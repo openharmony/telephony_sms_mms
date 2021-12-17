@@ -15,8 +15,6 @@
 
 #include "sms_misc_manager.h"
 
-#include <memory>
-
 #include "hril_sms_parcel.h"
 #include "short_message.h"
 #include "string_utils.h"
@@ -37,16 +35,8 @@ bool SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsg
     oldRangeList_ = rangeList_;
     if (enable) {
         ret = OpenCBRange(fromMsgId, toMsgId);
-        if (!ret) {
-            // if it is open,it will return true.
-            return true;
-        }
     } else {
         ret = CloseCBRange(fromMsgId, toMsgId);
-        if (!ret) {
-            // if it is close,it will return true.
-            return true;
-        }
     }
     if (ret) {
         ret = SendDataToRil(false, oldRangeList_);
@@ -62,7 +52,7 @@ bool SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsg
             return ret;
         }
     }
-    return ret;
+    return true;
 }
 
 std::list<SmsMiscManager::gsmCBRangeInfo> SmsMiscManager::GetRangeInfo() const
@@ -70,12 +60,41 @@ std::list<SmsMiscManager::gsmCBRangeInfo> SmsMiscManager::GetRangeInfo() const
     return rangeList_;
 }
 
+bool SmsMiscManager::ExpandMsgId(
+    uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data)
+{
+    if (static_cast<int32_t>(toMsgId) < static_cast<int32_t>((*oldIter).fromMsgId) - 1) {
+        return true;
+    } else if (static_cast<int32_t>(toMsgId) == static_cast<int32_t>((*oldIter).fromMsgId) - 1) {
+        data.endPos = (*oldIter).toMsgId;
+        rangeList_.erase(oldIter);
+        return true;
+    } else if (toMsgId <= (*oldIter).toMsgId) {
+        data.endPos = (*oldIter).toMsgId;
+        rangeList_.erase(oldIter);
+        return true;
+    } else if ((static_cast<int32_t>(toMsgId) == static_cast<int32_t>((*oldIter).fromMsgId) - 1) ||
+        (toMsgId == (*oldIter).fromMsgId)) {
+        data.endPos = (*oldIter).toMsgId;
+        rangeList_.erase(oldIter);
+        return false;
+    } else if (((fromMsgId >= (*oldIter).fromMsgId && fromMsgId <= (*oldIter).toMsgId &&
+        toMsgId > (*oldIter).toMsgId) ||
+        (static_cast<int32_t>(fromMsgId) - 1 == static_cast<int32_t>((*oldIter).toMsgId)) ||
+        ((fromMsgId < (*oldIter).fromMsgId) && (toMsgId > (*oldIter).toMsgId)))) {
+        data.isMerge = true;
+        data.startPos = (data.startPos < (*oldIter).fromMsgId) ? data.startPos : (*oldIter).fromMsgId;
+        rangeList_.erase(oldIter);
+        return false;
+    } else {
+        return false;
+    }
+}
+
 // from 3GPP TS 27.005 3.3.4 Select Cell Broadcast Message Types
 bool SmsMiscManager::OpenCBRange(uint32_t fromMsgId, uint32_t toMsgId)
 {
-    bool isMerge = false;
-    uint32_t startPos = fromMsgId;
-    uint32_t endPos = toMsgId;
+    infoData data(fromMsgId, toMsgId);
     if (rangeList_.size() == 0) {
         rangeList_.emplace_back(fromMsgId, toMsgId);
         return true;
@@ -86,38 +105,20 @@ bool SmsMiscManager::OpenCBRange(uint32_t fromMsgId, uint32_t toMsgId)
         auto &info = *oldIter;
         if (fromMsgId >= info.fromMsgId && toMsgId <= info.toMsgId) {
             return false;
-        } else if (!isMerge) {
-            if (static_cast<int32_t>(toMsgId) < static_cast<int32_t>(info.fromMsgId) - 1) {
+        } else if (!data.isMerge) {
+            if (ExpandMsgId(fromMsgId, toMsgId, oldIter, data)) {
                 break;
-            } else if (static_cast<int32_t>(toMsgId) == static_cast<int32_t>(info.fromMsgId) - 1) {
-                endPos = info.toMsgId;
-                rangeList_.erase(oldIter);
-                break;
-            } else if (toMsgId <= info.toMsgId) {
-                endPos = info.toMsgId;
-                rangeList_.erase(oldIter);
-                break;
-            } else if ((static_cast<int32_t>(toMsgId) == static_cast<int32_t>(info.fromMsgId) - 1) ||
-                (toMsgId == info.fromMsgId)) {
-                endPos = info.toMsgId;
-                rangeList_.erase(oldIter);
-            } else if (((fromMsgId >= info.fromMsgId && fromMsgId <= info.toMsgId && toMsgId > info.toMsgId) ||
-                (static_cast<int32_t>(fromMsgId) - 1 == static_cast<int32_t>(info.toMsgId)) ||
-                ((fromMsgId < info.fromMsgId) && (toMsgId > info.toMsgId)))) {
-                isMerge = true;
-                startPos = (startPos < info.fromMsgId) ? startPos : info.fromMsgId;
-                rangeList_.erase(oldIter);
             }
         } else {
             if (static_cast<int32_t>(toMsgId) < static_cast<int32_t>(info.fromMsgId) - 1) {
-                endPos = toMsgId;
+                data.endPos = toMsgId;
                 break;
             } else if (static_cast<int32_t>(toMsgId) == static_cast<int32_t>(info.fromMsgId) - 1) {
-                endPos = info.toMsgId;
+                data.endPos = info.toMsgId;
                 rangeList_.erase(oldIter);
                 break;
             } else if (toMsgId >= info.fromMsgId && toMsgId <= info.toMsgId) {
-                endPos = info.toMsgId;
+                data.endPos = info.toMsgId;
                 rangeList_.erase(oldIter);
                 break;
             } else if (toMsgId > info.toMsgId) {
@@ -125,67 +126,81 @@ bool SmsMiscManager::OpenCBRange(uint32_t fromMsgId, uint32_t toMsgId)
             }
         }
     }
-    rangeList_.emplace_back(startPos, endPos);
+    rangeList_.emplace_back(data.startPos, data.endPos);
     rangeList_.sort();
     return true;
+}
+
+void SmsMiscManager::SplitMsgId(
+    uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data)
+{
+    data.isMerge = true;
+    auto &info = *oldIter;
+    if (info.fromMsgId == fromMsgId && info.toMsgId == toMsgId) {
+        rangeList_.erase(oldIter);
+    } else if (info.fromMsgId == fromMsgId && info.toMsgId != toMsgId) {
+        rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
+        rangeList_.erase(oldIter);
+    } else if (info.fromMsgId != fromMsgId && info.toMsgId == toMsgId) {
+        rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
+        rangeList_.erase(oldIter);
+    } else if (fromMsgId > info.fromMsgId && toMsgId < info.toMsgId) {
+        rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
+        rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
+        rangeList_.erase(oldIter);
+    }
 }
 
 // from 3GPP TS 27.005 3.3.4 Select Cell Broadcast Message Types
 bool SmsMiscManager::CloseCBRange(uint32_t fromMsgId, uint32_t toMsgId)
 {
-    bool isChange = false;
+    bool ret = false;
+    infoData data(fromMsgId, toMsgId);
     auto iter = rangeList_.begin();
     while (iter != rangeList_.end()) {
         auto oldIter = iter++;
         auto &info = *oldIter;
         if (fromMsgId >= info.fromMsgId && toMsgId <= info.toMsgId) {
-            isChange = true;
-            if (info.fromMsgId == fromMsgId && info.toMsgId == toMsgId) {
-                rangeList_.erase(oldIter);
-                break;
-            } else if (info.fromMsgId == fromMsgId && info.toMsgId != toMsgId) {
-                rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
-                rangeList_.erase(oldIter);
-                break;
-            } else if (info.fromMsgId != fromMsgId && info.toMsgId == toMsgId) {
-                rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
-                rangeList_.erase(oldIter);
-                break;
-            } else if (fromMsgId > info.fromMsgId && toMsgId < info.toMsgId) {
-                rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
-                rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
-                rangeList_.erase(oldIter);
-                break;
-            }
-        } else if (fromMsgId <= info.fromMsgId && toMsgId >= info.toMsgId && !isChange) {
-            isChange = true;
+            SplitMsgId(fromMsgId, toMsgId, oldIter, data);
+            ret = true;
+            break;
+        } else if (fromMsgId <= info.fromMsgId && toMsgId >= info.toMsgId && !data.isMerge) {
+            data.isMerge = true;
+            ret = true;
             rangeList_.erase(oldIter);
-        } else if (isChange && toMsgId >= info.toMsgId) {
+        } else if (data.isMerge && toMsgId >= info.toMsgId) {
+            ret = true;
             rangeList_.erase(oldIter);
-        } else if (isChange && toMsgId < info.toMsgId && toMsgId >= info.fromMsgId) {
+        } else if (data.isMerge && toMsgId < info.toMsgId && toMsgId >= info.fromMsgId) {
+            ret = true;
             rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
             rangeList_.erase(oldIter);
             rangeList_.sort();
             break;
         } else if ((fromMsgId > info.fromMsgId && fromMsgId < info.toMsgId) && toMsgId >= info.toMsgId &&
-            !isChange) {
-            isChange = true;
+            !data.isMerge) {
+            data.isMerge = true;
+            ret = true;
             rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
             rangeList_.erase(oldIter);
             rangeList_.sort();
-        } else if (fromMsgId == info.toMsgId && toMsgId >= info.toMsgId && !isChange) {
-            isChange = true;
+        } else if (fromMsgId == info.toMsgId && toMsgId >= info.toMsgId && !data.isMerge) {
+            data.isMerge = true;
+            ret = true;
             rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
             rangeList_.erase(oldIter);
             rangeList_.sort();
+        } else if (fromMsgId < info.toMsgId && toMsgId <= info.toMsgId) {
+            if (toMsgId != info.toMsgId) {
+                rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
+                rangeList_.sort();
+            }
+            rangeList_.erase(oldIter);
+            ret = true;
+            break;
         }
     }
-    if (isChange) {
-        rangeList_.sort();
-        return true;
-    } else {
-        return false;
-    }
+    return ret;
 }
 
 void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
@@ -196,7 +211,7 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     }
 
     int eventId = 0;
-    TELEPHONY_LOGD("SmsMiscManager::ProcessEvent");
+    TELEPHONY_LOGI("SmsMiscManager::ProcessEvent");
     eventId = event->GetInnerEventId();
     switch (eventId) {
         case SET_CB_CONFIG_FINISH: {
@@ -283,7 +298,7 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list)
             reply->SetOwner(shared_from_this());
             int32_t condition = conditonVar_++;
             fairList_.push_back(condition);
-            core->SetCellBroadcast(enable ? 0 : 1, RangeListToString(list), codeScheme_, reply);
+            core->SetCBConfig(enable ? 0 : 1, RangeListToString(list), codeScheme_, reply);
             condVar_.wait(lock, [&]() { return fairVar_ == condition; });
             return isSuccess_;
         } else {
@@ -299,44 +314,48 @@ bool SmsMiscManager::AddSimMessage(
 {
     TELEPHONY_LOGI(
         "smscLen = %{public}zu pudLen = %{public}zu status = %{public}d", smsc.size(), pdu.size(), status);
-    std::shared_ptr<Telephony::ISimSmsManager> simSmsManager = GetSimSmsManager();
-    if (simSmsManager == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::AddSimMessage simSmsManager nullptr");
+
+    std::shared_ptr<Core> core = GetCore();
+    if (core == nullptr) {
+        TELEPHONY_LOGE("SmsMiscManager::AddSimMessage core is nullptr");
         return false;
     }
 
     std::string smscAddr(smsc);
-    if (smsc.empty()) {
+    if (smsc.length() <= MIN_SMSC_LEN) {
+        smscAddr.clear();
         smscAddr.insert(0, "00");
     }
-    return simSmsManager->AddSmsToIcc(static_cast<int>(status), const_cast<std::string &>(pdu), smscAddr);
+    TELEPHONY_LOGI("smscAddr = %{public}s", smscAddr.c_str());
+    return core->AddSmsToIcc(static_cast<int>(status), const_cast<std::string &>(pdu), smscAddr);
 }
 
 bool SmsMiscManager::DelSimMessage(uint32_t msgIndex)
 {
     TELEPHONY_LOGI("messageIndex = %{public}d", msgIndex);
-    std::shared_ptr<Telephony::ISimSmsManager> simSmsManager = GetSimSmsManager();
-    if (simSmsManager == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::DelSimMessage simSmsManager nullptr");
+    std::shared_ptr<Core> core = GetCore();
+    if (core == nullptr) {
+        TELEPHONY_LOGE("SmsMiscManager::DelSimMessage core is nullptr");
         return false;
     }
-    return simSmsManager->DelSmsIcc(msgIndex);
+    return core->DelSmsIcc(msgIndex);
 }
 
 bool SmsMiscManager::UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
     const std::string &pdu, const std::string &smsc)
 {
-    std::shared_ptr<Telephony::ISimSmsManager> simSmsManager = GetSimSmsManager();
-    if (simSmsManager == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::UpdateSimMessage simSmsManager nullptr");
+    std::shared_ptr<Core> core = GetCore();
+    if (core == nullptr) {
+        TELEPHONY_LOGE("SmsMiscManager::UpdateSimMessage core is nullptr");
         return false;
     }
 
     std::string smscAddr(smsc);
-    if (smsc.empty()) {
+    if (smsc.length() <= MIN_SMSC_LEN) {
+        smscAddr.clear();
         smscAddr.insert(0, "00");
     }
-    return simSmsManager->RenewSmsIcc(
+    return core->UpdateSmsIcc(
         msgIndex, static_cast<int>(newStatus), const_cast<std::string &>(pdu), smscAddr);
 }
 
@@ -344,12 +363,12 @@ std::vector<ShortMessage> SmsMiscManager::GetAllSimMessages()
 {
     std::vector<ShortMessage> ret;
     TELEPHONY_LOGI("GetAllSimMessages");
-    std::shared_ptr<Telephony::ISimSmsManager> simSmsManager = GetSimSmsManager();
-    if (simSmsManager == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::GetAllSimMessages simSmsManager nullptr");
+    std::shared_ptr<Core> core = GetCore();
+    if (core == nullptr) {
+        TELEPHONY_LOGE("SmsMiscManager::GetAllSimMessages core is nullptr");
         return ret;
     }
-    std::vector<std::string> pdus = simSmsManager->ObtainAllSmsOfIcc();
+    std::vector<std::string> pdus = core->ObtainAllSmsOfIcc();
     int index = 0;
     for (auto &v : pdus) {
         std::vector<unsigned char> pdu = StringUtils::HexToByteVector(v);
@@ -376,7 +395,7 @@ bool SmsMiscManager::SetSmscAddr(const std::string &scAddr)
     fairList_.push_back(condition);
     auto reply = AppExecFwk::InnerEvent::Get(SmsMiscManager::SET_SMSC_ADDR_FINISH);
     reply->SetOwner(shared_from_this());
-    core->SetSmsCenterAddress(0, scAddr, reply);
+    core->SetSmscAddr(0, scAddr, reply);
     condVar_.wait(lock, [&]() { return fairVar_ == condition; });
     return isSuccess_;
 }
@@ -396,7 +415,7 @@ std::string SmsMiscManager::GetSmscAddr()
     fairList_.push_back(condition);
     auto reply = AppExecFwk::InnerEvent::Get(SmsMiscManager::GET_SMSC_ADDR_FINISH);
     reply->SetOwner(shared_from_this());
-    core->GetSmsCenterAddress(reply);
+    core->GetSmscAddr(reply);
     condVar_.wait(lock, [&]() { return fairVar_ == condition; });
     return smscAddr_;
 }
@@ -404,24 +423,24 @@ std::string SmsMiscManager::GetSmscAddr()
 bool SmsMiscManager::SetDefaultSmsSlotId(int32_t slotId)
 {
     TELEPHONY_LOGI("SetDefaultSmsSlotId slotId = %{public}d", slotId);
-    std::shared_ptr<Telephony::ISimManager> simManager = GetSimManager();
-    if (simManager == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::SetDefaultSmsSlotId simManager nullptr");
+    std::shared_ptr<Core> core = GetCore();
+    if (core == nullptr) {
+        TELEPHONY_LOGE("SmsMiscManager::SetDefaultSmsSlotId core is nullptr");
         return false;
     }
-    return simManager->SetDefaultSmsSlotId(slotId);
+    return core->SetDefaultSmsSlotId(slotId);
 }
 
 int32_t SmsMiscManager::GetDefaultSmsSlotId()
 {
     int32_t result = -1;
-    TELEPHONY_LOGI("SetDefaultSmsSlotId");
-    std::shared_ptr<Telephony::ISimManager> simManager = GetSimManager();
-    if (simManager == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::SetDefaultSmsSlotId simManager nullptr");
+    TELEPHONY_LOGI("GetDefaultSmsSlotId");
+    std::shared_ptr<Core> core = GetCore();
+    if (core == nullptr) {
+        TELEPHONY_LOGE("SmsMiscManager::GetDefaultSmsSlotId core is nullptr");
         return result;
     }
-    return simManager->GetDefaultSmsSlotId();
+    return core->GetDefaultSmsSlotId();
 }
 
 std::shared_ptr<Core> SmsMiscManager::GetCore() const
@@ -429,24 +448,6 @@ std::shared_ptr<Core> SmsMiscManager::GetCore() const
     std::shared_ptr<Core> core = CoreManager::GetInstance().getCore(slotId_);
     if (core != nullptr && core->IsInitCore()) {
         return core;
-    }
-    return nullptr;
-}
-
-std::shared_ptr<Telephony::ISimManager> SmsMiscManager::GetSimManager() const
-{
-    std::shared_ptr<Core> core = CoreManager::GetInstance().getCore(slotId_);
-    if (core != nullptr && core->IsInitCore()) {
-        return core->GetSimManager();
-    }
-    return nullptr;
-}
-
-std::shared_ptr<Telephony::ISimSmsManager> SmsMiscManager::GetSimSmsManager() const
-{
-    std::shared_ptr<Core> core = CoreManager::GetInstance().getCore(slotId_);
-    if (core != nullptr && core->IsInitCore()) {
-        return core->GetSimSmsManager();
     }
     return nullptr;
 }

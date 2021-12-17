@@ -29,21 +29,18 @@
 using namespace OHOS;
 using namespace OHOS::Telephony;
 
-namespace {
-static const ShortMessage *g_shortMessage = nullptr;
-}
 using TestStruct = struct FunStruct {
     std::string funName;
-    std::function<void(void)> fun;
-    FunStruct(std::string name, std::function<void(void)> function) : funName(name), fun(function) {}
+    std::function<void(void)> fun = nullptr;
+    FunStruct(const std::string &name, const std::function<void(void)> &function) : funName(name), fun(function) {}
 };
 
 void TestRecev()
 {
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent("usual.event.SMS_RECEIVE_COMPLETED");
-    matchingSkills.AddEvent("ohos.action.telephonySmsETWSCBReceiveFinished");
-    matchingSkills.AddEvent("ohos.action.telephonySmsCBReceiveFinished");
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    matchingSkills.AddEvent("usual.event.SMS_EMERGENCY_CB_RECEIVE_COMPLETED");
+    matchingSkills.AddEvent("usual.event.SMS_CB_RECEIVE_COMPLETED");
     // make subcriber info
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     // make a subcriber object
@@ -57,18 +54,10 @@ void TestRecev()
     std::cout << "subscribeResult is " << (subscribeResult ? "true" : "false") << std::endl;
 }
 
-static std::unique_ptr<std::vector<TestStruct>> GetFunArray(const sptr<ISmsServiceInterface> smsService)
+void InitFunArray(std::unique_ptr<std::vector<TestStruct>> &funArray, const GsmSmsSenderTest &gsmSmsSenderTest,
+    const ShortMessageTest &shortMessageTest, const SmsCbMessageTest &smsCbMessageTest,
+    const sptr<ISmsServiceInterface> &smsService)
 {
-    static GsmSmsSenderTest gsmSmsSenderTest;
-    static ShortMessageTest shortMessageTest;
-    static SmsCbMessageTest smsCbMessageTest;
-    if (::g_shortMessage == nullptr) {
-        ::g_shortMessage = shortMessageTest.TestCreateMessage();
-    }
-    std::unique_ptr<std::vector<TestStruct>> funArray = std::make_unique<std::vector<TestStruct>>();
-    if (smsService == nullptr || ::g_shortMessage == nullptr || funArray == nullptr) {
-        return funArray;
-    }
     funArray->emplace_back(
         "TestGsmSendShortText", std::bind(&GsmSmsSenderTest::TestGsmSendShortText, gsmSmsSenderTest, smsService));
     funArray->emplace_back(
@@ -78,10 +67,10 @@ static std::unique_ptr<std::vector<TestStruct>> GetFunArray(const sptr<ISmsServi
     funArray->emplace_back(
         "TestGsmSendLongData", std::bind(&GsmSmsSenderTest::TestGsmSendLongData, gsmSmsSenderTest, smsService));
     funArray->emplace_back("TestCreateMessage", std::bind(&ShortMessageTest::TestCreateMessage, shortMessageTest));
-    funArray->emplace_back("TestGetVisibleMessageBody",
-        std::bind(&ShortMessageTest::TestGetVisibleMessageBody, shortMessageTest, *::g_shortMessage));
-    funArray->emplace_back("TestShowShortMessage",
-        std::bind(&ShortMessageTest::TestShowShortMessage, shortMessageTest, *::g_shortMessage));
+    funArray->emplace_back(
+        "TestGetVisibleMessageBody", std::bind(&ShortMessageTest::TestGetVisibleMessageBody, shortMessageTest));
+    funArray->emplace_back(
+        "TestShowShortMessage", std::bind(&ShortMessageTest::TestShowShortMessage, shortMessageTest));
     funArray->emplace_back(
         "TestSetSmscAddr", std::bind(&GsmSmsSenderTest::TestSetSmscAddr, gsmSmsSenderTest, smsService));
     funArray->emplace_back(
@@ -107,37 +96,54 @@ static std::unique_ptr<std::vector<TestStruct>> GetFunArray(const sptr<ISmsServi
         std::bind(&GsmSmsSenderTest::TestSetDefaultSmsSlotId, gsmSmsSenderTest, smsService));
     funArray->emplace_back("TestGetDefaultSmsSlotId",
         std::bind(&GsmSmsSenderTest::TestGetDefaultSmsSlotId, gsmSmsSenderTest, smsService));
+    funArray->emplace_back(
+        "TestCreate3Gpp2Message", std::bind(&ShortMessageTest::Test3Gpp2CreateMessage, shortMessageTest));
+    funArray->emplace_back(
+        "TestSplitMessage", std::bind(&GsmSmsSenderTest::TestSplitMessage, gsmSmsSenderTest, smsService));
+    funArray->emplace_back(
+        "TestCalculateLength", std::bind(&GsmSmsSenderTest::TestCalculateLength, gsmSmsSenderTest, smsService));
+}
+
+std::unique_ptr<std::vector<TestStruct>> GetFunArray(const sptr<ISmsServiceInterface> &smsService)
+{
+    static GsmSmsSenderTest gsmSmsSenderTest;
+    static ShortMessageTest shortMessageTest;
+    static SmsCbMessageTest smsCbMessageTest;
+    shortMessageTest.TestCreateMessage();
+    std::unique_ptr<std::vector<TestStruct>> funArray = std::make_unique<std::vector<TestStruct>>();
+    if (smsService == nullptr || funArray == nullptr) {
+        return funArray;
+    }
+    InitFunArray(funArray, gsmSmsSenderTest, shortMessageTest, smsCbMessageTest, smsService);
     return funArray;
 }
 
 int main()
 {
     TestRecev();
-    std::string hint = "[-1]:Exit\n";
-    int8_t caseCount = 0;
-    std::unique_ptr<std::vector<TestStruct>> testFunArray = nullptr;
-    sptr<IRemoteObject> remote = nullptr;
-    sptr<ISmsServiceInterface> smsService = nullptr;
     sptr<ISystemAbilityManager> systemAbilityMgr =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remote = nullptr;
+    sptr<ISmsServiceInterface> smsService = nullptr;
     if ((systemAbilityMgr == nullptr) ||
         ((remote = systemAbilityMgr->CheckSystemAbility(TELEPHONY_SMS_MMS_SYS_ABILITY_ID)) == nullptr) ||
-        ((smsService = iface_cast<ISmsServiceInterface>(remote))) == nullptr) {
+        ((smsService = iface_cast<ISmsServiceInterface>(remote)) == nullptr)) {
+        std::cout << "connect to sms service failed." << std::endl;
         return 0;
     }
-    testFunArray = GetFunArray(smsService);
+    std::unique_ptr<std::vector<TestStruct>> testFunArray = GetFunArray(smsService);
+    int8_t caseCount = 0;
     if (testFunArray == nullptr || ((caseCount = testFunArray->size()) <= 0)) {
-        if (::g_shortMessage != nullptr) {
-            delete ::g_shortMessage;
-            ::g_shortMessage = nullptr;
-        }
+        std::cout << "Failed to get testFunArray data!\n";
         return 0;
     }
+    std::string hint = "[-1]:Exit\n";
     for (int index = 0; index < caseCount; ++index) {
         hint += "[" + std::to_string(index) + "]:" + (*testFunArray)[index].funName + "\n";
     }
     while (smsService != nullptr) {
-        std::cout << hint << "Please input test case number!" << std::endl;
+        std::cout << hint;
+        std::cout << "Please input test case number!" << std::endl;
         std::string input;
         int caseNumber = 0;
         std::cin >> input;
@@ -146,18 +152,16 @@ int main()
         std::cin.ignore();
         std::cin.sync();
         if (caseNumber < -1 || caseNumber >= caseCount) {
+            std::cout << "test case is not exist!" << std::endl;
             continue;
         }
         if (caseNumber == -1) {
             break;
         }
+        std::cout << "Enter the " << (*testFunArray)[caseNumber].funName << " case!" << std::endl;
         if ((*testFunArray)[caseNumber].fun != nullptr) {
             (*testFunArray)[caseNumber].fun();
         }
-    }
-    if (::g_shortMessage != nullptr) {
-        delete ::g_shortMessage;
-        ::g_shortMessage = nullptr;
     }
     return 0;
 }

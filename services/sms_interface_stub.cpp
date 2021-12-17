@@ -15,10 +15,6 @@
 
 #include "sms_interface_stub.h"
 
-#include <codecvt>
-#include <locale>
-#include <map>
-
 #include "sms_interface_manager.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
@@ -39,6 +35,8 @@ SmsInterfaceStub::SmsInterfaceStub()
     memberFuncMap_[SET_CB_CONFIG] = &SmsInterfaceStub::OnSetCBConfig;
     memberFuncMap_[SET_DEFAULT_SMS_SLOT_ID] = &SmsInterfaceStub::OnSetDefaultSmsSlotId;
     memberFuncMap_[GET_DEFAULT_SMS_SLOT_ID] = &SmsInterfaceStub::OnGetDefaultSmsSlotId;
+    memberFuncMap_[SPLIT_MESSAGE] = &SmsInterfaceStub::OnSplitMessage;
+    memberFuncMap_[CALCULATE_LENGTH] = &SmsInterfaceStub::OnCalculateLength;
 }
 
 SmsInterfaceStub::~SmsInterfaceStub()
@@ -52,17 +50,20 @@ void SmsInterfaceStub::InitModule()
     static bool bInitModule = false;
     if (!bInitModule) {
         bInitModule = true;
-        TELEPHONY_LOGI("SmsInterfaceStub = ############### InitModule Start");
-        slotSmsInterfaceManagerMap_[CoreManager::DEFAULT_SLOT_ID] =
+        std::shared_ptr<SmsInterfaceManager> interface =
             std::make_shared<SmsInterfaceManager>(CoreManager::DEFAULT_SLOT_ID);
+        if (interface == nullptr) {
+            TELEPHONY_LOGE("interface is nullptr.");
+            return;
+        }
+        slotSmsInterfaceManagerMap_[CoreManager::DEFAULT_SLOT_ID] = interface;
         slotSmsInterfaceManagerMap_[CoreManager::DEFAULT_SLOT_ID]->InitInterfaceManager();
-        TELEPHONY_LOGI("SmsInterfaceStub = ############### InitModule end");
+        TELEPHONY_LOGI("SmsInterfaceStub = ############### InitModule");
     }
 }
 
 std::shared_ptr<SmsInterfaceManager> SmsInterfaceStub::GetSmsInterfaceManager(int32_t slotId)
 {
-    TELEPHONY_LOGI("GetSmsInterfaceManager = %{public}d", slotId);
     std::map<uint32_t, std::shared_ptr<SmsInterfaceManager>>::iterator iter =
         slotSmsInterfaceManagerMap_.find(slotId);
     if (iter != slotSmsInterfaceManagerMap_.end()) {
@@ -77,34 +78,6 @@ std::shared_ptr<SmsInterfaceManager> SmsInterfaceStub::GetSmsInterfaceManager()
         return iter.second;
     }
     return nullptr;
-}
-
-void SmsInterfaceStub::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr,
-    const u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
-{
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
-    if (interfaceManager == nullptr) {
-        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("SmsInterfaceStub::SendMessage interfaceManager== nullptr");
-        return;
-    }
-    interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
-        StringUtils::ToUtf8(text), sendCallback, deliveryCallback);
-}
-
-void SmsInterfaceStub::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr, uint16_t port,
-    const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
-{
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
-    if (interfaceManager == nullptr) {
-        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("SmsInterfaceStub::SendMessage interfaceManager== nullptr");
-        return;
-    }
-    interfaceManager->DataBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr), port, data,
-        dataLen, sendCallback, deliveryCallback);
 }
 
 void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -250,6 +223,33 @@ void SmsInterfaceStub::OnGetDefaultSmsSlotId(MessageParcel &data, MessageParcel 
     reply.WriteInt32(result);
 }
 
+void SmsInterfaceStub::OnSplitMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    std::vector<std::u16string> result;
+    std::u16string message = data.ReadString16();
+    result = SplitMessage(message);
+    int32_t resultLen = static_cast<int32_t>(result.size());
+    TELEPHONY_LOGI("SplitMessage size %{public}d", resultLen);
+    reply.WriteInt32(resultLen);
+    for (const auto &item : result) {
+        reply.WriteString16(item);
+    }
+}
+
+void SmsInterfaceStub::OnCalculateLength(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    std::vector<int32_t> result;
+    std::u16string message = data.ReadString16();
+    bool force7BitCode = data.ReadBool();
+    result = CalculateLength(message, force7BitCode);
+    int32_t resultLen = static_cast<int32_t>(result.size());
+    TELEPHONY_LOGI("SplitMessage size %{public}d", resultLen);
+    reply.WriteInt32(resultLen);
+    for (const auto &item : result) {
+        reply.WriteInt32(item);
+    }
+}
+
 int SmsInterfaceStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
@@ -274,113 +274,6 @@ int SmsInterfaceStub::OnRemoteRequest(
         return result;
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-}
-
-bool SmsInterfaceStub::SetSmscAddr(int32_t slotId, const std::u16string &scAddr)
-{
-    bool result = false;
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
-    if (interfaceManager == nullptr) {
-        TELEPHONY_LOGE("SmsInterfaceStub::SetSmscAddr interfaceManager== nullptr");
-        return result;
-    }
-    string sca = StringUtils::ToUtf8(scAddr);
-    return interfaceManager->SetSmscAddr(sca);
-}
-
-std::u16string SmsInterfaceStub::GetSmscAddr(int32_t slotId)
-{
-    std::u16string result;
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
-    if (interfaceManager == nullptr) {
-        TELEPHONY_LOGE("SmsInterfaceStub::GetSmscAddr interfaceManager== nullptr");
-        return result;
-    }
-    return StringUtils::ToUtf16(interfaceManager->GetSmscAddr());
-}
-
-bool SmsInterfaceStub::AddSimMessage(
-    int32_t slotId, const std::u16string &smsc, const std::u16string &pdu, SimMessageStatus status)
-{
-    bool result = false;
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
-    if (interfaceManager == nullptr) {
-        TELEPHONY_LOGE("SmsInterfaceStub::AddSimMessage interfaceManager== nullptr");
-        return result;
-    }
-    std::string smscData = StringUtils::ToUtf8(smsc);
-    std::string pduData = StringUtils::ToUtf8(pdu);
-    return interfaceManager->AddSimMessage(smscData, pduData, status);
-}
-
-bool SmsInterfaceStub::DelSimMessage(int32_t slotId, uint32_t msgIndex)
-{
-    bool result = false;
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
-    if (interfaceManager == nullptr) {
-        TELEPHONY_LOGE("SmsInterfaceStub::DelSimMessage interfaceManager== nullptr");
-        return result;
-    }
-    return interfaceManager->DelSimMessage(msgIndex);
-}
-
-bool SmsInterfaceStub::UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessageStatus newStatus,
-    const std::u16string &pdu, const std::u16string &smsc)
-{
-    bool result = false;
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
-    if (interfaceManager == nullptr) {
-        TELEPHONY_LOGE("SmsInterfaceStub::UpdateSimMessage interfaceManager== nullptr");
-        return result;
-    }
-    std::string pduData = StringUtils::ToUtf8(pdu);
-    std::string smscData = StringUtils::ToUtf8(smsc);
-    return interfaceManager->UpdateSimMessage(msgIndex, newStatus, pduData, smscData);
-}
-
-std::vector<ShortMessage> SmsInterfaceStub::GetAllSimMessages(int32_t slotId)
-{
-    std::vector<ShortMessage> result;
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
-    if (interfaceManager == nullptr) {
-        TELEPHONY_LOGE("SmsInterfaceStub::GetAllSimMessages interfaceManager== nullptr");
-        return result;
-    }
-    return interfaceManager->GetAllSimMessages();
-}
-
-bool SmsInterfaceStub::SetCBConfig(
-    int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
-{
-    bool result = false;
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
-    if (interfaceManager == nullptr) {
-        TELEPHONY_LOGE("SmsInterfaceStub::SetCBConfig interfaceManager== nullptr");
-        return result;
-    }
-    return interfaceManager->SetCBConfig(enable, fromMsgId, toMsgId, netType);
-}
-
-bool SmsInterfaceStub::SetDefaultSmsSlotId(int32_t slotId)
-{
-    bool result = false;
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager();
-    if (interfaceManager == nullptr) {
-        TELEPHONY_LOGE("SmsInterfaceStub::SetCBConfig interfaceManager== nullptr");
-        return result;
-    }
-    return interfaceManager->SetDefaultSmsSlotId(slotId);
-}
-
-int32_t SmsInterfaceStub::GetDefaultSmsSlotId()
-{
-    int32_t result = -1;
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager();
-    if (interfaceManager == nullptr) {
-        TELEPHONY_LOGE("SmsInterfaceStub::SetCBConfig interfaceManager== nullptr");
-        return result;
-    }
-    return interfaceManager->GetDefaultSmsSlotId();
 }
 } // namespace Telephony
 } // namespace OHOS

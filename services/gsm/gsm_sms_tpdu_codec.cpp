@@ -16,13 +16,12 @@
 
 #include "gsm_sms_tpdu_codec.h"
 
-#include <memory>
-#include <string>
+#include "securec.h"
+
+#include "telephony_log_wrapper.h"
 
 #include "gsm_sms_param_codec.h"
 #include "gsm_sms_udata_codec.h"
-#include "securec.h"
-#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -359,15 +358,14 @@ int GsmSmsTpduCodec::EncodeStatusReport(const struct SmsStatusReport *pStatusRep
     }
     /* TP-DCS */
     if (pStatusRep->paramInd & 0x02) {
-        int len = 0;
         char *dcs = nullptr;
         unique_ptr<char *, void (*)(char **(&))> dcsBuf(&dcs, UniquePtrDeleterOneDimension);
-        len = GsmSmsParamCodec::EncodeDCS(&pStatusRep->dcs, &dcs);
-        if (memcpy_s(&(pTpdu[offset]), len, dcs, len) != EOK) {
+        length = GsmSmsParamCodec::EncodeDCS(&pStatusRep->dcs, &dcs);
+        if (memcpy_s(&(pTpdu[offset]), length, dcs, length) != EOK) {
             TELEPHONY_LOGE("EncodeStatusReport memory EncodeDCS error");
             return offset;
         }
-        offset += len;
+        offset += length;
     }
     /* TP-UDL & TP-UD */
     if (pStatusRep->paramInd & 0x04) {
@@ -388,7 +386,7 @@ int GsmSmsTpduCodec::DecodeSubmit(const unsigned char *pSubpdu, int pduLen, stru
     if (pSubpdu == nullptr || pSmsSub == nullptr) {
         return offset;
     }
-    DebugTpdu(pSubpdu, pduLen, DecodeType::DECODE_SUBMIT_TYPE);
+    DebugTpdu(pSubpdu, pduLen, DECODE_SUBMIT_TYPE);
     // TP-RD
     if (pSubpdu[offset] & 0x04) {
         pSmsSub->bRejectDup = false;
@@ -470,7 +468,7 @@ int GsmSmsTpduCodec::DecodeDeliver(const unsigned char *pTpdu, int TpduLen, stru
     if (pTpdu == nullptr || pDeliver == nullptr) {
         return offset;
     }
-    DebugTpdu(pTpdu, TpduLen, DecodeType::DECODE_DELIVER_TYPE);
+    DebugTpdu(pTpdu, TpduLen, DECODE_DELIVER_TYPE);
     DecodePartData(pTpdu[offset], *pDeliver);
     offset++;
     tmpOffset = offset;
@@ -552,7 +550,7 @@ int GsmSmsTpduCodec::DecodeStatusReport(const unsigned char *pTpdu, int TpduLen,
         pStatusRep->dcs.bCompressed = false;
         pStatusRep->dcs.bMWI = false;
         pStatusRep->dcs.bIndActive = false;
-        pStatusRep->dcs.msgClass = SmsMessageClass::SMS_CLASS_UNKNOWN;
+        pStatusRep->dcs.msgClass = SMS_CLASS_UNKNOWN;
         pStatusRep->dcs.codingScheme = SMS_CODING_7BIT;
         pStatusRep->dcs.codingGroup = SMS_GENERAL_GROUP;
         pStatusRep->dcs.indType = SMS_OTHER_INDICATOR;
@@ -588,26 +586,28 @@ enum SmsPid GsmSmsTpduCodec::ParsePid(const unsigned char pid)
 void GsmSmsTpduCodec::DebugTpdu(const unsigned char *pTpdu, int TpduLen, const enum DecodeType type)
 {
     if (pTpdu == nullptr) {
+        TELEPHONY_LOGE("debugTpdu error ptpdu nullptr");
         return;
     }
     char tpduTmp[(TpduLen * HEX_BYTE_STEP) + 1];
     if (memset_s(tpduTmp, sizeof(tpduTmp), 0x00, sizeof(tpduTmp)) != EOK) {
+        TELEPHONY_LOGE("memset_s error.");
         return;
     }
     for (int i = 0; i < TpduLen; i++) {
         uint8_t step = HEX_BYTE_STEP;
         const int len = sizeof(tpduTmp) - (i * step);
-        if (snprintf_s(tpduTmp + (i * step), len - 1, len - 1, "%02X", static_cast<uint32_t>(pTpdu[i])) < 0) {
+        if (snprintf_s(tpduTmp + (i * step), len - 1, len - 1, "%02X", pTpdu[i]) < 0) {
             TELEPHONY_LOGE("DebugTpdu snprintf_s error");
             return;
         }
     }
     switch (type) {
-        case DecodeType::DECODE_SUBMIT_TYPE:
+        case DECODE_SUBMIT_TYPE:
             break;
-        case DecodeType::DECODE_DELIVER_TYPE:
+        case DECODE_DELIVER_TYPE:
             break;
-        case DecodeType::DECODE_STATUS_REP_TYPE:
+        case DECODE_STATUS_REP_TYPE:
             break;
         default:
             break;

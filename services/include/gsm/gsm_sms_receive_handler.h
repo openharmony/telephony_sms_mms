@@ -37,11 +37,11 @@ protected:
     std::shared_ptr<SmsBaseMessage> TransformMessageInfo(const std::shared_ptr<SmsMessageInfo> &info) override;
 
 private:
-    std::shared_ptr<AppExecFwk::EventRunner> smsCbRunner_;
-    std::shared_ptr<GsmSmsCbHandler> smsCbHandler_;
-
     bool RegisterHandler();
     void UnRegisterHandler();
+
+    std::shared_ptr<GsmSmsCbHandler> smsCbHandler_;
+    std::shared_ptr<AppExecFwk::EventRunner> smsCbRunner_;
 };
 } // namespace Telephony
 } // namespace OHOS

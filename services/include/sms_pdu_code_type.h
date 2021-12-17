@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2021 Huawei Device Co., Ltd.
- * Copyright (C) 2014 Samsung Electronics Co., Ltd. All rights reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +16,13 @@
 #ifndef SMS_PDU_CODE_TYPE_H
 #define SMS_PDU_CODE_TYPE_H
 
+#include <cstdint>
+
 namespace OHOS {
 namespace Telephony {
-#define SMS_MAX_ADDRESS_LEN 21
+static constexpr uint8_t SMS_MAX_ADDRESS_LEN = 21;
+static constexpr uint8_t MAX_UD_HEADER_NUM = 7;
+static constexpr uint8_t MAX_USER_DATA_LEN = 160;
 
 enum SmsNumberPlanType : unsigned char {
     SMS_NPI_UNKNOWN = 0,
@@ -152,6 +155,17 @@ struct SmsUDH {
         struct SmsAddress alternateAddress;
     } udh;
 };
+
+/**
+ * @brief SmsUserData
+ * from 3GPP TS 23.040 V5.1.0 9.2.3.24	TP User Data (TP UD)
+ */
+typedef struct SmsUserData {
+    int headerCnt;
+    struct SmsUDH header[MAX_UD_HEADER_NUM];
+    int length;
+    char data[MAX_USER_DATA_LEN + 1];
+} SmsUserData_;
 } // namespace Telephony
 } // namespace OHOS
 #endif

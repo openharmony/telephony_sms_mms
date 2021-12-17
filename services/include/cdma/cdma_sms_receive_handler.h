@@ -31,6 +31,7 @@ public:
     CdmaSmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
     virtual ~CdmaSmsReceiveHandler() override;
     void SetCdmaSender(const std::weak_ptr<SmsSender> &smsSender);
+    void Init();
 
 protected:
     virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage) override;
@@ -39,6 +40,11 @@ protected:
         const std::shared_ptr<SmsMessageInfo> &info) override;
 
 private:
+    bool RegisterHandler();
+    void UnRegisterHandler();
+    bool AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer);
+    bool HandleStatusReport(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage);
+    std::shared_ptr<SmsReceiveIndexer> CreateIndexer(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage);
     std::weak_ptr<SmsSender> cdmaSmsSender_;
 };
 } // namespace Telephony

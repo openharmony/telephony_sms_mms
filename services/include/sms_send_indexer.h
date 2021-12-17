@@ -45,9 +45,9 @@ public:
     void SetMsgRefId(uint8_t msgRefId);
     int64_t GetMsgRefId64Bit() const;
     void SetMsgRefId64Bit(int64_t msgRefId64Bit);
-    const std::vector<uint8_t> &GetAckPdu() const;
+    std::vector<uint8_t> GetAckPdu() const;
     void SetAckPdu(const std::vector<uint8_t> &ackPdu);
-    const std::vector<uint8_t> &GetData() const;
+    std::vector<uint8_t> GetData() const;
     void SetData(const std::vector<uint8_t> &data);
     uint8_t GetErrorCode() const;
     void SetErrorCode(uint8_t errorCode);
@@ -77,9 +77,9 @@ public:
     void SetNetWorkType(NetWorkType netWorkType);
     NetWorkType GetNetWorkType() const;
     void SetEncodeSmca(const std::vector<uint8_t> &smca);
-    const std::vector<uint8_t> &GetEncodeSmca() const;
+    std::vector<uint8_t> GetEncodeSmca() const;
     void SetEncodePdu(const std::vector<uint8_t> &pdu);
-    const std::vector<uint8_t> &GetEncodePdu() const;
+    std::vector<uint8_t> GetEncodePdu() const;
     void UpdatePduForResend();
     void SetEncodePdu(const std::vector<uint8_t> &&pdu);
     void SetEncodeSmca(const std::vector<uint8_t> &&smca);
@@ -118,7 +118,7 @@ private:
     bool isFailure_ = false;
     enum SmsCodingScheme dcs_;
     bool isConcat_ = false;
-    SmsConcat smsConcat_;
+    SmsConcat smsConcat_ {.is8Bits = false};
     uint8_t langId_ = 0;
     bool isText_ = false;
 };

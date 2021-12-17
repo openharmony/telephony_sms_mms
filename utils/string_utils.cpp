@@ -14,7 +14,7 @@
  */
 
 #include "string_utils.h"
-#include <iostream>
+
 #include <sstream>
 #include <string_ex.h>
 
@@ -26,7 +26,7 @@ StringUtils::~StringUtils() {}
 
 uint16_t StringUtils::HexCharToInt(char c)
 {
-    uint8_t decimal = 10;
+    const uint8_t decimal = 10;
     if (c >= '0' && c <= '9') {
         return (c - '0');
     }

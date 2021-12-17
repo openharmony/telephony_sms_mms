@@ -15,7 +15,7 @@
 
 #ifndef CDMA_SMS_MESSAGE_H
 #define CDMA_SMS_MESSAGE_H
-#include <cstdint>
+#include <stdint.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -24,8 +24,6 @@
 
 namespace OHOS {
 namespace Telephony {
-#define CDMA_MAX_UD_HEADER_NUM 7
-
 class CdmaSmsMessage : public SmsBaseMessage {
 public:
     CdmaSmsMessage() = default;
@@ -36,17 +34,54 @@ public:
     virtual bool IsWapPushMsg();
     virtual int GetTransMsgType() const;
     virtual int GetTransTeleService() const;
+    virtual bool IsStatusReport() const;
+    virtual int16_t GetDestPort() const;
+    virtual bool IsBroadcastMsg() const;
     virtual bool AddUserDataHeader(const struct SmsUDH &header);
+    virtual int8_t GetCMASCategory() const;
+    virtual int8_t GetCMASResponseType() const;
+    virtual int8_t GetCMASSeverity() const;
+    virtual int8_t GetCMASUrgency() const;
+    virtual int8_t GetCMASCertainty() const;
+    virtual int8_t GetCMASMessageClass() const;
+    virtual bool IsCMAS() const;
+    virtual uint16_t GetMessageId() const;
+    virtual int8_t GetFormat() const;
+    virtual int8_t GetLanguage() const;
+    virtual std::string GetCbInfo() const;
+    virtual int8_t GetPriority() const;
 
     virtual std::shared_ptr<SpecialSmsIndication> GetSpecialSmsInd();
     static std::shared_ptr<CdmaSmsMessage> CreateMessage(const std::string &pdu);
 
+    std::unique_ptr<SmsTransMsg> CreateSubmitTransMsg(const std::string &dest, const std::string &sc,
+        const std::string &text, bool bStatusReport, const SmsCodingScheme codingScheme);
+    std::unique_ptr<SmsTransMsg> CreateSubmitTransMsg(const std::string &dest, const std::string &sc, int32_t port,
+        const uint8_t *data, uint32_t dataLen, bool bStatusReport);
+
 private:
+    static constexpr uint16_t DEFAULT_PORT = -1;
+    static constexpr uint16_t CDMA_MAX_UD_HEADER_NUM = 7;
+    static constexpr uint16_t TAPI_NETTEXT_SMDATA_SIZE_MAX = 255;
+    static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
+
+    uint16_t destPort_ = -1;
     std::unique_ptr<SmsTransAddr> address_;
     std::unique_ptr<SmsTeleSvcAddr> callbackNumber_;
     std::vector<struct SmsUDH> userHeaders_;
+    int8_t category_ = SMS_CMAE_CTG_RESERVED;
+    int8_t responseType_ = SMS_CMAE_RESP_TYPE_RESERVED;
+    int8_t severity_  = SMS_CMAE_SEVERITY_RESERVED;
+    int8_t urgency_ = SMS_CMAE_URGENCY_RESERVED;
+    int8_t certainty_ = SMS_CMAE_CERTAINTY_RESERVED;
+    int8_t messageClass_ = SMS_CMAE_ALERT_RESERVED;
+    int8_t priority_ = SMS_PRIORITY_NORMAL;
+    bool isCmas_ = false;
+    uint16_t messageId_;
+    int8_t language_;
     std::unique_ptr<struct SmsTransMsg> transMsg_;
-
+    std::unique_ptr<struct SmsTransMsg> GreateTransMsg();
+    SmsEncodingType CovertEncodingType(const SmsCodingScheme &codingScheme);
     bool PduAnalysis(const std::string &pduHex);
     void AnalysisP2pMsg(const SmsTransP2PMsg &p2pMsg);
     void AnalysisCbMsg(const SmsTransBroadCastMsg &cbMsg);
@@ -55,8 +90,12 @@ private:
     void AnalsisDeliverMsg(const SmsTeleSvcDeliver &deliver);
     void AnalsisDeliverAck(const SmsTeleSvcDeliverAck &deliverAck);
     void AnalsisSubmitReport(const SmsTeleSvcDeliverReport &report);
+    void AnalsisSubmitMsg(const SmsTeleSvcSubmit &submit);
     void AnalsisUserData(const SmsTeleSvcUserData &userData);
     void AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver);
+    void AnalsisHeader(const SmsTeleSvcUserData &userData);
+    virtual int DecodeMessage(unsigned char *decodeData, SmsCodingScheme &codingType, const std::string &msgText,
+        bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
 };
 } // namespace Telephony
 } // namespace OHOS

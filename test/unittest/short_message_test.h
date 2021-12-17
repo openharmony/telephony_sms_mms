@@ -16,15 +16,19 @@
 #ifndef SHORT_MESSAGE_TEST_H
 #define SHORT_MESSAGE_TEST_H
 
+#include <memory>
+
 #include "short_message.h"
 
 namespace OHOS {
 namespace Telephony {
 class ShortMessageTest {
 public:
-    void TestGetVisibleMessageBody(const ShortMessage &message) const;
-    void TestShowShortMessage(const ShortMessage &message) const;
-    ShortMessage *TestCreateMessage() const;
+    static std::unique_ptr<ShortMessage> shortMessage_;
+    void TestGetVisibleMessageBody() const;
+    void TestShowShortMessage() const;
+    void TestCreateMessage() const;
+    void Test3Gpp2CreateMessage() const;
 };
 } // namespace Telephony
 } // namespace OHOS

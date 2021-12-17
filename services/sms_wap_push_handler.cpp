@@ -17,8 +17,7 @@
 
 namespace OHOS {
 namespace Telephony {
-using namespace std;
-SmsWapPushHandler::SmsWapPushHandler(const shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
+SmsWapPushHandler::SmsWapPushHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
     : AppExecFwk::EventHandler(runner), slotId_(slotId)
 {}
 

@@ -34,6 +34,7 @@ int GsmSmsParamCodec::EncodeAddress(const struct SmsAddress *pAddress, char **pp
     int offset = 0;
     int length = 0;
     if (pAddress == nullptr) {
+        TELEPHONY_LOGE("PortAddress is null!");
         return offset;
     }
     const char *temp = static_cast<const char *>(pAddress->address);
@@ -41,11 +42,14 @@ int GsmSmsParamCodec::EncodeAddress(const struct SmsAddress *pAddress, char **pp
 
     char *tempParam = new (std::nothrow) char[MAX_ADD_PARAM_LEN];
     if (tempParam == nullptr) {
+        TELEPHONY_LOGE("tempParam is null!");
         return offset;
     }
 
     if (memset_s(tempParam, sizeof(char) * MAX_ADD_PARAM_LEN, 0x00, sizeof(char) * MAX_ADD_PARAM_LEN) != EOK) {
         TELEPHONY_LOGE("textData memset_s error!");
+        delete [] tempParam;
+        return offset;
     }
     if (temp[0] == '+') {
         tempParam[offset++] = strlen(temp) - 1;
@@ -72,6 +76,7 @@ int GsmSmsParamCodec::EncodeSMSC(const char *pAddress, unsigned char *pEncodeAdd
     int ret = 0;
     char newAddr[MAX_SMSC_LEN + 1];
     if (pAddress == nullptr || pEncodeAddr == nullptr) {
+        TELEPHONY_LOGE("Address or EncodeAddr is null.");
         return 0;
     }
     (void)memset_s(newAddr, sizeof(newAddr), 0x00, sizeof(newAddr));
@@ -87,6 +92,7 @@ int GsmSmsParamCodec::EncodeSMSC(const char *pAddress, unsigned char *pEncodeAdd
     /* Set Address */
     int encodeLen = SmsCommonUtils::DigitToBcd(newAddr, strlen(newAddr), pEncodeAddr);
     if (encodeLen < 0) {
+        TELEPHONY_LOGE("No address!");
         return 0;
     }
     pEncodeAddr[encodeLen] = '\0';
@@ -101,6 +107,7 @@ int GsmSmsParamCodec::EncodeSMSC(const struct SmsAddress *pAddress, unsigned cha
     char newAddr[MAX_SMSC_LEN + 1];
     (void)memset_s(newAddr, sizeof(newAddr), 0x00, sizeof(newAddr));
     if (pAddress == nullptr || pSMSC == nullptr) {
+        TELEPHONY_LOGE("Address or SMSC is null!");
         return dataSize;
     }
     if (pAddress->address[0] == '+') {
@@ -110,6 +117,7 @@ int GsmSmsParamCodec::EncodeSMSC(const struct SmsAddress *pAddress, unsigned cha
     }
     if (ret != EOK) {
         TELEPHONY_LOGE("EncodeSMSC memory copy error!");
+        return ret;
     }
     addrLen = strlen(newAddr);
     if (addrLen % HEX_BYTE_STEP == 0) {
@@ -118,8 +126,7 @@ int GsmSmsParamCodec::EncodeSMSC(const struct SmsAddress *pAddress, unsigned cha
         dataSize = HEX_BYTE_STEP + (addrLen / HEX_BYTE_STEP) + 1;
     }
     if (dataSize > MAX_SMSC_LEN || dataSize > smscLen) {
-        TELEPHONY_LOGI("addrLen is too long [%{public}d]", addrLen);
-        TELEPHONY_LOGI("dataSize is too long [%{public}d]", dataSize);
+        TELEPHONY_LOGE("AddrLen or DataSize is too long!");
         return 0;
     }
     /* Set Address Length Check IPC 4.0 -> addrLen/2 */
@@ -137,12 +144,14 @@ int GsmSmsParamCodec::EncodeTime(const struct SmsTimeStamp *pTimeStamp, char **p
     int ret = 0;
     int offset = 0;
     if (pTimeStamp == nullptr) {
+        TELEPHONY_LOGE("TimeStamp is null.");
         return offset;
     }
     if (pTimeStamp->format == SMS_TIME_ABSOLUTE) {
         int timeZone = pTimeStamp->time.absolute.timeZone;
         *ppParam = new (std::nothrow) char[MAX_ABS_TIME_PARAM_LEN];
         if (*ppParam == nullptr) {
+            TELEPHONY_LOGE("ppParam is null.");
             return offset;
         }
         (*ppParam)[offset++] = ((pTimeStamp->time.absolute.year % NUMBER_TEN) << 0x04) +
@@ -169,6 +178,7 @@ int GsmSmsParamCodec::EncodeTime(const struct SmsTimeStamp *pTimeStamp, char **p
     } else if (pTimeStamp->format == SMS_TIME_RELATIVE) {
         *ppParam = new (std::nothrow) char[MAX_REL_TIME_PARAM_LEN + 1];
         if (*ppParam == nullptr) {
+            TELEPHONY_LOGE("ppParam is null.");
             return offset;
         }
         ret = memcpy_s(
@@ -185,10 +195,13 @@ int GsmSmsParamCodec::EncodeTime(const struct SmsTimeStamp *pTimeStamp, char **p
 int GsmSmsParamCodec::EncodeDCS(const struct SmsDcs *pDCS, char **ppParam)
 {
     if (pDCS == nullptr) {
+        TELEPHONY_LOGE("pDCS is null.");
         return 0;
     }
     *ppParam = new (std::nothrow) char[MAX_DCS_PARAM_LEN];
     if (*ppParam == nullptr) {
+        delete ppParam;
+        TELEPHONY_LOGE("ppParam is null.");
         return 0;
     }
     unsigned char *temp = (unsigned char *)*ppParam;
@@ -200,15 +213,15 @@ int GsmSmsParamCodec::EncodeDCS(const struct SmsDcs *pDCS, char **ppParam)
             /* not supported */
             break;
         case SMS_GENERAL_GROUP:
-            if (pDCS->msgClass != SmsMessageClass::SMS_CLASS_UNKNOWN) {
-                *temp = 0x10 + static_cast<unsigned char>(pDCS->msgClass);
+            if (pDCS->msgClass != SMS_CLASS_UNKNOWN) {
+                *temp = 0x10 + pDCS->msgClass;
             }
             if (pDCS->bCompressed) {
                 *temp |= 0x20;
             }
             break;
         case SMS_CODING_CLASS_GROUP:
-            *temp = 0xF0 + static_cast<unsigned char>(pDCS->msgClass);
+            *temp = 0xF0 + pDCS->msgClass;
             break;
         default:
             return 0;
@@ -236,6 +249,7 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
     int addrLen = 0;
     int bcdLen = 0;
     if (pTpdu == nullptr || pAddress == nullptr) {
+        TELEPHONY_LOGE("Address or SMSC is null!");
         return offset;
     }
     MsgTextConvert *textCvt = MsgTextConvert::Instance();
@@ -245,6 +259,7 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
     }
     if (memset_s(pAddress->address, sizeof(pAddress->address), 0x00, sizeof(pAddress->address)) != EOK) {
         TELEPHONY_LOGE("pAddress memset_s error!");
+        return offset;
     }
     addrLen = (int)pTpdu[offset++];
     if (addrLen % HEX_BYTE_STEP == 0) {
@@ -261,6 +276,7 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
         }
         if (memset_s(tmpAddress, MAX_ADDRESS_LEN, 0x00, MAX_ADDRESS_LEN) != EOK) {
             TELEPHONY_LOGE("pAddress memset_s error!");
+            return offset;
         }
         int tmplength = 0;
         tmplength = SmsCommonUtils::Unpack7bitChar(
@@ -290,6 +306,7 @@ int GsmSmsParamCodec::DecodeTime(const unsigned char *pTpdu, struct SmsTimeStamp
 {
     int offset = 0;
     if (pTpdu == nullptr || pTimeStamp == nullptr) {
+        TELEPHONY_LOGE("Tpdu or TimeStamp is null.");
         return offset;
     }
     /* decode in ABSOLUTE time type. */
@@ -325,16 +342,16 @@ int GsmSmsParamCodec::DecodeTime(const unsigned char *pTpdu, struct SmsTimeStamp
 static enum SmsMessageClass ParseMsgClass(unsigned char dcs)
 {
     switch (dcs & 0x03) {
-        case static_cast<unsigned char>(SmsMessageClass::SMS_INSTANT_MESSAGE):
-            return SmsMessageClass::SMS_INSTANT_MESSAGE;
-        case static_cast<unsigned char>(SmsMessageClass::SMS_OPTIONAL_MESSAGE):
-            return SmsMessageClass::SMS_OPTIONAL_MESSAGE;
-        case static_cast<unsigned char>(SmsMessageClass::SMS_SIM_MESSAGE):
-            return SmsMessageClass::SMS_SIM_MESSAGE;
-        case static_cast<unsigned char>(SmsMessageClass::SMS_FORWARD_MESSAGE):
-            return SmsMessageClass::SMS_FORWARD_MESSAGE;
+        case SMS_INSTANT_MESSAGE:
+            return SMS_INSTANT_MESSAGE;
+        case SMS_OPTIONAL_MESSAGE:
+            return SMS_OPTIONAL_MESSAGE;
+        case SMS_SIM_MESSAGE:
+            return SMS_SIM_MESSAGE;
+        case SMS_FORWARD_MESSAGE:
+            return SMS_FORWARD_MESSAGE;
         default:
-            return SmsMessageClass::SMS_CLASS_UNKNOWN;
+            return SMS_CLASS_UNKNOWN;
     }
 }
 
@@ -373,7 +390,7 @@ static SmsIndicatorType ParseMsgIndicatorType(const unsigned char dcs)
 static void DecodeMWIType(const unsigned char dcs, struct SmsDcs &pDCS)
 {
     pDCS.bCompressed = false;
-    pDCS.msgClass = SmsMessageClass::SMS_CLASS_UNKNOWN;
+    pDCS.msgClass = SMS_CLASS_UNKNOWN;
     pDCS.bMWI = true;
     pDCS.bIndActive = (((dcs & 0x08) >> 0x03) == 0x01) ? true : false;
     pDCS.indType = ParseMsgIndicatorType(dcs & 0x03);
@@ -383,6 +400,7 @@ int GsmSmsParamCodec::DecodeDCS(const unsigned char *pTpdu, struct SmsDcs *pDCS)
 {
     int offset = 0;
     if (pTpdu == nullptr || pDCS == nullptr) {
+        TELEPHONY_LOGE("Tpdu or pDCS is null.");
         return offset;
     }
     unsigned char dcs = pTpdu[offset++];
@@ -395,7 +413,7 @@ int GsmSmsParamCodec::DecodeDCS(const unsigned char *pTpdu, struct SmsDcs *pDCS)
         pDCS->codingScheme = ParseMsgCodingScheme((dcs & 0x0C) >> 0x02);
 
         if (((dcs & 0x10) >> 0x04) == 0) {
-            pDCS->msgClass = SmsMessageClass::SMS_CLASS_UNKNOWN;
+            pDCS->msgClass = SMS_CLASS_UNKNOWN;
         } else {
             pDCS->msgClass = ParseMsgClass(dcs & 0x03);
         }
@@ -407,7 +425,7 @@ int GsmSmsParamCodec::DecodeDCS(const unsigned char *pTpdu, struct SmsDcs *pDCS)
     } else if (((dcs & 0xC0) >> 0x06) == 1) {
         pDCS->codingGroup = SMS_DELETION_GROUP;
         pDCS->bCompressed = false;
-        pDCS->msgClass = SmsMessageClass::SMS_CLASS_UNKNOWN;
+        pDCS->msgClass = SMS_CLASS_UNKNOWN;
     } else if (((dcs & 0xF0) >> 0x04) == 0x0C) {
         pDCS->codingGroup = SMS_DISCARD_GROUP;
         DecodeMWIType(dcs, *pDCS);
@@ -423,7 +441,7 @@ int GsmSmsParamCodec::DecodeDCS(const unsigned char *pTpdu, struct SmsDcs *pDCS)
         pDCS->codingGroup = SMS_UNKNOWN_GROUP;
         pDCS->bCompressed = (dcs & 0x20) >> 0x05;
         pDCS->codingScheme = ParseMsgCodingScheme((dcs & 0x0C) >> 0x02);
-        pDCS->msgClass = SmsMessageClass::SMS_CLASS_UNKNOWN;
+        pDCS->msgClass = SMS_CLASS_UNKNOWN;
     }
 
     return offset;
@@ -432,9 +450,11 @@ int GsmSmsParamCodec::DecodeDCS(const unsigned char *pTpdu, struct SmsDcs *pDCS)
 void GsmSmsParamCodec::DecodeSMSC(unsigned char *pAddress, int AddrLen, enum SmsTon ton, char *pDecodeAddr)
 {
     if (pAddress == nullptr || AddrLen == 0) {
+        TELEPHONY_LOGE("Address  is null.");
         return;
     }
     if (pDecodeAddr == nullptr) {
+        TELEPHONY_LOGE("DecodeAddress  is null.");
         return;
     }
     if (ton == SMS_TON_INTERNATIONAL) {
@@ -450,6 +470,7 @@ int GsmSmsParamCodec::DecodeSMSC(const unsigned char *pTpdu, int pduLen, struct 
     int offset = 0;
     int addrLen = 0;
     if (pTpdu == nullptr) {
+        TELEPHONY_LOGE("Tpdu  is null.");
         return offset;
     }
     if (memset_s(pAddress.address, sizeof(pAddress.address), 0x00, sizeof(pAddress.address)) != EOK) {
@@ -457,13 +478,16 @@ int GsmSmsParamCodec::DecodeSMSC(const unsigned char *pTpdu, int pduLen, struct 
     }
     addrLen = (int)pTpdu[offset++];
     if ((addrLen == 0) || (addrLen >= pduLen)) {
+        TELEPHONY_LOGE("AddrLen  is invilid.");
         return offset;
     }
 
     pAddress.ton = (pTpdu[offset] & 0x70) >> 0x04;
     pAddress.npi = pTpdu[offset++] & 0x0F;
+
     if (pAddress.ton == SMS_TON_INTERNATIONAL) {
         if (addrLen > (SMS_MAX_ADDRESS_LEN - 1)) {
+            TELEPHONY_LOGE("AddrLen  is invilid.");
             return 0;
         }
         SmsCommonUtils::BcdToDigit(&(pTpdu[offset]), addrLen, &((pAddress.address)[1]));
@@ -472,6 +496,7 @@ int GsmSmsParamCodec::DecodeSMSC(const unsigned char *pTpdu, int pduLen, struct 
         }
     } else {
         if (addrLen > SMS_MAX_ADDRESS_LEN) {
+            TELEPHONY_LOGE("AddrLen  is invilid.");
             return 0;
         }
         SmsCommonUtils::BcdToDigit(&(pTpdu[offset]), addrLen, &((pAddress.address)[0]));
@@ -487,6 +512,7 @@ bool GsmSmsParamCodec::CheckCphsVmiMsg(const unsigned char *pTpdu, int *setType,
     int offset = 0;
     int addrLen = 0;
     if (pTpdu == nullptr) {
+        TELEPHONY_LOGE("Tpdu  is null.");
         return ret;
     }
     addrLen = (int)pTpdu[offset++];
