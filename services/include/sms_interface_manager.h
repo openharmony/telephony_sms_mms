@@ -50,6 +50,8 @@ public:
     bool SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType);
     bool SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
+    std::vector<std::string> SplitMessage(const std::string &message);
+    std::vector<int32_t> CalculateLength(const std::string &message, bool force7BitCode);
 
 private:
     int32_t slotId_;

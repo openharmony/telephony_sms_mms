@@ -15,16 +15,14 @@
 
 #include "gsm_sms_cb_handler.h"
 
-#include "common_event.h"
-#include "common_event_manager.h"
+#include "common_event_support.h"
 #include "securec.h"
-#include "want.h"
 
+#include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
-using namespace EventFwk;
 GsmSmsCbHandler::GsmSmsCbHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
     : AppExecFwk::EventHandler(runner), slotId_(slotId)
 {
@@ -35,7 +33,7 @@ GsmSmsCbHandler::~GsmSmsCbHandler()
 {
     std::shared_ptr<Core> core = GetCore();
     if (core != nullptr) {
-        core->UnRegisterPhoneNotify(shared_from_this(), ObserverHandler::RADIO_CELL_BROADCAST);
+        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_CELL_BROADCAST);
     }
 }
 
@@ -44,14 +42,15 @@ void GsmSmsCbHandler::Init()
     cbMsgList_.clear();
     std::shared_ptr<Core> core = GetCore();
     if (core != nullptr) {
-        core->RegisterPhoneNotify(shared_from_this(), ObserverHandler::RADIO_CELL_BROADCAST, nullptr);
-        TELEPHONY_LOGD("GsmSmsCbHandler::RegisterHandler::slotId= %{public}d", slotId_);
+        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_CELL_BROADCAST, nullptr);
+        TELEPHONY_LOGI("GsmSmsCbHandler::RegisterHandler::slotId= %{public}d", slotId_);
     }
 }
 
 bool GsmSmsCbHandler::CheckCbActive(const std::shared_ptr<SmsCbMessage> &cbMessage)
 {
     if (cbMessage == nullptr) {
+        TELEPHONY_LOGE("CbMessage is null!");
         return false;
     }
     return true;
@@ -66,7 +65,7 @@ unsigned char GsmSmsCbHandler::CheckCbMessage(const std::shared_ptr<SmsCbMessage
         return currPageCnt;
     }
 
-    std::shared_ptr<SmsCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
+    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
     if (cbHeader == nullptr || cbHeader->totalPages == 0) {
         TELEPHONY_LOGE("CheckCbMessage GetCbHeader err.");
         return currPageCnt;
@@ -76,15 +75,17 @@ unsigned char GsmSmsCbHandler::CheckCbMessage(const std::shared_ptr<SmsCbMessage
         SmsCbInfo &cbInfo = cbMsgList_[i];
         if (*cbInfo.header.get() == *cbHeader.get()) {
             int updateNum = cbHeader->serialNum.updateNum - cbInfo.header->serialNum.updateNum;
-            if (updateNum == 0) {
-                if (cbInfo.cbMsgs.count(cbHeader->page)) {
-                    currPageCnt = 0x01;
-                    return currPageCnt;
-                }
-                cbInfo.cbMsgs.insert(std::make_pair(cbHeader->page, cbMessage));
-                currPageCnt = cbInfo.cbMsgs.size();
-                bFind = true;
+            if (updateNum != 0) {
+                break;
             }
+
+            if (cbInfo.cbMsgs.count(cbHeader->page)) {
+                currPageCnt = 0x01;
+                return currPageCnt;
+            }
+            cbInfo.cbMsgs.insert(std::make_pair(cbHeader->page, cbMessage));
+            currPageCnt = cbInfo.cbMsgs.size();
+            bFind = true;
             break;
         }
     }
@@ -105,7 +106,7 @@ std::unique_ptr<SmsCbInfo> GsmSmsCbHandler::FindCbMessage(const std::shared_ptr<
         return cbInfo;
     }
 
-    std::shared_ptr<SmsCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
+    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
     if (cbHeader == nullptr) {
         TELEPHONY_LOGE("FindCbMessage header err.");
         return cbInfo;
@@ -115,7 +116,10 @@ std::unique_ptr<SmsCbInfo> GsmSmsCbHandler::FindCbMessage(const std::shared_ptr<
         SmsCbInfo &info = cbMsgList_[i];
         if (*info.header.get() == *cbHeader.get()) {
             cbInfo = std::make_unique<SmsCbInfo>(info.header, info.cbMsgs);
-            return cbInfo;
+            if (cbInfo == nullptr) {
+                TELEPHONY_LOGE("Make SmsCbInfo err.");
+                return cbInfo;
+            }
         }
     }
     return cbInfo;
@@ -128,7 +132,7 @@ bool GsmSmsCbHandler::AddCbMessageToList(const std::shared_ptr<SmsCbMessage> &cb
         return false;
     }
 
-    std::shared_ptr<SmsCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
+    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
     if (cbHeader == nullptr) {
         TELEPHONY_LOGE("AddCbMessageToList header err.");
         return false;
@@ -147,32 +151,34 @@ bool GsmSmsCbHandler::AddCbMessageToList(const std::shared_ptr<SmsCbMessage> &cb
 
 bool GsmSmsCbHandler::RemoveCbMessageFromList(const std::shared_ptr<SmsCbMessage> &cbMessage)
 {
+    bool result = false;
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("RemoveCbMessageFromList cbMessage nullptr err.");
         return false;
     }
 
-    std::shared_ptr<SmsCbMessageHeader> header = cbMessage->GetCbHeader();
+    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> header = cbMessage->GetCbHeader();
     if (header == nullptr) {
         TELEPHONY_LOGE("RemoveCbMessageFromList header err.");
         return false;
     }
     auto it = cbMsgList_.begin();
     while (it != cbMsgList_.end()) {
-        auto oldIt = it++;
-        SmsCbInfo &info = *oldIt;
-        if (*info.header.get() == *header.get()) {
-            cbMsgList_.erase(oldIt);
-            return true;
+        SmsCbInfo &info = *it;
+        if (*info.header.get() == *header.get() || !info.MatchLocation(plmn_, lac_, cid_)) {
+            it = cbMsgList_.erase(it);
+            result = true;
+        } else {
+            ++it;
         }
     }
-    return false;
+    return result;
 }
 
-void GsmSmsCbHandler::HandleCbMessage(std::shared_ptr<CellBroadcastReportInfo> &message)
+void GsmSmsCbHandler::HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &message)
 {
     if (message == nullptr) {
-        TELEPHONY_LOGE("SmsCellBroadcastHandler HandleCbMessage message == nullptr");
+        TELEPHONY_LOGE("GsmSmsCbHandler HandleCbMessage message == nullptr");
         return;
     }
 
@@ -182,14 +188,14 @@ void GsmSmsCbHandler::HandleCbMessage(std::shared_ptr<CellBroadcastReportInfo> &
         TELEPHONY_LOGE("create Sms CbMessage fail, pdu %{public}s", pdu.c_str());
         return;
     }
-    std::shared_ptr<SmsCbMessageHeader> header = cbMessage->GetCbHeader();
+    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> header = cbMessage->GetCbHeader();
     if (header == nullptr) {
         TELEPHONY_LOGE("HandleCbMessage header is null.");
         return;
     }
 
     if (!CheckCbActive(cbMessage)) {
-        TELEPHONY_LOGD("The Cell Broadcast msg is not active");
+        TELEPHONY_LOGE("The Cell Broadcast msg is not active");
         return;
     }
 
@@ -206,45 +212,16 @@ bool GsmSmsCbHandler::SendCbMessageBroadcast(const std::shared_ptr<SmsCbMessage>
         TELEPHONY_LOGE("SendCbMessageBroadcast cbMessage nullptr err.");
         return false;
     }
-
-    std::unique_ptr<SmsCbInfo> info = FindCbMessage(cbMessage);
-    std::shared_ptr<SmsCbMessageHeader> header = cbMessage->GetCbHeader();
-    if (header == nullptr || info == nullptr) {
-        TELEPHONY_LOGE("SendCbMessageBroadcast FindCbMessage header err.");
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    if (!SetWantData(want, cbMessage)) {
+        TELEPHONY_LOGE("SendCbMessageBroadcast SetWantData fail.");
         return false;
     }
-
-    std::string rawMsgBody;
-    std::string msgBody;
-    for (auto it = info->cbMsgs.begin(); it != info->cbMsgs.end(); it++) {
-        rawMsgBody.append(it->second->GetCbMessageRaw());
-    }
-
-    cbMessage->ConvertToUTF8(rawMsgBody, msgBody);
-    TELEPHONY_LOGI("cell broadcast msgBody--> %{public}s", msgBody.c_str());
-    Want want;
-    CommonEventData data;
-    unsigned short serialNum = cbMessage->EncodeCbSerialNum(header->serialNum);
-    want.SetParam("serialNum", serialNum);
-    want.SetParam("msgBody", msgBody);
-    want.SetParam("recvTime", header->recvTime);
-    data.SetCode(msgReceiveCode_);
-    if (!header->bEtwsMessage) {
-        want.SetAction("ohos.action.telephonySmsETWSCBReceiveFinished");
-        want.SetParam("warningType", header->warningType);
-        data.SetData("ETWS CB MSG RECEIVE");
-    } else {
-        want.SetAction("ohos.action.telephonySmsCBReceiveFinished");
-        want.SetParam("cbMsgType", header->cbMsgType);
-        want.SetParam("msgId", header->msgId);
-        want.SetParam("langType", header->langType);
-        want.SetParam("dcs", header->dcs.rawData);
-        data.SetData("CB MSG RECEIVE");
-    }
     data.SetWant(want);
-    CommonEventPublishInfo publishInfo;
+    EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(true);
-    bool publishResult = CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
+    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     if (!publishResult) {
         TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
         return false;
@@ -255,20 +232,22 @@ bool GsmSmsCbHandler::SendCbMessageBroadcast(const std::shared_ptr<SmsCbMessage>
 void GsmSmsCbHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
 {
     if (event == nullptr) {
-        TELEPHONY_LOGE("SmsCellBroadcastHandler event == nullptr");
+        TELEPHONY_LOGE("GsmSmsCbHandler event nullptr error.");
         return;
     }
 
     int eventId = 0;
     eventId = event->GetInnerEventId();
+    TELEPHONY_LOGI("ProcessEvent eventId = %{public}d", eventId);
     switch (eventId) {
         case ObserverHandler::RADIO_CELL_BROADCAST: {
-            std::shared_ptr<CellBroadcastReportInfo> cbMessage = nullptr;
-            cbMessage = event->GetSharedObject<CellBroadcastReportInfo>();
+            std::shared_ptr<CBConfigReportInfo> cbMessage = nullptr;
+            cbMessage = event->GetSharedObject<CBConfigReportInfo>();
             HandleCbMessage(cbMessage);
             break;
         }
         default:
+            TELEPHONY_LOGE("GsmSmsCbHandler eventId unknown error.");
             break;
     }
 }
@@ -280,6 +259,88 @@ std::shared_ptr<Core> GsmSmsCbHandler::GetCore() const
         return core;
     }
     return nullptr;
+}
+
+bool GsmSmsCbHandler::SetWantData(
+    EventFwk::Want &want, const std::shared_ptr<SmsCbMessage> &cbMessage)
+{
+    if (cbMessage == nullptr) {
+        TELEPHONY_LOGE("cbMessage is nullptr.");
+        return false;
+    }
+    SmsCbData::CbData sendData;
+    std::unique_ptr<SmsCbInfo> info = FindCbMessage(cbMessage);
+    if (info == nullptr) {
+        TELEPHONY_LOGE("find cb message fail.");
+        return false;
+    }
+    std::string rawMsgBody;
+    for (auto it = info->cbMsgs.begin(); it != info->cbMsgs.end(); it++) {
+        rawMsgBody.append(it->second->GetCbMessageRaw());
+    }
+    GetCbData(cbMessage, sendData);
+    cbMessage->ConvertToUTF8(rawMsgBody, sendData.msgBody);
+    want.SetParam(SmsCbData::GEO_SCOPE, static_cast<char>(sendData.geoScope));
+    want.SetParam(SmsCbData::CMAS_RESPONSE, static_cast<char>(sendData.cmasRes));
+    want.SetParam(SmsCbData::SLOT_ID, static_cast<int>(slotId_));
+    want.SetParam(SmsCbData::FORMAT, static_cast<char>(sendData.format));
+    want.SetParam(SmsCbData::CB_MSG_TYPE, static_cast<char>(sendData.msgType));
+    want.SetParam(SmsCbData::MSG_ID, static_cast<int>(sendData.msgId));
+    want.SetParam(SmsCbData::SERVICE_CATEGORY, static_cast<int>(sendData.category));
+    want.SetParam(SmsCbData::LANG_TYPE, static_cast<char>(sendData.langType));
+    want.SetParam(SmsCbData::PRIORITY, static_cast<char>(sendData.priority));
+    want.SetParam(SmsCbData::MSG_BODY, sendData.msgBody);
+    want.SetParam(SmsCbData::CMAS_CLASS, static_cast<char>(sendData.cmasClass));
+    want.SetParam(SmsCbData::CMAS_CATEGORY, static_cast<char>(sendData.cmasCate));
+    want.SetParam(SmsCbData::SEVERITY, static_cast<char>(sendData.severity));
+    want.SetParam(SmsCbData::URGENCY, static_cast<char>(sendData.urgency));
+    want.SetParam(SmsCbData::CERTAINTY, static_cast<char>(sendData.certainty));
+    want.SetParam(SmsCbData::IS_CMAS_MESSAGE, sendData.isCmas);
+    want.SetParam(SmsCbData::SERIAL_NUM, static_cast<int>(sendData.serial));
+    want.SetParam(SmsCbData::RECV_TIME, std::to_string(sendData.recvTime));
+    want.SetParam(SmsCbData::DCS, static_cast<char>(sendData.dcs));
+
+    want.SetParam(SmsCbData::IS_ETWS_PRIMARY, sendData.isPrimary);
+    want.SetParam(SmsCbData::IS_ETWS_MESSAGE, sendData.isEtws);
+    want.SetParam(SmsCbData::PLMN, StringUtils::ToUtf8(plmn_));
+    want.SetParam(SmsCbData::LAC, static_cast<int>(lac_));
+    want.SetParam(SmsCbData::CID, static_cast<int>(cid_));
+    want.SetParam(SmsCbData::WARNING_TYPE, static_cast<int>(sendData.warnType));
+    if (sendData.isPrimary) {
+        want.SetAction("usual.event.SMS_EMERGENCY_CB_RECEIVE_COMPLETED");
+    } else {
+        want.SetAction("usual.event.SMS_CB_RECEIVE_COMPLETED");
+    }
+    return true;
+}
+
+void GsmSmsCbHandler::GetCbData(const std::shared_ptr<SmsCbMessage> &cbMessage,
+    SmsCbData::CbData &sendData)
+{
+    if (cbMessage == nullptr) {
+        TELEPHONY_LOGE("Get Cb Data error.");
+        return ;
+    }
+    cbMessage->GetMsgType(sendData.msgType);
+    cbMessage->GetLangType(sendData.langType);
+    cbMessage->GetDcs(sendData.dcs);
+    cbMessage->GetPriority(sendData.priority);
+    cbMessage->GetCmasMessageClass(sendData.cmasClass);
+    cbMessage->GetCmasResponseType(sendData.cmasRes);
+    cbMessage->GetCmasSeverity(sendData.severity);
+    cbMessage->GetCmasUrgency(sendData.urgency);
+    cbMessage->GetCmasCertainty(sendData.certainty);
+    cbMessage->IsEtwsMessage(sendData.isEtws);
+    cbMessage->GetWarningType(sendData.warnType);
+    cbMessage->IsCmasMessage(sendData.isCmas);
+    cbMessage->GetSerialNum(sendData.serial);
+    cbMessage->GetReceiveTime(sendData.recvTime);
+    cbMessage->GetMessageId(sendData.msgId);
+    cbMessage->GetServiceCategory(sendData.category);
+    cbMessage->GetFormat(sendData.format);
+    cbMessage->IsEtwsPrimary(sendData.isPrimary);
+    cbMessage->GetGeoScope(sendData.geoScope);
+    cbMessage->GetCmasCategory(sendData.cmasCate);
 }
 } // namespace Telephony
 } // namespace OHOS

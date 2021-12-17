@@ -15,19 +15,14 @@
 
 #include "gsm_sms_sender.h"
 
-#include <chrono>
-#include <list>
-
 #include "securec.h"
 #include "string_utils.h"
-
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
-using namespace std;
 GsmSmsSender::GsmSmsSender(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId,
-    function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun)
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun)
     : SmsSender(runner, slotId, sendRetryFun)
 {}
 
@@ -40,92 +35,131 @@ void GsmSmsSender::Init()
     }
 }
 
-void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
+void GsmSmsSender::TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
     const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    bool isMore = false;
-    bool isStatusReport = false;
-    int ret = 0;
-    int headerCnt;
-    int cellsInfosSize;
-    unsigned char msgRef8bit;
     SmsCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
     std::vector<struct SplitInfo> cellsInfos;
     gsmSmsMessage.SplitMessage(cellsInfos, text, false, codingType);
-    isStatusReport = (deliveryCallback == nullptr) ? false : true;
+    int cellsInfosSize = cellsInfos.size();
+    bool isStatusReport = (deliveryCallback == nullptr) ? false : true;
     std::shared_ptr<struct SmsTpdu> tpdu =
         gsmSmsMessage.CreateDefaultSubmitSmsTpdu(desAddr, scAddr, text, isStatusReport, codingType);
-    if (tpdu == nullptr) {
+    std::shared_ptr<uint8_t> unSentCellCount = std::make_shared<uint8_t>(cellsInfosSize);
+    std::shared_ptr<bool> hasCellFailed = std::make_shared<bool>(false);
+    if (unSentCellCount == nullptr || hasCellFailed == nullptr || tpdu == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("TextBasedSmsDelivery tpdu nullptr error.");
+        TELEPHONY_LOGE("Create Text data object error.");
         return;
     }
-    cellsInfosSize = cellsInfos.size();
-    msgRef8bit = GetMsgRef8Bit();
+    unsigned char msgRef8bit = GetMsgRef8Bit();
     isStatusReport = tpdu->data.submit.bStatusReport;
-
-    TELEPHONY_LOGI("TextBasedSmsDelivery isStatusReport= %{public}d", isStatusReport);
-    shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(cellsInfosSize);
-    shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
-    chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
-    chrono::seconds sec = chrono::duration_cast<chrono::seconds>(timePoint);
-    long timeStamp = sec.count();
     std::unique_lock<std::mutex> lock(mutex_);
     for (int i = 0; i < cellsInfosSize; i++) {
-        std::shared_ptr<SmsSendIndexer> indexer = nullptr;
-        std::string segmentText;
-        segmentText.append((char *)(cellsInfos[i].encodeData.data()), cellsInfos[i].encodeData.size());
-        indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, segmentText, sendCallback, deliveryCallback);
-        headerCnt = 0;
-        (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
-        ret = memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, &cellsInfos[i].encodeData[0],
-            cellsInfos[i].encodeData.size());
-        if (ret != EOK || indexer == nullptr) {
-            SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-            TELEPHONY_LOGE("TextBasedSmsDelivery memcpy_s error.");
+        std::string segmentText((char *)(cellsInfos[i].encodeData.data()), cellsInfos[i].encodeData.size());
+        std::shared_ptr<SmsSendIndexer> indexer = std::make_shared<SmsSendIndexer>(desAddr,
+            scAddr, segmentText, sendCallback, deliveryCallback);
+        bool ret = SetUserData(tpdu, cellsInfos, i);
+        if (!ret || indexer == nullptr) {
+            TELEPHONY_LOGE("SetUserData fail or indexer is null.");
+            SendResultCallBack(indexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
             return;
         }
-        tpdu->data.submit.userData.length = cellsInfos[i].encodeData.size();
-        tpdu->data.submit.userData.data[cellsInfos[i].encodeData.size()] = 0;
+        int headerCnt = SetConcatData(msgRef8bit, cellsInfosSize, indexer, gsmSmsMessage, i);
         tpdu->data.submit.msgRef = msgRef8bit;
-        if (cellsInfosSize > 1) {
-            indexer->SetIsConcat(true);
-            SmsConcat concat;
-            concat.is8Bits = true;
-            concat.msgRef = msgRef8bit;
-            concat.totalSeg = cellsInfosSize;
-            concat.seqNum = i + 1;
-            indexer->SetSmsConcat(concat);
-            headerCnt += gsmSmsMessage.SetHeaderConcat(headerCnt, concat);
-        }
         /* Set User Data Header for Alternate Reply Address */
         headerCnt += gsmSmsMessage.SetHeaderReply(headerCnt);
         /* Set User Data Header for National Language Single Shift */
         headerCnt += gsmSmsMessage.SetHeaderLang(headerCnt, codingType, cellsInfos[i].langId);
-        indexer->SetLangId(cellsInfos[i].langId);
         tpdu->data.submit.userData.headerCnt = headerCnt;
         tpdu->data.submit.bHeaderInd = (headerCnt > 0) ? true : false;
-        if (cellsInfosSize > 1 && i < (cellsInfosSize - 1)) {
-            tpdu->data.submit.bStatusReport = false;
-            isMore = true;
-        } else {
-            tpdu->data.submit.bStatusReport = isStatusReport;
-            isMore = false;
-        }
+        bool isMore = SetStatusReport(cellsInfosSize, i, tpdu, isStatusReport);
         std::shared_ptr<struct EncodeInfo> encodeInfo = gsmSmsMessage.GetSubmitEncodeInfo(scAddr, isMore);
         if (encodeInfo == nullptr) {
-            SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-            TELEPHONY_LOGE("create encodeInfo indexer == nullptr\r\n");
+            SendResultCallBack(indexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+            TELEPHONY_LOGE("create encodeInfo encodeInfo nullptr error.");
             continue;
         }
         SetSendIndexerInfo(indexer, encodeInfo, msgRef8bit);
-        indexer->SetUnSentCellCount(unSentCellCount);
-        indexer->SetHasCellFailed(hasCellFailed);
-        indexer->SetTimeStamp(timeStamp);
+        SetSendStatusIndexerInfo(unSentCellCount, hasCellFailed, cellsInfos, indexer, i);
         SendSmsToRil(indexer);
     }
+}
+
+void GsmSmsSender::SetSendStatusIndexerInfo(const std::shared_ptr<uint8_t> &unSentCellCount,
+    const std::shared_ptr<bool> &hasCellFailed, const std::vector<struct SplitInfo> &cellsInfos,
+    std::shared_ptr<SmsSendIndexer> &indexer, int i)
+{
+    if (unSentCellCount == nullptr || hasCellFailed == nullptr || indexer == nullptr) {
+        TELEPHONY_LOGE("Set send status parameter error.");
+        return ;
+    }
+    indexer->SetUnSentCellCount(unSentCellCount);
+    indexer->SetHasCellFailed(hasCellFailed);
+    indexer->SetLangId(cellsInfos[i].langId);
+}
+
+bool GsmSmsSender::SetStatusReport(int cellsInfosSize, int i, std::shared_ptr<struct SmsTpdu> &tpdu,
+    bool isStatusReport)
+{
+    bool isMore = false;
+    if (tpdu == nullptr) {
+        TELEPHONY_LOGE("Set status report parameter error.");
+        return isMore;
+    }
+    if (cellsInfosSize > 1 && i < (cellsInfosSize - 1)) {
+        tpdu->data.submit.bStatusReport = false;
+        isMore = true;
+    } else {
+        tpdu->data.submit.bStatusReport = isStatusReport;
+        isMore = false;
+    }
+    return isMore;
+}
+
+bool GsmSmsSender::SetUserData(std::shared_ptr<struct SmsTpdu> &tpdu,
+    const std::vector<struct SplitInfo> &cellsInfos, int i)
+{
+    bool result = false;
+    if (tpdu == nullptr) {
+        TELEPHONY_LOGE("Set user data parameter error");
+        return result;
+    }
+    if (memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1) != EOK) {
+        TELEPHONY_LOGE("Init User Data memset fail");
+        return result;
+    }
+    if (memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, &cellsInfos[i].encodeData[0],
+        cellsInfos[i].encodeData.size())) {
+        TELEPHONY_LOGE("Init User Data memcpy fail");
+        return result;
+    }
+    tpdu->data.submit.userData.length = cellsInfos[i].encodeData.size();
+    tpdu->data.submit.userData.data[cellsInfos[i].encodeData.size()] = 0;
+    return true;
+}
+
+int GsmSmsSender::SetConcatData(unsigned char msgRef8bit, int cellsInfosSize,
+    std::shared_ptr<SmsSendIndexer> &indexer, GsmSmsMessage &gsmSmsMessage, int i)
+{
+    int headerCnt = 0;
+    if (indexer == nullptr) {
+        TELEPHONY_LOGE("Set concat data indexer is nullptr");
+        return headerCnt;
+    }
+    if (cellsInfosSize > 1) {
+        indexer->SetIsConcat(true);
+        SmsConcat concat;
+        concat.is8Bits = true;
+        concat.msgRef = msgRef8bit;
+        concat.totalSeg = cellsInfosSize;
+        concat.seqNum = i + 1;
+        indexer->SetSmsConcat(concat);
+        headerCnt += gsmSmsMessage.SetHeaderConcat(headerCnt, concat);
+    }
+    return headerCnt;
 }
 
 void GsmSmsSender::DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, int32_t port,
@@ -137,25 +171,24 @@ void GsmSmsSender::DataBasedSmsDelivery(const std::string &desAddr, const std::s
     std::shared_ptr<struct SmsTpdu> tpdu = gsmSmsMessage.CreateDataSubmitSmsTpdu(
         desAddr, scAddr, port, data, dataLen, msgRef8bit, (deliveryCallback == nullptr) ? false : true);
     std::shared_ptr<struct EncodeInfo> encodeInfo = gsmSmsMessage.GetSubmitEncodeInfo(scAddr, false);
-    if (encodeInfo == nullptr || tpdu == nullptr) {
+    std::shared_ptr<SmsSendIndexer> indexer = std::make_shared<SmsSendIndexer>(desAddr,
+        scAddr, port, data, dataLen, sendCallback, deliveryCallback);
+    if (encodeInfo == nullptr || tpdu == nullptr || indexer == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("DataBasedSmsDelivery encodeInfo or tpdu nullptr error.");
-        return;
-    }
-    shared_ptr<SmsSendIndexer> indexer = nullptr;
-    indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, port, data, dataLen, sendCallback, deliveryCallback);
-    if (indexer == nullptr) {
-        SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("DataBasedSmsDelivery create SmsSendIndexer nullptr");
+        TELEPHONY_LOGE("created data sms info fail.");
         return;
     }
     std::vector<uint8_t> smca(encodeInfo->smcaData_, encodeInfo->smcaData_ + encodeInfo->smcaLen);
     std::vector<uint8_t> pdu(encodeInfo->tpduData_, encodeInfo->tpduData_ + encodeInfo->tpduLen);
-    std::shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(1);
-    std::shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
-    chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
-    chrono::seconds sec = chrono::duration_cast<chrono::seconds>(timePoint);
-    long timeStamp = sec.count();
+    std::shared_ptr<uint8_t> unSentCellCount = std::make_shared<uint8_t>(1);
+    std::shared_ptr<bool> hasCellFailed = std::make_shared<bool>(false);
+    if (unSentCellCount == nullptr || hasCellFailed == nullptr) {
+        SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("unSentCellCount or hasCellFailed is nullptr.");
+        return;
+    }
+    std::chrono::system_clock::duration timePoint = std::chrono::system_clock::now().time_since_epoch();
+    long timeStamp = std::chrono::duration_cast<std::chrono::seconds>(timePoint).count();
     indexer->SetUnSentCellCount(unSentCellCount);
     indexer->SetHasCellFailed(hasCellFailed);
     indexer->SetEncodeSmca(std::move(smca));
@@ -168,7 +201,7 @@ void GsmSmsSender::DataBasedSmsDelivery(const std::string &desAddr, const std::s
     SendSmsToRil(indexer);
 }
 
-void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
+void GsmSmsSender::SendSmsToRil(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
 {
     if (smsIndexer == nullptr) {
         SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -184,6 +217,7 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     int64_t refId = GetMsgRef64Bit();
     if (!SendCacheMapAddItem(refId, smsIndexer)) {
         TELEPHONY_LOGE("SendCacheMapAddItem Error!!");
+        return;
     }
     if (netDomainType_ != NET_DOMAIN_IMS && (smsIndexer->GetPsResendCount() == 0)) {
         uint8_t tryCount = smsIndexer->GetCsResendCount();
@@ -200,34 +234,33 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
             auto reply = AppExecFwk::InnerEvent::Get(ObserverHandler::RADIO_SEND_SMS, refId);
             reply->SetOwner(shared_from_this());
             TELEPHONY_LOGI("SendSms pdu len = %{public}zu", smsIndexer->GetEncodePdu().size());
-            core->SendSms(StringUtils::StringToHex(smsIndexer->GetEncodeSmca()),
+            core->SendGsmSms(StringUtils::StringToHex(smsIndexer->GetEncodeSmca()),
                 StringUtils::StringToHex(smsIndexer->GetEncodePdu()), reply);
         }
     } else {
-        TELEPHONY_LOGD("ims network domain not support!");
+        TELEPHONY_LOGI("ims network domain not support!");
         smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
     }
 }
 
 void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event)
 {
+    if (event == nullptr) {
+        TELEPHONY_LOGE("gsm_sms_sender: StatusReportAnalysis event nullptr error.");
+        return;
+    }
+
     std::shared_ptr<SmsMessageInfo> statusInfo = event->GetSharedObject<SmsMessageInfo>();
     if (statusInfo == nullptr) {
+        TELEPHONY_LOGE("gsm_sms_sender: StatusReportAnalysis statusInfo nullptr error.");
         return;
     }
-    if (statusInfo->pdu.size() == 0) {
-        TELEPHONY_LOGE("gsm_sms_sender: StatusReportAnalysis statusInfo->pdu == 0");
-        return;
-    }
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("gsm_sms_sender: StatusReportAnalysis core nullptr");
-        return;
-    }
+
     std::string pdu = StringUtils::StringToHex(statusInfo->pdu);
+    TELEPHONY_LOGI("StatusReport pdu size == %{public}zu", pdu.length());
     std::shared_ptr<GsmSmsMessage> message = GsmSmsMessage::CreateMessage(pdu);
     if (message == nullptr) {
-        TELEPHONY_LOGE("gsm_sms_sender: StatusReportAnalysis message nullptr");
+        TELEPHONY_LOGE("gsm_sms_sender: StatusReportAnalysis message nullptr error.");
         return;
     }
     sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
@@ -241,11 +274,15 @@ void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &e
             reportList_.erase(iter);
         }
     }
-    core->SendSmsAck(true, AckIncomeCause::SMS_ACK_PROCESSED, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    std::shared_ptr<Core> core = GetCore();
+    auto ackPointer = AppExecFwk::InnerEvent::Pointer(nullptr, nullptr);
+    if (core != nullptr) {
+        core->SendSmsAck(true, AckIncomeCause::SMS_ACK_PROCESSED, ackPointer);
+    }
     if (deliveryCallback != nullptr) {
         std::string ackpdu = StringUtils::StringToHex(message->GetRawPdu());
         deliveryCallback->OnSmsDeliveryResult(StringUtils::ToUtf16(ackpdu));
-        TELEPHONY_LOGI("gsm_sms_sender: StatusReportAnalysis %{public}zu", pdu.length());
+        TELEPHONY_LOGI("gsm_sms_sender: StatusReportAnalysis %{public}s", pdu.c_str());
     }
 }
 
@@ -259,6 +296,9 @@ void GsmSmsSender::SetSendIndexerInfo(const std::shared_ptr<SmsSendIndexer> &ind
 
     std::vector<uint8_t> smca(encodeInfo->smcaData_, encodeInfo->smcaData_ + encodeInfo->smcaLen);
     std::vector<uint8_t> pdu(encodeInfo->tpduData_, encodeInfo->tpduData_ + encodeInfo->tpduLen);
+    std::chrono::system_clock::duration timePoint = std::chrono::system_clock::now().time_since_epoch();
+    long timeStamp = std::chrono::duration_cast<std::chrono::seconds>(timePoint).count();
+    indexer->SetTimeStamp(timeStamp);
     indexer->SetEncodeSmca(std::move(smca));
     indexer->SetEncodePdu(std::move(pdu));
     indexer->SetHasMore(encodeInfo->isMore_);
@@ -272,7 +312,7 @@ bool GsmSmsSender::RegisterHandler()
     std::shared_ptr<Core> core = GetCore();
     if (core != nullptr) {
         TELEPHONY_LOGI("GsmSmsSender::RegisteHandler Register RADIO_SMS_STATUS ok.");
-        core->RegisterPhoneNotify(shared_from_this(), ObserverHandler::RADIO_SMS_STATUS, nullptr);
+        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_SMS_STATUS, nullptr);
         ret = true;
     }
     return ret;
@@ -287,6 +327,7 @@ void GsmSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &sms
     GsmSmsMessage gsmSmsMessage;
     bool isMore = false;
     if (!SetPduInfo(smsIndexer, gsmSmsMessage, isMore)) {
+        TELEPHONY_LOGE("SetPduInfo fail.");
         return;
     }
 
@@ -329,10 +370,15 @@ void GsmSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sms
     }
     std::vector<uint8_t> smca(encodeInfo->smcaData_, encodeInfo->smcaData_ + encodeInfo->smcaLen);
     std::vector<uint8_t> pdu(encodeInfo->tpduData_, encodeInfo->tpduData_ + encodeInfo->tpduLen);
-    std::shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(1);
-    std::shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
-    chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
-    long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
+    std::shared_ptr<uint8_t> unSentCellCount = std::make_shared<uint8_t>(1);
+    std::shared_ptr<bool> hasCellFailed = std::make_shared<bool>(false);
+    if (unSentCellCount == nullptr || hasCellFailed == nullptr) {
+        SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("unSentCellCount or hasCellFailed is nullptr.");
+        return;
+    }
+    std::chrono::system_clock::duration timePoint = std::chrono::system_clock::now().time_since_epoch();
+    long timeStamp = std::chrono::duration_cast<std::chrono::seconds>(timePoint).count();
 
     smsIndexer->SetUnSentCellCount(unSentCellCount);
     smsIndexer->SetHasCellFailed(hasCellFailed);
@@ -351,6 +397,7 @@ bool GsmSmsSender::SetPduInfo(
 {
     bool ret = false;
     if (smsIndexer == nullptr) {
+        TELEPHONY_LOGE("Indexer is nullptr");
         return ret;
     }
     SmsCodingScheme codingType = SMS_CODING_7BIT;
@@ -392,6 +439,32 @@ bool GsmSmsSender::SetPduInfo(
         isMore = false;
     }
     return true;
+}
+
+std::vector<std::string> GsmSmsSender::SplitMessage(const std::string &message)
+{
+    std::vector<std::string> result;
+    SmsCodingScheme codingType;
+    GsmSmsMessage gsmSmsMessage;
+    std::vector<struct SplitInfo> cellsInfos;
+    gsmSmsMessage.SplitMessage(cellsInfos, message, false, codingType);
+    for (auto &item : cellsInfos) {
+        result.emplace_back(item.text);
+    }
+    return result;
+}
+
+std::vector<int32_t> GsmSmsSender::CalculateLength(const std::string &message, bool force7BitCode)
+{
+    std::vector<int32_t> result;
+    GsmSmsMessage gsmSmsMessage;
+    LengthInfo lenInfo;
+    gsmSmsMessage.CalculateLength(message, force7BitCode, lenInfo);
+    result.emplace_back(static_cast<int32_t>(lenInfo.msgSegCount));
+    result.emplace_back(static_cast<int32_t>(lenInfo.msgEncodeCount));
+    result.emplace_back(static_cast<int32_t>(lenInfo.msgRemainCount));
+    result.emplace_back(static_cast<int32_t>(lenInfo.dcs));
+    return result;
 }
 } // namespace Telephony
 } // namespace OHOS

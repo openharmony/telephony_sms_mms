@@ -39,6 +39,9 @@ public:
     void RetriedSmsDelivery(const std::shared_ptr<SmsSendIndexer> smsIndexer);
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
     void Init();
+    std::shared_ptr<SmsSender> GetCdmaSmsSender() const;
+    std::vector<std::string> SplitMessage(const std::string &message);
+    std::vector<int32_t> CalculateLength(const std::string &message, bool force7BitCode);
 
 private:
     SmsSendManager &operator=(const SmsSendManager &) = delete;

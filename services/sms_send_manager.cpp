@@ -15,8 +15,7 @@
 
 #include "sms_send_manager.h"
 
-#include <functional>
-#include <memory.h>
+#include <cinttypes>
 
 #include "gsm_sms_tpdu_codec.h"
 #include "i_sms_service_interface.h"
@@ -40,9 +39,9 @@ void SmsSendManager::RegisterHandler()
     std::shared_ptr<Core> core = GetCore();
     if (core != nullptr) {
         TELEPHONY_LOGI("SmsSendManager::RegisterHandler Ok.");
-        core->RegisterPhoneNotify(shared_from_this(), ObserverHandler::RADIO_ON, nullptr);
-        core->RegisterPhoneNotify(shared_from_this(), ObserverHandler::RADIO_NETWORK_STATE, nullptr);
-        core->RegisterPhoneNotify(shared_from_this(), ObserverHandler::RADIO_IMS_NETWORK_STATE_CHANGED, nullptr);
+        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_ON, nullptr);
+        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_NETWORK_STATE, nullptr);
+        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_IMS_NETWORK_STATE_CHANGED, nullptr);
         GetRadioState();
     }
 }
@@ -51,9 +50,9 @@ void SmsSendManager::UnRegisterHandler()
 {
     std::shared_ptr<Core> core = GetCore();
     if (core != nullptr) {
-        core->UnRegisterPhoneNotify(shared_from_this(), ObserverHandler::RADIO_ON);
-        core->UnRegisterPhoneNotify(shared_from_this(), ObserverHandler::RADIO_NETWORK_STATE);
-        core->UnRegisterPhoneNotify(shared_from_this(), ObserverHandler::RADIO_IMS_NETWORK_STATE_CHANGED);
+        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_ON);
+        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_NETWORK_STATE);
+        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_IMS_NETWORK_STATE_CHANGED);
     }
 }
 
@@ -136,7 +135,7 @@ void SmsSendManager::DataBasedSmsDelivery(const string &desAddr, const string &s
 void SmsSendManager::RetriedSmsDelivery(const shared_ptr<SmsSendIndexer> smsIndexer)
 {
     if (smsIndexer == nullptr) {
-        TELEPHONY_LOGE("smsIndexer is nullptr");
+        TELEPHONY_LOGI("smsIndexer is nullptr error.");
         return;
     }
     if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr) {
@@ -146,7 +145,6 @@ void SmsSendManager::RetriedSmsDelivery(const shared_ptr<SmsSendIndexer> smsInde
 
     NetWorkType oldNetWorkType = smsIndexer->GetNetWorkType();
     NetWorkType newNetWorkType = GetNetWorkType();
-    TELEPHONY_LOGE("oldNetWorkType = %{public}d newNetWorkType = %{public}d", oldNetWorkType, newNetWorkType);
     if (oldNetWorkType != newNetWorkType) {
         smsIndexer->SetNetWorkType(newNetWorkType);
         shared_ptr<SmsSendIndexer> indexer = smsIndexer;
@@ -186,7 +184,7 @@ void SmsSendManager::RetriedSmsDelivery(const shared_ptr<SmsSendIndexer> smsInde
 
 NetWorkType SmsSendManager::GetNetWorkType()
 {
-    NetWorkType netWorkType = NetWorkType::NET_TYPE_GSM;
+    NetWorkType netWorkType = NetWorkType::NET_TYPE_UNKNOWN;
     if (netDomainType_ == NetDomainType::NET_DOMAIN_CS) {
         netWorkType = csNetWorkType_;
     } else if (netDomainType_ == NetDomainType::NET_DOMAIN_IMS) {
@@ -201,15 +199,22 @@ void SmsSendManager::HandlerRadioState(const AppExecFwk::InnerEvent::Pointer &ev
         TELEPHONY_LOGE("HandlerRadioState event == nullptr");
         return;
     }
-    int64_t radioState = event->GetParam();
+    std::unique_ptr<HRilRadioStateInfo> object = event->GetUniqueObject<HRilRadioStateInfo>();
+    if (object == nullptr) {
+        TELEPHONY_LOGE("HRilRadioStateInfo object nullptr error.");
+        return;
+    }
+
+    int64_t radioState = object->state;
+    TELEPHONY_LOGI("HandlerRadioState state %{public}" PRId64 "", radioState);
     switch (radioState) {
-        case OHOS::Telephony::ModemPowerState::CORE_SERVICE_POWER_ON:
+        case static_cast<int64_t>(OHOS::Telephony::ModemPowerState::CORE_SERVICE_POWER_ON):
             TELEPHONY_LOGI("SmsSendManager::HandlerRadioState RADIO_ON");
             netDomainType_ = NetDomainType::NET_DOMAIN_CS;
             csNetWorkType_ = NetWorkType::NET_TYPE_GSM;
             break;
-        case OHOS::Telephony::ModemPowerState::CORE_SERVICE_POWER_NOT_AVAILABLE:
-        case OHOS::Telephony::ModemPowerState::CORE_SERVICE_POWER_OFF:
+        case static_cast<int64_t>(OHOS::Telephony::ModemPowerState::CORE_SERVICE_POWER_NOT_AVAILABLE):
+        case static_cast<int64_t>(OHOS::Telephony::ModemPowerState::CORE_SERVICE_POWER_OFF):
         default:
             TELEPHONY_LOGI("SmsSendManager::HandlerRadioState RADIO_OFF");
             netDomainType_ = NetDomainType::NET_DOMAIN_UNKNOWN;
@@ -224,7 +229,7 @@ void SmsSendManager::GetRadioState()
     auto event = AppExecFwk::InnerEvent::Get(ObserverHandler::RADIO_GET_STATUS);
     if (event != nullptr && core != nullptr) {
         event->SetOwner(shared_from_this());
-        core->GetRadioStatus(event);
+        core->GetRadioState(event);
     }
 }
 
@@ -254,6 +259,36 @@ void SmsSendManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     }
 }
 
+std::vector<std::string> SmsSendManager::SplitMessage(const std::string &message)
+{
+    std::vector<std::string> result;
+    if (cdmaSmsSender_ == nullptr || gsmSmsSender_ == nullptr) {
+        TELEPHONY_LOGE("SmsSendManager::SplitMessage cdmaSmsSender_ or gsmSmsSender_ is nullptr");
+        return result;
+    }
+    NetWorkType netWorkType = GetNetWorkType();
+    if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
+        return cdmaSmsSender_->SplitMessage(message);
+    } else {
+        return gsmSmsSender_->SplitMessage(message);
+    }
+}
+
+std::vector<int32_t> SmsSendManager::CalculateLength(const std::string &message, bool force7BitCode)
+{
+    std::vector<int32_t> result;
+    if (cdmaSmsSender_ == nullptr || gsmSmsSender_ == nullptr) {
+        TELEPHONY_LOGE("CalculateLength cdmaSmsSender_ or gsmSmsSender_ is nullptr");
+        return result;
+    }
+    NetWorkType netWorkType = GetNetWorkType();
+    if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
+        return cdmaSmsSender_->CalculateLength(message, force7BitCode);
+    } else {
+        return gsmSmsSender_->CalculateLength(message, force7BitCode);
+    }
+}
+
 std::shared_ptr<Core> SmsSendManager::GetCore() const
 {
     std::shared_ptr<Core> core = CoreManager::GetInstance().getCore(slotId_);
@@ -261,6 +296,11 @@ std::shared_ptr<Core> SmsSendManager::GetCore() const
         return core;
     }
     return nullptr;
+}
+
+std::shared_ptr<SmsSender> SmsSendManager::GetCdmaSmsSender() const
+{
+    return cdmaSmsSender_;
 }
 } // namespace Telephony
 } // namespace OHOS

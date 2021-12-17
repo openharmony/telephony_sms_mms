@@ -16,12 +16,18 @@
 #ifndef SMS_BASE_MESSAGE__H
 #define SMS_BASE_MESSAGE__H
 
+#include <cmath>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "gsm_sms_tpdu_codec.h"
+#include "securec.h"
+
+#include "string_utils.h"
+#include "sms_common_utils.h"
 #include "cdma_sms_pdu_codec.h"
+#include "gsm_sms_tpdu_codec.h"
+#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -43,6 +49,20 @@ typedef struct {
     uint16_t msgInd;
     uint16_t waitMsgNum;
 } SpecialSmsIndication;
+
+struct SplitInfo {
+    std::string text;
+    std::vector<uint8_t> encodeData;
+    SmsCodingScheme encodeType;
+    MSG_LANGUAGE_ID_T langId;
+};
+
+using LengthInfo = struct {
+    uint8_t dcs = 0;
+    uint8_t msgSegCount = 0;
+    uint16_t msgEncodeCount = 0;
+    uint8_t msgRemainCount = 0;
+};
 
 class SmsBaseMessage {
 public:
@@ -73,15 +93,23 @@ public:
     virtual bool IsWapPushMsg();
     virtual void ConvertMessageClass(enum SmsMessageClass msgClass);
     virtual int GetMsgRef();
-    virtual int GetIndexOnSim() const;
-    virtual void SetIndexOnSim(int index);
+    virtual int GetSegmentSize(SmsCodingScheme &codingScheme, int dataLen, bool bPortNum,
+        MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
+    virtual void SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text,
+        bool force7BitCode, SmsCodingScheme &codingType);
+    virtual int32_t GetIndexOnSim() const;
+    virtual void SetIndexOnSim(int32_t index);
+    virtual void CalculateLength(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
+    virtual int GetMaxSegmentSize(SmsCodingScheme &codingScheme, int dataLen, bool bPortNum,
+        MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
 
 protected:
+    constexpr static int16_t MAX_MSG_TEXT_LEN = 1530;
+    constexpr static int16_t MAX_REPLY_PID = 8;
     std::string scAddress_;
     std::string originatingAddress_;
-    std::string visibleOriginatingAddress_;
     std::string visibleMessageBody_;
-    enum SmsMessageClass msgClass_ = SmsMessageClass::SMS_CLASS_UNKNOWN;
+    enum SmsMessageClass msgClass_ = SMS_CLASS_UNKNOWN;
     long scTimestamp_;
     int status_;
     int protocolId_;
@@ -103,21 +131,29 @@ protected:
     bool bIndActive_;
     int codingScheme_;
     int codingGroup_;
-    int indexOnSim_ = -1;
     std::vector<uint8_t> rawPdu_;
     std::vector<uint8_t> rawUserData_;
     struct SmsUserData smsUserData_;
     std::shared_ptr<SmsConcat> smsConcat_;
     std::shared_ptr<SmsAppPortAddr> portAddress_;
     std::shared_ptr<SpecialSmsIndication> specialSmsInd_;
-    constexpr static int16_t MAX_MSG_TEXT_LEN = 1530;
-    constexpr static int16_t MAX_REPLY_PID = 8;
+    int32_t indexOnSim_ = -1;
 
 private:
-    constexpr static int PID_87 = 0xc0;
-    constexpr static int PID_7 = 0x40;
-    constexpr static int PID_10_LOW = 0x3f;
+    constexpr static uint8_t PID_87 = 0xc0;
+    constexpr static uint8_t PID_7 = 0x40;
+    constexpr static uint8_t PID_10_LOW = 0x3f;
     constexpr static int16_t WAP_PUSH_PORT = 2948;
+    static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
+    static constexpr uint8_t MAX_UCS2_DATA_LEN = 140;
+    static constexpr uint8_t BYTE_BITS = 8;
+    static constexpr uint8_t MAX_ADD_PARAM_LEN = 12;
+    static constexpr uint16_t TAPI_TEXT_SIZE_MAX = 520;
+    static constexpr uint8_t GSM_BEAR_DATA_LEN = 140;
+    static constexpr uint8_t CHARSET_7BIT_BITS = 7;
+    virtual int DecodeMessage(unsigned char *decodeData, SmsCodingScheme &codingType, const std::string &msgText,
+        bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
+    void ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType);
 };
 } // namespace Telephony
 } // namespace OHOS

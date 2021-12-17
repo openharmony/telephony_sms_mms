@@ -21,24 +21,24 @@
 
 namespace OHOS {
 namespace Telephony {
-#define SMS_MAX_MESSAGE_ID 65536
-#define SMS_SEQ_NUM_MAX 64
-#define SMS_MAX_USER_DATA_LEN 160
-#define SMS_CDMA_MAX_USER_UD_LEN 7
-#define SMS_MAX_SUBMIT_MESSAGE_ID 256
+static constexpr uint32_t SMS_MAX_MESSAGE_ID = 65536;
+static constexpr uint8_t SMS_SEQ_NUM_MAX = 64;
+static constexpr uint16_t SMS_MAX_USER_DATA_LEN = 160;
+static constexpr uint16_t SMS_CDMA_MAX_USER_UD_LEN = 7;
+static constexpr uint16_t SMS_MAX_SUBMIT_MESSAGE_ID = 256;
 
-#define SMS_TRANS_ADDRESS_MAX_LEN 256
-#define SMS_MAX_NUMBER_OF_ACK 8
+static constexpr uint16_t SMS_TRANS_ADDRESS_MAX_LEN = 256;
+static constexpr uint16_t SMS_MAX_NUMBER_OF_ACK = 8;
 
-#define SMS_PUSH_XML_HREF_TAG "href"
-#define SMS_PUSH_XML_SI_ID_TAG "si-id"
-#define SMS_PUSH_XML_CREATED_TAG "created"
-#define SMS_PUSH_XML_EXPIRES_TAG "si-expires"
-#define SMS_PUSH_XML_ACTION_TAG "action"
+static constexpr char SMS_PUSH_XML_HREF_TAG[] = "href";
+static constexpr char SMS_PUSH_XML_SI_ID_TAG[] = "si-id";
+static constexpr char SMS_PUSH_XML_CREATED_TAG[] = "created";
+static constexpr char SMS_PUSH_XML_EXPIRES_TAG[] = "si-expires";
+static constexpr char SMS_PUSH_XML_ACTION_TAG[] = "action";
 
-#define SMS_PUSH_XML_INVAL_OBJ "invalidate-object"
-#define SMS_PUSH_XML_INVAL_SVC "invalidate-service"
-#define SMS_PUSH_XML_CO_URI "uri"
+static constexpr char SMS_PUSH_XML_INVAL_OBJ[] = "invalidate-object";
+static constexpr char SMS_PUSH_XML_INVAL_SVC[] = "invalidate-service";
+static constexpr char SMS_PUSH_XML_CO_URI[] = "uri";
 
 struct SmsWapContentType {
     char *contentsTypeName;
@@ -457,10 +457,7 @@ struct SmsSvcCtgProgramData {
 struct SmsTeleSvcUserData {
     enum SmsEncodingType encodeType;
     unsigned char msgType;
-    int headerCnt;
-    struct SmsUDH header[SMS_CDMA_MAX_USER_UD_LEN];
-    unsigned int dataLen;
-    unsigned char userData[SMS_MAX_USER_DATA_LEN + 1];
+    struct SmsUserData userData;
 };
 
 struct SmsTeleSvcCmasData {

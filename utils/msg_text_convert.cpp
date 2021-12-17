@@ -15,10 +15,11 @@
  */
 
 #include "msg_text_convert.h"
+
 #include <cstdio>
 #include <cstring>
-#include <iostream>
 #include <memory>
+
 #include "glib.h"
 #include "securec.h"
 #include "telephony_log_wrapper.h"
@@ -122,7 +123,7 @@ void MsgTextConvert::InitUCS2ToGSM7DefList()
     uint8_t gsm7DefListLen = 128;
     ucs2toGSM7DefList_.clear();
     for (unsigned char i = 0; i < gsm7DefListLen; i++) {
-        ucs2toGSM7DefList_[g_GSM7BitToUCS2[i]] = i;
+        ucs2toGSM7DefList_[GSM_7BIT_TO_UCS2[i]] = i;
     }
 }
 
@@ -466,33 +467,40 @@ void MsgTextConvert::InitUCS2ToReplaceCharList()
     replaceCharList_[0x017D] = 0x5A; /* Z LATIN CAPITAL LETTER Z WITH CARON */
 }
 
-int MsgTextConvert::ConvertUTF8ToGSM7bit(OUT unsigned char *pDestText, IN int maxLength,
-    IN const unsigned char *pSrcText, IN int srcTextLen, OUT MSG_LANGUAGE_ID_T *pLangId,
-    OUT bool *bIncludeAbnormalChar)
+/**
+ * @brief ConvertUTF8ToGSM7bit
+ * max # of UCS2 chars, NOT bytes. when all utf8 chars are only one byte,
+ * UCS2Length is maxUCS2 Length. otherwise (ex: 2 bytes of UTF8 is one char)
+ * UCS2Length must be  less than utf8Length
+ */
+int MsgTextConvert::ConvertUTF8ToGSM7bit(std::tuple<unsigned char *, int,
+    unsigned char *, int, MSG_LANGUAGE_ID_T *, bool *> &parameters)
 {
+    unsigned char *pDestText;
+    int maxLength;
+    unsigned char *pSrcText;
+    int srcTextLen;
+    MSG_LANGUAGE_ID_T *pLangId;
+    bool *bIncludeAbnormalChar;
+    std::tie(pDestText, maxLength, pSrcText, srcTextLen, pLangId, bIncludeAbnormalChar) = parameters;
     int utf8Length = 0;
     int gsm7bitLength = 0;
     int ucs2Length = 0;
-
     if (srcTextLen <= 0 && pSrcText) {
-        utf8Length = strlen((char *)pSrcText);
+        utf8Length = strlen(reinterpret_cast<const char *>(pSrcText));
         srcTextLen = utf8Length;
     } else {
         utf8Length = srcTextLen;
     }
 
-    int maxUCS2Length = utf8Length; /* max # of UCS2 chars, NOT bytes. when all utf8 chars are only one byte,
-                                       UCS2Length is maxUCS2 Length. otherwise (ex: 2 bytes of UTF8 is one char)
-                                       UCS2Length must be  less than utf8Length  */
-
+    int maxUCS2Length = utf8Length;
     WCHAR *pUCS2Text = nullptr;
     unique_ptr<WCHAR *, void (*)(WCHAR * *(&))> buf(&pUCS2Text, UniquePtrDeleterOneDimension);
-    pUCS2Text = (WCHAR *)new (std::nothrow) char[maxUCS2Length * sizeof(WCHAR)];
+    pUCS2Text = reinterpret_cast<WCHAR *>(new (std::nothrow) char[maxUCS2Length * sizeof(WCHAR)]);
     if (pUCS2Text == nullptr) {
         return gsm7bitLength;
     }
     (void)memset_s(pUCS2Text, maxUCS2Length * sizeof(WCHAR), 0x00, maxUCS2Length * sizeof(WCHAR));
-
     TELEPHONY_LOGI("srcTextLen = %{public}d", srcTextLen);
 
     ucs2Length = ConvertUTF8ToUCS2(
@@ -509,13 +517,11 @@ int MsgTextConvert::ConvertUTF8ToUCS2(
     auto unicodeTemp = reinterpret_cast<unsigned char *>(pDestText);
     gsize ucs2Length = 0;
     gsize remainedBuffer = maxLength;
-
 #ifdef CONVERT_DUMP
     int srcLen = srcTextLen;
     const unsigned char *pTempSrcText = pSrcText;
     const unsigned char *pTempDestText = pDestText;
 #endif
-
     if (maxLength == 0 || pSrcText == nullptr || pDestText == nullptr) {
         TELEPHONY_LOGE("UTF8 to UCS2 Failed as text length is 0");
         return -1;
@@ -536,25 +542,17 @@ int MsgTextConvert::ConvertUTF8ToUCS2(
             reinterpret_cast<gsize *>(&textLen), reinterpret_cast<char **>(&unicodeTemp),
             reinterpret_cast<gsize *>(&remainedBuffer));
     }
-
-    if (err < 0) {
-        TELEPHONY_LOGE("Error in g_iconv.");
-        ucs2Length = -1;
-    } else {
-        ucs2Length = maxLength - remainedBuffer;
-    }
-
+    ucs2Length = (err < 0) ? -1 : (maxLength - remainedBuffer);
 #ifdef CONVERT_DUMP
     TELEPHONY_LOGI("########## Dump UTF8 -> UCS2");
     ConvertDumpTextToHex((unsigned char *)pTempSrcText, srcLen);
     ConvertDumpTextToHex((unsigned char *)pTempDestText, ucs2Length);
 #endif
-
     g_iconv_close(cd);
     return ucs2Length;
 }
 
-int MsgTextConvert::ConvertUTF8ToAuto(OUT unsigned char *pDestText, IN int maxLength,
+int MsgTextConvert::ConvertGsmUTF8ToAuto(OUT unsigned char *pDestText, IN int maxLength,
     IN const unsigned char *pSrcText, IN int srcTextLen, OUT SmsCodingScheme *pCharType)
 {
     int ret = 0;
@@ -570,6 +568,7 @@ int MsgTextConvert::ConvertUTF8ToAuto(OUT unsigned char *pDestText, IN int maxLe
     ret = memset_s(pUCS2Text, sizeof(pUCS2Text), 0x00, maxUCS2Length * sizeof(WCHAR));
     if (ret != EOK) {
         TELEPHONY_LOGE("memset_s err = %{public}d", ret);
+        return 0;
     }
     ucs2Length = ConvertUTF8ToUCS2(
         reinterpret_cast<unsigned char *>(pUCS2Text), maxUCS2Length * sizeof(WCHAR), pSrcText, srcTextLen);
@@ -579,44 +578,96 @@ int MsgTextConvert::ConvertUTF8ToAuto(OUT unsigned char *pDestText, IN int maxLe
         ret = memcpy_s(pDestText, tempTextLen, pSrcText, tempTextLen);
         if (ret != EOK) {
             TELEPHONY_LOGE("memcpy_s err = %{public}d", ret);
+            return 0;
         }
         return tempTextLen;
     } else {
-#ifndef FEATURE_SMS_CDMA
-        gsm7bitLength =
-            ConvertUCS2ToGSM7bitAuto(pDestText, maxLength, (unsigned char *)pUCS2Text, ucs2Length, &bUnknown);
-#else
-        gsm7bitLength = ConvertUCS2ToASCII(pDestText, maxLength, (unsigned char *)pUCS2Text, ucs2Length, &bUnknown);
-#endif
-        if (bUnknown == true) {
+        gsm7bitLength = ConvertUCS2ToGSM7bitAuto(
+            pDestText, maxLength, reinterpret_cast<unsigned char *>(pUCS2Text), ucs2Length, &bUnknown);
+        if (bUnknown) {
             *pCharType = SMS_CODING_UCS2;
-            if (ucs2Length > 0) {
-                tempTextLen = (ucs2Length > maxLength) ? maxLength : ucs2Length;
-                ret = memcpy_s(pDestText, tempTextLen, pUCS2Text, tempTextLen);
-                if (ret != EOK) {
-                    TELEPHONY_LOGE("memcpy_s err = %{public}d", ret);
-                }
-                return tempTextLen;
+            if (ucs2Length <= 0) {
+                return gsm7bitLength;
             }
+            tempTextLen = (ucs2Length > maxLength) ? maxLength : ucs2Length;
+            ret = memcpy_s(pDestText, tempTextLen, pUCS2Text, tempTextLen);
+            if (ret != EOK) {
+                TELEPHONY_LOGE("memcpy_s err = %{public}d", ret);
+                return 0;
+            }
+            return tempTextLen;
         } else {
-#ifndef FEATURE_SMS_CDMA
             *pCharType = SMS_CODING_7BIT;
-#else
-            *pCharType = MSG_ENCODE_ASCII7BIT;
-#endif
         }
         return gsm7bitLength;
     }
 }
 
+int MsgTextConvert::ConvertCdmaUTF8ToAuto(OUT unsigned char *pDestText, IN int maxLength,
+    IN const unsigned char *pSrcText, IN int srcTextLen, OUT SmsCodingScheme *pCharType)
+{
+    int ret = 0;
+    int tempTextLen = 0;
+    int utf8Length = 0;
+    int gsm7bitLength = 0;
+    int ucs2Length = 0;
+    bool bUnknown = false;
+    utf8Length = srcTextLen;
+
+    int maxUCS2Length = utf8Length;
+    WCHAR pUCS2Text[maxUCS2Length];
+    ret = memset_s(pUCS2Text, sizeof(pUCS2Text), 0x00, maxUCS2Length * sizeof(WCHAR));
+    if (ret != EOK) {
+        TELEPHONY_LOGE("memset_s err = %{public}d", ret);
+        return 0;
+    }
+    ucs2Length = ConvertUTF8ToUCS2(
+        reinterpret_cast<unsigned char *>(pUCS2Text), maxUCS2Length * sizeof(WCHAR), pSrcText, srcTextLen);
+    if (ucs2Length < 0) {
+        *pCharType = SMS_CODING_8BIT;
+        tempTextLen = (srcTextLen > maxLength) ? maxLength : srcTextLen;
+        ret = memcpy_s(pDestText, tempTextLen, pSrcText, tempTextLen);
+        if (ret != EOK) {
+            TELEPHONY_LOGE("memcpy_s err = %{public}d", ret);
+            return 0;
+        }
+        return tempTextLen;
+    } else {
+        gsm7bitLength = ConvertUCS2ToASCII(
+            pDestText, maxLength, reinterpret_cast<unsigned char *>(pUCS2Text), ucs2Length, &bUnknown);
+        if (bUnknown) {
+            *pCharType = SMS_CODING_UCS2;
+            if (ucs2Length <= 0) {
+                return gsm7bitLength;
+            }
+            tempTextLen = (ucs2Length > maxLength) ? maxLength : ucs2Length;
+            ret = memcpy_s(pDestText, tempTextLen, pUCS2Text, tempTextLen);
+            if (ret != EOK) {
+                TELEPHONY_LOGE("memcpy_s err = %{public}d", ret);
+                return 0;
+            }
+            return tempTextLen;
+        } else {
+            *pCharType = SMS_CODING_ASCII7BIT;
+        }
+        return gsm7bitLength;
+    }
+}
+
+/* max # of UCS2 chars, NOT bytes. when all gsm7 chars are only one byte(-there
+   is no extension), UCS2Length is maxUCS2 Length. otherwise(ex: gsm7 char
+   starts with 0x1b) UCS2Length must be less than gsm7 length */
 int MsgTextConvert::ConvertGSM7bitToUTF8(OUT unsigned char *pDestText, IN int maxLength,
     IN const unsigned char *pSrcText, IN int srcTextLen, const IN MsgLangInfo *pLangInfo)
 {
     int utf8Length = 0;
     int ucs2Length = 0;
-    int maxUCS2Length = srcTextLen; /* max # of UCS2 chars, NOT bytes. when all gsm7 chars are only one byte(-there
-                                       is no extension), UCS2Length is maxUCS2 Length. otherwise(ex: gsm7 char
-                                       starts with 0x1b) UCS2Length must be less than gsm7 length */
+    int maxUCS2Length = srcTextLen;
+
+    if (pSrcText == nullptr) {
+        TELEPHONY_LOGE("pSrcText nullptr");
+        return 0;
+    }
 
     WCHAR pUCS2Text[maxUCS2Length];
     if (memset_s(pUCS2Text, sizeof(pUCS2Text), 0x00, sizeof(pUCS2Text)) != EOK) {
@@ -663,9 +714,8 @@ int MsgTextConvert::ConvertUCS2ToUTF8(
             reinterpret_cast<gsize *>(&textLen), reinterpret_cast<char **>(&pDestText),
             reinterpret_cast<gsize *>(&remainedBuffer));
     }
-
     if (err != 0) {
-        TELEPHONY_LOGI("g_iconv() return value = %d", err);
+        TELEPHONY_LOGI("g_iconv() return value = %{public}d", err);
     }
     utf8Length = maxLength - remainedBuffer;
     pTempDestText[utf8Length] = 0x00;
@@ -709,7 +759,9 @@ int MsgTextConvert::ConvertEUCKRToUTF8(
             reinterpret_cast<gsize *>(&textLen), reinterpret_cast<char **>(&pDestText),
             reinterpret_cast<gsize *>(&remainedBuffer));
     }
-    TELEPHONY_LOGI("g_iconv() return value = %d", err);
+    if (err != 0) {
+        TELEPHONY_LOGI("g_iconv() return value = %{public}d", err);
+    }
     utf8Length = maxLength - remainedBuffer;
     pTempDestText[utf8Length] = 0x00;
 #ifdef CONVERT_DUMP
@@ -766,160 +818,52 @@ int MsgTextConvert::ConvertSHIFTJISToUTF8(
 }
 
 int MsgTextConvert::ConvertUCS2ToGSM7bit(OUT unsigned char *pDestText, IN int maxLength,
-    IN const unsigned char *pSrcText, IN int srcTextLen, OUT MSG_LANGUAGE_ID_T *pLangId,
-    OUT bool *bIncludeAbnormalChar)
+    IN const unsigned char *pSrcText, IN int srcTextLen, OUT MSG_LANGUAGE_ID_T *pLangId, OUT bool *abnormalChar)
 {
     /* for UNICODE */
     int outTextLen = 0;
-    unsigned char lowerByte;
-    unsigned char upperByte;
-
-    if (srcTextLen == 0 || pSrcText == nullptr || pDestText == nullptr || maxLength == 0) {
+    int remainLen = 0;
+    if (srcTextLen == 0 || pSrcText == nullptr || pDestText == nullptr || maxLength <= 0) {
         TELEPHONY_LOGE("Invalid parameter.");
         return -1;
     }
-
-    std::map<unsigned short, unsigned char>::iterator itChar;
-    std::map<unsigned short, unsigned char>::iterator itExt;
-    std::map<unsigned short, unsigned char>::iterator itReplace;
-
-    unsigned char currType = MSG_DEFAULT_CHAR;
-    unsigned char newType = MSG_DEFAULT_CHAR;
     unsigned short inText;
-
-    /* Get Language Type by checking each character */
+    unsigned char lowerByte;
+    unsigned char upperByte;
+    unsigned char currType = GetLangType(pSrcText, srcTextLen);
+    std::map<unsigned short, unsigned char>::iterator itChar;
     for (int index = 0; index < (srcTextLen - 1); index++) {
         upperByte = pSrcText[index++];
         lowerByte = pSrcText[index];
-        inText = (upperByte << 0x08) & 0xFF00;
-        inText = inText | lowerByte;
-        itExt = extCharList_.find(inText);
-        if (itExt != extCharList_.end()) {
-            newType = static_cast<unsigned char>(itExt->second);
-            if (newType >= currType) {
-                if (inText == 0x00e7 && currType <= MSG_TURKISH_CHAR) {
-                    currType = MSG_TURKISH_CHAR;
-                } else {
-                    currType = newType;
-                }
-            }
-        }
-    }
-#ifdef CONVERT_DUMP
-    TELEPHONY_LOGI("charType : [%{public}d]", currType);
-#endif
-    for (int index = 0; index < (srcTextLen - 1); index++) {
-        upperByte = pSrcText[index++];
-        lowerByte = pSrcText[index];
-        inText = (upperByte << 0x08) & 0xFF00;
-        inText = inText | lowerByte;
-        /* Check Default Char */
-        itChar = ucs2toGSM7DefList_.find(inText);
+        inText = ((upperByte << 0x08) & 0xFF00) | lowerByte;
+        itChar = ucs2toGSM7DefList_.find(inText); /* Check Default Char */
         if (itChar != ucs2toGSM7DefList_.end()) {
             pDestText[outTextLen++] = static_cast<unsigned char>(itChar->second);
         } else {
-            if (currType == MSG_GSM7EXT_CHAR) {
-                itExt = ucs2toGSM7ExtList_.find(inText);
-                if (itExt != ucs2toGSM7ExtList_.end()) {
-                    /* prevent buffer overflow */
-                    if (maxLength <= outTextLen + 1) {
-                        TELEPHONY_LOGE("Buffer Full.");
-                        break;
-                    }
-                    pDestText[outTextLen++] = 0x1B;
-                    pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
-                } else {
-                    itReplace = replaceCharList_.find(inText);
-                    if (itReplace != replaceCharList_.end()) {
-                        pDestText[outTextLen++] = static_cast<unsigned char>(itReplace->second);
-                    } else {
-                        pDestText[outTextLen++] = 0x3F;
-                    }
-                    *bIncludeAbnormalChar = true;
-#ifdef CONVERT_DUMP
-                    TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
-#endif
-                }
-            } else if (currType == MSG_TURKISH_CHAR) {
-                *pLangId = MSG_ID_TURKISH_LANG;
-                itExt = ucs2toTurkishList_.find(inText);
-                if (itExt != ucs2toTurkishList_.end()) {
-                    /* prevent buffer overflow */
-                    if (maxLength <= outTextLen + 1) {
-                        TELEPHONY_LOGE("Buffer Full.");
-                        break;
-                    }
-                    pDestText[outTextLen++] = 0x1B;
-                    pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
-                } else {
-                    itReplace = replaceCharList_.find(inText);
-                    if (itReplace != replaceCharList_.end()) {
-                        pDestText[outTextLen++] = static_cast<unsigned char>(itReplace->second);
-                    } else {
-                        pDestText[outTextLen++] = 0x3F;
-                    }
-                    *bIncludeAbnormalChar = true;
-#ifdef CONVERT_DUMP
-                    TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
-#endif
-                }
-            } else if (currType == MSG_SPANISH_CHAR) {
-                *pLangId = MSG_ID_SPANISH_LANG;
-                itExt = ucs2toSpanishList_.find(inText);
-                if (itExt != ucs2toSpanishList_.end()) {
-                    /* prevent buffer overflow */
-                    if (maxLength <= outTextLen + 1) {
-                        TELEPHONY_LOGE("Buffer Full.");
-                        break;
-                    }
-                    pDestText[outTextLen++] = 0x1B;
-                    pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
-                } else {
-                    itReplace = replaceCharList_.find(inText);
-                    if (itReplace != replaceCharList_.end()) {
-                        pDestText[outTextLen++] = static_cast<unsigned char>(itReplace->second);
-                    } else {
-                        pDestText[outTextLen++] = 0x3F;
-                    }
-                    *bIncludeAbnormalChar = true;
-#ifdef CONVERT_DUMP
-                    TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
-#endif
-                }
-            } else if (currType == MSG_PORTUGUESE_CHAR) {
-                *pLangId = MSG_ID_PORTUGUESE_LANG;
-                itExt = ucs2toPortuList_.find(inText);
-                if (itExt != ucs2toPortuList_.end()) {
-                    /* prevent buffer overflow */
-                    if (maxLength <= outTextLen + 1) {
-                        TELEPHONY_LOGE("Buffer Full.");
-                        break;
-                    }
-                    pDestText[outTextLen++] = 0x1B;
-                    pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
-                } else {
-                    itReplace = replaceCharList_.find(inText);
-                    if (itReplace != replaceCharList_.end()) {
-                        pDestText[outTextLen++] = static_cast<unsigned char>(itReplace->second);
-                    } else {
-                        pDestText[outTextLen++] = 0x3F;
-                    }
-                    *bIncludeAbnormalChar = true;
-#ifdef CONVERT_DUMP
-                    TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
-#endif
-                }
-            } else {
-                itReplace = replaceCharList_.find(inText);
-                if (itReplace != replaceCharList_.end()) {
-                    pDestText[outTextLen++] = static_cast<unsigned char>(itReplace->second);
-                } else {
-                    pDestText[outTextLen++] = 0x3F;
-                }
-                *bIncludeAbnormalChar = true;
-#ifdef CONVERT_DUMP
-                TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
-#endif
+            switch (currType) {
+                case MSG_GSM7EXT_CHAR:
+                    remainLen = maxLength - outTextLen;
+                    outTextLen += FindUCS2toGSM7Ext(&pDestText[outTextLen++], remainLen, inText, *abnormalChar);
+                    break;
+                case MSG_TURKISH_CHAR:
+                    *pLangId = MSG_ID_TURKISH_LANG;
+                    remainLen = maxLength - outTextLen;
+                    outTextLen += FindUCS2toTurkish(&pDestText[outTextLen++], remainLen, inText, *abnormalChar);
+                    break;
+                case MSG_SPANISH_CHAR:
+                    *pLangId = MSG_ID_SPANISH_LANG;
+                    remainLen = maxLength - outTextLen;
+                    outTextLen += FindUCS2toSpanish(&pDestText[outTextLen++], remainLen, inText, *abnormalChar);
+                    break;
+                case MSG_PORTUGUESE_CHAR:
+                    *pLangId = MSG_ID_PORTUGUESE_LANG;
+                    remainLen = maxLength - outTextLen;
+                    outTextLen += FindUCS2toPortu(&pDestText[outTextLen++], remainLen, inText, *abnormalChar);
+                    break;
+                default:
+                    pDestText[outTextLen++] = FindUCS2ReplaceChar(inText);
+                    *abnormalChar = true;
+                    break;
             }
         }
         /* prevent buffer overflow */
@@ -928,16 +872,9 @@ int MsgTextConvert::ConvertUCS2ToGSM7bit(OUT unsigned char *pDestText, IN int ma
             break;
         }
     }
-
-#ifdef CONVERT_DUMP
-    TELEPHONY_LOGI("\n########## Dump UCS2 -> GSM7bit");
-    ConvertDumpTextToHex((unsigned char *)pSrcText, srcTextLen);
-    ConvertDumpTextToHex((unsigned char *)pDestText, outTextLen);
-#endif
     return outTextLen;
 }
 
-#ifndef FEATURE_SMS_CDMA
 int MsgTextConvert::ConvertUCS2ToGSM7bitAuto(OUT unsigned char *pDestText, IN int maxLength,
     IN const unsigned char *pSrcText, IN int srcTextLen, OUT bool *pUnknown)
 {
@@ -945,96 +882,75 @@ int MsgTextConvert::ConvertUCS2ToGSM7bitAuto(OUT unsigned char *pDestText, IN in
     int outTextLen = 0;
     unsigned char lowerByte;
     unsigned char upperByte;
-
     if (srcTextLen == 0 || pSrcText == nullptr || pDestText == nullptr || maxLength == 0) {
         TELEPHONY_LOGE("UCS2 to GSM7bit Failed as text length is 0");
         return -1;
     }
-
     std::map<unsigned short, unsigned char>::iterator itChar;
     std::map<unsigned short, unsigned char>::iterator itExt;
-
     unsigned short inText;
-
     for (int index = 0; index < srcTextLen; index++) {
         upperByte = pSrcText[index++];
         lowerByte = pSrcText[index];
-
         inText = (upperByte << 0x08) & 0xFF00;
         inText = inText | lowerByte;
-
         /* Check Default Char */
         itChar = ucs2toGSM7DefList_.find(inText);
         if (itChar != ucs2toGSM7DefList_.end()) {
             pDestText[outTextLen++] = static_cast<unsigned char>(itChar->second);
         } else {
             itExt = ucs2toGSM7ExtList_.find(inText);
-
-            if (itExt != ucs2toGSM7ExtList_.end()) {
-                /* prevent buffer overflow */
-                if (maxLength <= outTextLen + 1) {
-                    TELEPHONY_LOGE("Buffer Full.");
-                    break;
-                }
-
-                pDestText[outTextLen++] = 0x1B;
-                pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
-            } else {
+            if (itExt == ucs2toGSM7ExtList_.end()) {
                 TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
                 *pUnknown = true;
                 return 0;
+            } else if (maxLength <= outTextLen + 1) {
+                TELEPHONY_LOGE("Buffer Full.");
+                break;
+            } else {
+                pDestText[outTextLen++] = 0x1B;
+                pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
             }
         }
-
         /* prevent buffer overflow */
         if (maxLength <= outTextLen) {
             TELEPHONY_LOGE("Buffer full");
             break;
         }
     }
-
 #ifdef CONVERT_DUMP
     TELEPHONY_LOGI("\n########## Dump UCS2 -> GSM7bit");
     ConvertDumpTextToHex((unsigned char *)pSrcText, srcTextLen);
     ConvertDumpTextToHex((unsigned char *)pDestText, outTextLen);
 #endif
-
     return outTextLen;
 }
 
-#else
-int MsgTextConvert::convertUCS2ToASCII(OUT unsigned char *pDestText, IN int maxLength,
+int MsgTextConvert::ConvertUCS2ToASCII(OUT unsigned char *pDestText, IN int maxLength,
     IN const unsigned char *pSrcText, IN int srcTextLen, OUT bool *pUnknown)
 {
     /* for UNICODE */
     int outTextLen = 0;
     unsigned char lowerByte;
     unsigned char upperByte;
-
     if (srcTextLen == 0 || pSrcText == nullptr || pDestText == nullptr || maxLength == 0) {
-        TELEPHONY_LOGI("UCS2 to GSM7bit Failed as text length is 0");
+        TELEPHONY_LOGE("UCS2 to GSM7bit Failed as text length is 0");
         return -1;
     }
-
     std::map<unsigned short, unsigned char>::iterator itChar;
     std::map<unsigned short, unsigned char>::iterator itExt;
-
     unsigned short inText;
-
     for (int index = 0; index < srcTextLen; index++) {
         upperByte = pSrcText[index++];
         lowerByte = pSrcText[index];
-
         inText = (upperByte << 0x08) & 0xFF00;
         inText = inText | lowerByte;
-
         /* Check Default Char */
         if (inText > 0x007f) {
             TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
             *pUnknown = true;
             return 0;
         }
-
         pDestText[outTextLen++] = static_cast<unsigned char>(inText);
         /* prevent buffer overflow */
         if (maxLength <= outTextLen) {
@@ -1048,10 +964,165 @@ int MsgTextConvert::convertUCS2ToASCII(OUT unsigned char *pDestText, IN int maxL
     ConvertDumpTextToHex((unsigned char *)pSrcText, srcTextLen);
     ConvertDumpTextToHex((unsigned char *)pDestText, outTextLen);
 #endif
-
     return outTextLen;
 }
+
+unsigned char MsgTextConvert::GetLangType(const unsigned char *pSrcText, int srcTextLen)
+{
+    /* for UNICODE */
+    if (srcTextLen <= 0 || pSrcText == nullptr) {
+        TELEPHONY_LOGE("Invalid parameter.");
+        return MSG_DEFAULT_CHAR;
+    }
+
+    unsigned char lowerByte;
+    unsigned char upperByte;
+    std::map<unsigned short, unsigned char>::iterator itExt;
+    unsigned char currType = MSG_DEFAULT_CHAR;
+    unsigned char newType = MSG_DEFAULT_CHAR;
+    unsigned short inText;
+    /* Get Language Type by checking each character */
+    for (int index = 0; index < (srcTextLen - 1); index++) {
+        upperByte = pSrcText[index++];
+        lowerByte = pSrcText[index];
+        inText = (upperByte << 0x08) & 0xFF00;
+        inText = inText | lowerByte;
+        itExt = extCharList_.find(inText);
+        if (itExt != extCharList_.end()) {
+            newType = static_cast<unsigned char>(itExt->second);
+            if (newType >= currType) {
+                bool isTurkisk = (inText == 0x00e7 && currType <= MSG_TURKISH_CHAR);
+                currType = isTurkisk ? MSG_TURKISH_CHAR : newType;
+            }
+        }
+    }
+    TELEPHONY_LOGI("charType : [%{public}d]", currType);
+    return currType;
+}
+
+int MsgTextConvert::FindUCS2toGSM7Ext(
+    unsigned char *pDestText, int maxLength, const unsigned short inText, bool &abnormalChar)
+{
+    int outTextLen = 0;
+    if (pDestText == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("Invalid parameter.");
+        return outTextLen;
+    }
+
+    auto itExt = ucs2toGSM7ExtList_.find(inText);
+    if (itExt != ucs2toGSM7ExtList_.end()) {
+        /* prevent buffer overflow */
+        if (maxLength <= outTextLen + 1) {
+            TELEPHONY_LOGE("Buffer Full.");
+            return outTextLen;
+        }
+        pDestText[outTextLen++] = 0x1B;
+        pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
+    } else {
+        pDestText[outTextLen++] = FindUCS2ReplaceChar(inText);
+        abnormalChar = true;
+#ifdef CONVERT_DUMP
+        TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
 #endif
+    }
+    return outTextLen;
+}
+
+int MsgTextConvert::FindUCS2toTurkish(
+    unsigned char *pDestText, int maxLength, const unsigned short inText, bool &abnormalChar)
+{
+    int outTextLen = 0;
+    if (pDestText == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("Invalid parameter.");
+        return outTextLen;
+    }
+
+    auto itExt = ucs2toTurkishList_.find(inText);
+    if (itExt != ucs2toTurkishList_.end()) {
+        /* prevent buffer overflow */
+        if (maxLength <= outTextLen + 1) {
+            TELEPHONY_LOGE("Buffer Full.");
+            return outTextLen;
+        }
+        pDestText[outTextLen++] = 0x1B;
+        pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
+    } else {
+        pDestText[outTextLen++] = FindUCS2ReplaceChar(inText);
+        abnormalChar = true;
+#ifdef CONVERT_DUMP
+        TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
+#endif
+    }
+    return outTextLen;
+}
+
+int MsgTextConvert::FindUCS2toSpanish(
+    unsigned char *pDestText, int maxLength, const unsigned short inText, bool &abnormalChar)
+{
+    int outTextLen = 0;
+    if (pDestText == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("Invalid parameter.");
+        return outTextLen;
+    }
+
+    auto itExt = ucs2toSpanishList_.find(inText);
+    if (itExt != ucs2toSpanishList_.end()) {
+        /* prevent buffer overflow */
+        if (maxLength <= outTextLen + 1) {
+            TELEPHONY_LOGE("Buffer Full.");
+            return outTextLen;
+        }
+        pDestText[outTextLen++] = 0x1B;
+        pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
+    } else {
+        pDestText[outTextLen++] = FindUCS2ReplaceChar(inText);
+        abnormalChar = true;
+#ifdef CONVERT_DUMP
+        TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
+#endif
+    }
+    return outTextLen;
+}
+
+int MsgTextConvert::FindUCS2toPortu(
+    unsigned char *pDestText, int maxLength, const unsigned short inText, bool &abnormalChar)
+{
+    int outTextLen = 0;
+    if (pDestText == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("Invalid parameter.");
+        return outTextLen;
+    }
+
+    auto itExt = ucs2toPortuList_.find(inText);
+    if (itExt != ucs2toPortuList_.end()) {
+        /* prevent buffer overflow */
+        if (maxLength <= outTextLen + 1) {
+            TELEPHONY_LOGE("Buffer Full.");
+            return outTextLen;
+        }
+        pDestText[outTextLen++] = 0x1B;
+        pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
+    } else {
+        pDestText[outTextLen++] = FindUCS2ReplaceChar(inText);
+        abnormalChar = true;
+#ifdef CONVERT_DUMP
+        TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
+#endif
+    }
+    return outTextLen;
+}
+
+unsigned char MsgTextConvert::FindUCS2ReplaceChar(const unsigned short inText)
+{
+    unsigned char result = 0;
+    auto itReplace = replaceCharList_.find(inText);
+    if (itReplace != replaceCharList_.end()) {
+        result = static_cast<unsigned char>(itReplace->second);
+    } else {
+        result = 0x3F;
+    }
+    return result;
+}
 
 int MsgTextConvert::ConvertGSM7bitToUCS2(OUT unsigned char *pDestText, IN int maxLength,
     IN const unsigned char *pSrcText, IN int srcTextLen, const IN MsgLangInfo *pLangInfo)
@@ -1059,105 +1130,34 @@ int MsgTextConvert::ConvertGSM7bitToUCS2(OUT unsigned char *pDestText, IN int ma
     int outTextLen = 0;
     unsigned char lowerByte = 0;
     unsigned char upperByte = 0;
-
-    if (srcTextLen == 0 || pSrcText == nullptr || pDestText == nullptr || maxLength == 0) {
+    unsigned short result;
+    if (srcTextLen == 0 || pSrcText == nullptr || pDestText == nullptr || maxLength <= 0) {
         TELEPHONY_LOGE("UCS2 to GSM7bit Failed as text length is 0");
         return -1;
     }
-
-    for (int i = 0; i < srcTextLen; i++) {
-        if (maxLength == 0) {
-            break;
-        }
+    for (int i = 0; i < srcTextLen && maxLength > 0; i++) {
         if (pSrcText[i] >= 0x80) {
-            /* error */
-            TELEPHONY_LOGE("a_pTextString[i]=%x, The alpha isn't the gsm 7bit code", pSrcText[i]);
+            TELEPHONY_LOGE("a_pTextString[i]=%{public}x, The alpha isn't the gsm 7bit code", pSrcText[i]);
             return -1;
         }
-        if (pLangInfo->bLockingShift == true) { /* National Language Locking Shift */
-            TELEPHONY_LOGI("Locking Shift [%d]", pLangInfo->lockingLang);
+        if (pLangInfo->bLockingShift) { /* National Language Locking Shift */
+            TELEPHONY_LOGI("Locking Shift [%{public}d]", pLangInfo->lockingLang);
             if (pLangInfo->lockingLang == MSG_ID_TURKISH_LANG) {
                 /* Check Escape */
-                if (g_TurkishLockingToUCS2[pSrcText[i]] == 0x001B) {
-                    i++;
-                    if (pLangInfo->bSingleShift == true) { /* National Language Single Shift */
-                        TELEPHONY_LOGI("Single Shift [%{public}d]", pLangInfo->singleLang);
-                        if (pLangInfo->singleLang == MSG_ID_TURKISH_LANG) {
-                            lowerByte = g_TurkishSingleToUCS2[pSrcText[i]] & 0x00FF;
-                            upperByte = (g_TurkishSingleToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                        } else if (pLangInfo->singleLang == MSG_ID_SPANISH_LANG) {
-                            lowerByte = g_SpanishSingleToUCS2[pSrcText[i]] & 0x00FF;
-                            upperByte = (g_SpanishSingleToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                        } else if (pLangInfo->singleLang == MSG_ID_PORTUGUESE_LANG) {
-                            lowerByte = g_PortuSingleToUCS2[pSrcText[i]] & 0x00FF;
-                            upperByte = (g_PortuSingleToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                        } else {
-                            lowerByte = g_GSM7BitExtToUCS2[pSrcText[i]] & 0x00FF;
-                            upperByte = (g_GSM7BitExtToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                        }
-                    } else { /* GSM 7 bit Default Alphabet Extension Table */
-                        lowerByte = g_GSM7BitExtToUCS2[pSrcText[i]] & 0x00FF;
-                        upperByte = (g_GSM7BitExtToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                    }
-                } else { /* TURKISH - National Language Locking Shift */
-                    lowerByte = g_TurkishLockingToUCS2[pSrcText[i]] & 0x00FF;
-                    upperByte = (g_TurkishLockingToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                }
+                i += EscapeTurkishLockingToUCS2(&pSrcText[i], (srcTextLen - i), *pLangInfo, result);
+                lowerByte = static_cast<unsigned char>(result & 0x00FF);
+                upperByte = static_cast<unsigned char>(result >> 0x08);
             } else if (pLangInfo->lockingLang == MSG_ID_PORTUGUESE_LANG) {
                 /* Check Escape */
-                if (g_PortuLockingToUCS2[pSrcText[i]] == 0x001B) {
-                    i++;
-                    if (pLangInfo->bSingleShift == true) { /* National Language Single Shift */
-                        TELEPHONY_LOGI("Single Shift [%{public}d]", pLangInfo->singleLang);
-                        if (pLangInfo->singleLang == MSG_ID_TURKISH_LANG) {
-                            lowerByte = g_TurkishSingleToUCS2[pSrcText[i]] & 0x00FF;
-                            upperByte = (g_TurkishSingleToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                        } else if (pLangInfo->singleLang == MSG_ID_SPANISH_LANG) {
-                            lowerByte = g_SpanishSingleToUCS2[pSrcText[i]] & 0x00FF;
-                            upperByte = (g_SpanishSingleToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                        } else if (pLangInfo->singleLang == MSG_ID_PORTUGUESE_LANG) {
-                            lowerByte = g_PortuSingleToUCS2[pSrcText[i]] & 0x00FF;
-                            upperByte = (g_PortuSingleToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                        } else {
-                            lowerByte = g_GSM7BitExtToUCS2[pSrcText[i]] & 0x00FF;
-                            upperByte = (g_GSM7BitExtToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                        }
-                    } else { /* GSM 7 bit Default Alphabet Extension Table */
-                        lowerByte = g_GSM7BitExtToUCS2[pSrcText[i]] & 0x00FF;
-                        upperByte = (g_GSM7BitExtToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                    }
-                } else { /* PORTUGUESE - National Language Locking Shift */
-                    lowerByte = g_PortuLockingToUCS2[pSrcText[i]] & 0x00FF;
-                    upperByte = (g_PortuLockingToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                }
+                i += EscapePortuLockingToUCS2(&pSrcText[i], (srcTextLen - i), *pLangInfo, result);
+                lowerByte = static_cast<unsigned char>(result & 0x00FF);
+                upperByte = static_cast<unsigned char>(result >> 0x08);
             }
         } else {
             /* Check Escape */
-            if (g_GSM7BitToUCS2[pSrcText[i]] == 0x001B) {
-                i++;
-                if (pLangInfo->bSingleShift == true) { /* National Language Single Shift */
-                    TELEPHONY_LOGI("Single Shift [%{public}d]", pLangInfo->singleLang);
-                    if (pLangInfo->singleLang == MSG_ID_TURKISH_LANG) {
-                        lowerByte = g_TurkishSingleToUCS2[pSrcText[i]] & 0x00FF;
-                        upperByte = (g_TurkishSingleToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                    } else if (pLangInfo->singleLang == MSG_ID_SPANISH_LANG) {
-                        lowerByte = g_SpanishSingleToUCS2[pSrcText[i]] & 0x00FF;
-                        upperByte = (g_SpanishSingleToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                    } else if (pLangInfo->singleLang == MSG_ID_PORTUGUESE_LANG) {
-                        lowerByte = g_PortuSingleToUCS2[pSrcText[i]] & 0x00FF;
-                        upperByte = (g_PortuSingleToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                    } else {
-                        lowerByte = g_GSM7BitExtToUCS2[pSrcText[i]] & 0x00FF;
-                        upperByte = (g_GSM7BitExtToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                    }
-                } else { /* GSM 7 bit Default Alphabet Extension Table */
-                    lowerByte = g_GSM7BitExtToUCS2[pSrcText[i]] & 0x00FF;
-                    upperByte = (g_GSM7BitExtToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-                }
-            } else {
-                lowerByte = g_GSM7BitToUCS2[pSrcText[i]] & 0x00FF;
-                upperByte = (g_GSM7BitToUCS2[pSrcText[i]] & 0xFF00) >> 0x08;
-            }
+            i += EscapeGSM7BitToUCS2(&pSrcText[i], (srcTextLen - i), *pLangInfo, result);
+            lowerByte = static_cast<unsigned char>(result & 0x00FF);
+            upperByte = static_cast<unsigned char>(result >> 0x08);
         }
         pDestText[outTextLen++] = upperByte;
         pDestText[outTextLen++] = lowerByte;
@@ -1172,16 +1172,103 @@ int MsgTextConvert::ConvertGSM7bitToUCS2(OUT unsigned char *pDestText, IN int ma
     return outTextLen;
 }
 
+int MsgTextConvert::EscapeTurkishLockingToUCS2(
+    const unsigned char *pSrcText, int srcLen, const MsgLangInfo &pLangInfo, unsigned short &result)
+{
+    int index = 0;
+    if (pSrcText == nullptr || srcLen <= 0) {
+        TELEPHONY_LOGE("pSrcText nullprt");
+        return index;
+    }
+    /* Check Escape */
+    if (TURKISH_LOCKING_TO_UCS2[pSrcText[index]] == 0x001B) {
+        index++;
+        if (index > srcLen) {
+            return index;
+        }
+        result = EscapeToUCS2(pSrcText[index], pLangInfo);
+    } else { /* TURKISH - National Language Locking Shift */
+        result = TURKISH_LOCKING_TO_UCS2[pSrcText[index]];
+    }
+    return index;
+}
+
+int MsgTextConvert::EscapePortuLockingToUCS2(
+    const unsigned char *pSrcText, int srcLen, const MsgLangInfo &pLangInfo, unsigned short &result)
+{
+    int index = 0;
+    if (pSrcText == nullptr || srcLen <= 0) {
+        TELEPHONY_LOGE("pSrcText nullprt");
+        return index;
+    }
+    if (PORTU_LOCKING_TO_UCS2[pSrcText[index]] == 0x001B) {
+        index++;
+        if (index > srcLen) {
+            return index;
+        }
+        result = EscapeToUCS2(pSrcText[index], pLangInfo);
+    } else { /* PORTUGUESE - National Language Locking Shift */
+        result = PORTU_LOCKING_TO_UCS2[pSrcText[index]];
+    }
+    return index;
+}
+
+int MsgTextConvert::EscapeGSM7BitToUCS2(
+    const unsigned char *pSrcText, int srcLen, const MsgLangInfo &pLangInfo, unsigned short &result)
+{
+    int index = 0;
+    if (pSrcText == nullptr || srcLen <= 0) {
+        TELEPHONY_LOGE("pSrcText nullprt");
+        return index;
+    }
+    if (GSM_7BIT_TO_UCS2[pSrcText[index]] == 0x001B) {
+        index++;
+        if (index > srcLen) {
+            return index;
+        }
+        result = EscapeToUCS2(pSrcText[index], pLangInfo);
+    } else {
+        result = GSM_7BIT_TO_UCS2[pSrcText[index]];
+    }
+    return index;
+}
+
+unsigned short MsgTextConvert::EscapeToUCS2(const unsigned char srcText, const MsgLangInfo &pLangInfo)
+{
+    unsigned short result = 0;
+    if (pLangInfo.bSingleShift) { /* National Language Single Shift */
+        TELEPHONY_LOGI("Single Shift [%{public}d]", pLangInfo.singleLang);
+        switch (pLangInfo.singleLang) {
+            case MSG_ID_TURKISH_LANG:
+                result = TURKISH_SINGLE_TO_UCS2[srcText];
+                break;
+            case MSG_ID_SPANISH_LANG:
+                result = SPANISH_SIGNAL_TO_UCS2[srcText];
+                break;
+            case MSG_ID_PORTUGUESE_LANG:
+                result = PORTU_SINGLE_TO_UCS2[srcText];
+                break;
+            default:
+                result = GSM_7BIT_EXT_To_UCS2[srcText];
+                break;
+        }
+    } else { /* GSM 7 bit Default Alphabet Extension Table */
+        result = GSM_7BIT_EXT_To_UCS2[srcText];
+    }
+    return result;
+}
+
 void MsgTextConvert::ConvertDumpTextToHex(const unsigned char *pText, int length)
 {
     if (pText == nullptr) {
+        TELEPHONY_LOGE("pText nullprt");
         return;
     }
     TELEPHONY_LOGI("=======================================");
     TELEPHONY_LOGI("   Dump Text To Hex - Length :%{public}d", length);
     TELEPHONY_LOGI("=======================================");
     for (int i = 0; i < length; i++) {
-        TELEPHONY_LOGI("[%02x]", pText[i]);
+        TELEPHONY_LOGI("[%{public}02x]", pText[i]);
     }
     TELEPHONY_LOGI("=======================================");
 }
