@@ -19,6 +19,8 @@
 #include <string>
 
 #include "securec.h"
+
+#include "cdma_sms_types.h"
 #include "sms_common_utils.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
@@ -28,9 +30,9 @@ namespace Telephony {
 bool SmsCbMessage::operator==(const SmsCbMessage &other) const
 {
     if (cbHeader_ == nullptr || other.cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr.");
         return false;
     }
-
     return cbHeader_->serialNum.geoScope == other.cbHeader_->serialNum.geoScope &&
         cbHeader_->serialNum.msgCode == other.cbHeader_->serialNum.msgCode &&
         cbHeader_->msgId == other.cbHeader_->msgId;
@@ -43,7 +45,6 @@ std::shared_ptr<SmsCbMessage> SmsCbMessage::CreateCbMessage(const std::string &p
     if (message != nullptr) {
         result = message->PduAnalysis(StringUtils::HexToByteVector(pdu));
     }
-
     return (result ? message : nullptr);
 }
 
@@ -54,11 +55,10 @@ std::shared_ptr<SmsCbMessage> SmsCbMessage::CreateCbMessage(const std::vector<un
     if (message != nullptr) {
         result = message->PduAnalysis(pdu);
     }
-
     return (result ? message : nullptr);
 }
 
-std::shared_ptr<SmsCbMessageHeader> SmsCbMessage::GetCbHeader() const
+std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> SmsCbMessage::GetCbHeader() const
 {
     return cbHeader_;
 }
@@ -75,11 +75,11 @@ bool SmsCbMessage::IsSinglePageMsg() const
 
 bool SmsCbMessage::PduAnalysis(const std::vector<unsigned char> &pdu)
 {
-    cbHeader_ = std::make_shared<SmsCbMessageHeader>();
+    cbHeader_ = std::make_shared<SmsCbMessage::SmsCbMessageHeader>();
     if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr.");
         return false;
     }
-
     int offset = 0;
     // from 3GPP TS 23.041 V4.1.0 (2001-06) 9.1.1 9.1.2 section Protocols and Protocol Architecture
     if (pdu.size() <= (MAX_CBMSG_PAGE_SIZE + SMS_CB_HEADER_SIZE)) {
@@ -92,21 +92,21 @@ bool SmsCbMessage::PduAnalysis(const std::vector<unsigned char> &pdu)
         offset = Decode3gHeader(pdu);
     }
     if (offset == 0 || pdu.size() <= (std::size_t)offset) {
+        TELEPHONY_LOGE("offset out of bound.");
         return false;
     }
-
+    TELEPHONY_LOGI("header offse = %{public}d", offset);
     std::vector<unsigned char> bodyPdu(pdu.begin() + offset, pdu.end());
-    if (cbHeader_->bEtwsMessage) {
+    if (cbHeader_->bEtwsMessage && cbHeader_->cbEtwsType == SMS_NETTEXT_ETWS_PRIMARY) {
         DecodeEtwsMsg(bodyPdu);
         return true;
     }
-
     switch (cbHeader_->cbNetType) {
         case SMS_NETTEXT_CB_MSG_GSM:
             Decode2gCbMsg(bodyPdu);
             break;
         case SMS_NETTEXT_CB_MSG_UMTS:
-            Decode3gCbMsg(pdu);
+            Decode3gCbMsg(bodyPdu);
             break;
         default:
             break;
@@ -119,12 +119,13 @@ int SmsCbMessage::Decode2gHeader(const std::vector<unsigned char> &pdu)
     int offset = 0;
     unsigned char temp;
     if (pdu.size() < SMS_CB_HEADER_SIZE) {
+        TELEPHONY_LOGE("pdu size less than min.");
         return offset;
     }
     if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr.");
         return offset;
     }
-
     cbHeader_->bEtwsMessage = false;
     temp = pdu[offset++];
     cbHeader_->serialNum.geoScope = (temp & 0xC0) >> 0x06;
@@ -136,14 +137,13 @@ int SmsCbMessage::Decode2gHeader(const std::vector<unsigned char> &pdu)
 
     temp = pdu[offset++];
     cbHeader_->msgId = (temp << 0x08) | pdu[offset++];
-
     if ((cbHeader_->msgId & 0xFFF8) == SMS_ETWS_BASE_MASK && pdu.size() <= MAX_ETWS_SIZE) {
+        cbHeader_->cbEtwsType = SMS_NETTEXT_ETWS_PRIMARY;
         cbHeader_->bEtwsMessage = true;
         temp = pdu[offset++];
         cbHeader_->warningType = (temp << 0x08) | pdu[offset++];
     } else {
         unsigned char dcs = pdu[offset++];
-
         temp = pdu[offset++];
         cbHeader_->totalPages = temp & 0x0f;
         cbHeader_->page = (temp & 0xF0) >> 0x04;
@@ -151,7 +151,6 @@ int SmsCbMessage::Decode2gHeader(const std::vector<unsigned char> &pdu)
         unsigned short iosTemp = pdu[offset++];
         iosTemp |= (pdu[offset++] << BYTE_BIT);
         DecodeCbMsgDCS(dcs, iosTemp, cbHeader_->dcs);
-
         cbHeader_->langType = cbHeader_->dcs.langType;
         cbHeader_->recvTime = GetRecvTime();
         if (cbHeader_->totalPages > MAX_CBMSG_PAGE_NUM) {
@@ -160,8 +159,10 @@ int SmsCbMessage::Decode2gHeader(const std::vector<unsigned char> &pdu)
         }
         if ((cbHeader_->msgId & 0xFFF8) == SMS_ETWS_BASE_MASK) {
             cbHeader_->bEtwsMessage = true;
+            cbHeader_->cbEtwsType = SMS_NETTEXT_ETWS_SECONDARY_GSM;
             cbHeader_->warningType = cbHeader_->msgId - SMS_ETWS_BASE_MASK;
         }
+        offset -= 0x02;
     }
     return offset;
 }
@@ -171,13 +172,15 @@ int SmsCbMessage::Decode3gHeader(const std::vector<unsigned char> &pdu)
     int offset = 0;
     unsigned char temp;
     if (pdu.size() < SMS_CB_HEADER_SIZE) {
+        TELEPHONY_LOGE("pdu size less than min.");
         return offset;
     }
     if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr.");
         return offset;
     }
+    offset++; // cbMsgType
 
-    offset++;
     temp = pdu[offset++];
     cbHeader_->msgId = (temp << 0x08) | pdu[offset++];
 
@@ -194,10 +197,10 @@ int SmsCbMessage::Decode3gHeader(const std::vector<unsigned char> &pdu)
 
     unsigned short iosTemp = pdu[offset++];
     iosTemp |= (pdu[offset++] << BYTE_BIT);
-
     DecodeCbMsgDCS(dcs, iosTemp, cbHeader_->dcs);
     cbHeader_->langType = cbHeader_->dcs.langType;
     cbHeader_->recvTime = GetRecvTime();
+    offset -= 0x02;
     return offset;
 }
 
@@ -208,6 +211,7 @@ void SmsCbMessage::Decode2gCbMsg(const std::vector<unsigned char> &pdu)
     if (cbHeader_ == nullptr) {
         TELEPHONY_LOGE("decode2gCbMsg null header");
     }
+    TELEPHONY_LOGI("Decode2gCbMsg codingScheme ==%{public}d", cbHeader_->dcs.codingScheme);
     switch (cbHeader_->dcs.codingScheme) {
         case SMS_CODING_7BIT: {
             dataLen = (dataLen * BYTE_BIT) / ENCODE_GSM_BIT;
@@ -215,8 +219,8 @@ void SmsCbMessage::Decode2gCbMsg(const std::vector<unsigned char> &pdu)
             int unpackLen = SmsCommonUtils::Unpack7bitChar(pdu.data(), dataLen, 0x00, pageData);
 
             if (cbHeader_->dcs.iso639Lang[0]) {
-                unpackLen = unpackLen - SMS_CB_IOS639LANG_SIZE;
-                offset = SMS_CB_IOS639LANG_SIZE;
+                unpackLen = unpackLen - SmsCbMessage::SMS_CB_IOS639LANG_SIZE;
+                offset = SmsCbMessage::SMS_CB_IOS639LANG_SIZE;
             }
             messageRaw_.insert(0, (const char *)&pageData[offset], unpackLen);
             break;
@@ -240,70 +244,88 @@ void SmsCbMessage::Decode2gCbMsg(const std::vector<unsigned char> &pdu)
 
 void SmsCbMessage::Decode3gCbMsg(const std::vector<unsigned char> &pdu)
 {
-    int dataLen = 0;
-    int offset = 0;
     if (cbHeader_ == nullptr) {
         TELEPHONY_LOGE("Decode3gCbMsg cbHeader null err.");
         return;
     }
-    const int pduLen = static_cast<int>(pdu.size());
-    const unsigned char *tpdu = pdu.data();
     switch (cbHeader_->dcs.codingScheme) {
         case SMS_CODING_7BIT: {
-            TELEPHONY_LOGD("SMS_CODING_7BIT %{public}d", cbHeader_->totalPages);
-            for (int i = 0; i < cbHeader_->totalPages; ++i) {
-                unsigned char pageLenOffset = (ENCODE_GSM_BIT + (i + 1) * MAX_CBMSG_PAGE_SIZE + i);
-                if (pduLen < pageLenOffset) {
-                    TELEPHONY_LOGE("CB Msg Size err [%{pulbic}d]", pduLen);
-                    messageRaw_.clear();
-                    return;
-                }
-
-                dataLen = tpdu[pageLenOffset];
-                offset = ENCODE_GSM_BIT + (i * MAX_CBMSG_PAGE_SIZE) + i;
-                if (dataLen > MAX_CBMSG_PAGE_SIZE) {
-                    TELEPHONY_LOGE("CB Msg Size is over MAX [%{pulbic}d]", dataLen);
-                    messageRaw_.clear();
-                    return;
-                }
-
-                int unpackLen = 0;
-                dataLen = (dataLen * BYTE_BIT) / ENCODE_GSM_BIT;
-                unsigned char pageData[MAX_CBMSG_PAGE_SIZE * BYTE_BIT / ENCODE_GSM_BIT] = {0};
-                unpackLen = SmsCommonUtils::Unpack7bitChar(&tpdu[offset], dataLen, 0x00, pageData);
-                messageRaw_.insert(messageRaw_.size(), (const char *)pageData, unpackLen);
-            }
+            TELEPHONY_LOGI("SMS_CODING_7BIT totalPages %{public}d", cbHeader_->totalPages);
+            Decode3g7Bit(pdu);
             break;
         }
-
         case SMS_CODING_8BIT:
         case SMS_CODING_UCS2: {
-            for (int i = 0; i < cbHeader_->totalPages; ++i) {
-                unsigned char pageLenOffset = (ENCODE_GSM_BIT + (i + 1) * MAX_CBMSG_PAGE_SIZE + i);
-                if (pduLen < pageLenOffset) {
-                    TELEPHONY_LOGD("CB Msg Size err [%{pulbic}d]", pduLen);
-                    messageRaw_.clear();
-                    return;
-                }
-
-                if (cbHeader_->dcs.iso639Lang[0]) {
-                    dataLen = tpdu[pageLenOffset] - 0x02;
-                    offset = ENCODE_GSM_BIT + (i * MAX_CBMSG_PAGE_SIZE) + i + 0x02;
-                } else {
-                    dataLen = tpdu[pageLenOffset];
-                    offset = ENCODE_GSM_BIT + (i * MAX_CBMSG_PAGE_SIZE) + i;
-                }
-
-                if (dataLen > 0 && dataLen <= MAX_CBMSG_PAGE_SIZE) {
-                    messageRaw_.insert(messageRaw_.size(), (const char *)&tpdu[offset], dataLen);
-                }
-            }
+            TELEPHONY_LOGI("SMS_CODING_UCS2 totalPages %{public}d", cbHeader_->totalPages);
+            Decode3gUCS2(pdu);
             break;
         }
         default:
             break;
     }
     cbHeader_->totalPages = 1;
+}
+
+void SmsCbMessage::Decode3g7Bit(const std::vector<unsigned char> &pdu)
+{
+    if (pdu.size() <= 0) {
+        TELEPHONY_LOGE("pdu size is invalid.");
+        return;
+    }
+    int offset = 0;
+    int dataLen = 0;
+    const int pduLen = static_cast<int>(pdu.size());
+    const unsigned char *tpdu = pdu.data();
+    for (int i = 0; i < cbHeader_->totalPages; ++i) {
+        unsigned char pageLenOffset = ((i + 1) * MAX_CBMSG_PAGE_SIZE + i);
+        if (pduLen < pageLenOffset) {
+            TELEPHONY_LOGE("CB Msg Size err [%{pulbic}d]", pduLen);
+            messageRaw_.clear();
+            return;
+        }
+        dataLen = tpdu[pageLenOffset];
+        offset = (i * MAX_CBMSG_PAGE_SIZE) + i;
+        if (dataLen > MAX_CBMSG_PAGE_SIZE) {
+            TELEPHONY_LOGE("CB Msg Size is over MAX [%{pulbic}d]", dataLen);
+            messageRaw_.clear();
+            return;
+        }
+        int unpackLen = 0;
+        dataLen = (dataLen * BYTE_BIT) / ENCODE_GSM_BIT;
+        unsigned char pageData[MAX_CBMSG_PAGE_SIZE * BYTE_BIT / ENCODE_GSM_BIT] = {0};
+        unpackLen = SmsCommonUtils::Unpack7bitChar(&tpdu[offset], dataLen, 0x00, pageData);
+        messageRaw_.insert(messageRaw_.size(), (const char *)pageData, unpackLen);
+    }
+}
+
+void SmsCbMessage::Decode3gUCS2(const std::vector<unsigned char> &pdu)
+{
+    if (pdu.size() <= 0) {
+        TELEPHONY_LOGE("pdu size is invalid.");
+        return;
+    }
+    int dataLen = 0;
+    int offset = 0;
+    const int pduLen = static_cast<int>(pdu.size());
+    const unsigned char *tpdu = pdu.data();
+    for (int i = 0; i < cbHeader_->totalPages; ++i) {
+        unsigned char pageLenOffset = ((i + 1) * MAX_CBMSG_PAGE_SIZE + i);
+        if (pduLen < pageLenOffset) {
+            TELEPHONY_LOGE("CB Msg Size err [%{pulbic}d]", pduLen);
+            messageRaw_.clear();
+            return;
+        }
+        if (cbHeader_->dcs.iso639Lang[0]) {
+            dataLen = tpdu[pageLenOffset] - 0x02;
+            offset = (i * MAX_CBMSG_PAGE_SIZE) + i + 0x02;
+        } else {
+            dataLen = tpdu[pageLenOffset];
+            offset = (i * MAX_CBMSG_PAGE_SIZE) + i;
+        }
+        if (dataLen > 0 && dataLen <= MAX_CBMSG_PAGE_SIZE) {
+            messageRaw_.insert(messageRaw_.size(), (const char *)&tpdu[offset], dataLen);
+        }
+    }
 }
 
 void SmsCbMessage::DecodeEtwsMsg(const std::vector<unsigned char> &pdu)
@@ -313,7 +335,6 @@ void SmsCbMessage::DecodeEtwsMsg(const std::vector<unsigned char> &pdu)
         TELEPHONY_LOGE("ETWS Msg Size is over MAX [%{public}zu]", pdu.size());
         return;
     }
-
     messageRaw_.insert(0, (const char *)(pdu.data() + offset), pdu.size() - offset);
 }
 
@@ -323,7 +344,7 @@ void SmsCbMessage::ConvertToUTF8(const std::string &raw, std::string &message) c
         TELEPHONY_LOGE("ConvertToUTF8 cbHeader null err.");
         return;
     }
-    if (cbHeader_->bEtwsMessage) {
+    if (cbHeader_->bEtwsMessage && cbHeader_->cbEtwsType == SMS_NETTEXT_ETWS_PRIMARY) {
         message.assign(raw);
     } else {
         MsgTextConvert *textCvt = MsgTextConvert::Instance();
@@ -331,7 +352,6 @@ void SmsCbMessage::ConvertToUTF8(const std::string &raw, std::string &message) c
             TELEPHONY_LOGE("MsgTextConvert Instance nullptr");
             return;
         }
-
         int codeSize = 0;
         MsgLangInfo langInfo = {
             0,
@@ -343,8 +363,10 @@ void SmsCbMessage::ConvertToUTF8(const std::string &raw, std::string &message) c
         } else if (cbHeader_->dcs.codingScheme == SMS_CODING_UCS2) {
             codeSize =
                 textCvt->ConvertUCS2ToUTF8(outBuf, sizeof(outBuf), (unsigned char *)raw.data(), raw.length());
+        } else {
+            message.assign(raw);
+            return;
         }
-
         outBuf[codeSize] = '\0';
         message.insert(0, (const char *)outBuf, codeSize);
     }
@@ -489,7 +511,7 @@ void SmsCbMessage::DecodeCbMsgDCS(
     const unsigned char dcsData, const unsigned short iosData, SmsCbMessageDcs &pDcs) const
 {
     pDcs.codingGroup = SMS_CBMSG_CODGRP_GENERAL_DCS;
-    pDcs.classType = static_cast<unsigned char>(SmsMessageClass::SMS_CLASS_UNKNOWN);
+    pDcs.classType = SMS_CLASS_UNKNOWN;
     pDcs.bCompressed = false;
     pDcs.codingScheme = SMS_CODING_7BIT;
     pDcs.langType = SMS_CBMSG_LANG_UNSPECIFIED;
@@ -497,7 +519,6 @@ void SmsCbMessage::DecodeCbMsgDCS(
     pDcs.bUDH = false;
     pDcs.rawData = dcsData;
     unsigned char codingGroup = (dcsData & 0xF0) >> 0x04;
-
     switch (codingGroup) {
         case 0x00:
         case 0x02:
@@ -542,9 +563,9 @@ unsigned long SmsCbMessage::GetRecvTime() const
 std::string SmsCbMessage::ToString() const
 {
     if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
         return "SmsCbMessage Header nullptr";
     }
-
     std::string msgId("msgId:" + std::to_string(cbHeader_->msgId));
     std::string langType("\nlangType:" + std::to_string(cbHeader_->langType));
     std::string isEtwsMessage("\nisEtws:" + std::to_string(cbHeader_->bEtwsMessage));
@@ -556,13 +577,333 @@ std::string SmsCbMessage::ToString() const
     std::string page(
         "\ntotalpage: " + std::to_string(cbHeader_->totalPages) + " page:" + std::to_string(cbHeader_->page));
     std::string recvTime("\nrecvTime: " + std::to_string(cbHeader_->recvTime));
+    std::string dcsRaw("\ndcsRaw: " + std::to_string(cbHeader_->dcs.rawData));
+    std::string msgBody;
+    ConvertToUTF8(messageRaw_, msgBody);
     return msgId.append(langType)
         .append(isEtwsMessage)
         .append(cbMsgType)
         .append(warningType)
         .append(serialNum)
         .append(page)
-        .append(recvTime);
+        .append(recvTime)
+        .append(dcsRaw)
+        .append("\nbody:")
+        .append(msgBody);
+}
+
+bool SmsCbMessage::GetFormat(int8_t &format) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    constexpr uint8_t FORMAT_3GPP = 1;
+    format = FORMAT_3GPP;
+    return true;
+}
+
+bool SmsCbMessage::GetPriority(int8_t &priority) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    const uint16_t pwsFirstId = 0x1100;
+    const uint16_t pwsLastId = 0x18FF;
+    const int8_t SmsPriorityNormal = 0x00;
+    const int8_t SmsPriorityEmergency = 0x03;
+    if (cbHeader_->msgId >= pwsFirstId && cbHeader_->msgId <= pwsLastId) {
+        priority = SmsPriorityEmergency;
+    } else {
+        priority = SmsPriorityNormal;
+    }
+    return true;
+}
+
+bool SmsCbMessage::GetGeoScope(uint8_t &gs) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    gs = cbHeader_->serialNum.geoScope;
+    return true;
+}
+
+bool SmsCbMessage::GetSerialNum(uint16_t &serial) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    serial = ((cbHeader_->serialNum.geoScope & 0x03) << 0x0E) |
+        ((cbHeader_->serialNum.msgCode & 0x03FF) << 0x04) | (cbHeader_->serialNum.updateNum & 0x0F);
+    return true;
+}
+
+bool SmsCbMessage::GetServiceCategory(uint16_t &category) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    category = cbHeader_->msgId;
+    return true;
+}
+
+bool SmsCbMessage::GetWarningType(uint16_t &warnType) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    warnType = cbHeader_->warningType;
+    return true;
+}
+
+bool SmsCbMessage::IsEtwsPrimary(bool &isPrimary) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    isPrimary = (cbHeader_->cbEtwsType == SMS_NETTEXT_ETWS_PRIMARY);
+    return true;
+}
+
+bool SmsCbMessage::IsEtwsMessage(bool &isEtws) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    const uint16_t etwsType = 0x1100;
+    const uint16_t etwsTypeMask = 0xFFF8;
+    isEtws = ((cbHeader_->msgId & etwsTypeMask) == etwsType);
+    return true;
+}
+
+bool SmsCbMessage::IsCmasMessage(bool &isCmas) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    const uint16_t cmasFirstId = 0x1112;
+    const uint16_t cmasLastId = 0x112F;
+    isCmas = ((cbHeader_->msgId >= cmasFirstId) && (cbHeader_->msgId <= cmasLastId));
+    return true;
+}
+
+bool SmsCbMessage::IsEtwsEmergencyUserAlert(bool &isUserAlert) const
+{
+    uint16_t serial = 0;
+    if (!GetSerialNum(serial)) {
+        TELEPHONY_LOGE("Get serial num fail.");
+        return false;
+    }
+    const uint16_t emergencyUserAlert = 0x2000;
+    isUserAlert = ((serial & emergencyUserAlert) != 0);
+    return true;
+}
+
+bool SmsCbMessage::IsEtwsPopupAlert(bool &isPopupAlert) const
+{
+    uint16_t serial = 0;
+    if (!GetSerialNum(serial)) {
+        TELEPHONY_LOGE("Get serial num fail.");
+        return false;
+    }
+    const uint16_t etwsPopup = 0x1000;
+    isPopupAlert = ((serial & etwsPopup) != 0);
+    return true;
+}
+
+bool SmsCbMessage::GetCmasSeverity(int8_t &severity) const
+{
+    uint16_t msgId = 0;
+    if (!GetMessageId(msgId)) {
+        TELEPHONY_LOGE("Get message id fail.");
+        return false;
+    }
+    switch (static_cast<SmsCmasMessageType>(msgId)) {
+        case SmsCmasMessageType::CMAS_EXTREME_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_EXTREME_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_EXTREME_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_EXTREME_LIKELY_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_EXTERME_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_EXTREME_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_SPANISH:
+            severity = SMS_CMAE_SEVERITY_EXTREME;
+            break;
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_SPANISH:
+            severity =  SMS_CMAE_SEVERITY_SEVERE;
+            break;
+        default:
+            severity = SMS_CMAE_SEVERITY_RESERVED;
+            break;
+    }
+    return true;
+}
+
+bool SmsCbMessage::GetCmasUrgency(int8_t &urgency) const
+{
+    uint16_t msgId = 0;
+    if (!GetMessageId(msgId)) {
+        TELEPHONY_LOGE("Get message id fail.");
+        return false;
+    }
+    switch (static_cast<SmsCmasMessageType>(msgId)) {
+        case SmsCmasMessageType::CMAS_EXTREME_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_EXTREME_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_EXTREME_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_EXTREME_LIKELY_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_SPANISH:
+            urgency = SMS_CMAE_URGENCY_IMMEDIATE;
+            break;
+        case SmsCmasMessageType::CMAS_SERVER_EXTERME_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_EXTREME_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_SPANISH:
+            urgency = SMS_CMAE_URGENCY_EXPECTED;
+            break;
+        default:
+            urgency = SMS_CMAE_URGENCY_RESERVED;
+            break;
+    }
+    return true;
+}
+
+bool SmsCbMessage::GetCmasCertainty(int8_t &certainty) const
+{
+    uint16_t msgId = 0;
+    if (!GetMessageId(msgId)) {
+        TELEPHONY_LOGE("Get message id fail.");
+        return false;
+    }
+    switch (static_cast<SmsCmasMessageType>(msgId)) {
+        case SmsCmasMessageType::CMAS_EXTREME_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_EXTREME_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_EXTERME_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_EXTREME_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_SPANISH:
+            certainty = SMS_CMAE_CERTAINTY_OBSERVED;
+            break;
+        case SmsCmasMessageType::CMAS_EXTREME_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_EXTREME_LIKELY_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_SPANISH:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_DEFUALT:
+        case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_SPANISH:
+            certainty = SMS_CMAE_CERTAINTY_LIKELY;
+            break;
+        default:
+            certainty = SMS_CMAE_CERTAINTY_RESERVED;
+            break;
+    }
+    return true;
+}
+
+bool SmsCbMessage::GetCmasCategory(int8_t &cmasCategory) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    cmasCategory = SMS_CMAE_CTG_RESERVED;
+    return true;
+}
+
+bool SmsCbMessage::GetCmasResponseType(int8_t &cmasRes) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    cmasRes = SMS_CMAE_RESP_TYPE_RESERVED;
+    return true;
+}
+
+bool SmsCbMessage::GetMessageId(uint16_t &msgId) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    msgId = cbHeader_->msgId;
+    return true;
+}
+
+bool SmsCbMessage::GetCmasMessageClass(int8_t &cmasClass) const
+{
+    uint16_t msgId = 0;
+    if (!GetMessageId(msgId)) {
+        TELEPHONY_LOGE("Get message id fail.");
+        return false;
+    }
+    cmasClass = CMASClass(msgId);
+    return true;
+}
+
+bool SmsCbMessage::GetMsgType(uint8_t &msgType) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    msgType = cbHeader_->cbMsgType;
+    return true;
+}
+
+bool SmsCbMessage::GetLangType(uint8_t &lan) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    lan = cbHeader_->langType;
+    return true;
+}
+
+bool SmsCbMessage::GetDcs(uint8_t &dcs) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    dcs = cbHeader_->dcs.codingScheme;
+    return true;
+}
+
+bool SmsCbMessage::GetReceiveTime(long &recvTime) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    recvTime = cbHeader_->recvTime;
+    return true;
 }
 } // namespace Telephony
 } // namespace OHOS

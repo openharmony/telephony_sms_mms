@@ -46,6 +46,8 @@ public:
     void SendSmsToRil(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
     void ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
     void ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
+    std::vector<std::string> SplitMessage(const std::string &message) override;
+    std::vector<int32_t> CalculateLength(const std::string &message, bool force7BitCode) override;
 
 protected:
     void StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event) override;
@@ -55,6 +57,16 @@ private:
         const std::shared_ptr<struct EncodeInfo> &encodeInfo, unsigned char msgRef8bit);
     bool RegisterHandler();
     bool SetPduInfo(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSmsMessage &gsmSmsMessage, bool &isMore);
+    int SetConcatData(unsigned char msgRef8bit, int cellsInfosSize,
+        std::shared_ptr<SmsSendIndexer> &indexer, GsmSmsMessage &gsmSmsMessage, int i);
+    bool SetUserData(std::shared_ptr<struct SmsTpdu> &tpdu,
+        const std::vector<struct SplitInfo> &cellsInfos, int i);
+    bool SetStatusReport(int cellsInfosSize, int i, std::shared_ptr<struct SmsTpdu> &tpdu,
+        bool isStatusReport);
+    void SetSendStatusIndexerInfo(const std::shared_ptr<uint8_t> &unSentCellCount,
+        const std::shared_ptr<bool> &hasCellFailed, const std::vector<struct SplitInfo> &cellsInfos,
+        std::shared_ptr<SmsSendIndexer> &indexer, int i);
+
     std::mutex mutex_;
 };
 } // namespace Telephony

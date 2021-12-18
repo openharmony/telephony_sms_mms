@@ -29,6 +29,10 @@ public:
     explicit SmsBroadcastSubscriber(const OHOS::EventFwk::CommonEventSubscribeInfo &subscriberInfo);
     ~SmsBroadcastSubscriber() = default;
     virtual void OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data);
+private:
+    void CbMessageTest(const OHOS::EventFwk::Want &want) const;
+
+    const int8_t DEFAULT_VALUE = -1;
 };
 } // namespace Telephony
 } // namespace OHOS

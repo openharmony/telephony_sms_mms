@@ -21,15 +21,6 @@
 
 namespace OHOS {
 namespace Telephony {
-#define MAX_TIME_LEN 32
-#define MAX_ADDRESS_LEN 21
-#define MAX_ADD_PARAM_LEN 12
-#define MAX_REL_TIME_PARAM_LEN 1
-#define MAX_SMSC_LEN 20
-#define MAX_DCS_PARAM_LEN 1
-#define MAX_ABS_TIME_PARAM_LEN 7
-#define YEARY_OF_MON 12
-#define HEX_BYTE_STEP 2
 class GsmSmsParamCodec {
 public:
     GsmSmsParamCodec() = default;
@@ -50,6 +41,15 @@ public:
 
 private:
     constexpr static unsigned char NUMBER_TEN = 10;
+    static constexpr uint8_t MAX_TIME_LEN = 32;
+    static constexpr uint8_t MAX_ADDRESS_LEN = 21;
+    static constexpr uint8_t MAX_ADD_PARAM_LEN = 12;
+    static constexpr uint8_t MAX_REL_TIME_PARAM_LEN = 1;
+    static constexpr uint8_t MAX_SMSC_LEN = 20;
+    static constexpr uint8_t MAX_DCS_PARAM_LEN = 1;
+    static constexpr uint8_t MAX_ABS_TIME_PARAM_LEN = 7;
+    static constexpr uint8_t YEARY_OF_MON = 12;
+    static constexpr uint8_t HEX_BYTE_STEP = 2;
 };
 } // namespace Telephony
 } // namespace OHOS

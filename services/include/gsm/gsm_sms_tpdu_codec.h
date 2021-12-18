@@ -22,10 +22,9 @@
 
 namespace OHOS {
 namespace Telephony {
-#define HEX_BYTE_STEP 2
 enum SmsMTIType { SMS_MTI_DELIVER = 0, SMS_MTI_SUBMIT, SMS_MTI_STATUS_REP };
 
-enum class DecodeType {
+enum DecodeType {
     DECODE_SUBMIT_TYPE,
     DECODE_DELIVER_TYPE,
     DECODE_STATUS_REP_TYPE,
@@ -39,6 +38,8 @@ public:
     static int DecodeTpdu(const unsigned char *pTpdu, int TpduLen, struct SmsTpdu *pSmsTpdu);
 
 private:
+    static constexpr uint8_t HEX_BYTE_STEP = 2;
+
     static int EncodeSubmit(const struct SmsSubmit *pSubmit, char *pTpdu);
     static int EncodeDeliver(const struct SmsDeliver *pDeliver, char *pTpdu);
     static int EncodeDeliverReport(const struct SmsDeliverReport *pDeliverRep, char *pTpdu);

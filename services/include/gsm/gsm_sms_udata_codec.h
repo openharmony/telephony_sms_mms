@@ -21,12 +21,6 @@
 
 namespace OHOS {
 namespace Telephony {
-#define MAX_GSM_7BIT_DATA_LEN 160
-#define MAX_UCS2_DATA_LEN 140
-#define MAX_TPDU_DATA_LEN 255
-#define BYTE_BIT 8
-#define ENCODE_BYTE_BIT 7
-#define HEX_BYTE_STEP 2
 class GsmSmsUDataCodec {
 public:
     GsmSmsUDataCodec() = default;
@@ -38,7 +32,6 @@ public:
     static int DecodeUserData(const unsigned char *pTpdu, const int tpduLen, bool bHeaderInd,
         SmsCodingScheme CodingScheme, struct SmsUserData *pUserData, struct SmsTpud *pTPUD);
 
-private:
     static int EncodeGSMData(const struct SmsUserData *pUserData, char *pEncodeData);
     static int Encode8bitData(const struct SmsUserData *pUserData, char *pEncodeData);
     static int EncodeUCS2Data(const struct SmsUserData *pUserData, char *pEncodeData);
@@ -50,10 +43,19 @@ private:
     static int DecodeUCS2Data(const unsigned char *pTpdu, const int tpduLen, bool bHeaderInd,
         struct SmsUserData *pUserData, struct SmsTpud *pTPUD);
     static int EncodeHeader(const struct SmsUDH header, char *pEncodeHeader);
-    static int EncodeHeaderConcat(const struct SmsUDH header, char *pEncodeHeader);
     static int DecodeHeader(const unsigned char *pTpdu, struct SmsUDH *pHeader);
-    static void DebugDecodeHeader(const struct SmsUDH *pHeader);
     static void ResetUserData(struct SmsUserData &userData);
+
+private:
+    static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
+    static constexpr uint8_t MAX_UCS2_DATA_LEN = 140;
+    static constexpr uint8_t MAX_TPDU_DATA_LEN = 255;
+    static constexpr uint8_t BYTE_BIT = 8;
+    static constexpr uint8_t ENCODE_BYTE_BIT = 7;
+    static constexpr uint8_t HEX_BYTE_STEP = 2;
+
+    static int EncodeHeaderConcat(const struct SmsUDH header, char *pEncodeHeader);
+    static void DebugDecodeHeader(const struct SmsUDH *pHeader);
 };
 } // namespace Telephony
 } // namespace OHOS

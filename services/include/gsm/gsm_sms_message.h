@@ -16,7 +16,7 @@
 #ifndef GSM_SMS_MESSAGE_H
 #define GSM_SMS_MESSAGE_H
 
-#include <cstdint>
+#include <stdint.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -26,27 +26,6 @@
 
 namespace OHOS {
 namespace Telephony {
-#define TAPI_SIM_SMSP_ADDRESS_LEN 20
-#define TAPI_NETTEXT_SMDATA_SIZE_MAX 255
-#define MAX_TPDU_DATA_LEN 255
-#define TAPI_TEXT_SIZE_MAX 520
-#define GSM_BEAR_DATA_LEN 140
-#define BYTE_BITS 8
-#define CHARSET_7BIT_BITS 7
-struct SplitInfo {
-    std::vector<uint8_t> encodeData;
-    SmsCodingScheme encodeType;
-    MSG_LANGUAGE_ID_T langId;
-};
-
-struct EncodeInfo {
-    char tpduData_[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1];
-    char smcaData_[TAPI_SIM_SMSP_ADDRESS_LEN + 1];
-    int tpduLen;
-    int smcaLen;
-    bool isMore_;
-};
-
 class GsmSmsMessage : public SmsBaseMessage {
 public:
     GsmSmsMessage() = default;
@@ -68,30 +47,36 @@ public:
 
     std::shared_ptr<struct SmsTpdu> CreateDefaultSubmitSmsTpdu(const std::string &dest, const std::string &sc,
         const std::string &text, bool bStatusReport, const SmsCodingScheme codingScheme);
-    std::shared_ptr<struct SmsTpdu> CreateDataSubmitSmsTpdu(const std::string desAddr, const std::string scAddr,
+    std::shared_ptr<struct SmsTpdu> CreateDataSubmitSmsTpdu(const std::string &desAddr, const std::string &scAddr,
         int32_t port, const uint8_t *data, uint32_t dataLen, uint16_t msgRef8bit, bool bStatusReport);
 
     std::shared_ptr<struct EncodeInfo> GetSubmitEncodeInfo(const std::string &sc, bool bMore);
     std::shared_ptr<struct SmsTpdu> CreateDeliverSmsTpdu();
     std::shared_ptr<struct SmsTpdu> CreateDeliverReportSmsTpdu();
     std::shared_ptr<struct SmsTpdu> CreateStatusReportSmsTpdu();
-
-    void SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &context, bool user7bitEncode,
-        SmsCodingScheme &codingType);
     static std::shared_ptr<GsmSmsMessage> CreateMessage(const std::string &pdu);
 
     bool PduAnalysis(const std::string &pdu);
-
     void ConvertMessageDcs();
     void ConvertUserData();
     bool GetIsTypeZeroInd() const;
     bool GetIsSIMDataTypeDownload() const;
     void ConvertMsgTimeStamp(const struct SmsTimeStamp &times);
-
     bool IsSpecialMessage() const;
+
+    static constexpr uint16_t TAPI_NETTEXT_SMDATA_SIZE_MAX = 255;
+    static constexpr uint8_t TAPI_SIM_SMSP_ADDRESS_LEN = 20;
 
 private:
     static constexpr uint16_t DEFAULT_PORT = -1;
+    static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
+    static constexpr uint8_t MAX_SMSC_LEN = 20;
+    static constexpr uint16_t MAX_TPDU_DATA_LEN = 255;
+    static constexpr uint16_t TAPI_TEXT_SIZE_MAX = 520;
+    static constexpr uint8_t GSM_BEAR_DATA_LEN = 140;
+    static constexpr uint8_t BYTE_BITS = 8;
+    static constexpr uint8_t CHARSET_7BIT_BITS = 7;
+
     std::string fullText_;
     std::string destAddress_;
     std::string replyAddress_;
@@ -105,8 +90,17 @@ private:
     void CreateDefaultSubmit(bool bStatusReport, const SmsCodingScheme codingScheme);
     int SetSmsTpduDestAddress(std::shared_ptr<struct SmsTpdu> &tPdu, const std::string &desAddr);
     int CalcReplyEncodeAddress(const std::string &replyAddress);
-    static int GetCodeLen(unsigned char (&decodeData)[(MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1],
-        SmsCodingScheme &codingType, std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
+    virtual int DecodeMessage(unsigned char *decodeData, SmsCodingScheme &codingType, const std::string &msgText,
+        bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
+    bool GetUserData();
+};
+
+struct EncodeInfo {
+    char tpduData_[GsmSmsMessage::TAPI_NETTEXT_SMDATA_SIZE_MAX + 1];
+    char smcaData_[GsmSmsMessage::TAPI_SIM_SMSP_ADDRESS_LEN + 1];
+    int tpduLen;
+    int smcaLen;
+    bool isMore_;
 };
 } // namespace Telephony
 } // namespace OHOS

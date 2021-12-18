@@ -108,10 +108,7 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
                 messageType = ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN;
             }
         }
-        sptr<ISendShortMessageCallback> sendCallback = smsIndexer->GetSendCallback();
-        if (sendCallback != nullptr) {
-            sendCallback->OnSmsSendResult(messageType);
-        }
+        SendResultCallBack(smsIndexer->GetSendCallback(), messageType);
     }
 }
 
@@ -138,9 +135,7 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
     if (isLastPart) {
         // save to db and update state
         sptr<ISendShortMessageCallback> sendCallback = smsIndexer->GetSendCallback();
-        if (sendCallback != nullptr) {
-            sendCallback->OnSmsSendResult(ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        }
+        SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
     }
 }
 
@@ -195,10 +190,8 @@ bool SmsSender::SendCacheMapLimitCheck(const sptr<ISendShortMessageCallback> &se
 {
     std::lock_guard<std::mutex> guard(sendCacheMapMutex_);
     if (sendCacheMap_.size() > MSG_QUEUE_LIMIT) {
-        if (sendCallback != nullptr) {
-            sendCallback->OnSmsSendResult(ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-            return true;
-        }
+        SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        return true;
     }
     return false;
 }
@@ -240,14 +233,14 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
             smsIndexer->SetMsgRefId64Bit(res->flag);
             smsIndexer->SetIsFailure(true);
         }
-    } else {
-        std::shared_ptr<SendSmsResultInfo> info = event->GetSharedObject<SendSmsResultInfo>();
-        if (info == nullptr) {
-            return nullptr;
-        }
+        return smsIndexer;
+    }
+
+    std::shared_ptr<SendSmsResultInfo> info = event->GetSharedObject<SendSmsResultInfo>();
+    if (info != nullptr) {
         auto iter = sendCacheMap_.find(info->flag);
         if (iter != sendCacheMap_.end()) {
-            TELEPHONY_LOGD("msgRef = %{public}d", info->msgRef);
+            TELEPHONY_LOGI("msgRef = %{public}d", info->msgRef);
             smsIndexer = iter->second;
             if (smsIndexer == nullptr) {
                 TELEPHONY_LOGE("smsIndexer is nullptr");
@@ -274,7 +267,7 @@ void SmsSender::HandleResend(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
     // resending mechanism
     if (((smsIndexer->GetErrorCode() == HRIL_ERR_GENERIC_FAILURE) ||
         (smsIndexer->GetErrorCode() == HRIL_ERR_CMD_SEND_FAILURE)) &&
-        (smsIndexer->GetCsResendCount() < MAX_SEND_RETRIES)) {
+        smsIndexer->GetCsResendCount() < MAX_SEND_RETRIES) {
         smsIndexer->SetCsResendCount(smsIndexer->GetCsResendCount() + 1);
         SendEvent(MSG_SMS_RETRY_DELIVERY, smsIndexer, DELAY_MAX_TIME_MSCE);
     } else {

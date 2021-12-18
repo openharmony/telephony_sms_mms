@@ -18,9 +18,8 @@
 #include <iostream>
 
 #include "core_manager.h"
-#include "delivery_short_message_callback_stub.h"
-#include "send_short_message_callback_stub.h"
-#include "short_message.h"
+#include "sms_delivery_callback_test.h"
+#include "sms_send_callback_test.h"
 #include "string_utils.h"
 
 namespace OHOS {
@@ -30,16 +29,16 @@ void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &sm
     if (smsService == nullptr) {
         return;
     }
-    int32_t cardId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     std::string dest;
     std::cout << "Please enter the receiver's telephone number\n" << std::endl;
     std::cin >> dest;
     std::string sca("");
-    OHOS::sptr<SendShortMessageCallbackStub> sendCallBackPtr(new SendShortMessageCallbackStub());
-    OHOS::sptr<DeliveryShortMessageCallbackStub> deliveryCallBackPtr(new DeliveryShortMessageCallbackStub());
+    OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
+    OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
     uint16_t port = 100;
     uint8_t data[] = "hello world";
-    smsService->SendMessage(cardId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
+    smsService->SendMessage(slotId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
         sizeof(data) / sizeof(data[0]), sendCallBackPtr, deliveryCallBackPtr);
     std::cout << "TestGsmSendShortData" << std::endl;
 }
@@ -49,13 +48,13 @@ void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &sms
     if (smsService == nullptr) {
         return;
     }
-    int32_t cardId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     std::string dest;
     std::cout << "Please enter the receiver's telephone number\n";
     std::cin >> dest;
     std::string sca("");
-    OHOS::sptr<SendShortMessageCallbackStub> sendCallBackPtr(new SendShortMessageCallbackStub());
-    OHOS::sptr<DeliveryShortMessageCallbackStub> deliveryCallBackPtr(new DeliveryShortMessageCallbackStub());
+    OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
+    OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
     uint8_t data[] =
         R"(This is the test data!This is the test data!This is the test data!
         This is the test data!This is the test data!This is the test data!
@@ -65,7 +64,7 @@ void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &sms
         This is the test data!This is the test data!This is the test data!)";
     uint16_t port = 100;
 
-    smsService->SendMessage(cardId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
+    smsService->SendMessage(slotId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
         sizeof(data) / sizeof(data[0]), sendCallBackPtr, deliveryCallBackPtr);
     std::cout << "TestGsmSendLongData" << std::endl;
 }
@@ -75,7 +74,7 @@ void GsmSmsSenderTest::TestGsmSendShortText(const sptr<ISmsServiceInterface> &sm
     if (smsService == nullptr) {
         return;
     }
-    int32_t cardId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     std::string dest;
     std::string text;
     std::cout << "Please enter the receiver's telephone number\n";
@@ -83,9 +82,9 @@ void GsmSmsSenderTest::TestGsmSendShortText(const sptr<ISmsServiceInterface> &sm
     std::cout << "Please enter text\n";
     getline(std::cin, text);
     std::string sca("");
-    OHOS::sptr<SendShortMessageCallbackStub> sendCallBackPtr(new SendShortMessageCallbackStub());
-    OHOS::sptr<DeliveryShortMessageCallbackStub> deliveryCallBackPtr(new DeliveryShortMessageCallbackStub());
-    smsService->SendMessage(cardId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
+    OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
+    OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
+    smsService->SendMessage(slotId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
         StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
     std::cout << "TestGsmSendShortText" << std::endl;
 }
@@ -95,7 +94,7 @@ void GsmSmsSenderTest::TestGsmSendLongText(const sptr<ISmsServiceInterface> &sms
     if (smsService == nullptr) {
         return;
     }
-    int32_t cardId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     std::string dest;
     std::cout << "Please enter the receiver's telephone number\n";
     std::cin >> dest;
@@ -107,9 +106,9 @@ void GsmSmsSenderTest::TestGsmSendLongText(const sptr<ISmsServiceInterface> &sms
         This is the test data!This is the test data!This is the test data!
         This is the test data!This is the test data!This is the test data!
         This is the test data!This is the test data!This is the test data!)");
-    OHOS::sptr<SendShortMessageCallbackStub> sendCallBackPtr(new SendShortMessageCallbackStub());
-    OHOS::sptr<DeliveryShortMessageCallbackStub> deliveryCallBackPtr(new DeliveryShortMessageCallbackStub());
-    smsService->SendMessage(cardId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
+    OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
+    OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
+    smsService->SendMessage(slotId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
         StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
     std::cout << "TestGsmSendLongText" << std::endl;
 }
@@ -120,11 +119,11 @@ void GsmSmsSenderTest::TestSetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
     if (smsService == nullptr) {
         return;
     }
-    int32_t cardId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     std::string sca;
     std::cout << "Please enter smsc" << std::endl;
     std::cin >> sca;
-    result = smsService->SetSmscAddr(cardId, StringUtils::ToUtf16(sca));
+    result = smsService->SetSmscAddr(slotId, StringUtils::ToUtf16(sca));
     if (result) {
         std::cout << "TestSetSmscAddr OK!" << std::endl;
     } else {
@@ -138,8 +137,8 @@ void GsmSmsSenderTest::TestGetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
     if (smsService == nullptr) {
         return;
     }
-    int32_t cardId = CoreManager::DEFAULT_SLOT_ID;
-    result = StringUtils::ToUtf8(smsService->GetSmscAddr(cardId));
+    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    result = StringUtils::ToUtf8(smsService->GetSmscAddr(slotId));
     std::cout << "TestGetSmscAddr:" << result << std::endl;
 }
 
@@ -205,10 +204,13 @@ void GsmSmsSenderTest::TestUpdateSimMessage(const sptr<ISmsServiceInterface> &sm
     std::string smsc;
     std::cout << "Please enter smsc" << std::endl;
     std::cin >> smsc;
+    int32_t status;
+    std::cout << "Please enter status" << std::endl;
+    std::cin >> status;
     std::u16string pduData = StringUtils::ToUtf16(pdu);
     std::u16string smscData = StringUtils::ToUtf16(smsc);
     result = smsService->UpdateSimMessage(
-        slotId, msgIndex, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_READ, pduData, smscData);
+        slotId, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
     if (result) {
         std::cout << "TestUpdateSimMessage OK!" << std::endl;
     } else {
@@ -224,13 +226,13 @@ void GsmSmsSenderTest::TestGetAllSimMessages(const sptr<ISmsServiceInterface> &s
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     result = smsService->GetAllSimMessages(slotId);
-    std::cout << "TestUpdateSimMessage001 Begin:" << std::endl;
+    std::cout << "TestGetAllSimMessages Begin:" << std::endl;
     for (auto &item : result) {
         std::cout << "[" << item.GetIndexOnSim() << "] " << StringUtils::StringToHex(item.GetPdu()) << std::endl;
         std::cout << "status:" << item.GetIccMessageStatus()
                   << " message:" << StringUtils::ToUtf8(item.GetVisibleMessageBody()) << std::endl;
     }
-    std::cout << "TestUpdateSimMessage001 End!" << std::endl;
+    std::cout << "TestGetAllSimMessages End!" << std::endl;
 }
 
 void GsmSmsSenderTest::TestEnableCBRangeConfig(const sptr<ISmsServiceInterface> &smsService) const
@@ -341,6 +343,38 @@ void GsmSmsSenderTest::TestGetDefaultSmsSlotId(const sptr<ISmsServiceInterface> 
     }
     result = smsService->GetDefaultSmsSlotId();
     std::cout << "TestGetDefaultSmsSlotId:" << result << std::endl;
+}
+
+void GsmSmsSenderTest::TestSplitMessage(const sptr<ISmsServiceInterface> &smsService) const
+{
+    std::vector<std::u16string> result;
+    if (smsService == nullptr) {
+        return;
+    }
+    std::string input;
+    std::cout << "Please enter message" << std::endl;
+    std::getline(std::cin, input);
+    result = smsService->SplitMessage(StringUtils::ToUtf16(input));
+    std::cout << "TestSplitMessage size:" << result.size() << std::endl;
+    for (auto &item : result) {
+        std::cout << StringUtils::ToUtf8(item) << std::endl;
+    }
+}
+
+void GsmSmsSenderTest::TestCalculateLength(const sptr<ISmsServiceInterface> &smsService) const
+{
+    std::string field[] = {"msgSegCount:", "codeUnitCount:", "codeUnitsRemaining:", "codeUnitSize:"};
+    std::vector<int32_t> result;
+    if (smsService == nullptr) {
+        return;
+    }
+    std::string input;
+    std::cout << "Please enter message" << std::endl;
+    std::getline(std::cin, input);
+    result = smsService->CalculateLength(StringUtils::ToUtf16(input), false);
+    for (size_t index = 0; index < result.size(); ++index) {
+        std::cout << field[index] << result.at(index) << std::endl;
+    }
 }
 } // namespace Telephony
 } // namespace OHOS

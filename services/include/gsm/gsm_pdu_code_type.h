@@ -19,16 +19,16 @@
 
 #include "sms_pdu_code_type.h"
 
-#define MAX_UD_HEADER_NUM 7
-#define MAX_USER_DATA_LEN 160
-#define MAX_ADDRESS_LEN 21
-#define MAX_SEGMENT_NUM 15
+#include <cstdint>
+
+namespace OHOS {
+namespace Telephony {
+static constexpr uint8_t MAX_ADDRESS_LEN = 21;
+static constexpr uint8_t MAX_SEGMENT_NUM = 15;
 
 using SMS_TON_T = unsigned char;
 using SMS_NPI_T = unsigned char;
 
-namespace OHOS {
-namespace Telephony {
 // from 3GPP TS 23.040 V5.1.0 9.1.2.5 Address fields
 enum SmsTon {
     SMS_TON_UNKNOWN = 0, /* unknown */
@@ -42,7 +42,7 @@ enum SmsTon {
 };
 
 // from 3GPP TS 23.038 V4.3.0 5 CBS Data Coding Scheme
-enum class SmsMessageClass {
+enum SmsMessageClass {
     /** class0 Indicates an instant message, which is displayed immediately after being received. */
     SMS_INSTANT_MESSAGE = 0,
     /** class1 Indicates an SMS message that can be stored on the device or SIM card based on the storage status. */
@@ -98,13 +98,18 @@ enum SmsPid {
     SMS_RETURN_CALL_PID = 0x5F,
 };
 
-// from 3GPP TS 23.040 V5.1.0 9.2.3.10 TP Data Coding Scheme (TP DCS)
+/**
+ * @brief SmsCodingScheme
+ * from 3GPP TS 23.040 V5.1.0 9.2.3.10 TP Data Coding Scheme (TP DCS)
+ */
 enum SmsCodingScheme {
     SMS_CODING_7BIT = 0, // GSM 7 bit default alphabet
     SMS_CODING_8BIT, // 8 bit data
     SMS_CODING_UCS2, // UCS2 (16bit) [10]
     SMS_CODING_AUTO,
     SMS_CODING_EUCKR,
+    SMS_CODING_ASCII7BIT, // cdma 7 bit defualt alphabet
+    SMS_CODING_UNKNOWN,
 };
 
 struct SmsTimeStamp {
@@ -115,7 +120,10 @@ struct SmsTimeStamp {
     } time;
 };
 
-// 3GPP TS 23.038 V4.3.0 4	SMS Data Coding Scheme
+/**
+ * @brief SmsDcs
+ * form 3GPP TS 23.038 V4.3.0 4	SMS Data Coding Scheme
+ */
 typedef struct SmsDcs {
     // indicates the text is compressed using the  compression algorithm defined in 3GPP TS 23.042 [13]
     bool bCompressed;
@@ -128,7 +136,10 @@ typedef struct SmsDcs {
     enum SmsIndicatorType indType;
 } SmsDcs_;
 
-// from 3GPP TS 23.040 V5.1.0 9.2.3.3 TP Validity Period Format (TP VPF)
+/**
+ * @brief SmsVpf
+ * from 3GPP TS 23.040 V5.1.0 9.2.3.3 TP Validity Period Format (TP VPF)
+ */
 enum SmsVpf {
     SMS_VPF_NOT_PRESENT = 0,
     SMS_VPF_ENHANCED,
@@ -138,15 +149,10 @@ enum SmsVpf {
 
 enum _SMS_REPORT_TYPE_E { SMS_REPORT_POSITIVE = 0, SMS_REPORT_NEGATIVE };
 
-// from 3GPP TS 23.040 V5.1.0 9.2.3.24	TP User Data (TP UD)
-typedef struct SmsUserData {
-    int headerCnt;
-    struct SmsUDH header[MAX_UD_HEADER_NUM];
-    int length;
-    char data[MAX_USER_DATA_LEN + 1];
-} SmsUserData_;
-
-// from 3GPP TS 23.040 V5.1.0 9.2.2.2 SMS SUBMIT type
+/**
+ * @brief SmsSubmit
+ * from 3GPP TS 23.040 V5.1.0 9.2.2.2 SMS SUBMIT type
+ */
 typedef struct SmsSubmit {
     bool bRejectDup; // TP Reject Duplicates
     bool bStatusReport; // TP Status report capabilities
@@ -166,7 +172,10 @@ typedef struct SmsTpud {
     char ud[MAX_USER_DATA_LEN + 1];
 } SmsTpud_;
 
-// from 3GPP TS 23.040 V5.1.0 9.2.2.1 SMS DELIVER type
+/**
+ * @brief SmsDeliver
+ * from 3GPP TS 23.040 V5.1.0 9.2.2.1 SMS DELIVER type
+ */
 typedef struct SmsDeliver {
     bool bMoreMsg; // TP More Messages to Send
     bool bStatusReport; // TP Status report capabilities
@@ -183,7 +192,10 @@ typedef struct SmsDeliver {
 using SMS_REPORT_TYPE_T = unsigned char;
 using SMS_FAIL_CAUSE_T = unsigned char;
 
-// from 3GPP TS 23.040 V5.1.0 9.2.2.1a SMS DELIVER REPORT type
+/**
+ * @brief SmsDeliverReport
+ * from 3GPP TS 23.040 V5.1.0 9.2.2.1a SMS DELIVER REPORT type
+ */
 typedef struct SmsDeliverReport {
     SMS_REPORT_TYPE_T reportType; // TP Message Type Indicator
     bool bHeaderInd; // TP User Data Header Indicator (TP UDHI)
@@ -196,7 +208,10 @@ typedef struct SmsDeliverReport {
 
 using SMS_STATUS_T = unsigned char;
 
-// from 3GPP TS 23.040 V5.1.0 9.2.2.3 SMS STATUS REPORT type
+/**
+ * @brief SmsStatusReport
+ * from 3GPP TS 23.040 V5.1.0 9.2.2.3 SMS STATUS REPORT type
+ */
 typedef struct SmsStatusReport {
     bool bMoreMsg; // More Messages to Send
     bool bStatusReport; // TP Status Report Qualifier

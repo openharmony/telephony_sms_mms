@@ -16,47 +16,81 @@
 #include "short_message_test.h"
 
 #include <iostream>
-#include <memory>
 
 #include "string_utils.h"
 
 namespace OHOS {
 namespace Telephony {
 using namespace OHOS::Telephony;
-ShortMessage *ShortMessageTest::TestCreateMessage() const
+std::unique_ptr<ShortMessage> ShortMessageTest::shortMessage_ = nullptr;
+
+void ShortMessageTest::TestCreateMessage() const
 {
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector(
         "0891683108200075F4240D91688129562983F6000012408"
-        "00102"
-        "142302C130");
+        "00102142302C130");
     ShortMessage *message = ShortMessage::CreateMessage(pdu, u"3gpp");
     if (message == nullptr) {
+        std::cout << "message is nullptr!" << std::endl;
+        return;
+    }
+    shortMessage_ = std::unique_ptr<ShortMessage>(message);
+    if (shortMessage_ == nullptr) {
         std::cout << "TestCreateMessage fail!!!" << std::endl;
     } else {
         std::cout << "TestCreateMessage success!!!" << std::endl;
     }
-    return message;
 }
 
-void ShortMessageTest::TestGetVisibleMessageBody(const ShortMessage &message) const
+void ShortMessageTest::Test3Gpp2CreateMessage() const
 {
-    std::cout << "GetVisibleMessageBody = " << StringUtils::ToUtf8(message.GetVisibleMessageBody()) << std::endl;
+    std::vector<unsigned char> pdu = StringUtils::HexToByteVector(
+        "0000021002020702c6049064c4d40601fc081b00031000200106102e8cbb366f03061409011126310a01400d0101");
+    ShortMessage *message = ShortMessage::CreateMessage(pdu, u"3gpp2");
+    if (message == nullptr) {
+        std::cout << "message is nullptr!" << std::endl;
+        return;
+    }
+    shortMessage_ = std::unique_ptr<ShortMessage>(message);
+    if (shortMessage_ == nullptr) {
+        std::cout << "TestCreateMessage Cdma fail!!!" << std::endl;
+    } else {
+        std::cout << "TestCreateMessage Cdma success!!!" << std::endl;
+    }
 }
 
-void ShortMessageTest::TestShowShortMessage(const ShortMessage &message) const
+void ShortMessageTest::TestGetVisibleMessageBody() const
 {
-    std::cout << "GetSmscAddr = " << StringUtils::ToUtf8(message.GetScAddress()) << std::endl;
-    std::cout << "GetVisibleMessageBody = " << StringUtils::ToUtf8(message.GetVisibleMessageBody()) << std::endl;
-    std::cout << "GetVisibleRawAddress = " << StringUtils::ToUtf8(message.GetVisibleRawAddress()) << std::endl;
-    std::cout << "GetScTimestamp = " << message.GetScTimestamp() << std::endl;
-    std::cout << "GetProtocolId = " << message.GetProtocolId() << std::endl;
-    std::cout << "GetStatus = " << message.GetStatus() << std::endl;
-    std::cout << "GetMessageClass = " << message.GetMessageClass() << std::endl;
-    std::cout << "HasReplyPath = " << message.HasReplyPath() << std::endl;
-    std::cout << "IsSmsStatusReportMessage = " << message.IsSmsStatusReportMessage() << std::endl;
-    std::cout << "IsReplaceMessage = " << message.IsReplaceMessage() << std::endl;
-    std::cout << "HasReplyPath = " << message.HasReplyPath() << std::endl;
-    std::cout << "raw pdu = " << StringUtils::StringToHex(message.GetPdu()) << std::endl;
+    if (shortMessage_ == nullptr) {
+        std::cout << "please create a short message!" << std::endl;
+        return;
+    }
+    std::cout << "GetVisibleMessageBody = " << StringUtils::ToUtf8(shortMessage_->GetVisibleMessageBody())
+              << std::endl;
+}
+
+void ShortMessageTest::TestShowShortMessage() const
+{
+    if (shortMessage_ == nullptr) {
+        std::cout << "please create a short message!" << std::endl;
+        return;
+    }
+
+    std::cout << "GetSmscAddr = " << StringUtils::ToUtf8(shortMessage_->GetScAddress()) << std::endl;
+    std::cout << "GetVisibleMessageBody = " << StringUtils::ToUtf8(shortMessage_->GetVisibleMessageBody())
+              << std::endl;
+    std::cout << "GetVisibleRawAddress = " << StringUtils::ToUtf8(shortMessage_->GetVisibleRawAddress())
+              << std::endl;
+    long time = shortMessage_->GetScTimestamp();
+    std::cout << "GetScTimestamp = " << ctime((time_t *)&(time));
+    std::cout << "GetProtocolId = " << shortMessage_->GetProtocolId() << std::endl;
+    std::cout << "GetStatus = " << shortMessage_->GetStatus() << std::endl;
+    std::cout << "GetMessageClass = " << shortMessage_->GetMessageClass() << std::endl;
+    std::cout << "HasReplyPath = " << shortMessage_->HasReplyPath() << std::endl;
+    std::cout << "IsSmsStatusReportMessage = " << shortMessage_->IsSmsStatusReportMessage() << std::endl;
+    std::cout << "IsReplaceMessage = " << shortMessage_->IsReplaceMessage() << std::endl;
+    std::cout << "HasReplyPath = " << shortMessage_->HasReplyPath() << std::endl;
+    std::cout << "raw pdu = " << StringUtils::StringToHex(shortMessage_->GetPdu()) << std::endl;
 }
 } // namespace Telephony
 } // namespace OHOS

@@ -20,8 +20,9 @@
 #include <memory>
 #include <string>
 
-#include "i_sms_service_interface.h"
 #include "iremote_stub.h"
+
+#include "i_sms_service_interface.h"
 #include "sms_interface_manager.h"
 #include "sms_receive_manager.h"
 #include "sms_send_manager.h"
@@ -32,27 +33,10 @@ class SmsInterfaceStub : public IRemoteStub<ISmsServiceInterface> {
 public:
     SmsInterfaceStub();
     ~SmsInterfaceStub();
-    void SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
-        const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
-    void SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr, uint16_t port,
-        const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
     virtual int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
     std::shared_ptr<SmsInterfaceManager> GetSmsInterfaceManager(int32_t slotId);
     std::shared_ptr<SmsInterfaceManager> GetSmsInterfaceManager();
-    bool SetSmscAddr(int32_t slotId, const std::u16string &scAddr) override;
-    std::u16string GetSmscAddr(int32_t slotId) override;
-    bool AddSimMessage(
-        int32_t slotId, const std::u16string &smsc, const std::u16string &pdu, SimMessageStatus status) override;
-    bool DelSimMessage(int32_t slotId, uint32_t msgIndex) override;
-    bool UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessageStatus newStatus, const std::u16string &pdu,
-        const std::u16string &smsc) override;
-    std::vector<ShortMessage> GetAllSimMessages(int32_t slotId) override;
-    bool SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) override;
-    bool SetDefaultSmsSlotId(int32_t slotId) override;
-    int32_t GetDefaultSmsSlotId() override;
 
 protected:
     void InitModule();
@@ -66,9 +50,12 @@ private:
     void OnDelSimMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnUpdateSimMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetAllSimMessages(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnSetCBRangeConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSetCBConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSetDefaultSmsSlotId(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetDefaultSmsSlotId(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnSplitMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnCalculateLength(MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
     std::map<uint32_t, std::shared_ptr<SmsInterfaceManager>> slotSmsInterfaceManagerMap_;
     using SmsServiceFunc = void (SmsInterfaceStub::*)(
