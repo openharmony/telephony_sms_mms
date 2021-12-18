@@ -16,7 +16,6 @@
 #ifndef SMS_RECEIVE_MANAGER_H
 #define SMS_RECEIVE_MANAGER_H
 
-#include <iostream>
 #include <memory>
 
 #include "cdma_sms_receive_handler.h"
@@ -39,6 +38,7 @@ private:
     std::shared_ptr<CdmaSmsReceiveHandler> cdmaSmsReceiveHandler_;
     std::shared_ptr<AppExecFwk::EventRunner> gsmSmsReceiveRunner_;
     std::shared_ptr<AppExecFwk::EventRunner> cdmaSmsReceiveRunner_;
+
     int32_t slotId_;
 };
 } // namespace Telephony

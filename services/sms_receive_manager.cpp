@@ -26,8 +26,13 @@ SmsReceiveManager::SmsReceiveManager(int32_t slotId) : slotId_(slotId) {}
 
 SmsReceiveManager::~SmsReceiveManager()
 {
-    gsmSmsReceiveRunner_->Stop();
-    cdmaSmsReceiveRunner_->Stop();
+    if (gsmSmsReceiveRunner_ != nullptr) {
+        gsmSmsReceiveRunner_->Stop();
+    }
+
+    if (cdmaSmsReceiveRunner_ != nullptr) {
+        cdmaSmsReceiveRunner_->Stop();
+    }
 }
 
 void SmsReceiveManager::Init()
@@ -57,9 +62,7 @@ void SmsReceiveManager::Init()
     gsmSmsReceiveHandler_->Init();
     cdmaSmsReceiveRunner_->Run();
     gsmSmsReceiveRunner_->Run();
-
-    TELEPHONY_LOGI("gsmSmsReceiveRunner_->Run().");
-    TELEPHONY_LOGI("cdmaSmsReceiveRunner_->Run().");
+    TELEPHONY_LOGI("SmsReceiveManager init ok.");
 }
 
 void SmsReceiveManager::SetCdmaSender(const weak_ptr<SmsSender> &smsSender)

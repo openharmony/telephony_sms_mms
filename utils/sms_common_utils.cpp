@@ -27,8 +27,8 @@ int SmsCommonUtils::Pack7bitChar(const unsigned char *userData, int dataLen, int
     int srcIdx = 0;
     int dstIdx = 0;
     auto shift = static_cast<unsigned int>(fillBits);
-
     if (userData == nullptr || packData == nullptr) {
+        TELEPHONY_LOGE("param nullptr error.");
         return dstIdx;
     }
 
@@ -67,6 +67,7 @@ int SmsCommonUtils::Unpack7bitChar(
     int dstIdx = 0;
     auto shift = static_cast<unsigned int>(fillBits);
     if (unpackData == nullptr || tpdu == nullptr) {
+        TELEPHONY_LOGE("param nullptr error.");
         return dstIdx;
     }
     if (shift > 0) {
@@ -100,6 +101,7 @@ int SmsCommonUtils::DigitToBcd(const char *digit, int digitLen, unsigned char *b
     int offset = 0;
     unsigned char temp;
     if (digit == nullptr || bcd == nullptr) {
+        TELEPHONY_LOGE("param nullptr error.");
         return offset;
     }
     for (int i = 0; i < digitLen; i++) {
@@ -136,12 +138,36 @@ int SmsCommonUtils::BcdToDigit(const unsigned char *bcd, int bcdLen, char *digit
     int offset = 0;
     unsigned char temp;
     if (bcd == nullptr || digit == nullptr) {
+        TELEPHONY_LOGE("param nullptr error.");
         return offset;
     }
     for (int i = 0; i < bcdLen; i++) {
         temp = bcd[i] & 0x0F;
         digit[offset++] = BcdToChar(temp);
         temp = (bcd[i] & 0xF0) >> 0x04;
+        if (temp == 0x0F) {
+            digit[offset] = '\0';
+            return offset;
+        }
+        digit[offset++] = BcdToChar(temp);
+    }
+    digit[offset] = '\0';
+    return offset;
+}
+
+int SmsCommonUtils::BcdToDigitCdma(const unsigned char *bcd, int bcdLen, char *digit)
+{
+    int offset = 0;
+    unsigned char temp;
+    if (bcd == nullptr || digit == nullptr) {
+        TELEPHONY_LOGE("param nullptr error.");
+        return offset;
+    }
+
+    for (int i = 0; i < bcdLen; i++) {
+        temp = (bcd[i] & 0xF0) >> 0x04;
+        digit[offset++] = BcdToChar(temp);
+        temp = bcd[i] & 0x0F;
         if (temp == 0x0F) {
             digit[offset] = '\0';
             return offset;
@@ -201,7 +227,7 @@ int SmsCommonUtils::ConvertDigitToDTMF(const char *digit, int digitLen, int star
             }
         } else if (shift >= 0x01 && shift < smsMaxShift) {
             if (i % SmsCommonUtils::SMS_HEX_BYTE_STEP == 0x01) {
-                dtmf[offset] |= static_cast<unsigned char>(static_cast<uint32_t>(temp) >> shift);
+                dtmf[offset] |= (temp >> shift);
                 dtmf[offset + 0x01] = temp << (SmsCommonUtils::SMS_BYTE_BIT - shift);
                 offset++;
             } else {
@@ -241,10 +267,8 @@ long SmsCommonUtils::ConvertTime(const struct SmsTimeAbs &timeAbs)
     tmInfo.tm_min = timeAbs.minute;
     tmInfo.tm_sec = timeAbs.second;
     tmInfo.tm_isdst = 0;
-
     rawtime = mktime(&tmInfo);
     DisplayTime(rawtime);
-
     rawtime -= (timeAbs.timeZone * (SEC_PER_HOUR / 0x04));
     DisplayTime(rawtime);
 /* timezone value is tiemzone + daylight. So should not add daylight */
@@ -253,7 +277,6 @@ long SmsCommonUtils::ConvertTime(const struct SmsTimeAbs &timeAbs)
 #else
     rawtime -= timezone;
 #endif
-
     DisplayTime(rawtime);
     return rawtime;
 }

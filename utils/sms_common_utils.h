@@ -17,7 +17,6 @@
 #ifndef SMS_COMMON_UTILS_H
 #define SMS_COMMON_UTILS_H
 
-#include <cstdint>
 #include <ctime>
 
 #include "sms_pdu_code_type.h"
@@ -31,6 +30,7 @@ public:
         const unsigned char *tpdu, unsigned char dataLen, int fillBits, unsigned char *unpackData);
     static int DigitToBcd(const char *digit, int digitLen, unsigned char *bcd);
     static int BcdToDigit(const unsigned char *bcd, int bcdLen, char *digit);
+    static int BcdToDigitCdma(const unsigned char *bcd, int bcdLen, char *digit);
     static int ConvertDigitToDTMF(const char *digit, int digitLen, int startBit, unsigned char *dtmf);
     static long ConvertTime(const struct SmsTimeAbs &timeAbs);
 

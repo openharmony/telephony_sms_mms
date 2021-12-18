@@ -23,11 +23,11 @@
 #include <string>
 #include <unordered_map>
 
-#include "core_manager.h"
-#include "hril_sms_parcel.h"
 #include "event_handler.h"
 #include "event_runner.h"
 
+#include "core_manager.h"
+#include "hril_sms_parcel.h"
 #include "i_sms_service_interface.h"
 #include "sms_send_indexer.h"
 
@@ -58,14 +58,10 @@ public:
         const std::shared_ptr<SmsSendIndexer> &indexer, ISendShortMessageCallback::SmsSendResult result);
     static void SendResultCallBack(
         const sptr<ISendShortMessageCallback> &sendCallback, ISendShortMessageCallback::SmsSendResult result);
+    virtual std::vector<std::string> SplitMessage(const std::string &message) = 0;
+    virtual std::vector<int32_t> CalculateLength(const std::string &message, bool force7BitCode) = 0;
 
 protected:
-    int32_t slotId_ = -1;
-    bool isRadioOn_ = false;
-    NetDomainType netDomainType_ = NetDomainType::NET_DOMAIN_CS;
-    NetWorkType netWorkType_ = NetWorkType::NET_TYPE_UNKNOWN;
-    std::list<std::shared_ptr<SmsSendIndexer>> reportList_;
-
     void SendCacheMapTimeoutCheck();
     bool SendCacheMapLimitCheck(const sptr<ISendShortMessageCallback> &sendCallback);
     bool SendCacheMapAddItem(int64_t id, const std::shared_ptr<SmsSendIndexer> &smsIndexer);
@@ -81,12 +77,13 @@ protected:
     enum NetDomainType GetNetDomainType() const;
     std::shared_ptr<Core> GetCore() const;
 
+    int32_t slotId_ = -1;
+    bool isRadioOn_ = false;
+    NetDomainType netDomainType_ = NetDomainType::NET_DOMAIN_CS;
+    NetWorkType netWorkType_ = NetWorkType::NET_TYPE_UNKNOWN;
+    std::list<std::shared_ptr<SmsSendIndexer>> reportList_;
+
 private:
-    uint8_t msgRef8bit_ = 0;
-    int64_t msgRef64bit_ = 0;
-    std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun_;
-    std::unordered_map<int64_t, std::shared_ptr<SmsSendIndexer>> sendCacheMap_;
-    std::mutex sendCacheMapMutex_;
     static constexpr uint16_t EXPIRED_TIME = 60 * 3;
     static constexpr uint16_t DELAY_MAX_TIME_MSCE = 2000;
     static constexpr uint8_t MSG_QUEUE_LIMIT = 25;
@@ -97,7 +94,13 @@ private:
     SmsSender(const SmsSender &&) = delete;
     SmsSender &operator=(const SmsSender &) = delete;
     SmsSender &operator=(const SmsSender &&) = delete;
+
     void HandleResend(const std::shared_ptr<SmsSendIndexer> &smsIndexer);
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun_;
+    std::unordered_map<int64_t, std::shared_ptr<SmsSendIndexer>> sendCacheMap_;
+    std::mutex sendCacheMapMutex_;
+    uint8_t msgRef8bit_ = 0;
+    int64_t msgRef64bit_ = 0;
 };
 } // namespace Telephony
 } // namespace OHOS

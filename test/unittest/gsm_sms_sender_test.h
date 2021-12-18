@@ -19,8 +19,9 @@
 #include <cstring>
 #include <iostream>
 
-#include "i_sms_service_interface.h"
 #include "securec.h"
+
+#include "i_sms_service_interface.h"
 #include "sms_service_proxy.h"
 #include "system_ability_definition.h"
 
@@ -44,6 +45,8 @@ public:
     void TestDisableCBConfig(const sptr<ISmsServiceInterface> &smsService) const;
     void TestSetDefaultSmsSlotId(const sptr<ISmsServiceInterface> &smsService) const;
     void TestGetDefaultSmsSlotId(const sptr<ISmsServiceInterface> &smsService) const;
+    void TestSplitMessage(const sptr<ISmsServiceInterface> &smsService) const;
+    void TestCalculateLength(const sptr<ISmsServiceInterface> &smsService) const;
 };
 } // namespace Telephony
 } // namespace OHOS

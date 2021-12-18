@@ -32,7 +32,7 @@ public:
     SmsReceiveIndexer(const std::vector<uint8_t> &pdu, long timestamp, int16_t destPort, bool isCdma,
         bool isCdmaWapPdu, const std::string &address, const std::string &displayAddress,
         const std::string &messageBody);
-    const std::vector<uint8_t> &GetPdu() const;
+    std::vector<uint8_t> GetPdu() const;
     void SetPdu(const std::vector<uint8_t> &pdu);
     long GetTimestamp() const;
     void SetTimestamp(long timestamp);
@@ -62,6 +62,8 @@ public:
     bool IsSingleMsg() const;
 
 private:
+    static constexpr int8_t TEXT_PORT_NUM = -1;
+    static constexpr int16_t WAP_PUSH_PORT = 2948;
     std::vector<uint8_t> pdu_;
     long timestamp_;
     int16_t destPort_;
@@ -74,8 +76,6 @@ private:
     uint16_t msgCount_;
     std::string eraseRefId_;
     std::string visibleAddress_;
-    static constexpr int8_t TEXT_PORT_NUM = -1;
-    static constexpr int16_t WAP_PUSH_PORT = 2948;
 };
 } // namespace Telephony
 } // namespace OHOS

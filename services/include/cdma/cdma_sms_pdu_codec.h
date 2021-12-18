@@ -21,26 +21,6 @@
 
 #include "cdma_sms_types.h"
 
-#define MSG_UDID_PARAM_LEN 3
-
-#define BYTE_BITS 8
-#define SHIFT_1BITS 1
-#define SHIFT_2BITS 2
-#define SHIFT_3BITS 3
-#define SHIFT_4BITS 4
-#define SHIFT_5BITS 5
-#define SHIFT_6BITS 6
-#define SHIFT_7BITS 7
-#define SHIFT_8BITS 8
-
-#define BYTE_STEP 1
-#define HALF_BYTE 4
-#define MIN_PDU_LEN 2
-#define HEX_BYTE_STEP 2
-#define MAX_MSG_ID_LEN 5
-#define DECIMAL_NUM 10
-#define ENCODE_GSM_BIT 7
-
 namespace OHOS {
 namespace Telephony {
 class CdmaSmsPduCodec {
@@ -53,6 +33,28 @@ public:
     static int DecodeMsg(const unsigned char *pduStr, int pduLen, struct SmsTransMsg &transMsg);
 
 private:
+    static constexpr uint8_t MSG_UDID_PARAM_LEN = 3;
+    static constexpr uint8_t BYTE_BITS = 8;
+    static constexpr uint8_t SHIFT_1BITS = 1;
+    static constexpr uint8_t SHIFT_2BITS = 2;
+    static constexpr uint8_t SHIFT_3BITS = 3;
+    static constexpr uint8_t SHIFT_4BITS = 4;
+    static constexpr uint8_t SHIFT_5BITS = 5;
+    static constexpr uint8_t SHIFT_6BITS = 6;
+    static constexpr uint8_t SHIFT_7BITS = 7;
+    static constexpr uint8_t SHIFT_8BITS = 8;
+
+    static constexpr uint8_t BYTE_STEP = 1;
+    static constexpr uint8_t HALF_BYTE = 4;
+    static constexpr uint8_t MIN_PDU_LEN = 2;
+    static constexpr uint8_t HEX_BYTE_STEP = 2;
+    static constexpr uint8_t MAX_MSG_ID_LEN = 5;
+    static constexpr uint8_t DECIMAL_NUM = 10;
+    static constexpr uint8_t ENCODE_GSM_BIT = 7;
+    static constexpr uint8_t ENCODE_BYTE_BIT = 7;
+    static constexpr uint8_t BYTE_BIT = 8;
+    static constexpr uint8_t MAX_TPDU_DATA_LEN = 255;
+
     static int EncodeP2PMsg(const struct SmsTransP2PMsg &p2pMsg, unsigned char *pduStr);
     static int EncodeAckMsg(const struct SmsTransAckMsg &ackMsg, unsigned char *pduStr);
     static int EncodeCBMsg(const struct SmsTransBroadCastMsg &cbMsg, unsigned char *pduStr);
@@ -81,8 +83,14 @@ private:
     static void DecodeCBBearerData(
         const unsigned char *pduStr, int pduLen, struct SmsTeleSvcMsg &telesvc, bool isCMAS);
 
-    static int EncodeUserData(const unsigned char *src, unsigned char *dest, int srcSize);
-    static void DecodeUserData(unsigned char *pduStr, int pduLen, struct SmsTeleSvcUserData &userData);
+    static int Encode7BitASCIIData(const struct SmsUserData &userData, unsigned char *dest, int &remainBits);
+    static int Encode7BitGSMData(const struct SmsUserData &userData, unsigned char *dest, int &remainBits);
+    static int EncodeUCS2Data(const struct SmsUserData &userData, unsigned char *dest, int &remainBits);
+
+    static void DecodeUserData(
+        unsigned char *pduStr, int pduLen, struct SmsTeleSvcUserData &userData, bool headerInd);
+    static void Decode7BitHeader(
+        const unsigned char *pduStr, unsigned char udhlBytes, struct SmsUserData &userData);
     static void DecodeCMASData(unsigned char *pduStr, int pduLen, struct SmsTeleSvcCmasData &cmasData);
     static int DecodeCMASType0Data(unsigned char *pduStr, int pduLen, struct SmsTeleSvcCmasData &cmasData);
 
@@ -108,6 +116,9 @@ private:
     static int EncodeAbsTime(const SmsTimeAbs &absTime, std::vector<unsigned char> &pdustr);
     static int EncodeMsgId(const SmsTransMsgId &msgId, const SmsMessageType &type, unsigned char *pduStr);
     static int EncodeBearerUserData(const struct SmsTeleSvcUserData &userData, unsigned char *pduStr);
+    static void ShiftNBitForDecode(unsigned char *src, unsigned int nBytes, unsigned int nShiftBit);
+    static void ShiftRNBit(unsigned char *src, unsigned int nBytes, unsigned int nShiftBit);
+    static void ShiftNBit(unsigned char *src, unsigned int nBytes, unsigned int nShiftBit);
 };
 } // namespace Telephony
 } // namespace OHOS

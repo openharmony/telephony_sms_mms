@@ -80,20 +80,33 @@ protected:
     int32_t slotId_;
 
 private:
+    static constexpr uint8_t GSM_TYPE = 1;
+    static constexpr uint8_t MIN_SMSC_LEN = 2;
+    static constexpr uint32_t RANG_MAX = 65535;
+    using infoData = struct info {
+        info(uint32_t fromMsgId, uint32_t toMsgId)
+        {
+            startPos = fromMsgId;
+            endPos = toMsgId;
+        }
+        bool isMerge = false;
+        uint32_t startPos;
+        uint32_t endPos;
+    };
+
     bool SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list);
     std::shared_ptr<Core> GetCore() const;
-    std::shared_ptr<Telephony::ISimManager> GetSimManager() const;
-    std::shared_ptr<Telephony::ISimSmsManager> GetSimSmsManager() const;
+    bool ExpandMsgId(
+        uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data);
+    void SplitMsgId(
+        uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data);
 
-    static constexpr uint32_t RANG_MAX = 65535;
     std::list<gsmCBRangeInfo> rangeList_;
     std::condition_variable condVar_;
     std::mutex mutex_;
     std::string smscAddr_;
     std::string codeScheme_ {"0-255"};
     std::list<gsmCBRangeInfo> oldRangeList_;
-    static constexpr uint8_t GSM_TYPE = 1;
-    static constexpr uint8_t SMS_PDU_LEN_MIN = 6;
 };
 } // namespace Telephony
 } // namespace OHOS

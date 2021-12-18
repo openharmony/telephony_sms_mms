@@ -15,7 +15,6 @@
 
 #ifndef SMS_COMMON_H
 #define SMS_COMMON_H
-
 namespace OHOS {
 namespace Telephony {
 static constexpr uint8_t SMS_FAIL_RETRY = 0;

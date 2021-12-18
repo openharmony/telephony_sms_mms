@@ -16,9 +16,6 @@
 #ifndef STRING_UTILS_H
 #define STRING_UTILS_H
 
-#include <codecvt>
-#include <cstdint>
-#include <locale>
 #include <string>
 #include <vector>
 

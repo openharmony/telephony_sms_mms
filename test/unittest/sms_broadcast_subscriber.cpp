@@ -17,6 +17,7 @@
 
 #include "common_event_support.h"
 
+#include "sms_cb_data.h"
 #include "short_message.h"
 #include "string_utils.h"
 
@@ -32,12 +33,12 @@ void SmsBroadcastSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventDat
     std::cout << "CommonEventPublishOrderedEventTest::Subscriber OnReceiveEvent" << std::endl;
     OHOS::EventFwk::Want want = data.GetWant();
     std::string action = data.GetWant().GetAction();
-    if (action == "usual.event.SMS_RECEIVE_COMPLETED") {
+    if (action == CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED) {
         int msgcode = GetCode();
         std::string msgdata = GetData();
         std::cout << "Sms Receive::OnReceiveEvent msgcode" << msgcode << std::endl;
         std::cout << "Sms Receive::OnReceiveEvent data = " << msgdata.data() << std::endl;
-        const std::vector<std::string> pdus = want.GetStringArrayParam("pdu");
+        const std::vector<std::string> pdus = want.GetStringArrayParam("pdus");
         for (unsigned int index = 0; index < pdus.size(); ++index) {
             std::vector<unsigned char> pdu = StringUtils::HexToByteVector(pdus[index]);
             ShortMessage *message = ShortMessage::CreateMessage(pdu, u"3gpp");
@@ -50,25 +51,63 @@ void SmsBroadcastSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventDat
                 std::cout << "Sms Receive::OnReceiveEvent pdus = " << pdus[index] << std::endl;
             }
         }
-    } else if (action == "ohos.action.telephonySmsETWSCBReceiveFinished") {
-        std::cout << "telephonySmsETWSCBReceiveFinished" << std::endl;
-        std::cout << "serialNum:" << static_cast<unsigned short>(want.GetShortParam("serialNum", 0)) << std::endl;
-        std::cout << "msgBody:" << want.GetStringParam("msgBody") << std::endl;
-        std::cout << "recvTime:" << want.GetLongParam("recvTime", 0) << std::endl;
-        std::cout << "warningType:" << static_cast<unsigned short>(want.GetShortParam("warningType", 0))
-                  << std::endl;
-    } else if (action == "ohos.action.telephonySmsCBReceiveFinished") {
-        std::cout << "telephonySmsCBReceiveFinished" << std::endl;
-        std::cout << "serialNum:" << static_cast<unsigned short>(want.GetShortParam("serialNum", 0)) << std::endl;
-        std::cout << "msgBody:" << want.GetStringParam("msgBody") << std::endl;
-        std::cout << "recvTime:" << want.GetLongParam("recvTime", 0) << std::endl;
-        std::cout << "cbMsgType:" << static_cast<unsigned char>(want.GetCharParam("cbMsgType", ' ')) << std::endl;
-        std::cout << "msgId:" << static_cast<unsigned short>(want.GetShortParam("msgId", 0)) << std::endl;
-        std::cout << "langType:" << static_cast<unsigned char>(want.GetCharParam("langType", ' ')) << std::endl;
-        std::cout << "dcs:" << static_cast<unsigned char>(want.GetCharParam("dcs", ' ')) << std::endl;
+    } else if (action == "usual.event.SMS_EMERGENCY_CB_RECEIVE_COMPLETED" ||
+        action == "usual.event.SMS_CB_RECEIVE_COMPLETED") {
+        CbMessageTest(want);
     } else {
         std::cout << "CommonEventPublishOrderedEventTest::Subscriber OnReceiveEvent do nothing" << std::endl;
     }
+}
+
+void SmsBroadcastSubscriber::CbMessageTest(const OHOS::EventFwk::Want &want) const
+{
+    std::cout << SmsCbData::SLOT_ID << ":" << want.GetIntParam(SmsCbData::SLOT_ID, DEFAULT_VALUE) << std::endl;
+    std::cout << SmsCbData::CB_MSG_TYPE << ":"
+              << std::to_string(static_cast<uint8_t>(want.GetByteParam(SmsCbData::CB_MSG_TYPE, DEFAULT_VALUE)))
+              << std::endl;
+    std::cout << SmsCbData::LANG_TYPE << ":"
+              << std::to_string(static_cast<uint8_t>(want.GetByteParam(SmsCbData::LANG_TYPE, DEFAULT_VALUE)))
+              << std::endl;
+    std::cout << SmsCbData::DCS << ":"
+              << std::to_string(static_cast<uint8_t>(want.GetByteParam(SmsCbData::DCS, DEFAULT_VALUE)))
+              << std::endl;
+    std::cout << SmsCbData::PRIORITY << ":"
+              << std::to_string(want.GetByteParam(SmsCbData::PRIORITY, DEFAULT_VALUE)) << std::endl;
+    std::cout << SmsCbData::CMAS_CLASS << ":"
+              << std::to_string(want.GetByteParam(SmsCbData::CMAS_CLASS, DEFAULT_VALUE)) << std::endl;
+    std::cout << SmsCbData::CMAS_CATEGORY << ":"
+              << std::to_string(want.GetByteParam(SmsCbData::CMAS_CATEGORY, DEFAULT_VALUE)) << std::endl;
+    std::cout << SmsCbData::CMAS_RESPONSE << ":"
+              << std::to_string(want.GetByteParam(SmsCbData::CMAS_RESPONSE, DEFAULT_VALUE)) << std::endl;
+    std::cout << SmsCbData::SEVERITY << ":"
+              << std::to_string(want.GetByteParam(SmsCbData::SEVERITY, DEFAULT_VALUE)) << std::endl;
+    std::cout << SmsCbData::URGENCY << ":" << std::to_string(want.GetByteParam(SmsCbData::URGENCY, DEFAULT_VALUE))
+              << std::endl;
+    std::cout << SmsCbData::CERTAINTY << ":"
+              << std::to_string(want.GetByteParam(SmsCbData::CERTAINTY, DEFAULT_VALUE)) << std::endl;
+    std::cout << SmsCbData::MSG_BODY << ":" << want.GetStringParam(SmsCbData::MSG_BODY) << std::endl;
+    std::cout << SmsCbData::FORMAT << ":" << std::to_string(want.GetByteParam(SmsCbData::FORMAT, DEFAULT_VALUE))
+              << std::endl;
+    std::cout << SmsCbData::SERIAL_NUM << ":"
+              << want.GetIntParam(SmsCbData::SERIAL_NUM, DEFAULT_VALUE) << std::endl;
+    std::cout << SmsCbData::RECV_TIME << ":" << want.GetStringParam(SmsCbData::RECV_TIME) << std::endl;
+    std::cout << SmsCbData::MSG_ID << ":"
+              << want.GetIntParam(SmsCbData::MSG_ID, DEFAULT_VALUE) << std::endl;
+    std::cout << SmsCbData::SERVICE_CATEGORY << ":"
+              << want.GetIntParam(SmsCbData::SERVICE_CATEGORY, DEFAULT_VALUE) << std::endl;
+    std::cout << SmsCbData::IS_ETWS_PRIMARY << ":" << want.GetBoolParam(SmsCbData::IS_ETWS_PRIMARY, false)
+              << std::endl;
+    std::cout << SmsCbData::IS_CMAS_MESSAGE << ":" << want.GetBoolParam(SmsCbData::IS_CMAS_MESSAGE, false)
+              << std::endl;
+    std::cout << SmsCbData::IS_ETWS_MESSAGE << ":" << want.GetBoolParam(SmsCbData::IS_ETWS_MESSAGE, false)
+              << std::endl;
+    std::cout << SmsCbData::PLMN << ":" << want.GetStringParam(SmsCbData::PLMN) << std::endl;
+    std::cout << SmsCbData::LAC << ":" << want.GetIntParam(SmsCbData::LAC, DEFAULT_VALUE) << std::endl;
+    std::cout << SmsCbData::CID << ":" << want.GetIntParam(SmsCbData::CID, DEFAULT_VALUE) << std::endl;
+    std::cout << SmsCbData::WARNING_TYPE << ":"
+              << want.GetIntParam(SmsCbData::WARNING_TYPE, DEFAULT_VALUE) << std::endl;
+    std::cout << SmsCbData::GEO_SCOPE << ":"
+              << std::to_string(want.GetByteParam(SmsCbData::GEO_SCOPE, DEFAULT_VALUE)) << std::endl;
 }
 } // namespace Telephony
 } // namespace OHOS
