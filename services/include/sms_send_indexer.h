@@ -118,7 +118,7 @@ private:
     bool isFailure_ = false;
     enum SmsCodingScheme dcs_;
     bool isConcat_ = false;
-    SmsConcat smsConcat_;
+    SmsConcat smsConcat_ {.is8Bits = false};
     uint8_t langId_ = 0;
     bool isText_ = false;
 };
