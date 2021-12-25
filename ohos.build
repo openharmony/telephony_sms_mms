@@ -4,7 +4,6 @@
         "sms_mms": {
             "module_list": [
                 "//base/telephony/sms_mms:tel_sms_mms",
-                "//base/telephony/sms_mms/test/unittest:tel_sms_mms_test",
                 "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
                 "//base/telephony/sms_mms/frameworks/js/napi:sms",
                 "//base/telephony/sms_mms/sa_profile:sms_mms_sa_profile"
