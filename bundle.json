@@ -1,0 +1,60 @@
+{
+    "name": "@ohos/telephony_sms_mms",
+    "version": "",
+    "description": "支持短信功能，提供相关API供应用使用",
+    "homePage": "https://gitee.com/openharmony",
+    "license": "Apache V2",
+    "repository": "https://gitee.com/openharmony/telephony_sms_mms",
+    "domain": "os",
+    "language": "",
+    "publishAs": "code-segment",
+    "private": false,
+    "scripts": {},
+    "tags": [
+        "base"
+    ],
+    "keywords": [
+        "telephony",
+        "sms",
+        "mms"
+    ],
+    "envs": [],
+    "dirs": [],
+    "author": {
+        "name": "",
+        "email": "",
+        "url": ""
+    },
+    "contributors": [
+        {
+            "name": "",
+            "email": "",
+            "url": ""
+        }
+    ],
+    "segment": {
+        "destPath": "base/telephony/sms_mms"
+    },
+    "component": {
+        "name": "sms_mms",
+        "subsystem": "telephony",
+        "syscap": [
+            "SystemCapability.Telephony.SmsMms"
+        ],
+        "features": [],
+        "adapted_system_type": [
+            "standard"
+        ],
+        "rom": "",
+        "ram": "",
+        "deps": {
+            "components": [],
+            "third_party": []
+        },
+        "build": {
+            "sub_component": [],
+            "inner_kits": [],
+            "test": []
+        }
+    }
+}
