@@ -22,6 +22,7 @@
 #include <queue>
 #include <string>
 #include <unordered_map>
+#include <optional>
 
 #include "event_handler.h"
 #include "event_runner.h"
@@ -30,6 +31,7 @@
 #include "hril_sms_parcel.h"
 #include "i_sms_service_interface.h"
 #include "sms_send_indexer.h"
+#include "sms_persist_helper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -58,8 +60,10 @@ public:
         const std::shared_ptr<SmsSendIndexer> &indexer, ISendShortMessageCallback::SmsSendResult result);
     static void SendResultCallBack(
         const sptr<ISendShortMessageCallback> &sendCallback, ISendShortMessageCallback::SmsSendResult result);
-    virtual std::vector<std::string> SplitMessage(const std::string &message) = 0;
-    virtual std::vector<int32_t> CalculateLength(const std::string &message, bool force7BitCode) = 0;
+    bool GetImsDomain();
+    void SetNetworkState(bool isImsNetDomain, int32_t voiceServiceState);
+    std::optional<int32_t> GetNetworkId();
+    void SetNetworkId(std::optional<int32_t> &id);
 
 protected:
     void SendCacheMapTimeoutCheck();
@@ -72,16 +76,13 @@ protected:
     virtual void StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event) = 0;
     void SendMessageSucceed(const std::shared_ptr<SmsSendIndexer> &smsIndexer);
     void SendMessageFailed(const std::shared_ptr<SmsSendIndexer> &smsIndexer);
-    bool GetImsDomain() const;
-    enum NetWorkType GetNetWorkType() const;
-    enum NetDomainType GetNetDomainType() const;
+    bool CheckForce7BitEncodeType();
     std::shared_ptr<Core> GetCore() const;
 
     int32_t slotId_ = -1;
-    bool isRadioOn_ = false;
-    NetDomainType netDomainType_ = NetDomainType::NET_DOMAIN_CS;
-    NetWorkType netWorkType_ = NetWorkType::NET_TYPE_UNKNOWN;
     std::list<std::shared_ptr<SmsSendIndexer>> reportList_;
+    bool isImsNetDomain_ = false;
+    int32_t voiceServiceState_ = static_cast<int32_t>(RegServiceState::REG_STATE_UNKNOWN);
 
 private:
     static constexpr uint16_t EXPIRED_TIME = 60 * 3;
@@ -101,6 +102,7 @@ private:
     std::mutex sendCacheMapMutex_;
     uint8_t msgRef8bit_ = 0;
     int64_t msgRef64bit_ = 0;
+    std::optional<int32_t> networkId_ = std::nullopt;
 };
 } // namespace Telephony
 } // namespace OHOS

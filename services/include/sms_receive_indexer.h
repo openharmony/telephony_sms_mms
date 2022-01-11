@@ -16,7 +16,6 @@
 #ifndef SMS_RECEIVE_INDEXER_H
 #define SMS_RECEIVE_INDEXER_H
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -60,6 +59,8 @@ public:
     bool GetIsWapPushMsg() const;
     void SetPdu(const std::vector<uint8_t> &&pdu);
     bool IsSingleMsg() const;
+    std::string GetRawUserData() const;
+    void SetRawUserData(const std::string &rawUserData);
 
 private:
     static constexpr int8_t TEXT_PORT_NUM = -1;
@@ -76,6 +77,7 @@ private:
     uint16_t msgCount_;
     std::string eraseRefId_;
     std::string visibleAddress_;
+    std::string rawUserData_;
 };
 } // namespace Telephony
 } // namespace OHOS

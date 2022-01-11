@@ -83,6 +83,7 @@ private:
     void HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &message);
     std::shared_ptr<Core> GetCore() const;
     bool SetWantData(EventFwk::Want &want, const std::shared_ptr<SmsCbMessage> &cbMessage);
+    bool InitLocation(SmsCbInfo &info);
     void GetCbData(const std::shared_ptr<SmsCbMessage> &cbMessage,
         SmsCbData::CbData &SendData);
 

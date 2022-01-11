@@ -319,5 +319,15 @@ void SmsSendIndexer::SetLangId(uint8_t langId)
 {
     langId_ = langId;
 }
+
+uint16_t SmsSendIndexer::GetMsgId() const
+{
+    return msgId_;
+}
+
+void SmsSendIndexer::SetMsgId(uint16_t msgId)
+{
+    msgId_ = msgId;
+}
 } // namespace Telephony
 } // namespace OHOS

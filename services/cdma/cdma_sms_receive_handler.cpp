@@ -15,9 +15,15 @@
 
 #include "cdma_sms_receive_handler.h"
 
+#include "common_event.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
+#include "want.h"
+
 #include "cdma_sms_message.h"
 #include "cdma_sms_sender.h"
 #include "cdma_sms_types.h"
+#include "observer_handler.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -36,38 +42,68 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
     CdmaSmsMessage *message = static_cast<CdmaSmsMessage *>(smsBaseMessage.get());
-    if (message == nullptr || message->IsBroadcastMsg()) {
-        TELEPHONY_LOGE("SmsBaseMessage is null or TransMsgType is 1");
+    if (message->IsBroadcastMsg()) {
+        SendCBBroadcast(smsBaseMessage);
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
     int service = message->GetTransTeleService();
-    if ((SMS_TRANS_TELESVC_WEMT == service || SMS_TRANS_TELESVC_CMT_95 == service)
-        && message->IsStatusReport()) {
-        if (HandleStatusReport(smsBaseMessage)) {
+    if (SMS_TRANS_TELESVC_WEMT == service || SMS_TRANS_TELESVC_CMT_95 == service) {
+        if (message->IsStatusReport()) {
+            if (!cdmaSmsSender_.expired()) {
+                std::shared_ptr<SmsSender> smsSender = cdmaSmsSender_.lock();
+                CdmaSmsSender *cdmaSend = static_cast<CdmaSmsSender *>(smsSender.get());
+                std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
+                statusInfo->SetMsgRefId(message->GetMsgRef());
+                statusInfo->SetPdu(message->GetRawPdu());
+                cdmaSend->ReceiveStatusReport(statusInfo);
+            }
             return AckIncomeCause::SMS_ACK_RESULT_OK;
-        } else {
-            return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
         }
     } else if (SMS_TRANS_TELESVC_WAP == service) {
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     } else {
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
-    std::shared_ptr<SmsReceiveIndexer> indexer = CreateIndexer(smsBaseMessage);
+    // Encapsulate key information to Tracker
+    std::shared_ptr<SmsReceiveIndexer> indexer;
+    if (!message->IsConcatMsg()) {
+        indexer = std::make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
+            message->GetDestPort(), true, false, message->GetOriginatingAddress(),
+            message->GetVisibleOriginatingAddress(), message->GetVisibleMessageBody());
+    } else {
+        std::shared_ptr<SmsConcat> smsConcat = message->GetConcatMsg();
+        if (smsConcat == nullptr) {
+            return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+        }
+        indexer = std::make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
+            message->GetDestPort(), true, message->GetOriginatingAddress(), message->GetVisibleOriginatingAddress(),
+            smsConcat->msgRef, smsConcat->seqNum, smsConcat->totalSeg, false, message->GetVisibleMessageBody());
+    }
     // add messages to the database
-    if (indexer == nullptr || (indexer->GetIsText() && IsRepeatedMessagePart(indexer))) {
-        TELEPHONY_LOGE("Make SmsReceiveIndexer or ReceiveIndexer err.");
+    if (indexer == nullptr) {
+        TELEPHONY_LOGE("indexer is nullptr.");
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
+    if (indexer->GetIsText() && IsRepeatedMessagePart(indexer)) {
+        return AckIncomeCause::SMS_ACK_REPEATED_ERROR;
+    }
     if (!AddMsgToDB(indexer)) {
-        TELEPHONY_LOGE("Add msg to database fail.");
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
     CombineMessagePart(indexer);
     return AckIncomeCause::SMS_ACK_RESULT_OK;
 }
 
-void CdmaSmsReceiveHandler::ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> &response) {}
+void CdmaSmsReceiveHandler::ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> &response)
+{
+    std::shared_ptr<Core> core = GetCore();
+    if (core != nullptr) {
+        auto reply = AppExecFwk::InnerEvent::Get(SMS_EVENT_NEW_SMS_REPLY, response);
+        reply->SetOwner(shared_from_this());
+        TELEPHONY_LOGI("Reply To Smsc ackResult %{public}d", result);
+        core->SendSmsAck(result == AckIncomeCause::SMS_ACK_RESULT_OK, result, reply);
+    }
+}
 
 void CdmaSmsReceiveHandler::SetCdmaSender(const std::weak_ptr<SmsSender> &smsSender)
 {
@@ -104,8 +140,8 @@ bool CdmaSmsReceiveHandler::RegisterHandler()
     bool ret = false;
     std::shared_ptr<Core> core = GetCore();
     if (core != nullptr) {
-        TELEPHONY_LOGI("CdmaSmsReceiveHandler::RegisteHandler Register RADIO_GSM_SMS ok.");
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_GSM_SMS, nullptr);
+        TELEPHONY_LOGI("CdmaSmsReceiveHandler::RegisteHandler Register RADIO_CDMA_SMS ok.");
+        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_CDMA_SMS, nullptr);
         ret = true;
     }
     return ret;
@@ -116,73 +152,101 @@ void CdmaSmsReceiveHandler::UnRegisterHandler()
     std::shared_ptr<Core> core = GetCore();
     if (core != nullptr) {
         TELEPHONY_LOGI("CdmaSmsReceiveHandler::UnRegisterHandler::slotId= %{public}d", slotId_);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_GSM_SMS);
+        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_CDMA_SMS);
     }
 }
 
-bool CdmaSmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer)
+bool CdmaSmsReceiveHandler::SendCBBroadcast(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage)
 {
-    if (indexer == nullptr) {
-        TELEPHONY_LOGE("SmsReceiveIndexer is null!");
+    if (smsBaseMessage == nullptr) {
+        TELEPHONY_LOGE("smsBaseMessage is nullptr.");
         return false;
     }
-    std::string key = indexer->GetOriginatingAddress() + std::to_string(indexer->GetMsgRefId()) +
-        std::to_string(indexer->GetMsgCount());
-    indexer->SetEraseRefId(key);
-    auto ret = receiveMap_.emplace(key, indexer);
-    if (!ret->second) {
-        TELEPHONY_LOGE("Add msg to db fail.");
-        return false;
-    }
-    return true;
-}
-
-bool CdmaSmsReceiveHandler::HandleStatusReport(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage)
-{
-    bool result = false;
-    if (smsBaseMessage == nullptr) {
-        TELEPHONY_LOGE("SmsBaseMessage is null!");
-        return result;
-    }
-    CdmaSmsMessage *message = static_cast<CdmaSmsMessage *>(smsBaseMessage.get());
-    if (!cdmaSmsSender_.expired()) {
-        std::shared_ptr<SmsSender> smsSender = cdmaSmsSender_.lock();
-        CdmaSmsSender *cdmaSend = static_cast<CdmaSmsSender *>(smsSender.get());
-        std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
-        if (statusInfo == nullptr || cdmaSend == nullptr) {
-            TELEPHONY_LOGE("Make SmsReceiveIndexer err.!");
-            return result;
-        }
-        statusInfo->SetMsgRefId(message->GetMsgRef());
-        statusInfo->SetPdu(message->GetRawPdu());
-        cdmaSend->ReceiveStatusReport(statusInfo);
-    }
-    return true;
-}
-
-std::shared_ptr<SmsReceiveIndexer> CreateIndexer(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage)
-{
-    std::shared_ptr<SmsReceiveIndexer> result = nullptr;
-    if (smsBaseMessage == nullptr) {
-        TELEPHONY_LOGE("SmsBaseMessage is null!");
-        return result;
-    }
-    CdmaSmsMessage *message = static_cast<CdmaSmsMessage *>(smsBaseMessage.get());
-    if (!message->IsConcatMsg()) {
-        result = std::make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
-            message->GetDestPort(), true, false, message->GetOriginatingAddress(),
-            message->GetVisibleOriginatingAddress(), message->GetVisibleMessageBody());
+    const int lac = -1;
+    const int cid = -1;
+    bool isMergency = false;
+    SmsCbData::CbData sendData;
+    GetCBData(smsBaseMessage, sendData, isMergency);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    if (isMergency) {
+        want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_COMPLETED);
     } else {
-        std::shared_ptr<SmsConcat> smsConcat = message->GetConcatMsg();
-        if (smsConcat == nullptr) {
-            TELEPHONY_LOGE("SmsConcat is null!");
-            return result;
-        }
-        result = std::make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
-            message->GetDestPort(), true, message->GetOriginatingAddress(), message->GetVisibleOriginatingAddress(),
-            smsConcat->msgRef, smsConcat->seqNum, smsConcat->totalSeg, false, message->GetVisibleMessageBody());
+        want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
     }
-    return result;
+    want.SetParam(SmsCbData::GEO_SCOPE, static_cast<char>(sendData.geoScope));
+    want.SetParam(SmsCbData::CMAS_RESPONSE, static_cast<char>(sendData.cmasRes));
+    want.SetParam(SmsCbData::SLOT_ID, static_cast<int>(slotId_));
+    want.SetParam(SmsCbData::FORMAT, static_cast<char>(sendData.format));
+    want.SetParam(SmsCbData::CB_MSG_TYPE, static_cast<char>(sendData.msgType));
+    want.SetParam(SmsCbData::MSG_ID, static_cast<int>(sendData.msgId));
+    want.SetParam(SmsCbData::SERVICE_CATEGORY, static_cast<int>(sendData.category));
+    want.SetParam(SmsCbData::LANG_TYPE, static_cast<char>(sendData.langType));
+    want.SetParam(SmsCbData::PRIORITY, static_cast<char>(sendData.priority));
+    want.SetParam(SmsCbData::MSG_BODY, sendData.msgBody);
+    want.SetParam(SmsCbData::CMAS_CLASS, static_cast<char>(sendData.cmasClass));
+    want.SetParam(SmsCbData::CMAS_CATEGORY, static_cast<char>(sendData.cmasCate));
+    want.SetParam(SmsCbData::SEVERITY, static_cast<char>(sendData.severity));
+    want.SetParam(SmsCbData::URGENCY, static_cast<char>(sendData.urgency));
+    want.SetParam(SmsCbData::CERTAINTY, static_cast<char>(sendData.certainty));
+    want.SetParam(SmsCbData::IS_CMAS_MESSAGE, sendData.isCmas);
+    want.SetParam(SmsCbData::SERIAL_NUM, static_cast<int>(sendData.serial));
+    want.SetParam(SmsCbData::RECV_TIME, std::to_string(sendData.recvTime));
+    want.SetParam(SmsCbData::DCS, static_cast<char>(sendData.dcs));
+
+    want.SetParam(SmsCbData::IS_ETWS_PRIMARY, sendData.isPrimary);
+    want.SetParam(SmsCbData::IS_ETWS_MESSAGE, sendData.isEtws);
+    want.SetParam(SmsCbData::PLMN, StringUtils::ToUtf8(plmn_));
+    want.SetParam(SmsCbData::LAC, static_cast<int>(lac));
+    want.SetParam(SmsCbData::CID, static_cast<int>(cid));
+    want.SetParam(SmsCbData::WARNING_TYPE, static_cast<int>(sendData.warnType));
+    data.SetWant(want);
+    EventFwk::CommonEventPublishInfo publishInfo;
+    publishInfo.SetOrdered(true);
+    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
+    if (!publishResult) {
+        TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
+        return false;
+    }
+    return true;
+}
+
+void CdmaSmsReceiveHandler::GetCBData(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage,
+    SmsCbData::CbData &sendData, bool &isEmergency)
+{
+    if (smsBaseMessage == nullptr) {
+        TELEPHONY_LOGE("smsBaseMessage is nullptr.");
+        return ;
+    }
+    CdmaSmsMessage *message = static_cast<CdmaSmsMessage *>(smsBaseMessage.get());
+    if (message == nullptr) {
+        TELEPHONY_LOGE("message is nullptr.");
+        return ;
+    }
+
+    sendData.format = message->GetFormat();
+    sendData.geoScope = message->GetGeoScope();
+    sendData.msgId = message->GetMessageId();
+    sendData.serial = message->GetMessageId();
+    sendData.category = message->GetServiceCategoty();
+    sendData.langType = message->GetLanguage();
+    sendData.msgBody = message->GetVisibleMessageBody();
+    sendData.priority = message->GetPriority();
+    sendData.isCmas = message->IsCMAS();
+    sendData.cmasClass = message->GetCMASMessageClass();
+    sendData.cmasCate = message->GetCMASCategory();
+    sendData.severity = message->GetCMASSeverity();
+    sendData.urgency = message->GetCMASUrgency();
+    sendData.certainty = message->GetCMASCertainty();
+    sendData.recvTime = message->GetReceTime();
+    sendData.langType = message->GetLanguage();
+    isEmergency = message->IsEmergencyMsg();
+    std::shared_ptr<Core> core = GetCore();
+    if (core == nullptr) {
+        TELEPHONY_LOGE("core is nullptr.");
+        return ;
+    }
+    plmn_ = core->GetOperatorNumeric(slotId_);
 }
 } // namespace Telephony
 } // namespace OHOS

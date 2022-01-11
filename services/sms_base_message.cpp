@@ -55,7 +55,7 @@ std::vector<uint8_t> SmsBaseMessage::GetRawPdu() const
     return rawPdu_;
 }
 
-std::vector<uint8_t> SmsBaseMessage::GetRawUserData() const
+std::string SmsBaseMessage::GetRawUserData() const
 {
     return rawUserData_;
 }
@@ -316,13 +316,13 @@ int SmsBaseMessage::GetMaxSegmentSize(
             segSize = ((GSM_BEAR_DATA_LEN * BYTE_BITS) - ((headerLen + concat + headerSize) * BYTE_BITS)) /
                 CHARSET_7BIT_BITS;
         } else {
-            segSize = (GSM_BEAR_DATA_LEN * BYTE_BITS) / CHARSET_7BIT_BITS;
+            segSize = maxSize - headerSize;
         }
     } else if (codingScheme == SMS_CODING_8BIT || codingScheme == SMS_CODING_UCS2) {
         if ((dataLen + headerSize) > maxSize) {
             segSize = GSM_BEAR_DATA_LEN - (headerLen + concat + headerSize);
         } else {
-            segSize = GSM_BEAR_DATA_LEN;
+            segSize = maxSize - headerSize;
         }
     }
     return segSize;
@@ -416,18 +416,17 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
     }
 }
 
-void SmsBaseMessage::CalculateLength(const std::string &message, bool force7BitCode, LengthInfo &lenInfo)
+bool SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo)
 {
     unsigned char decodeData[(MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1];
     if (memset_s(decodeData, sizeof(decodeData), 0x00, sizeof(decodeData)) != EOK) {
         TELEPHONY_LOGE("SplitMessage memset_s error!");
-        return;
+        return false;
     }
     const uint8_t smsEncodingUnkown = 0;
     const uint8_t smsEncoding7Bit = 1;
     const uint8_t smsEncoding8Bit = 2;
     const uint8_t smsEncoding16Bit = 3;
-    const uint8_t ucsBit = 2;
     int encodeLen = 0;
     bool bAbnormal = false;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
@@ -435,10 +434,10 @@ void SmsBaseMessage::CalculateLength(const std::string &message, bool force7BitC
     encodeLen = DecodeMessage(decodeData, codingType, message, bAbnormal, langId);
     if (encodeLen <= 0) {
         TELEPHONY_LOGE("encodeLen Less than or equal to 0");
-        return;
+        return false;
     }
-    int segSize = 0;
-    segSize = GetMaxSegmentSize(codingType, encodeLen, false, langId, MAX_ADD_PARAM_LEN);
+    int segSize = GetMaxSegmentSize(codingType, encodeLen, false, langId, MAX_ADD_PARAM_LEN);
+    TELEPHONY_LOGI("segSize = %{public}d", segSize);
     lenInfo.msgEncodeCount = encodeLen;
     if (codingType == SMS_CODING_7BIT || codingType == SMS_CODING_ASCII7BIT) {
         lenInfo.dcs = smsEncoding7Bit;
@@ -449,19 +448,16 @@ void SmsBaseMessage::CalculateLength(const std::string &message, bool force7BitC
     } else {
         lenInfo.dcs = smsEncodingUnkown;
     }
-    if (lenInfo.dcs == SMS_CODING_UCS2) {
-        lenInfo.msgEncodeCount = lenInfo.msgEncodeCount / ucsBit;
-        if (segSize != 0) {
-            lenInfo.msgRemainCount = (segSize - (lenInfo.msgEncodeCount % segSize)) / ucsBit;
-        }
-    } else {
-        if (segSize != 0) {
-            lenInfo.msgRemainCount = (segSize - (lenInfo.msgEncodeCount % segSize));
-        }
+    if (lenInfo.dcs == smsEncoding16Bit) {
+        lenInfo.msgEncodeCount = lenInfo.msgEncodeCount / 2;
+        segSize = segSize / 2;
     }
-    if (segSize > 0) {
-        lenInfo.msgSegCount = ceil((double)encodeLen / (double)segSize);
+    if (segSize != 0) {
+        lenInfo.msgRemainCount = ((segSize - (lenInfo.msgEncodeCount % segSize))) % segSize;
+        lenInfo.msgSegCount = ceil(static_cast<double>(lenInfo.msgEncodeCount) /
+            static_cast<double>(segSize));
     }
+    return true;
 }
 
 int32_t SmsBaseMessage::GetIndexOnSim() const

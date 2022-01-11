@@ -75,7 +75,7 @@ public:
     virtual std::string GetVisibleMessageBody() const;
     virtual enum SmsMessageClass GetMessageClass() const;
     std::vector<uint8_t> GetRawPdu() const;
-    std::vector<uint8_t> GetRawUserData() const;
+    std::string GetRawUserData() const;
     virtual long GetScTimestamp() const;
     virtual int GetStatus() const;
     virtual int GetProtocolId() const;
@@ -99,7 +99,7 @@ public:
         bool force7BitCode, SmsCodingScheme &codingType);
     virtual int32_t GetIndexOnSim() const;
     virtual void SetIndexOnSim(int32_t index);
-    virtual void CalculateLength(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
+    virtual bool GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
     virtual int GetMaxSegmentSize(SmsCodingScheme &codingScheme, int dataLen, bool bPortNum,
         MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
 
@@ -132,7 +132,7 @@ protected:
     int codingScheme_;
     int codingGroup_;
     std::vector<uint8_t> rawPdu_;
-    std::vector<uint8_t> rawUserData_;
+    std::string rawUserData_;
     struct SmsUserData smsUserData_;
     std::shared_ptr<SmsConcat> smsConcat_;
     std::shared_ptr<SmsAppPortAddr> portAddress_;

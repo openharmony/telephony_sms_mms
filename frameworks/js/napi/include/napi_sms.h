@@ -16,6 +16,8 @@
 #ifndef NAPI_SMS_H
 #define NAPI_SMS_H
 #include <codecvt>
+#include <cstring>
+#include <memory>
 #include <locale>
 #include <string>
 #include <vector>
@@ -26,6 +28,10 @@
 #include "base_context.h"
 #include "short_message.h"
 #include "core_manager.h"
+#include "refbase.h"
+#include "telephony_log_wrapper.h"
+#include "napi_util.h"
+#include "short_message_manager.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -165,11 +171,19 @@ struct SplitMessageContext : BaseContext {
     std::vector<std::u16string> messageArray;
 };
 
-struct CalculateLengthContext : BaseContext {
+struct GetSmsSegmentsInfoContext : BaseContext {
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     std::string content = "";
     bool force7BitCode = false;
-    std::vector<int32_t> resultArray;
+    int32_t splitCount;
+    int32_t encodeCount;
+    int32_t encodeCountRemaining;
+    ISmsServiceInterface::SmsSegmentsInfo::SmsSegmentCodeScheme scheme;
+};
+
+template<typename T>
+struct SingleValueContext : BaseContext {
+    T value;
 };
 } // namespace Telephony
 } // namespace OHOS

@@ -25,6 +25,7 @@
 #include "short_message_test.h"
 #include "sms_broadcast_subscriber.h"
 #include "sms_cb_message_test.h"
+#include "mms_msg_test.h"
 
 using namespace OHOS;
 using namespace OHOS::Telephony;
@@ -35,12 +36,20 @@ using TestStruct = struct FunStruct {
     FunStruct(const std::string &name, const std::function<void(void)> &function) : funName(name), fun(function) {}
 };
 
+using TestParam = struct Param {
+    GsmSmsSenderTest gsmSmsSenderTest;
+    ShortMessageTest shortMessageTest;
+    SmsCbMessageTest smsCbMessageTest;
+    MmsMsgTest mmsMsgTest;
+};
+
 void TestRecev()
 {
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
-    matchingSkills.AddEvent("usual.event.SMS_EMERGENCY_CB_RECEIVE_COMPLETED");
-    matchingSkills.AddEvent("usual.event.SMS_CB_RECEIVE_COMPLETED");
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_COMPLETED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
+    matchingSkills.AddEvent("usual.event.SMS_WAPPUSH_RECEIVE_COMPLETED");
     // make subcriber info
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     // make a subcriber object
@@ -54,67 +63,94 @@ void TestRecev()
     std::cout << "subscribeResult is " << (subscribeResult ? "true" : "false") << std::endl;
 }
 
-void InitFunArray(std::unique_ptr<std::vector<TestStruct>> &funArray, const GsmSmsSenderTest &gsmSmsSenderTest,
-    const ShortMessageTest &shortMessageTest, const SmsCbMessageTest &smsCbMessageTest,
+void InitGsmFun(const std::unique_ptr<std::vector<TestStruct>> &funArray, const TestParam &param,
     const sptr<ISmsServiceInterface> &smsService)
 {
     funArray->emplace_back(
-        "TestGsmSendShortText", std::bind(&GsmSmsSenderTest::TestGsmSendShortText, gsmSmsSenderTest, smsService));
+        "TestSendShortText", std::bind(&GsmSmsSenderTest::TestSendShortText, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestGsmSendShortData",
+        std::bind(&GsmSmsSenderTest::TestGsmSendShortData, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back(
-        "TestGsmSendShortData", std::bind(&GsmSmsSenderTest::TestGsmSendShortData, gsmSmsSenderTest, smsService));
+        "TestSendLongText", std::bind(&GsmSmsSenderTest::TestSendLongText, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestGsmSendLongData",
+        std::bind(&GsmSmsSenderTest::TestGsmSendLongData, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back(
-        "TestGsmSendLongText", std::bind(&GsmSmsSenderTest::TestGsmSendLongText, gsmSmsSenderTest, smsService));
+        "TestSetSmscAddr", std::bind(&GsmSmsSenderTest::TestSetSmscAddr, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back(
-        "TestGsmSendLongData", std::bind(&GsmSmsSenderTest::TestGsmSendLongData, gsmSmsSenderTest, smsService));
-    funArray->emplace_back("TestCreateMessage", std::bind(&ShortMessageTest::TestCreateMessage, shortMessageTest));
+        "TestGetSmscAddr", std::bind(&GsmSmsSenderTest::TestGetSmscAddr, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back(
-        "TestGetVisibleMessageBody", std::bind(&ShortMessageTest::TestGetVisibleMessageBody, shortMessageTest));
+        "TestAddSimMessage", std::bind(&GsmSmsSenderTest::TestAddSimMessage, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back(
-        "TestShowShortMessage", std::bind(&ShortMessageTest::TestShowShortMessage, shortMessageTest));
-    funArray->emplace_back(
-        "TestSetSmscAddr", std::bind(&GsmSmsSenderTest::TestSetSmscAddr, gsmSmsSenderTest, smsService));
-    funArray->emplace_back(
-        "TestGetSmscAddr", std::bind(&GsmSmsSenderTest::TestGetSmscAddr, gsmSmsSenderTest, smsService));
-    funArray->emplace_back(
-        "TestAddSimMessage", std::bind(&GsmSmsSenderTest::TestAddSimMessage, gsmSmsSenderTest, smsService));
-    funArray->emplace_back(
-        "TestDelSimMessage", std::bind(&GsmSmsSenderTest::TestDelSimMessage, gsmSmsSenderTest, smsService));
-    funArray->emplace_back(
-        "TestUpdateSimMessage", std::bind(&GsmSmsSenderTest::TestUpdateSimMessage, gsmSmsSenderTest, smsService));
+        "TestDelSimMessage", std::bind(&GsmSmsSenderTest::TestDelSimMessage, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestUpdateSimMessage",
+        std::bind(&GsmSmsSenderTest::TestUpdateSimMessage, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back("TestGetAllSimMessages",
-        std::bind(&GsmSmsSenderTest::TestGetAllSimMessages, gsmSmsSenderTest, smsService));
-    funArray->emplace_back("TestCbMessage", std::bind(&SmsCbMessageTest::ProcessTest, smsCbMessageTest));
+        std::bind(&GsmSmsSenderTest::TestGetAllSimMessages, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestCbMessage", std::bind(&SmsCbMessageTest::ProcessTest, param.smsCbMessageTest));
     funArray->emplace_back("TestEnableCBRangeConfig",
-        std::bind(&GsmSmsSenderTest::TestEnableCBRangeConfig, gsmSmsSenderTest, smsService));
+        std::bind(&GsmSmsSenderTest::TestEnableCBRangeConfig, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back("TestDisableCBRangeConfig",
-        std::bind(&GsmSmsSenderTest::TestDisableCBRangeConfig, gsmSmsSenderTest, smsService));
-    funArray->emplace_back(
-        "TestEnableCBConfig", std::bind(&GsmSmsSenderTest::TestEnableCBConfig, gsmSmsSenderTest, smsService));
-    funArray->emplace_back(
-        "TestDisableCBConfig", std::bind(&GsmSmsSenderTest::TestDisableCBConfig, gsmSmsSenderTest, smsService));
+        std::bind(&GsmSmsSenderTest::TestDisableCBRangeConfig, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestEnableCBConfig",
+        std::bind(&GsmSmsSenderTest::TestEnableCBConfig, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestDisableCBConfig",
+        std::bind(&GsmSmsSenderTest::TestDisableCBConfig, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back("TestSetDefaultSmsSlotId",
-        std::bind(&GsmSmsSenderTest::TestSetDefaultSmsSlotId, gsmSmsSenderTest, smsService));
+        std::bind(&GsmSmsSenderTest::TestSetDefaultSmsSlotId, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back("TestGetDefaultSmsSlotId",
-        std::bind(&GsmSmsSenderTest::TestGetDefaultSmsSlotId, gsmSmsSenderTest, smsService));
+        std::bind(&GsmSmsSenderTest::TestGetDefaultSmsSlotId, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back(
-        "TestCreate3Gpp2Message", std::bind(&ShortMessageTest::Test3Gpp2CreateMessage, shortMessageTest));
+        "TestSplitMessage", std::bind(&GsmSmsSenderTest::TestSplitMessage, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestGetSmsSegmentsInfo",
+        std::bind(&GsmSmsSenderTest::TestGetSmsSegmentsInfo, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestIsImsSmsSupported",
+        std::bind(&GsmSmsSenderTest::TestIsImsSmsSupported, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestGetImsShortMessageFormat",
+        std::bind(&GsmSmsSenderTest::TestGetImsShortMessageFormat, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back(
-        "TestSplitMessage", std::bind(&GsmSmsSenderTest::TestSplitMessage, gsmSmsSenderTest, smsService));
+        "TestAddBlockPhone", std::bind(&GsmSmsSenderTest::TestAddBlockPhone, param.gsmSmsSenderTest));
     funArray->emplace_back(
-        "TestCalculateLength", std::bind(&GsmSmsSenderTest::TestCalculateLength, gsmSmsSenderTest, smsService));
+        "TestRemoveBlockPhone", std::bind(&GsmSmsSenderTest::TestRemoveBlockPhone, param.gsmSmsSenderTest));
+    funArray->emplace_back("TestHasSmsCapability",
+        std::bind(&GsmSmsSenderTest::TestHasSmsCapability, param.gsmSmsSenderTest, smsService));
+}
+
+void InitShortMessageFun(const std::unique_ptr<std::vector<TestStruct>> &funArray, const TestParam &param,
+    const sptr<ISmsServiceInterface> &smsService)
+{
+    funArray->emplace_back(
+        "TestCreateMessage", std::bind(&ShortMessageTest::TestCreateMessage, param.shortMessageTest));
+    funArray->emplace_back("TestGetVisibleMessageBody",
+        std::bind(&ShortMessageTest::TestGetVisibleMessageBody, param.shortMessageTest));
+    funArray->emplace_back(
+        "TestShowShortMessage", std::bind(&ShortMessageTest::TestShowShortMessage, param.shortMessageTest));
+    funArray->emplace_back(
+        "TestCreate3Gpp2Message", std::bind(&ShortMessageTest::Test3Gpp2CreateMessage, param.shortMessageTest));
+}
+
+void InitMmsFun(const std::unique_ptr<std::vector<TestStruct>> &funArray, const TestParam &param,
+    const sptr<ISmsServiceInterface> &smsService)
+{
+    funArray->emplace_back("TestMmsMsgFunction", std::bind(&MmsMsgTest::ProcessTest, param.mmsMsgTest));
+}
+
+void InitFunArray(const std::unique_ptr<std::vector<TestStruct>> &funArray, const TestParam &param,
+    const sptr<ISmsServiceInterface> &smsService)
+{
+    InitGsmFun(funArray, param, smsService);
+    InitShortMessageFun(funArray, param, smsService);
+    InitMmsFun(funArray, param, smsService);
 }
 
 std::unique_ptr<std::vector<TestStruct>> GetFunArray(const sptr<ISmsServiceInterface> &smsService)
 {
-    static GsmSmsSenderTest gsmSmsSenderTest;
-    static ShortMessageTest shortMessageTest;
-    static SmsCbMessageTest smsCbMessageTest;
-    shortMessageTest.TestCreateMessage();
+    static TestParam param;
+    param.shortMessageTest.TestCreateMessage();
     std::unique_ptr<std::vector<TestStruct>> funArray = std::make_unique<std::vector<TestStruct>>();
     if (smsService == nullptr || funArray == nullptr) {
         return funArray;
     }
-    InitFunArray(funArray, gsmSmsSenderTest, shortMessageTest, smsCbMessageTest, smsService);
+    InitFunArray(funArray, param, smsService);
     return funArray;
 }
 

@@ -320,7 +320,6 @@ bool SmsMiscManager::AddSimMessage(
         TELEPHONY_LOGE("SmsMiscManager::AddSimMessage core is nullptr");
         return false;
     }
-
     std::string smscAddr(smsc);
     if (smsc.length() <= MIN_SMSC_LEN) {
         smscAddr.clear();
@@ -370,9 +369,18 @@ std::vector<ShortMessage> SmsMiscManager::GetAllSimMessages()
     }
     std::vector<std::string> pdus = core->ObtainAllSmsOfIcc();
     int index = 0;
+    PhoneType type = core->GetPhoneType();
+    std::string specification;
+    if (PhoneType::PHONE_TYPE_IS_GSM == type) {
+        specification = "3gpp";
+    } else if (PhoneType::PHONE_TYPE_IS_CDMA == type) {
+        specification = "3gpp2";
+    } else {
+        return ret;
+    }
     for (auto &v : pdus) {
         std::vector<unsigned char> pdu = StringUtils::HexToByteVector(v);
-        ShortMessage item = ShortMessage::CreateIccMessage(pdu, "3gpp", index);
+        ShortMessage item = ShortMessage::CreateIccMessage(pdu, specification, index);
         if (item.GetIccMessageStatus() != ShortMessage::SMS_SIM_MESSAGE_STATUS_FREE) {
             ret.emplace_back(item);
         }

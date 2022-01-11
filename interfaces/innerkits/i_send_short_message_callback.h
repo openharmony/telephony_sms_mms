@@ -45,6 +45,11 @@ public:
 
     enum SendCallback { ON_SMS_SEND_RESULT };
 
+    /**
+     * @brief OnSmsDeliveryResult
+     * Status of sending SMS messages to the SMS service center.
+     * @param result [in]
+     */
     virtual void OnSmsSendResult(const SmsSendResult result) = 0;
 
 public:

@@ -60,6 +60,7 @@ void SmsReceiveManager::Init()
     }
 
     gsmSmsReceiveHandler_->Init();
+    cdmaSmsReceiveHandler_->Init();
     cdmaSmsReceiveRunner_->Run();
     gsmSmsReceiveRunner_->Run();
     TELEPHONY_LOGI("SmsReceiveManager init ok.");
