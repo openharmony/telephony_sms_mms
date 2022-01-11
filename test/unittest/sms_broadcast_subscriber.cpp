@@ -36,12 +36,15 @@ void SmsBroadcastSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventDat
     if (action == CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED) {
         int msgcode = GetCode();
         std::string msgdata = GetData();
+        bool isCdma = want.GetBoolParam("isCdma", false);
         std::cout << "Sms Receive::OnReceiveEvent msgcode" << msgcode << std::endl;
         std::cout << "Sms Receive::OnReceiveEvent data = " << msgdata.data() << std::endl;
+        std::cout << "Sms Receive::OnReceiveEvent format Type = " << (isCdma ? "Cdma" : "Gsm") << std::endl;
         const std::vector<std::string> pdus = want.GetStringArrayParam("pdus");
         for (unsigned int index = 0; index < pdus.size(); ++index) {
             std::vector<unsigned char> pdu = StringUtils::HexToByteVector(pdus[index]);
-            ShortMessage *message = ShortMessage::CreateMessage(pdu, u"3gpp");
+            ShortMessage *message = nullptr;
+            message = ShortMessage::CreateMessage(pdu, isCdma ? u"3gpp2" : u"3gpp");
             if (message != nullptr) {
                 std::string messageBody = StringUtils::ToUtf8(message->GetVisibleMessageBody());
                 std::cout << "receive new sms = " << messageBody.c_str() << std::endl;
@@ -51,9 +54,11 @@ void SmsBroadcastSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventDat
                 std::cout << "Sms Receive::OnReceiveEvent pdus = " << pdus[index] << std::endl;
             }
         }
-    } else if (action == "usual.event.SMS_EMERGENCY_CB_RECEIVE_COMPLETED" ||
-        action == "usual.event.SMS_CB_RECEIVE_COMPLETED") {
+    } else if (action == CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_COMPLETED ||
+        action == CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED) {
         CbMessageTest(want);
+    } else if (action == "usual.event.SMS_WAPPUSH_RECEIVE_COMPLETED") {
+        WapPushMessageTest(want);
     } else {
         std::cout << "CommonEventPublishOrderedEventTest::Subscriber OnReceiveEvent do nothing" << std::endl;
     }
@@ -108,6 +113,17 @@ void SmsBroadcastSubscriber::CbMessageTest(const OHOS::EventFwk::Want &want) con
               << want.GetIntParam(SmsCbData::WARNING_TYPE, DEFAULT_VALUE) << std::endl;
     std::cout << SmsCbData::GEO_SCOPE << ":"
               << std::to_string(want.GetByteParam(SmsCbData::GEO_SCOPE, DEFAULT_VALUE)) << std::endl;
+}
+
+void SmsBroadcastSubscriber::WapPushMessageTest(const OHOS::EventFwk::Want &want) const
+{
+    std::cout << "wap push slotId:" << want.GetIntParam("slotId", 0) << std::endl;
+    std::cout << "wap push pushType:" << want.GetIntParam("pushType", 0) << std::endl;
+    std::cout << "wap push transactionId:" << want.GetIntParam("transactionId", 0) << std::endl;
+    std::cout << "wap push strAppId:" << want.GetStringParam("strAppId") << std::endl;
+    std::cout << "wap push contentType:" << want.GetStringParam("contentType") << std::endl;
+    std::cout << "wap push header:" << want.GetStringParam("headerData") << std::endl;
+    std::cout << "wap push data:" << want.GetStringParam("rawData") << std::endl;
 }
 } // namespace Telephony
 } // namespace OHOS

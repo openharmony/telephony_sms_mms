@@ -190,5 +190,15 @@ bool SmsReceiveIndexer::IsSingleMsg() const
 {
     return msgCount_ == 1;
 }
+
+std::string SmsReceiveIndexer::GetRawUserData() const
+{
+    return rawUserData_;
+}
+
+void SmsReceiveIndexer::SetRawUserData(const std::string &rawUserData)
+{
+    rawUserData_ = rawUserData;
+}
 } // namespace Telephony
 } // namespace OHOS

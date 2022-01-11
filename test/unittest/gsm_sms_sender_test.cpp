@@ -17,6 +17,14 @@
 
 #include <iostream>
 
+#include "data_ability_predicates.h"
+#include "iservice_registry.h"
+#include "values_bucket.h"
+
+#include "ability_context.h"
+#include "context_deal.h"
+#include "ability_info.h"
+
 #include "core_manager.h"
 #include "sms_delivery_callback_test.h"
 #include "sms_send_callback_test.h"
@@ -27,6 +35,7 @@ namespace Telephony {
 void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &smsService) const
 {
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -46,6 +55,7 @@ void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &sm
 void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &smsService) const
 {
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -69,9 +79,11 @@ void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &sms
     std::cout << "TestGsmSendLongData" << std::endl;
 }
 
-void GsmSmsSenderTest::TestGsmSendShortText(const sptr<ISmsServiceInterface> &smsService) const
+void GsmSmsSenderTest::TestSendShortText(const sptr<ISmsServiceInterface> &smsService) const
 {
+    RequestPermissions();
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -89,9 +101,10 @@ void GsmSmsSenderTest::TestGsmSendShortText(const sptr<ISmsServiceInterface> &sm
     std::cout << "TestGsmSendShortText" << std::endl;
 }
 
-void GsmSmsSenderTest::TestGsmSendLongText(const sptr<ISmsServiceInterface> &smsService) const
+void GsmSmsSenderTest::TestSendLongText(const sptr<ISmsServiceInterface> &smsService) const
 {
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -117,6 +130,7 @@ void GsmSmsSenderTest::TestSetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
 {
     bool result = false;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -135,6 +149,7 @@ void GsmSmsSenderTest::TestGetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
 {
     std::string result;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -146,6 +161,7 @@ void GsmSmsSenderTest::TestAddSimMessage(const sptr<ISmsServiceInterface> &smsSe
 {
     bool result = false;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -172,6 +188,7 @@ void GsmSmsSenderTest::TestDelSimMessage(const sptr<ISmsServiceInterface> &smsSe
 {
     bool result = false;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -191,6 +208,7 @@ void GsmSmsSenderTest::TestUpdateSimMessage(const sptr<ISmsServiceInterface> &sm
 {
     bool result = false;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -222,6 +240,7 @@ void GsmSmsSenderTest::TestGetAllSimMessages(const sptr<ISmsServiceInterface> &s
 {
     std::vector<ShortMessage> result;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -239,6 +258,7 @@ void GsmSmsSenderTest::TestEnableCBRangeConfig(const sptr<ISmsServiceInterface> 
 {
     bool result = false;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -262,6 +282,7 @@ void GsmSmsSenderTest::TestDisableCBRangeConfig(const sptr<ISmsServiceInterface>
 {
     bool result = false;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -285,6 +306,7 @@ void GsmSmsSenderTest::TestEnableCBConfig(const sptr<ISmsServiceInterface> &smsS
 {
     bool result = false;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -304,6 +326,7 @@ void GsmSmsSenderTest::TestDisableCBConfig(const sptr<ISmsServiceInterface> &sms
 {
     bool result = false;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
@@ -323,6 +346,7 @@ void GsmSmsSenderTest::TestSetDefaultSmsSlotId(const sptr<ISmsServiceInterface> 
 {
     bool result = false;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId;
@@ -339,6 +363,7 @@ void GsmSmsSenderTest::TestGetDefaultSmsSlotId(const sptr<ISmsServiceInterface> 
 {
     int32_t result;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     result = smsService->GetDefaultSmsSlotId();
@@ -349,6 +374,7 @@ void GsmSmsSenderTest::TestSplitMessage(const sptr<ISmsServiceInterface> &smsSer
 {
     std::vector<std::u16string> result;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
         return;
     }
     std::string input;
@@ -361,20 +387,144 @@ void GsmSmsSenderTest::TestSplitMessage(const sptr<ISmsServiceInterface> &smsSer
     }
 }
 
-void GsmSmsSenderTest::TestCalculateLength(const sptr<ISmsServiceInterface> &smsService) const
+void GsmSmsSenderTest::TestGetSmsSegmentsInfo(const sptr<ISmsServiceInterface> &smsService) const
 {
-    std::string field[] = {"msgSegCount:", "codeUnitCount:", "codeUnitsRemaining:", "codeUnitSize:"};
-    std::vector<int32_t> result;
     if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
+        return;
+    }
+    int32_t slotId;
+    std::string input;
+    std::cout << "Please enter Slot Id" << std::endl;
+    std::getline(std::cin, input);
+    slotId = std::atoi(input.c_str());
+    input.clear();
+    std::cout << "Please enter message" << std::endl;
+    std::getline(std::cin, input);
+    ISmsServiceInterface::SmsSegmentsInfo result;
+    if (!smsService->GetSmsSegmentsInfo(slotId, StringUtils::ToUtf16(input), false, result)) {
+        std::cout << "Get Sms SegmentsInfo Fail." << std::endl;
+        return;
+    }
+
+    int32_t codeScheme = static_cast<int32_t>(result.msgCodeScheme);
+    std::cout << "msgSegCount:" << result.msgSegCount << " msgEncodingCount:" << result.msgEncodingCount << std::endl;
+    std::cout << "msgRemainCount:" << result.msgRemainCount << " msgCodeScheme:" << codeScheme << std::endl;
+}
+
+void GsmSmsSenderTest::TestIsImsSmsSupported(const sptr<ISmsServiceInterface> &smsService) const
+{
+    if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
+        return;
+    }
+    std::string res = smsService->IsImsSmsSupported() ? "true" : "false";
+    std::cout << "IsImsSmsSupported:" << res << std::endl;
+}
+
+void GsmSmsSenderTest::TestGetImsShortMessageFormat(const sptr<ISmsServiceInterface> &smsService) const
+{
+    if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
+        return;
+    }
+    std::cout << "GetImsShortMessageFormat:" << StringUtils::ToUtf8(smsService->GetImsShortMessageFormat())
+              << std::endl;
+}
+
+void GsmSmsSenderTest::TestAddBlockPhone() const
+{
+    std::shared_ptr<AppExecFwk::DataAbilityHelper> helper = CreateDataAHelper();
+    if (helper == nullptr) {
+        std::cout << "Creator helper nullptr error." << std::endl;
         return;
     }
     std::string input;
-    std::cout << "Please enter message" << std::endl;
+    std::cout << "Please enter block phone number" << std::endl;
     std::getline(std::cin, input);
-    result = smsService->CalculateLength(StringUtils::ToUtf16(input), false);
-    for (size_t index = 0; index < result.size(); ++index) {
-        std::cout << field[index] << result.at(index) << std::endl;
+
+    Uri uri("dataability:///com.ohos.contactsdataability/contacts/contact_blocklist");
+    NativeRdb::ValuesBucket value;
+    value.PutString("phone_number", input);
+    int ret = helper->Insert(uri, value);
+    helper->Release();
+    std::cout << "add block:" << input << ((ret >= 0) ? " success" : " error") << std::endl;
+}
+
+void GsmSmsSenderTest::TestRemoveBlockPhone() const
+{
+    std::shared_ptr<AppExecFwk::DataAbilityHelper> helper = CreateDataAHelper();
+    if (helper == nullptr) {
+        std::cout << "Creator helper nullptr error." << std::endl;
+        return;
     }
+    std::string input;
+    std::cout << "Please enter Remove phone number" << std::endl;
+    std::getline(std::cin, input);
+    Uri uri("dataability:///com.ohos.contactsdataability/contacts/contact_blocklist");
+    NativeRdb::DataAbilityPredicates predicates;
+    predicates.EqualTo("phone_number", input);
+    int ret = helper->Delete(uri, predicates);
+    helper->Release();
+    std::cout << "remove block:" << input << ((ret >= 0) ? " success" : " error") << std::endl;
+}
+
+void GsmSmsSenderTest::TestHasSmsCapability(const sptr<ISmsServiceInterface> &smsService) const
+{
+    if (smsService == nullptr) {
+        std::cout << "GsmSmsSenderTest smsService is nullptr error." << std::endl;
+        return;
+    }
+    std::string res = smsService->HasSmsCapability() ? "true" : "false";
+    std::cout << "HasSmsCapability:" << res << std::endl;
+}
+
+std::shared_ptr<AppExecFwk::DataAbilityHelper> GsmSmsSenderTest::CreateDataAHelper() const
+{
+    auto saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        std::cout << "Get system ability mgr failed." << std::endl;
+        return nullptr;
+    }
+    auto remoteObj = saManager->GetSystemAbility(TELEPHONY_SMS_MMS_SYS_ABILITY_ID);
+    while (remoteObj == nullptr) {
+        std::cout << "GetSystemAbility Service Failed." << std::endl;
+        return nullptr;
+    }
+    const std::string uriContact("dataability:///com.ohos.contactsdataability");
+    std::shared_ptr<Uri> dataAbilityUri = std::make_shared<Uri>(uriContact);
+    return AppExecFwk::DataAbilityHelper::Creator(remoteObj, dataAbilityUri);
+}
+
+bool GsmSmsSenderTest::RequestPermissions() const
+{
+    std::shared_ptr<AppExecFwk::AbilityContext> context = std::make_shared<AppExecFwk::AbilityContext>();
+    if (context == nullptr) {
+        std::cout << "make AbilityContext Error." << std::endl;
+        return false;
+    }
+
+    std::shared_ptr<AppExecFwk::ApplicationInfo> appInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
+    std::shared_ptr<AppExecFwk::ContextDeal> deal = std::make_shared<AppExecFwk::ContextDeal>();
+    if (appInfo == nullptr || deal == nullptr) {
+        std::cout << "make ApplicationInfo ContextDeal Error." << std::endl;
+        return false;
+    }
+
+    const int32_t requestCodes = 10048;
+    std::string name = "sms_mms_test";
+    appInfo->bundleName = name;
+    std::vector<std::string> permissions;
+    permissions.emplace_back("ohos.permission.SET_TELEPHONY_STATE");
+    permissions.emplace_back("ohos.permission.GET_TELEPHONY_STATE");
+    permissions.emplace_back("ohos.permission.SEND_MESSAGES");
+    permissions.emplace_back("ohos.permission.RECEIVE_SMS");
+
+    deal->SetApplicationInfo(appInfo);
+    context->AttachBaseContext(deal);
+    context->RequestPermissionsFromUser(permissions, requestCodes);
+    std::cout << "RequestPermissions Ok." << std::endl;
+    return true;
 }
 } // namespace Telephony
 } // namespace OHOS

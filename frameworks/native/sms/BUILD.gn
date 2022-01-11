@@ -1,0 +1,69 @@
+# Copyright (C) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+SUBSYSTEM_DIR = "//base/telephony"
+
+config("sms_native_config") {
+  visibility = [ "*:*" ]
+  include_dirs = [
+    "include",
+    "$SUBSYSTEM_DIR/sms_mms/interfaces/innerkits",
+    "$SUBSYSTEM_DIR/sms_mms:tel_sms_mms_config",
+  ]
+}
+
+ohos_source_set("sms_native_source") {
+  sources = [
+    "src/delivery_short_message_callback_stub.cpp",
+    "src/send_short_message_callback_stub.cpp",
+    "src/short_message.cpp",
+    "src/short_message_manager.cpp",
+    "src/sms_service_death_recipient.cpp",
+    "src/sms_service_proxy.cpp",
+    "src/sms_service_proxy_holder.cpp",
+  ]
+
+  include_dirs = [
+    ":sms_native_config",
+    "$SUBSYSTEM_DIR/core_service/frameworks/js/napi",
+    "$SUBSYSTEM_DIR/core_service/interfaces/innerkits/common",
+  ]
+
+  deps = [
+    "$SUBSYSTEM_DIR/sms_mms:tel_sms_mms",
+    "//base/telephony/core_service/utils:libtelephony_common",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = [
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr_standard:samgr_proxy",
+  ]
+
+  defines = [
+    "TELEPHONY_LOG_TAG = \"SMS_MMS\"",
+    "LOG_DOMAIN = 0xD002B01",
+  ]
+
+  public_configs = [ ":sms_native_config" ]
+
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+  part_name = "sms_mms"
+  subsystem_name = "telephony"
+}

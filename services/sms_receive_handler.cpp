@@ -19,7 +19,7 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "want.h"
-
+#include "observer_handler.h"
 #include "string_utils.h"
 #include "gsm_sms_message.h"
 #include "telephony_log_wrapper.h"
@@ -30,7 +30,12 @@ using namespace std;
 using namespace EventFwk;
 SmsReceiveHandler::SmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
     : AppExecFwk::EventHandler(runner), slotId_(slotId)
-{}
+{
+    smsWapPushHandler_ = std::make_unique<SmsWapPushHandler>(slotId);
+    if (smsWapPushHandler_ == nullptr) {
+        TELEPHONY_LOGE("make sms wapPush Hander error.");
+    }
+}
 
 SmsReceiveHandler::~SmsReceiveHandler() {}
 
@@ -45,11 +50,12 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
     eventId = event->GetInnerEventId();
     TELEPHONY_LOGI("SmsReceiveHandler::ProcessEvent eventId = %{public}d", eventId);
     switch (eventId) {
-        case ObserverHandler::RADIO_GSM_SMS: {
+        case ObserverHandler::RADIO_GSM_SMS:
+        case ObserverHandler::RADIO_CDMA_SMS: {
             std::shared_ptr<SmsBaseMessage> message = nullptr;
             message = TransformMessageInfo(event->GetSharedObject<SmsMessageInfo>());
             if (message != nullptr) {
-                TELEPHONY_LOGI("[raw pdu size] = %{public}zu", StringUtils::StringToHex(message->GetRawPdu()).size());
+                TELEPHONY_LOGI("[raw pdu] =%{public}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
             }
             HandleReceivedSms(message);
             break;
@@ -77,9 +83,11 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
         return;
     }
     std::string messagBody;
+    std::string userDataRaw;
     if (indexer->IsSingleMsg()) {
         string pdu = StringUtils::StringToHex(indexer->GetPdu());
         messagBody.append(indexer->GetVisibleMessageBody());
+        userDataRaw.append(indexer->GetRawUserData());
         pdus->push_back(pdu);
     } else {
         pdus->assign(MAX_SEGMENT_NUM, "");
@@ -89,62 +97,52 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
 
         std::vector<SmsReceiveIndexer> dbIndexers;
         NativeRdb::DataAbilityPredicates predicates;
-        predicates.EqualTo(SmsMmsData::SENDER_NUMBER, indexer->GetOriginatingAddress())->And()
-                    ->EqualTo(SmsMmsData::SMS_SUBSECTION_ID, std::to_string(indexer->GetMsgRefId()))->And()
-                    ->EqualTo(SmsMmsData::SIZE, std::to_string(indexer->GetMsgCount()));
-        DelayedSingleton<SmsDataBaseHelper>::GetInstance()->Query(predicates, dbIndexers);
+        predicates.EqualTo(SmsMmsData::SENDER_NUMBER, indexer->GetOriginatingAddress())
+            ->And()
+            ->EqualTo(SmsMmsData::SMS_SUBSECTION_ID, std::to_string(indexer->GetMsgRefId()))
+            ->And()
+            ->EqualTo(SmsMmsData::SIZE, std::to_string(indexer->GetMsgCount()));
+        DelayedSingleton<SmsPersistHelper>::GetInstance()->Query(predicates, dbIndexers);
 
         for (const auto &v : dbIndexers) {
-            ++ count;
+            ++count;
             string pdu = StringUtils::StringToHex(v.GetPdu());
-            if ((v.GetMsgSeqId() - PDU_POS_OFFSET >= MAX_SEGMENT_NUM) ||
-                (v.GetMsgSeqId() - PDU_POS_OFFSET < 0)) {
-                DeleteMessageFromDb(indexer);
+            if ((v.GetMsgSeqId() - PDU_POS_OFFSET >= MAX_SEGMENT_NUM) || (v.GetMsgSeqId() - PDU_POS_OFFSET < 0)) {
+                DeleteMessageFormDb(indexer);
                 return;
             }
             pdus->at(v.GetMsgSeqId() - PDU_POS_OFFSET) = pdu;
             if (v.GetPdu().size() == 0) {
                 --notNullPart;
             }
+            std::shared_ptr<SmsBaseMessage> baseMessage = GsmSmsMessage::CreateMessage(pdu);
+            if (baseMessage != nullptr) {
+                userDataRaw.append(baseMessage->GetRawUserData());
+                messagBody.append(baseMessage->GetVisibleMessageBody());
+            }
         }
         if ((count != msgSeg) || (pdus->empty()) || (notNullPart != msgSeg)) {
             return;
         }
     }
-    if (indexer->GetIsWapPushMsg()) {
-        DeleteMessageFromDb(indexer);
+
+    indexer->SetVisibleMessageBody(messagBody);
+    indexer->SetRawUserData(userDataRaw);
+    DeleteMessageFormDb(indexer);
+    if (CheckBlockPhone(indexer)) {
+        TELEPHONY_LOGI("indexer display address is block");
         return;
     }
-    DeleteMessageFromDb(indexer);
-    indexer->SetVisibleMessageBody(messagBody);
+    if (indexer->GetIsWapPushMsg()) {
+        if (smsWapPushHandler_ != nullptr) {
+            smsWapPushHandler_->DecodeWapPushPdu(userDataRaw);
+        }
+        return;
+    }
     SendBroadcast(indexer, pdus);
 }
 
-bool SmsReceiveHandler::AddMessageToDb(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer)
-{
-    const uint8_t gsm = 1;
-    const uint8_t cdma = 2;
-    bool result = false;
-    if (smsIndexer == nullptr) {
-        TELEPHONY_LOGE("smsIndexer is nullptr");
-        return result;
-    }
-    NativeRdb::ValuesBucket bucket;
-    bucket.PutString(SmsMmsData::RECEIVER_NUMBER, smsIndexer->GetOriginatingAddress());
-    bucket.PutString(SmsMmsData::SENDER_NUMBER, smsIndexer->GetOriginatingAddress());
-    bucket.PutString(SmsMmsData::START_TIME, std::to_string(smsIndexer->GetTimestamp()));
-    bucket.PutString(SmsMmsData::END_TIME, std::to_string(smsIndexer->GetTimestamp()));
-    bucket.PutString(SmsMmsData::REW_PUD, StringUtils::StringToHex(smsIndexer->GetPdu()));
-
-    bucket.PutInt(SmsMmsData::FORMAT, smsIndexer->GetIsCdma() ? cdma : gsm);
-    bucket.PutInt(SmsMmsData::DEST_PORT, smsIndexer->GetDestPort());
-    bucket.PutInt(SmsMmsData::SMS_SUBSECTION_ID, smsIndexer->GetMsgRefId());
-    bucket.PutInt(SmsMmsData::SIZE, smsIndexer->GetMsgCount());
-    bucket.PutInt(SmsMmsData::SUBSECTION_INDEX, smsIndexer->GetMsgSeqId());
-    return DelayedSingleton<SmsDataBaseHelper>::GetInstance()->Insert(bucket);
-}
-
-void SmsReceiveHandler::DeleteMessageFromDb(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer)
+void SmsReceiveHandler::DeleteMessageFormDb(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer)
 {
     if (smsIndexer == nullptr) {
         TELEPHONY_LOGE("smsIndexer is nullptr");
@@ -153,7 +151,7 @@ void SmsReceiveHandler::DeleteMessageFromDb(const std::shared_ptr<SmsReceiveInde
 
     NativeRdb::DataAbilityPredicates predicates;
     predicates.EqualTo(SmsMmsData::SMS_SUBSECTION_ID, std::to_string(smsIndexer->GetMsgRefId()));
-    DelayedSingleton<SmsDataBaseHelper>::GetInstance()->Delete(predicates);
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->Delete(predicates);
 }
 
 bool SmsReceiveHandler::IsRepeatedMessagePart(const shared_ptr<SmsReceiveIndexer> &smsIndexer)
@@ -161,10 +159,12 @@ bool SmsReceiveHandler::IsRepeatedMessagePart(const shared_ptr<SmsReceiveIndexer
     if (smsIndexer != nullptr) {
         std::vector<SmsReceiveIndexer> dbIndexers;
         NativeRdb::DataAbilityPredicates predicates;
-        predicates.EqualTo(SmsMmsData::SENDER_NUMBER, smsIndexer->GetOriginatingAddress())->And()
-                    ->EqualTo(SmsMmsData::SMS_SUBSECTION_ID, std::to_string(smsIndexer->GetMsgRefId()))->And()
-                    ->EqualTo(SmsMmsData::SIZE, std::to_string(smsIndexer->GetMsgCount()));
-        DelayedSingleton<SmsDataBaseHelper>::GetInstance()->Query(predicates, dbIndexers);
+        predicates.EqualTo(SmsMmsData::SENDER_NUMBER, smsIndexer->GetOriginatingAddress())
+            ->And()
+            ->EqualTo(SmsMmsData::SMS_SUBSECTION_ID, std::to_string(smsIndexer->GetMsgRefId()))
+            ->And()
+            ->EqualTo(SmsMmsData::SIZE, std::to_string(smsIndexer->GetMsgCount()));
+        DelayedSingleton<SmsPersistHelper>::GetInstance()->Query(predicates, dbIndexers);
 
         for (const auto &it : dbIndexers) {
             if (it.GetMsgSeqId() == smsIndexer->GetMsgSeqId()) {
@@ -217,6 +217,49 @@ std::shared_ptr<Core> SmsReceiveHandler::GetCore() const
         return core;
     }
     return nullptr;
+}
+
+bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer)
+{
+    if (indexer == nullptr) {
+        TELEPHONY_LOGE("indexer is nullptr.");
+        return false;
+    }
+    const uint8_t gsm = 1;
+    const uint8_t cdma = 2;
+    NativeRdb::ValuesBucket bucket;
+    bucket.PutString(SmsMmsData::RECEIVER_NUMBER, indexer->GetOriginatingAddress());
+    bucket.PutString(SmsMmsData::SENDER_NUMBER, indexer->GetOriginatingAddress());
+    bucket.PutString(SmsMmsData::START_TIME, std::to_string(indexer->GetTimestamp()));
+    bucket.PutString(SmsMmsData::END_TIME, std::to_string(indexer->GetTimestamp()));
+    bucket.PutString(SmsMmsData::RAW_PUD, StringUtils::StringToHex(indexer->GetPdu()));
+
+    bucket.PutInt(SmsMmsData::FORMAT, indexer->GetIsCdma() ? cdma : gsm);
+    bucket.PutInt(SmsMmsData::DEST_PORT, indexer->GetDestPort());
+    bucket.PutInt(SmsMmsData::SMS_SUBSECTION_ID, indexer->GetMsgRefId());
+    bucket.PutInt(SmsMmsData::SIZE, indexer->GetMsgCount());
+    bucket.PutInt(SmsMmsData::SUBSECTION_INDEX, indexer->GetMsgSeqId());
+    return DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(bucket);
+}
+
+bool SmsReceiveHandler::CheckBlockPhone(const std::shared_ptr<SmsReceiveIndexer> &indexer)
+{
+    if (indexer == nullptr) {
+        TELEPHONY_LOGE("CheckBlockPhone sms indexer nullptr error.");
+        return false;
+    }
+    TELEPHONY_LOGI("indexer originating =%{public}s", indexer->GetOriginatingAddress().c_str());
+    return DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryBlockPhoneNumber(
+        indexer->GetOriginatingAddress());
+}
+
+bool SmsReceiveHandler::CheckSmsCapable()
+{
+    auto helperPtr = DelayedSingleton<SmsPersistHelper>::GetInstance();
+    if (helperPtr == nullptr) {
+        return true;
+    }
+    return helperPtr->QueryParamBoolean(SmsPersistHelper::SMS_CAPABLE_PARAM_KEY, true);
 }
 } // namespace Telephony
 } // namespace OHOS

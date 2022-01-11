@@ -31,6 +31,7 @@ public:
     virtual void OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data);
 private:
     void CbMessageTest(const OHOS::EventFwk::Want &want) const;
+    void WapPushMessageTest(const OHOS::EventFwk::Want &want) const;
 
     const int8_t DEFAULT_VALUE = -1;
 };

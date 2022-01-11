@@ -19,8 +19,6 @@
 #include <vector>
 #include <string>
 
-#include "telephony_log_wrapper.h"
-
 namespace OHOS {
 namespace Telephony {
 class SmsDumpHelper {
@@ -35,9 +33,7 @@ private:
     void ShowSmsInfo(std::string &result) const;
 
 private:
-    static constexpr HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, LOG_DOMAIN, "SmsMmsDumpHelper"};
 };
 } // namespace Telephony
 } // namespace OHOS
-
 #endif // SMS_DUMP_HELPER_H

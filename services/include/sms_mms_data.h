@@ -27,7 +27,7 @@ public:
     static constexpr const char *IS_SENDER = "is_sender";
     static constexpr const char *START_TIME = "start_time";
     static constexpr const char *END_TIME = "end_time";
-    static constexpr const char *REW_PUD = "raw_pdu";
+    static constexpr const char *RAW_PUD = "raw_pdu";
     static constexpr const char *FORMAT = "format";
     static constexpr const char *DEST_PORT = "dest_port";
     static constexpr const char *SUBSECTION_INDEX = "subsection_index";

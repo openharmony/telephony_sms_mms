@@ -43,7 +43,7 @@ public:
         uint16_t warnType = 0;
         uint8_t msgType = SmsCbMessage::SMS_CBMSG_TYPE_UNKNOWN;
         uint8_t langType = SmsCbMessage::SMS_CBMSG_LANG_DUMMY;
-        uint8_t dcs = SMS_CODING_UNKNOWN;
+        uint8_t dcs = 0;
         int8_t priority = SMS_PRIORITY_NORMAL;
         bool isPrimary = false;
         int8_t cmasRes = SMS_CMAE_RESP_TYPE_RESERVED;

@@ -24,6 +24,12 @@ class IDeliveryShortMessageCallback : public IRemoteBroker {
 public:
     virtual ~IDeliveryShortMessageCallback() = default;
     enum DeliveryCallback { ON_SMS_DELIVERY_RESULT };
+
+    /**
+     * @brief OnSmsDeliveryResult
+     * Status of the sent SMS on the recipient.
+     * @param pdu [in]
+     */
     virtual void OnSmsDeliveryResult(const std::u16string pdu) = 0;
 
 public:

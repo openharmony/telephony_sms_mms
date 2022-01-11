@@ -21,6 +21,7 @@
 
 #include "securec.h"
 
+#include "data_ability_helper.h"
 #include "i_sms_service_interface.h"
 #include "sms_service_proxy.h"
 #include "system_ability_definition.h"
@@ -31,8 +32,8 @@ class GsmSmsSenderTest {
 public:
     void TestGsmSendShortData(const sptr<ISmsServiceInterface> &smsService) const;
     void TestGsmSendLongData(const sptr<ISmsServiceInterface> &smsService) const;
-    void TestGsmSendShortText(const sptr<ISmsServiceInterface> &smsService) const;
-    void TestGsmSendLongText(const sptr<ISmsServiceInterface> &smsService) const;
+    void TestSendShortText(const sptr<ISmsServiceInterface> &smsService) const;
+    void TestSendLongText(const sptr<ISmsServiceInterface> &smsService) const;
     void TestSetSmscAddr(const sptr<ISmsServiceInterface> &smsService) const;
     void TestGetSmscAddr(const sptr<ISmsServiceInterface> &smsService) const;
     void TestAddSimMessage(const sptr<ISmsServiceInterface> &smsService) const;
@@ -46,7 +47,15 @@ public:
     void TestSetDefaultSmsSlotId(const sptr<ISmsServiceInterface> &smsService) const;
     void TestGetDefaultSmsSlotId(const sptr<ISmsServiceInterface> &smsService) const;
     void TestSplitMessage(const sptr<ISmsServiceInterface> &smsService) const;
-    void TestCalculateLength(const sptr<ISmsServiceInterface> &smsService) const;
+    void TestGetSmsSegmentsInfo(const sptr<ISmsServiceInterface> &smsService) const;
+    void TestIsImsSmsSupported(const sptr<ISmsServiceInterface> &smsService) const;
+    void TestGetImsShortMessageFormat(const sptr<ISmsServiceInterface> &smsService) const;
+    void TestAddBlockPhone() const;
+    void TestRemoveBlockPhone() const;
+    void TestHasSmsCapability(const sptr<ISmsServiceInterface> &smsService) const;
+private:
+    std::shared_ptr<AppExecFwk::DataAbilityHelper> CreateDataAHelper() const;
+    bool RequestPermissions() const;
 };
 } // namespace Telephony
 } // namespace OHOS

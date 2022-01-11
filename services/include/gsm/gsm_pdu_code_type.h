@@ -109,7 +109,6 @@ enum SmsCodingScheme {
     SMS_CODING_AUTO,
     SMS_CODING_EUCKR,
     SMS_CODING_ASCII7BIT, // cdma 7 bit defualt alphabet
-    SMS_CODING_UNKNOWN,
 };
 
 struct SmsTimeStamp {

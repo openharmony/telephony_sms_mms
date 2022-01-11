@@ -36,7 +36,10 @@ SmsInterfaceStub::SmsInterfaceStub()
     memberFuncMap_[SET_DEFAULT_SMS_SLOT_ID] = &SmsInterfaceStub::OnSetDefaultSmsSlotId;
     memberFuncMap_[GET_DEFAULT_SMS_SLOT_ID] = &SmsInterfaceStub::OnGetDefaultSmsSlotId;
     memberFuncMap_[SPLIT_MESSAGE] = &SmsInterfaceStub::OnSplitMessage;
-    memberFuncMap_[CALCULATE_LENGTH] = &SmsInterfaceStub::OnCalculateLength;
+    memberFuncMap_[GET_SMS_SEGMENTS_INFO] = &SmsInterfaceStub::OnGetSmsSegmentsInfo;
+    memberFuncMap_[GET_IMS_SHORT_MESSAGE_FORMAT] = &SmsInterfaceStub::OnGetImsShortMessageFormat;
+    memberFuncMap_[IS_IMS_SMS_SUPPORTED] = &SmsInterfaceStub::OnIsImsSmsSupported;
+    memberFuncMap_[HAS_SMS_CAPABILITY] = &SmsInterfaceStub::OnHasSmsCapability;
 }
 
 SmsInterfaceStub::~SmsInterfaceStub()
@@ -50,14 +53,9 @@ void SmsInterfaceStub::InitModule()
     static bool bInitModule = false;
     if (!bInitModule) {
         bInitModule = true;
-        std::shared_ptr<SmsInterfaceManager> interface =
-            std::make_shared<SmsInterfaceManager>(CoreManager::DEFAULT_SLOT_ID);
-        if (interface == nullptr) {
-            TELEPHONY_LOGE("interface is nullptr.");
-            return;
-        }
-        slotSmsInterfaceManagerMap_[CoreManager::DEFAULT_SLOT_ID] = interface;
-        slotSmsInterfaceManagerMap_[CoreManager::DEFAULT_SLOT_ID]->InitInterfaceManager();
+        int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+        slotSmsInterfaceManagerMap_[slotId] = std::make_shared<SmsInterfaceManager>(slotId);
+        slotSmsInterfaceManagerMap_[slotId]->InitInterfaceManager();
         TELEPHONY_LOGI("SmsInterfaceStub = ############### InitModule");
     }
 }
@@ -236,18 +234,38 @@ void SmsInterfaceStub::OnSplitMessage(MessageParcel &data, MessageParcel &reply,
     }
 }
 
-void SmsInterfaceStub::OnCalculateLength(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+void SmsInterfaceStub::OnGetSmsSegmentsInfo(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    std::vector<int32_t> result;
+    int32_t slotId = data.ReadInt32();
     std::u16string message = data.ReadString16();
     bool force7BitCode = data.ReadBool();
-    result = CalculateLength(message, force7BitCode);
-    int32_t resultLen = static_cast<int32_t>(result.size());
-    TELEPHONY_LOGI("SplitMessage size %{public}d", resultLen);
-    reply.WriteInt32(resultLen);
-    for (const auto &item : result) {
-        reply.WriteInt32(item);
+
+    SmsSegmentsInfo segInfo;
+    bool result = GetSmsSegmentsInfo(slotId, message, force7BitCode, segInfo);
+    reply.WriteBool(result);
+
+    if (result) {
+        reply.WriteInt32(segInfo.msgSegCount);
+        reply.WriteInt32(segInfo.msgEncodingCount);
+        reply.WriteInt32(segInfo.msgRemainCount);
+        reply.WriteInt32(static_cast<int32_t>(segInfo.msgCodeScheme));
     }
+}
+
+void SmsInterfaceStub::OnIsImsSmsSupported(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    reply.WriteBool(IsImsSmsSupported());
+}
+
+void SmsInterfaceStub::OnGetImsShortMessageFormat(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    std::u16string format = GetImsShortMessageFormat();
+    reply.WriteString16(format);
+}
+
+void SmsInterfaceStub::OnHasSmsCapability(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    reply.WriteBool(HasSmsCapability());
 }
 
 int SmsInterfaceStub::OnRemoteRequest(

@@ -16,6 +16,7 @@
 #include "gsm_sms_receive_handler.h"
 
 #include "gsm_sms_message.h"
+#include "observer_handler.h"
 #include "sms_base_message.h"
 #include "sms_receive_indexer.h"
 #include "string_utils.h"
@@ -23,7 +24,8 @@
 
 namespace OHOS {
 namespace Telephony {
-GsmSmsReceiveHandler::GsmSmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
+using namespace std;
+GsmSmsReceiveHandler::GsmSmsReceiveHandler(const shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
     : SmsReceiveHandler(runner, slotId)
 {}
 
@@ -37,7 +39,7 @@ void GsmSmsReceiveHandler::Init()
     if (!RegisterHandler()) {
         TELEPHONY_LOGI("GsmSmsSender::Init Register RADIO_SMS_STATUS fail.");
     }
-    smsCbRunner_ = AppExecFwk::EventRunner::Create("GsmSmsCbHandler" + std::to_string(slotId_));
+    smsCbRunner_ = AppExecFwk::EventRunner::Create("GsmSmsCbHandler" + to_string(slotId_));
     if (smsCbRunner_ == nullptr) {
         TELEPHONY_LOGE("failed to create GsmSmsCbHandler");
         return;
@@ -76,7 +78,7 @@ void GsmSmsReceiveHandler::UnRegisterHandler()
     }
 }
 
-int32_t GsmSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage)
+int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> &smsBaseMessage)
 {
     TELEPHONY_LOGI("GsmSmsReceiveHandler:: HandleSmsByType");
     if (smsBaseMessage == nullptr) {
@@ -88,9 +90,14 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMessa
         TELEPHONY_LOGI("GsmSmsReceiveHandler:: IsSpecialMessage");
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
-    std::shared_ptr<SmsReceiveIndexer> indexer;
+    if (!CheckSmsCapable()) {
+        TELEPHONY_LOGI("sms receive capable unSupport");
+        return AckIncomeCause::SMS_ACK_PROCESSED;
+    }
+
+    shared_ptr<SmsReceiveIndexer> indexer;
     if (!message->IsConcatMsg()) {
-        indexer = std::make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
+        indexer = make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
             message->GetDestPort(), !message->GetGsm(), false, message->GetOriginatingAddress(),
             message->GetVisibleOriginatingAddress(), message->GetVisibleMessageBody());
     } else {
@@ -99,7 +106,7 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMessa
             TELEPHONY_LOGE("Concat is null.");
             return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
         }
-        indexer = std::make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
+        indexer = make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
             message->GetDestPort(), !message->GetGsm(), message->GetOriginatingAddress(),
             message->GetVisibleOriginatingAddress(), smsConcat->msgRef, smsConcat->seqNum, smsConcat->totalSeg,
             false, message->GetVisibleMessageBody());
@@ -108,22 +115,19 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMessa
         TELEPHONY_LOGE("indexer is null.");
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
-
+    indexer->SetRawUserData(message->GetRawUserData());
     if (indexer->GetIsText() && IsRepeatedMessagePart(indexer)) {
         TELEPHONY_LOGE("Ack repeated error.");
         return AckIncomeCause::SMS_ACK_REPEATED_ERROR;
     }
-
-    bool result = AddMessageToDb(indexer);
-    if (result == false) {
-        TELEPHONY_LOGE("HandleSmsByType insert fail.");
+    if (!AddMsgToDB(indexer)) {
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
     CombineMessagePart(indexer);
     return AckIncomeCause::SMS_ACK_RESULT_OK;
 }
 
-void GsmSmsReceiveHandler::ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> &response)
+void GsmSmsReceiveHandler::ReplySmsToSmsc(int result, const shared_ptr<SmsBaseMessage> &response)
 {
     std::shared_ptr<Core> core = GetCore();
     if (core != nullptr) {
@@ -134,7 +138,7 @@ void GsmSmsReceiveHandler::ReplySmsToSmsc(int result, const std::shared_ptr<SmsB
     }
 }
 
-std::shared_ptr<SmsBaseMessage> GsmSmsReceiveHandler::TransformMessageInfo(const std::shared_ptr<SmsMessageInfo> &info)
+shared_ptr<SmsBaseMessage> GsmSmsReceiveHandler::TransformMessageInfo(const shared_ptr<SmsMessageInfo> &info)
 {
     std::shared_ptr<SmsBaseMessage> baseMessage = nullptr;
     if (info == nullptr) {
