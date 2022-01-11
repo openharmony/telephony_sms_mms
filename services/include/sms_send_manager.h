@@ -23,12 +23,13 @@
 #include "cdma_sms_sender.h"
 #include "gsm_sms_sender.h"
 #include "sms_send_indexer.h"
+#include "sms_network_policy_manager.h"
 
 namespace OHOS {
 namespace Telephony {
-class SmsSendManager : public AppExecFwk::EventHandler {
+class SmsSendManager {
 public:
-    SmsSendManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
+    SmsSendManager(int32_t slotId);
     virtual ~SmsSendManager();
     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
         const sptr<ISendShortMessageCallback> &sendCallback,
@@ -37,32 +38,26 @@ public:
         const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
     void RetriedSmsDelivery(const std::shared_ptr<SmsSendIndexer> smsIndexer);
-    virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
     void Init();
     std::shared_ptr<SmsSender> GetCdmaSmsSender() const;
     std::vector<std::string> SplitMessage(const std::string &message);
-    std::vector<int32_t> CalculateLength(const std::string &message, bool force7BitCode);
+    bool GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
+    bool IsImsSmsSupported();
+    std::string GetImsShortMessageFormat();
 
 private:
     SmsSendManager &operator=(const SmsSendManager &) = delete;
     SmsSendManager &operator=(const SmsSendManager &&) = delete;
     SmsSendManager(const SmsSendManager &) = delete;
     SmsSendManager(const SmsSendManager &&) = delete;
-    void RegisterHandler();
-    void UnRegisterHandler();
-    NetWorkType GetNetWorkType();
-    void HandlerRadioState(const AppExecFwk::InnerEvent::Pointer &event);
-    void GetRadioState();
 
     int32_t slotId_;
-    enum NetWorkType csNetWorkType_ = NetWorkType::NET_TYPE_GSM;
-    enum NetWorkType imsNetWorkType_ = NetWorkType::NET_TYPE_UNKNOWN;
-    enum NetDomainType netDomainType_ = NetDomainType::NET_DOMAIN_CS;
     std::shared_ptr<SmsSender> gsmSmsSender_;
     std::shared_ptr<SmsSender> cdmaSmsSender_;
     std::shared_ptr<AppExecFwk::EventRunner> gsmSmsSendRunner_;
     std::shared_ptr<AppExecFwk::EventRunner> cdmaSmsSendRunner_;
-    std::shared_ptr<Core> GetCore() const;
+    std::shared_ptr<SmsNetworkPolicyManager> networkManager_;
+    std::shared_ptr<AppExecFwk::EventRunner> networkRunner_;
 };
 } // namespace Telephony
 } // namespace OHOS

@@ -93,6 +93,8 @@ public:
     SmsConcat GetSmsConcat() const;
     uint8_t GetLangId() const;
     void SetLangId(uint8_t langId);
+    uint16_t GetMsgId() const;
+    void SetMsgId(uint16_t msgId);
 
 private:
     std::vector<uint8_t> pdu_;
@@ -118,9 +120,10 @@ private:
     bool isFailure_ = false;
     enum SmsCodingScheme dcs_;
     bool isConcat_ = false;
-    SmsConcat smsConcat_ {.is8Bits = false};
+    SmsConcat smsConcat_;
     uint8_t langId_ = 0;
     bool isText_ = false;
+    uint16_t msgId_ = 0;
 };
 } // namespace Telephony
 } // namespace OHOS

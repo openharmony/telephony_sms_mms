@@ -22,6 +22,7 @@
 
 namespace OHOS {
 namespace Telephony {
+using namespace std;
 template<typename T>
 inline void UniquePtrDeleterOneDimension(T **(&ptr))
 {
@@ -36,7 +37,7 @@ int GsmSmsMessage::CalcReplyEncodeAddress(const std::string &replyAddress)
     int ret = 0;
     int addrLen = 0;
     char *encodedAddr = nullptr;
-    std::unique_ptr<char *, void (*)(char **(&))> addressBuf(&encodedAddr, UniquePtrDeleterOneDimension);
+    unique_ptr<char *, void (*)(char **(&))> addressBuf(&encodedAddr, UniquePtrDeleterOneDimension);
     if (replyAddress.length() > 0) {
         struct SmsAddress replyAddr = {};
         replyAddr.ton = SMS_TON_NATIONAL;
@@ -232,7 +233,7 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
         TELEPHONY_LOGE("failed to initialize!");
         return nullptr;
     }
-    const unsigned char *pMsgText = static_cast<const unsigned char*>(data);
+    const unsigned char *pMsgText = (const unsigned char *)data;
     unsigned char *pDestText = encodeData;
     MSG_LANGUAGE_ID_T *pLangId = &langId;
     bool *pIncludeAbnormalChar = &bAbnormal;
@@ -384,7 +385,7 @@ std::shared_ptr<GsmSmsMessage> GsmSmsMessage::CreateMessage(const std::string &p
     return nullptr;
 }
 
-bool GsmSmsMessage::PduAnalysis(const std::string &pdu)
+bool GsmSmsMessage::PduAnalysis(const string &pdu)
 {
     bool result = true;
     if (smsTpdu_ == nullptr || pdu.empty() || pdu.length() > MAX_TPDU_DATA_LEN) {
@@ -512,42 +513,12 @@ void GsmSmsMessage::ConvertMessageDcs()
 
 void GsmSmsMessage::ConvertUserData()
 {
+    int ret = 0;
     int dataSize = 0;
     if (smsTpdu_ == nullptr ||
         (memset_s(&smsUserData_, sizeof(struct SmsUserData), 0x00, sizeof(struct SmsUserData)) != EOK)) {
-        TELEPHONY_LOGE("ConvertUserData memset_s error!");
         return;
     }
-    if (!GetUserData()) {
-        TELEPHONY_LOGE("Get user data fail!");
-        return;
-    }
-    if (smsUserData_.length > 0) {
-        MsgTextConvert *textCvt = MsgTextConvert::Instance();
-        if (textCvt == nullptr) {
-            TELEPHONY_LOGE("TextConvert is null!");
-            return;
-        }
-        unsigned char buff[MAX_MSG_TEXT_LEN + 1] = {0};
-        if (codingScheme_ == SMS_CODING_7BIT) {
-            MsgLangInfo langInfo = {
-                0,
-            };
-            langInfo.bSingleShift = false;
-            langInfo.bLockingShift = false;
-            dataSize = textCvt->ConvertGSM7bitToUTF8(
-                buff, MAX_MSG_TEXT_LEN, (unsigned char *)smsUserData_.data, smsUserData_.length, &langInfo);
-        } else if (codingScheme_ == SMS_CODING_UCS2) {
-            dataSize = textCvt->ConvertUCS2ToUTF8(
-                buff, MAX_MSG_TEXT_LEN, (unsigned char *)smsUserData_.data, smsUserData_.length);
-        }
-        visibleMessageBody_.insert(0, (char *)buff, dataSize);
-    }
-}
-
-bool GsmSmsMessage::GetUserData()
-{
-    int ret = 0;
     switch (smsTpdu_->tpduType) {
         case SMS_TPDU_DELIVER:
             headerDataLen_ = smsTpdu_->data.deliver.userData.length;
@@ -567,7 +538,30 @@ bool GsmSmsMessage::GetUserData()
         default:
             break;
     }
-    return ret != EOK ? false : true;
+    if (ret != EOK) {
+        return;
+    }
+    if (smsUserData_.length > 0) {
+        MsgTextConvert *textCvt = MsgTextConvert::Instance();
+        if (textCvt == nullptr) {
+            return;
+        }
+        unsigned char buff[MAX_MSG_TEXT_LEN + 1] = {0};
+        if (codingScheme_ == SMS_CODING_7BIT) {
+            MsgLangInfo langInfo = {
+                0,
+            };
+            langInfo.bSingleShift = false;
+            langInfo.bLockingShift = false;
+            dataSize = textCvt->ConvertGSM7bitToUTF8(
+                buff, MAX_MSG_TEXT_LEN, (unsigned char *)smsUserData_.data, smsUserData_.length, &langInfo);
+        } else if (codingScheme_ == SMS_CODING_UCS2) {
+            dataSize = textCvt->ConvertUCS2ToUTF8(
+                buff, MAX_MSG_TEXT_LEN, (unsigned char *)smsUserData_.data, smsUserData_.length);
+        }
+        visibleMessageBody_.insert(0, (char *)buff, dataSize);
+        rawUserData_.insert(0, (char *)smsUserData_.data, smsUserData_.length);
+    }
 }
 
 void GsmSmsMessage::SetFullText(const std::string &text)

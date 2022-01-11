@@ -391,12 +391,14 @@ void CdmaSmsMessage::AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver)
 
 void CdmaSmsMessage::AnalysisCbMsg(const SmsTransBroadCastMsg &cbMsg)
 {
+    serviceCategory_ = cbMsg.transSvcCtg;
     if (cbMsg.telesvcMsg.type != SmsMessageType::SMS_TYPE_DELIVER) {
         TELEPHONY_LOGE("No matching type = [%{public}d]", cbMsg.telesvcMsg.type);
         return;
     }
     messageId_ = cbMsg.telesvcMsg.data.deliver.msgId.msgId;
     priority_ = cbMsg.telesvcMsg.data.deliver.priority;
+    language_ = cbMsg.telesvcMsg.data.deliver.language;
     TELEPHONY_LOGI("analysisCbMsg transSvcCtg %{public}d", cbMsg.transSvcCtg);
     if ((cbMsg.transSvcCtg >= SMS_TRANS_SVC_CTG_CMAS_PRESIDENTIAL) &&
         (cbMsg.transSvcCtg <= SMS_TRANS_SVC_CTG_CMAS_TEST)) {
@@ -618,7 +620,7 @@ uint16_t CdmaSmsMessage::GetMessageId() const
 
 int8_t CdmaSmsMessage::GetFormat() const
 {
-    constexpr uint8_t FORMAT_3GPP2 = 2;
+    constexpr int8_t FORMAT_3GPP2 = 2;
     return FORMAT_3GPP2;
 }
 
@@ -665,13 +667,36 @@ std::string CdmaSmsMessage::GetCbInfo() const
         .append("\n")
         .append("messageClass:")
         .append(std::to_string(messageClass_))
-        .append("\n");
+        .append("\n")
+        .append("serviceCategory:")
+        .append(std::to_string(serviceCategory_));
     return info;
 }
 
 int8_t CdmaSmsMessage::GetPriority() const
 {
     return priority_;
+}
+
+bool CdmaSmsMessage::IsEmergencyMsg() const
+{
+    return priority_ == SMS_PRIORITY_EMERGENCY;
+}
+
+uint16_t CdmaSmsMessage::GetServiceCategoty() const
+{
+    return serviceCategory_;
+}
+
+uint8_t CdmaSmsMessage::GetGeoScope() const
+{
+    const uint8_t scopePlmnWide = 1;
+    return scopePlmnWide;
+}
+
+long CdmaSmsMessage::GetReceTime() const
+{
+    return scTimestamp_;
 }
 } // namespace Telephony
 } // namespace OHOS

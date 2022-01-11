@@ -16,18 +16,12 @@ ohos_shared_library("sms") {
   include_dirs = [
     "//third_party/node/src",
     "include",
-    "$SUBSYSTEM_DIR/sms_mms/frameworks/native/include",
-    "$SUBSYSTEM_DIR/sms_mms/interfaces/innerkits",
-    "$SUBSYSTEM_DIR/sms_mms/services/include",
-    "$SUBSYSTEM_DIR/sms_mms/services/include/gsm",
-    "$SUBSYSTEM_DIR/sms_mms/services/include/cdma",
-    "$SUBSYSTEM_DIR/sms_mms/utils",
+    "$SUBSYSTEM_DIR/sms_mms/frameworks/js/napi/include",
     "$SUBSYSTEM_DIR/core_service/frameworks/js/napi",
     "//base/telephony/core_service/interfaces/innerkits/network_search",
     "//base/telephony/core_service/interfaces/innerkits/core",
     "//base/telephony/core_service/interfaces/innerkits/sim",
     "//base/telephony/core_service/interfaces/innerkits/core",
-    "//base/telephony/core_service/interfaces/innerkits/network_search",
     "//base/telephony/core_service/interfaces/innerkits/cellular_data",
     "//base/telephony/core_service/interfaces/innerkits/sim",
   ]
@@ -35,6 +29,7 @@ ohos_shared_library("sms") {
   sources = [
     "$SUBSYSTEM_DIR/core_service/frameworks/js/napi/napi_util.cpp",
     "src/delivery_callback.cpp",
+    "src/napi_mms.cpp",
     "src/napi_sms.cpp",
     "src/send_callback.cpp",
   ]

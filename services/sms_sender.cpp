@@ -15,6 +15,7 @@
 
 #include "sms_sender.h"
 
+#include "observer_handler.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -40,6 +41,7 @@ void SmsSender::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     TELEPHONY_LOGI("SmsSender::ProcessEvent eventId %{public}d", eventId);
     switch (eventId) {
         case ObserverHandler::RADIO_SEND_SMS:
+        case ObserverHandler::RADIO_SEND_CDMA_SMS:
         case ObserverHandler::RADIO_SEND_IMS_GSM_SMS:
         case ObserverHandler::RADIO_SEND_SMS_EXPECT_MORE: {
             smsIndexer = FindCacheMapAndTransform(event);
@@ -139,19 +141,15 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
     }
 }
 
-bool SmsSender::GetImsDomain() const
+bool SmsSender::GetImsDomain()
 {
-    return (netDomainType_ == NetDomainType::NET_DOMAIN_IMS) ? true : false;
-}
-
-NetWorkType SmsSender::GetNetWorkType() const
-{
-    return netWorkType_;
-}
-
-NetDomainType SmsSender::GetNetDomainType() const
-{
-    return netDomainType_;
+    bool result = false;
+    std::shared_ptr<Core> core = GetCore();
+    if (core == nullptr) {
+        TELEPHONY_LOGE("core is nullptr.");
+        return result;
+    }
+    return core->GetImsRegStatus();
 }
 
 void SmsSender::SendResultCallBack(
@@ -292,6 +290,34 @@ std::shared_ptr<Core> SmsSender::GetCore() const
         return core;
     }
     return nullptr;
+}
+
+void SmsSender::SetNetworkState(bool isImsNetDomain, int32_t voiceServiceState)
+{
+    isImsNetDomain_ = isImsNetDomain;
+    voiceServiceState_ = voiceServiceState;
+    TELEPHONY_LOGI("isImsNetDomain = %{public}s voiceServiceState = %{public}d",
+        isImsNetDomain_ ? "true" : "false", voiceServiceState_);
+}
+
+bool SmsSender::CheckForce7BitEncodeType()
+{
+    auto helperPtr = DelayedSingleton<SmsPersistHelper>::GetInstance();
+    if (helperPtr == nullptr) {
+        TELEPHONY_LOGE("Check User Force 7Bit Encode Type helperPtr nullptr error.");
+        return false;
+    }
+    return helperPtr->QueryParamBoolean(SmsPersistHelper::SMS_ENCODING_PARAM_KEY, false);
+}
+
+std::optional<int32_t> SmsSender::GetNetworkId()
+{
+    return networkId_;
+}
+
+void SmsSender::SetNetworkId(std::optional<int32_t> &id)
+{
+    networkId_ = id;
 }
 } // namespace Telephony
 } // namespace OHOS

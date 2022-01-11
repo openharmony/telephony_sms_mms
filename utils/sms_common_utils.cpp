@@ -27,8 +27,8 @@ int SmsCommonUtils::Pack7bitChar(const unsigned char *userData, int dataLen, int
     int srcIdx = 0;
     int dstIdx = 0;
     auto shift = static_cast<unsigned int>(fillBits);
+
     if (userData == nullptr || packData == nullptr) {
-        TELEPHONY_LOGE("param nullptr error.");
         return dstIdx;
     }
 
@@ -67,7 +67,6 @@ int SmsCommonUtils::Unpack7bitChar(
     int dstIdx = 0;
     auto shift = static_cast<unsigned int>(fillBits);
     if (unpackData == nullptr || tpdu == nullptr) {
-        TELEPHONY_LOGE("param nullptr error.");
         return dstIdx;
     }
     if (shift > 0) {
@@ -101,7 +100,6 @@ int SmsCommonUtils::DigitToBcd(const char *digit, int digitLen, unsigned char *b
     int offset = 0;
     unsigned char temp;
     if (digit == nullptr || bcd == nullptr) {
-        TELEPHONY_LOGE("param nullptr error.");
         return offset;
     }
     for (int i = 0; i < digitLen; i++) {
@@ -138,7 +136,6 @@ int SmsCommonUtils::BcdToDigit(const unsigned char *bcd, int bcdLen, char *digit
     int offset = 0;
     unsigned char temp;
     if (bcd == nullptr || digit == nullptr) {
-        TELEPHONY_LOGE("param nullptr error.");
         return offset;
     }
     for (int i = 0; i < bcdLen; i++) {
@@ -160,7 +157,6 @@ int SmsCommonUtils::BcdToDigitCdma(const unsigned char *bcd, int bcdLen, char *d
     int offset = 0;
     unsigned char temp;
     if (bcd == nullptr || digit == nullptr) {
-        TELEPHONY_LOGE("param nullptr error.");
         return offset;
     }
 

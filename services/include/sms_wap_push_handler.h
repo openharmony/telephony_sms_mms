@@ -18,20 +18,42 @@
 
 #include <memory>
 
-#include "event_handler.h"
-#include "event_runner.h"
+#include "sms_wap_push_buffer.h"
+#include "sms_wap_push_content_type.h"
 
 namespace OHOS {
 namespace Telephony {
-class SmsWapPushHandler : public AppExecFwk::EventHandler {
+class SmsWapPushHandler {
 public:
-    SmsWapPushHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
+    SmsWapPushHandler(int32_t slotId);
     virtual ~SmsWapPushHandler();
-    virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 
-protected:
+    bool DecodeWapPushPduData(SmsWapPushBuffer &decodeBuffer, uint32_t startPos, uint32_t len);
+    bool DecodeWapPushPdu(std::string &wapPdu);
+    bool DecodePushType(SmsWapPushBuffer &decodeBuffer);
+    bool DeocdeCheckIsBlock(std::string &hexData);
+    bool DecodeXWapApplicationField(SmsWapPushBuffer &decodeBuffer, std::string &strWapAppId);
+    bool DecodeXWapApplication(SmsWapPushBuffer &decodeBuffer, uint32_t headersLen);
+    bool DecodeXWapApplicationValue(SmsWapPushBuffer &decodeBuffer, std::string &strWapAppId);
+    bool DecodeXWapAbandonHeaderValue(SmsWapPushBuffer &decodeBuffer);
+    bool SendWapPushMessageBroadcast();
+
 private:
     int32_t slotId_;
+    uint8_t pushType_;
+    std::string strAppId_;
+    uint8_t transactionId_;
+    SmsWapPushContentType contentType_;
+    std::string hexHeaderData_;
+    std::string hexWbXmlData_;
+
+    static constexpr uint8_t PDU_TYPE_PUSH = 0x06;
+    static constexpr uint8_t PDU_TYPE_CONFIRMED_PUSH = 0x07;
+    static constexpr uint32_t PARAMETER_X_WAP_APPLICATION_ID = 0x2F;
+    const std::string CONTENT_MIME_TYPE_B_PUSH_SI = "application/vnd.wap.sic";
+    const std::string CONTENT_MIME_TYPE_B_PUSH_SL = "application/vnd.wap.slc";
+    const std::string CONTENT_MIME_TYPE_B_PUSH_CO = "application/vnd.wap.coc";
+    const std::string CONTENT_MIME_TYPE_B_MMS = "application/vnd.wap.mms-message";
 };
 } // namespace Telephony
 } // namespace OHOS

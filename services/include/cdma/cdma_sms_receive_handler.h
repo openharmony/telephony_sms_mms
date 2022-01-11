@@ -19,6 +19,7 @@
 #include "event_handler.h"
 #include "event_runner.h"
 
+#include "sms_cb_data.h"
 #include "sms_receive_indexer.h"
 #include "sms_receive_handler.h"
 #include "sms_send_indexer.h"
@@ -42,10 +43,12 @@ protected:
 private:
     bool RegisterHandler();
     void UnRegisterHandler();
-    bool AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer);
-    bool HandleStatusReport(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage);
-    std::shared_ptr<SmsReceiveIndexer> CreateIndexer(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage);
+    bool SendCBBroadcast(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage);
+    void GetCBData(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage, SmsCbData::CbData &sendData,
+        bool &isEmergency);
     std::weak_ptr<SmsSender> cdmaSmsSender_;
+
+    std::u16string plmn_;
 };
 } // namespace Telephony
 } // namespace OHOS

@@ -200,7 +200,6 @@ int GsmSmsParamCodec::EncodeDCS(const struct SmsDcs *pDCS, char **ppParam)
     }
     *ppParam = new (std::nothrow) char[MAX_DCS_PARAM_LEN];
     if (*ppParam == nullptr) {
-        delete ppParam;
         TELEPHONY_LOGE("ppParam is null.");
         return 0;
     }

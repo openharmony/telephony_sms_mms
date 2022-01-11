@@ -16,13 +16,14 @@
 #include "gsm_sms_cb_handler.h"
 
 #include "common_event_support.h"
+#include "observer_handler.h"
 #include "securec.h"
-
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
+using namespace OHOS::EventFwk;
 GsmSmsCbHandler::GsmSmsCbHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
     : AppExecFwk::EventHandler(runner), slotId_(slotId)
 {
@@ -131,22 +132,67 @@ bool GsmSmsCbHandler::AddCbMessageToList(const std::shared_ptr<SmsCbMessage> &cb
         TELEPHONY_LOGE("AddCbMessageToList cbMessage nullptr err.");
         return false;
     }
-
     std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
     if (cbHeader == nullptr) {
         TELEPHONY_LOGE("AddCbMessageToList header err.");
         return false;
     }
-
     std::unique_ptr<SmsCbInfo> cbInfo = FindCbMessage(cbMessage);
     if (cbInfo == nullptr) {
         SmsCbInfo info;
         info.header = cbHeader;
         info.cbMsgs.insert(std::make_pair(cbHeader->page, cbMessage));
+        InitLocation(info);
         cbMsgList_.push_back(info);
         return true;
     }
     return false;
+}
+
+bool GsmSmsCbHandler::InitLocation(SmsCbInfo &info)
+{
+    const uint8_t cellWideImmediate = 0;
+    const uint8_t plmnWide = 1;
+    const uint8_t LaWide = 2;
+    const uint8_t cellWide = 3;
+    const int32_t defaultValue = -1;
+    std::shared_ptr<Core> core = GetCore();
+    if (core == nullptr) {
+        TELEPHONY_LOGE("core is nullptr.");
+        return false;
+    }
+    info.plmn_ = core->GetOperatorNumeric(slotId_);
+    sptr<CellLocation> location = core->GetCellLocation(slotId_);
+    if (location == nullptr) {
+        TELEPHONY_LOGE("location is nullptr.");
+        return false;
+    }
+    if (location->GetCellLocationType() != CellLocation::CellType::CELL_TYPE_GSM) {
+        TELEPHONY_LOGE("location type isn't GSM.");
+        return false;
+    }
+    sptr<GsmCellLocation> gsmLocation = sptr<GsmCellLocation>(static_cast<GsmCellLocation *>(location.GetRefPtr()));
+    info.lac_ = gsmLocation->GetLac();
+    info.cid_ = gsmLocation->GetCellId();
+    TELEPHONY_LOGI("plmn = %{public}s lac = %{public}s cid = %{public}s", StringUtils::ToUtf8(info.plmn_).c_str(),
+        std::to_string(info.lac_).c_str(), std::to_string(info.cid_).c_str());
+    switch (info.header->serialNum.geoScope) {
+        case LaWide:
+            info.cid_ = defaultValue;
+            break;
+        case cellWide:
+        case cellWideImmediate:
+            break;
+        case plmnWide:
+        default:
+            info.cid_ = defaultValue;
+            info.lac_ = defaultValue;
+            break;
+    }
+    plmn_ = info.plmn_;
+    cid_ = info.cid_;
+    lac_ = info.lac_;
+    return true;
 }
 
 bool GsmSmsCbHandler::RemoveCbMessageFromList(const std::shared_ptr<SmsCbMessage> &cbMessage)
@@ -307,9 +353,9 @@ bool GsmSmsCbHandler::SetWantData(
     want.SetParam(SmsCbData::CID, static_cast<int>(cid_));
     want.SetParam(SmsCbData::WARNING_TYPE, static_cast<int>(sendData.warnType));
     if (sendData.isPrimary) {
-        want.SetAction("usual.event.SMS_EMERGENCY_CB_RECEIVE_COMPLETED");
+        want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_COMPLETED);
     } else {
-        want.SetAction("usual.event.SMS_CB_RECEIVE_COMPLETED");
+        want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
     }
     return true;
 }

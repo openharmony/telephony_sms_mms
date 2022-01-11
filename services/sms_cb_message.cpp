@@ -73,6 +73,14 @@ bool SmsCbMessage::IsSinglePageMsg() const
     return cbHeader_ != nullptr && (cbHeader_->totalPages == 1);
 }
 
+/**
+ * @brief PduAnalysis Cell Broadcast Message
+ * 3GPP TS 23.041 V4.1.0 (2001-06) 9.1.1 9.1.2 section Protocols and Protocol Architecture
+ * 3GPP TS 23.041 V4.1.0 (2001-06) 9.3 Parameters
+ * @param pdu [in]
+ * @return true [out]
+ * @return false [out]
+ */
 bool SmsCbMessage::PduAnalysis(const std::vector<unsigned char> &pdu)
 {
     cbHeader_ = std::make_shared<SmsCbMessage::SmsCbMessageHeader>();
@@ -114,6 +122,13 @@ bool SmsCbMessage::PduAnalysis(const std::vector<unsigned char> &pdu)
     return true;
 }
 
+/**
+ * @brief Decode2gHeader GSM Cell Broadcast Message Header
+ * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4 Message Format on the Radio Network – MS/UE Interface
+ * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4.1.2 Message Parameter
+ * @param pdu [in]
+ * @return int [out]
+ */
 int SmsCbMessage::Decode2gHeader(const std::vector<unsigned char> &pdu)
 {
     int offset = 0;
@@ -167,6 +182,13 @@ int SmsCbMessage::Decode2gHeader(const std::vector<unsigned char> &pdu)
     return offset;
 }
 
+/**
+ * @brief Decode3gHeader UMTS Cell Broadcast Message Header
+ * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4.2.1 General Description
+ * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4.2.2 Message Parameter
+ * @param pdu [in]
+ * @return int [out]
+ */
 int SmsCbMessage::Decode3gHeader(const std::vector<unsigned char> &pdu)
 {
     int offset = 0;
@@ -204,6 +226,11 @@ int SmsCbMessage::Decode3gHeader(const std::vector<unsigned char> &pdu)
     return offset;
 }
 
+/**
+ * @brief Decode2gCbMsg GSM Content of Message
+ * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4.2.2 Message Parameter
+ * @param pdu [in]
+ */
 void SmsCbMessage::Decode2gCbMsg(const std::vector<unsigned char> &pdu)
 {
     int offset = 0;
@@ -242,6 +269,11 @@ void SmsCbMessage::Decode2gCbMsg(const std::vector<unsigned char> &pdu)
     }
 }
 
+/**
+ * @brief Decode3gCbMsg UMTS CB Data
+ * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4.2.2.5 CB Data
+ * @param pdu [in]
+ */
 void SmsCbMessage::Decode3gCbMsg(const std::vector<unsigned char> &pdu)
 {
     if (cbHeader_ == nullptr) {

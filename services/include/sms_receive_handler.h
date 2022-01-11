@@ -29,7 +29,8 @@
 #include "sms_common.h"
 #include "sms_receive_indexer.h"
 #include "sms_wap_push_handler.h"
-#include "sms_data_base_helper.h"
+#include "sms_persist_helper.h"
+#include "sms_wap_push_handler.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -44,14 +45,14 @@ protected:
     virtual void ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> &response) = 0;
     virtual std::shared_ptr<SmsBaseMessage> TransformMessageInfo(const std::shared_ptr<SmsMessageInfo> &info) = 0;
     void CombineMessagePart(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
-    void DeleteMessageFromDb(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
+    void DeleteMessageFormDb(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
     bool IsRepeatedMessagePart(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
-    bool AddMessageToDb(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
     std::shared_ptr<Core> GetCore() const;
+    bool AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer);
+    bool CheckBlockPhone(const std::shared_ptr<SmsReceiveIndexer> &indexer);
+    bool CheckSmsCapable();
 
     int32_t slotId_ = -1;
-    std::unordered_multimap<std::string, std::shared_ptr<SmsReceiveIndexer>> receiveMap_;
-
 private:
     constexpr static uint16_t PDU_POS_OFFSET = 1;
     constexpr static int32_t TEXT_MSG_RECEIVE_CODE = 0;
@@ -65,7 +66,7 @@ private:
     SmsReceiveHandler &operator=(const SmsReceiveHandler &) = delete;
     SmsReceiveHandler &operator=(const SmsReceiveHandler &&) = delete;
 
-    std::shared_ptr<AppExecFwk::EventRunner> smsWappushRunner_;
+    std::unique_ptr<SmsWapPushHandler> smsWapPushHandler_;
 };
 } // namespace Telephony
 } // namespace OHOS

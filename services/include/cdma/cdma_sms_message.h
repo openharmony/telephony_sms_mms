@@ -50,6 +50,10 @@ public:
     virtual int8_t GetLanguage() const;
     virtual std::string GetCbInfo() const;
     virtual int8_t GetPriority() const;
+    virtual bool IsEmergencyMsg() const;
+    virtual uint16_t GetServiceCategoty() const;
+    virtual uint8_t GetGeoScope() const;
+    long GetReceTime() const;
 
     virtual std::shared_ptr<SpecialSmsIndication> GetSpecialSmsInd();
     static std::shared_ptr<CdmaSmsMessage> CreateMessage(const std::string &pdu);
@@ -79,6 +83,8 @@ private:
     bool isCmas_ = false;
     uint16_t messageId_;
     int8_t language_;
+    uint16_t serviceCategory_;
+
     std::unique_ptr<struct SmsTransMsg> transMsg_;
     std::unique_ptr<struct SmsTransMsg> GreateTransMsg();
     SmsEncodingType CovertEncodingType(const SmsCodingScheme &codingScheme);
