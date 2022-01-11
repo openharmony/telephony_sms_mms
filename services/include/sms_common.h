@@ -30,9 +30,9 @@ enum AckIncomeCause {
 };
 
 enum NetWorkType {
-    NET_TYPE_GSM = 0,
+    NET_TYPE_UNKNOWN = 0,
+    NET_TYPE_GSM,
     NET_TYPE_CDMA,
-    NET_TYPE_UNKNOWN,
 };
 
 enum NetDomainType {

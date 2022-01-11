@@ -367,7 +367,7 @@ int CdmaSmsPduCodec::EncodeTelesvcSubmitMsg(const struct SmsTeleSvcSubmit &sbMsg
 int CdmaSmsPduCodec::EncodeCbNumber(const SmsTeleSvcAddr &cbNumber, std::vector<unsigned char> &pdustr)
 {
     unsigned char cbData[SMS_TRANS_ADDRESS_MAX_LEN] = {0};
-    unsigned char temp = (cbNumber.digitMode << SHIFT_7BITS);
+    unsigned char temp = cbNumber.digitMode ? 0x80 : 0x00;
     if (cbNumber.digitMode == false) {
         temp |= (cbNumber.addrLen & 0xfe) >> SHIFT_1BITS;
         pdustr.push_back(temp);
@@ -423,7 +423,7 @@ int CdmaSmsPduCodec::EncodeSubAddress(const struct SmsTransSubAddr &address, uns
     pduStr[offset++] = SMS_TRANS_PARAM_ORG_SUB_ADDRESS;
     pduStr[offset] = address.addrLen + 0x02;
     index = offset++;
-    pduStr[offset] |= address.type << SHIFT_5BITS;
+    pduStr[offset] |= static_cast<unsigned char>(address.type) << SHIFT_5BITS;
     pduStr[offset++] |= (address.odd ? 0x10 : 0x00);
     pduStr[offset++] = address.addrLen;
     if (memcpy_s(pduStr + offset, address.addrLen, address.szData, address.addrLen) != EOK) {
@@ -497,27 +497,32 @@ int CdmaSmsPduCodec::EncodeBearerUserData(const struct SmsTeleSvcUserData &userD
         TELEPHONY_LOGE("PDU is null!");
         return offset;
     }
+
     pduStr[offset++] = SMS_BEARER_USER_DATA;
     lenIndex = offset;
     offset++;
-    pduStr[offset++] = userData.encodeType << SHIFT_3BITS;
+    pduStr[offset++] = static_cast<unsigned char>(userData.encodeType) << SHIFT_3BITS;
     if (userData.encodeType == SMS_ENCODE_EPM || userData.encodeType == SMS_ENCODE_GSMDCS) {
         pduStr[offset++] = userData.msgType;
     }
+
     int remainBits = 0;
     switch (userData.encodeType) {
         case SMS_ENCODE_7BIT_ASCII: {
             encodeSize = Encode7BitASCIIData(userData.userData, &pduStr[offset], remainBits);
+            TELEPHONY_LOGI("Encode7BitASCIIData remainBits %{public}d  offset %{public}d", remainBits, offset);
             offset += encodeSize;
             break;
         }
         case SMS_ENCODE_GSM7BIT: {
             encodeSize = Encode7BitGSMData(userData.userData, &pduStr[offset], remainBits);
+            TELEPHONY_LOGI("Encode7BitGSMData remainBits %{public}d  offset %{public}d", remainBits, offset);
             offset += encodeSize;
             break;
         }
         case SMS_ENCODE_UNICODE: {
             encodeSize = EncodeUCS2Data(userData.userData, &pduStr[offset], remainBits);
+            TELEPHONY_LOGI("EncodeUCS2Data remainBits %{public}d  offset %{public}d", remainBits, offset);
             offset += encodeSize;
             break;
         }
@@ -530,7 +535,9 @@ int CdmaSmsPduCodec::EncodeBearerUserData(const struct SmsTeleSvcUserData &userD
             break;
         }
     }
+
     ShiftNBit(&pduStr[lenIndex + 1], offset - lenIndex - 1, SHIFT_3BITS);
+
     int padding = 0;
     padding = (remainBits > 0) ? (BYTE_BITS - remainBits) : 0;
     if (padding >= SHIFT_3BITS) {
@@ -1539,7 +1546,7 @@ int CdmaSmsPduCodec::Encode7BitASCIIData(const struct SmsUserData &userData, uns
         return shift;
     }
     for (int i = 0; i < userData.length; i++) {
-        temp[i] = userData.data[i] << SHIFT_1BITS;
+        temp[i] = static_cast<unsigned char>(userData.data[i]) << SHIFT_1BITS;
     }
 
     int j = 0;

@@ -15,9 +15,8 @@
 import("//build/ohos.gni")
 ohos_executable("tel_sms_mms_test") {
   sources = [
-    "//base/telephony/sms_mms/frameworks/native/src/short_message.cpp",
-    "//base/telephony/sms_mms/frameworks/native/src/sms_service_proxy.cpp",
     "gsm_sms_sender_test.cpp",
+    "mms_msg_test.cpp",
     "short_message_test.cpp",
     "sms_broadcast_subscriber.cpp",
     "sms_cb_message_test.cpp",
@@ -27,15 +26,9 @@ ohos_executable("tel_sms_mms_test") {
   ]
 
   include_dirs = [
-    "//base/telephony/sms_mms/services/include",
-    "//base/telephony/sms_mms/services/include/cdma",
-    "//base/telephony/sms_mms/services/include/gsm",
-    "//base/telephony/sms_mms/utils",
     "//base/telephony/ril_adapter/interfaces/innerkits/include",
-    "//base/telephony/sms_mms/interfaces/innerkits",
     "//base/telephony/core_service/interfaces/innerkits/common",
     "//base/telephony/core_service/interfaces/kits/include/",
-    "//base/telephony/sms_mms/frameworks/native/include",
     "//base/telephony/core_service/interfaces/innerkits/network_search",
     "//base/telephony/core_service/interfaces/innerkits/core",
     "//base/telephony/core_service/interfaces/innerkits/sim",
@@ -47,14 +40,25 @@ ohos_executable("tel_sms_mms_test") {
     "//base/telephony/core_service:tel_core_service",
     "//base/telephony/core_service/utils:libtelephony_common",
     "//base/telephony/sms_mms:tel_sms_mms",
+    "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
+    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
+    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
+    "//foundation/aafwk/standard/interfaces/innerkits/base:base",
+    "//foundation/appexecfwk/standard/common:libappexecfwk_common",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
+    "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
     "//utils/native/base:utils",
   ]
+
   external_deps = [
     "aafwk_standard:want",
     "appexecfwk_standard:libeventhandler",
     "ces_standard:cesfwk_innerkits",
     "ces_standard:cesfwk_services",
     "ipc:ipc_core",
+    "native_appdatamgr:native_appdatafwk",
+    "native_appdatamgr:native_dataability",
+    "native_appdatamgr:native_rdb",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
   ]

@@ -11,8 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//base/telephony/core_service/telephony.gni")
 import("//build/ohos.gni")
 SOURCE_DIR = "//base/telephony/sms_mms"
+
+config("tel_sms_mms_config") {
+  visibility = [ "./*" ]
+  include_dirs = [
+    "utils",
+    "services/include",
+    "services/include/cdma",
+    "services/include/gsm",
+  ]
+}
 
 ohos_shared_library("tel_sms_mms") {
   sources = [
@@ -28,14 +39,15 @@ ohos_shared_library("tel_sms_mms") {
     "$SOURCE_DIR/services/gsm/gsm_sms_tpdu_codec.cpp",
     "$SOURCE_DIR/services/gsm/gsm_sms_udata_codec.cpp",
     "$SOURCE_DIR/services/proxy/sms_delivery_short_message_proxy.cpp",
-    "$SOURCE_DIR/services/proxy/sms_send_short_message_proxy.cpp",
+    "$SOURCE_DIR/services/proxy/sms_send_message_proxy.cpp",
     "$SOURCE_DIR/services/sms_base_message.cpp",
     "$SOURCE_DIR/services/sms_cb_message.cpp",
-    "$SOURCE_DIR/services/sms_data_base_helper.cpp",
     "$SOURCE_DIR/services/sms_dump_helper.cpp",
     "$SOURCE_DIR/services/sms_interface_manager.cpp",
     "$SOURCE_DIR/services/sms_interface_stub.cpp",
     "$SOURCE_DIR/services/sms_misc_manager.cpp",
+    "$SOURCE_DIR/services/sms_network_policy_manager.cpp",
+    "$SOURCE_DIR/services/sms_persist_helper.cpp",
     "$SOURCE_DIR/services/sms_receive_handler.cpp",
     "$SOURCE_DIR/services/sms_receive_indexer.cpp",
     "$SOURCE_DIR/services/sms_receive_manager.cpp",
@@ -43,18 +55,17 @@ ohos_shared_library("tel_sms_mms") {
     "$SOURCE_DIR/services/sms_send_manager.cpp",
     "$SOURCE_DIR/services/sms_sender.cpp",
     "$SOURCE_DIR/services/sms_service.cpp",
+    "$SOURCE_DIR/services/sms_wap_push_buffer.cpp",
+    "$SOURCE_DIR/services/sms_wap_push_content_type.cpp",
+    "$SOURCE_DIR/services/sms_wap_push_handler.cpp",
     "$SOURCE_DIR/utils/msg_text_convert.cpp",
     "$SOURCE_DIR/utils/sms_common_utils.cpp",
     "$SOURCE_DIR/utils/string_utils.cpp",
-    "//base/telephony/sms_mms/frameworks/native/src/short_message.cpp",
+    "//base/telephony/sms_mms/frameworks/native/sms/src/short_message.cpp",
   ]
 
   include_dirs = [
-    "utils",
-    "interfaces/innerkits",
-    "services/include",
-    "services/include/cdma",
-    "services/include/gsm",
+    ":tel_sms_mms_config",
     "//third_party/glib/glib",
     "//third_party/glib",
     "//third_party/glib/gmodule",
@@ -64,12 +75,14 @@ ohos_shared_library("tel_sms_mms") {
     "//base/telephony/core_service/common/core",
     "//base/telephony/core_service/common/cellular_data",
     "//base/telephony/sms_mms/interfaces/innerkits/",
-    "//base/telephony/sms_mms/frameworks/native/include",
+    "//base/telephony/sms_mms/frameworks/native/sms/include",
   ]
 
   deps = [
+    "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
     "//base/telephony/core_service:tel_core_service",
     "//base/telephony/core_service/utils:libtelephony_common",
+    "//base/telephony/sms_mms/frameworks/native/mms:mms_native_source",
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
@@ -96,10 +109,14 @@ ohos_shared_library("tel_sms_mms") {
     "LOG_DOMAIN = 0xD002B01",
   ]
 
+  public_configs = [ ":tel_sms_mms_config" ]
+
   if (is_standard_system) {
     external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps += [ "startup_l2:syspara" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
+    external_deps += [ "startup:syspara" ]
   }
 
   part_name = "sms_mms"

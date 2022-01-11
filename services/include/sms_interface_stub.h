@@ -55,7 +55,10 @@ private:
     void OnSetDefaultSmsSlotId(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetDefaultSmsSlotId(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSplitMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-    void OnCalculateLength(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnGetSmsSegmentsInfo(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnIsImsSmsSupported(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnGetImsShortMessageFormat(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnHasSmsCapability(MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
     std::map<uint32_t, std::shared_ptr<SmsInterfaceManager>> slotSmsInterfaceManagerMap_;
     using SmsServiceFunc = void (SmsInterfaceStub::*)(

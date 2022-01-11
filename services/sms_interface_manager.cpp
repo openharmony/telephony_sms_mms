@@ -28,18 +28,12 @@ SmsInterfaceManager::~SmsInterfaceManager() {}
 
 void SmsInterfaceManager::InitInterfaceManager()
 {
-    smsSendManagerRunner_ = AppExecFwk::EventRunner::Create("SmsSMEventLoop" + to_string(slotId_));
-    if (smsSendManagerRunner_ == nullptr) {
-        TELEPHONY_LOGE("failed to create SmsSendManagerRunner_");
-        return;
-    }
-    smsSendManager_ = make_shared<SmsSendManager>(smsSendManagerRunner_, slotId_);
+    smsSendManager_ = make_unique<SmsSendManager>(slotId_);
     if (smsSendManager_ == nullptr) {
         TELEPHONY_LOGE("failed to create SmsSendManager");
         return;
     }
     smsSendManager_->Init();
-    smsSendManagerRunner_->Run();
 
     smsReceiveManager_ = make_unique<SmsReceiveManager>(slotId_);
     if (smsReceiveManager_ == nullptr) {
@@ -171,20 +165,49 @@ std::vector<std::string> SmsInterfaceManager::SplitMessage(const std::string &me
 {
     std::vector<std::string> result;
     if (smsSendManager_ == nullptr) {
-        TELEPHONY_LOGE("smsSendManager_ nullptr error.");
+        TELEPHONY_LOGE("smsSendManager nullptr error.");
         return result;
     }
     return smsSendManager_->SplitMessage(message);
 }
 
-std::vector<int32_t> SmsInterfaceManager::CalculateLength(const std::string &message, bool force7BitCode)
+bool SmsInterfaceManager::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &outInfo)
 {
-    std::vector<int32_t> result;
     if (smsSendManager_ == nullptr) {
-        TELEPHONY_LOGE("smsSendManager_ nullptr error.");
+        TELEPHONY_LOGE("smsSendManager nullptr error.");
+        return false;
+    }
+    return smsSendManager_->GetSmsSegmentsInfo(message, force7BitCode, outInfo);
+}
+
+bool SmsInterfaceManager::IsImsSmsSupported()
+{
+    bool result = false;
+    if (smsSendManager_ == nullptr) {
+        TELEPHONY_LOGE("smsSendManager is nullptr error.");
         return result;
     }
-    return smsSendManager_->CalculateLength(message, force7BitCode);
+    return smsSendManager_->IsImsSmsSupported();
+}
+
+std::string SmsInterfaceManager::GetImsShortMessageFormat()
+{
+    std::string result;
+    if (smsSendManager_ == nullptr) {
+        TELEPHONY_LOGE("smsSendManager is nullptr error.");
+        return result;
+    }
+    return smsSendManager_->GetImsShortMessageFormat();
+}
+
+bool SmsInterfaceManager::HasSmsCapability()
+{
+    auto helperPtr = DelayedSingleton<SmsPersistHelper>::GetInstance();
+    if (helperPtr == nullptr) {
+        TELEPHONY_LOGE("Get SmsPersistHelper Singleton nullptr error.");
+        return true;
+    }
+    return helperPtr->QueryParamBoolean(SmsPersistHelper::SMS_CAPABLE_PARAM_KEY, true);
 }
 } // namespace Telephony
 } // namespace OHOS

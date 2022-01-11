@@ -39,8 +39,6 @@ public:
     void ReceiveStatusReport(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
     void ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
     void ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
-    std::vector<std::string> SplitMessage(const std::string &message) override;
-    std::vector<int32_t> CalculateLength(const std::string &message, bool force7BitCode) override;
 
 protected:
     void StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event) override;
@@ -48,12 +46,12 @@ protected:
 private:
     static constexpr uint16_t TAPI_NETTEXT_SMDATA_SIZE_MAX = 255;
 
+    void SetConcact(const std::shared_ptr<SmsSendIndexer> &smsIndexer,
+        const std::unique_ptr<SmsTransMsg> &transMsg);
     uint8_t GetSeqNum();
     uint8_t GetSubmitMsgId();
-    void SetPduSeqInfo(const std::size_t size, const std::unique_ptr<SmsTransMsg> &transMsg,
-        const std::size_t index, const uint8_t msgRef8bit);
-    bool InitEncodeData(std::unique_ptr<SmsTransMsg> &transMsg,
-        const std::vector<struct SplitInfo> &splits, std::size_t index);
+    void SetPduSeqInfo(const std::shared_ptr<SmsSendIndexer> &smsIndexer, const std::size_t size,
+        const std::unique_ptr<SmsTransMsg> &transMsg, const std::size_t index, const uint8_t msgRef8bit);
 
     uint8_t msgSeqNum_;
     uint8_t msgSubmitId_;

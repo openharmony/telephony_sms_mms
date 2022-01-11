@@ -15,8 +15,11 @@
 
 #include "sms_send_manager.h"
 
-#include <cinttypes>
+#include <functional>
+#include <memory.h>
 
+#include "cdma_sms_message.h"
+#include "gsm_sms_message.h"
 #include "gsm_sms_tpdu_codec.h"
 #include "i_sms_service_interface.h"
 #include "sms_receive_manager.h"
@@ -25,34 +28,19 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
-SmsSendManager::SmsSendManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
-    : AppExecFwk::EventHandler(runner), slotId_(slotId)
-{}
+SmsSendManager::SmsSendManager(int32_t slotId) : slotId_(slotId) {}
 
 SmsSendManager::~SmsSendManager()
 {
-    UnRegisterHandler();
-}
-
-void SmsSendManager::RegisterHandler()
-{
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        TELEPHONY_LOGI("SmsSendManager::RegisterHandler Ok.");
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_ON, nullptr);
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_NETWORK_STATE, nullptr);
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_IMS_NETWORK_STATE_CHANGED, nullptr);
-        GetRadioState();
+    if (gsmSmsSender_ != nullptr) {
+        if (auto id = gsmSmsSender_->GetNetworkId(); id.has_value()) {
+            networkManager_->NetworkUnregister(id.value());
+        }
     }
-}
-
-void SmsSendManager::UnRegisterHandler()
-{
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_ON);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_NETWORK_STATE);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_IMS_NETWORK_STATE_CHANGED);
+    if (cdmaSmsSender_ != nullptr) {
+        if (auto id = cdmaSmsSender_->GetNetworkId(); id.has_value()) {
+            networkManager_->NetworkUnregister(id.value());
+        }
     }
 }
 
@@ -84,21 +72,48 @@ void SmsSendManager::Init()
         return;
     }
     cdmaSmsSendRunner_->Run();
-    RegisterHandler();
-    TELEPHONY_LOGI("Init SmsSenderHandler start successfully.");
+
+    networkRunner_ = AppExecFwk::EventRunner::Create("networkLoop" + to_string(slotId_));
+    if (networkRunner_ == nullptr) {
+        TELEPHONY_LOGE("failed to create networkRunner");
+        return;
+    }
+    networkManager_ = std::make_shared<SmsNetworkPolicyManager>(networkRunner_, slotId_);
+    if (networkManager_ == nullptr) {
+        TELEPHONY_LOGE("failed to create networkManager");
+        return;
+    }
+    networkManager_->Init();
+    networkRunner_->Run();
+    TELEPHONY_LOGI("Init SmsSendManager successfully.");
+    if (auto ret = networkManager_->NetworkRegister(
+        std::bind(&SmsSender::SetNetworkState, gsmSmsSender_, std::placeholders::_1, std::placeholders::_2));
+        ret.has_value()) {
+        gsmSmsSender_->SetNetworkId(ret);
+    } else {
+        TELEPHONY_LOGE("gsm failed to register networkManager");
+    }
+    if (auto ret = networkManager_->NetworkRegister(
+        std::bind(&SmsSender::SetNetworkState, cdmaSmsSender_, std::placeholders::_1, std::placeholders::_2));
+        ret.has_value()) {
+        cdmaSmsSender_->SetNetworkId(ret);
+    } else {
+        TELEPHONY_LOGE("cdma failed to register networkManager");
+    }
 }
 
 void SmsSendManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr) {
+    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr || networkManager_ == nullptr) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("gsmSmsSender or cdmaSmsSender nullptr error.");
         return;
     }
 
-    NetWorkType netWorkType = GetNetWorkType();
+    NetWorkType netWorkType = networkManager_->GetNetWorkType();
+    TELEPHONY_LOGI("netWorkType = %{public}d.", netWorkType);
     if (netWorkType == NetWorkType::NET_TYPE_GSM) {
         gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
     } else if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
@@ -114,13 +129,13 @@ void SmsSendManager::DataBasedSmsDelivery(const string &desAddr, const string &s
     const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr) {
+    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr || networkManager_ == nullptr) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("gsmSmsSender or cdmaSmsSender nullptr error.");
         return;
     }
 
-    NetWorkType netWorkType = GetNetWorkType();
+    NetWorkType netWorkType = networkManager_->GetNetWorkType();
     if (netWorkType == NetWorkType::NET_TYPE_GSM) {
         gsmSmsSender_->DataBasedSmsDelivery(desAddr, scAddr, port, data, dataLen, sendCallback, deliveryCallback);
     } else if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
@@ -138,13 +153,13 @@ void SmsSendManager::RetriedSmsDelivery(const shared_ptr<SmsSendIndexer> smsInde
         TELEPHONY_LOGI("smsIndexer is nullptr error.");
         return;
     }
-    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr) {
-        TELEPHONY_LOGE("gsmSmsSender or cdmaSmsSender nullptr error.");
+    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr || networkManager_ == nullptr) {
+        TELEPHONY_LOGE("Sender or network nullptr error.");
         return;
     }
 
     NetWorkType oldNetWorkType = smsIndexer->GetNetWorkType();
-    NetWorkType newNetWorkType = GetNetWorkType();
+    NetWorkType newNetWorkType = networkManager_->GetNetWorkType();
     if (oldNetWorkType != newNetWorkType) {
         smsIndexer->SetNetWorkType(newNetWorkType);
         shared_ptr<SmsSendIndexer> indexer = smsIndexer;
@@ -182,125 +197,91 @@ void SmsSendManager::RetriedSmsDelivery(const shared_ptr<SmsSendIndexer> smsInde
     }
 }
 
-NetWorkType SmsSendManager::GetNetWorkType()
-{
-    NetWorkType netWorkType = NetWorkType::NET_TYPE_UNKNOWN;
-    if (netDomainType_ == NetDomainType::NET_DOMAIN_CS) {
-        netWorkType = csNetWorkType_;
-    } else if (netDomainType_ == NetDomainType::NET_DOMAIN_IMS) {
-        netWorkType = imsNetWorkType_;
-    }
-    return netWorkType;
-}
-
-void SmsSendManager::HandlerRadioState(const AppExecFwk::InnerEvent::Pointer &event)
-{
-    if (event == nullptr) {
-        TELEPHONY_LOGE("HandlerRadioState event == nullptr");
-        return;
-    }
-    std::unique_ptr<HRilRadioStateInfo> object = event->GetUniqueObject<HRilRadioStateInfo>();
-    if (object == nullptr) {
-        TELEPHONY_LOGE("HRilRadioStateInfo object nullptr error.");
-        return;
-    }
-
-    int64_t radioState = object->state;
-    TELEPHONY_LOGI("HandlerRadioState state %{public}" PRId64 "", radioState);
-    switch (radioState) {
-        case static_cast<int64_t>(OHOS::Telephony::ModemPowerState::CORE_SERVICE_POWER_ON):
-            TELEPHONY_LOGI("SmsSendManager::HandlerRadioState RADIO_ON");
-            netDomainType_ = NetDomainType::NET_DOMAIN_CS;
-            csNetWorkType_ = NetWorkType::NET_TYPE_GSM;
-            break;
-        case static_cast<int64_t>(OHOS::Telephony::ModemPowerState::CORE_SERVICE_POWER_NOT_AVAILABLE):
-        case static_cast<int64_t>(OHOS::Telephony::ModemPowerState::CORE_SERVICE_POWER_OFF):
-        default:
-            TELEPHONY_LOGI("SmsSendManager::HandlerRadioState RADIO_OFF");
-            netDomainType_ = NetDomainType::NET_DOMAIN_UNKNOWN;
-            csNetWorkType_ = NetWorkType::NET_TYPE_UNKNOWN;
-            break;
-    }
-}
-
-void SmsSendManager::GetRadioState()
-{
-    std::shared_ptr<Core> core = GetCore();
-    auto event = AppExecFwk::InnerEvent::Get(ObserverHandler::RADIO_GET_STATUS);
-    if (event != nullptr && core != nullptr) {
-        event->SetOwner(shared_from_this());
-        core->GetRadioState(event);
-    }
-}
-
-void SmsSendManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
-{
-    if (event == nullptr) {
-        TELEPHONY_LOGE("SmsSendManager::ProcessEvent event == nullptr");
-        return;
-    }
-
-    int eventId = 0;
-    eventId = event->GetInnerEventId();
-    TELEPHONY_LOGI("SmsSendManager::ProcessEvent Handler Rec%{public}d", eventId);
-    switch (eventId) {
-        case ObserverHandler::RADIO_ON:
-        case ObserverHandler::RADIO_NETWORK_STATE:
-        case ObserverHandler::RADIO_IMS_NETWORK_STATE_CHANGED:
-            GetRadioState();
-            break;
-        case ObserverHandler::RADIO_RIL_IMS_REGISTRATION_STATE:
-            break;
-        case ObserverHandler::RADIO_GET_STATUS:
-            HandlerRadioState(event);
-            break;
-        default:
-            break;
-    }
-}
-
 std::vector<std::string> SmsSendManager::SplitMessage(const std::string &message)
 {
     std::vector<std::string> result;
-    if (cdmaSmsSender_ == nullptr || gsmSmsSender_ == nullptr) {
+    if (networkManager_ == nullptr) {
         TELEPHONY_LOGE("SmsSendManager::SplitMessage cdmaSmsSender_ or gsmSmsSender_ is nullptr");
         return result;
     }
-    NetWorkType netWorkType = GetNetWorkType();
-    if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
-        return cdmaSmsSender_->SplitMessage(message);
-    } else {
-        return gsmSmsSender_->SplitMessage(message);
+
+    SmsCodingScheme codingType;
+    std::vector<struct SplitInfo> cellsInfos;
+    NetWorkType netWorkType = networkManager_->GetNetWorkType();
+    switch (netWorkType) {
+        case NetWorkType::NET_TYPE_CDMA: {
+            GsmSmsMessage gsmSmsMessage;
+            gsmSmsMessage.SplitMessage(cellsInfos, message, false, codingType);
+            break;
+        }
+        case NetWorkType::NET_TYPE_GSM: {
+            CdmaSmsMessage cdmaSmsMessage;
+            cdmaSmsMessage.SplitMessage(cellsInfos, message, false, codingType);
+            break;
+        }
+        default:
+            TELEPHONY_LOGE("netWorkType is NET_TYPE_UNKNOWN");
+            break;
     }
+
+    for (auto &item : cellsInfos) {
+        result.emplace_back(item.text);
+    }
+    return result;
 }
 
-std::vector<int32_t> SmsSendManager::CalculateLength(const std::string &message, bool force7BitCode)
+bool SmsSendManager::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo)
 {
-    std::vector<int32_t> result;
-    if (cdmaSmsSender_ == nullptr || gsmSmsSender_ == nullptr) {
-        TELEPHONY_LOGE("CalculateLength cdmaSmsSender_ or gsmSmsSender_ is nullptr");
-        return result;
+    if (networkManager_ == nullptr) {
+        TELEPHONY_LOGE("GetSmsSegmentsInfo Sender_ or networkManager_ is nullptr");
+        return false;
     }
-    NetWorkType netWorkType = GetNetWorkType();
-    if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
-        return cdmaSmsSender_->CalculateLength(message, force7BitCode);
-    } else {
-        return gsmSmsSender_->CalculateLength(message, force7BitCode);
+    NetWorkType netWorkType = networkManager_->GetNetWorkType();
+    switch (netWorkType) {
+        case NetWorkType::NET_TYPE_CDMA: {
+            CdmaSmsMessage cdmaSmsMessage;
+            return cdmaSmsMessage.GetSmsSegmentsInfo(message, force7BitCode, lenInfo);
+        }
+        case NetWorkType::NET_TYPE_GSM: {
+            GsmSmsMessage gsmSmsMessage;
+            return gsmSmsMessage.GetSmsSegmentsInfo(message, force7BitCode, lenInfo);
+        }
+        default:
+            TELEPHONY_LOGE("netWorkType is NET_TYPE_UNKNOWN");
+            break;
     }
-}
-
-std::shared_ptr<Core> SmsSendManager::GetCore() const
-{
-    std::shared_ptr<Core> core = CoreManager::GetInstance().getCore(slotId_);
-    if (core != nullptr && core->IsInitCore()) {
-        return core;
-    }
-    return nullptr;
+    return false;
 }
 
 std::shared_ptr<SmsSender> SmsSendManager::GetCdmaSmsSender() const
 {
     return cdmaSmsSender_;
+}
+
+bool SmsSendManager::IsImsSmsSupported()
+{
+    bool result = false;
+    if (networkManager_ == nullptr) {
+        TELEPHONY_LOGE("networkManager is nullptr.");
+        return result;
+    }
+    return networkManager_->IsImsNetDomain();
+}
+
+std::string SmsSendManager::GetImsShortMessageFormat()
+{
+    if (networkManager_ == nullptr) {
+        TELEPHONY_LOGE("networkManager_ is nullptr.");
+        return "unknown";
+    }
+    NetWorkType netWorkType = networkManager_->GetNetWorkType();
+    if (netWorkType == NET_TYPE_GSM) {
+        return "3gpp";
+    } else if (netWorkType == NET_TYPE_CDMA) {
+        return "3gpp2";
+    } else {
+        return "unknown";
+    }
 }
 } // namespace Telephony
 } // namespace OHOS

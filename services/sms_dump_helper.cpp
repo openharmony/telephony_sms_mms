@@ -30,7 +30,7 @@ bool SmsDumpHelper::Dump(const std::vector<std::string> &args, std::string &resu
 
 SmsDumpHelper::SmsDumpHelper()
 {
-    TELEPHONY_LOGD("SmsDumpHelper() entry.");
+    TELEPHONY_LOGI("SmsDumpHelper() entry.");
 }
 
 void SmsDumpHelper::ShowHelp(std::string &result) const

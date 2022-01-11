@@ -92,7 +92,6 @@ private:
     int CalcReplyEncodeAddress(const std::string &replyAddress);
     virtual int DecodeMessage(unsigned char *decodeData, SmsCodingScheme &codingType, const std::string &msgText,
         bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
-    bool GetUserData();
 };
 
 struct EncodeInfo {

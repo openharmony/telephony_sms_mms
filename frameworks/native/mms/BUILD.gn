@@ -1,0 +1,80 @@
+# Copyright (C) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+SOURCE_DIR = "//base/telephony/sms_mms/frameworks/native/mms"
+
+config("mms_native_config") {
+  visibility = [ "*:*" ]
+  include_dirs = [
+    "$SOURCE_DIR/include",
+    "$SOURCE_DIR/include/utils",
+    "//base/telephony/sms_mms/interfaces/innerkits",
+  ]
+}
+
+ohos_source_set("mms_native_source") {
+  sources = [
+    "$SOURCE_DIR/src/mms_address.cpp",
+    "$SOURCE_DIR/src/mms_attachment.cpp",
+    "$SOURCE_DIR/src/mms_body.cpp",
+    "$SOURCE_DIR/src/mms_body_part.cpp",
+    "$SOURCE_DIR/src/mms_body_part_header.cpp",
+    "$SOURCE_DIR/src/mms_buffer.cpp",
+    "$SOURCE_DIR/src/mms_content_param.cpp",
+    "$SOURCE_DIR/src/mms_content_type.cpp",
+    "$SOURCE_DIR/src/mms_decode_buffer.cpp",
+    "$SOURCE_DIR/src/mms_encode_buffer.cpp",
+    "$SOURCE_DIR/src/mms_encode_string.cpp",
+    "$SOURCE_DIR/src/mms_header.cpp",
+    "$SOURCE_DIR/src/mms_header_categ.cpp",
+    "$SOURCE_DIR/src/mms_msg.cpp",
+    "$SOURCE_DIR/src/utils/mms_base64.cpp",
+    "$SOURCE_DIR/src/utils/mms_charset.cpp",
+    "$SOURCE_DIR/src/utils/mms_quoted_printable.cpp",
+  ]
+
+  include_dirs = [
+    ":mms_native_config",
+    "//third_party/glib/glib",
+    "//third_party/glib",
+    "//third_party/glib/gmodule",
+  ]
+
+  deps = [
+    "//base/telephony/core_service/utils:libtelephony_common",
+    "//third_party/glib:glib_packages",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = [
+    "aafwk_standard:want",
+    "ces_standard:cesfwk_innerkits",
+    "ces_standard:cesfwk_services",
+    "safwk:system_ability_fwk",
+    "samgr_standard:samgr_proxy",
+  ]
+
+  defines = [
+    "TELEPHONY_LOG_TAG = \"SMS_MMS\"",
+    "LOG_DOMAIN = 0xD002B01",
+  ]
+
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
+  public_configs = [ ":mms_native_config" ]
+}

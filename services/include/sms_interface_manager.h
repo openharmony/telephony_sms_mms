@@ -25,6 +25,7 @@
 #include "sms_receive_manager.h"
 #include "sms_send_manager.h"
 #include "sms_misc_manager.h"
+#include "sms_persist_helper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -51,11 +52,14 @@ public:
     bool SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
     std::vector<std::string> SplitMessage(const std::string &message);
-    std::vector<int32_t> CalculateLength(const std::string &message, bool force7BitCode);
+    bool GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &outInfo);
+    bool IsImsSmsSupported();
+    std::string GetImsShortMessageFormat();
+    bool HasSmsCapability();
 
 private:
     int32_t slotId_;
-    std::shared_ptr<SmsSendManager> smsSendManager_;
+    std::unique_ptr<SmsSendManager> smsSendManager_;
     std::unique_ptr<SmsReceiveManager> smsReceiveManager_;
     std::shared_ptr<AppExecFwk::EventRunner> smsSendManagerRunner_;
     std::shared_ptr<SmsMiscManager> smsMiscManager_;

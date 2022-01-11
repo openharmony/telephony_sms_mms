@@ -325,18 +325,23 @@ int GsmSmsUDataCodec::Decode8bitData(
     if (bHeaderInd == true) {
         /* UDHL */
         udhl = pTpdu[offset++];
+        TELEPHONY_LOGI("udhl = %{public}d", udhl);
         pUserData->headerCnt = 0;
         for (int i = 0; offset < udhl; i++) {
             headerLen = DecodeHeader(&(pTpdu[offset]), &(pUserData->header[i]));
             if (headerLen <= 0) {
-                TELEPHONY_LOGI("Error to Header. headerLen [%{public}d]", headerLen);
-                ResetUserData(*pUserData);
+                pUserData->length = 0;
+                if (memset_s(pUserData->data, sizeof(pUserData->data), 0x00, sizeof(pUserData->data)) != EOK) {
+                    TELEPHONY_LOGE("memset_s fail.");
+                }
                 return 0;
             }
             offset += headerLen;
             if (offset > (udhl + HEX_BYTE_STEP)) {
-                TELEPHONY_LOGI("Error to Header. offset [%{public}d] > (udhl [%{public}d] + 2)", offset, udhl);
-                ResetUserData(*pUserData);
+                pUserData->length = 0;
+                if (memset_s(pUserData->data, sizeof(pUserData->data), 0x00, sizeof(pUserData->data)) != EOK) {
+                    TELEPHONY_LOGE("memset_s fail.");
+                }
                 return 0;
             }
             pUserData->headerCnt++;

@@ -26,6 +26,12 @@ class SmsDeliveryShortMessageProxy : public IRemoteProxy<IDeliveryShortMessageCa
 public:
     explicit SmsDeliveryShortMessageProxy(const sptr<IRemoteObject> &impl);
     virtual ~SmsDeliveryShortMessageProxy() = default;
+
+    /**
+     * @brief OnSmsDeliveryResult
+     * Status of the sent SMS on the recipient.
+     * @param pdu [in]
+     */
     virtual void OnSmsDeliveryResult(const std::u16string pdu) override;
 
 protected:
