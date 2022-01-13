@@ -832,22 +832,26 @@ int MsgTextConvert::ConvertUCS2ToGSM7bit(OUT unsigned char *pDestText, IN int ma
             switch (currType) {
                 case MSG_GSM7EXT_CHAR:
                     remainLen = maxLength - outTextLen;
-                    outTextLen += FindUCS2toGSM7Ext(&pDestText[outTextLen++], remainLen, inText, *abnormalChar);
+                    outTextLen += FindUCS2toGSM7Ext(&pDestText[outTextLen], remainLen, inText, *abnormalChar);
+                    outTextLen++;
                     break;
                 case MSG_TURKISH_CHAR:
                     *pLangId = MSG_ID_TURKISH_LANG;
                     remainLen = maxLength - outTextLen;
-                    outTextLen += FindUCS2toTurkish(&pDestText[outTextLen++], remainLen, inText, *abnormalChar);
+                    outTextLen += FindUCS2toTurkish(&pDestText[outTextLen], remainLen, inText, *abnormalChar);
+                    outTextLen++;
                     break;
                 case MSG_SPANISH_CHAR:
                     *pLangId = MSG_ID_SPANISH_LANG;
                     remainLen = maxLength - outTextLen;
-                    outTextLen += FindUCS2toSpanish(&pDestText[outTextLen++], remainLen, inText, *abnormalChar);
+                    outTextLen += FindUCS2toSpanish(&pDestText[outTextLen], remainLen, inText, *abnormalChar);
+                    outTextLen++;
                     break;
                 case MSG_PORTUGUESE_CHAR:
                     *pLangId = MSG_ID_PORTUGUESE_LANG;
                     remainLen = maxLength - outTextLen;
-                    outTextLen += FindUCS2toPortu(&pDestText[outTextLen++], remainLen, inText, *abnormalChar);
+                    outTextLen += FindUCS2toPortu(&pDestText[outTextLen], remainLen, inText, *abnormalChar);
+                    outTextLen++;
                     break;
                 default:
                     pDestText[outTextLen++] = FindUCS2ReplaceChar(inText);
