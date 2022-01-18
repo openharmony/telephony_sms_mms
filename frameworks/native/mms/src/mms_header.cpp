@@ -168,7 +168,7 @@ bool MmsHeader::DecodeMmsHeader(MmsDecodeBuffer &decodeBuffer)
         if (decodeFunc != memberFuncMap_.end()) {
             auto fun = decodeFunc->second;
             if (fun != nullptr && !(this->*fun)(fieldCode, decodeBuffer, len)) {
-                TELEPHONY_LOGE("Decode header fail.");
+                TELEPHONY_LOGE("The fieldId[%{public}d] decode header fail.", fieldCode);
                 return false;
             }
             if (fieldCode == MMS_CONTENT_TYPE) {
@@ -396,6 +396,10 @@ bool MmsHeader::GetTextValue(uint8_t fieldId, std::string &value) const
 
 bool MmsHeader::SetTextValue(uint8_t fieldId, std::string value)
 {
+    if (value.empty()) {
+        TELEPHONY_LOGE("fieldId[%{public}d] The Value Is Empty Error.", fieldId);
+        return false;
+    }
     if (mmsHaderCateg_.FindFieldDes(fieldId) != MmsFieldValueType::MMS_FIELD_TEXT_TYPE) {
         TELEPHONY_LOGE("The fieldId[%{public}02X] value is not belong to TextValue.", fieldId);
         return false;
@@ -416,6 +420,10 @@ bool MmsHeader::GetEncodeStringValue(uint8_t fieldId, MmsEncodeString &value) co
 
 bool MmsHeader::SetEncodeStringValue(uint8_t fieldId, uint32_t charset, const std::string &value)
 {
+    if (value.empty()) {
+        TELEPHONY_LOGE("fieldId[%{public}d] The Value Is Empty Error.", fieldId);
+        return false;
+    }
     if (mmsHaderCateg_.FindFieldDes(fieldId) != MmsFieldValueType::MMS_FIELD_ENCODE_TEXT_TYPE) {
         TELEPHONY_LOGE("The fieldId[%{public}02X] value is not belong to EncodeString.", fieldId);
         return false;
@@ -431,6 +439,11 @@ bool MmsHeader::SetEncodeStringValue(uint8_t fieldId, uint32_t charset, const st
 
 bool MmsHeader::AddHeaderAddressValue(uint8_t fieldId, MmsAddress &address)
 {
+    std::string strAddress = address.GetAddressString();
+    if (strAddress.empty() && fieldId != MMS_FROM) {
+        TELEPHONY_LOGE("Address is empty error.");
+        return false;
+    }
     if (mmsHaderCateg_.FindFieldDes(fieldId) != MmsFieldValueType::MMS_FIELD_ENCODE_ADDR_TYPE) {
         TELEPHONY_LOGE("The fieldId[%{public}02X] value is not belong to EncodeString.", fieldId);
         return false;
@@ -466,7 +479,7 @@ bool MmsHeader::GetStringValue(uint8_t fieldId, std::string &value) const
         value.clear();
         MmsEncodeString eValue;
         if (!GetEncodeStringValue(fieldId, eValue)) {
-            TELEPHONY_LOGE("MmsHeader GetEncodeStringValue fail.");
+            TELEPHONY_LOGE("The fieldId[%{public}d] GetEncodeStringValue fail.", fieldId);
             return false;
         }
         eValue.GetEncodeString(value);
@@ -495,7 +508,7 @@ bool MmsHeader::DecodeMmsMsgType(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t
 {
     std::string fieldName;
     if (!FindHeaderFieldName(fieldId, fieldName)) {
-        TELEPHONY_LOGE("MmsHeader FindHeaderFieldName fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader FindHeaderFieldName fail.", fieldId);
         return false;
     }
 
@@ -528,7 +541,7 @@ bool MmsHeader::DecodeFieldAddressModelValue(uint8_t fieldId, MmsDecodeBuffer &b
 {
     std::string fieldName;
     if (!FindHeaderFieldName(fieldId, fieldName)) {
-        TELEPHONY_LOGE("MmsHeader FindHeaderFieldName fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader FindHeaderFieldName fail.", fieldId);
         return false;
     }
 
@@ -555,7 +568,7 @@ bool MmsHeader::DecodeFieldOctetValue(uint8_t fieldId, MmsDecodeBuffer &buff, in
 {
     std::string fieldName;
     if (!FindHeaderFieldName(fieldId, fieldName)) {
-        TELEPHONY_LOGE("MmsHeader FindHeaderFieldName fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader FindHeaderFieldName fail.", fieldId);
         return false;
     }
     uint8_t oneByte = 0;
@@ -577,7 +590,7 @@ bool MmsHeader::DecodeFieldLongValue(uint8_t fieldId, MmsDecodeBuffer &buff, int
 
     uint64_t value = 0;
     if (!buff.DecodeLongInteger(value)) {
-        TELEPHONY_LOGE("MmsHeader DecodeLongInteger fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeLongInteger fail.", fieldId);
         return false;
     }
     auto ret = longValueMap_.emplace(fieldId, value);
@@ -621,7 +634,7 @@ bool MmsHeader::DecodeFieldTextStringValue(uint8_t fieldId, MmsDecodeBuffer &buf
     std::string tempString;
     uint32_t tempLen = 0;
     if (!buff.DecodeText(tempString, tempLen)) {
-        TELEPHONY_LOGE("MmsHeader DecodeText fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeText fail.", fieldId);
         return false;
     }
 
@@ -640,7 +653,7 @@ bool MmsHeader::DecodeFieldEncodedStringValue(uint8_t fieldId, MmsDecodeBuffer &
 
     MmsEncodeString encodeString;
     if (!encodeString.DecodeEncodeString(buff)) {
-        TELEPHONY_LOGE("MmsHeader DecodeEncodeString fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeEncodeString fail.", fieldId);
         return false;
     }
     encodeStringsMap_.emplace(fieldId, encodeString);
@@ -672,7 +685,7 @@ bool MmsHeader::DecodeFromValue(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t 
 
     uint32_t valueLength = 0;
     if (!buff.DecodeValueLength(valueLength)) {
-        TELEPHONY_LOGE("MmsHeader DecodeValueLength fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeValueLength fail.", fieldId);
         return false;
     }
 
@@ -741,7 +754,7 @@ bool MmsHeader::DecodeMmsContentType(uint8_t fieldId, MmsDecodeBuffer &buff, int
 {
     std::string fieldName;
     if (!FindHeaderFieldName(fieldId, fieldName)) {
-        TELEPHONY_LOGE("MmsHeader FindHeaderFieldName fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader FindHeaderFieldName fail.", fieldId);
         return false;
     }
     if (mmsContentType_.DecodeMmsContentType(buff, len)) {
@@ -774,7 +787,7 @@ bool MmsHeader::DecodeFieldIntegerValue(uint8_t fieldId, MmsDecodeBuffer &buff, 
 
     uint64_t value = 0;
     if (!buff.DecodeInteger(value)) {
-        TELEPHONY_LOGE("MmsHeader DecodeInteger fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeInteger fail.", fieldId);
         return false;
     }
     auto ret = longValueMap_.emplace(fieldId, value);
@@ -804,7 +817,7 @@ bool MmsHeader::DecodeFieldDate(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t 
     const uint8_t relativeToken = 0x81;
     uint32_t length = 0;
     if (!buff.DecodeValueLength(length)) {
-        TELEPHONY_LOGE("MmsHeader DecodeValueLength fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeValueLength fail.", fieldId);
         return false;
     }
     /* Absolute-token or Relative-token */
@@ -816,7 +829,7 @@ bool MmsHeader::DecodeFieldDate(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t 
     /* Date-value or Delta-seconds-value */
     uint64_t timeValue = 0;
     if (!buff.DecodeLongInteger(timeValue)) {
-        TELEPHONY_LOGE("MmsHeader DecodeLongInteger fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeLongInteger fail.", fieldId);
         return false;
     }
     if (relativeToken == token) {
@@ -857,16 +870,16 @@ bool MmsHeader::DecodeFieldPreviouslySentDate(uint8_t fieldId, MmsDecodeBuffer &
     uint64_t count = 0;
     uint64_t perviouslySentDate = 0;
     if (!buff.DecodeValueLength(length)) {
-        TELEPHONY_LOGE("MmsHeader DecodeValueLength fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeValueLength fail.", fieldId);
         return false;
     }
     /* parse Forwarded-count-value */
     if (!buff.DecodeInteger(count)) {
-        TELEPHONY_LOGE("MmsHeader DecodeInteger fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeInteger fail.", fieldId);
         return false;
     }
     if (!buff.DecodeLongInteger(perviouslySentDate)) {
-        TELEPHONY_LOGE("MmsHeader DecodeLongInteger fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeLongInteger fail.", fieldId);
         return false;
     }
     auto ret = longValueMap_.emplace(fieldId, perviouslySentDate);
@@ -897,7 +910,7 @@ bool MmsHeader::DecodeFieldMBox(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t 
      * (Message-total-token | Size-total-token) Integer-Value */
     uint32_t length = 0;
     if (!buff.DecodeValueLength(length)) {
-        TELEPHONY_LOGE("MmsHeader DecodeValueLength fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeValueLength fail.", fieldId);
         return false;
     }
     uint8_t token = 0;
@@ -907,7 +920,7 @@ bool MmsHeader::DecodeFieldMBox(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t 
     }
     uint64_t value = 0;
     if (!buff.DecodeInteger(value)) {
-        TELEPHONY_LOGE("MmsHeader DecodeInteger fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeInteger fail.", fieldId);
         return false;
     }
     return true;
@@ -936,7 +949,7 @@ bool MmsHeader::DecodeFieldMMFlag(uint8_t fieldId, MmsDecodeBuffer &buff, int32_
 
     uint32_t length = 0;
     if (!buff.DecodeValueLength(length)) {
-        TELEPHONY_LOGE("MmsHeader DecodeValueLength fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeValueLength fail.", fieldId);
         return false;
     }
     uint8_t token = 0;
@@ -946,7 +959,7 @@ bool MmsHeader::DecodeFieldMMFlag(uint8_t fieldId, MmsDecodeBuffer &buff, int32_
     }
     MmsEncodeString encodeString;
     if (!encodeString.DecodeEncodeString(buff)) {
-        TELEPHONY_LOGE("MmsHeader DecodeEncodeString fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeEncodeString fail.", fieldId);
         return false;
     }
     return true;
@@ -965,11 +978,11 @@ bool MmsHeader::IsHaveBody()
 bool MmsHeader::EncodeOctetValue(MmsEncodeBuffer &buff, uint8_t fieldId, uint8_t value)
 {
     if (!buff.WriteByte(fieldId)) {
-        TELEPHONY_LOGE("MmsHeader WriteByte fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader WriteByte fail.", fieldId);
         return false;
     }
     if (!buff.WriteByte(value)) {
-        TELEPHONY_LOGE("MmsHeader WriteByte fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader WriteByte fail.", fieldId);
         return false;
     }
     return true;
@@ -978,11 +991,11 @@ bool MmsHeader::EncodeOctetValue(MmsEncodeBuffer &buff, uint8_t fieldId, uint8_t
 bool MmsHeader::EncodeShortIntegerValue(MmsEncodeBuffer &buff, uint8_t fieldId, int64_t value)
 {
     if (!buff.WriteByte(fieldId)) {
-        TELEPHONY_LOGE("MmsHeader WriteByte fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader WriteByte fail.", fieldId);
         return false;
     }
     if (!buff.EncodeShortInteger(value)) {
-        TELEPHONY_LOGE("MmsHeader EncodeShortInteger fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeShortInteger fail.", fieldId);
         return false;
     }
     return true;
@@ -990,12 +1003,16 @@ bool MmsHeader::EncodeShortIntegerValue(MmsEncodeBuffer &buff, uint8_t fieldId, 
 
 bool MmsHeader::EncodeTextStringValue(MmsEncodeBuffer &buff, uint8_t fieldId, std::string value)
 {
+    if (value.empty()) {
+        TELEPHONY_LOGE("fieldId[%{public}d] EncodeTextStringValue Value Empty fail.", fieldId);
+        return false;
+    }
     if (!buff.WriteByte(fieldId)) {
-        TELEPHONY_LOGE("MmsHeader WriteByte fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader WriteByte fail.", fieldId);
         return false;
     }
     if (!buff.EncodeText(value)) {
-        TELEPHONY_LOGE("MmsHeader EncodeText fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeText fail.", fieldId);
         return false;
     }
     return true;
@@ -1003,12 +1020,22 @@ bool MmsHeader::EncodeTextStringValue(MmsEncodeBuffer &buff, uint8_t fieldId, st
 
 bool MmsHeader::EncodeEncodeStringValue(MmsEncodeBuffer &buff, uint8_t fieldId, MmsEncodeString value)
 {
+    std::string valueUtf8;
+    if (!value.GetEncodeString(valueUtf8)) {
+        TELEPHONY_LOGE("fieldId[%{public}d] GetEncodeString Error", fieldId);
+        return false;
+    }
+    if (valueUtf8.empty()) {
+        TELEPHONY_LOGE("fieldId[%{public}d] GetEncodeString Empty Error", fieldId);
+        return false;
+    }
+
     if (!buff.WriteByte(fieldId)) {
-        TELEPHONY_LOGE("MmsHeader WriteByte fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader WriteByte fail.", fieldId);
         return false;
     }
     if (!value.EncodeEncodeString(buff)) {
-        TELEPHONY_LOGE("MmsHeader EncodeEncodeString fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeEncodeString fail.", fieldId);
         return false;
     }
     return true;
@@ -1017,11 +1044,11 @@ bool MmsHeader::EncodeEncodeStringValue(MmsEncodeBuffer &buff, uint8_t fieldId, 
 bool MmsHeader::EncodeLongIntergerValue(MmsEncodeBuffer &buff, uint8_t fieldId, int64_t value)
 {
     if (!buff.WriteByte(fieldId)) {
-        TELEPHONY_LOGE("MmsHeader WriteByte fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader WriteByte fail.", fieldId);
         return false;
     }
     if (!buff.EncodeLongInteger(value)) {
-        TELEPHONY_LOGE("MmsHeader EncodeLongInteger fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeLongInteger fail.", fieldId);
         return false;
     }
     return true;
@@ -1031,11 +1058,11 @@ bool MmsHeader::EncodeOctetValueFromMap(MmsEncodeBuffer &buff, uint8_t fieldId)
 {
     uint8_t value = 0;
     if (!GetOctetValue(fieldId, value)) {
-        TELEPHONY_LOGE("MmsHeader WriteByte fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader WriteByte fail.", fieldId);
         return false;
     }
     if (!EncodeOctetValue(buff, fieldId, value)) {
-        TELEPHONY_LOGE("MmsHeader EncodeOctetValue fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeOctetValue fail.", fieldId);
         return false;
     }
     return true;
@@ -1045,11 +1072,11 @@ bool MmsHeader::EncodeTextStringValueFromMap(MmsEncodeBuffer &buff, uint8_t fiel
 {
     std::string value = "";
     if (!GetTextValue(fieldId, value)) {
-        TELEPHONY_LOGE("MmsHeader WriteByte fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] GetTextValue fail.", fieldId);
         return false;
     }
     if (!EncodeTextStringValue(buff, fieldId, value)) {
-        TELEPHONY_LOGE("MmsHeader EncodeTextStringValue fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeTextStringValue fail.", fieldId);
         return false;
     }
     return true;
@@ -1059,11 +1086,11 @@ bool MmsHeader::EnocdeEncodeStringValueFromMap(MmsEncodeBuffer &buff, uint8_t fi
 {
     MmsEncodeString value;
     if (!GetEncodeStringValue(fieldId, value)) {
-        TELEPHONY_LOGE("MmsHeader GetEncodeStringValue fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader GetEncodeStringValue fail.", fieldId);
         return false;
     }
     if (!EncodeEncodeStringValue(buff, fieldId, value)) {
-        TELEPHONY_LOGE("MmsHeader EncodeEncodeStringValue fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeEncodeStringValue fail.", fieldId);
         return false;
     }
     return true;
@@ -1073,11 +1100,11 @@ bool MmsHeader::EnocdeShortIntegerValueFromMap(MmsEncodeBuffer &buff, uint8_t fi
 {
     int64_t value = 0;
     if (!GetLongValue(fieldId, value)) {
-        TELEPHONY_LOGE("MmsHeader GetLongValue fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader GetLongValue fail.", fieldId);
         return false;
     }
     if (!EncodeShortIntegerValue(buff, fieldId, value)) {
-        TELEPHONY_LOGE("MmsHeader EncodeShortIntegerValue fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeShortIntegerValue fail.", fieldId);
         return false;
     }
     return true;
@@ -1087,11 +1114,11 @@ bool MmsHeader::EncodeLongIntergerValueFromMap(MmsEncodeBuffer &buff, uint8_t fi
 {
     int64_t value = 0;
     if (!GetLongValue(fieldId, value)) {
-        TELEPHONY_LOGE("MmsHeader GetLongValue fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader GetLongValue fail.", fieldId);
         return false;
     }
     if (!EncodeLongIntergerValue(buff, fieldId, value)) {
-        TELEPHONY_LOGE("MmsHeader EncodeLongIntergerValue fail.");
+        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeLongIntergerValue fail.", fieldId);
         return false;
     }
     return true;
@@ -1149,10 +1176,6 @@ bool MmsHeader::EncodeFieldFromValue(MmsEncodeBuffer &buff, std::vector<MmsAddre
         const uint8_t insertAddressToken = 129;
         MmsEncodeBuffer tempBuff;
         if (addr.empty() || addr[0].GetAddressString().empty()) {
-            if (!tempBuff.WriteByte(0x01)) { // len
-                TELEPHONY_LOGE("MmsHeader WriteByte fail.");
-                return false;
-            }
             if (!tempBuff.WriteByte(insertAddressToken)) {
                 TELEPHONY_LOGE("MmsHeader WriteByte fail.");
                 return false;
@@ -1192,13 +1215,13 @@ bool MmsHeader::EncodeMultipleAddressValue(MmsEncodeBuffer &buff, uint8_t fieldI
 
     for (auto addr : addrs) {
         if (!buff.WriteByte(fieldId)) {
-            TELEPHONY_LOGE("MmsHeader WriteByte fail.");
+            TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader WriteByte fail.", fieldId);
             return false;
         }
         MmsEncodeString encodeString;
         encodeString.SetAddressString(addr);
         if (!encodeString.EncodeEncodeString(buff)) {
-            TELEPHONY_LOGE("MmsHeader EncodeEncodeString fail.");
+            TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeEncodeString fail.", fieldId);
             return false;
         }
     }

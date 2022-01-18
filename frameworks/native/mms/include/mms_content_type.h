@@ -21,10 +21,6 @@
 
 namespace OHOS {
 namespace Telephony {
-/**
-* OMA content type form
-* http://www.wapforum.org/wina/wsp-content-type.htm
-*/
 enum class ContentTypes {
     X_X                                          = 0x00,
     TEXT_X                                       = 0x01,
@@ -119,10 +115,6 @@ using KeyValue = struct {
     const char *value;
 };
 
-/**
-* OMA content type form
-* http://www.wapforum.org/wina/wsp-content-type.htm
-*/
 static const KeyValue mmsContentNames[] = {
     { ContentTypes::X_X,                                        "*/*" },
     { ContentTypes::TEXT_X,                                     "text/*" },

@@ -26,8 +26,7 @@ SmsWapPushBuffer::SmsWapPushBuffer() {}
 SmsWapPushBuffer::~SmsWapPushBuffer()
 {
     if (pduBuffer_ != nullptr) {
-        pduBuffer_.release();
-        pduBuffer_ = nullptr;
+        pduBuffer_.reset();
     }
 }
 
@@ -60,8 +59,7 @@ bool SmsWapPushBuffer::WriteRawStringBuffer(const std::string &inSrc)
     }
 
     if (pduBuffer_) {
-        pduBuffer_.release();
-        pduBuffer_ = nullptr;
+        pduBuffer_.reset();
     }
 
     pduBuffer_ = std::make_unique<char[]>(len);
@@ -89,8 +87,7 @@ bool SmsWapPushBuffer::WriteDataBuffer(std::unique_ptr<char[]> inBuff, uint32_t 
     }
 
     if (pduBuffer_) {
-        pduBuffer_.release();
-        pduBuffer_ = nullptr;
+        pduBuffer_.reset();
     }
 
     pduBuffer_ = std::make_unique<char[]>(len);

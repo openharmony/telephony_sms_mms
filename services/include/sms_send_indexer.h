@@ -45,9 +45,9 @@ public:
     void SetMsgRefId(uint8_t msgRefId);
     int64_t GetMsgRefId64Bit() const;
     void SetMsgRefId64Bit(int64_t msgRefId64Bit);
-    std::vector<uint8_t> GetAckPdu() const;
+    const std::vector<uint8_t>& GetAckPdu() const;
     void SetAckPdu(const std::vector<uint8_t> &ackPdu);
-    std::vector<uint8_t> GetData() const;
+    const std::vector<uint8_t>& GetData() const;
     void SetData(const std::vector<uint8_t> &data);
     uint8_t GetErrorCode() const;
     void SetErrorCode(uint8_t errorCode);
@@ -77,9 +77,9 @@ public:
     void SetNetWorkType(NetWorkType netWorkType);
     NetWorkType GetNetWorkType() const;
     void SetEncodeSmca(const std::vector<uint8_t> &smca);
-    std::vector<uint8_t> GetEncodeSmca() const;
+    const std::vector<uint8_t>& GetEncodeSmca() const;
     void SetEncodePdu(const std::vector<uint8_t> &pdu);
-    std::vector<uint8_t> GetEncodePdu() const;
+    const std::vector<uint8_t>& GetEncodePdu() const;
     void UpdatePduForResend();
     void SetEncodePdu(const std::vector<uint8_t> &&pdu);
     void SetEncodeSmca(const std::vector<uint8_t> &&smca);

@@ -1696,7 +1696,7 @@ void CdmaSmsPduCodec::DecodeCMASData(unsigned char *pduStr, int pduLen, struct S
         } else {
             offset++;
         }
-        TELEPHONY_LOGI("offset = [%d], pduLen = [%{public}d]", offset, pduLen);
+        TELEPHONY_LOGI("offset = [%{public}d], pduLen = [%{public}d]", offset, pduLen);
     }
 }
 

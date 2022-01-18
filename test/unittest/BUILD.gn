@@ -25,20 +25,10 @@ ohos_executable("tel_sms_mms_test") {
     "sms_send_callback_test.cpp",
   ]
 
-  include_dirs = [
-    "//base/telephony/ril_adapter/interfaces/innerkits/include",
-    "//base/telephony/core_service/interfaces/innerkits/common",
-    "//base/telephony/core_service/interfaces/kits/include/",
-    "//base/telephony/core_service/interfaces/innerkits/network_search",
-    "//base/telephony/core_service/interfaces/innerkits/core",
-    "//base/telephony/core_service/interfaces/innerkits/sim",
-    "//base/telephony/core_service/common/core",
-    "//base/telephony/core_service/common/cellular_data",
-  ]
+  include_dirs = []
 
   deps = [
-    "//base/telephony/core_service:tel_core_service",
-    "//base/telephony/core_service/utils:libtelephony_common",
+    "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms:tel_sms_mms",
     "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
@@ -55,6 +45,7 @@ ohos_executable("tel_sms_mms_test") {
     "appexecfwk_standard:libeventhandler",
     "ces_standard:cesfwk_innerkits",
     "ces_standard:cesfwk_services",
+    "core_service:tel_core_service_api",
     "ipc:ipc_core",
     "native_appdatamgr:native_appdatafwk",
     "native_appdatamgr:native_dataability",
