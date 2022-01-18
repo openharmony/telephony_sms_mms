@@ -91,7 +91,7 @@ ohos_shared_library("tel_sms_mms") {
   ]
 
   external_deps = [
-    "aafwk_standard:want",
+    "ability_runtime:want",
     "appexecfwk_standard:libeventhandler",
     "ces_standard:cesfwk_innerkits",
     "ces_standard:cesfwk_services",
