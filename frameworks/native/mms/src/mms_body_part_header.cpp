@@ -143,6 +143,7 @@ bool MmsBodyPartHeader::DecodeContentDisposition(MmsDecodeBuffer &decodeBuffer, 
             break;
         }
     }
+    TELEPHONY_LOGI("strDisposition_ == %{public}s", strDisposition_.c_str());
     if (!DecodeDispositionParameter(decodeBuffer, dispositionLength, beginPostion)) {
         TELEPHONY_LOGE("Decode Disposition Parameter error.");
         return false;
@@ -300,6 +301,7 @@ bool MmsBodyPartHeader::DecodeApplicationHeader(MmsDecodeBuffer &decodeBuffer, u
 
 bool MmsBodyPartHeader::GetContentId(std::string &contentId)
 {
+    contentId.clear();
     contentId = strContentID_;
     return true;
 }
@@ -312,6 +314,7 @@ bool MmsBodyPartHeader::SetContentId(std::string contentId)
 
 bool MmsBodyPartHeader::GetContentTransferEncoding(std::string &contentTransferEncoding)
 {
+    contentTransferEncoding.clear();
     contentTransferEncoding = strContentTransferEncoding_;
     return true;
 }
@@ -338,7 +341,7 @@ bool MmsBodyPartHeader::SetContentLocation(std::string contentLocation)
 bool MmsBodyPartHeader::GetContentDisposition(std::string &contentDisposition)
 {
     contentDisposition.clear();
-    contentDisposition.assign(strContentLocation_);
+    contentDisposition.assign(strDisposition_);
     return true;
 }
 
@@ -422,14 +425,19 @@ bool MmsBodyPartHeader::EncodeContentId(MmsEncodeBuffer &encodeBuffer)
 bool MmsBodyPartHeader::EncodeContentDisposition(MmsEncodeBuffer &encodeBuffer)
 {
     const uint8_t setHighestBitOne = 0x80;
-
-    if (strDisposition_.empty()) {
-        TELEPHONY_LOGI("Body part header encode content ID is empty.");
+    std::vector<std::string> dispVec {DISPOSITION_FROM_DATA, DISPOSITION_ATTACHMENT, DISPOSITION_INLINE};
+    auto it = std::find(dispVec.begin(), dispVec.end(), strDisposition_);
+    if (it == dispVec.end()) {
         return true;
     }
 
+    TELEPHONY_LOGI("strDisposition = %{public}s", strDisposition_.c_str());
     if (!encodeBuffer.WriteByte(static_cast<uint8_t>(MmsHeaderParam::P_CONTENT_DISPOSITION_V1) | setHighestBitOne)) {
         TELEPHONY_LOGE("Body part header encode content disposition write byte fail.");
+        return false;
+    }
+    if (!encodeBuffer.EncodeUintvar(0x01)) {
+        TELEPHONY_LOGE("EncodeContentDisposition EncodeUintvar Error.");
         return false;
     }
     if (strDisposition_ == DISPOSITION_FROM_DATA) {

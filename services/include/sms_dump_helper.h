@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Telephony {
 class SmsDumpHelper {
 public:
-    explicit SmsDumpHelper();
+    SmsDumpHelper();
     ~SmsDumpHelper() = default;
     bool Dump(const std::vector<std::string> &args, std::string &result) const;
 

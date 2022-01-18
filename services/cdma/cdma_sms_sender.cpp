@@ -15,9 +15,11 @@
 
 #include "cdma_sms_sender.h"
 
-#include "cdma_sms_message.h"
-#include "observer_handler.h"
 #include "securec.h"
+
+#include "cdma_sms_message.h"
+#include "core_manager_inner.h"
+#include "radio_event.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -136,7 +138,7 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     message.SplitMessage(splits, text, false, codingType);
     if (splits.size() == 0) {
         TELEPHONY_LOGE("splits fail.");
-        return ;
+        return;
     }
     std::unique_ptr<SmsTransMsg> transMsg = nullptr;
     bool bStatusReport = (deliveryCallback == nullptr) ? false : true;
@@ -154,14 +156,7 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     transMsg->data.p2pMsg.telesvcMsg.data.submit.msgId.msgId = msgId;
     /* while user data header isn't exist, headerInd must be set false. */
     transMsg->data.p2pMsg.telesvcMsg.data.submit.msgId.headerInd = true;
-    const uint8_t segmentCount = 1;
-    shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(segmentCount);
-    shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
-    if (unSentCellCount == nullptr || hasCellFailed == nullptr) {
-        SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("unSentCellCount or hasCellFailed is nullptr.");
-        return;
-    }
+
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
     transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length = splits[0].encodeData.size();
@@ -175,15 +170,23 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     /* encode msg data */
     unsigned char pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = {0};
     int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr);
-
-    std::shared_ptr<SmsSendIndexer> indexer = nullptr;
-    indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, port, splits[0].encodeData.data(),
-        splits[0].encodeData.size(), sendCallback, deliveryCallback);
-    if (indexer == nullptr) {
+    if (len <= 0) {
+        TELEPHONY_LOGE("EncodeMsg Error len = %{public}d", len);
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         return;
     }
-    TELEPHONY_LOGE("len = %{public}d", len);
+
+    const uint8_t segmentCount = 1;
+    std::shared_ptr<SmsSendIndexer> indexer = nullptr;
+    shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(segmentCount);
+    shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
+    indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, port, splits[0].encodeData.data(),
+        splits[0].encodeData.size(), sendCallback, deliveryCallback);
+    if (indexer == nullptr || unSentCellCount == nullptr || hasCellFailed == nullptr) {
+        SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("Init SmsSend Indexer Error.");
+        return;
+    }
     std::vector<uint8_t> pdu(pduStr, pduStr + len);
     indexer->SetEncodePdu(std::move(pdu));
     indexer->SetMsgRefId(msgRef8bit);
@@ -237,11 +240,9 @@ void CdmaSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         TELEPHONY_LOGE("cdma_sms_sender: SendSms smsIndexer nullptr");
         return;
     }
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr || (!isImsNetDomain_ && voiceServiceState_ !=
-        static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE))) {
+    if ((!isImsNetDomain_ && voiceServiceState_ != static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE))) {
         SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
-        TELEPHONY_LOGE("cdma_sms_sender: SendSms core nullptr or not in service");
+        TELEPHONY_LOGE("cdma_sms_sender: SendSms not in service");
         return;
     }
     int64_t refId = GetMsgRef64Bit();
@@ -249,12 +250,14 @@ void CdmaSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         TELEPHONY_LOGE("SendCacheMapAddItem Error!!");
     }
 
-    {
-        auto reply = AppExecFwk::InnerEvent::Get(ObserverHandler::RADIO_SEND_CDMA_SMS, refId);
-        reply->SetOwner(shared_from_this());
-        core->SendCdmaSms(StringUtils::StringToHex(smsIndexer->GetEncodePdu()), reply);
-        TELEPHONY_LOGI(
-            "SendSmsToRil pdu = %{public}s", StringUtils::StringToHex(smsIndexer->GetEncodePdu()).c_str());
+    std::string pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
+    if (!isImsNetDomain_ && (smsIndexer->GetPsResendCount() == 0)) {
+        smsIndexer->SetCsResendCount(smsIndexer->GetCsResendCount() + 1);
+        CoreManagerInner::GetInstance().SendCdmaSms(
+            slotId_, RadioEvent::RADIO_SEND_CDMA_SMS, pdu, refId, shared_from_this());
+        TELEPHONY_LOGI("SendSmsToRil pdu = %{public}s", pdu.c_str());
+    } else {
+        smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
     }
 }
 
@@ -262,7 +265,7 @@ void CdmaSmsSender::Init() {}
 
 void CdmaSmsSender::ReceiveStatusReport(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer)
 {
-    SendEvent(ObserverHandler::RADIO_SMS_STATUS, smsIndexer);
+    SendEvent(RadioEvent::RADIO_SMS_STATUS, smsIndexer);
 }
 
 uint8_t CdmaSmsSender::GetSeqNum()

@@ -71,8 +71,13 @@ void SmsSendManager::Init()
         TELEPHONY_LOGE("failed to create CdmaSmsSender");
         return;
     }
+    cdmaSmsSender_->Init();
     cdmaSmsSendRunner_->Run();
+    InitNetworkHandle();
+}
 
+void SmsSendManager::InitNetworkHandle()
+{
     networkRunner_ = AppExecFwk::EventRunner::Create("networkLoop" + to_string(slotId_));
     if (networkRunner_ == nullptr) {
         TELEPHONY_LOGE("failed to create networkRunner");
@@ -87,14 +92,14 @@ void SmsSendManager::Init()
     networkRunner_->Run();
     TELEPHONY_LOGI("Init SmsSendManager successfully.");
     if (auto ret = networkManager_->NetworkRegister(
-        std::bind(&SmsSender::SetNetworkState, gsmSmsSender_, std::placeholders::_1, std::placeholders::_2));
+            std::bind(&SmsSender::SetNetworkState, gsmSmsSender_, std::placeholders::_1, std::placeholders::_2));
         ret.has_value()) {
         gsmSmsSender_->SetNetworkId(ret);
     } else {
         TELEPHONY_LOGE("gsm failed to register networkManager");
     }
     if (auto ret = networkManager_->NetworkRegister(
-        std::bind(&SmsSender::SetNetworkState, cdmaSmsSender_, std::placeholders::_1, std::placeholders::_2));
+            std::bind(&SmsSender::SetNetworkState, cdmaSmsSender_, std::placeholders::_1, std::placeholders::_2));
         ret.has_value()) {
         cdmaSmsSender_->SetNetworkId(ret);
     } else {
@@ -106,7 +111,17 @@ void SmsSendManager::TextBasedSmsDelivery(const string &desAddr, const string &s
     const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr || networkManager_ == nullptr) {
+    if (desAddr.empty() || text.empty()) {
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("TextBasedSmsDelivery::param Set Error.");
+        return;
+    }
+    if (networkManager_ == nullptr) {
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("TextBasedSmsDelivery::networkManager nullptr error.");
+        return;
+    }
+    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("gsmSmsSender or cdmaSmsSender nullptr error.");
         return;
@@ -129,7 +144,17 @@ void SmsSendManager::DataBasedSmsDelivery(const string &desAddr, const string &s
     const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr || networkManager_ == nullptr) {
+    if (desAddr.empty() || data == nullptr) {
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("DataBasedSmsDelivery::param Set Error.");
+        return;
+    }
+    if (networkManager_ == nullptr) {
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("DataBasedSmsDelivery::networkManager nullptr error.");
+        return;
+    }
+    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("gsmSmsSender or cdmaSmsSender nullptr error.");
         return;
@@ -150,7 +175,7 @@ void SmsSendManager::DataBasedSmsDelivery(const string &desAddr, const string &s
 void SmsSendManager::RetriedSmsDelivery(const shared_ptr<SmsSendIndexer> smsIndexer)
 {
     if (smsIndexer == nullptr) {
-        TELEPHONY_LOGI("smsIndexer is nullptr error.");
+        TELEPHONY_LOGI("RetriedSmsDelivery::smsIndexer is nullptr error.");
         return;
     }
     if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr || networkManager_ == nullptr) {
@@ -201,7 +226,7 @@ std::vector<std::string> SmsSendManager::SplitMessage(const std::string &message
 {
     std::vector<std::string> result;
     if (networkManager_ == nullptr) {
-        TELEPHONY_LOGE("SmsSendManager::SplitMessage cdmaSmsSender_ or gsmSmsSender_ is nullptr");
+        TELEPHONY_LOGE("SmsSendManager::SplitMessage networkManager nullptr Error.");
         return result;
     }
 
@@ -233,7 +258,7 @@ std::vector<std::string> SmsSendManager::SplitMessage(const std::string &message
 bool SmsSendManager::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo)
 {
     if (networkManager_ == nullptr) {
-        TELEPHONY_LOGE("GetSmsSegmentsInfo Sender_ or networkManager_ is nullptr");
+        TELEPHONY_LOGE("GetSmsSegmentsInfo networkManager_ Nullptr Error.");
         return false;
     }
     NetWorkType netWorkType = networkManager_->GetNetWorkType();
@@ -262,7 +287,7 @@ bool SmsSendManager::IsImsSmsSupported()
 {
     bool result = false;
     if (networkManager_ == nullptr) {
-        TELEPHONY_LOGE("networkManager is nullptr.");
+        TELEPHONY_LOGE("networkManager is nullptr error.");
         return result;
     }
     return networkManager_->IsImsNetDomain();
@@ -271,16 +296,16 @@ bool SmsSendManager::IsImsSmsSupported()
 std::string SmsSendManager::GetImsShortMessageFormat()
 {
     if (networkManager_ == nullptr) {
-        TELEPHONY_LOGE("networkManager_ is nullptr.");
+        TELEPHONY_LOGE("networkManager is nullptr error.");
         return "unknown";
     }
-    NetWorkType netWorkType = networkManager_->GetNetWorkType();
-    if (netWorkType == NET_TYPE_GSM) {
-        return "3gpp";
-    } else if (netWorkType == NET_TYPE_CDMA) {
-        return "3gpp2";
-    } else {
-        return "unknown";
+    switch (networkManager_->GetNetWorkType()) {
+        case NetWorkType::NET_TYPE_GSM:
+            return "3gpp";
+        case NetWorkType::NET_TYPE_CDMA:
+            return "3gpp2";
+        default:
+            return "unknown";
     }
 }
 } // namespace Telephony

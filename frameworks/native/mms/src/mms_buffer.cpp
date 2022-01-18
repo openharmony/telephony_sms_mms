@@ -33,8 +33,7 @@ MmsBuffer::MmsBuffer()
 MmsBuffer::~MmsBuffer()
 {
     if (pduBuffer_ != nullptr) {
-        pduBuffer_.release();
-        pduBuffer_ = nullptr;
+        pduBuffer_.reset();
     }
 }
 
@@ -75,8 +74,7 @@ bool MmsBuffer::WriteDataBuffer(std::unique_ptr<char[]> inBuff, uint32_t len)
     }
 
     if (pduBuffer_) {
-        pduBuffer_.release();
-        pduBuffer_ = nullptr;
+        pduBuffer_.reset();
     }
 
     pduBuffer_ = std::make_unique<char[]>(len);
@@ -108,8 +106,7 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         return false;
     }
     if (pduBuffer_) {
-        pduBuffer_.release();
-        pduBuffer_ = nullptr;
+        pduBuffer_.reset();
     }
 
     pduBuffer_ = std::make_unique<char[]>(fileLen);

@@ -69,19 +69,14 @@ ohos_shared_library("tel_sms_mms") {
     "//third_party/glib/glib",
     "//third_party/glib",
     "//third_party/glib/gmodule",
-    "//base/telephony/core_service/interfaces/innerkits/network_search",
-    "//base/telephony/core_service/interfaces/innerkits/core",
-    "//base/telephony/core_service/interfaces/innerkits/sim",
-    "//base/telephony/core_service/common/core",
-    "//base/telephony/core_service/common/cellular_data",
     "//base/telephony/sms_mms/interfaces/innerkits/",
     "//base/telephony/sms_mms/frameworks/native/sms/include",
   ]
 
   deps = [
     "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
-    "//base/telephony/core_service:tel_core_service",
-    "//base/telephony/core_service/utils:libtelephony_common",
+    "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
+    "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms/frameworks/native/mms:mms_native_source",
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
@@ -104,7 +99,7 @@ ohos_shared_library("tel_sms_mms") {
     "samgr_standard:samgr_proxy",
   ]
 
-  defines = [
+  defines += [
     "TELEPHONY_LOG_TAG = \"SMS_MMS\"",
     "LOG_DOMAIN = 0xD002B01",
   ]

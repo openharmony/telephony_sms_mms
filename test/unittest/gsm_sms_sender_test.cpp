@@ -25,7 +25,6 @@
 #include "context_deal.h"
 #include "ability_info.h"
 
-#include "core_manager.h"
 #include "sms_delivery_callback_test.h"
 #include "sms_send_callback_test.h"
 #include "string_utils.h"
@@ -38,9 +37,13 @@ void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &sm
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     std::string dest;
-    std::cout << "Please enter the receiver's telephone number\n" << std::endl;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
+    std::cout << "Please enter the receiver's telephone number" << std::endl;
     std::cin >> dest;
     std::string sca("");
     OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
@@ -58,9 +61,13 @@ void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &sms
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     std::string dest;
-    std::cout << "Please enter the receiver's telephone number\n";
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
+    std::cout << "Please enter the receiver's telephone number" << std::endl;
     std::cin >> dest;
     std::string sca("");
     OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
@@ -86,12 +93,17 @@ void GsmSmsSenderTest::TestSendShortText(const sptr<ISmsServiceInterface> &smsSe
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     std::string text;
-    std::cout << "Please enter the receiver's telephone number\n";
+    std::cin.ignore();
+    std::cout << "Please enter the receiver's telephone number" << std::endl;
     getline(std::cin, dest);
-    std::cout << "Please enter text\n";
+    std::cout << "Please enter text" << std::endl;
     getline(std::cin, text);
     std::string sca("");
     OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
@@ -107,9 +119,13 @@ void GsmSmsSenderTest::TestSendLongText(const sptr<ISmsServiceInterface> &smsSer
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
     std::string dest;
-    std::cout << "Please enter the receiver's telephone number\n";
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
+    std::cout << "Please enter the receiver's telephone number" << std::endl;
     std::cin >> dest;
     std::string sca("");
     std::string text(
@@ -133,7 +149,12 @@ void GsmSmsSenderTest::TestSetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     std::string sca;
     std::cout << "Please enter smsc" << std::endl;
     std::cin >> sca;
@@ -152,7 +173,12 @@ void GsmSmsSenderTest::TestGetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     result = StringUtils::ToUtf8(smsService->GetSmscAddr(slotId));
     std::cout << "TestGetSmscAddr:" << result << std::endl;
 }
@@ -164,7 +190,12 @@ void GsmSmsSenderTest::TestAddSimMessage(const sptr<ISmsServiceInterface> &smsSe
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     std::string smsc;
     std::cout << "Please enter smsc" << std::endl;
     std::cin >> smsc;
@@ -191,7 +222,12 @@ void GsmSmsSenderTest::TestDelSimMessage(const sptr<ISmsServiceInterface> &smsSe
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     std::string input;
     std::cout << "Please enter msgIndex" << std::endl;
     std::cin >> input;
@@ -211,7 +247,12 @@ void GsmSmsSenderTest::TestUpdateSimMessage(const sptr<ISmsServiceInterface> &sm
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     std::string input;
     std::cout << "Please enter msgIndex" << std::endl;
     std::cin >> input;
@@ -243,7 +284,12 @@ void GsmSmsSenderTest::TestGetAllSimMessages(const sptr<ISmsServiceInterface> &s
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     result = smsService->GetAllSimMessages(slotId);
     std::cout << "TestGetAllSimMessages Begin:" << std::endl;
     for (auto &item : result) {
@@ -261,7 +307,12 @@ void GsmSmsSenderTest::TestEnableCBRangeConfig(const sptr<ISmsServiceInterface> 
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     bool enable = true;
     uint32_t startMessageId = 0;
     uint32_t endMessageId = 0;
@@ -285,7 +336,12 @@ void GsmSmsSenderTest::TestDisableCBRangeConfig(const sptr<ISmsServiceInterface>
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     bool enable = false;
     uint32_t startMessageId = 0;
     uint32_t endMessageId = 0;
@@ -309,7 +365,12 @@ void GsmSmsSenderTest::TestEnableCBConfig(const sptr<ISmsServiceInterface> &smsS
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     bool enable = true;
     uint32_t identifier = 0;
     uint8_t ranType = 1;
@@ -329,7 +390,12 @@ void GsmSmsSenderTest::TestDisableCBConfig(const sptr<ISmsServiceInterface> &sms
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
     bool enable = false;
     uint32_t identifier = 0;
     uint8_t ranType = 1;

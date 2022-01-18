@@ -53,15 +53,18 @@ void SmsInterfaceStub::InitModule()
     static bool bInitModule = false;
     if (!bInitModule) {
         bInitModule = true;
-        int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
-        slotSmsInterfaceManagerMap_[slotId] = std::make_shared<SmsInterfaceManager>(slotId);
-        slotSmsInterfaceManagerMap_[slotId]->InitInterfaceManager();
-        TELEPHONY_LOGI("SmsInterfaceStub = ############### InitModule");
+        std::lock_guard<std::mutex> lock(mutex_);
+        for (int32_t slotId = 0; slotId < SIM_SLOT_COUNT; ++slotId) {
+            slotSmsInterfaceManagerMap_[slotId] = std::make_shared<SmsInterfaceManager>(slotId);
+            slotSmsInterfaceManagerMap_[slotId]->InitInterfaceManager();
+            TELEPHONY_LOGI("SmsInterfaceStub InitModule slotId = %{public}d", slotId);
+        }
     }
 }
 
 std::shared_ptr<SmsInterfaceManager> SmsInterfaceStub::GetSmsInterfaceManager(int32_t slotId)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     std::map<uint32_t, std::shared_ptr<SmsInterfaceManager>>::iterator iter =
         slotSmsInterfaceManagerMap_.find(slotId);
     if (iter != slotSmsInterfaceManagerMap_.end()) {
@@ -72,6 +75,7 @@ std::shared_ptr<SmsInterfaceManager> SmsInterfaceStub::GetSmsInterfaceManager(in
 
 std::shared_ptr<SmsInterfaceManager> SmsInterfaceStub::GetSmsInterfaceManager()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     for (auto &iter : slotSmsInterfaceManagerMap_) {
         return iter.second;
     }

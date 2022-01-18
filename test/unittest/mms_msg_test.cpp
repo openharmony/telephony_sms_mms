@@ -667,6 +667,7 @@ bool MmsMsgTest::MmsAddAttachment(
         std::cout << "MmsAddAttachment SetContentType fail" << std::endl;
         return false;
     }
+    imageAttachment.SetContentDisposition("attachment");
     if (!msg.AddAttachment(imageAttachment)) {
         std::cout << "MmsAddAttachment AddAttachment fail" << std::endl;
         return false;
