@@ -44,6 +44,8 @@ public:
     bool GetContentId(std::string &contentId);
     bool SetContentLocation(std::string contentLocation);
     bool GetContentLocation(std::string &contentLocation);
+    bool SetContentDisposition(std::string contentDisposition);
+    bool GetContentDisposition(std::string &contentDisposition);
 
     void SetFileName(std::string fileName);
     MmsContentType &GetContentType();

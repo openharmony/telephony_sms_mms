@@ -58,9 +58,9 @@ public:
 
 public:
     bool GetContentId(std::string &contentId);
-    bool GetContentLocation(std::string &ContentLocation);
-    bool GetContentDisposition(std::string &ContentDisposition);
-    bool GetContentTransferEncoding(std::string &ContentTransferEncoding);
+    bool GetContentLocation(std::string &contentLocation);
+    bool GetContentDisposition(std::string &contentDisposition);
+    bool GetContentTransferEncoding(std::string &contentTransferEncoding);
 
     bool SetContentId(std::string contentId);
     bool SetContentLocation(std::string contentLocation);

@@ -23,6 +23,7 @@
 #include "sms_service_proxy.h"
 #include "system_ability_definition.h"
 
+#include "core_service_client.h"
 #include "string_utils.h"
 
 namespace OHOS {
@@ -30,7 +31,6 @@ namespace Telephony {
 namespace {
 sptr<ISmsServiceInterface> g_telephonyService = nullptr;
 } // namespace
-
 using namespace testing::ext;
 class SmsMmsGtest : public testing::Test {
 public:
@@ -39,6 +39,13 @@ public:
     void SetUp();
     void TearDown();
     static sptr<ISmsServiceInterface> GetProxy();
+    static bool HasSimCard(int32_t slotId)
+    {
+        if (CoreServiceClient::GetInstance().GetProxy() == nullptr) {
+            return false;
+        }
+        return CoreServiceClient::GetInstance().HasSimCard(slotId);
+    }
 };
 
 void SmsMmsGtest::TearDownTestCase() {}
@@ -108,7 +115,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0002, Function | MediumTest | Level2)
 {
     bool result = false;
     if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+        int32_t slotId = DEFAULT_SIM_SLOT_ID;
         bool enable = true;
         uint32_t fromMsgId = 20;
         uint32_t toMsgId = 10;
@@ -127,7 +134,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
 {
     bool result = false;
     if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+        int32_t slotId = DEFAULT_SIM_SLOT_ID;
         bool enable = true;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 10;
@@ -145,8 +152,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         bool enable = true;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 10;
@@ -164,8 +171,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         bool enable = true;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 1000;
@@ -183,8 +190,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level4)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         bool enable = true;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 0;
@@ -222,7 +229,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0002, Function | MediumTest | Level2)
 {
     bool result = false;
     if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+        int32_t slotId = DEFAULT_SIM_SLOT_ID;
         bool enable = false;
         uint32_t fromMsgId = 20;
         uint32_t toMsgId = 10;
@@ -241,7 +248,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
 {
     bool result = false;
     if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+        int32_t slotId = DEFAULT_SIM_SLOT_ID;
         bool enable = false;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 10;
@@ -259,8 +266,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         bool enable = false;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 10;
@@ -278,8 +285,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         bool enable = false;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 1000;
@@ -297,8 +304,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level4)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         bool enable = false;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 0;
@@ -316,8 +323,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level4)
 HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+    int32_t slotId = 0;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         result = g_telephonyService->SetDefaultSmsSlotId(slotId);
         EXPECT_TRUE(result);
     }
@@ -331,8 +338,8 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 1;
+    int32_t slotId = 1;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         result = g_telephonyService->SetDefaultSmsSlotId(slotId);
         EXPECT_TRUE(result);
     }
@@ -346,8 +353,8 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0003, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 2;
+    int32_t slotId = 2;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         result = g_telephonyService->SetDefaultSmsSlotId(slotId);
         EXPECT_TRUE(result);
     }
@@ -361,10 +368,10 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0003, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0004, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 3;
+    int32_t slotId = 3;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         result = g_telephonyService->SetDefaultSmsSlotId(slotId);
-        EXPECT_FALSE(result);
+        EXPECT_TRUE(result);
     }
 }
 
@@ -376,10 +383,10 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0004, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0005, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 4;
+    int32_t slotId = 4;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         result = g_telephonyService->SetDefaultSmsSlotId(slotId);
-        EXPECT_FALSE(result);
+        EXPECT_TRUE(result);
     }
 }
 
@@ -391,8 +398,8 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0005, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
 {
     const int32_t error = -1;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = 0;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
         slotId = g_telephonyService->GetDefaultSmsSlotId();
         EXPECT_TRUE(slotId != error);
     }

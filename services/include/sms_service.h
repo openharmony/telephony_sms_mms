@@ -204,11 +204,10 @@ public:
     bool HasSmsCapability() override;
 
 private:
-    constexpr static uint32_t CONNECT_MAX_TRY_COUNT = 20;
     constexpr static uint32_t CONNECT_SERVICE_WAIT_TIME = 2000; // ms
     int64_t bindTime_ = 0L;
     bool Init();
-    bool WaitCoreServiceToInit();
+    void WaitCoreServiceToInit();
 
     bool registerToService_ = false;
     ServiceRunningState state_ = ServiceRunningState::STATE_NOT_START;

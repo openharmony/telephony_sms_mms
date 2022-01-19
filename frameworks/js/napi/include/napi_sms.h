@@ -27,7 +27,6 @@
 #include "i_sms_service_interface.h"
 #include "base_context.h"
 #include "short_message.h"
-#include "core_manager.h"
 #include "refbase.h"
 #include "telephony_log_wrapper.h"
 #include "napi_util.h"
@@ -88,7 +87,7 @@ enum RanType {
 };
 
 struct SendMessageContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::u16string destinationHost = u"";
     std::u16string serviceCenter = u"";
     std::u16string textContent = u"";
@@ -109,27 +108,27 @@ struct CreateMessageContext : BaseContext {
 };
 
 struct SetDefaultSmsSlotIdContext : BaseContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     bool setResult = false;
 };
 
 struct GetDefaultSmsSlotIdContext : BaseContext {
-    int32_t defaultSmsSlotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t defaultSmsSlotId = DEFAULT_SIM_SLOT_ID;
 };
 
 struct SetSmscAddrContext : BaseContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::string smscAddr = "";
     bool setResult = false;
 };
 
 struct GetSmscAddrContext : BaseContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::string smscAddr = "";
 };
 
 struct AddSimMessageContext : BaseContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::string smsc = "";
     std::string pdu = "";
     int32_t status = MESSAGE_UNKNOWN_STATUS;
@@ -137,13 +136,13 @@ struct AddSimMessageContext : BaseContext {
 };
 
 struct DelSimMessageContext : BaseContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     int32_t msgIndex = DEFAULT_ERROR;
     bool deleteResult = false;
 };
 
 struct UpdateSimMessageContext : BaseContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     int32_t msgIndex = DEFAULT_ERROR;
     bool updateResult = false;
     int32_t newStatus = MESSAGE_UNKNOWN_STATUS;
@@ -152,12 +151,12 @@ struct UpdateSimMessageContext : BaseContext {
 };
 
 struct GetAllSimMessagesContext : BaseContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::vector<ShortMessage> messageArray;
 };
 
 struct CBConfigContext : BaseContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     bool enable = false;
     int32_t startMessageId = DEFAULT_ERROR;
     int32_t endMessageId = DEFAULT_ERROR;
@@ -166,13 +165,13 @@ struct CBConfigContext : BaseContext {
 };
 
 struct SplitMessageContext : BaseContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::string content = "";
     std::vector<std::u16string> messageArray;
 };
 
 struct GetSmsSegmentsInfoContext : BaseContext {
-    int32_t slotId = CoreManager::DEFAULT_SLOT_ID;
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::string content = "";
     bool force7BitCode = false;
     int32_t splitCount;
