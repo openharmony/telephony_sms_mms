@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Telephony {
 class SmsWapPushHandler {
 public:
-    SmsWapPushHandler(int32_t slotId);
+    explicit SmsWapPushHandler(int32_t slotId);
     virtual ~SmsWapPushHandler();
 
     bool DecodeWapPushPduData(SmsWapPushBuffer &decodeBuffer, uint32_t startPos, uint32_t len);

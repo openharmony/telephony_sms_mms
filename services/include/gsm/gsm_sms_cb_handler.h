@@ -23,7 +23,6 @@
 #include "common_event_manager.h"
 #include "want.h"
 
-#include "core_manager.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "hril_sms_parcel.h"
@@ -81,7 +80,6 @@ private:
     bool RemoveCbMessageFromList(const std::shared_ptr<SmsCbMessage> &cbMessage);
     bool SendCbMessageBroadcast(const std::shared_ptr<SmsCbMessage> &cbMessage);
     void HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &message);
-    std::shared_ptr<Core> GetCore() const;
     bool SetWantData(EventFwk::Want &want, const std::shared_ptr<SmsCbMessage> &cbMessage);
     bool InitLocation(SmsCbInfo &info);
     void GetCbData(const std::shared_ptr<SmsCbMessage> &cbMessage,

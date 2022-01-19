@@ -22,8 +22,7 @@ namespace Telephony {
 MmsAttachment::~MmsAttachment()
 {
     if (pAttachmentBuffer_ != nullptr) {
-        pAttachmentBuffer_.release();
-        pAttachmentBuffer_ = nullptr;
+        pAttachmentBuffer_.reset();
         dataLength_ = 0;
     }
 }
@@ -106,7 +105,7 @@ std::string MmsAttachment::GetContentLocation()
 bool MmsAttachment::SetContentDisposition(std::string contentDisposition)
 {
     if (contentDisposition.empty()) {
-        TELEPHONY_LOGE("Attachment ContentDisposition is empty!");
+        TELEPHONY_LOGE("Attachment contentDisposition is empty!");
         return false;
     }
     contentDispositon_.assign(contentDisposition);

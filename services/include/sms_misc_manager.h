@@ -25,7 +25,6 @@
 #include "event_handler.h"
 #include "event_runner.h"
 
-#include "core_manager.h"
 #include "i_sms_service_interface.h"
 
 namespace OHOS {
@@ -95,7 +94,6 @@ private:
     };
 
     bool SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list);
-    std::shared_ptr<Core> GetCore() const;
     bool ExpandMsgId(
         uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data);
     void SplitMsgId(

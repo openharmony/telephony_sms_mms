@@ -107,6 +107,32 @@ int32_t WrapEncodeMmsStatus(int32_t status)
     }
 }
 
+std::string parseDispositionValue(int32_t value)
+{
+    switch (value) {
+        case FROM_DATA:
+            return "from-data";
+        case ATTACHMENT:
+            return "attachment";
+        case INLINE:
+            return "inline";
+        default:
+            TELEPHONY_LOGE("Invalid contentDisposition value");
+            return nullptr;
+    }
+}
+
+int32_t formatDispositionValue(std::string value)
+{
+    if (std::string("from-data") == value) {
+        return FROM_DATA;
+    } else if (std::string("attachment") == value) {
+        return ATTACHMENT;
+    } else {
+        return INLINE;
+    }
+}
+
 void GetMmsSendConf(MmsMsg mmsMsg, MmsSendConfContext &asyncContext)
 {
     TELEPHONY_LOGI("napi_mms GetMmsSendConf start");
@@ -130,7 +156,7 @@ void GetMmsSendReq(MmsMsg mmsMsg, MmsSendReqContext &asyncContext)
     asyncContext.subject = mmsMsg.GetMmsSubject();
     asyncContext.messageClass = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_MESSAGE_CLASS);
     asyncContext.expiry = mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_EXPIRY);
-    asyncContext.priority = mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_PRIORITY);
+    asyncContext.priority = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_PRIORITY);
     asyncContext.senderVisibility = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_SENDER_VISIBILITY);
     asyncContext.deliveryReport = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_DELIVERY_REPORT);
     asyncContext.readReport = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_READ_REPORT);
@@ -175,7 +201,7 @@ void GetMmsRetrieveConf(MmsMsg mmsMsg, MmsRetrieveConfContext &asyncContext)
     asyncContext.from = mmsMsg.GetMmsFrom();
     mmsMsg.GetHeaderAllAddressValue(MmsFieldCode::MMS_CC, asyncContext.cc);
     asyncContext.subject = mmsMsg.GetMmsSubject();
-    asyncContext.priority = mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_PRIORITY);
+    asyncContext.priority = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_PRIORITY);
     asyncContext.deliveryReport = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_DELIVERY_REPORT);
     asyncContext.readReport = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_READ_REPORT);
     asyncContext.retrieveStatus = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_RETRIEVE_STATUS);
@@ -315,7 +341,8 @@ napi_value CreateAttachmentValue(napi_env env, MmsAttachmentContext &context)
     NapiUtil::SetPropertyStringUtf8(env, attachment, "fileName", context.fileName);
     NapiUtil::SetPropertyStringUtf8(env, attachment, "contentId", context.contentId);
     NapiUtil::SetPropertyStringUtf8(env, attachment, "contentLocation", context.contentLocation);
-    NapiUtil::SetPropertyStringUtf8(env, attachment, "contentDisposition", context.contentDisposition);
+    NapiUtil::SetPropertyInt32(
+        env, attachment, "contentDisposition", formatDispositionValue(context.contentDisposition));
     NapiUtil::SetPropertyStringUtf8(env, attachment, "contentTransferEncoding", context.contentTransferEncoding);
     NapiUtil::SetPropertyStringUtf8(env, attachment, "contentType", context.contentType);
     NapiUtil::SetPropertyBoolean(env, attachment, "isSmil", context.isSmil);
@@ -870,7 +897,8 @@ bool ReadEncodeMmsType(napi_env env, napi_value napiValue, MmsNotificationIndCon
     notificationInd.messageSize = GetNapiInt64Value(env, napiValue, "messageSize");
     notificationInd.expiry = GetNapiInt32Value(env, napiValue, "expiry");
     notificationInd.version = GetNapiInt32Value(env, napiValue, "version");
-    notificationInd.from = ReadMmsAddress(env, napiValue);
+    napi_value from = NapiUtil::GetNamedProperty(env, napiValue, "from");
+    notificationInd.from = ReadMmsAddress(env, from);
     notificationInd.subject = GetNapiStringValue(env, napiValue, "subject");
     notificationInd.deliveryReport = GetNapiUint8Value(env, napiValue, "deliveryReport");
     notificationInd.contentLocation = GetNapiStringValue(env, napiValue, "contentLocation");
@@ -889,6 +917,7 @@ bool ReadEncodeMmsType(napi_env env, napi_value napiValue, MmsRespIndContext &re
     respInd.status = GetNapiUint8Value(env, napiValue, "status");
     respInd.version = GetNapiInt32Value(env, napiValue, "version");
     respInd.reportAllowed = GetNapiUint8Value(env, napiValue, "reportAllowed");
+    TELEPHONY_LOGI("respInd.reportAllowed = %{public}d", respInd.reportAllowed);
     return true;
 }
 
@@ -902,7 +931,8 @@ bool ReadEncodeMmsType(napi_env env, napi_value napiValue, MmsRetrieveConfContex
     retrieveConf.date = GetNapiInt64Value(env, napiValue, "date");
     retrieveConf.version = GetNapiInt32Value(env, napiValue, "version");
     ReadMmsAddress(env, napiValue, "to", retrieveConf.to);
-    retrieveConf.from = ReadMmsAddress(env, napiValue);
+    napi_value from = NapiUtil::GetNamedProperty(env, napiValue, "from");
+    retrieveConf.from = ReadMmsAddress(env, from);
     ReadMmsAddress(env, napiValue, "cc", retrieveConf.cc);
     retrieveConf.subject = GetNapiStringValue(env, napiValue, "subject");
     retrieveConf.priority = GetNapiUint8Value(env, napiValue, "priority");
@@ -946,7 +976,8 @@ bool ReadEncodeMmsType(napi_env env, napi_value napiValue, MmsReadOrigIndContext
     readOrigInd.version = GetNapiInt32Value(env, napiValue, "version");
     readOrigInd.messageId = GetNapiStringValue(env, napiValue, "messageId");
     ReadMmsAddress(env, napiValue, "to", readOrigInd.to);
-    readOrigInd.from = ReadMmsAddress(env, napiValue);
+    napi_value from = NapiUtil::GetNamedProperty(env, napiValue, "from");
+    readOrigInd.from = ReadMmsAddress(env, from);
     readOrigInd.date = GetNapiInt64Value(env, napiValue, "date");
     readOrigInd.readStatus = GetNapiUint8Value(env, napiValue, "readStatus");
     return true;
@@ -960,7 +991,8 @@ bool ReadEncodeMmsType(napi_env env, napi_value napiValue, MmsReadRecIndContext 
     readRecInd.version = GetNapiInt32Value(env, napiValue, "version");
     readRecInd.messageId = GetNapiStringValue(env, napiValue, "messageId");
     ReadMmsAddress(env, napiValue, "to", readRecInd.to);
-    readRecInd.from = ReadMmsAddress(env, napiValue);
+    napi_value from = NapiUtil::GetNamedProperty(env, napiValue, "from");
+    readRecInd.from = ReadMmsAddress(env, from);
     readRecInd.date = GetNapiInt64Value(env, napiValue, "date");
     readRecInd.readStatus = GetNapiUint8Value(env, napiValue, "readStatus");
     TELEPHONY_LOGI("context->readRecInd.readStatus = %{public}d", readRecInd.readStatus);
@@ -974,7 +1006,8 @@ MmsAttachmentContext BuildMmsAttachment(napi_env env, napi_value value)
     attachmentContext.fileName = GetNapiStringValue(env, value, "fileName");
     attachmentContext.contentId = GetNapiStringValue(env, value, "contentId");
     attachmentContext.contentLocation = GetNapiStringValue(env, value, "contentLocation");
-    attachmentContext.contentDisposition = GetNapiStringValue(env, value, "contentDisposition");
+    attachmentContext.contentDisposition =
+        parseDispositionValue(GetNapiInt32Value(env, value, "contentDisposition"));
     attachmentContext.contentTransferEncoding = GetNapiStringValue(env, value, "contentTransferEncoding");
     attachmentContext.contentType = GetNapiStringValue(env, value, "contentType");
     attachmentContext.isSmil = GetNapiBooleanValue(env, value, "isSmil");
@@ -990,12 +1023,12 @@ MmsAttachmentContext BuildMmsAttachment(napi_env env, napi_value value)
         }
         napi_value elementValue = nullptr;
         for (uint32_t i = 0; i < arrayLength; i++) {
-            napi_get_element(env, value, i, &elementValue);
+            napi_get_element(env, inBuffValue, i, &elementValue);
             napi_get_value_int32(env, elementValue, &elementInt);
-            attachmentContext.inBuff[i] = (char)elementInt;
+            attachmentContext.inBuff[i] = static_cast<char>(elementInt);
         }
     }
-    attachmentContext.charset = GetNapiInt32Value(env, value, "charset");
+    attachmentContext.charset = GetNapiInt32Value(env, value, "charset", static_cast<int32_t>(MmsCharSets::UTF_8));
     return attachmentContext;
 }
 
@@ -1012,7 +1045,7 @@ bool ReadEncodeMmsAttachment(napi_env env, napi_value value, std::vector<MmsAtta
     return true;
 }
 
-bool EncodeMmsTypy(napi_env env, napi_value mmsTypeValue, EncodeMmsContext &context)
+bool EncodeMmsType(napi_env env, napi_value mmsTypeValue, EncodeMmsContext &context)
 {
     bool result = false;
     switch (context.messageType) {
@@ -1065,7 +1098,7 @@ bool ParseEncodeMmsParam(napi_env env, napi_value object, EncodeMmsContext &cont
         TELEPHONY_LOGE("mmsTypeValue == nullptr");
         return false;
     }
-    bool result = EncodeMmsTypy(env, mmsTypeValue, context);
+    bool result = EncodeMmsType(env, mmsTypeValue, context);
     if (NapiUtil::HasNamedProperty(env, object, "attachment")) {
         napi_value napiAttachment = NapiUtil::GetNamedProperty(env, object, "attachment");
         if (napiAttachment != nullptr) {
@@ -1084,6 +1117,7 @@ void setAttachmentToCore(MmsMsg &mmsMsg, std::vector<MmsAttachmentContext> &atta
             if (it->path.size() > 0) {
                 itAttachment.SetAttachmentFilePath(it->path, it->isSmil);
             }
+            itAttachment.SetIsSmilFile(it->isSmil);
             if (it->fileName.size() > 0) {
                 itAttachment.SetFileName(it->fileName);
             }
@@ -1101,9 +1135,6 @@ void setAttachmentToCore(MmsMsg &mmsMsg, std::vector<MmsAttachmentContext> &atta
             }
             if (it->contentType.size() > 0) {
                 itAttachment.SetContentType(it->contentType);
-            }
-            if (it->contentType.size() > 0) {
-                itAttachment.SetContentTransferEncoding(it->contentTransferEncoding);
             }
             if (it->charset != DEFAULT_ERROR) {
                 itAttachment.SetCharSet(it->charset);
@@ -1139,7 +1170,7 @@ void setSendReqToCore(MmsMsg &mmsMsg, MmsSendReqContext &context)
     }
     if (context.bcc.size() > 0) {
         for (MmsAddress address : context.bcc) {
-            mmsMsg.AddHeaderAddressValue(MmsFieldCode::MMS_CC, address);
+            mmsMsg.AddHeaderAddressValue(MmsFieldCode::MMS_BCC, address);
         }
     }
     if (context.subject.size() > 0) {
@@ -1208,7 +1239,10 @@ void setRetrieveConfToCore(MmsMsg &mmsMsg, MmsRetrieveConfContext &context)
     mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_DELIVERY_REPORT, context.deliveryReport);
     mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_READ_REPORT, context.readReport);
     mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_RETRIEVE_STATUS, context.retrieveStatus);
-    mmsMsg.SetHeaderStringValue(MmsFieldCode::MMS_RETRIEVE_TEXT, context.retrieveText);
+    if (!context.retrieveText.empty()) {
+        mmsMsg.SetHeaderEncodedStringValue(
+            MmsFieldCode::MMS_RETRIEVE_TEXT, context.retrieveText, (uint32_t)MmsCharSets::UTF_8);
+    }
     mmsMsg.SetHeaderContentType(context.contentType);
 }
 
@@ -1301,11 +1335,11 @@ void NativeEncodeMms(napi_env env, void *data)
 void EncodeMmsCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<EncodeMmsContext *>(data);
+
     napi_value callbackValue = nullptr;
     if (status == napi_ok) {
         if (context->resolved) {
             napi_create_array(env, &callbackValue);
-            TELEPHONY_LOGI("napi_sms bufferLen =  %{public}d", context->bufferLen);
             for (uint32_t i = 0; i < context->bufferLen; i++) {
                 napi_value itemValue = nullptr;
                 int32_t element = context->outBuffer[i];
@@ -1338,7 +1372,7 @@ napi_value NapiMms::EncodeMms(napi_env env, napi_callback_info info)
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     result = NapiUtil::HandleAsyncWork(env, context, "EncodeMms", NativeEncodeMms, EncodeMmsCallback);
-    TELEPHONY_LOGI("napi_mms DecodeMms end");
+    TELEPHONY_LOGI("napi_mms EncodeMms end");
     return result;
 }
 
@@ -1427,6 +1461,32 @@ napi_value NapiMms::InitEnumVersionType(napi_env env, napi_value exports)
             "MMS_VERSION_1_2", NapiUtil::ToInt32Value(env, static_cast<int32_t>(MmsVersionType::MMS_VERSION_1_2))),
         DECLARE_NAPI_STATIC_PROPERTY(
             "MMS_VERSION_1_3", NapiUtil::ToInt32Value(env, static_cast<int32_t>(MmsVersionType::MMS_VERSION_1_3))),
+    };
+    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    return exports;
+}
+
+napi_value NapiMms::InitEnumDispositionType(napi_env env, napi_value exports)
+{
+    napi_property_descriptor desc[] = {
+            DECLARE_NAPI_STATIC_PROPERTY(
+                    "FROM_DATA", NapiUtil::ToInt32Value(env, static_cast<int32_t>(DispositionValue::FROM_DATA))),
+            DECLARE_NAPI_STATIC_PROPERTY(
+                    "ATTACHMENT", NapiUtil::ToInt32Value(env, static_cast<int32_t>(DispositionValue::ATTACHMENT))),
+            DECLARE_NAPI_STATIC_PROPERTY(
+                    "INLINE", NapiUtil::ToInt32Value(env, static_cast<int32_t>(DispositionValue::INLINE))),
+    };
+    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    return exports;
+}
+
+napi_value NapiMms::InitEnumReportAllowedType(napi_env env, napi_value exports)
+{
+    napi_property_descriptor desc[] = {
+            DECLARE_NAPI_STATIC_PROPERTY(
+                    "MMS_YES", NapiUtil::ToInt32Value(env, static_cast<int32_t>(MmsBoolType::MMS_YES))),
+            DECLARE_NAPI_STATIC_PROPERTY(
+                    "MMS_NO", NapiUtil::ToInt32Value(env, static_cast<int32_t>(MmsBoolType::MMS_NO))),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;

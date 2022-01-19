@@ -161,7 +161,7 @@ void SmsReceiveIndexer::SetTimestamp(long timestamp)
     timestamp_ = timestamp;
 }
 
-std::vector<uint8_t> SmsReceiveIndexer::GetPdu() const
+const std::vector<uint8_t>& SmsReceiveIndexer::GetPdu() const
 {
     return pdu_;
 }
