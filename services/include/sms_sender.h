@@ -27,11 +27,11 @@
 #include "event_handler.h"
 #include "event_runner.h"
 
-#include "core_manager.h"
 #include "hril_sms_parcel.h"
 #include "i_sms_service_interface.h"
 #include "sms_send_indexer.h"
 #include "sms_persist_helper.h"
+#include "network_state.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -60,7 +60,6 @@ public:
         const std::shared_ptr<SmsSendIndexer> &indexer, ISendShortMessageCallback::SmsSendResult result);
     static void SendResultCallBack(
         const sptr<ISendShortMessageCallback> &sendCallback, ISendShortMessageCallback::SmsSendResult result);
-    bool GetImsDomain();
     void SetNetworkState(bool isImsNetDomain, int32_t voiceServiceState);
     std::optional<int32_t> GetNetworkId();
     void SetNetworkId(std::optional<int32_t> &id);
@@ -77,7 +76,6 @@ protected:
     void SendMessageSucceed(const std::shared_ptr<SmsSendIndexer> &smsIndexer);
     void SendMessageFailed(const std::shared_ptr<SmsSendIndexer> &smsIndexer);
     bool CheckForce7BitEncodeType();
-    std::shared_ptr<Core> GetCore() const;
 
     int32_t slotId_ = -1;
     std::list<std::shared_ptr<SmsSendIndexer>> reportList_;

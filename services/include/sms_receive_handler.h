@@ -23,7 +23,6 @@
 #include "event_handler.h"
 #include "event_runner.h"
 
-#include "core_manager.h"
 #include "hril_sms_parcel.h"
 #include "sms_base_message.h"
 #include "sms_common.h"
@@ -47,7 +46,6 @@ protected:
     void CombineMessagePart(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
     void DeleteMessageFormDb(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
     bool IsRepeatedMessagePart(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
-    std::shared_ptr<Core> GetCore() const;
     bool AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer);
     bool CheckBlockPhone(const std::shared_ptr<SmsReceiveIndexer> &indexer);
     bool CheckSmsCapable();

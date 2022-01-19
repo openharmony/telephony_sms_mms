@@ -31,7 +31,7 @@ namespace OHOS {
 namespace Telephony {
 class SmsInterfaceManager {
 public:
-    SmsInterfaceManager(int32_t slotId);
+    explicit SmsInterfaceManager(int32_t slotId);
     virtual ~SmsInterfaceManager();
     void InitInterfaceManager();
     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
@@ -61,7 +61,6 @@ private:
     int32_t slotId_;
     std::unique_ptr<SmsSendManager> smsSendManager_;
     std::unique_ptr<SmsReceiveManager> smsReceiveManager_;
-    std::shared_ptr<AppExecFwk::EventRunner> smsSendManagerRunner_;
     std::shared_ptr<SmsMiscManager> smsMiscManager_;
 };
 } // namespace Telephony

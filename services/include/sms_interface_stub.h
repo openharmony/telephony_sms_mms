@@ -18,6 +18,7 @@
 
 #include <list>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "iremote_stub.h"
@@ -64,6 +65,7 @@ private:
     using SmsServiceFunc = void (SmsInterfaceStub::*)(
         MessageParcel &data, MessageParcel &reply, MessageOption &option);
     std::map<uint32_t, SmsServiceFunc> memberFuncMap_;
+    std::mutex mutex_;
 };
 } // namespace Telephony
 } // namespace OHOS

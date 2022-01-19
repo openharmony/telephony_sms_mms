@@ -67,7 +67,7 @@ static int32_t WrapSimMessageStatus(int32_t status)
 
 static int32_t GetDefaultSmsSlotId()
 {
-    return CoreManager::DEFAULT_SLOT_ID;
+    return DEFAULT_SIM_SLOT_ID;
 }
 
 static bool MatchObjectProperty(
@@ -114,10 +114,6 @@ static bool ActuallySendMessage(napi_env env, SendMessageContext &parameter)
         TELEPHONY_LOGI("ActuallySendMessage parameter.slotId < 0 illegal slotId");
         return false;
     }
-    if (parameter.destinationHost.empty()) {
-        TELEPHONY_LOGI("ActuallySendMessage destinationHost empty illegal parameter");
-        return false;
-    }
     bool hasSendCallback = parameter.sendCallbackRef != nullptr;
     std::unique_ptr<SendCallback> sendCallback =
         std::make_unique<SendCallback>(hasSendCallback, env, parameter.thisVarRef, parameter.sendCallbackRef);
@@ -133,15 +129,13 @@ static bool ActuallySendMessage(napi_env env, SendMessageContext &parameter)
         return false;
     }
     if (parameter.messageType == TEXT_MESSAGE_PARAMETER_MATCH) {
-        if (!parameter.textContent.empty()) {
-            int32_t sendResult = ShortMessageManager::SendMessage(parameter.slotId, parameter.destinationHost,
-                parameter.serviceCenter, parameter.textContent, sendCallback.release(), deliveryCallback.release());
-            TELEPHONY_LOGI("NativeSendMessage SendTextMessage execResult = %{public}d", sendResult);
-            if (sendResult == ERROR_NONE) {
-                return true;
-            } else {
-                return false;
-            }
+        int32_t sendResult = ShortMessageManager::SendMessage(parameter.slotId, parameter.destinationHost,
+            parameter.serviceCenter, parameter.textContent, sendCallback.release(), deliveryCallback.release());
+        TELEPHONY_LOGI("NativeSendMessage SendTextMessage execResult = %{public}d", sendResult);
+        if (sendResult == ERROR_NONE) {
+            return true;
+        } else {
+            return false;
         }
     } else if (parameter.messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
         if (parameter.rawDataContent.size() > 0) {
@@ -503,7 +497,7 @@ static void NativeGetDefaultSmsSlotId(napi_env env, void *data)
     auto context = static_cast<GetDefaultSmsSlotIdContext *>(data);
     context->defaultSmsSlotId = ShortMessageManager::GetDefaultSmsSlotId();
     TELEPHONY_LOGI("NativeGetDefaultSmsSlotId defaultSmsSlotId  = %{public}d", context->defaultSmsSlotId);
-    if (context->defaultSmsSlotId >= CoreManager::SLOT_ID0) {
+    if (context->defaultSmsSlotId >= SIM_SLOT_0) {
         context->resolved = true;
     } else {
         context->resolved = false;
@@ -1469,6 +1463,8 @@ napi_value InitNapiSmsRegistry(napi_env env, napi_value exports)
     NapiMms::InitEnumMessageType(env, exports);
     NapiMms::InitEnumPriorityType(env, exports);
     NapiMms::InitEnumVersionType(env, exports);
+    NapiMms::InitEnumDispositionType(env, exports);
+    NapiMms::InitEnumReportAllowedType(env, exports);
     return exports;
 }
 EXTERN_C_END

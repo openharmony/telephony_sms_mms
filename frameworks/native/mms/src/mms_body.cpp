@@ -81,8 +81,7 @@ bool MmsBody::DecodeMmsBody(MmsDecodeBuffer &decodeBuffer, MmsHeader &header)
         case ContentTypes::MULTIPART_ALTERNATIVE:
         case ContentTypes::APPLICATION_VND_OMA_DRM_MESSAGE:
         case ContentTypes::APPLICATION_VND_OMA_DRM_CONTENT:
-            DecodeMultipart(decodeBuffer);
-            break;
+            return DecodeMultipart(decodeBuffer);
         default:
             break;
     }

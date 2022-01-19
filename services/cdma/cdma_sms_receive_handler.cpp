@@ -23,7 +23,8 @@
 #include "cdma_sms_message.h"
 #include "cdma_sms_sender.h"
 #include "cdma_sms_types.h"
-#include "observer_handler.h"
+#include "core_manager_inner.h"
+#include "radio_event.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -96,13 +97,9 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
 
 void CdmaSmsReceiveHandler::ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> &response)
 {
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        auto reply = AppExecFwk::InnerEvent::Get(SMS_EVENT_NEW_SMS_REPLY, response);
-        reply->SetOwner(shared_from_this());
-        TELEPHONY_LOGI("Reply To Smsc ackResult %{public}d", result);
-        core->SendSmsAck(result == AckIncomeCause::SMS_ACK_RESULT_OK, result, reply);
-    }
+    TELEPHONY_LOGI("Reply To Smsc ackResult %{public}d", result);
+    CoreManagerInner::GetInstance().SendSmsAck(
+        slotId_, SMS_EVENT_NEW_SMS_REPLY, result == AckIncomeCause::SMS_ACK_RESULT_OK, result, shared_from_this());
 }
 
 void CdmaSmsReceiveHandler::SetCdmaSender(const std::weak_ptr<SmsSender> &smsSender)
@@ -137,23 +134,16 @@ void CdmaSmsReceiveHandler::Init()
 
 bool CdmaSmsReceiveHandler::RegisterHandler()
 {
-    bool ret = false;
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        TELEPHONY_LOGI("CdmaSmsReceiveHandler::RegisteHandler Register RADIO_CDMA_SMS ok.");
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_CDMA_SMS, nullptr);
-        ret = true;
-    }
-    return ret;
+    TELEPHONY_LOGI("CdmaSmsReceiveHandler::RegisteHandler Register RADIO_CDMA_SMS ok.");
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_CDMA_SMS, nullptr);
+    return true;
 }
 
 void CdmaSmsReceiveHandler::UnRegisterHandler()
 {
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        TELEPHONY_LOGI("CdmaSmsReceiveHandler::UnRegisterHandler::slotId= %{public}d", slotId_);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_CDMA_SMS);
-    }
+    TELEPHONY_LOGI("CdmaSmsReceiveHandler::UnRegisterHandler::slotId= %{public}d", slotId_);
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_CDMA_SMS);
 }
 
 bool CdmaSmsReceiveHandler::SendCBBroadcast(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage)
@@ -211,17 +201,17 @@ bool CdmaSmsReceiveHandler::SendCBBroadcast(const std::shared_ptr<SmsBaseMessage
     return true;
 }
 
-void CdmaSmsReceiveHandler::GetCBData(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage,
-    SmsCbData::CbData &sendData, bool &isEmergency)
+void CdmaSmsReceiveHandler::GetCBData(
+    const std::shared_ptr<SmsBaseMessage> &smsBaseMessage, SmsCbData::CbData &sendData, bool &isEmergency)
 {
     if (smsBaseMessage == nullptr) {
         TELEPHONY_LOGE("smsBaseMessage is nullptr.");
-        return ;
+        return;
     }
     CdmaSmsMessage *message = static_cast<CdmaSmsMessage *>(smsBaseMessage.get());
     if (message == nullptr) {
         TELEPHONY_LOGE("message is nullptr.");
-        return ;
+        return;
     }
 
     sendData.format = message->GetFormat();
@@ -241,12 +231,7 @@ void CdmaSmsReceiveHandler::GetCBData(const std::shared_ptr<SmsBaseMessage> &sms
     sendData.recvTime = message->GetReceTime();
     sendData.langType = message->GetLanguage();
     isEmergency = message->IsEmergencyMsg();
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("core is nullptr.");
-        return ;
-    }
-    plmn_ = core->GetOperatorNumeric(slotId_);
+    plmn_ = CoreManagerInner::GetInstance().GetOperatorNumeric(slotId_);
 }
 } // namespace Telephony
 } // namespace OHOS

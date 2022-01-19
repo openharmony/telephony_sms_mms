@@ -23,8 +23,8 @@
 #include "event_handler.h"
 #include "event_runner.h"
 
-#include "core.h"
 #include "sms_common.h"
+#include "network_state.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -48,7 +48,6 @@ public:
 protected:
     void HandlerRadioState(const AppExecFwk::InnerEvent::Pointer &event);
     void GetRadioState();
-    std::shared_ptr<Core> GetCore() const;
     void RegisterHandler();
     void UnRegisterHandler();
 
