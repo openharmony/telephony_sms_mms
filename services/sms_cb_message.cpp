@@ -124,7 +124,7 @@ bool SmsCbMessage::PduAnalysis(const std::vector<unsigned char> &pdu)
 
 /**
  * @brief Decode2gHeader GSM Cell Broadcast Message Header
- * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4 Message Format on the Radio Network â€“ MS/UE Interface
+ * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4 Message Format on the Radio Network – MS/UE Interface
  * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4.1.2 Message Parameter
  * @param pdu [in]
  * @return int [out]

@@ -64,6 +64,8 @@ void MmsAddress::CheckAddressType()
         addressType_ = ADDRESS_TYPE_PLMN;
     } else if (addressString_.find("EMAIL")) {
         addressType_ = ADDRESS_TYPE_PLMN;
+    } else {
+        addressType_ = ADDRESS_TYPE_UNKNOWN;
     }
 }
 } // namespace Telephony

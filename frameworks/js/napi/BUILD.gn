@@ -12,18 +12,13 @@
 # limitations under the License.
 import("//build/ohos.gni")
 SUBSYSTEM_DIR = "//base/telephony"
+import("//base/telephony/core_service/telephony.gni")
 ohos_shared_library("sms") {
   include_dirs = [
     "//third_party/node/src",
     "include",
     "$SUBSYSTEM_DIR/sms_mms/frameworks/js/napi/include",
     "$SUBSYSTEM_DIR/core_service/frameworks/js/napi",
-    "//base/telephony/core_service/interfaces/innerkits/network_search",
-    "//base/telephony/core_service/interfaces/innerkits/core",
-    "//base/telephony/core_service/interfaces/innerkits/sim",
-    "//base/telephony/core_service/interfaces/innerkits/core",
-    "//base/telephony/core_service/interfaces/innerkits/cellular_data",
-    "//base/telephony/core_service/interfaces/innerkits/sim",
   ]
 
   sources = [
@@ -37,19 +32,19 @@ ohos_shared_library("sms") {
   deps = [
     "$SUBSYSTEM_DIR/sms_mms:tel_sms_mms",
     "$SUBSYSTEM_DIR/sms_mms/frameworks/native:tel_sms_mms_api",
-    "//base/telephony/core_service:tel_core_service",
-    "//base/telephony/core_service/utils:libtelephony_common",
+    "//base/telephony/core_service/utils:libtel_common",
     "//foundation/ace/napi:ace_napi",
     "//utils/native/base:utils",
   ]
 
-  defines = [
+  defines += [
     "TELEPHONY_LOG_TAG = \"SMS_MMS_API\"",
     "LOG_DOMAIN = 0xD002B01",
   ]
 
   external_deps = [
     "appexecfwk_standard:libeventhandler",
+    "core_service:tel_core_service_api",
     "ipc:ipc_core",
     "ril_adapter:hril_innerkits",
     "safwk:system_ability_fwk",

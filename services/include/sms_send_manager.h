@@ -29,7 +29,7 @@ namespace OHOS {
 namespace Telephony {
 class SmsSendManager {
 public:
-    SmsSendManager(int32_t slotId);
+    explicit SmsSendManager(int32_t slotId);
     virtual ~SmsSendManager();
     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
         const sptr<ISendShortMessageCallback> &sendCallback,
@@ -39,6 +39,7 @@ public:
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
     void RetriedSmsDelivery(const std::shared_ptr<SmsSendIndexer> smsIndexer);
     void Init();
+    void InitNetworkHandle();
     std::shared_ptr<SmsSender> GetCdmaSmsSender() const;
     std::vector<std::string> SplitMessage(const std::string &message);
     bool GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);

@@ -15,7 +15,8 @@
 
 #include "sms_sender.h"
 
-#include "observer_handler.h"
+#include "core_manager_inner.h"
+#include "radio_event.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -40,10 +41,10 @@ void SmsSender::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     int eventId = event->GetInnerEventId();
     TELEPHONY_LOGI("SmsSender::ProcessEvent eventId %{public}d", eventId);
     switch (eventId) {
-        case ObserverHandler::RADIO_SEND_SMS:
-        case ObserverHandler::RADIO_SEND_CDMA_SMS:
-        case ObserverHandler::RADIO_SEND_IMS_GSM_SMS:
-        case ObserverHandler::RADIO_SEND_SMS_EXPECT_MORE: {
+        case RadioEvent::RADIO_SEND_SMS:
+        case RadioEvent::RADIO_SEND_CDMA_SMS:
+        case RadioEvent::RADIO_SEND_IMS_GSM_SMS:
+        case RadioEvent::RADIO_SEND_SMS_EXPECT_MORE: {
             smsIndexer = FindCacheMapAndTransform(event);
             HandleMessageResponse(smsIndexer);
             break;
@@ -55,7 +56,7 @@ void SmsSender::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
             }
             break;
         }
-        case ObserverHandler::RADIO_SMS_STATUS: {
+        case RadioEvent::RADIO_SMS_STATUS: {
             StatusReportAnalysis(event);
             break;
         }
@@ -139,17 +140,6 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         sptr<ISendShortMessageCallback> sendCallback = smsIndexer->GetSendCallback();
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
     }
-}
-
-bool SmsSender::GetImsDomain()
-{
-    bool result = false;
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("core is nullptr.");
-        return result;
-    }
-    return core->GetImsRegStatus();
 }
 
 void SmsSender::SendResultCallBack(
@@ -281,15 +271,6 @@ uint8_t SmsSender::GetMsgRef8Bit()
 int64_t SmsSender::GetMsgRef64Bit()
 {
     return ++msgRef64bit_;
-}
-
-std::shared_ptr<Core> SmsSender::GetCore() const
-{
-    std::shared_ptr<Core> core = CoreManager::GetInstance().getCore(slotId_);
-    if (core != nullptr && core->IsInitCore()) {
-        return core;
-    }
-    return nullptr;
 }
 
 void SmsSender::SetNetworkState(bool isImsNetDomain, int32_t voiceServiceState)
