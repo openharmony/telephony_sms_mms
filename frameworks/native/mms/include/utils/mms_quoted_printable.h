@@ -17,6 +17,7 @@
 #define MMS_QUOTED_PRINTABLE_H
 
 #include <string>
+
 namespace OHOS {
 namespace Telephony {
 class MmsQuotedPrintable {

@@ -19,10 +19,11 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "want.h"
-#include "observer_handler.h"
+
 #include "string_utils.h"
 #include "gsm_sms_message.h"
 #include "telephony_log_wrapper.h"
+#include "radio_event.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -50,8 +51,8 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
     eventId = event->GetInnerEventId();
     TELEPHONY_LOGI("SmsReceiveHandler::ProcessEvent eventId = %{public}d", eventId);
     switch (eventId) {
-        case ObserverHandler::RADIO_GSM_SMS:
-        case ObserverHandler::RADIO_CDMA_SMS: {
+        case RadioEvent::RADIO_GSM_SMS:
+        case RadioEvent::RADIO_CDMA_SMS: {
             std::shared_ptr<SmsBaseMessage> message = nullptr;
             message = TransformMessageInfo(event->GetSharedObject<SmsMessageInfo>());
             if (message != nullptr) {
@@ -208,15 +209,6 @@ void SmsReceiveHandler::SendBroadcast(
     if (!publishResult) {
         TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
     }
-}
-
-std::shared_ptr<Core> SmsReceiveHandler::GetCore() const
-{
-    std::shared_ptr<Core> core = CoreManager::GetInstance().getCore(slotId_);
-    if (core != nullptr && core->IsInitCore()) {
-        return core;
-    }
-    return nullptr;
 }
 
 bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer)

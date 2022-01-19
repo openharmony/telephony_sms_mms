@@ -15,6 +15,7 @@
 
 #include "sms_misc_manager.h"
 
+#include "core_manager_inner.h"
 #include "hril_sms_parcel.h"
 #include "short_message.h"
 #include "string_utils.h"
@@ -290,22 +291,17 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list)
         TELEPHONY_LOGI("[%{public}d-%{public}d]", item.fromMsgId, item.toMsgId);
     }
     std::unique_lock<std::mutex> lock(mutex_);
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        if (!list.empty()) {
-            isSuccess_ = false;
-            auto reply = AppExecFwk::InnerEvent::Get(SmsMiscManager::SET_CB_CONFIG_FINISH);
-            reply->SetOwner(shared_from_this());
-            int32_t condition = conditonVar_++;
-            fairList_.push_back(condition);
-            core->SetCBConfig(enable ? 0 : 1, RangeListToString(list), codeScheme_, reply);
-            condVar_.wait(lock, [&]() { return fairVar_ == condition; });
-            return isSuccess_;
-        } else {
-            return true;
-        }
+    if (!list.empty()) {
+        isSuccess_ = false;
+        int32_t condition = conditonVar_++;
+        fairList_.push_back(condition);
+        CBConfigParam cbData {.mode = enable ? 0 : 1, .idList = RangeListToString(list), .dcsList = codeScheme_};
+        CoreManagerInner::GetInstance().SetCBConfig(
+            slotId_, SmsMiscManager::SET_CB_CONFIG_FINISH, cbData, shared_from_this());
+        condVar_.wait(lock, [&]() { return fairVar_ == condition; });
+        return isSuccess_;
     } else {
-        return false;
+        return true;
     }
 }
 
@@ -315,61 +311,41 @@ bool SmsMiscManager::AddSimMessage(
     TELEPHONY_LOGI(
         "smscLen = %{public}zu pudLen = %{public}zu status = %{public}d", smsc.size(), pdu.size(), status);
 
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::AddSimMessage core is nullptr");
-        return false;
-    }
     std::string smscAddr(smsc);
     if (smsc.length() <= MIN_SMSC_LEN) {
         smscAddr.clear();
         smscAddr.insert(0, "00");
     }
     TELEPHONY_LOGI("smscAddr = %{public}s", smscAddr.c_str());
-    return core->AddSmsToIcc(static_cast<int>(status), const_cast<std::string &>(pdu), smscAddr);
+    return CoreManagerInner::GetInstance().AddSmsToIcc(
+        slotId_, static_cast<int>(status), const_cast<std::string &>(pdu), smscAddr);
 }
 
 bool SmsMiscManager::DelSimMessage(uint32_t msgIndex)
 {
     TELEPHONY_LOGI("messageIndex = %{public}d", msgIndex);
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::DelSimMessage core is nullptr");
-        return false;
-    }
-    return core->DelSmsIcc(msgIndex);
+    return CoreManagerInner::GetInstance().DelSmsIcc(slotId_, msgIndex);
 }
 
 bool SmsMiscManager::UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
     const std::string &pdu, const std::string &smsc)
 {
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::UpdateSimMessage core is nullptr");
-        return false;
-    }
-
     std::string smscAddr(smsc);
     if (smsc.length() <= MIN_SMSC_LEN) {
         smscAddr.clear();
         smscAddr.insert(0, "00");
     }
-    return core->UpdateSmsIcc(
-        msgIndex, static_cast<int>(newStatus), const_cast<std::string &>(pdu), smscAddr);
+    return CoreManagerInner::GetInstance().UpdateSmsIcc(
+        slotId_, msgIndex, static_cast<int>(newStatus), const_cast<std::string &>(pdu), smscAddr);
 }
 
 std::vector<ShortMessage> SmsMiscManager::GetAllSimMessages()
 {
     std::vector<ShortMessage> ret;
     TELEPHONY_LOGI("GetAllSimMessages");
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::GetAllSimMessages core is nullptr");
-        return ret;
-    }
-    std::vector<std::string> pdus = core->ObtainAllSmsOfIcc();
+    std::vector<std::string> pdus = CoreManagerInner::GetInstance().ObtainAllSmsOfIcc(slotId_);
     int index = 0;
-    PhoneType type = core->GetPhoneType();
+    PhoneType type = CoreManagerInner::GetInstance().GetPhoneType(slotId_);
     std::string specification;
     if (PhoneType::PHONE_TYPE_IS_GSM == type) {
         specification = "3gpp";
@@ -393,17 +369,11 @@ bool SmsMiscManager::SetSmscAddr(const std::string &scAddr)
 {
     TELEPHONY_LOGI("SmsMiscManager::SetSmscAddr [%{public}s]", scAddr.c_str());
     std::unique_lock<std::mutex> lock(mutex_);
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::GetSmscAddr core nullptr");
-        return false;
-    }
     isSuccess_ = false;
     int32_t condition = conditonVar_++;
     fairList_.push_back(condition);
-    auto reply = AppExecFwk::InnerEvent::Get(SmsMiscManager::SET_SMSC_ADDR_FINISH);
-    reply->SetOwner(shared_from_this());
-    core->SetSmscAddr(0, scAddr, reply);
+    CoreManagerInner::GetInstance().SetSmscAddr(
+        slotId_, SmsMiscManager::SET_SMSC_ADDR_FINISH, 0, scAddr, shared_from_this());
     condVar_.wait(lock, [&]() { return fairVar_ == condition; });
     return isSuccess_;
 }
@@ -413,17 +383,10 @@ std::string SmsMiscManager::GetSmscAddr()
     TELEPHONY_LOGI("SmsMiscManager::GetSmscAddr");
     std::unique_lock<std::mutex> lock(mutex_);
     smscAddr_.clear();
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::GetSmscAddr core nullptr");
-        return "";
-    }
     isSuccess_ = false;
     int32_t condition = conditonVar_++;
     fairList_.push_back(condition);
-    auto reply = AppExecFwk::InnerEvent::Get(SmsMiscManager::GET_SMSC_ADDR_FINISH);
-    reply->SetOwner(shared_from_this());
-    core->GetSmscAddr(reply);
+    CoreManagerInner::GetInstance().GetSmscAddr(slotId_, SmsMiscManager::GET_SMSC_ADDR_FINISH, shared_from_this());
     condVar_.wait(lock, [&]() { return fairVar_ == condition; });
     return smscAddr_;
 }
@@ -431,33 +394,13 @@ std::string SmsMiscManager::GetSmscAddr()
 bool SmsMiscManager::SetDefaultSmsSlotId(int32_t slotId)
 {
     TELEPHONY_LOGI("SetDefaultSmsSlotId slotId = %{public}d", slotId);
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::SetDefaultSmsSlotId core is nullptr");
-        return false;
-    }
-    return core->SetDefaultSmsSlotId(slotId);
+    return CoreManagerInner::GetInstance().SetDefaultSmsSlotId(slotId);
 }
 
 int32_t SmsMiscManager::GetDefaultSmsSlotId()
 {
-    int32_t result = -1;
     TELEPHONY_LOGI("GetDefaultSmsSlotId");
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("SmsMiscManager::GetDefaultSmsSlotId core is nullptr");
-        return result;
-    }
-    return core->GetDefaultSmsSlotId();
-}
-
-std::shared_ptr<Core> SmsMiscManager::GetCore() const
-{
-    std::shared_ptr<Core> core = CoreManager::GetInstance().getCore(slotId_);
-    if (core != nullptr && core->IsInitCore()) {
-        return core;
-    }
-    return nullptr;
+    return CoreManagerInner::GetInstance().GetDefaultSmsSlotId();
 }
 } // namespace Telephony
 } // namespace OHOS

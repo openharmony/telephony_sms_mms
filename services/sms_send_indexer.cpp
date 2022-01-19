@@ -44,7 +44,7 @@ void SmsSendIndexer::SetEncodeSmca(const std::vector<uint8_t> &&smca)
     smca_ = std::forward<const std::vector<uint8_t>>(smca);
 }
 
-std::vector<uint8_t> SmsSendIndexer::GetEncodeSmca() const
+const std::vector<uint8_t>& SmsSendIndexer::GetEncodeSmca() const
 {
     return smca_;
 }
@@ -59,7 +59,7 @@ void SmsSendIndexer::SetEncodePdu(const std::vector<uint8_t> &&pdu)
     pdu_ = std::forward<const std::vector<uint8_t>>(pdu);
 }
 
-std::vector<uint8_t> SmsSendIndexer::GetEncodePdu() const
+const std::vector<uint8_t>& SmsSendIndexer::GetEncodePdu() const
 {
     return pdu_;
 }
@@ -209,7 +209,7 @@ void SmsSendIndexer::SetErrorCode(uint8_t errorCode)
     errorCode_ = errorCode;
 }
 
-std::vector<uint8_t> SmsSendIndexer::GetData() const
+const std::vector<uint8_t>& SmsSendIndexer::GetData() const
 {
     return data_;
 }
@@ -224,7 +224,7 @@ void SmsSendIndexer::SetData(const std::vector<uint8_t> &&data)
     data_ = std::forward<const std::vector<uint8_t>>(data);
 }
 
-std::vector<uint8_t> SmsSendIndexer::GetAckPdu() const
+const std::vector<uint8_t>& SmsSendIndexer::GetAckPdu() const
 {
     return ackPdu_;
 }

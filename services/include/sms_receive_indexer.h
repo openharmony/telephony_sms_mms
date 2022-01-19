@@ -31,7 +31,7 @@ public:
     SmsReceiveIndexer(const std::vector<uint8_t> &pdu, long timestamp, int16_t destPort, bool isCdma,
         bool isCdmaWapPdu, const std::string &address, const std::string &displayAddress,
         const std::string &messageBody);
-    std::vector<uint8_t> GetPdu() const;
+    const std::vector<uint8_t>& GetPdu() const;
     void SetPdu(const std::vector<uint8_t> &pdu);
     long GetTimestamp() const;
     void SetTimestamp(long timestamp);

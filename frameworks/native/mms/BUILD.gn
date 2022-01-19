@@ -52,7 +52,7 @@ ohos_source_set("mms_native_source") {
   ]
 
   deps = [
-    "//base/telephony/core_service/utils:libtelephony_common",
+    "//base/telephony/core_service/utils:libtel_common",
     "//third_party/glib:glib_packages",
     "//utils/native/base:utils",
   ]

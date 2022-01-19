@@ -15,8 +15,8 @@
 
 #include "sms_network_policy_manager.h"
 
-#include "core_manager.h"
-#include "observer_handler.h"
+#include "core_manager_inner.h"
+#include "radio_event.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -38,44 +38,43 @@ void SmsNetworkPolicyManager::Init()
 
 void SmsNetworkPolicyManager::RegisterHandler()
 {
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        TELEPHONY_LOGI("SmsNetworkPolicyManager::RegisterHandler Ok.");
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_PS_CONNECTION_ATTACHED, nullptr);
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_PS_CONNECTION_DETACHED, nullptr);
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_ON, nullptr);
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_OFF, nullptr);
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_STATE_CHANGED, nullptr);
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_PS_RAT_CHANGED, nullptr);
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_NETWORK_STATE, nullptr);
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_IMS_NETWORK_STATE_CHANGED, nullptr);
-        GetRadioState();
-    }
+    TELEPHONY_LOGI("SmsNetworkPolicyManager::RegisterHandler Ok.");
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_ATTACHED, nullptr);
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_DETACHED, nullptr);
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_ON, nullptr);
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_OFF, nullptr);
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_STATE_CHANGED, nullptr);
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_PS_RAT_CHANGED, nullptr);
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_NETWORK_STATE, nullptr);
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED, nullptr);
+    GetRadioState();
 }
 
 void SmsNetworkPolicyManager::UnRegisterHandler()
 {
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_PS_CONNECTION_ATTACHED);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_PS_CONNECTION_DETACHED);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_ON);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_OFF);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_STATE_CHANGED);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_PS_RAT_CHANGED);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_NETWORK_STATE);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_IMS_NETWORK_STATE_CHANGED);
-    }
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_ATTACHED);
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_DETACHED);
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_ON);
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_OFF);
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_STATE_CHANGED);
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_PS_RAT_CHANGED);
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_NETWORK_STATE);
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED);
     callbackMap_.clear();
-}
-
-std::shared_ptr<Core> SmsNetworkPolicyManager::GetCore() const
-{
-    std::shared_ptr<Core> core = CoreManager::GetInstance().getCore(slotId_);
-    if (core != nullptr && core->IsInitCore()) {
-        return core;
-    }
-    return nullptr;
 }
 
 void SmsNetworkPolicyManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
@@ -89,14 +88,14 @@ void SmsNetworkPolicyManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer
     eventId = event->GetInnerEventId();
     TELEPHONY_LOGI("SmsNetworkPolicyManager::ProcessEvent Handler Rec%{public}d", eventId);
     switch (eventId) {
-        case ObserverHandler::RADIO_ON:
-        case ObserverHandler::RADIO_OFF:
-        case ObserverHandler::RADIO_STATE_CHANGED:
-        case ObserverHandler::RADIO_PS_RAT_CHANGED:
-        case ObserverHandler::RADIO_NETWORK_STATE:
-        case ObserverHandler::RADIO_IMS_NETWORK_STATE_CHANGED:
-        case ObserverHandler::RADIO_PS_CONNECTION_DETACHED:
-        case ObserverHandler::RADIO_PS_CONNECTION_ATTACHED:
+        case RadioEvent::RADIO_ON:
+        case RadioEvent::RADIO_OFF:
+        case RadioEvent::RADIO_STATE_CHANGED:
+        case RadioEvent::RADIO_PS_RAT_CHANGED:
+        case RadioEvent::RADIO_NETWORK_STATE:
+        case RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED:
+        case RadioEvent::RADIO_PS_CONNECTION_DETACHED:
+        case RadioEvent::RADIO_PS_CONNECTION_ATTACHED:
             GetRadioState();
             break;
         default:
@@ -111,14 +110,9 @@ NetWorkType SmsNetworkPolicyManager::GetNetWorkType()
 
 void SmsNetworkPolicyManager::GetRadioState()
 {
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("Get core return nullptr.");
-        return;
-    }
-    netWorkType_ = static_cast<NetWorkType>(core->GetPhoneType());
-    isImsNetDomain_ = core->GetImsRegStatus();
-    voiceServiceState_ = core->GetCsRegState(slotId_);
+    netWorkType_ = static_cast<NetWorkType>(CoreManagerInner::GetInstance().GetPhoneType(slotId_));
+    isImsNetDomain_ = CoreManagerInner::GetInstance().GetImsRegStatus(slotId_);
+    voiceServiceState_ = CoreManagerInner::GetInstance().GetCsRegState(slotId_);
     TELEPHONY_LOGI("netWorkType_ = %{public}d isImsNetDomain_ = %{public}s GetCsRegStatus = %{public}d",
         netWorkType_, isImsNetDomain_ ? "true" : "false", voiceServiceState_);
     for (const auto &item : callbackMap_) {

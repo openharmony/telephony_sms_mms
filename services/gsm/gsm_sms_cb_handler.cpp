@@ -16,8 +16,10 @@
 #include "gsm_sms_cb_handler.h"
 
 #include "common_event_support.h"
-#include "observer_handler.h"
 #include "securec.h"
+
+#include "core_manager_inner.h"
+#include "radio_event.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -32,20 +34,16 @@ GsmSmsCbHandler::GsmSmsCbHandler(const std::shared_ptr<AppExecFwk::EventRunner> 
 
 GsmSmsCbHandler::~GsmSmsCbHandler()
 {
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_CELL_BROADCAST);
-    }
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_CELL_BROADCAST);
 }
 
 void GsmSmsCbHandler::Init()
 {
     cbMsgList_.clear();
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_CELL_BROADCAST, nullptr);
-        TELEPHONY_LOGI("GsmSmsCbHandler::RegisterHandler::slotId= %{public}d", slotId_);
-    }
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_CELL_BROADCAST, nullptr);
+    TELEPHONY_LOGI("GsmSmsCbHandler::RegisterHandler::slotId= %{public}d", slotId_);
 }
 
 bool GsmSmsCbHandler::CheckCbActive(const std::shared_ptr<SmsCbMessage> &cbMessage)
@@ -156,13 +154,8 @@ bool GsmSmsCbHandler::InitLocation(SmsCbInfo &info)
     const uint8_t LaWide = 2;
     const uint8_t cellWide = 3;
     const int32_t defaultValue = -1;
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr) {
-        TELEPHONY_LOGE("core is nullptr.");
-        return false;
-    }
-    info.plmn_ = core->GetOperatorNumeric(slotId_);
-    sptr<CellLocation> location = core->GetCellLocation(slotId_);
+    info.plmn_ = CoreManagerInner::GetInstance().GetOperatorNumeric(slotId_);
+    sptr<CellLocation> location = CoreManagerInner::GetInstance().GetCellLocation(slotId_);
     if (location == nullptr) {
         TELEPHONY_LOGE("location is nullptr.");
         return false;
@@ -286,7 +279,7 @@ void GsmSmsCbHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     eventId = event->GetInnerEventId();
     TELEPHONY_LOGI("ProcessEvent eventId = %{public}d", eventId);
     switch (eventId) {
-        case ObserverHandler::RADIO_CELL_BROADCAST: {
+        case RadioEvent::RADIO_CELL_BROADCAST: {
             std::shared_ptr<CBConfigReportInfo> cbMessage = nullptr;
             cbMessage = event->GetSharedObject<CBConfigReportInfo>();
             HandleCbMessage(cbMessage);
@@ -298,17 +291,7 @@ void GsmSmsCbHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     }
 }
 
-std::shared_ptr<Core> GsmSmsCbHandler::GetCore() const
-{
-    std::shared_ptr<Core> core = CoreManager::GetInstance().getCore(slotId_);
-    if (core != nullptr && core->IsInitCore()) {
-        return core;
-    }
-    return nullptr;
-}
-
-bool GsmSmsCbHandler::SetWantData(
-    EventFwk::Want &want, const std::shared_ptr<SmsCbMessage> &cbMessage)
+bool GsmSmsCbHandler::SetWantData(EventFwk::Want &want, const std::shared_ptr<SmsCbMessage> &cbMessage)
 {
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("cbMessage is nullptr.");
@@ -360,12 +343,11 @@ bool GsmSmsCbHandler::SetWantData(
     return true;
 }
 
-void GsmSmsCbHandler::GetCbData(const std::shared_ptr<SmsCbMessage> &cbMessage,
-    SmsCbData::CbData &sendData)
+void GsmSmsCbHandler::GetCbData(const std::shared_ptr<SmsCbMessage> &cbMessage, SmsCbData::CbData &sendData)
 {
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("Get Cb Data error.");
-        return ;
+        return;
     }
     cbMessage->GetMsgType(sendData.msgType);
     cbMessage->GetLangType(sendData.langType);

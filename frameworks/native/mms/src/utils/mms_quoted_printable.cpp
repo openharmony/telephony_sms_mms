@@ -14,7 +14,6 @@
  */
 
 #include "mms_quoted_printable.h"
-
 #include "securec.h"
 
 namespace OHOS {
@@ -42,16 +41,20 @@ bool MmsQuotedPrintable::Decode(const std::string src, std::string &dest)
 {
     const int endLineCharNum = 3;
 
-    char *tempBuffer = new (std::nothrow) char[src.length()];
+    uint32_t inLength = 0;
+    inLength = src.length();
+    if (inLength == 0) {
+        return false;
+    }
+
+    std::unique_ptr<char[]> tempBuffer = std::make_unique<char[]>(src.length());
     if (tempBuffer == nullptr) {
         return false;
     }
-    char *startPostion = tempBuffer;
+
     uint32_t index = 0;
     uint32_t outLength = 0;
-    uint32_t inLength = 0;
     const char *input = src.data();
-    inLength = src.length();
     while (index < inLength) {
         if (strncmp(input, "=/r/n", endLineCharNum) == 0) {
             input += endLineCharNum;
@@ -60,23 +63,21 @@ bool MmsQuotedPrintable::Decode(const std::string src, std::string &dest)
             if (*input == '=') {
                 uint32_t hexChar = 0;
                 (void)sscanf_s(input, "=%02X", &hexChar) ;
-                *tempBuffer = (char)hexChar;
+                tempBuffer[outLength] = static_cast<char>(hexChar);
                 input += endLineCharNum;
                 index += endLineCharNum;
             } else {
-                *tempBuffer = *input;
+                tempBuffer[outLength] = *input;
                 input++;
                 index++;
             }
-            tempBuffer++;
             outLength++;
         }
     }
-    *tempBuffer = '\0';
-    dest = std::string(startPostion, outLength);
-    if (startPostion) {
-        delete startPostion;
-        startPostion = nullptr;
+    tempBuffer[outLength] = '\0';
+    dest = std::string(tempBuffer.get(), outLength);
+    if (tempBuffer) {
+        tempBuffer.reset();
     }
     return true;
 }
