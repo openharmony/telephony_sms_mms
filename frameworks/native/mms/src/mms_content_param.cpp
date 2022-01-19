@@ -77,6 +77,9 @@ void MmsContentParam::GetFileName(std::string &fileName)
 
 void MmsContentParam::SetFileName(std::string fileName)
 {
+    if (fileName.empty()) {
+        return;
+    }
     uint8_t fieldCode = static_cast<uint8_t>(ContentParam::CT_P_NAME);
     textMap_.insert(std::make_pair(fieldCode, fileName));
 }

@@ -34,8 +34,7 @@ MmsBodyPart::MmsBodyPart(const MmsBodyPart &srcBodyPart) : headerLen_(0), bodyLe
 MmsBodyPart::~MmsBodyPart()
 {
     if (pbodyPartBuffer_ != nullptr) {
-        pbodyPartBuffer_.release();
-        pbodyPartBuffer_ = nullptr;
+        pbodyPartBuffer_.reset();
     }
 }
 
@@ -168,7 +167,7 @@ bool MmsBodyPart::DecodePartHeader(MmsDecodeBuffer &decodeBuffer, uint32_t heade
                 return false;
             }
         } else {
-            TELEPHONY_LOGE("Header Field is not support.");
+            TELEPHONY_LOGE("Header Field[%{pulbic}02X] is not support.", oneByte);
             return false;
         }
     }
@@ -208,8 +207,7 @@ bool MmsBodyPart::DecodePartBody(MmsDecodeBuffer &decodeBuffer, uint32_t bodyLen
 
     if (encodebuffer.length()) {
         pbodyPartBuffer_ = std::unique_ptr<char[]>((char *)encodebuffer.data());
-        bodyPartBuffer.release();
-        bodyPartBuffer = nullptr;
+        bodyPartBuffer.reset();
         bodyLen_ = encodebuffer.length();
     } else {
         pbodyPartBuffer_ = std::move(bodyPartBuffer);
@@ -266,7 +264,8 @@ bool MmsBodyPart::SetAttachment(MmsAttachment &attachment)
         return false;
     }
     SetSmilFile(attachment.IsSmilFile());
-    GetContentType().GetContentParam().SetFileName(attachment.GetFileName());
+    SetContentDisposition(attachment.GetContentDisposition());
+    GetContentType().GetContentParam().SetFileName(strFileName_);
     GetContentType().GetContentParam().SetCharSet(attachment.GetCharSet());
     return true;
 }
@@ -311,6 +310,16 @@ bool MmsBodyPart::GetContentLocation(std::string &contentLocation)
     return mmsBodyPartHeader_.GetContentLocation(contentLocation);
 }
 
+bool MmsBodyPart::SetContentDisposition(std::string contentDisposition)
+{
+    return mmsBodyPartHeader_.SetContentDisposition(contentDisposition);
+}
+
+bool MmsBodyPart::GetContentDisposition(std::string &contentDisposition)
+{
+    return mmsBodyPartHeader_.GetContentDisposition(contentDisposition);
+}
+
 /**
  * @brief EncodeMmsBodyPart
  * wap-230-wsp-20010705-a   section:8.5.3 Multipart Entry
@@ -348,8 +357,7 @@ bool MmsBodyPart::EncodeMmsBodyPart(MmsEncodeBuffer &encodeBuffer)
     }
     uint32_t bodyLen = 0;
     std::unique_ptr<char[]> bodyBuff = ReadBodyPartBuffer(bodyLen);
-    if (bodyBuff == nullptr || !encodeBuffer.WriteBuffer(std::move(bodyBuff), bodyLen)) {
-        TELEPHONY_LOGE("ReadBody Part Buffer To Encode Buffer Error.");
+    if (!encodeBuffer.WriteBuffer(std::move(bodyBuff), bodyLen)) {
         return false;
     }
     return true;
@@ -376,19 +384,16 @@ void MmsBodyPart::DecodeSetFileName()
         return;
     }
 
-    time_t currentTime = time(nullptr);
-    if (currentTime == static_cast<time_t>(-1)) {
-        TELEPHONY_LOGE("Get Sys Time Failed.");
-        return;
-    }
-    tm *time = localtime(&currentTime);
-    if (time == nullptr) {
-        TELEPHONY_LOGE("obtain current time Error.");
-        return;
-    }
-
     const unsigned char timeBufferLen = 64;
+    time_t currentTime = time(nullptr);
+    if (currentTime == -1) {
+        return;
+    }
     char chCurrentTime[timeBufferLen] = {0};
+    tm *time = localtime(&currentTime);
+    if (currentTime == static_cast<time_t>(-1) || time == nullptr) {
+        TELEPHONY_LOGI("obtain current time Error.");
+    }
     (void)strftime(chCurrentTime, sizeof(chCurrentTime), "%Y%m%d%H%M%S", time);
     strFileName_ = chCurrentTime;
     return;
@@ -410,8 +415,7 @@ bool MmsBodyPart::WriteBodyFromFile(std::string path)
         return false;
     }
     if (pbodyPartBuffer_) {
-        pbodyPartBuffer_.release();
-        pbodyPartBuffer_ = nullptr;
+        pbodyPartBuffer_.reset();
     }
     pbodyPartBuffer_ = std::make_unique<char[]>(fileLen);
     if (!pbodyPartBuffer_) {
@@ -447,8 +451,7 @@ bool MmsBodyPart::WriteBodyFromAttachmentBuffer(MmsAttachment &attachment)
     }
 
     if (pbodyPartBuffer_) {
-        pbodyPartBuffer_.release();
-        pbodyPartBuffer_ = nullptr;
+        pbodyPartBuffer_.reset();
     }
     pbodyPartBuffer_ = std::make_unique<char[]>(dataLen);
     if (!pbodyPartBuffer_) {

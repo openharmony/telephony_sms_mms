@@ -207,7 +207,7 @@ int SmsCommonUtils::ConvertDigitToDTMF(const char *digit, int digitLen, int star
     }
     /* shift 1 and shift 2 are supported in this spec. */
     if (shift >= smsMaxShift) {
-        TELEPHONY_LOGE("Invalid Param value shift : %d", shift);
+        TELEPHONY_LOGE("Invalid Param value shift : %{public}d", shift);
         return offset;
     }
 

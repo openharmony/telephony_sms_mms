@@ -336,15 +336,22 @@ declare namespace sms {
     date?: number,
   }
 
+  export enum  DispositionType{
+    FROM_DATA = 0,
+    ATTACHMENT,
+    INLINE,
+  }
+
   /**
    * @systemapi Hide this for inner system use.
    * @since 8
    */
   export interface MmsAttachment {
     path: string,
+    fileName: string,
     contentId: string,
     contentLocation: string,
-    contentDisposition: string,
+    contentDisposition: DispositionType,
     contentTransferEncoding: string,
     contentType: string,
     isSmil: boolean,

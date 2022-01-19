@@ -42,7 +42,7 @@ ohos_source_set("sms_native_source") {
 
   deps = [
     "$SUBSYSTEM_DIR/sms_mms:tel_sms_mms",
-    "//base/telephony/core_service/utils:libtelephony_common",
+    "//base/telephony/core_service/utils:libtel_common",
     "//utils/native/base:utils",
   ]
 

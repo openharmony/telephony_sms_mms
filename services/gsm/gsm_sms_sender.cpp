@@ -15,8 +15,10 @@
 
 #include "gsm_sms_sender.h"
 
-#include "observer_handler.h"
 #include "securec.h"
+
+#include "core_manager_inner.h"
+#include "radio_event.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -73,7 +75,7 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
     shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
     if (unSentCellCount == nullptr || hasCellFailed == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        return ;
+        return;
     }
     std::unique_lock<std::mutex> lock(mutex_);
     for (int i = 0; i < cellsInfosSize; i++) {
@@ -163,7 +165,7 @@ void GsmSmsSender::DataBasedSmsDelivery(const std::string &desAddr, const std::s
     std::shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
     if (unSentCellCount == nullptr || hasCellFailed == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        return ;
+        return;
     }
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
@@ -186,11 +188,9 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         TELEPHONY_LOGE("gsm_sms_sender: SendSms smsIndexer nullptr");
         return;
     }
-    std::shared_ptr<Core> core = GetCore();
-    if (core == nullptr || (!isImsNetDomain_ && voiceServiceState_ !=
-        static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE))) {
+    if (!isImsNetDomain_ && (voiceServiceState_ != static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE))) {
         SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
-        TELEPHONY_LOGE("gsm_sms_sender: SendSms core nullptr or not in service");
+        TELEPHONY_LOGE("gsm_sms_sender: SendSms not in service");
         return;
     }
     int64_t refId = GetMsgRef64Bit();
@@ -199,24 +199,28 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         return;
     }
 
-    {
+    if (!isImsNetDomain_ && smsIndexer->GetPsResendCount() == 0) {
         uint8_t tryCount = smsIndexer->GetCsResendCount();
         if (tryCount > 0) {
             smsIndexer->UpdatePduForResend();
         }
+        GsmSimMessageParam smsData {
+            .refId = refId,
+            .smscPdu = StringUtils::StringToHex(smsIndexer->GetEncodeSmca()),
+            .pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu())
+        };
         if (tryCount == 0 && smsIndexer->GetHasMore()) {
-            auto reply = AppExecFwk::InnerEvent::Get(ObserverHandler::RADIO_SEND_SMS_EXPECT_MORE, refId);
-            reply->SetOwner(shared_from_this());
             TELEPHONY_LOGI("SendSmsMoreMode pdu len = %{public}zu", smsIndexer->GetEncodePdu().size());
-            core->SendSmsMoreMode(StringUtils::StringToHex(smsIndexer->GetEncodeSmca()),
-                StringUtils::StringToHex(smsIndexer->GetEncodePdu()), reply);
+            CoreManagerInner::GetInstance().SendSmsMoreMode(slotId_,
+                RadioEvent::RADIO_SEND_SMS_EXPECT_MORE, smsData, shared_from_this());
         } else {
-            auto reply = AppExecFwk::InnerEvent::Get(ObserverHandler::RADIO_SEND_SMS, refId);
-            reply->SetOwner(shared_from_this());
             TELEPHONY_LOGI("SendSms pdu len = %{public}zu", smsIndexer->GetEncodePdu().size());
-            core->SendGsmSms(StringUtils::StringToHex(smsIndexer->GetEncodeSmca()),
-                StringUtils::StringToHex(smsIndexer->GetEncodePdu()), reply);
+            CoreManagerInner::GetInstance().SendGsmSms(slotId_,
+                RadioEvent::RADIO_SEND_SMS, smsData, shared_from_this());
         }
+    } else {
+        TELEPHONY_LOGI("ims network domain not support!");
+        smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
     }
 }
 
@@ -251,11 +255,7 @@ void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &e
             reportList_.erase(iter);
         }
     }
-    std::shared_ptr<Core> core = GetCore();
-    auto ackPointer = AppExecFwk::InnerEvent::Pointer(nullptr, nullptr);
-    if (core != nullptr) {
-        core->SendSmsAck(true, AckIncomeCause::SMS_ACK_PROCESSED, ackPointer);
-    }
+    CoreManagerInner::GetInstance().SendSmsAck(slotId_, 0, AckIncomeCause::SMS_ACK_PROCESSED, true, nullptr);
     if (deliveryCallback != nullptr) {
         std::string ackpdu = StringUtils::StringToHex(message->GetRawPdu());
         deliveryCallback->OnSmsDeliveryResult(StringUtils::ToUtf16(ackpdu));
@@ -285,14 +285,9 @@ void GsmSmsSender::SetSendIndexerInfo(const std::shared_ptr<SmsSendIndexer> &ind
 
 bool GsmSmsSender::RegisterHandler()
 {
-    bool ret = false;
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        TELEPHONY_LOGI("GsmSmsSender::RegisteHandler Register RADIO_SMS_STATUS ok.");
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_SMS_STATUS, nullptr);
-        ret = true;
-    }
-    return ret;
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_SMS_STATUS, nullptr);
+    return true;
 }
 
 void GsmSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer)

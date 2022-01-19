@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/telephony/core_service/telephony.gni")
 import("//build/test.gni")
-
 ohos_unittest("tel_sms_mms_gtest") {
   subsystem_name = "telephony"
   part_name = "sms_mms"
@@ -33,6 +33,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   ]
 
   deps = [
+    "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms:tel_sms_mms",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
@@ -40,6 +41,7 @@ ohos_unittest("tel_sms_mms_gtest") {
 
   external_deps = [
     "appexecfwk_standard:libeventhandler",
+    "core_service:tel_core_service_api",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",

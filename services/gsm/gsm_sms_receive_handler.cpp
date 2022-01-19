@@ -15,8 +15,9 @@
 
 #include "gsm_sms_receive_handler.h"
 
+#include "core_manager_inner.h"
+#include "radio_event.h"
 #include "gsm_sms_message.h"
-#include "observer_handler.h"
 #include "sms_base_message.h"
 #include "sms_receive_indexer.h"
 #include "string_utils.h"
@@ -56,23 +57,17 @@ void GsmSmsReceiveHandler::Init()
 
 bool GsmSmsReceiveHandler::RegisterHandler()
 {
-    bool ret = false;
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        TELEPHONY_LOGI("GsmSmsReceiveHandler::RegisteHandler Register RADIO_GSM_SMS ok.");
-        core->RegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_GSM_SMS, nullptr);
-        ret = true;
-    }
-    return ret;
+    TELEPHONY_LOGI("GsmSmsReceiveHandler::RegisteHandler Register RADIO_GSM_SMS ok.");
+    CoreManagerInner::GetInstance().RegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_GSM_SMS, nullptr);
+    return true;
 }
 
 void GsmSmsReceiveHandler::UnRegisterHandler()
 {
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        TELEPHONY_LOGI("SmsReceiveHandler::UnRegisterHandler::slotId= %{public}d", slotId_);
-        core->UnRegisterCoreNotify(shared_from_this(), ObserverHandler::RADIO_GSM_SMS);
-    }
+    TELEPHONY_LOGI("SmsReceiveHandler::UnRegisterHandler::slotId= %{public}d", slotId_);
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
+        slotId_, shared_from_this(), RadioEvent::RADIO_GSM_SMS);
     if (smsCbHandler_ != nullptr) {
         smsCbRunner_->Stop();
     }
@@ -129,13 +124,9 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> &
 
 void GsmSmsReceiveHandler::ReplySmsToSmsc(int result, const shared_ptr<SmsBaseMessage> &response)
 {
-    std::shared_ptr<Core> core = GetCore();
-    if (core != nullptr) {
-        auto reply = AppExecFwk::InnerEvent::Get(SMS_EVENT_NEW_SMS_REPLY, response);
-        reply->SetOwner(shared_from_this());
-        TELEPHONY_LOGI("GsmSmsReceiveHandler::ReplySmsToSmsc ackResult %{public}d", result);
-        core->SendSmsAck(result == AckIncomeCause::SMS_ACK_RESULT_OK, result, reply);
-    }
+    TELEPHONY_LOGI("GsmSmsReceiveHandler::ReplySmsToSmsc ackResult %{public}d", result);
+    CoreManagerInner::GetInstance().SendSmsAck(
+        slotId_, SMS_EVENT_NEW_SMS_REPLY, result == AckIncomeCause::SMS_ACK_RESULT_OK, result, shared_from_this());
 }
 
 shared_ptr<SmsBaseMessage> GsmSmsReceiveHandler::TransformMessageInfo(const shared_ptr<SmsMessageInfo> &info)

@@ -27,7 +27,6 @@
 #include "i_sms_service_interface.h"
 #include "base_context.h"
 #include "short_message.h"
-#include "core_manager.h"
 #include "napi_sms.h"
 
 #include "mms_msg.h"
@@ -41,6 +40,7 @@
 
 namespace OHOS {
 namespace Telephony {
+
 enum MessageType {
     TYPE_MMS_SEND_REQ = 128,
     TYPE_MMS_SEND_CONF,
@@ -51,6 +51,12 @@ enum MessageType {
     TYPE_MMS_DELIVERY_IND,
     TYPE_MMS_READ_REC_IND,
     TYPE_MMS_READ_ORIG_IND,
+};
+
+enum DispositionValue{
+    FROM_DATA = 0,
+    ATTACHMENT,
+    INLINE,
 };
 
 struct MmsAddressContext {
@@ -107,7 +113,7 @@ struct MmsNotificationIndContext {
     std::string subject;
     uint8_t deliveryReport;
     std::string contentLocation;
-    int8_t contentClass;
+    uint8_t contentClass;
     uint32_t charset;
 };
 
@@ -213,6 +219,8 @@ public:
     static napi_value InitEnumMessageType(napi_env env, napi_value exports);
     static napi_value InitEnumPriorityType(napi_env env, napi_value exports);
     static napi_value InitEnumVersionType(napi_env env, napi_value exports);
+    static napi_value InitEnumDispositionType(napi_env env, napi_value exports);
+    static napi_value InitEnumReportAllowedType(napi_env env, napi_value exports);
 };
 } // namespace Telephony
 } // namespace OHOS
