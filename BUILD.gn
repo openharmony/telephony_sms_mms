@@ -27,6 +27,7 @@ config("tel_sms_mms_config") {
 
 ohos_shared_library("tel_sms_mms") {
   sources = [
+    "$SOURCE_DIR/frameworks/native/sms/src/short_message.cpp",
     "$SOURCE_DIR/services/cdma/cdma_sms_message.cpp",
     "$SOURCE_DIR/services/cdma/cdma_sms_pdu_codec.cpp",
     "$SOURCE_DIR/services/cdma/cdma_sms_receive_handler.cpp",
@@ -61,7 +62,6 @@ ohos_shared_library("tel_sms_mms") {
     "$SOURCE_DIR/utils/msg_text_convert.cpp",
     "$SOURCE_DIR/utils/sms_common_utils.cpp",
     "$SOURCE_DIR/utils/string_utils.cpp",
-    "//base/telephony/sms_mms/frameworks/native/sms/src/short_message.cpp",
   ]
 
   include_dirs = [
@@ -74,29 +74,30 @@ ohos_shared_library("tel_sms_mms") {
   ]
 
   deps = [
-    "//base/global/resmgr_standard/frameworks/resmgr:global_resmgr",
-    "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
-    "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms/frameworks/native/mms:mms_native_source",
-    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
-    "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/uri:zuri",
     "//third_party/glib:glib_packages",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_manager",
     "ability_runtime:want",
     "appexecfwk_standard:libeventhandler",
     "ces_standard:cesfwk_innerkits",
     "ces_standard:cesfwk_services",
+    "core_service:libtel_common",
+    "core_service:tel_core_service_api",
+    "dmsfwk_standard:zuri",
     "ipc:ipc_core",
     "native_appdatamgr:native_appdatafwk",
     "native_appdatamgr:native_dataability",
     "native_appdatamgr:native_rdb",
+    "resmgr_standard:global_resmgr",
     "ril_adapter:hril_innerkits",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
+    "utils_base:utils",
   ]
 
   defines += [
