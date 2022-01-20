@@ -1,0 +1,71 @@
+{
+    "name": "@ohos/sms_mms",
+    "version": "3.1.0",
+    "description": "telephony sms mms service",
+    "publishAs": "code-segment",
+    "homePage": "https://gitee.com/openharmony",
+    "repository": "https://gitee.com/openharmony/telephony_sms_mms",
+    "license": "Apache License 2.0",
+    "language": "",
+    "private": false,
+    "scripts": {},
+    "envs": [],
+    "dirs": [],
+    "author": {},
+    "contributors": [],
+    "segment": {
+        "destPath": "//base/telephony/sms_mms"
+    },
+    "component": {
+        "name": "sms_mms",
+        "subsystem": "telephony",
+        "syscap": [
+            "SystemCapability.Telephony.SmsMms"
+        ],
+        "features": [],
+        "adapted_system_type": [
+            "standard"
+        ],
+        "rom": "",
+        "ram": "",
+        "deps": {
+            "components": [
+                "ability_runtime",
+                "appexecfwk_standard",
+                "ces_standard",
+                "core_service",
+                "dmsfwk_standard",
+                "ipc",
+                "native_appdatamgr",
+                "ril_adapter",
+                "safwk",
+                "samgr_standard",
+                "utils_base"
+            ],
+            "third_party": [
+                "glib"
+            ]
+        },
+        "build": {
+            "sub_component": [
+                "//base/telephony/sms_mms:tel_sms_mms",
+                "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
+                "//base/telephony/sms_mms/frameworks/js/napi/:sms",
+                "//base/telephony/sms_mms/sa_profile:sms_mms_sa_profile"
+            ],
+            "inner_kits": [
+                {
+                    "name":"//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
+                    "header": {
+                        "header_base" : "//base/telephony/sms_mms/interfaces/innerkits",
+                        "header_files": []
+                    }
+                }
+            ],
+            "test": [
+                "//base/telephony/sms_mms/test:unittest"
+            ]
+        }
+    }
+}
+
