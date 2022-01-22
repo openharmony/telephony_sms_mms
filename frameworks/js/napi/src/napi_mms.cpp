@@ -1469,12 +1469,12 @@ napi_value NapiMms::InitEnumVersionType(napi_env env, napi_value exports)
 napi_value NapiMms::InitEnumDispositionType(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
-            DECLARE_NAPI_STATIC_PROPERTY(
-                    "FROM_DATA", NapiUtil::ToInt32Value(env, static_cast<int32_t>(DispositionValue::FROM_DATA))),
-            DECLARE_NAPI_STATIC_PROPERTY(
-                    "ATTACHMENT", NapiUtil::ToInt32Value(env, static_cast<int32_t>(DispositionValue::ATTACHMENT))),
-            DECLARE_NAPI_STATIC_PROPERTY(
-                    "INLINE", NapiUtil::ToInt32Value(env, static_cast<int32_t>(DispositionValue::INLINE))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "FROM_DATA", NapiUtil::ToInt32Value(env, static_cast<int32_t>(DispositionValue::FROM_DATA))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "ATTACHMENT", NapiUtil::ToInt32Value(env, static_cast<int32_t>(DispositionValue::ATTACHMENT))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "INLINE", NapiUtil::ToInt32Value(env, static_cast<int32_t>(DispositionValue::INLINE))),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
@@ -1483,10 +1483,10 @@ napi_value NapiMms::InitEnumDispositionType(napi_env env, napi_value exports)
 napi_value NapiMms::InitEnumReportAllowedType(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
-            DECLARE_NAPI_STATIC_PROPERTY(
-                    "MMS_YES", NapiUtil::ToInt32Value(env, static_cast<int32_t>(MmsBoolType::MMS_YES))),
-            DECLARE_NAPI_STATIC_PROPERTY(
-                    "MMS_NO", NapiUtil::ToInt32Value(env, static_cast<int32_t>(MmsBoolType::MMS_NO))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "MMS_YES", NapiUtil::ToInt32Value(env, static_cast<int32_t>(MmsBoolType::MMS_YES))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "MMS_NO", NapiUtil::ToInt32Value(env, static_cast<int32_t>(MmsBoolType::MMS_NO))),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;

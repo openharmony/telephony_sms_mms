@@ -24,7 +24,6 @@ namespace OHOS {
 namespace Telephony {
 class MmsDecodeBuffer : public MmsBuffer {
 public:
-    bool CopyBuffer(uint8_t *dest, uint32_t pos, uint32_t len);
     bool PeekOneByte(uint8_t &oneByte);
     bool GetOneByte(uint8_t &oneByte);
     bool MovePointer(int32_t offset);
