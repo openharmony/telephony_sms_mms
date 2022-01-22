@@ -258,6 +258,7 @@ void CdmaSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         TELEPHONY_LOGI("SendSmsToRil pdu = %{public}s", pdu.c_str());
     } else {
         smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
+        TELEPHONY_LOGI("ims network domain send unsupported.!");
     }
 }
 

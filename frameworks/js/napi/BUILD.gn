@@ -29,10 +29,11 @@ ohos_shared_library("sms") {
     "src/send_callback.cpp",
   ]
 
+  configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
+
   deps = [
     "$SUBSYSTEM_DIR/sms_mms:tel_sms_mms",
     "$SUBSYSTEM_DIR/sms_mms/frameworks/native:tel_sms_mms_api",
-    "//base/telephony/core_service/utils:libtel_common",
     "//foundation/ace/napi:ace_napi",
     "//utils/native/base:utils",
   ]
