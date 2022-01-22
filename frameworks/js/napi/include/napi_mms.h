@@ -40,7 +40,6 @@
 
 namespace OHOS {
 namespace Telephony {
-
 enum MessageType {
     TYPE_MMS_SEND_REQ = 128,
     TYPE_MMS_SEND_CONF,
@@ -53,7 +52,7 @@ enum MessageType {
     TYPE_MMS_READ_ORIG_IND,
 };
 
-enum DispositionValue{
+enum DispositionValue {
     FROM_DATA = 0,
     ATTACHMENT,
     INLINE,

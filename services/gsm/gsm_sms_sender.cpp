@@ -199,16 +199,15 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         return;
     }
 
+    GsmSimMessageParam smsData;
+    smsData.refId = refId;
+    smsData.smscPdu = StringUtils::StringToHex(smsIndexer->GetEncodeSmca());
     if (!isImsNetDomain_ && smsIndexer->GetPsResendCount() == 0) {
         uint8_t tryCount = smsIndexer->GetCsResendCount();
         if (tryCount > 0) {
             smsIndexer->UpdatePduForResend();
         }
-        GsmSimMessageParam smsData {
-            .refId = refId,
-            .smscPdu = StringUtils::StringToHex(smsIndexer->GetEncodeSmca()),
-            .pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu())
-        };
+        smsData.pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
         if (tryCount == 0 && smsIndexer->GetHasMore()) {
             TELEPHONY_LOGI("SendSmsMoreMode pdu len = %{public}zu", smsIndexer->GetEncodePdu().size());
             CoreManagerInner::GetInstance().SendSmsMoreMode(slotId_,
@@ -219,8 +218,11 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
                 RadioEvent::RADIO_SEND_SMS, smsData, shared_from_this());
         }
     } else {
-        TELEPHONY_LOGI("ims network domain not support!");
+        TELEPHONY_LOGI("ims network domain send sms interface.!");
         smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
+        smsData.pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
+        CoreManagerInner::GetInstance().SendGsmSms(slotId_,
+            RadioEvent::RADIO_SEND_SMS, smsData, shared_from_this());
     }
 }
 
@@ -397,8 +399,8 @@ bool GsmSmsSender::SetPduInfo(
     tpdu->data.submit.userData.headerCnt = headerCnt;
     tpdu->data.submit.bHeaderInd = (headerCnt > 0) ? true : false;
 
-    if ((smsIndexer->GetSmsConcat().totalSeg > 1) &&
-        ((smsIndexer->GetSmsConcat().seqNum) < (smsIndexer->GetSmsConcat().totalSeg - 1))) {
+    unsigned char totalSeg = smsIndexer->GetSmsConcat().totalSeg;
+    if ((totalSeg > 1) && (smsIndexer->GetSmsConcat().seqNum < totalSeg)) {
         tpdu->data.submit.bStatusReport = false;
         isMore = true;
     } else {

@@ -92,14 +92,14 @@ void SmsSendManager::InitNetworkHandle()
     networkRunner_->Run();
     TELEPHONY_LOGI("Init SmsSendManager successfully.");
     if (auto ret = networkManager_->NetworkRegister(
-            std::bind(&SmsSender::SetNetworkState, gsmSmsSender_, std::placeholders::_1, std::placeholders::_2));
+        std::bind(&SmsSender::SetNetworkState, gsmSmsSender_, std::placeholders::_1, std::placeholders::_2));
         ret.has_value()) {
         gsmSmsSender_->SetNetworkId(ret);
     } else {
         TELEPHONY_LOGE("gsm failed to register networkManager");
     }
     if (auto ret = networkManager_->NetworkRegister(
-            std::bind(&SmsSender::SetNetworkState, cdmaSmsSender_, std::placeholders::_1, std::placeholders::_2));
+        std::bind(&SmsSender::SetNetworkState, cdmaSmsSender_, std::placeholders::_1, std::placeholders::_2));
         ret.has_value()) {
         cdmaSmsSender_->SetNetworkId(ret);
     } else {
