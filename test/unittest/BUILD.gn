@@ -43,10 +43,10 @@ ohos_executable("tel_sms_mms_test") {
 
   external_deps = [
     "ability_runtime:want",
-    "appexecfwk_standard:libeventhandler",
     "ces_standard:cesfwk_innerkits",
     "ces_standard:cesfwk_services",
     "core_service:tel_core_service_api",
+    "eventhandler:libeventhandler",
     "ipc:ipc_core",
     "native_appdatamgr:native_appdatafwk",
     "native_appdatamgr:native_dataability",
