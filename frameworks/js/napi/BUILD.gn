@@ -44,8 +44,8 @@ ohos_shared_library("sms") {
   ]
 
   external_deps = [
-    "appexecfwk_standard:libeventhandler",
     "core_service:tel_core_service_api",
+    "eventhandler:libeventhandler",
     "ipc:ipc_core",
     "ril_adapter:hril_innerkits",
     "safwk:system_ability_fwk",
