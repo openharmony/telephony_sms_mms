@@ -19,8 +19,7 @@ import {AsyncCallback} from "./basic";
  * Provides the capabilities and methods for obtaining Short Message Service (SMS) management objects.
  *
  * @since 7
- * @sysCap SystemCapability.Telephony.Telephony
- * @devices phone, tablet, wearable
+ * @sysCap SystemCapability.Telephony.SmsMms
  */
 declare namespace sms {
   /**
