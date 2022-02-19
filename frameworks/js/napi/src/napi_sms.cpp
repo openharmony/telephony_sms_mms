@@ -1341,6 +1341,127 @@ static napi_value GetImsShortMessageFormat(napi_env env, napi_callback_info info
     return result;
 }
 
+static napi_value CreateEnumConstructor(napi_env env, napi_callback_info info)
+{
+    napi_value thisArg = nullptr;
+    void *data = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
+    napi_value global = nullptr;
+    napi_get_global(env, &global);
+    return thisArg;
+}
+
+static napi_value CreateEnumSendSmsResult(napi_env env, napi_value exports)
+{
+    napi_value success = nullptr;
+    napi_value unknow = nullptr;
+    napi_value radioOff = nullptr;
+    napi_value serviceUnavailable = nullptr;
+
+    napi_create_int32(env, (int32_t)SendSmsResult::SEND_SMS_SUCCESS, &success);
+    napi_create_int32(env, (int32_t)SendSmsResult::SEND_SMS_FAILURE_UNKNOWN, &unknow);
+    napi_create_int32(env, (int32_t)SendSmsResult::SEND_SMS_FAILURE_RADIO_OFF, &radioOff);
+    napi_create_int32(env, (int32_t)SendSmsResult::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE, &serviceUnavailable);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("SEND_SMS_SUCCESS", success),
+        DECLARE_NAPI_STATIC_PROPERTY("SEND_SMS_FAILURE_UNKNOWN", unknow),
+        DECLARE_NAPI_STATIC_PROPERTY("SEND_SMS_FAILURE_RADIO_OFF", radioOff),
+        DECLARE_NAPI_STATIC_PROPERTY("SEND_SMS_FAILURE_SERVICE_UNAVAILABLE", serviceUnavailable),
+    };
+
+    napi_value result = nullptr;
+    napi_define_class(env, "SendSmsResult", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
+        sizeof(desc) / sizeof(*desc), desc, &result);
+    napi_set_named_property(env, exports, "SendSmsResult", result);
+    return exports;
+}
+
+static napi_value CreateEnumShortMessageClass(napi_env env, napi_value exports)
+{
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "UNKNOWN", NapiUtil::ToInt32Value(env, static_cast<int32_t>(ShortMessageClass::UNKNOWN))),
+        DECLARE_NAPI_STATIC_PROPERTY("INSTANT_MESSAGE",
+            NapiUtil::ToInt32Value(env, static_cast<int32_t>(ShortMessageClass::INSTANT_MESSAGE))),
+        DECLARE_NAPI_STATIC_PROPERTY("OPTIONAL_MESSAGE",
+            NapiUtil::ToInt32Value(env, static_cast<int32_t>(ShortMessageClass::OPTIONAL_MESSAGE))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "SIM_MESSAGE", NapiUtil::ToInt32Value(env, static_cast<int32_t>(ShortMessageClass::SIM_MESSAGE))),
+        DECLARE_NAPI_STATIC_PROPERTY("FORWARD_MESSAGE",
+            NapiUtil::ToInt32Value(env, static_cast<int32_t>(ShortMessageClass::FORWARD_MESSAGE))),
+    };
+    napi_value result = nullptr;
+    napi_define_class(env, "ShortMessageClass", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
+        sizeof(desc) / sizeof(*desc), desc, &result);
+    napi_set_named_property(env, exports, "ShortMessageClass", result);
+    return exports;
+}
+
+static napi_value CreateEnumMessageStatusClass(napi_env env, napi_value exports)
+{
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("SIM_MESSAGE_STATUS_FREE",
+            NapiUtil::ToInt32Value(
+                env, static_cast<int32_t>(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_FREE))),
+        DECLARE_NAPI_STATIC_PROPERTY("SIM_MESSAGE_STATUS_READ",
+            NapiUtil::ToInt32Value(
+                env, static_cast<int32_t>(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_READ))),
+        DECLARE_NAPI_STATIC_PROPERTY("SIM_MESSAGE_STATUS_UNREAD",
+            NapiUtil::ToInt32Value(
+                env, static_cast<int32_t>(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_UNREAD))),
+        DECLARE_NAPI_STATIC_PROPERTY("SIM_MESSAGE_STATUS_SENT",
+            NapiUtil::ToInt32Value(
+                env, static_cast<int32_t>(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_SENT))),
+        DECLARE_NAPI_STATIC_PROPERTY("SIM_MESSAGE_STATUS_UNSENT",
+            NapiUtil::ToInt32Value(
+                env, static_cast<int32_t>(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_UNSENT))),
+    };
+    napi_value result = nullptr;
+    napi_define_class(env, "SimMessageStatus", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
+        sizeof(desc) / sizeof(*desc), desc, &result);
+    napi_set_named_property(env, exports, "SimMessageStatus", result);
+    return exports;
+}
+
+static napi_value CreateEnumRanType(napi_env env, napi_value exports)
+{
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "TYPE_GSM", NapiUtil::ToInt32Value(env, static_cast<int32_t>(RanType::TYPE_GSM))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "TYPE_CDMA", NapiUtil::ToInt32Value(env, static_cast<int32_t>(RanType::TYPE_CDMA))),
+    };
+    napi_value result = nullptr;
+    napi_define_class(env, "RanType", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
+        sizeof(desc) / sizeof(*desc), desc, &result);
+    napi_set_named_property(env, exports, "RanType", result);
+    return exports;
+}
+
+static napi_value CreateEnumSmsSegmentsInfo(napi_env env, napi_value exports)
+{
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("SMS_ENCODING_UNKNOWN",
+            NapiUtil::ToInt32Value(
+                env, static_cast<int32_t>(ISmsServiceInterface::SmsEncodingScheme::SMS_ENCODING_UNKNOWN))),
+        DECLARE_NAPI_STATIC_PROPERTY("SMS_ENCODING_7BIT",
+            NapiUtil::ToInt32Value(
+                env, static_cast<int32_t>(ISmsServiceInterface::SmsEncodingScheme::SMS_ENCODING_7BIT))),
+        DECLARE_NAPI_STATIC_PROPERTY("SMS_ENCODING_8BIT",
+            NapiUtil::ToInt32Value(
+                env, static_cast<int32_t>(ISmsServiceInterface::SmsEncodingScheme::SMS_ENCODING_8BIT))),
+        DECLARE_NAPI_STATIC_PROPERTY("SMS_ENCODING_16BIT",
+            NapiUtil::ToInt32Value(
+                env, static_cast<int32_t>(ISmsServiceInterface::SmsEncodingScheme::SMS_ENCODING_16BIT))),
+    };
+    napi_value result = nullptr;
+    napi_define_class(env, "SmsEncodingScheme", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
+        sizeof(desc) / sizeof(*desc), desc, &result);
+    napi_set_named_property(env, exports, "SmsEncodingScheme", result);
+    return exports;
+}
+
 static napi_value InitEnumSendSmsResult(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
@@ -1454,6 +1575,11 @@ napi_value InitNapiSmsRegistry(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("encodeMms", NapiMms::EncodeMms),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    CreateEnumSendSmsResult(env, exports);
+    CreateEnumShortMessageClass(env, exports);
+    CreateEnumMessageStatusClass(env, exports);
+    CreateEnumRanType(env, exports);
+    CreateEnumSmsSegmentsInfo(env, exports);
     InitEnumSendSmsResult(env, exports);
     InitEnumShortMessageClass(env, exports);
     InitEnumMessageStatusClass(env, exports);
@@ -1465,6 +1591,12 @@ napi_value InitNapiSmsRegistry(napi_env env, napi_value exports)
     NapiMms::InitEnumVersionType(env, exports);
     NapiMms::InitEnumDispositionType(env, exports);
     NapiMms::InitEnumReportAllowedType(env, exports);
+    NapiMms::InitSupportEnumMmsCharSets(env, exports);
+    NapiMms::InitSupportEnumMessageType(env, exports);
+    NapiMms::InitSupportEnumPriorityType(env, exports);
+    NapiMms::InitSupportEnumVersionType(env, exports);
+    NapiMms::InitSupportEnumDispositionType(env, exports);
+    NapiMms::InitSupportEnumReportAllowedType(env, exports);
     return exports;
 }
 EXTERN_C_END

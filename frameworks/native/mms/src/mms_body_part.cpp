@@ -199,16 +199,26 @@ bool MmsBodyPart::DecodePartBody(MmsDecodeBuffer &decodeBuffer, uint32_t bodyLen
     }
 
     std::string encodebuffer = "";
+    std::string encodeString(bodyPartBuffer.get(), bodyLength);
     if (transferEncoding == ENCODE_BASE64) {
-        encodebuffer = MmsBase64::Decode(bodyPartBuffer.get());
+        encodebuffer = MmsBase64::Decode(encodeString);
     } else if (transferEncoding == ENCODE_QUOTED_PRINTABLE) {
-        MmsQuotedPrintable::Decode(bodyPartBuffer.get(), encodebuffer);
+        MmsQuotedPrintable::Decode(encodeString, encodebuffer);
     }
 
     if (encodebuffer.length()) {
-        pbodyPartBuffer_ = std::unique_ptr<char[]>((char *)encodebuffer.data());
-        bodyPartBuffer.reset();
-        bodyLen_ = encodebuffer.length();
+        bodyLen_ = 0;
+        uint32_t tempLen = encodebuffer.length();
+        pbodyPartBuffer_ = std::make_unique<char[]>(tempLen);
+        if (pbodyPartBuffer_ == nullptr) {
+            TELEPHONY_LOGE("pbodyPartBuffer_ nullptr Error");
+            return false;
+        }
+        if (memcpy_s(pbodyPartBuffer_.get(), tempLen, encodebuffer.data(), tempLen) != EOK) {
+            TELEPHONY_LOGE("Memcpy_s pbodyPartBuffer_ Error");
+            return false;
+        }
+        bodyLen_ = tempLen;
     } else {
         pbodyPartBuffer_ = std::move(bodyPartBuffer);
     }

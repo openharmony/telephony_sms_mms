@@ -29,6 +29,7 @@
 #include "short_message.h"
 #include "refbase.h"
 #include "telephony_log_wrapper.h"
+#include "telephony_types.h"
 #include "napi_util.h"
 #include "short_message_manager.h"
 
