@@ -34,6 +34,7 @@ ohos_shared_library("sms") {
   deps = [
     "$SUBSYSTEM_DIR/sms_mms:tel_sms_mms",
     "$SUBSYSTEM_DIR/sms_mms/frameworks/native:tel_sms_mms_api",
+    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     "//foundation/ace/napi:ace_napi",
     "//utils/native/base:utils",
   ]

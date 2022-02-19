@@ -221,8 +221,13 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         TELEPHONY_LOGI("ims network domain send sms interface.!");
         smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
         smsData.pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
-        CoreManagerInner::GetInstance().SendGsmSms(slotId_,
-            RadioEvent::RADIO_SEND_SMS, smsData, shared_from_this());
+        if (smsIndexer->GetHasMore()) {
+            CoreManagerInner::GetInstance().SendSmsMoreMode(slotId_,
+                RadioEvent::RADIO_SEND_SMS_EXPECT_MORE, smsData, shared_from_this());
+        } else {
+            CoreManagerInner::GetInstance().SendGsmSms(slotId_,
+                RadioEvent::RADIO_SEND_SMS, smsData, shared_from_this());
+        }
     }
 }
 

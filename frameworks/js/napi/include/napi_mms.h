@@ -220,6 +220,12 @@ public:
     static napi_value InitEnumVersionType(napi_env env, napi_value exports);
     static napi_value InitEnumDispositionType(napi_env env, napi_value exports);
     static napi_value InitEnumReportAllowedType(napi_env env, napi_value exports);
+    static napi_value InitSupportEnumMmsCharSets(napi_env env, napi_value exports);
+    static napi_value InitSupportEnumMessageType(napi_env env, napi_value exports);
+    static napi_value InitSupportEnumPriorityType(napi_env env, napi_value exports);
+    static napi_value InitSupportEnumVersionType(napi_env env, napi_value exports);
+    static napi_value InitSupportEnumDispositionType(napi_env env, napi_value exports);
+    static napi_value InitSupportEnumReportAllowedType(napi_env env, napi_value exports);
 };
 } // namespace Telephony
 } // namespace OHOS
