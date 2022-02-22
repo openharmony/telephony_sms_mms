@@ -18,6 +18,7 @@
 #include "sms_interface_manager.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
+#include "telephony_types.h"
 
 namespace OHOS {
 namespace Telephony {

@@ -22,6 +22,7 @@
 #include "i_sms_service_interface.h"
 #include "sms_service_proxy.h"
 #include "system_ability_definition.h"
+#include "telephony_types.h"
 
 #include "core_service_client.h"
 #include "string_utils.h"
