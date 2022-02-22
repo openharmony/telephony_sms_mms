@@ -40,7 +40,7 @@ public:
 
     inline static const std::string SMS_CAPABLE_KEY = "sms_config_capable";
     inline static const std::string SMS_ENCODING_KEY = "sms_config_force_7bit_encoding";
-    inline static const std::string SMS_CAPABLE_PARAM_KEY = "persist.sys.sms.config.capable";
+    inline static const std::string SMS_CAPABLE_PARAM_KEY = "const.telephony.sms.capable";
     inline static const std::string SMS_ENCODING_PARAM_KEY = "persist.sys.sms.config.7bitforce";
 
 private:

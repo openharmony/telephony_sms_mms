@@ -194,11 +194,6 @@ std::u16string SmsService::GetImsShortMessageFormat()
 
 bool SmsService::HasSmsCapability()
 {
-    if (!TelephonyPermission::CheckPermission(Permission::GET_TELEPHONY_STATE)) {
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
-        return false;
-    }
-
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager();
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("Get SmsInterfaceManager is nullptr error.");
