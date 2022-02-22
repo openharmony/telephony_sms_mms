@@ -35,6 +35,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
 
   deps = [
+    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     "//base/telephony/sms_mms:tel_sms_mms",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",

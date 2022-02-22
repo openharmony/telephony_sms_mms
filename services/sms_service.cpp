@@ -124,7 +124,7 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
     const u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (!TelephonyPermission::CheckPermission(Permission::TELEPHONY_SEND_MESSAGES)) {
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
         return;
     }
@@ -143,7 +143,7 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
     const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (!TelephonyPermission::CheckPermission(Permission::TELEPHONY_SEND_MESSAGES)) {
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
         return;
     }
@@ -161,11 +161,6 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
 bool SmsService::IsImsSmsSupported()
 {
     bool result = false;
-    if (!TelephonyPermission::CheckPermission(Permission::GET_TELEPHONY_STATE)) {
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
-        return result;
-    }
-
     int32_t slotId = GetDefaultSmsSlotId();
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
@@ -178,11 +173,6 @@ bool SmsService::IsImsSmsSupported()
 std::u16string SmsService::GetImsShortMessageFormat()
 {
     std::u16string result;
-    if (!TelephonyPermission::CheckPermission(Permission::GET_TELEPHONY_STATE)) {
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
-        return result;
-    }
-
     int32_t slotId = GetDefaultSmsSlotId();
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
@@ -239,8 +229,12 @@ bool SmsService::AddSimMessage(
     int32_t slotId, const std::u16string &smsc, const std::u16string &pdu, SimMessageStatus status)
 {
     bool result = false;
-    if (!TelephonyPermission::CheckPermission(Permission::TELEPHONY_RECEIVE_MESSAGES)) {
+    if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
+        return result;
+    }
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
+        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
         return result;
     }
 
@@ -257,8 +251,12 @@ bool SmsService::AddSimMessage(
 bool SmsService::DelSimMessage(int32_t slotId, uint32_t msgIndex)
 {
     bool result = false;
-    if (!TelephonyPermission::CheckPermission(Permission::TELEPHONY_RECEIVE_MESSAGES)) {
+    if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
+        return result;
+    }
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
+        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
         return result;
     }
 
@@ -274,8 +272,12 @@ bool SmsService::UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessageS
     const std::u16string &pdu, const std::u16string &smsc)
 {
     bool result = false;
-    if (!TelephonyPermission::CheckPermission(Permission::TELEPHONY_RECEIVE_MESSAGES)) {
+    if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
+        return result;
+    }
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
+        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
         return result;
     }
 
@@ -292,7 +294,7 @@ bool SmsService::UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessageS
 std::vector<ShortMessage> SmsService::GetAllSimMessages(int32_t slotId)
 {
     std::vector<ShortMessage> result;
-    if (!TelephonyPermission::CheckPermission(Permission::TELEPHONY_RECEIVE_MESSAGES)) {
+    if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
         return result;
     }
@@ -309,7 +311,7 @@ bool SmsService::SetCBConfig(
     int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
 {
     bool result = false;
-    if (!TelephonyPermission::CheckPermission(Permission::TELEPHONY_RECEIVE_MESSAGES)) {
+    if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
         return result;
     }
@@ -341,11 +343,6 @@ bool SmsService::SetDefaultSmsSlotId(int32_t slotId)
 int32_t SmsService::GetDefaultSmsSlotId()
 {
     int32_t result = -1;
-    if (!TelephonyPermission::CheckPermission(Permission::GET_TELEPHONY_STATE)) {
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
-        return result;
-    }
-
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager();
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("SmsService::SetCBConfig interfaceManager nullptr error.");
@@ -357,7 +354,7 @@ int32_t SmsService::GetDefaultSmsSlotId()
 std::vector<std::u16string> SmsService::SplitMessage(const std::u16string &message)
 {
     std::vector<std::u16string> result;
-    if (!TelephonyPermission::CheckPermission(Permission::GET_TELEPHONY_STATE)) {
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
         return result;
     }
