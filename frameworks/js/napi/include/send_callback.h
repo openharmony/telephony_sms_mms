@@ -22,6 +22,12 @@
 
 namespace OHOS {
 namespace Telephony {
+using SendCallbackContext = struct {
+    napi_env env;
+    napi_ref thisVarRef;
+    napi_ref callbackRef;
+    SendSmsResult result;
+};
 class SendCallback : public SendShortMessageCallbackStub {
 public:
     SendCallback(bool hasCallback, napi_env env, napi_ref thisVarRef, napi_ref callbackRef);

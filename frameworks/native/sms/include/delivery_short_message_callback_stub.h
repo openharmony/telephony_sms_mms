@@ -19,7 +19,7 @@
 #include <cstdint>
 
 #include "iremote_stub.h"
-#include "short_message_manager.h"
+#include "i_delivery_short_message_callback.h"
 
 namespace OHOS {
 namespace Telephony {

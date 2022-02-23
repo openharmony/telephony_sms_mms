@@ -34,7 +34,6 @@ ohos_shared_library("sms") {
   deps = [
     "$SUBSYSTEM_DIR/sms_mms:tel_sms_mms",
     "$SUBSYSTEM_DIR/sms_mms/frameworks/native:tel_sms_mms_api",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     "//foundation/ace/napi:ace_napi",
     "//utils/native/base:utils",
   ]
@@ -51,6 +50,7 @@ ohos_shared_library("sms") {
     "ril_adapter:hril_innerkits",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
+    "startup_l2:syspara",
   ]
 
   if (is_standard_system) {

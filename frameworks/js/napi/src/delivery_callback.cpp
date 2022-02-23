@@ -14,7 +14,11 @@
  */
 
 #include "delivery_callback.h"
+
+#include <uv.h>
+
 #include "napi_util.h"
+#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -29,42 +33,73 @@ DeliveryCallback::~DeliveryCallback()
     callbackRef_ = nullptr;
 }
 
+void CompleteSmsDeliveryWork(uv_work_t *work, int status)
+{
+    TELEPHONY_LOGI("CompleteSmsDeliveryWork start");
+    std::unique_ptr<DeliveryCallbackContext> pContext(static_cast<DeliveryCallbackContext *>(work->data));
+    napi_env env_ = pContext->env;
+    napi_ref thisVarRef_ = pContext->thisVarRef;
+    napi_ref callbackRef_ = pContext->callbackRef;
+    std::string pduStr_ = pContext->pduStr;
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env_, &scope);
+    if (scope == nullptr) {
+        TELEPHONY_LOGE("scope is nullptr");
+        napi_close_handle_scope(env_, scope);
+        return;
+    }
+    napi_value callbackFunc = nullptr;
+    napi_get_reference_value(env_, callbackRef_, &callbackFunc);
+    napi_value callbackValues[2] = {0};
+    if (!pduStr_.empty()) {
+        callbackValues[0] = NapiUtil::CreateUndefined(env_);
+        napi_create_object(env_, &callbackValues[1]);
+        size_t dataSize = pduStr_.size();
+        uint32_t forDataSize = (uint32_t)dataSize;
+        napi_value arrayValue = nullptr;
+        napi_create_array(env_, &arrayValue);
+        for (uint32_t i = 0; i < forDataSize; ++i) {
+            napi_value element = nullptr;
+            int32_t intValue = pduStr_[i];
+            napi_create_int32(env_, intValue, &element);
+            napi_set_element(env_, arrayValue, i, element);
+        }
+        std::string pduStr = "pdu";
+        napi_set_named_property(env_, callbackValues[1], pduStr_.c_str(), arrayValue);
+    } else {
+        callbackValues[0] = NapiUtil::CreateErrorMessage(env_, "pdu empty");
+        callbackValues[1] = NapiUtil::CreateUndefined(env_);
+    }
+    napi_value callbackResult = nullptr;
+    napi_value thisVar = nullptr;
+    size_t argc = sizeof(callbackValues) / sizeof(callbackValues[0]);
+    napi_get_reference_value(env_, thisVarRef_, &thisVar);
+    napi_call_function(env_, thisVar, callbackFunc, argc, callbackValues, &callbackResult);
+    napi_delete_reference(env_, thisVarRef_);
+    napi_delete_reference(env_, callbackRef_);
+    napi_close_handle_scope(env_, scope);
+    if (work != nullptr) {
+        delete work;
+    }
+    TELEPHONY_LOGI("CompleteSmsDeliveryWork end");
+}
+
 void DeliveryCallback::OnSmsDeliveryResult(const std::u16string pdu)
 {
+    TELEPHONY_LOGI("OnSmsDeliveryResult start");
     if (hasCallback_) {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env_, &scope);
-        napi_value callbackFunc = nullptr;
-        napi_get_reference_value(env_, callbackRef_, &callbackFunc);
-        napi_value callbackValues[2] = {0};
-        if (!pdu.empty()) {
-            std::string pdu8 = NapiUtil::ToUtf8(pdu);
-            callbackValues[0] = NapiUtil::CreateUndefined(env_);
-            napi_create_object(env_, &callbackValues[1]);
-            size_t dataSize = pdu8.size();
-            uint32_t forDataSize = (uint32_t)dataSize;
-            napi_value arrayValue = nullptr;
-            napi_create_array(env_, &arrayValue);
-            for (uint32_t i = 0; i < forDataSize; ++i) {
-                napi_value element = nullptr;
-                int32_t intValue = pdu8[i];
-                napi_create_int32(env_, intValue, &element);
-                napi_set_element(env_, arrayValue, i, element);
-            }
-            std::string pduStr = "pdu";
-            napi_set_named_property(env_, callbackValues[1], pduStr.c_str(), arrayValue);
-        } else {
-            callbackValues[0] = NapiUtil::CreateErrorMessage(env_, "pdu empty");
-            callbackValues[1] = NapiUtil::CreateUndefined(env_);
-        }
-        napi_value callbackResult = nullptr;
-        napi_value thisVar = nullptr;
-        size_t argc = sizeof(callbackValues) / sizeof(callbackValues[0]);
-        napi_get_reference_value(env_, thisVarRef_, &thisVar);
-        napi_call_function(env_, thisVar, callbackFunc, argc, callbackValues, &callbackResult);
-        napi_delete_reference(env_, thisVarRef_);
-        napi_delete_reference(env_, callbackRef_);
-        napi_close_handle_scope(env_, scope);
+        uv_loop_s *loop = nullptr;
+        napi_get_uv_event_loop(env_, &loop);
+        uv_work_t *work = new uv_work_t;
+        DeliveryCallbackContext *pContext = std::make_unique<DeliveryCallbackContext>().release();
+        pContext->env = env_;
+        pContext->thisVarRef = thisVarRef_;
+        pContext->callbackRef = callbackRef_;
+        pContext->pduStr = NapiUtil::ToUtf8(pdu);
+        work->data = static_cast<void *>(pContext);
+        uv_queue_work(
+            loop, work, [](uv_work_t *work) {},
+            [](uv_work_t *work, int status) { CompleteSmsDeliveryWork(work, status); });
     }
 }
 } // namespace Telephony
