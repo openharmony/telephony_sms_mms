@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "sms_service_proxy_holder.h"
+#include "sms_service_manager_client.h"
 
 #include "sms_service_interface_death_recipient.h"
 #include "if_system_ability_manager.h"
@@ -24,7 +24,11 @@
 
 namespace OHOS {
 namespace Telephony {
-bool SmsServiceProxyHolder::InitSmsServiceProxy()
+SmsServiceManagerClient::SmsServiceManagerClient() {}
+
+SmsServiceManagerClient::~SmsServiceManagerClient() {}
+
+bool SmsServiceManagerClient::InitSmsServiceProxy()
 {
     if (smsServiceInterface_ == nullptr) {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -54,7 +58,7 @@ bool SmsServiceProxyHolder::InitSmsServiceProxy()
     return true;
 }
 
-void SmsServiceProxyHolder::ResetSmsServiceProxy()
+void SmsServiceManagerClient::ResetSmsServiceProxy()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if ((smsServiceInterface_ != nullptr) && (smsServiceInterface_->AsObject() != nullptr)) {
@@ -63,7 +67,8 @@ void SmsServiceProxyHolder::ResetSmsServiceProxy()
     smsServiceInterface_ = nullptr;
 }
 
-bool SmsServiceProxyHolder::SetDefaultSmsSlotId(int32_t slotId)
+
+bool SmsServiceManagerClient::SetDefaultSmsSlotId(int32_t slotId)
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->SetDefaultSmsSlotId(slotId);
@@ -71,7 +76,7 @@ bool SmsServiceProxyHolder::SetDefaultSmsSlotId(int32_t slotId)
     return false;
 }
 
-int32_t SmsServiceProxyHolder::GetDefaultSmsSlotId()
+int32_t SmsServiceManagerClient::GetDefaultSmsSlotId()
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->GetDefaultSmsSlotId();
@@ -79,7 +84,7 @@ int32_t SmsServiceProxyHolder::GetDefaultSmsSlotId()
     return ERROR_SERVICE_UNAVAILABLE;
 }
 
-int32_t SmsServiceProxyHolder::SendMessage(int32_t slotId, const std::u16string desAddr,
+int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16string desAddr,
     const std::u16string scAddr, const std::u16string text, const sptr<ISendShortMessageCallback> &callback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
@@ -91,7 +96,7 @@ int32_t SmsServiceProxyHolder::SendMessage(int32_t slotId, const std::u16string 
     return ERROR_SERVICE_UNAVAILABLE;
 }
 
-int32_t SmsServiceProxyHolder::SendMessage(int32_t slotId, const std::u16string desAddr,
+int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16string desAddr,
     const std::u16string scAddr, uint16_t port, const uint8_t *data, uint16_t dataLen,
     const sptr<ISendShortMessageCallback> &callback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
@@ -102,7 +107,7 @@ int32_t SmsServiceProxyHolder::SendMessage(int32_t slotId, const std::u16string 
     return ERROR_SERVICE_UNAVAILABLE;
 }
 
-bool SmsServiceProxyHolder::SetScAddress(int32_t slotId, const std::u16string &scAddr)
+bool SmsServiceManagerClient::SetScAddress(int32_t slotId, const std::u16string &scAddr)
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->SetSmscAddr(slotId, scAddr);
@@ -110,7 +115,7 @@ bool SmsServiceProxyHolder::SetScAddress(int32_t slotId, const std::u16string &s
     return false;
 }
 
-std::u16string SmsServiceProxyHolder::GetScAddress(int32_t slotId)
+std::u16string SmsServiceManagerClient::GetScAddress(int32_t slotId)
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->GetSmscAddr(slotId);
@@ -118,7 +123,7 @@ std::u16string SmsServiceProxyHolder::GetScAddress(int32_t slotId)
     return u"";
 }
 
-bool SmsServiceProxyHolder::AddSimMessage(int32_t slotId, const std::u16string &smsc, const std::u16string &pdu,
+bool SmsServiceManagerClient::AddSimMessage(int32_t slotId, const std::u16string &smsc, const std::u16string &pdu,
     ISmsServiceInterface::SimMessageStatus status)
 {
     if (InitSmsServiceProxy()) {
@@ -127,7 +132,7 @@ bool SmsServiceProxyHolder::AddSimMessage(int32_t slotId, const std::u16string &
     return false;
 }
 
-bool SmsServiceProxyHolder::DelSimMessage(int32_t slotId, uint32_t msgIndex)
+bool SmsServiceManagerClient::DelSimMessage(int32_t slotId, uint32_t msgIndex)
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->DelSimMessage(slotId, msgIndex);
@@ -135,7 +140,7 @@ bool SmsServiceProxyHolder::DelSimMessage(int32_t slotId, uint32_t msgIndex)
     return false;
 }
 
-bool SmsServiceProxyHolder::UpdateSimMessage(int32_t slotId, uint32_t msgIndex,
+bool SmsServiceManagerClient::UpdateSimMessage(int32_t slotId, uint32_t msgIndex,
     ISmsServiceInterface::SimMessageStatus newStatus, const std::u16string &pdu, const std::u16string &smsc)
 {
     if (InitSmsServiceProxy()) {
@@ -144,7 +149,7 @@ bool SmsServiceProxyHolder::UpdateSimMessage(int32_t slotId, uint32_t msgIndex,
     return false;
 }
 
-std::vector<ShortMessage> SmsServiceProxyHolder::GetAllSimMessages(int32_t slotId)
+std::vector<ShortMessage> SmsServiceManagerClient::GetAllSimMessages(int32_t slotId)
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->GetAllSimMessages(slotId);
@@ -153,7 +158,7 @@ std::vector<ShortMessage> SmsServiceProxyHolder::GetAllSimMessages(int32_t slotI
     return messageArray;
 }
 
-bool SmsServiceProxyHolder::SetCBConfig(
+bool SmsServiceManagerClient::SetCBConfig(
     int32_t slotId, bool enable, uint32_t startMessageId, uint32_t endMessageId, uint8_t ranType)
 {
     if (InitSmsServiceProxy()) {
@@ -162,7 +167,7 @@ bool SmsServiceProxyHolder::SetCBConfig(
     return false;
 }
 
-std::vector<std::u16string> SmsServiceProxyHolder::SplitMessage(const std::u16string &message)
+std::vector<std::u16string> SmsServiceManagerClient::SplitMessage(const std::u16string &message)
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->SplitMessage(message);
@@ -171,7 +176,7 @@ std::vector<std::u16string> SmsServiceProxyHolder::SplitMessage(const std::u16st
     return messageArray;
 }
 
-bool SmsServiceProxyHolder::GetSmsSegmentsInfo(int32_t slotId, const std::u16string &message, bool force7BitCode,
+bool SmsServiceManagerClient::GetSmsSegmentsInfo(int32_t slotId, const std::u16string &message, bool force7BitCode,
     ISmsServiceInterface::SmsSegmentsInfo &segInfo)
 {
     if (InitSmsServiceProxy()) {
@@ -180,7 +185,7 @@ bool SmsServiceProxyHolder::GetSmsSegmentsInfo(int32_t slotId, const std::u16str
     return false;
 }
 
-bool SmsServiceProxyHolder::IsImsSmsSupported()
+bool SmsServiceManagerClient::IsImsSmsSupported()
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->IsImsSmsSupported();
@@ -188,7 +193,7 @@ bool SmsServiceProxyHolder::IsImsSmsSupported()
     return false;
 }
 
-std::u16string SmsServiceProxyHolder::GetImsShortMessageFormat()
+std::u16string SmsServiceManagerClient::GetImsShortMessageFormat()
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->GetImsShortMessageFormat();
@@ -197,7 +202,7 @@ std::u16string SmsServiceProxyHolder::GetImsShortMessageFormat()
     return defaultValue;
 }
 
-bool SmsServiceProxyHolder::HasSmsCapability()
+bool SmsServiceManagerClient::HasSmsCapability()
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->HasSmsCapability();

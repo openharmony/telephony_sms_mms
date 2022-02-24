@@ -21,6 +21,12 @@
 
 namespace OHOS {
 namespace Telephony {
+using DeliveryCallbackContext = struct {
+    napi_env env;
+    napi_ref thisVarRef;
+    napi_ref callbackRef;
+    std::string pduStr;
+};
 class DeliveryCallback : public DeliveryShortMessageCallbackStub {
 public:
     DeliveryCallback(bool hasCallback, napi_env env, napi_ref thisVarRef, napi_ref callbackRef);

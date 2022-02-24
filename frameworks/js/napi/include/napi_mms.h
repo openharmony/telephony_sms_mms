@@ -34,7 +34,6 @@
 #include "mms_attachment.h"
 #include "telephony_log_wrapper.h"
 #include "napi_util.h"
-#include "short_message_manager.h"
 #include "mms_codec_type.h"
 #include "mms_header.h"
 
