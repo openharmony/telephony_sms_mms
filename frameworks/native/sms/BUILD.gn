@@ -28,10 +28,9 @@ ohos_source_set("sms_native_source") {
     "src/delivery_short_message_callback_stub.cpp",
     "src/send_short_message_callback_stub.cpp",
     "src/short_message.cpp",
-    "src/short_message_manager.cpp",
     "src/sms_service_death_recipient.cpp",
+    "src/sms_service_manager_client.cpp",
     "src/sms_service_proxy.cpp",
-    "src/sms_service_proxy_holder.cpp",
   ]
 
   include_dirs = [

@@ -31,7 +31,7 @@
 #include "telephony_log_wrapper.h"
 #include "telephony_types.h"
 #include "napi_util.h"
-#include "short_message_manager.h"
+#include "sms_service_manager_client.h"
 
 namespace OHOS {
 namespace Telephony {
