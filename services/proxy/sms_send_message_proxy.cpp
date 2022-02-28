@@ -29,6 +29,9 @@ void SmsSendMessageProxy::OnSmsSendResult(const SmsSendResult result)
     MessageOption option;
     MessageParcel dataParcel;
     MessageParcel replyParcel;
+    if (!dataParcel.WriteInterfaceToken(GetDescriptor())) {
+        return;
+    }
     dataParcel.WriteInt32(result);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
