@@ -168,33 +168,6 @@ static void NativeSendMessage(napi_env env, void *data)
 static void SendMessageCallback(napi_env env, napi_status status, void *data)
 {
     auto asyncContext = static_cast<SendMessageContext *>(data);
-    if (!asyncContext->resolved) {
-        TELEPHONY_LOGI("SendMessageCallback status == REJECT");
-        if (asyncContext->thisVarRef != nullptr) {
-            TELEPHONY_LOGI("SendMessageCallback thisVarRef != nullptr");
-            napi_value thisVar = nullptr;
-            napi_get_reference_value(env, asyncContext->thisVarRef, &thisVar);
-            if (asyncContext->sendCallbackRef != nullptr) {
-                TELEPHONY_LOGI("SendMessageCallback sendCallbackRef != nullptr");
-                napi_value sendCallback = nullptr;
-                napi_get_reference_value(env, asyncContext->sendCallbackRef, &sendCallback);
-                napi_value callbackValues[2] = {0};
-                callbackValues[0] = NapiUtil::CreateErrorMessage(env, "parameter illegal");
-                napi_get_undefined(env, &callbackValues[1]);
-                napi_value undefined = nullptr;
-                napi_get_undefined(env, &undefined);
-                napi_value callbackResult = nullptr;
-                napi_call_function(
-                    env, undefined, sendCallback, std::size(callbackValues), callbackValues, &callbackResult);
-                TELEPHONY_LOGI("SendMessageCallback after napi_call_function");
-                napi_delete_reference(env, asyncContext->sendCallbackRef);
-            }
-            if (asyncContext->deliveryCallbackRef != nullptr) {
-                napi_delete_reference(env, asyncContext->deliveryCallbackRef);
-            }
-            napi_delete_reference(env, asyncContext->thisVarRef);
-        }
-    }
     napi_delete_async_work(env, asyncContext->work);
 }
 
