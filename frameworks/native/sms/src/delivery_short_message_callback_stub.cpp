@@ -27,6 +27,10 @@ void DeliveryShortMessageCallbackStub::OnSmsDeliveryResult(const std::u16string 
 int DeliveryShortMessageCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        TELEPHONY_LOGE("descriptor checked fail");
+        return SMS_DEFAULT_ERROR;
+    }
     switch (code) {
         case ON_SMS_DELIVERY_RESULT: {
             auto result = data.ReadString16();

@@ -29,6 +29,9 @@ void SmsDeliveryShortMessageProxy::OnSmsDeliveryResult(const std::u16string pdu)
     MessageOption option;
     MessageParcel dataParcel;
     MessageParcel replyParcel;
+    if (!dataParcel.WriteInterfaceToken(GetDescriptor())) {
+        return;
+    }
     dataParcel.WriteString16(pdu);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
