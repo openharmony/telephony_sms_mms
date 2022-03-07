@@ -327,8 +327,8 @@ bool SmsService::SetCBConfig(
 bool SmsService::SetDefaultSmsSlotId(int32_t slotId)
 {
     bool result = false;
-    if (!TelephonyPermission::CheckPermission(Permission::GET_TELEPHONY_STATE)) {
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
+    if (!TelephonyPermission::CheckPermission(Permission::SET_TELEPHONY_STATE)) {
+        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Set State Permisson.");
         return result;
     }
 
