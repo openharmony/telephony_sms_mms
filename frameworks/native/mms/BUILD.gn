@@ -78,4 +78,7 @@ ohos_source_set("mms_native_source") {
   }
 
   public_configs = [ ":mms_native_config" ]
+
+  part_name = "sms_mms"
+  subsystem_name = "telephony"
 }
