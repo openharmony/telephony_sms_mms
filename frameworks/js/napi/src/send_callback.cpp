@@ -79,8 +79,6 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
     napi_get_reference_value(env_, thisVarRef_, &thisVar);
     int satatus = napi_call_function(env_, thisVar, callbackFunc, 2, callbackValues, &callbackResult);
     TELEPHONY_LOGI("OnSmsSendResult napi_call_function satatus = %d", satatus);
-    napi_delete_reference(env_, thisVarRef_);
-    napi_delete_reference(env_, callbackRef_);
     napi_close_handle_scope(env_, scope);
     if (work != nullptr) {
         delete work;
