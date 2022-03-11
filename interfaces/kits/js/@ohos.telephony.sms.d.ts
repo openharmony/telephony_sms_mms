@@ -1,25 +1,25 @@
 /*
-* Copyright (C) 2021 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 import {AsyncCallback} from "./basic";
 
 /**
  * Provides the capabilities and methods for obtaining Short Message Service (SMS) management objects.
  *
- * @since 7
- * @sysCap SystemCapability.Telephony.SmsMms
+ * @since 6
+ * @syscap SystemCapability.Telephony.SmsMms
  */
 declare namespace sms {
   /**
@@ -34,6 +34,7 @@ declare namespace sms {
    *     returns an empty string if no permission is granted or the short message content is {@code null}.
    * @permission ohos.permission.SEND_MESSAGES
    * @systemapi Hide this for inner system use.
+   * @since 8
    */
   function splitMessage(content: string, callback: AsyncCallback<Array<string>>): void;
   function splitMessage(content: string): Promise<Array<string>>;
@@ -74,6 +75,7 @@ declare namespace sms {
    *     and the value {@code 1} indicates card slot 2.
    * @permission ohos.permission.SET_TELEPHONY_STATE
    * @systemapi Hide this for inner system use.
+   * @since 7
    */
   function setDefaultSmsSlotId(slotId: number, callback: AsyncCallback<void>): void;
   function setDefaultSmsSlotId(slotId: number): Promise<void>;
@@ -83,6 +85,7 @@ declare namespace sms {
    *
    * @param callback Returns {@code 0} if the default SIM card for sending SMS messages is in card slot 1;
    *     returns {@code 1} if the default SIM card for sending SMS messages is in card slot 2.
+   * @since 7
    */
   function getDefaultSmsSlotId(callback: AsyncCallback<number>): void;
   function getDefaultSmsSlotId(): Promise<number>;
@@ -95,6 +98,8 @@ declare namespace sms {
    * @param slotId Indicates the ID of the slot holding the SIM card for sending SMS messages.
    * @param smscAddr Indicates the SMSC address.
    * @permission ohos.permission.SET_TELEPHONY_STATE
+   * @systemapi Hide this for inner system use.
+   * @since 7
    */
   function setSmscAddr(slotId: number, smscAddr: string, callback: AsyncCallback<void>): void;
   function setSmscAddr(slotId: number, smscAddr: string): Promise<void>;
@@ -107,6 +112,8 @@ declare namespace sms {
    * @param slotId Indicates the ID of the slot holding the SIM card for sending SMS messages.
    * @param callback Returns the SMSC address.
    * @permission ohos.permission.GET_TELEPHONY_STATE
+   * @systemapi Hide this for inner system use.
+   * @since 7
    */
   function getSmscAddr(slotId: number, callback: AsyncCallback<string>): void;
   function getSmscAddr(slotId: number): Promise<string>;
@@ -116,12 +123,14 @@ declare namespace sms {
    *
    * @return Returns {@code true} if the device is capable of sending and receiving SMS messages;
    *     returns {@code false} otherwise.
+   * @since 7
    */
   function hasSmsCapability(): boolean;
 
   /**
    * @permission ohos.permission.RECEIVE_SMS,ohos.permission.SEND_MESSAGES
    * @systemapi Hide this for inner system use.
+   * @since 7
    */
   function addSimMessage(options: SimMessageOptions, callback: AsyncCallback<void>): void;
   function addSimMessage(options: SimMessageOptions): Promise<void>;
@@ -129,6 +138,7 @@ declare namespace sms {
   /**
    * @permission ohos.permission.RECEIVE_SMS,ohos.permission.SEND_MESSAGES
    * @systemapi Hide this for inner system use.
+   * @since 7
    */
   function delSimMessage(slotId: number, msgIndex: number, callback: AsyncCallback<void>): void;
   function delSimMessage(slotId: number, msgIndex: number): Promise<void>;
@@ -136,6 +146,7 @@ declare namespace sms {
   /**
    * @permission ohos.permission.RECEIVE_SMS,ohos.permission.SEND_MESSAGES
    * @systemapi Hide this for inner system use.
+   * @since 7
    */
   function updateSimMessage(options: UpdateSimMessageOptions, callback: AsyncCallback<void>): void;
   function updateSimMessage(options: UpdateSimMessageOptions): Promise<void>;
@@ -143,6 +154,7 @@ declare namespace sms {
   /**
    * @permission ohos.permission.RECEIVE_SMS
    * @systemapi Hide this for inner system use.
+   * @since 7
    */
   function getAllSimMessages(slotId: number, callback: AsyncCallback<Array<SimShortMessage>>): void;
   function getAllSimMessages(slotId: number): Promise<Array<SimShortMessage>>;
@@ -150,6 +162,7 @@ declare namespace sms {
   /**
    * @permission ohos.permission.RECEIVE_SMS
    * @systemapi Hide this for inner system use.
+   * @since 7
    */
   function setCBConfig(options: CBConfigOptions, callback: AsyncCallback<void>): void;
   function setCBConfig(options: CBConfigOptions): Promise<void>;
@@ -200,9 +213,9 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsInformation {
-    messageType: MessageType,
-    mmsType: MmsSendReq | MmsSendConf | MmsNotificationInd | MmsRespInd | MmsRetrieveConf | MmsAcknowledgeInd | MmsDeliveryInd | MmsReadOrigInd | MmsReadRecInd,
-    attachment?: Array<MmsAttachment>,
+    messageType: MessageType;
+    mmsType: MmsSendReq | MmsSendConf | MmsNotificationInd | MmsRespInd | MmsRetrieveConf | MmsAcknowledgeInd | MmsDeliveryInd | MmsReadOrigInd | MmsReadRecInd;
+    attachment?: Array<MmsAttachment>;
   }
 
   /**
@@ -210,21 +223,21 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsSendReq {
-    from: MmsAddress,
-    transactionId: string,
-    contentType: string,
-    version: MmsVersionType,
-    to?: Array<MmsAddress>,
-    date?: number,
-    cc?: Array<MmsAddress>,
-    bcc?: Array<MmsAddress>,
-    subject?: string,
-    messageClass?: number,
-    expiry?: number,
-    priority?: MmsPriorityType,
-    senderVisibility?: number,
-    deliveryReport?: number,
-    readReport?: number,
+    from: MmsAddress;
+    transactionId: string;
+    contentType: string;
+    version: MmsVersionType;
+    to?: Array<MmsAddress>;
+    date?: number;
+    cc?: Array<MmsAddress>;
+    bcc?: Array<MmsAddress>;
+    subject?: string;
+    messageClass?: number;
+    expiry?: number;
+    priority?: MmsPriorityType;
+    senderVisibility?: number;
+    deliveryReport?: number;
+    readReport?: number;
   }
 
   /**
@@ -232,10 +245,10 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsSendConf {
-    responseState: number,
-    transactionId: string,
-    version: MmsVersionType,
-    messageId?: string,
+    responseState: number;
+    transactionId: string;
+    version: MmsVersionType;
+    messageId?: string;
   }
 
   /**
@@ -243,16 +256,16 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsNotificationInd {
-    transactionId: string,
-    messageClass: number,
-    messageSize: number,
-    expiry: number,
-    contentLocation: string,
-    version: MmsVersionType,
-    from?: MmsAddress,
-    subject?: string,
-    deliveryReport?: number,
-    contentClass?: number,
+    transactionId: string;
+    messageClass: number;
+    messageSize: number;
+    expiry: number;
+    contentLocation: string;
+    version: MmsVersionType;
+    from?: MmsAddress;
+    subject?: string;
+    deliveryReport?: number;
+    contentClass?: number;
   }
 
   /**
@@ -260,10 +273,10 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsRespInd {
-    transactionId: string,
-    status: number,
-    version: MmsVersionType,
-    reportAllowed?: number
+    transactionId: string;
+    status: number;
+    version: MmsVersionType;
+    reportAllowed?: ReportType;
   }
 
   /**
@@ -271,20 +284,20 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsRetrieveConf {
-    transactionId: string,
-    messageId: string,
-    date: number,
-    contentType: string,
-    to: Array<MmsAddress>,
-    version: MmsVersionType,
-    from?: MmsAddress,
-    cc?: Array<MmsAddress>,
-    subject?: string,
-    priority?: MmsPriorityType,
-    deliveryReport?: number,
-    readReport?: number,
-    retrieveStatus?: number,
-    retrieveText?: string,
+    transactionId: string;
+    messageId: string;
+    date: number;
+    contentType: string;
+    to: Array<MmsAddress>;
+    version: MmsVersionType;
+    from?: MmsAddress;
+    cc?: Array<MmsAddress>;
+    subject?: string;
+    priority?: MmsPriorityType;
+    deliveryReport?: number;
+    readReport?: number;
+    retrieveStatus?: number;
+    retrieveText?: string;
   }
 
   /**
@@ -292,9 +305,9 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsAcknowledgeInd {
-    transactionId: string,
-    version: MmsVersionType,
-    reportAllowed?: number,
+    transactionId: string;
+    version: MmsVersionType;
+    reportAllowed?: ReportType;
   }
 
   /**
@@ -302,11 +315,11 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsDeliveryInd {
-    messageId: string,
-    date: number,
-    to: Array<MmsAddress>,
-    status: number,
-    version: MmsVersionType,
+    messageId: string;
+    date: number;
+    to: Array<MmsAddress>;
+    status: number;
+    version: MmsVersionType;
   }
 
   /**
@@ -314,12 +327,12 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsReadOrigInd {
-    version: MmsVersionType,
-    messageId: string,
-    to: Array<MmsAddress>,
-    from: MmsAddress,
-    date: number,
-    readStatus: number,
+    version: MmsVersionType;
+    messageId: string;
+    to: Array<MmsAddress>;
+    from: MmsAddress;
+    date: number;
+    readStatus: number;
   }
 
   /**
@@ -327,18 +340,12 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsReadRecInd {
-    version: MmsVersionType,
-    messageId: string,
-    to: Array<MmsAddress>,
-    from: MmsAddress,
-    readStatus: number,
-    date?: number,
-  }
-
-  export enum  DispositionType{
-    FROM_DATA = 0,
-    ATTACHMENT,
-    INLINE,
+    version: MmsVersionType;
+    messageId: string;
+    to: Array<MmsAddress>;
+    from: MmsAddress;
+    readStatus: number;
+    date?: number;
   }
 
   /**
@@ -346,16 +353,16 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsAttachment {
-    path: string,
-    fileName: string,
-    contentId: string,
-    contentLocation: string,
-    contentDisposition: DispositionType,
-    contentTransferEncoding: string,
-    contentType: string,
-    isSmil: boolean,
-    inBuff: Array<number>,
-    charset?: MmsCharSets,
+    contentId: string;
+    contentLocation: string;
+    contentDisposition: DispositionType;
+    contentTransferEncoding: string;
+    contentType: string;
+    isSmil: boolean;
+    path?: string;
+    inBuff?: Array<number>;
+    fileName?: string;
+    charset?: MmsCharSets;
   }
 
   /**
@@ -363,8 +370,8 @@ declare namespace sms {
    * @since 8
    */
   export interface MmsAddress {
-    address: string,
-    charset: MmsCharSets,
+    address: string;
+    charset: MmsCharSets;
   }
 
   /**
@@ -427,34 +434,56 @@ declare namespace sms {
 
   /**
    * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  export enum DispositionType {
+    FROM_DATA = 0,
+    ATTACHMENT,
+    INLINE,
+  }
+
+  /**
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  export enum ReportType {
+    MMS_YES = 128,
+    MMS_NO,
+  }
+
+  /**
+   * @systemapi Hide this for inner system use.
+   * @since 7
    */
   export interface CBConfigOptions {
-    slotId: number,
-    enable: boolean,
-    startMessageId: number,
-    endMessageId: number,
-    ranType: RanType,
+    slotId: number;
+    enable: boolean;
+    startMessageId: number;
+    endMessageId: number;
+    ranType: RanType;
   }
 
   /**
    * @systemapi Hide this for inner system use.
+   * @since 7
    */
   export interface SimMessageOptions {
-    slotId: number,
-    smsc: string,
-    pdu: string,
-    status: SimMessageStatus
+    slotId: number;
+    smsc: string;
+    pdu: string;
+    status: SimMessageStatus;
   }
 
   /**
    * @systemapi Hide this for inner system use.
+   * @since 7
    */
   export interface UpdateSimMessageOptions {
-    slotId: number,
-    msgIndex: number,
-    newStatus: SimMessageStatus,
-    pdu: string,
-    smsc: string
+    slotId: number;
+    msgIndex: number;
+    newStatus: SimMessageStatus;
+    pdu: string;
+    smsc: string;
   }
 
   export interface ShortMessage {
@@ -483,18 +512,11 @@ declare namespace sms {
     status: number;
     /** Indicates whether the current message is SMS-STATUS-REPORT. */
     isSmsStatusReportMessage: boolean;
-    /** Indicates the email message address. */
-    emailAddress: string;
-    /** Indicates the email message body. */
-    emailMessageBody: string;
-    /** Indicates the user data excluding the data header. */
-    userRawData: Array<number>;
-    /** Indicates whether the received SMS is an email message. */
-    isEmailMessage: boolean;
   }
 
   /**
    * @systemapi Hide this for inner system use.
+   * @since 7
    */
   export interface SimShortMessage {
     shortMessage: ShortMessage;
@@ -507,6 +529,7 @@ declare namespace sms {
 
   /**
    * @systemapi Hide this for inner system use.
+   * @since 7
    */
   export enum SimMessageStatus {
     /** status free space ON SIM */
@@ -590,7 +613,7 @@ declare namespace sms {
 
   /**
    * @systemapi Hide this for inner system use.
-   * @since 8
+   * @since 7
    */
   export enum RanType {
     TYPE_GSM = 1, // GSM
