@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#include "sms_send_message_proxy.h"
+#include "sms_send_short_message_proxy.h"
 
 #include "message_option.h"
 #include "message_parcel.h"
 
 namespace OHOS {
 namespace Telephony {
-SmsSendMessageProxy::SmsSendMessageProxy(const sptr<IRemoteObject> &impl)
+SmsSendShortMessageProxy::SmsSendShortMessageProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<ISendShortMessageCallback>(impl)
 {}
 
-void SmsSendMessageProxy::OnSmsSendResult(const SmsSendResult result)
+void SmsSendShortMessageProxy::OnSmsSendResult(const SmsSendResult result)
 {
     MessageOption option;
     MessageParcel dataParcel;
