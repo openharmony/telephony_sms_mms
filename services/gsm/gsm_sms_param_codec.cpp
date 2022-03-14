@@ -275,6 +275,7 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
         }
         if (memset_s(tmpAddress, MAX_ADDRESS_LEN, 0x00, MAX_ADDRESS_LEN) != EOK) {
             TELEPHONY_LOGE("pAddress memset_s error!");
+            delete[] tmpAddress;
             return offset;
         }
         int tmplength = 0;
