@@ -77,6 +77,7 @@ sptr<ISmsServiceInterface> SmsMmsGtest::GetProxy()
     return nullptr;
 }
 
+#ifndef TEL_TEST_UNSUPPORT
 /**
  * @tc.number   Telephony_SmsMmsGtest_GetProxy_0001
  * @tc.name     Get SmsMms service
@@ -421,6 +422,18 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level3)
         EXPECT_FALSE(result);
     }
 }
+
+#else // TEL_TEST_UNSUPPORT
+/**
+ * @tc.number   Telephony_SmsMms_MockTest_0001
+ * @tc.name     Mock test for unsupported platform
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, MockTest_0001, Function | MediumTest | Level3)
+{
+    EXPECT_TRUE(true);
+}
+#endif // TEL_TEST_UNSUPPORT
 } // namespace Telephony
 } // namespace OHOS
 #endif
