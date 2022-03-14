@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SMS_SEND_MESSAGE_PROXY_H
-#define SMS_SEND_MESSAGE_PROXY_H
+#ifndef SMS_SEND_SHORT_MESSAGE_PROXY_H
+#define SMS_SEND_SHORT_MESSAGE_PROXY_H
 
 #include "i_send_short_message_callback.h"
 #include "iremote_object.h"
@@ -22,10 +22,10 @@
 
 namespace OHOS {
 namespace Telephony {
-class SmsSendMessageProxy : public IRemoteProxy<ISendShortMessageCallback> {
+class SmsSendShortMessageProxy : public IRemoteProxy<ISendShortMessageCallback> {
 public:
-    explicit SmsSendMessageProxy(const sptr<IRemoteObject> &impl);
-    virtual ~SmsSendMessageProxy() = default;
+    explicit SmsSendShortMessageProxy(const sptr<IRemoteObject> &impl);
+    virtual ~SmsSendShortMessageProxy() = default;
 
     /**
      * @brief OnSmsDeliveryResult
@@ -36,7 +36,7 @@ public:
 
 protected:
 private:
-    static inline BrokerDelegator<SmsSendMessageProxy> delegator_;
+    static inline BrokerDelegator<SmsSendShortMessageProxy> delegator_;
 };
 } // namespace Telephony
 } // namespace OHOS
