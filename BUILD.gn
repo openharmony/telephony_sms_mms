@@ -39,7 +39,7 @@ ohos_shared_library("tel_sms_mms") {
     "$SOURCE_DIR/services/gsm/gsm_sms_tpdu_codec.cpp",
     "$SOURCE_DIR/services/gsm/gsm_sms_udata_codec.cpp",
     "$SOURCE_DIR/services/proxy/sms_delivery_short_message_proxy.cpp",
-    "$SOURCE_DIR/services/proxy/sms_send_message_proxy.cpp",
+    "$SOURCE_DIR/services/proxy/sms_send_short_message_proxy.cpp",
     "$SOURCE_DIR/services/sms_base_message.cpp",
     "$SOURCE_DIR/services/sms_cb_message.cpp",
     "$SOURCE_DIR/services/sms_dump_helper.cpp",
