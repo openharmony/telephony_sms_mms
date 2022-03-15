@@ -37,7 +37,7 @@ std::unique_ptr<char[]> SmsWapPushBuffer::ReadDataBuffer(uint32_t desLen)
 
 std::unique_ptr<char[]> SmsWapPushBuffer::ReadDataBuffer(uint32_t offset, uint32_t desLen)
 {
-    if (offset + desLen > totolLength_) {
+    if ((desLen > totolLength_) || ((offset + desLen) > totolLength_)) {
         return nullptr;
     }
     std::unique_ptr<char[]> result = std::make_unique<char[]>(desLen);
