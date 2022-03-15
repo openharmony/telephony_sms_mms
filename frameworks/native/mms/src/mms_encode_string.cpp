@@ -56,7 +56,7 @@ bool MmsEncodeString::DecodeEncodeString(MmsDecodeBuffer &decodeBuffer)
 
     if (oneByte == 0) {
         strEncodeString_.clear();
-        decodeBuffer.MovePointer(1);
+        decodeBuffer.IncreasePointer(1);
         TELEPHONY_LOGE("Decode encodeString DecodeEncodeString fail.");
         return false;
     }
