@@ -222,8 +222,8 @@ bool MmsBodyPart::DecodePartBody(MmsDecodeBuffer &decodeBuffer, uint32_t bodyLen
     } else {
         pbodyPartBuffer_ = std::move(bodyPartBuffer);
     }
-    if (!decodeBuffer.MovePointer(bodyLength)) {
-        TELEPHONY_LOGE("Decode Body Part MovePointer err.");
+    if (!decodeBuffer.IncreasePointer(bodyLength)) {
+        TELEPHONY_LOGE("Decode Body Part IncreasePointer err.");
         return false;
     }
     return true;
