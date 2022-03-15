@@ -129,7 +129,7 @@ bool MmsBodyPartHeader::DecodeContentDisposition(MmsDecodeBuffer &decodeBuffer, 
             break;
         }
         default: {
-            if (!decodeBuffer.MovePointer(-1)) {
+            if (!decodeBuffer.DecreasePointer(1)) {
                 TELEPHONY_LOGE("Body part header move pointer fail.");
                 return false;
             }
@@ -192,7 +192,7 @@ bool MmsBodyPartHeader::DecodeDispositionParameter(
             TELEPHONY_LOGE("Body part header decode content disposition length err.");
             return false;
         }
-        if (!decodeBuffer.MovePointer(dispLen - (endPostion - beginPos))) {
+        if (!decodeBuffer.IncreasePointer(dispLen - (endPostion - beginPos))) {
             TELEPHONY_LOGE("Body part header decode content disposition move pointer err.");
             return false;
         }

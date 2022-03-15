@@ -26,7 +26,8 @@ class MmsDecodeBuffer : public MmsBuffer {
 public:
     bool PeekOneByte(uint8_t &oneByte);
     bool GetOneByte(uint8_t &oneByte);
-    bool MovePointer(int32_t offset);
+    bool IncreasePointer(uint32_t offset);
+    bool DecreasePointer(uint32_t offset);
     void MarkPosition();
     void UnMarkPosition();
 
