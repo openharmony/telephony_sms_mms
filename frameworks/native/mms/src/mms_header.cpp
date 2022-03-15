@@ -773,7 +773,7 @@ bool MmsHeader::DecodeMmsMsgUnKnownField(MmsDecodeBuffer &decodeBuffer)
             return false;
         }
     }
-    decodeBuffer.MovePointer(-1);
+    decodeBuffer.DecreasePointer(1);
     return true;
 }
 

@@ -130,8 +130,8 @@ bool MmsContentType::DecodeMmsCTGeneralForm(MmsDecodeBuffer &decodeBuffer, int32
     }
     if (decodeBuffer.DecodeIsShortInt()) {
         contentType_ = GetContentTypeFromInt(oneByte & setHighestBitZero);
-        if (!decodeBuffer.MovePointer(1)) {
-            TELEPHONY_LOGE("Decode contentType MovePointer fail.");
+        if (!decodeBuffer.IncreasePointer(1)) {
+            TELEPHONY_LOGE("Decode contentType IncreasePointer fail.");
             return false;
         }
         if (valueLength < 0) {
@@ -239,8 +239,8 @@ bool MmsContentType::DecodeParameter(MmsDecodeBuffer &decodeBuffer, int32_t valu
                 break;
             }
             default: {
-                if (!decodeBuffer.MovePointer(valueLength)) {
-                    TELEPHONY_LOGE("Decode contentType MovePointer fail.");
+                if (!decodeBuffer.IncreasePointer(valueLength)) {
+                    TELEPHONY_LOGE("Decode contentType IncreasePointer fail.");
                     return false;
                 }
                 valueLength = 0;
@@ -366,8 +366,8 @@ bool MmsContentType::DecodeTypeField(MmsDecodeBuffer &decodeBuffer, int32_t &val
         msgContentParm_.SetType(GetContentTypeFromInt(oneByte & 0x7f));
         valueLength -= 1;
     } else {
-        if (!decodeBuffer.MovePointer(-1)) {
-            TELEPHONY_LOGE("Decode contentType MovePointer fail.");
+        if (!decodeBuffer.DecreasePointer(1)) {
+            TELEPHONY_LOGE("Decode contentType DecreasePointer fail.");
             return false;
         }
 
