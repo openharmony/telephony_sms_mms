@@ -143,8 +143,8 @@ bool SmsWapPushContentType::DecodeCTGeneralForm(SmsWapPushBuffer &decodeBuffer, 
     }
     if (decodeBuffer.DecodeIsShortInt()) {
         contentType_ = GetContentTypeFromInt(oneByte & setHighestBitZero);
-        if (!decodeBuffer.MovePointer(1)) {
-            TELEPHONY_LOGE("Wap push decode contentType MovePointer fail.");
+        if (!decodeBuffer.IncreasePointer(1)) {
+            TELEPHONY_LOGE("Wap push decode contentType IncreasePointer fail.");
             return false;
         }
         if (valueLength < 0) {
@@ -231,8 +231,8 @@ bool SmsWapPushContentType::DecodeParameter(SmsWapPushBuffer &decodeBuffer, int3
                 break;
             }
             default: {
-                if (!decodeBuffer.MovePointer(valueLength)) {
-                    TELEPHONY_LOGE("Wap push DecodeParameter MovePointer fail.");
+                if (!decodeBuffer.IncreasePointer(valueLength)) {
+                    TELEPHONY_LOGE("Wap push DecodeParameter IncreasePointer fail.");
                     return false;
                 }
                 valueLength = 0;
@@ -352,8 +352,8 @@ bool SmsWapPushContentType::DecodeTypeField(SmsWapPushBuffer &decodeBuffer, int3
         type_ = GetContentTypeFromInt(oneByte & TEXT_MAX);
         valueLength -= 1;
     } else {
-        if (!decodeBuffer.MovePointer(-1)) {
-            TELEPHONY_LOGE("Wap push DecodeTypeField MovePointer fail.");
+        if (!decodeBuffer.DecreasePointer(1)) {
+            TELEPHONY_LOGE("Wap push DecodeTypeField DecreasePointer fail.");
             return false;
         }
         std::string sType = "";
