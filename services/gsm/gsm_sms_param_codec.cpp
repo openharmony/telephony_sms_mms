@@ -516,12 +516,14 @@ bool GsmSmsParamCodec::CheckCphsVmiMsg(const unsigned char *pTpdu, int *setType,
         return ret;
     }
     addrLen = (int)pTpdu[offset++];
-    if ((pTpdu[offset++] == 0xD0) && (addrLen == 0x04)) {
-        if (pTpdu[offset] == 0x11 || pTpdu[offset] == 0x10) {
-            TELEPHONY_LOGI("####### VMI msg ######");
-            *setType = (int)(pTpdu[offset] & 0x01); /* 0 : clear, 1 : set */
-            *indType = (int)(pTpdu[offset + 1] & 0x01); /* 0 : indicator 1, 1 : indicator 2 */
-            ret = true;
+    if (addrLen == 0x04) {
+        if (pTpdu[offset++] == 0xD0) {
+            if (pTpdu[offset] == 0x11 || pTpdu[offset] == 0x10) {
+                TELEPHONY_LOGI("####### VMI msg ######");
+                *setType = (int)(pTpdu[offset] & 0x01); /* 0 : clear, 1 : set */
+                *indType = (int)(pTpdu[offset + 1] & 0x01); /* 0 : indicator 1, 1 : indicator 2 */
+                ret = true;
+            }
         }
     }
     return ret;

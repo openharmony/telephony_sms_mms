@@ -93,12 +93,7 @@ bool MmsBuffer::WriteDataBuffer(std::unique_ptr<char[]> inBuff, uint32_t len)
 bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
 {
     FILE *pFile = nullptr;
-    char *realPath = GetRealPath(strPathName.c_str());
-    if (realPath == nullptr) {
-        TELEPHONY_LOGE("path or realPath is NULL");
-        return false;
-    }
-    pFile = fopen(realPath, "rb");
+    pFile = fopen(strPathName.c_str(), "rb");
     if (pFile == nullptr) {
         TELEPHONY_LOGE("Open File Error :%{public}s", strPathName.c_str());
         return false;
@@ -134,20 +129,6 @@ uint32_t MmsBuffer::GetCurPosition() const
 uint32_t MmsBuffer::GetSize() const
 {
     return totolLength_;
-}
-
-char* MmsBuffer::GetRealPath(const std::string &path)
-{
-    if (path.empty()) {
-        return nullptr;
-    }
-
-    char realPath[PATH_MAX] = {0x00};
-    if (realpath(path.c_str(), realPath) == nullptr) {
-        return nullptr;
-    }
-
-    return realPath;
 }
 } // namespace Telephony
 } // namespace OHOS

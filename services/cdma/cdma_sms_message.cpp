@@ -66,7 +66,7 @@ std::unique_ptr<SmsTransMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::str
     }
 
     scAddress_ = sc;
-    destPort_ = (int16_t)port;
+    destPort_ = static_cast<uint16_t>(port);
     originatingAddress_ = dest;
     bStatusReportMessage_ = bStatusReport;
     /* Set Reply option */
