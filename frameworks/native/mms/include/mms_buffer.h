@@ -38,7 +38,6 @@ protected:
     uint32_t totolLength_ = 0;
     uint32_t savePosition_ = 0;
     const uint32_t CODE_BUFFER_MAX_SIZE = 300 * 1024;
-    static char *GetRealPath(const std::string &path);
 };
 } // namespace Telephony
 } // namespace OHOS

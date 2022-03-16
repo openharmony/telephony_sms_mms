@@ -687,7 +687,7 @@ enum SmsTransErrClass {
 enum SmsTransCauseCodeType : unsigned char {
     SMS_CAUSE_CODE_INVAILD_TELESERVICE_ID = 0x04,
     SMS_CAUSE_CODE_SERVICE_TERMINATION_DENIED = 0x62,
-    SMS_TOBE_FILL_THIS_ENUMS
+    SMS_TO_FILL_THIS_ENUMS
 };
 
 enum SmsTransSubAddrType : unsigned char {

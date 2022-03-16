@@ -148,7 +148,7 @@
 | visibleRawAddress        | string                                                       | 发送者地址。                                                 |
 
 
-完整的JS API说明以及实例代码请参考：[收发短信](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-sms.md)
+完整的JS API说明以及实例代码请参考：[收发短信](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/js-reference/apis/js-apis-sms.md)
 
 ## 使用说明<a name="section170mcpsimp"></a>
 

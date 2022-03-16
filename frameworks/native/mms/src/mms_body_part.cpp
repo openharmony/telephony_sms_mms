@@ -420,12 +420,7 @@ void MmsBodyPart::DecodeSetFileName()
 bool MmsBodyPart::WriteBodyFromFile(std::string path)
 {
     FILE *pFile = nullptr;
-    char *realPath = GetRealPath(path.c_str());
-    if (realPath == nullptr) {
-        TELEPHONY_LOGE("path or realPath is NULL");
-        return false;
-    }
-    pFile = fopen(realPath, "rb");
+    pFile = fopen(path.c_str(), "rb");
     if (pFile == nullptr) {
         TELEPHONY_LOGI("Write Body Part from File notFind, try to use buffer");
         return false;
@@ -524,20 +519,6 @@ std::unique_ptr<char[]> MmsBodyPart::ReadBodyPartBuffer(uint32_t &len)
         return nullptr;
     }
     return result;
-}
-
-char* MmsBodyPart::GetRealPath(const std::string &path)
-{
-    if (path.empty()) {
-        return nullptr;
-    }
-
-    char realPath[PATH_MAX] = {0x00};
-    if (realpath(path.c_str(), realPath) == nullptr) {
-        return nullptr;
-    }
-
-    return realPath;
 }
 } // namespace Telephony
 } // namespace OHOS

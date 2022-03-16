@@ -149,7 +149,7 @@ void GetMmsSendReq(MmsMsg mmsMsg, MmsSendReqContext &asyncContext)
     asyncContext.from = mmsMsg.GetMmsFrom();
     mmsMsg.GetMmsTo(asyncContext.to);
     asyncContext.transactionId = mmsMsg.GetMmsTransactionId();
-    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = mmsMsg.GetMmsVersion();
     asyncContext.date = mmsMsg.GetMmsDate();
     mmsMsg.GetHeaderAllAddressValue(MmsFieldCode::MMS_CC, asyncContext.cc);
     mmsMsg.GetHeaderAllAddressValue(MmsFieldCode::MMS_BCC, asyncContext.bcc);
@@ -171,7 +171,7 @@ void GetMmsNotificationInd(MmsMsg mmsMsg, MmsNotificationIndContext &asyncContex
     asyncContext.messageClass = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_MESSAGE_CLASS);
     asyncContext.messageSize = mmsMsg.GetHeaderLongValue(MmsFieldCode::MMS_MESSAGE_SIZE);
     asyncContext.expiry = mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_EXPIRY);
-    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = mmsMsg.GetMmsVersion();
     asyncContext.from = mmsMsg.GetMmsFrom();
     asyncContext.subject = mmsMsg.GetMmsSubject();
     asyncContext.deliveryReport = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_DELIVERY_REPORT);
@@ -185,7 +185,7 @@ void GetMmsRespInd(MmsMsg mmsMsg, MmsRespIndContext &asyncContext)
     TELEPHONY_LOGI("napi_mms GetMmsRespInd start");
     asyncContext.transactionId = mmsMsg.GetMmsTransactionId();
     asyncContext.status = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_STATUS);
-    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = mmsMsg.GetMmsVersion();
     asyncContext.reportAllowed = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_REPORT_ALLOWED);
     TELEPHONY_LOGI("napi_mms GetMmsRespInd end");
 }
@@ -196,7 +196,7 @@ void GetMmsRetrieveConf(MmsMsg mmsMsg, MmsRetrieveConfContext &asyncContext)
     asyncContext.transactionId = mmsMsg.GetMmsTransactionId();
     asyncContext.messageId = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_MESSAGE_ID);
     asyncContext.date = mmsMsg.GetMmsDate();
-    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = mmsMsg.GetMmsVersion();
     mmsMsg.GetMmsTo(asyncContext.to);
     asyncContext.from = mmsMsg.GetMmsFrom();
     mmsMsg.GetHeaderAllAddressValue(MmsFieldCode::MMS_CC, asyncContext.cc);
@@ -214,7 +214,7 @@ void GetMmsAcknowledgeInd(MmsMsg mmsMsg, MmsAcknowledgeIndContext &asyncContext)
 {
     TELEPHONY_LOGI("napi_mms GetMmsAcknowledgeInd start");
     asyncContext.transactionId = mmsMsg.GetMmsTransactionId();
-    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = mmsMsg.GetMmsVersion();
     asyncContext.reportAllowed = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_REPORT_ALLOWED);
     TELEPHONY_LOGI("napi_mms GetMmsAcknowledgeInd end");
 }
@@ -230,7 +230,7 @@ void GetMmsDeliveryInd(MmsMsg mmsMsg, MmsDeliveryIndContext &asyncContext)
         asyncContext.to.assign(toAddress.begin(), toAddress.end());
     }
     asyncContext.status = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_STATUS);
-    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = mmsMsg.GetMmsVersion();
 
     TELEPHONY_LOGI("napi_mms GetMmsDeliveryInd end");
 }
@@ -238,7 +238,7 @@ void GetMmsDeliveryInd(MmsMsg mmsMsg, MmsDeliveryIndContext &asyncContext)
 void GetMmsReadOrigInd(MmsMsg mmsMsg, MmsReadOrigIndContext &asyncContext)
 {
     TELEPHONY_LOGI("napi_mms GetMmsReadOrigInd start");
-    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = mmsMsg.GetMmsVersion();
     asyncContext.messageId = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_MESSAGE_ID);
     mmsMsg.GetMmsTo(asyncContext.to);
     asyncContext.from = mmsMsg.GetMmsFrom();
@@ -251,7 +251,7 @@ void GetMmsReadOrigInd(MmsMsg mmsMsg, MmsReadOrigIndContext &asyncContext)
 void GetMmsReadRecInd(MmsMsg mmsMsg, MmsReadRecIndContext &asyncContext)
 {
     TELEPHONY_LOGI("napi_mms GetMmsReadRecInd start");
-    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = mmsMsg.GetMmsVersion();
     asyncContext.messageId = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_MESSAGE_ID);
     mmsMsg.GetMmsTo(asyncContext.to);
     asyncContext.from = mmsMsg.GetMmsFrom();
