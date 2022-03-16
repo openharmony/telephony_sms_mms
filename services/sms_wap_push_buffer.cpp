@@ -37,7 +37,7 @@ std::unique_ptr<char[]> SmsWapPushBuffer::ReadDataBuffer(uint32_t desLen)
 
 std::unique_ptr<char[]> SmsWapPushBuffer::ReadDataBuffer(uint32_t offset, uint32_t desLen)
 {
-    if (offset + desLen > totolLength_) {
+    if ((desLen > totolLength_) || ((offset + desLen) > totolLength_)) {
         return nullptr;
     }
     std::unique_ptr<char[]> result = std::make_unique<char[]>(desLen);
@@ -134,13 +134,23 @@ bool SmsWapPushBuffer::GetOneByte(uint8_t &oneByte)
     return true;
 }
 
-bool SmsWapPushBuffer::MovePointer(int32_t offset)
+bool SmsWapPushBuffer::IncreasePointer(uint32_t offset)
 {
-    if (curPosition_ + offset > totolLength_) {
+    if ((offset > totolLength_) || ((curPosition_ + offset) > totolLength_)) {
         TELEPHONY_LOGE("wap push current position invalid.");
         return false;
     }
     curPosition_ += offset;
+    return true;
+}
+
+bool SmsWapPushBuffer::DecreasePointer(uint32_t offset)
+{
+    if (offset > curPosition_) {
+        TELEPHONY_LOGE("wap push current position invalid.");
+        return false;
+    }
+    curPosition_ -= offset;
     return true;
 }
 
@@ -225,7 +235,7 @@ bool SmsWapPushBuffer::DecodeValueLengthReturnLen(uint32_t &valueLength, uint32_
     uint32_t uintvar = 0;
     uint8_t oneByte = 0;
     if (!GetOneByte(oneByte)) {
-        MovePointer(-1);
+        DecreasePointer(1);
         TELEPHONY_LOGE("wap push GetOneByte fail.");
         return false;
     }
@@ -267,7 +277,7 @@ bool SmsWapPushBuffer::DecodeValueLength(uint32_t &valueLength)
     uint32_t uintvar = 0;
     uint8_t oneByte = 0;
     if (!GetOneByte(oneByte)) {
-        MovePointer(-1);
+        DecreasePointer(1);
         TELEPHONY_LOGE("wap push GetOneByte fail.");
         return false;
     }
@@ -398,7 +408,7 @@ bool SmsWapPushBuffer::DecodeText(std::string &str, uint32_t &len)
 
     // ignore quote
     if (oneByte != quoteChar) {
-        this->MovePointer(-1);
+        this->DecreasePointer(1);
     } else {
         len++;
     }
@@ -635,8 +645,8 @@ bool SmsWapPushBuffer::DecodeTextValue(std::string &str, bool &isNoValue)
         isNoValue = true;
         return true;
     } else {
-        if (MovePointer(-1) != true) {
-            TELEPHONY_LOGE("wap push MovePointer fail.");
+        if (DecreasePointer(1) != true) {
+            TELEPHONY_LOGE("wap push DecreasePointer fail.");
             return false;
         }
     }
