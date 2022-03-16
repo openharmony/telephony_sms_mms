@@ -39,10 +39,10 @@ public:
     bool SendWapPushMessageBroadcast();
 
 private:
-    int32_t slotId_;
-    uint8_t pushType_;
+    int32_t slotId_ = 0;
+    uint8_t pushType_ = 0;
     std::string strAppId_;
-    uint8_t transactionId_;
+    uint8_t transactionId_ = 0;
     SmsWapPushContentType contentType_;
     std::string hexHeaderData_;
     std::string hexWbXmlData_;

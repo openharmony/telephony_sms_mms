@@ -35,8 +35,8 @@ static void SetPropertyArray(napi_env env, napi_value object, std::string name, 
 {
     napi_value array = nullptr;
     napi_create_array(env, &array);
-    int size = pdu.size();
-    for (int i = 0; i < size; i++) {
+    size_t size = pdu.size();
+    for (size_t i = 0; i < size; i++) {
         napi_value element = nullptr;
         napi_create_int32(env, pdu[i], &element);
         napi_set_element(env, array, i, element);

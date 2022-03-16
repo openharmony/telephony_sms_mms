@@ -71,6 +71,7 @@ private:
     const std::string ENCODE_BINARY = "binary";
     const std::string ENCODE_BASE64 = "base64";
     const std::string ENCODE_QUOTED_PRINTABLE = "quoted-printable";
+    static char *GetRealPath(const std::string &path);
 };
 } // namespace Telephony
 } // namespace OHOS

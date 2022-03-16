@@ -138,7 +138,7 @@ void GetMmsSendConf(MmsMsg mmsMsg, MmsSendConfContext &asyncContext)
     TELEPHONY_LOGI("napi_mms GetMmsSendConf start");
     asyncContext.responseState = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_RESPONSE_STATUS);
     asyncContext.transactionId = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_TRANSACTION_ID);
-    asyncContext.version = mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_MMS_VERSION);
+    asyncContext.version = (uint16_t)mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_MMS_VERSION);
     asyncContext.messageId = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_MESSAGE_ID);
     TELEPHONY_LOGI("napi_mms GetMmsSendConf end");
 }
@@ -149,7 +149,7 @@ void GetMmsSendReq(MmsMsg mmsMsg, MmsSendReqContext &asyncContext)
     asyncContext.from = mmsMsg.GetMmsFrom();
     mmsMsg.GetMmsTo(asyncContext.to);
     asyncContext.transactionId = mmsMsg.GetMmsTransactionId();
-    asyncContext.version = static_cast<int32_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
     asyncContext.date = mmsMsg.GetMmsDate();
     mmsMsg.GetHeaderAllAddressValue(MmsFieldCode::MMS_CC, asyncContext.cc);
     mmsMsg.GetHeaderAllAddressValue(MmsFieldCode::MMS_BCC, asyncContext.bcc);
@@ -171,7 +171,7 @@ void GetMmsNotificationInd(MmsMsg mmsMsg, MmsNotificationIndContext &asyncContex
     asyncContext.messageClass = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_MESSAGE_CLASS);
     asyncContext.messageSize = mmsMsg.GetHeaderLongValue(MmsFieldCode::MMS_MESSAGE_SIZE);
     asyncContext.expiry = mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_EXPIRY);
-    asyncContext.version = static_cast<int32_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
     asyncContext.from = mmsMsg.GetMmsFrom();
     asyncContext.subject = mmsMsg.GetMmsSubject();
     asyncContext.deliveryReport = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_DELIVERY_REPORT);
@@ -185,7 +185,7 @@ void GetMmsRespInd(MmsMsg mmsMsg, MmsRespIndContext &asyncContext)
     TELEPHONY_LOGI("napi_mms GetMmsRespInd start");
     asyncContext.transactionId = mmsMsg.GetMmsTransactionId();
     asyncContext.status = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_STATUS);
-    asyncContext.version = static_cast<int32_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
     asyncContext.reportAllowed = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_REPORT_ALLOWED);
     TELEPHONY_LOGI("napi_mms GetMmsRespInd end");
 }
@@ -196,7 +196,7 @@ void GetMmsRetrieveConf(MmsMsg mmsMsg, MmsRetrieveConfContext &asyncContext)
     asyncContext.transactionId = mmsMsg.GetMmsTransactionId();
     asyncContext.messageId = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_MESSAGE_ID);
     asyncContext.date = mmsMsg.GetMmsDate();
-    asyncContext.version = static_cast<int32_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
     mmsMsg.GetMmsTo(asyncContext.to);
     asyncContext.from = mmsMsg.GetMmsFrom();
     mmsMsg.GetHeaderAllAddressValue(MmsFieldCode::MMS_CC, asyncContext.cc);
@@ -214,7 +214,7 @@ void GetMmsAcknowledgeInd(MmsMsg mmsMsg, MmsAcknowledgeIndContext &asyncContext)
 {
     TELEPHONY_LOGI("napi_mms GetMmsAcknowledgeInd start");
     asyncContext.transactionId = mmsMsg.GetMmsTransactionId();
-    asyncContext.version = static_cast<int32_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
     asyncContext.reportAllowed = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_REPORT_ALLOWED);
     TELEPHONY_LOGI("napi_mms GetMmsAcknowledgeInd end");
 }
@@ -230,7 +230,7 @@ void GetMmsDeliveryInd(MmsMsg mmsMsg, MmsDeliveryIndContext &asyncContext)
         asyncContext.to.assign(toAddress.begin(), toAddress.end());
     }
     asyncContext.status = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_STATUS);
-    asyncContext.version = static_cast<int32_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
 
     TELEPHONY_LOGI("napi_mms GetMmsDeliveryInd end");
 }
@@ -238,7 +238,7 @@ void GetMmsDeliveryInd(MmsMsg mmsMsg, MmsDeliveryIndContext &asyncContext)
 void GetMmsReadOrigInd(MmsMsg mmsMsg, MmsReadOrigIndContext &asyncContext)
 {
     TELEPHONY_LOGI("napi_mms GetMmsReadOrigInd start");
-    asyncContext.version = static_cast<int32_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
     asyncContext.messageId = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_MESSAGE_ID);
     mmsMsg.GetMmsTo(asyncContext.to);
     asyncContext.from = mmsMsg.GetMmsFrom();
@@ -251,7 +251,7 @@ void GetMmsReadOrigInd(MmsMsg mmsMsg, MmsReadOrigIndContext &asyncContext)
 void GetMmsReadRecInd(MmsMsg mmsMsg, MmsReadRecIndContext &asyncContext)
 {
     TELEPHONY_LOGI("napi_mms GetMmsReadRecInd start");
-    asyncContext.version = static_cast<int32_t>(mmsMsg.GetMmsVersion());
+    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetMmsVersion());
     asyncContext.messageId = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_MESSAGE_ID);
     mmsMsg.GetMmsTo(asyncContext.to);
     asyncContext.from = mmsMsg.GetMmsFrom();
@@ -278,7 +278,7 @@ void getAttachmentByDecodeMms(MmsMsg &mmsMsg, DecodeMmsContext &context)
         attachmentContext.contentTransferEncoding = it.GetContentTransferEncoding();
         attachmentContext.contentType = it.GetContentType();
         attachmentContext.isSmil = it.IsSmilFile();
-        attachmentContext.charset = it.GetCharSet();
+        attachmentContext.charset = (uint32_t)it.GetCharSet();
         std::unique_ptr<char[]> buffer = nullptr;
         buffer = it.GetDataBuffer(attachmentContext.inBuffLen);
         attachmentContext.inBuff = std::move(buffer);
@@ -620,7 +620,7 @@ void ParseDecodeMmsParam(napi_env env, napi_value object, DecodeMmsContext &cont
         int32_t element = 0;
         uint32_t arrayLength = 0;
         napi_get_array_length(env, object, &arrayLength);
-        context.inLen = static_cast<int32_t>(arrayLength);
+        context.inLen = static_cast<uint32_t>(arrayLength);
         TELEPHONY_LOGI("napi_mms ParseDecodeMmsParam arrayLength = %{public}d", arrayLength);
         context.inBuffer = std::make_unique<char[]>(arrayLength);
         if (context.inBuffer == nullptr) {
@@ -929,7 +929,7 @@ bool ReadEncodeMmsType(napi_env env, napi_value napiValue, MmsRetrieveConfContex
     retrieveConf.transactionId = GetNapiStringValue(env, napiValue, "transactionId");
     retrieveConf.messageId = GetNapiStringValue(env, napiValue, "messageId");
     retrieveConf.date = GetNapiInt64Value(env, napiValue, "date");
-    retrieveConf.version = GetNapiInt32Value(env, napiValue, "version");
+    retrieveConf.version = (uint16_t)GetNapiInt32Value(env, napiValue, "version");
     ReadMmsAddress(env, napiValue, "to", retrieveConf.to);
     napi_value from = NapiUtil::GetNamedProperty(env, napiValue, "from");
     retrieveConf.from = ReadMmsAddress(env, from);
@@ -1020,6 +1020,7 @@ MmsAttachmentContext BuildMmsAttachment(napi_env env, napi_value value)
         attachmentContext.inBuff = std::make_unique<char[]>(arrayLength);
         if (attachmentContext.inBuff == nullptr) {
             TELEPHONY_LOGE("make unique error");
+            return attachmentContext;
         }
         napi_value elementValue = nullptr;
         for (uint32_t i = 0; i < arrayLength; i++) {
@@ -1294,7 +1295,7 @@ void NativeEncodeMms(napi_env env, void *data)
     }
     EncodeMmsContext *context = static_cast<EncodeMmsContext *>(data);
     MmsMsg mmsMsg;
-    mmsMsg.SetMmsMessageType(WrapEncodeMmsStatus(context->messageType));
+    mmsMsg.SetMmsMessageType((uint8_t)WrapEncodeMmsStatus(context->messageType));
     setAttachmentToCore(mmsMsg, context->attachment);
     switch (context->messageType) {
         case MessageType::TYPE_MMS_SEND_REQ:

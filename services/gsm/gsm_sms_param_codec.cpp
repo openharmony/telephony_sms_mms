@@ -130,7 +130,7 @@ int GsmSmsParamCodec::EncodeSMSC(const struct SmsAddress *pAddress, unsigned cha
         return 0;
     }
     /* Set Address Length Check IPC 4.0 -> addrLen/2 */
-    pSMSC[0] = dataSize - 1;
+    pSMSC[0] = (char)(dataSize - 1);
     /* Set TON, NPI */
     pSMSC[1] = 0x80 + ((unsigned char)pAddress->ton << 0x04) + pAddress->npi;
     /* Set Address */
@@ -516,7 +516,7 @@ bool GsmSmsParamCodec::CheckCphsVmiMsg(const unsigned char *pTpdu, int *setType,
         return ret;
     }
     addrLen = (int)pTpdu[offset++];
-    if (addrLen == 0x04 && pTpdu[offset++] == 0xD0) {
+    if ((pTpdu[offset++] == 0xD0) && (addrLen == 0x04)) {
         if (pTpdu[offset] == 0x11 || pTpdu[offset] == 0x10) {
             TELEPHONY_LOGI("####### VMI msg ######");
             *setType = (int)(pTpdu[offset] & 0x01); /* 0 : clear, 1 : set */

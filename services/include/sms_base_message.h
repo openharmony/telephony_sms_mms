@@ -151,8 +151,8 @@ private:
     static constexpr uint16_t TAPI_TEXT_SIZE_MAX = 520;
     static constexpr uint8_t GSM_BEAR_DATA_LEN = 140;
     static constexpr uint8_t CHARSET_7BIT_BITS = 7;
-    virtual int DecodeMessage(unsigned char *decodeData, SmsCodingScheme &codingType, const std::string &msgText,
-        bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
+    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
+            const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
     void ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType);
 };
 } // namespace Telephony

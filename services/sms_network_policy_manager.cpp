@@ -84,7 +84,7 @@ void SmsNetworkPolicyManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer
         return;
     }
 
-    int eventId = 0;
+    uint32_t eventId = 0;
     eventId = event->GetInnerEventId();
     TELEPHONY_LOGI("SmsNetworkPolicyManager::ProcessEvent Handler Rec%{public}d", eventId);
     switch (eventId) {

@@ -38,7 +38,7 @@ void SmsSender::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
         return;
     }
     shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
-    int eventId = event->GetInnerEventId();
+    uint32_t eventId = event->GetInnerEventId();
     TELEPHONY_LOGI("SmsSender::ProcessEvent eventId %{public}d", eventId);
     switch (eventId) {
         case RadioEvent::RADIO_SEND_SMS:
