@@ -47,7 +47,7 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
         return;
     }
 
-    int eventId = 0;
+    uint32_t eventId = 0;
     eventId = event->GetInnerEventId();
     TELEPHONY_LOGI("SmsReceiveHandler::ProcessEvent eventId = %{public}d", eventId);
     switch (eventId) {

@@ -53,8 +53,8 @@ private:
     void SetPduSeqInfo(const std::shared_ptr<SmsSendIndexer> &smsIndexer, const std::size_t size,
         const std::unique_ptr<SmsTransMsg> &transMsg, const std::size_t index, const uint8_t msgRef8bit);
 
-    uint8_t msgSeqNum_;
-    uint8_t msgSubmitId_;
+    uint8_t msgSeqNum_ = 0;
+    uint8_t msgSubmitId_ = 0;
 };
 } // namespace Telephony
 } // namespace OHOS

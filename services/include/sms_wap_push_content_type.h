@@ -261,7 +261,7 @@ public:
     bool SetContentType(std::string str);
 
 private:
-    std::string contentType_;
+    std::string contentType_ = "";
     uint32_t charset_ = 0;
     std::string type_ = "";
     std::map<uint8_t, std::string> textParameterMap_;

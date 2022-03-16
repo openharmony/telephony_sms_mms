@@ -50,7 +50,7 @@ bool MmsDecodeBuffer::IncreasePointer(uint32_t offset)
         TELEPHONY_LOGE("Decode buffer current position invalid.");
         return false;
     }
-    curPosition_ += offset;
+    curPosition_ += (uint32_t)offset;
     return true;
 }
 
@@ -415,7 +415,7 @@ bool MmsDecodeBuffer::DecodeLongInteger(uint64_t &value)
     }
     valuelength = oneByte;
 
-    for (unsigned char i = 0; i < valuelength; i++) {
+    for (uint32_t i = 0; i < valuelength; i++) {
         if (GetOneByte(oneByte) != true) {
             TELEPHONY_LOGE("Decode buffer GetOneByte fail.");
             return false;

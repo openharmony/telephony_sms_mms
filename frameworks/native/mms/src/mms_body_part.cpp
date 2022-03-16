@@ -400,11 +400,19 @@ void MmsBodyPart::DecodeSetFileName()
         return;
     }
     char chCurrentTime[timeBufferLen] = {0};
-    tm *time = localtime(&currentTime);
-    if (currentTime == static_cast<time_t>(-1) || time == nullptr) {
+    struct tm tmInfo;
+    if (memset_s(&tmInfo, sizeof(struct tm), 0x00, sizeof(tm)) != EOK) {
+        TELEPHONY_LOGE("DisplayTime memset fail.");
+        return;
+    }
+
+    tm *timeptr = localtime_r(&currentTime, &tmInfo);
+    if (currentTime == static_cast<time_t>(-1) || timeptr == nullptr) {
         TELEPHONY_LOGI("obtain current time Error.");
     }
-    (void)strftime(chCurrentTime, sizeof(chCurrentTime), "%Y%m%d%H%M%S", time);
+    if (timeptr != nullptr) {
+        (void)strftime(chCurrentTime, sizeof(chCurrentTime), "%Y%m%d%H%M%S", timeptr);
+    }
     strFileName_ = chCurrentTime;
     return;
 }
@@ -412,7 +420,12 @@ void MmsBodyPart::DecodeSetFileName()
 bool MmsBodyPart::WriteBodyFromFile(std::string path)
 {
     FILE *pFile = nullptr;
-    pFile = fopen(path.c_str(), "rb");
+    char *realPath = GetRealPath(path.c_str());
+    if (realPath == nullptr) {
+        TELEPHONY_LOGE("path or realPath is NULL");
+        return false;
+    }
+    pFile = fopen(realPath, "rb");
     if (pFile == nullptr) {
         TELEPHONY_LOGI("Write Body Part from File notFind, try to use buffer");
         return false;
@@ -455,7 +468,7 @@ bool MmsBodyPart::WriteBodyFromAttachmentBuffer(MmsAttachment &attachment)
         return false;
     }
 
-    if (dataLen <= 0 || dataLen > (long)MAX_MMS_MSG_PART_LEN) {
+    if (dataLen <= 0 || dataLen > MAX_MMS_MSG_PART_LEN) {
         TELEPHONY_LOGE("Attachment DataLen is invalid Error");
         return false;
     }
@@ -511,6 +524,20 @@ std::unique_ptr<char[]> MmsBodyPart::ReadBodyPartBuffer(uint32_t &len)
         return nullptr;
     }
     return result;
+}
+
+char* MmsBodyPart::GetRealPath(const std::string &path)
+{
+    if (path.empty()) {
+        return nullptr;
+    }
+
+    char realPath[PATH_MAX] = {0x00};
+    if (realpath(path.c_str(), realPath) == nullptr) {
+        return nullptr;
+    }
+
+    return realPath;
 }
 } // namespace Telephony
 } // namespace OHOS

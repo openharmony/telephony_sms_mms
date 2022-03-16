@@ -140,7 +140,7 @@ bool SmsWapPushBuffer::IncreasePointer(uint32_t offset)
         TELEPHONY_LOGE("wap push current position invalid.");
         return false;
     }
-    curPosition_ += offset;
+    curPosition_ += (uint32_t)offset;
     return true;
 }
 
@@ -505,7 +505,7 @@ bool SmsWapPushBuffer::DecodeLongInteger(uint64_t &value)
     }
     valuelength = oneByte;
 
-    for (unsigned char i = 0; i < valuelength; i++) {
+    for (uint32_t i = 0; i < valuelength; i++) {
         if (GetOneByte(oneByte) != true) {
             TELEPHONY_LOGE("wap push GetOneByte fail.");
             return false;

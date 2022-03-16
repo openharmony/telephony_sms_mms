@@ -44,7 +44,8 @@ void SmsBroadcastSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventDat
         for (unsigned int index = 0; index < pdus.size(); ++index) {
             std::vector<unsigned char> pdu = StringUtils::HexToByteVector(pdus[index]);
             ShortMessage *message = nullptr;
-            message = ShortMessage::CreateMessage(pdu, isCdma ? u"3gpp2" : u"3gpp");
+            std::string netType = isCdma ? u"3gpp2" : u"3gpp";
+            message = ShortMessage::CreateMessage(pdu, netType);
             if (message != nullptr) {
                 std::string messageBody = StringUtils::ToUtf8(message->GetVisibleMessageBody());
                 std::cout << "receive new sms = " << messageBody.c_str() << std::endl;

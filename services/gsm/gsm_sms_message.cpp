@@ -68,7 +68,7 @@ int GsmSmsMessage::SetSmsTpduDestAddress(std::shared_ptr<struct SmsTpdu> &tPdu, 
         TELEPHONY_LOGE("TPdu is null.");
         return addLen;
     }
-    addLen = desAddr.length();
+    addLen = (int)desAddr.length();
     tPdu->data.submit.destAddress.ton = SMS_TON_UNKNOWN;
     tPdu->data.submit.destAddress.npi = SMS_NPI_ISDN;
     if (addLen < MAX_ADDRESS_LEN) {
@@ -655,12 +655,12 @@ bool GsmSmsMessage::IsSpecialMessage() const
     return result;
 }
 
-int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, SmsCodingScheme &codingType,
+int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, SmsCodingScheme &codingType,
     const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId)
 {
     int decodeLen = 0;
-    int dataLen = msgText.length();
-    const int maxDecodeLen = (MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1;
+    int dataLen = (int)msgText.length();
+    const int maxDecodeLen = len;
     const unsigned char *pMsgText = (const unsigned char *)msgText.c_str();
 
     MsgTextConvert *textCvt = MsgTextConvert::Instance();

@@ -66,7 +66,7 @@ std::unique_ptr<SmsTransMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::str
     }
 
     scAddress_ = sc;
-    destPort_ = port;
+    destPort_ = (int16_t)port;
     originatingAddress_ = dest;
     bStatusReportMessage_ = bStatusReport;
     /* Set Reply option */
@@ -529,12 +529,12 @@ bool CdmaSmsMessage::IsBroadcastMsg() const
     return GetTransMsgType() == SMS_TRANS_BROADCAST_MSG;
 }
 
-int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, SmsCodingScheme &codingType,
+int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, SmsCodingScheme &codingType,
     const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId)
 {
     int decodeLen = 0;
-    int dataLen = msgText.length();
-    const int maxDecodeLen = (MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1;
+    int dataLen = (int)(msgText.length());
+    const int maxDecodeLen = len;
     const unsigned char *pMsgText = (const unsigned char *)msgText.c_str();
 
     MsgTextConvert *textCvt = MsgTextConvert::Instance();
