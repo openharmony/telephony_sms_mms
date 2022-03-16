@@ -44,13 +44,23 @@ bool MmsDecodeBuffer::GetOneByte(uint8_t &oneByte)
     return true;
 }
 
-bool MmsDecodeBuffer::MovePointer(int32_t offset)
+bool MmsDecodeBuffer::IncreasePointer(uint32_t offset)
 {
-    if (curPosition_ + offset < 0 || curPosition_ + offset > totolLength_) {
+    if ((offset > totolLength_) || ((curPosition_ + offset) > totolLength_)) {
         TELEPHONY_LOGE("Decode buffer current position invalid.");
         return false;
     }
     curPosition_ += offset;
+    return true;
+}
+
+bool MmsDecodeBuffer::DecreasePointer(uint32_t offset)
+{
+    if (offset > curPosition_) {
+        TELEPHONY_LOGE("Decode buffer current position invalid.");
+        return false;
+    }
+    curPosition_ -= offset;
     return true;
 }
 
@@ -135,7 +145,7 @@ bool MmsDecodeBuffer::DecodeValueLengthReturnLen(uint32_t &valueLength, uint32_t
     uint8_t oneByte = 0;
     valueLength = 0;
     if (!GetOneByte(oneByte)) {
-        MovePointer(-1);
+        DecreasePointer(1);
         TELEPHONY_LOGE("Decode buffer GetOneByte fail.");
         return false;
     }
@@ -178,7 +188,7 @@ bool MmsDecodeBuffer::DecodeValueLength(uint32_t &valueLength)
     uint8_t oneByte = 0;
     valueLength = 0;
     if (!GetOneByte(oneByte)) {
-        MovePointer(-1);
+        DecreasePointer(1);
         TELEPHONY_LOGE("Decode buffer GetOneByte fail.");
         return false;
     }
@@ -307,7 +317,7 @@ bool MmsDecodeBuffer::DecodeText(std::string &str, uint32_t &len)
 
     // ignore quote
     if (oneByte != quoteChar) {
-        this->MovePointer(-1);
+        this->DecreasePointer(1);
     } else {
         len++;
     }

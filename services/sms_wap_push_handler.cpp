@@ -196,7 +196,7 @@ bool SmsWapPushHandler::DecodeXWapApplication(SmsWapPushBuffer &decodeBuffer, ui
             TELEPHONY_LOGE("Wap push WriteDataBuffer fail.");
             return false;
         }
-        decodeBuffer.MovePointer(headersLen);
+        decodeBuffer.IncreasePointer(headersLen);
         return DecodeXWapApplicationField(tempXWapDataBuffer, strAppId_);
     }
     return false;
@@ -270,8 +270,8 @@ bool SmsWapPushHandler::DecodeXWapAbandonHeaderValue(SmsWapPushBuffer &decodeBuf
     }
 
     if ((oneByte >= 0) && (oneByte <= wapShortLengthMax)) {
-        if (!decodeBuffer.MovePointer(oneByte)) {
-            TELEPHONY_LOGE("Wap push MovePointer fail.");
+        if (!decodeBuffer.IncreasePointer(oneByte)) {
+            TELEPHONY_LOGE("Wap push IncreasePointer fail.");
             return false;
         }
     } else if (oneByte == wapLengthQuote) {
@@ -281,8 +281,8 @@ bool SmsWapPushHandler::DecodeXWapAbandonHeaderValue(SmsWapPushBuffer &decodeBuf
             TELEPHONY_LOGE("Wap push DecodeUintvar fail.");
             return false;
         }
-        if (!decodeBuffer.MovePointer(length)) {
-            TELEPHONY_LOGE("Wap push MovePointer fail.");
+        if (!decodeBuffer.IncreasePointer(length)) {
+            TELEPHONY_LOGE("Wap push IncreasePointer fail.");
             return false;
         }
     } else if ((wapLengthQuote < oneByte) && (oneByte <= textLengthMax)) {
