@@ -275,7 +275,7 @@ void GsmSmsCbHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
         return;
     }
 
-    int eventId = 0;
+    uint32_t eventId = 0;
     eventId = event->GetInnerEventId();
     TELEPHONY_LOGI("ProcessEvent eventId = %{public}d", eventId);
     switch (eventId) {

@@ -60,8 +60,6 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
             }
             return AckIncomeCause::SMS_ACK_RESULT_OK;
         }
-    } else if (SMS_TRANS_TELESVC_WAP == service) {
-        return AckIncomeCause::SMS_ACK_RESULT_OK;
     } else {
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
@@ -219,7 +217,7 @@ void CdmaSmsReceiveHandler::GetCBData(
     sendData.msgId = message->GetMessageId();
     sendData.serial = message->GetMessageId();
     sendData.category = message->GetServiceCategoty();
-    sendData.langType = message->GetLanguage();
+    sendData.langType = (uint8_t)message->GetLanguage();
     sendData.msgBody = message->GetVisibleMessageBody();
     sendData.priority = message->GetPriority();
     sendData.isCmas = message->IsCMAS();

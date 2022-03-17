@@ -60,9 +60,8 @@ bool MmsQuotedPrintable::Decode(const std::string src, std::string &dest)
             input += endLineCharNum;
             index += endLineCharNum;
         } else {
-            if (*input == '=') {
-                uint32_t hexChar = 0;
-                (void)sscanf_s(input, "=%02X", &hexChar) ;
+            uint32_t hexChar = 0;
+            if (*input == '=' && sscanf_s(input, "=%02X", &hexChar) >= 1) {
                 tempBuffer[outLength] = static_cast<char>(hexChar);
                 input += endLineCharNum;
                 index += endLineCharNum;

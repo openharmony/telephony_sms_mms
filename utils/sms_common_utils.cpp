@@ -52,7 +52,7 @@ int SmsCommonUtils::Pack7bitChar(const unsigned char *userData, int dataLen, int
             srcIdx++;
             dstIdx++;
         } else if (shift == 1) {
-            packData[dstIdx - 1] |= userData[srcIdx] << shift;
+            packData[dstIdx - 1] |= static_cast<unsigned int>(userData[srcIdx]) << shift;
             srcIdx++;
             shift--;
         }
@@ -84,7 +84,7 @@ int SmsCommonUtils::Unpack7bitChar(
         }
         if (shift > 0) {
             unpackData[dstIdx] =
-                (tpdu[srcIdx - 1] >> shift) + (tpdu[srcIdx] << (SmsCommonUtils::SMS_BYTE_BIT - shift));
+                ((unsigned int)tpdu[srcIdx - 1] >> shift) + (tpdu[srcIdx] << (SmsCommonUtils::SMS_BYTE_BIT - shift));
             unpackData[dstIdx] &= 0x7F;
             shift--;
             if (shift > 0) {
@@ -227,7 +227,7 @@ int SmsCommonUtils::ConvertDigitToDTMF(const char *digit, int digitLen, int star
                 dtmf[offset + 0x01] = temp << (SmsCommonUtils::SMS_BYTE_BIT - shift);
                 offset++;
             } else {
-                dtmf[offset] |= (temp << (SmsCommonUtils::SMS_BYTE_BIT - shift - smsMaxShift));
+                dtmf[offset] |= (char)(temp << (SmsCommonUtils::SMS_BYTE_BIT - shift - smsMaxShift));
             }
         }
         srcIdx++;
