@@ -359,7 +359,7 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
                 TELEPHONY_LOGE("AnalsisDeliverMsg memcpy_s fail.");
                 return;
             }
-            dataSize = split.encodeData.size();
+            dataSize = (int)split.encodeData.size();
             buff[dataSize] = '\0';
             break;
         }
@@ -383,7 +383,7 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
     bool bAbnormal = false;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
     codingType = force7BitCode ? SMS_CODING_7BIT : SMS_CODING_AUTO;
-    encodeLen = DecodeMessage(decodeData, codingType, msgText, bAbnormal, langId);
+    encodeLen = DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
     if (encodeLen <= 0) {
         TELEPHONY_LOGE("encodeLen Less than or equal to 0");
         return;
@@ -431,14 +431,14 @@ bool SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool force7B
     bool bAbnormal = false;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
     SmsCodingScheme codingType = force7BitCode ? SMS_CODING_7BIT : SMS_CODING_AUTO;
-    encodeLen = DecodeMessage(decodeData, codingType, message, bAbnormal, langId);
+    encodeLen = DecodeMessage(decodeData, sizeof(decodeData), codingType, message, bAbnormal, langId);
     if (encodeLen <= 0) {
         TELEPHONY_LOGE("encodeLen Less than or equal to 0");
         return false;
     }
     int segSize = GetMaxSegmentSize(codingType, encodeLen, false, langId, MAX_ADD_PARAM_LEN);
     TELEPHONY_LOGI("segSize = %{public}d", segSize);
-    lenInfo.msgEncodeCount = encodeLen;
+    lenInfo.msgEncodeCount = (uint16_t)encodeLen;
     if (codingType == SMS_CODING_7BIT || codingType == SMS_CODING_ASCII7BIT) {
         lenInfo.dcs = smsEncoding7Bit;
     } else if (codingType == SMS_CODING_UCS2) {
@@ -453,7 +453,7 @@ bool SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool force7B
         segSize = segSize / 2;
     }
     if (segSize != 0) {
-        lenInfo.msgRemainCount = ((segSize - (lenInfo.msgEncodeCount % segSize))) % segSize;
+        lenInfo.msgRemainCount = (uint8_t)((segSize - (lenInfo.msgEncodeCount % segSize))) % segSize;
         lenInfo.msgSegCount = ceil(static_cast<double>(lenInfo.msgEncodeCount) /
             static_cast<double>(segSize));
     }

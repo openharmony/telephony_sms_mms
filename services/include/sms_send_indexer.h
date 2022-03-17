@@ -118,9 +118,9 @@ private:
     sptr<ISendShortMessageCallback> sendCallback_ = nullptr;
     sptr<IDeliveryShortMessageCallback> deliveryCallback_ = nullptr;
     bool isFailure_ = false;
-    enum SmsCodingScheme dcs_;
+    enum SmsCodingScheme dcs_ = SMS_CODING_7BIT;
     bool isConcat_ = false;
-    SmsConcat smsConcat_;
+    SmsConcat smsConcat_ = {0, 0, 0, false};
     uint8_t langId_ = 0;
     bool isText_ = false;
     uint16_t msgId_ = 0;

@@ -211,7 +211,7 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
         return;
     }
 
-    int eventId = 0;
+    uint32_t eventId = 0;
     TELEPHONY_LOGI("SmsMiscManager::ProcessEvent");
     eventId = event->GetInnerEventId();
     switch (eventId) {

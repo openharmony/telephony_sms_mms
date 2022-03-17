@@ -61,7 +61,7 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
         TELEPHONY_LOGE("TextBasedSmsDelivery tpdu nullptr error.");
         return;
     }
-    cellsInfosSize = cellsInfos.size();
+    cellsInfosSize = (int)cellsInfos.size();
     if (cellsInfosSize > MAX_SEGMENT_NUM) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("message exceed the limit.");
@@ -104,8 +104,8 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
             SmsConcat concat;
             concat.is8Bits = true;
             concat.msgRef = msgRef8bit;
-            concat.totalSeg = cellsInfosSize;
-            concat.seqNum = i + 1;
+            concat.totalSeg = (uint16_t)cellsInfosSize;
+            concat.seqNum = (uint16_t)(i + 1);
             indexer->SetSmsConcat(concat);
             headerCnt += gsmSmsMessage.SetHeaderConcat(headerCnt, concat);
         }
@@ -391,7 +391,7 @@ bool GsmSmsSender::SetPduInfo(
         return ret;
     }
     int headerCnt = 0;
-    tpdu->data.submit.userData.length = smsIndexer->GetText().length();
+    tpdu->data.submit.userData.length = (int)smsIndexer->GetText().length();
     tpdu->data.submit.userData.data[smsIndexer->GetText().length()] = 0;
     tpdu->data.submit.msgRef = smsIndexer->GetMsgRefId();
     if (smsIndexer->GetIsConcat()) {

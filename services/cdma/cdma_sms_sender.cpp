@@ -89,7 +89,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
         }
         indexer->SetDcs(splits[i].encodeType);
         SetPduSeqInfo(indexer, splits.size(), transMsg, i, msgRef8bit);
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length = splits[i].encodeData.size();
+        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length = (int)splits[i].encodeData.size();
         /* encode msg data */
         unsigned char pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = {0};
         int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr);
@@ -159,7 +159,7 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
 
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length = splits[0].encodeData.size();
+    transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length = (int)splits[0].encodeData.size();
     if (memcpy_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
         sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data),
         splits[0].encodeData.data(), splits[0].encodeData.size()) != EOK) {
@@ -357,7 +357,7 @@ void CdmaSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sm
         return;
     }
 
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length = smsIndexer->GetData().size();
+    transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length = (int)smsIndexer->GetData().size();
     /* encode msg data */
     unsigned char pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = {0};
     int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr);

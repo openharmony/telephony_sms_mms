@@ -94,7 +94,7 @@ std::string StringUtils::HexToString(const std::string &str)
 std::vector<uint8_t> StringUtils::HexToByteVector(const std::string &str)
 {
     std::vector<uint8_t> ret;
-    int sz = str.length();
+    int sz = static_cast<int>(str.length());
     if (sz <= 0) {
         return ret;
     }

@@ -77,7 +77,7 @@ bool MmsContentType::DecodeMmsContentType(MmsDecodeBuffer &decodeBuffer, int32_t
         std::string sType = "";
         uint32_t len = 0;
         decodeBuffer.DecodeText(sType, len);
-        contentLength = len + 1;
+        contentLength = (int32_t)(len + 1);
         contentType_ = sType;
         return true; // 2
     }
@@ -121,7 +121,7 @@ bool MmsContentType::DecodeMmsCTGeneralForm(MmsDecodeBuffer &decodeBuffer, int32
         TELEPHONY_LOGE("Decode contentType DecodeValueLengthReturnLen fail.");
         return false;
     }
-    contentLength = valueLength + returnLength;
+    contentLength = (int32_t)(valueLength + returnLength);
 
     uint8_t oneByte = 0;
     if (!decodeBuffer.PeekOneByte(oneByte)) {
@@ -289,7 +289,7 @@ bool MmsContentType::DecodeTextField(MmsDecodeBuffer &decodeBuffer, uint8_t fiel
         return false;
     }
     msgContentParm_.GetParamMap().insert(std::make_pair(field, str));
-    valueLength -= len;
+    valueLength -= (int32_t)len;
     valueLength -= 1;
     return true;
 }
@@ -321,14 +321,14 @@ bool MmsContentType::DecodeCharsetField(MmsDecodeBuffer &decodeBuffer, int32_t &
             TELEPHONY_LOGE("Decode contentType DecodeText fail.");
             return false;
         }
-        valueLength -= len + 1;
+        valueLength -= (int32_t)(len + 1);
         uint32_t tmpCharSet = 0;
         auto charSetInstance = DelayedSingleton<MmsCharSet>::GetInstance();
         if (charSetInstance == nullptr || (!charSetInstance->GetCharSetIntFromString(tmpCharSet, sCharset))) {
             TELEPHONY_LOGE("Decode contentType GetInstance or GetCharSetIntFromString fail.");
             return false;
         }
-        charset = tmpCharSet;
+        charset = (int32_t)tmpCharSet;
     } else {
         uint32_t startPosition = decodeBuffer.GetCurPosition();
         uint64_t tmp = 0;
@@ -338,7 +338,7 @@ bool MmsContentType::DecodeCharsetField(MmsDecodeBuffer &decodeBuffer, int32_t &
         }
         charset = (int32_t)tmp;
         uint32_t endPosition = decodeBuffer.GetCurPosition();
-        valueLength -= (endPosition - startPosition);
+        valueLength -= (int32_t)(endPosition - startPosition);
     }
     msgContentParm_.SetCharSet(charset);
     return true;
@@ -377,7 +377,7 @@ bool MmsContentType::DecodeTypeField(MmsDecodeBuffer &decodeBuffer, int32_t &val
             TELEPHONY_LOGE("Decode contentType DecodeText fail.");
             return false;
         }
-        valueLength -= len;
+        valueLength -= (int32_t)len;
         valueLength -= 1;
         msgContentParm_.SetType(sType);
     }
@@ -528,7 +528,7 @@ bool MmsContentType::EncodeMmsBodyPartContentType(MmsEncodeBuffer &encodeBuffer)
             return false;
         }
     } else {
-        if (!tmpEncodeBuffer.WriteByte(u8ContentType | 0x80)) {
+        if (!tmpEncodeBuffer.WriteByte((uint8_t)u8ContentType | 0x80)) {
             TELEPHONY_LOGE("Encode contentType WriteByte fail.");
             return false;
         }

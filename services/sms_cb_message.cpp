@@ -124,7 +124,7 @@ bool SmsCbMessage::PduAnalysis(const std::vector<unsigned char> &pdu)
 
 /**
  * @brief Decode2gHeader GSM Cell Broadcast Message Header
- * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4 Message Format on the Radio Network – MS/UE Interface
+ * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4 Message Format on the Radio Network  â€“ MS/UE Interface
  * 3GPP TS 23.041 V4.1.0 (2001-06) 9.4.1.2 Message Parameter
  * @param pdu [in]
  * @return int [out]
@@ -167,7 +167,7 @@ int SmsCbMessage::Decode2gHeader(const std::vector<unsigned char> &pdu)
         iosTemp |= (pdu[offset++] << BYTE_BIT);
         DecodeCbMsgDCS(dcs, iosTemp, cbHeader_->dcs);
         cbHeader_->langType = cbHeader_->dcs.langType;
-        cbHeader_->recvTime = GetRecvTime();
+        cbHeader_->recvTime = (time_t)GetRecvTime();
         if (cbHeader_->totalPages > MAX_CBMSG_PAGE_NUM) {
             TELEPHONY_LOGE("CB Page Count is over MAX[%{public}d]", cbHeader_->totalPages);
             offset = 0;
@@ -221,7 +221,7 @@ int SmsCbMessage::Decode3gHeader(const std::vector<unsigned char> &pdu)
     iosTemp |= (pdu[offset++] << BYTE_BIT);
     DecodeCbMsgDCS(dcs, iosTemp, cbHeader_->dcs);
     cbHeader_->langType = cbHeader_->dcs.langType;
-    cbHeader_->recvTime = GetRecvTime();
+    cbHeader_->recvTime = (time_t)GetRecvTime();
     offset -= 0x02;
     return offset;
 }
@@ -309,7 +309,7 @@ void SmsCbMessage::Decode3g7Bit(const std::vector<unsigned char> &pdu)
     const int pduLen = static_cast<int>(pdu.size());
     const unsigned char *tpdu = pdu.data();
     for (int i = 0; i < cbHeader_->totalPages; ++i) {
-        unsigned char pageLenOffset = ((i + 1) * MAX_CBMSG_PAGE_SIZE + i);
+        unsigned char pageLenOffset = (unsigned char)((i + 1) * MAX_CBMSG_PAGE_SIZE + i);
         if (pduLen < pageLenOffset) {
             TELEPHONY_LOGE("CB Msg Size err [%{pulbic}d]", pduLen);
             messageRaw_.clear();
@@ -341,7 +341,7 @@ void SmsCbMessage::Decode3gUCS2(const std::vector<unsigned char> &pdu)
     const int pduLen = static_cast<int>(pdu.size());
     const unsigned char *tpdu = pdu.data();
     for (int i = 0; i < cbHeader_->totalPages; ++i) {
-        unsigned char pageLenOffset = ((i + 1) * MAX_CBMSG_PAGE_SIZE + i);
+        unsigned char pageLenOffset = (unsigned char)((i + 1) * MAX_CBMSG_PAGE_SIZE + i);
         if (pduLen < pageLenOffset) {
             TELEPHONY_LOGE("CB Msg Size err [%{pulbic}d]", pduLen);
             messageRaw_.clear();
