@@ -93,6 +93,11 @@ bool MmsBuffer::WriteDataBuffer(std::unique_ptr<char[]> inBuff, uint32_t len)
 bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
 {
     FILE *pFile = nullptr;
+    char realPath[PATH_MAX] = {0};
+    if (strPathName.empty() || realpath(strPathName.c_str(), realPath) == NULL) {
+        TELEPHONY_LOGE("path or realPath is NULL");
+        return false;
+    }
     pFile = fopen(strPathName.c_str(), "rb");
     if (pFile == nullptr) {
         TELEPHONY_LOGE("Open File Error :%{public}s", strPathName.c_str());

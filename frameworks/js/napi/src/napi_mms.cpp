@@ -138,7 +138,7 @@ void GetMmsSendConf(MmsMsg mmsMsg, MmsSendConfContext &asyncContext)
     TELEPHONY_LOGI("napi_mms GetMmsSendConf start");
     asyncContext.responseState = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_RESPONSE_STATUS);
     asyncContext.transactionId = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_TRANSACTION_ID);
-    asyncContext.version = (uint16_t)mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_MMS_VERSION);
+    asyncContext.version = static_cast<uint16_t>(mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_MMS_VERSION));
     asyncContext.messageId = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_MESSAGE_ID);
     TELEPHONY_LOGI("napi_mms GetMmsSendConf end");
 }
@@ -278,7 +278,7 @@ void getAttachmentByDecodeMms(MmsMsg &mmsMsg, DecodeMmsContext &context)
         attachmentContext.contentTransferEncoding = it.GetContentTransferEncoding();
         attachmentContext.contentType = it.GetContentType();
         attachmentContext.isSmil = it.IsSmilFile();
-        attachmentContext.charset = (uint32_t)it.GetCharSet();
+        attachmentContext.charset = static_cast<int32_t>(it.GetCharSet());
         std::unique_ptr<char[]> buffer = nullptr;
         buffer = it.GetDataBuffer(attachmentContext.inBuffLen);
         attachmentContext.inBuff = std::move(buffer);
@@ -620,7 +620,7 @@ void ParseDecodeMmsParam(napi_env env, napi_value object, DecodeMmsContext &cont
         int32_t element = 0;
         uint32_t arrayLength = 0;
         napi_get_array_length(env, object, &arrayLength);
-        context.inLen = static_cast<uint32_t>(arrayLength);
+        context.inLen = arrayLength;
         TELEPHONY_LOGI("napi_mms ParseDecodeMmsParam arrayLength = %{public}d", arrayLength);
         context.inBuffer = std::make_unique<char[]>(arrayLength);
         if (context.inBuffer == nullptr) {
@@ -896,7 +896,7 @@ bool ReadEncodeMmsType(napi_env env, napi_value napiValue, MmsNotificationIndCon
     notificationInd.messageClass = GetNapiUint8Value(env, napiValue, "messageClass");
     notificationInd.messageSize = GetNapiInt64Value(env, napiValue, "messageSize");
     notificationInd.expiry = GetNapiInt32Value(env, napiValue, "expiry");
-    notificationInd.version = GetNapiInt32Value(env, napiValue, "version");
+    notificationInd.version = static_cast<uint16_t>(GetNapiInt32Value(env, napiValue, "version"));
     napi_value from = NapiUtil::GetNamedProperty(env, napiValue, "from");
     notificationInd.from = ReadMmsAddress(env, from);
     notificationInd.subject = GetNapiStringValue(env, napiValue, "subject");
@@ -1295,7 +1295,7 @@ void NativeEncodeMms(napi_env env, void *data)
     }
     EncodeMmsContext *context = static_cast<EncodeMmsContext *>(data);
     MmsMsg mmsMsg;
-    mmsMsg.SetMmsMessageType((uint8_t)WrapEncodeMmsStatus(context->messageType));
+    mmsMsg.SetMmsMessageType(static_cast<uint8_t>(WrapEncodeMmsStatus(context->messageType)));
     setAttachmentToCore(mmsMsg, context->attachment);
     switch (context->messageType) {
         case MessageType::TYPE_MMS_SEND_REQ:

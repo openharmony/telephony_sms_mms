@@ -119,7 +119,7 @@ bool MmsBodyPart::DecodePart(MmsDecodeBuffer &decodeBuffer)
         TELEPHONY_LOGE("Decode Body Part HeaderLen Less Than ContentLength Error.");
         return false;
     }
-    if (!DecodePartHeader(decodeBuffer, headerLen_ - contentLength)) {
+    if (!DecodePartHeader(decodeBuffer, headerLen_ - static_cast<uint32_t>(contentLength))) {
         TELEPHONY_LOGE("Decode Body Part Header Error.");
         return false;
     }
@@ -420,6 +420,11 @@ void MmsBodyPart::DecodeSetFileName()
 bool MmsBodyPart::WriteBodyFromFile(std::string path)
 {
     FILE *pFile = nullptr;
+    char realPath[PATH_MAX] = {0};
+    if (path.empty() || realpath(path.c_str(), realPath) == NULL) {
+        TELEPHONY_LOGE("path or realPath is NULL");
+        return false;
+    }
     pFile = fopen(path.c_str(), "rb");
     if (pFile == nullptr) {
         TELEPHONY_LOGI("Write Body Part from File notFind, try to use buffer");

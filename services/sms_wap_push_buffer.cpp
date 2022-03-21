@@ -140,7 +140,7 @@ bool SmsWapPushBuffer::IncreasePointer(uint32_t offset)
         TELEPHONY_LOGE("wap push current position invalid.");
         return false;
     }
-    curPosition_ += (uint32_t)offset;
+    curPosition_ += offset;
     return true;
 }
 
