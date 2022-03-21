@@ -71,7 +71,7 @@ bool MmsEncodeString::DecodeEncodeString(MmsDecodeBuffer &decodeBuffer)
             TELEPHONY_LOGE("Decode encodeString DecodeInteger fail.");
             return false;
         }
-        charset_ = (uint32_t)static_cast<int32_t>(charset);
+        charset_ = static_cast<uint32_t>(charset);
     }
 
     uint32_t len = 0;

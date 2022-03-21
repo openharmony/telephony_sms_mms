@@ -167,7 +167,7 @@ int SmsCbMessage::Decode2gHeader(const std::vector<unsigned char> &pdu)
         iosTemp |= (pdu[offset++] << BYTE_BIT);
         DecodeCbMsgDCS(dcs, iosTemp, cbHeader_->dcs);
         cbHeader_->langType = cbHeader_->dcs.langType;
-        cbHeader_->recvTime = (time_t)GetRecvTime();
+        cbHeader_->recvTime = static_cast<time_t>(GetRecvTime());
         if (cbHeader_->totalPages > MAX_CBMSG_PAGE_NUM) {
             TELEPHONY_LOGE("CB Page Count is over MAX[%{public}d]", cbHeader_->totalPages);
             offset = 0;
@@ -221,7 +221,7 @@ int SmsCbMessage::Decode3gHeader(const std::vector<unsigned char> &pdu)
     iosTemp |= (pdu[offset++] << BYTE_BIT);
     DecodeCbMsgDCS(dcs, iosTemp, cbHeader_->dcs);
     cbHeader_->langType = cbHeader_->dcs.langType;
-    cbHeader_->recvTime = (time_t)GetRecvTime();
+    cbHeader_->recvTime = static_cast<time_t>(GetRecvTime());
     offset -= 0x02;
     return offset;
 }
@@ -308,7 +308,7 @@ void SmsCbMessage::Decode3g7Bit(const std::vector<unsigned char> &pdu)
     int dataLen = 0;
     const int pduLen = static_cast<int>(pdu.size());
     const unsigned char *tpdu = pdu.data();
-    for (int i = 0; i < cbHeader_->totalPages; ++i) {
+    for (unsigned char i = 0; i < cbHeader_->totalPages; ++i) {
         unsigned char pageLenOffset = (unsigned char)((i + 1) * MAX_CBMSG_PAGE_SIZE + i);
         if (pduLen < pageLenOffset) {
             TELEPHONY_LOGE("CB Msg Size err [%{pulbic}d]", pduLen);
@@ -340,7 +340,7 @@ void SmsCbMessage::Decode3gUCS2(const std::vector<unsigned char> &pdu)
     int offset = 0;
     const int pduLen = static_cast<int>(pdu.size());
     const unsigned char *tpdu = pdu.data();
-    for (int i = 0; i < cbHeader_->totalPages; ++i) {
+    for (unsigned char i = 0; i < cbHeader_->totalPages; ++i) {
         unsigned char pageLenOffset = (unsigned char)((i + 1) * MAX_CBMSG_PAGE_SIZE + i);
         if (pduLen < pageLenOffset) {
             TELEPHONY_LOGE("CB Msg Size err [%{pulbic}d]", pduLen);
@@ -367,7 +367,7 @@ void SmsCbMessage::DecodeEtwsMsg(const std::vector<unsigned char> &pdu)
         TELEPHONY_LOGE("ETWS Msg Size is over MAX [%{public}zu]", pdu.size());
         return;
     }
-    messageRaw_.insert(0, (const char *)(pdu.data() + offset), pdu.size() - offset);
+    messageRaw_.insert(0, (const char *)(pdu.data() + offset), static_cast<int>(pdu.size()) - offset);
 }
 
 void SmsCbMessage::ConvertToUTF8(const std::string &raw, std::string &message) const
