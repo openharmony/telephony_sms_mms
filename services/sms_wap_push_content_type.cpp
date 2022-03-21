@@ -90,7 +90,7 @@ bool SmsWapPushContentType::DecodeContentType(SmsWapPushBuffer &decodeBuffer, in
         std::string sType = "";
         uint32_t len = 0;
         decodeBuffer.DecodeText(sType, len);
-        contentLength = len + 1;
+        contentLength = static_cast<int32_t>(len + 1);
         contentType_ = sType;
         return true; // 2
     }
@@ -134,7 +134,7 @@ bool SmsWapPushContentType::DecodeCTGeneralForm(SmsWapPushBuffer &decodeBuffer, 
         TELEPHONY_LOGE("Wap push decode contentType DecodeValueLengthReturnLen fail.");
         return false;
     }
-    contentLength = valueLength + returnLength;
+    contentLength = static_cast<int32_t>(valueLength + returnLength);
 
     uint8_t oneByte = 0;
     if (!decodeBuffer.PeekOneByte(oneByte)) {
@@ -274,7 +274,7 @@ bool SmsWapPushContentType::DecodeTextField(SmsWapPushBuffer &decodeBuffer, uint
         return false;
     }
     textParameterMap_.insert(std::make_pair(field, str));
-    valueLength -= len;
+    valueLength -= static_cast<int32_t>(len);
     valueLength -= 1;
     return true;
 }
@@ -307,13 +307,13 @@ bool SmsWapPushContentType::DecodeCharsetField(SmsWapPushBuffer &decodeBuffer, i
             TELEPHONY_LOGE("Wap push DecodeCharsetField DecodeText fail.");
             return false;
         }
-        valueLength -= len + 1;
+        valueLength -= static_cast<int32_t>(len + 1);
         uint32_t tmpCharSet = 0;
         if (!GetCharSetIntFromString(tmpCharSet, sCharset)) {
             TELEPHONY_LOGE("Wap push DecodeCharsetField GetCharSetIntFromString fail.");
             return false;
         }
-        charset = tmpCharSet;
+        charset = static_cast<int32_t>(tmpCharSet);
     } else {
         uint32_t startPosition = decodeBuffer.GetCurPosition();
         uint64_t temp = 0;
@@ -323,9 +323,9 @@ bool SmsWapPushContentType::DecodeCharsetField(SmsWapPushBuffer &decodeBuffer, i
         }
         charset = static_cast<int32_t>(temp);
         uint32_t endPosition = decodeBuffer.GetCurPosition();
-        valueLength -= (endPosition - startPosition);
+        valueLength -= static_cast<int32_t>(endPosition - startPosition);
     }
-    charset_ = charset;
+    charset_ = static_cast<uint32_t>(charset);
     return true;
 }
 
@@ -362,7 +362,7 @@ bool SmsWapPushContentType::DecodeTypeField(SmsWapPushBuffer &decodeBuffer, int3
             TELEPHONY_LOGE("Wap push DecodeTypeField DecodeText fail.");
             return false;
         }
-        valueLength -= len;
+        valueLength -= static_cast<int32_t>(len);
         valueLength -= 1;
         type_ = sType;
     }
