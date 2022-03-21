@@ -553,7 +553,7 @@ std::shared_ptr<AppExecFwk::DataAbilityHelper> GsmSmsSenderTest::CreateDataAHelp
         return nullptr;
     }
     auto remoteObj = saManager->GetSystemAbility(TELEPHONY_SMS_MMS_SYS_ABILITY_ID);
-    while (remoteObj == nullptr) {
+    if (remoteObj == nullptr) {
         std::cout << "GetSystemAbility Service Failed." << std::endl;
         return nullptr;
     }

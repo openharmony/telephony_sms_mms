@@ -147,7 +147,7 @@ bool SmsWapPushContentType::DecodeCTGeneralForm(SmsWapPushBuffer &decodeBuffer, 
             TELEPHONY_LOGE("Wap push decode contentType IncreasePointer fail.");
             return false;
         }
-        if (valueLength < 0) {
+        if (valueLength == 0) {
             TELEPHONY_LOGI("Wap push decode contentType empty.");
             return false;
         }
