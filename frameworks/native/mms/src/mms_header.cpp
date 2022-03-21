@@ -837,7 +837,7 @@ bool MmsHeader::DecodeFieldDate(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t 
          * into Date-value */
         chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
         long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
-        timeValue += (uint64_t)timeStamp;
+        timeValue += static_cast<uint64_t>(timeStamp);
     }
     auto ret = longValueMap_.emplace(fieldId, timeValue);
     return ret.second;

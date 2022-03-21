@@ -92,7 +92,7 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
         pdus->push_back(pdu);
     } else {
         pdus->assign(MAX_SEGMENT_NUM, "");
-        int msgSeg = indexer->GetMsgCount();
+        int msgSeg = static_cast<int>(indexer->GetMsgCount());
         int8_t count = 0;
         int8_t notNullPart = msgSeg;
 

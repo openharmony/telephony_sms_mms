@@ -232,7 +232,7 @@ bool MmsEncodeBuffer::EncodeLongInteger(uint64_t value)
         return false;
     }
 
-    for (int i = count - 1; i >= 0; i--) {
+    for (uint8_t i = count - 1; i >= 0; i--) {
         if (!WriteByte(result[i])) {
             TELEPHONY_LOGE("Encode buffer WriteByte fail.");
             return false;

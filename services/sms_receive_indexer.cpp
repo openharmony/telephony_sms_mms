@@ -98,7 +98,7 @@ uint16_t SmsReceiveIndexer::GetMsgRefId() const
 
 void SmsReceiveIndexer::SetMsgRefId(uint16_t msgRefId)
 {
-    msgRefId_ = (int16_t)msgRefId;
+    msgRefId_ = static_cast<int16_t>(msgRefId);
 }
 
 std::string SmsReceiveIndexer::GetOriginatingAddress() const

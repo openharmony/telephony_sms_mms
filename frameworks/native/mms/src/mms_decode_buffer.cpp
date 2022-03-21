@@ -50,7 +50,7 @@ bool MmsDecodeBuffer::IncreasePointer(uint32_t offset)
         TELEPHONY_LOGE("Decode buffer current position invalid.");
         return false;
     }
-    curPosition_ += (uint32_t)offset;
+    curPosition_ += offset;
     return true;
 }
 

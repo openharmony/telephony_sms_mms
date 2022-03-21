@@ -533,7 +533,7 @@ int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, S
     const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId)
 {
     int decodeLen = 0;
-    int dataLen = (int)(msgText.length());
+    int dataLen = static_cast<int>(msgText.length());
     const int maxDecodeLen = len;
     const unsigned char *pMsgText = (const unsigned char *)msgText.c_str();
 

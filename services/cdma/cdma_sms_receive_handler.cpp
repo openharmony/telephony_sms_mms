@@ -217,7 +217,7 @@ void CdmaSmsReceiveHandler::GetCBData(
     sendData.msgId = message->GetMessageId();
     sendData.serial = message->GetMessageId();
     sendData.category = message->GetServiceCategoty();
-    sendData.langType = (uint8_t)message->GetLanguage();
+    sendData.langType = static_cast<uint8_t>(message->GetLanguage());
     sendData.msgBody = message->GetVisibleMessageBody();
     sendData.priority = message->GetPriority();
     sendData.isCmas = message->IsCMAS();
@@ -227,7 +227,7 @@ void CdmaSmsReceiveHandler::GetCBData(
     sendData.urgency = message->GetCMASUrgency();
     sendData.certainty = message->GetCMASCertainty();
     sendData.recvTime = message->GetReceTime();
-    sendData.langType = message->GetLanguage();
+    sendData.langType = static_cast<uint8_t>(message->GetLanguage());
     isEmergency = message->IsEmergencyMsg();
     plmn_ = CoreManagerInner::GetInstance().GetOperatorNumeric(slotId_);
 }
