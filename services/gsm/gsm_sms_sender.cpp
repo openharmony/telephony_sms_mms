@@ -92,7 +92,7 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
         (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
         ret = memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, &cellsInfos[i].encodeData[0],
             cellsInfos[i].encodeData.size());
-        if (ret != EOK || indexer == nullptr) {
+        if (ret != EOK) {
             SendResultCallBack(indexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
             return;
         }
@@ -255,9 +255,9 @@ void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &e
     auto oldIndexer = reportList_.begin();
     while (oldIndexer != reportList_.end()) {
         auto iter = oldIndexer++;
-        TELEPHONY_LOGI("StatusReport %{public}d %{public}d", message->GetMsgRef(), (*iter)->GetMsgRefId());
         if (*iter != nullptr && (message->GetMsgRef() == (*iter)->GetMsgRefId())) {
             // save the message to db, or updata to db msg state(success or failed)
+            TELEPHONY_LOGI("StatusReport %{public}d %{public}d", message->GetMsgRef(), (*iter)->GetMsgRefId());
             deliveryCallback = (*iter)->GetDeliveryCallback();
             reportList_.erase(iter);
         }

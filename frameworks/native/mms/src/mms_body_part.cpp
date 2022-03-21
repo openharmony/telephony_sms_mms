@@ -468,7 +468,7 @@ bool MmsBodyPart::WriteBodyFromAttachmentBuffer(MmsAttachment &attachment)
         return false;
     }
 
-    if (dataLen <= 0 || dataLen > MAX_MMS_MSG_PART_LEN) {
+    if (dataLen == 0 || dataLen > MAX_MMS_MSG_PART_LEN) {
         TELEPHONY_LOGE("Attachment DataLen is invalid Error");
         return false;
     }

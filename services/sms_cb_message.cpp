@@ -237,6 +237,7 @@ void SmsCbMessage::Decode2gCbMsg(const std::vector<unsigned char> &pdu)
     int dataLen = static_cast<int>(pdu.size());
     if (cbHeader_ == nullptr) {
         TELEPHONY_LOGE("decode2gCbMsg null header");
+        return;
     }
     TELEPHONY_LOGI("Decode2gCbMsg codingScheme ==%{public}d", cbHeader_->dcs.codingScheme);
     switch (cbHeader_->dcs.codingScheme) {

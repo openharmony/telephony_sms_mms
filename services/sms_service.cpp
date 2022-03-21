@@ -125,6 +125,7 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
         return;
     }
@@ -144,6 +145,7 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
         return;
     }
