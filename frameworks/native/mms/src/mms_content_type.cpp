@@ -134,8 +134,8 @@ bool MmsContentType::DecodeMmsCTGeneralForm(MmsDecodeBuffer &decodeBuffer, int32
             TELEPHONY_LOGE("Decode contentType IncreasePointer fail.");
             return false;
         }
-        if (valueLength < 0) {
-            TELEPHONY_LOGE("Decode contentType valueLength invalid.");
+        if (valueLength == 0) {
+            TELEPHONY_LOGE("Decode contentType valueLength empty.");
             return false;
         }
         valueLength--;

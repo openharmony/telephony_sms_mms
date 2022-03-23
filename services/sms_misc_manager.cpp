@@ -30,7 +30,7 @@ SmsMiscManager::SmsMiscManager(const std::shared_ptr<AppExecFwk::EventRunner> &r
 bool SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
 {
     bool ret = false;
-    if ((fromMsgId < 0) || (toMsgId > RANG_MAX) || (fromMsgId > toMsgId) || (netType != GSM_TYPE)) {
+    if ((toMsgId > RANG_MAX) || (fromMsgId > toMsgId) || (netType != GSM_TYPE)) {
         return ret;
     }
     oldRangeList_ = rangeList_;
