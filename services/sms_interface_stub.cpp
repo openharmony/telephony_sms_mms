@@ -57,6 +57,11 @@ void SmsInterfaceStub::InitModule()
         std::lock_guard<std::mutex> lock(mutex_);
         for (int32_t slotId = 0; slotId < SIM_SLOT_COUNT; ++slotId) {
             slotSmsInterfaceManagerMap_[slotId] = std::make_shared<SmsInterfaceManager>(slotId);
+            if (slotSmsInterfaceManagerMap_[slotId] == nullptr) {
+                TELEPHONY_LOGE(
+                    "SmsInterfaceStub InitModule slotSmsInterfaceManagerMap_[%{public}d] is nullptr", slotId);
+                return;
+            }
             slotSmsInterfaceManagerMap_[slotId]->InitInterfaceManager();
             TELEPHONY_LOGI("SmsInterfaceStub InitModule slotId = %{public}d", slotId);
         }

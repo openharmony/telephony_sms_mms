@@ -16,10 +16,6 @@
 
 #include "gsm_sms_udata_codec.h"
 
-#include <cstdio>
-#include <cstring>
-#include <memory>
-
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "telephony_log_wrapper.h"
@@ -66,13 +62,13 @@ int GsmSmsUDataCodec::DecodeUserData(const unsigned char *pTpdu, const int tpduL
     }
     switch (CodingScheme) {
         case SMS_CODING_7BIT:
-            decodeSize = DecodeGSMData(pTpdu, tpduLen, bHeaderInd, pUserData, NULL);
+            decodeSize = DecodeGSMData(pTpdu, tpduLen, bHeaderInd, pUserData, nullptr);
             break;
         case SMS_CODING_8BIT:
-            decodeSize = Decode8bitData(pTpdu, bHeaderInd, pUserData, NULL);
+            decodeSize = Decode8bitData(pTpdu, bHeaderInd, pUserData, nullptr);
             break;
         case SMS_CODING_UCS2:
-            decodeSize = DecodeUCS2Data(pTpdu, tpduLen, bHeaderInd, pUserData, NULL);
+            decodeSize = DecodeUCS2Data(pTpdu, tpduLen, bHeaderInd, pUserData, nullptr);
             break;
         default:
             break;
@@ -243,7 +239,7 @@ int GsmSmsUDataCodec::DecodeGSMData(const unsigned char *pTpdu, const int tpduLe
         return 0;
     }
     /* Setting for Wap Push */
-    if (pTPUD != NULL) {
+    if (pTPUD != nullptr) {
         pTPUD->udl = udl;
         if (memcpy_s(pTPUD->ud, sizeof(pTPUD->ud), &(pTpdu[offset]), udl) != EOK) {
             TELEPHONY_LOGE("DecodeGSMData memcpy_s error");

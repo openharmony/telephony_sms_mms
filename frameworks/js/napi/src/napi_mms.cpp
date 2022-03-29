@@ -666,6 +666,12 @@ napi_value NapiMms::DecodeMms(napi_env env, napi_callback_info info)
     int32_t messageMatchResult = GetMatchDecodeMmsResult(env, parameters, parameterCount);
     NAPI_ASSERT(env, messageMatchResult != MESSAGE_PARAMETER_NOT_MATCH, "type mismatch");
     auto context = std::make_unique<DecodeMmsContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at DecodeMmsContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     context->messageMatchResult = messageMatchResult;
     ParseDecodeMmsParam(env, parameters[0], *context);
     if (parameterCount == 2) {
@@ -1368,6 +1374,12 @@ napi_value NapiMms::EncodeMms(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchEncodeMms(env, parameters, parameterCount), "type mismatch");
     auto context = std::make_unique<EncodeMmsContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at EncodeMmsContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     NAPI_ASSERT(env, ParseEncodeMmsParam(env, parameters[0], *context), "missing required arguments");
     if (parameterCount == 2) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
