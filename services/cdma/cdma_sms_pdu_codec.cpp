@@ -914,8 +914,7 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
         ShiftNBitForDecode(tempStr, tempLen, SHIFT_4BITS);
         enhancedVmn.cliNumField = tempStr[tempOff++];
         (void)memset_s(enhancedVmn.cliChar, sizeof(enhancedVmn.cliChar), 0x00, sizeof(enhancedVmn.cliChar));
-        ret =
-            memcpy_s(enhancedVmn.cliChar, sizeof(enhancedVmn.cliChar), tempStr + tempOff, enhancedVmn.cliNumField);
+        ret = memcpy_s(enhancedVmn.cliChar, sizeof(enhancedVmn.cliChar), tempStr + tempOff, enhancedVmn.cliNumField);
         if (ret != EOK) {
             TELEPHONY_LOGE("enhancedVmn cliChar memcpy_s fail.");
             return;

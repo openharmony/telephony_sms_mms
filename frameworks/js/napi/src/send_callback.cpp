@@ -55,6 +55,10 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
 {
     TELEPHONY_LOGI("CompleteSmsSendWork start");
     std::unique_ptr<SendCallbackContext> pContext(static_cast<SendCallbackContext *>(work->data));
+    if (pContext == nullptr) {
+        TELEPHONY_LOGE("CompleteSmsSendWork pContext is nullptr!");
+        return;
+    }
     napi_env env_ = pContext->env;
     napi_ref thisVarRef_ = pContext->thisVarRef;
     napi_ref callbackRef_ = pContext->callbackRef;
@@ -93,7 +97,16 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
         uv_loop_s *loop = nullptr;
         napi_get_uv_event_loop(env_, &loop);
         uv_work_t *work = new uv_work_t;
+        if (work == nullptr) {
+            TELEPHONY_LOGE("OnSmsSendResult work is nullptr!");
+            return;
+        }
         SendCallbackContext *pContext = std::make_unique<SendCallbackContext>().release();
+        if (pContext == nullptr) {
+            TELEPHONY_LOGE("OnSmsSendResult pContext is nullptr!");
+            delete work;
+            return;
+        }
         pContext->env = env_;
         pContext->thisVarRef = thisVarRef_;
         pContext->callbackRef = callbackRef_;

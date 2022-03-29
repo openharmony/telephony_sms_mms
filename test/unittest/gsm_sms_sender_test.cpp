@@ -88,7 +88,10 @@ void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &sms
 
 void GsmSmsSenderTest::TestSendShortText(const sptr<ISmsServiceInterface> &smsService) const
 {
-    RequestPermissions();
+    if (!RequestPermissions()) {
+        std::cout << "RequestPermissions failed." << std::endl;
+        return;
+    }
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -559,6 +562,10 @@ std::shared_ptr<AppExecFwk::DataAbilityHelper> GsmSmsSenderTest::CreateDataAHelp
     }
     const std::string uriContact("dataability:///com.ohos.contactsdataability");
     std::shared_ptr<Uri> dataAbilityUri = std::make_shared<Uri>(uriContact);
+    if (dataAbilityUri == nullptr) {
+        std::cout << "make dataAbilityUri Error." << std::endl;
+        return nullptr;
+    }
     return AppExecFwk::DataAbilityHelper::Creator(remoteObj, dataAbilityUri);
 }
 

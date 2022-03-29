@@ -989,7 +989,7 @@ unsigned char MsgTextConvert::GetLangType(const unsigned char *pSrcText, int src
             }
         }
     }
-    TELEPHONY_LOGI("charType : [%{public}d]", currType);
+    TELEPHONY_LOGI("charType : [%{public}hhu]", currType);
     return currType;
 }
 

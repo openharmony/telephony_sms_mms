@@ -273,7 +273,7 @@ void SmsCbMessageTest::TestCdmaUserData() const
     std::shared_ptr<CdmaSmsMessage> message = CdmaSmsMessage::CreateMessage(pdu);
     if (message == nullptr) {
         std::cout << "message is nullptr!" << std::endl;
-        return ;
+        return;
     }
     std::cout << message->GetCbInfo() << std::endl;
 }
@@ -284,7 +284,7 @@ void SmsCbMessageTest::TestCdmaCmasType1() const
     std::shared_ptr<CdmaSmsMessage> message = CdmaSmsMessage::CreateMessage(pdu);
     if (message == nullptr) {
         std::cout << "message is nullptr!" << std::endl;
-        return ;
+        return;
     }
     std::cout << message->GetCbInfo() << std::endl;
 }

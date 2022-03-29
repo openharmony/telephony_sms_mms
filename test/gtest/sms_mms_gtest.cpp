@@ -417,7 +417,8 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level3)
     bool result = false;
     if (g_telephonyService != nullptr) {
         int32_t slotId = -1;
-        std::string scAddr("13333333333");
+        // invalid slotID scenario, a invalid smsc addr is OKAY
+        std::string scAddr("1234");
         result = g_telephonyService->SetSmscAddr(slotId, StringUtils::ToUtf16(scAddr));
         EXPECT_FALSE(result);
     }

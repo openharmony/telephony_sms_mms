@@ -37,6 +37,10 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
 {
     TELEPHONY_LOGI("CompleteSmsDeliveryWork start");
     std::unique_ptr<DeliveryCallbackContext> pContext(static_cast<DeliveryCallbackContext *>(work->data));
+    if (pContext == nullptr) {
+        TELEPHONY_LOGE("CompleteSmsDeliveryWork pContext is nullptr!");
+        return;
+    }
     napi_env env_ = pContext->env;
     napi_ref thisVarRef_ = pContext->thisVarRef;
     napi_ref callbackRef_ = pContext->callbackRef;
@@ -54,11 +58,9 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     if (!pduStr_.empty()) {
         callbackValues[0] = NapiUtil::CreateUndefined(env_);
         napi_create_object(env_, &callbackValues[1]);
-        size_t dataSize = pduStr_.size();
-        uint32_t forDataSize = (uint32_t)dataSize;
         napi_value arrayValue = nullptr;
         napi_create_array(env_, &arrayValue);
-        for (uint32_t i = 0; i < forDataSize; ++i) {
+        for (uint32_t i = 0; i < static_cast<uint32_t>(pduStr_.size()); ++i) {
             napi_value element = nullptr;
             int32_t intValue = pduStr_[i];
             napi_create_int32(env_, intValue, &element);
@@ -91,7 +93,16 @@ void DeliveryCallback::OnSmsDeliveryResult(const std::u16string pdu)
         uv_loop_s *loop = nullptr;
         napi_get_uv_event_loop(env_, &loop);
         uv_work_t *work = new uv_work_t;
+        if (work == nullptr) {
+            TELEPHONY_LOGE("OnSmsDeliveryResult work is nullptr!");
+            return;
+        }
         DeliveryCallbackContext *pContext = std::make_unique<DeliveryCallbackContext>().release();
+        if (pContext == nullptr) {
+            TELEPHONY_LOGE("OnSmsDeliveryResult pContext is nullptr!");
+            delete work;
+            return;
+        }
         pContext->env = env_;
         pContext->thisVarRef = thisVarRef_;
         pContext->callbackRef = callbackRef_;

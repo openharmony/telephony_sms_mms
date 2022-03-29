@@ -399,7 +399,7 @@ void CdmaSmsMessage::AnalysisCbMsg(const SmsTransBroadCastMsg &cbMsg)
     messageId_ = cbMsg.telesvcMsg.data.deliver.msgId.msgId;
     priority_ = cbMsg.telesvcMsg.data.deliver.priority;
     language_ = cbMsg.telesvcMsg.data.deliver.language;
-    TELEPHONY_LOGI("analysisCbMsg transSvcCtg %{public}d", cbMsg.transSvcCtg);
+    TELEPHONY_LOGI("analysisCbMsg transSvcCtg %{public}hu", cbMsg.transSvcCtg);
     if ((cbMsg.transSvcCtg >= SMS_TRANS_SVC_CTG_CMAS_PRESIDENTIAL) &&
         (cbMsg.transSvcCtg <= SMS_TRANS_SVC_CTG_CMAS_TEST)) {
         AnalsisCMASMsg(cbMsg.telesvcMsg.data.deliver);
