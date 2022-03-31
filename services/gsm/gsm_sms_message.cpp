@@ -237,10 +237,9 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
     unsigned char *pDestText = encodeData;
     MSG_LANGUAGE_ID_T *pLangId = &langId;
     bool *pIncludeAbnormalChar = &bAbnormal;
-    std::tuple<unsigned char *, int, unsigned char *, int, MSG_LANGUAGE_ID_T *, bool *> paras (pDestText,
+    std::tuple<unsigned char *, int, unsigned char *, int, MSG_LANGUAGE_ID_T *, bool *> paras(pDestText,
         bufSize, const_cast<unsigned char *>(pMsgText), (int)dataLen, pLangId, pIncludeAbnormalChar);
-    endcodeLen =
-        textCvt->ConvertUTF8ToGSM7bit(paras);
+    endcodeLen = textCvt->ConvertUTF8ToGSM7bit(paras);
     if (smsTpdu_ == nullptr) {
         TELEPHONY_LOGE("smsTpdu_ is nullptr!");
         return nullptr;
@@ -675,10 +674,9 @@ int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, Sm
 
     switch (codingType) {
         case SMS_CODING_7BIT: {
-            std::tuple<unsigned char *, int, unsigned char *, int, MSG_LANGUAGE_ID_T *, bool *> paras (
+            std::tuple<unsigned char *, int, unsigned char *, int, MSG_LANGUAGE_ID_T *, bool *> paras(
                 decodeData, maxDecodeLen, const_cast<unsigned char *>(pMsgText), dataLen, &langId, &bAbnormal);
-            decodeLen =
-                textCvt->ConvertUTF8ToGSM7bit(paras);
+            decodeLen = textCvt->ConvertUTF8ToGSM7bit(paras);
             break;
         }
         case SMS_CODING_8BIT: {
