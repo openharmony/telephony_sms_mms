@@ -101,7 +101,7 @@ int32_t SmsService::Dump(std::int32_t fd, const std::vector<std::u16string> &arg
 
 void SmsService::WaitCoreServiceToInit()
 {
-    std::thread connectTask ([&]() {
+    std::thread connectTask([&]() {
         while (true) {
             TELEPHONY_LOGI("connect core service ...");
             if (CoreManagerInner::GetInstance().IsInitFinished()) {

@@ -49,15 +49,17 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
     }
     int service = message->GetTransTeleService();
     if (SMS_TRANS_TELESVC_WEMT == service || SMS_TRANS_TELESVC_CMT_95 == service) {
-        if (message->IsStatusReport()) {
-            if (!cdmaSmsSender_.expired()) {
-                std::shared_ptr<SmsSender> smsSender = cdmaSmsSender_.lock();
-                CdmaSmsSender *cdmaSend = static_cast<CdmaSmsSender *>(smsSender.get());
-                std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
-                statusInfo->SetMsgRefId(message->GetMsgRef());
-                statusInfo->SetPdu(message->GetRawPdu());
-                cdmaSend->ReceiveStatusReport(statusInfo);
+        if (message->IsStatusReport() && !cdmaSmsSender_.expired()) {
+            std::shared_ptr<SmsSender> smsSender = cdmaSmsSender_.lock();
+            CdmaSmsSender *cdmaSend = static_cast<CdmaSmsSender *>(smsSender.get());
+            std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
+            if (statusInfo == nullptr) {
+                TELEPHONY_LOGE("statusInfo is null!");
+                return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
             }
+            statusInfo->SetMsgRefId(message->GetMsgRef());
+            statusInfo->SetPdu(message->GetRawPdu());
+            cdmaSend->ReceiveStatusReport(statusInfo);
             return AckIncomeCause::SMS_ACK_RESULT_OK;
         }
     } else {

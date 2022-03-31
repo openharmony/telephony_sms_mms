@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -350,7 +350,17 @@ void GsmSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sms
     std::vector<uint8_t> smca(encodeInfo->smcaData_, encodeInfo->smcaData_ + encodeInfo->smcaLen);
     std::vector<uint8_t> pdu(encodeInfo->tpduData_, encodeInfo->tpduData_ + encodeInfo->tpduLen);
     std::shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(1);
+    if (unSentCellCount == nullptr) {
+        SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("DataBasedSmsDelivery unSentCellCount nullptr");
+        return;
+    }
     std::shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
+    if (hasCellFailed == nullptr) {
+        SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("DataBasedSmsDelivery hasCellFailed nullptr");
+        return;
+    }
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
 

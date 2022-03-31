@@ -265,6 +265,12 @@ static napi_value SendMessage(napi_env env, napi_callback_info info)
     int32_t messageMatchResult = MatchSendMessageParameters(env, parameters, parameterCount);
     NAPI_ASSERT(env, messageMatchResult != MESSAGE_PARAMETER_NOT_MATCH, "type mismatch");
     auto asyncContext = std::make_unique<SendMessageContext>().release();
+    if (asyncContext == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at SendMessageContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     ParseMessageParameter(messageMatchResult, env, parameters[0], *asyncContext);
     napi_create_reference(env, thisVar, DEFAULT_REF_COUNT, &asyncContext->thisVarRef);
     napi_value resourceName = nullptr;
@@ -365,6 +371,12 @@ static napi_value CreateMessage(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchCreateMessageParameter(env, parameters, parameterCount), "type mismatch");
     auto asyncContext = std::make_unique<CreateMessageContext>().release();
+    if (asyncContext == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at CreateMessageContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     asyncContext->specification = Get64StringFromValue(env, parameters[1]);
     TELEPHONY_LOGI("CreateMessage specification = %s", asyncContext->specification.c_str());
     uint32_t arrayLength = 0;
@@ -434,6 +446,12 @@ static napi_value SetDefaultSmsSlotId(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchSetDefaultSmsSlotIdParameters(env, parameters, parameterCount), "type mismatch");
     auto context = std::make_unique<SetDefaultSmsSlotIdContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at SetDefaultSmsSlotIdContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     napi_get_value_int32(env, parameters[0], &context->slotId);
     if (parameterCount == 2) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
@@ -508,6 +526,12 @@ static napi_value GetDefaultSmsSlotId(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchGetDefaultSmsSlotIdParameters(env, parameters, parameterCount), "type mismatch");
     auto context = std::make_unique<GetDefaultSmsSlotIdContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at GetDefaultSmsSlotIdContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     napi_status statusValue = napi_get_value_int32(env, parameters[0], &context->defaultSmsSlotId);
     TELEPHONY_LOGI("GetDefaultSmsSlotId statusValue = %{private}d", statusValue);
     if (parameterCount == 1) {
@@ -569,6 +593,12 @@ static napi_value SetSmscAddr(napi_env env, napi_callback_info info)
     NAPI_ASSERT(env, MatchSetSmscAddrParameters(env, parameters, parameterCount), "type mismatch");
     TELEPHONY_LOGI("SetSmscAddr start after MatchSetSmscAddrParameters");
     auto context = std::make_unique<SetSmscAddrContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at SetSmscAddrContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     TELEPHONY_LOGI("SetSmscAddr start after SetSmscAddrContext contruct");
     napi_get_value_int32(env, parameters[0], &context->slotId);
     context->smscAddr = Get64StringFromValue(env, parameters[1]);
@@ -634,6 +664,12 @@ static napi_value GetSmscAddr(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchGetSmscAddrParameters(env, parameters, parameterCount), "type mismatch");
     auto context = std::make_unique<GetSmscAddrContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at GetSmscAddrContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     napi_get_value_int32(env, parameters[0], &context->slotId);
     if (parameterCount == 2) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
@@ -714,6 +750,12 @@ static napi_value AddSimMessage(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchAddSimMessageParameters(env, parameters, parameterCount), "type mismatch");
     auto context = std::make_unique<AddSimMessageContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at AddSimMessageContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     napi_value slotIdValue = NapiUtil::GetNamedProperty(env, parameters[0], "slotId");
     if (slotIdValue != nullptr) {
         napi_get_value_int32(env, slotIdValue, &context->slotId);
@@ -784,6 +826,12 @@ static napi_value DelSimMessage(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchDelSimMessageParameters(env, parameters, parameterCount), "type mismatch");
     auto context = std::make_unique<DelSimMessageContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at DelSimMessageContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     napi_get_value_int32(env, parameters[0], &context->slotId);
     napi_get_value_int32(env, parameters[1], &context->msgIndex);
     if (parameterCount == 3) {
@@ -871,6 +919,12 @@ static napi_value UpdateSimMessage(napi_env env, napi_callback_info info)
     NAPI_ASSERT(env, MatchUpdateSimMessageParameters(env, parameters, parameterCount), "type mismatch");
     TELEPHONY_LOGI("UpdateSimMessage start parameter match passed");
     auto context = std::make_unique<UpdateSimMessageContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at UpdateSimMessageContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     napi_value slotIdValue = NapiUtil::GetNamedProperty(env, parameters[0], "slotId");
     if (slotIdValue != nullptr) {
         napi_get_value_int32(env, slotIdValue, &context->slotId);
@@ -969,6 +1023,12 @@ static napi_value GetAllSimMessages(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchGetAllSimMessagesParameters(env, parameters, parameterCount), "type mismatch");
     auto context = std::make_unique<GetAllSimMessagesContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at GetAllSimMessagesContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     napi_get_value_int32(env, parameters[0], &context->slotId);
     if (parameterCount == 2) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
@@ -1043,6 +1103,12 @@ static napi_value SetCBConfig(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchSetCBConfigParameters(env, parameters, parameterCount), "type mismatch");
     auto context = std::make_unique<CBConfigContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at CBConfigContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     napi_value slotIdValue = NapiUtil::GetNamedProperty(env, parameters[0], "slotId");
     if (slotIdValue != nullptr) {
         napi_get_value_int32(env, slotIdValue, &context->slotId);
@@ -1119,7 +1185,7 @@ static void SplitMessageCallback(napi_env env, napi_status status, void *data)
 
 static napi_value SplitMessage(napi_env env, napi_callback_info info)
 {
-    TELEPHONY_LOGI("napi_sms splitMessage start！");
+    TELEPHONY_LOGI("napi_sms splitMessage start!");
     size_t parameterCount = 2;
     napi_value parameters[2] = {0};
     napi_value thisVar = nullptr;
@@ -1127,7 +1193,13 @@ static napi_value SplitMessage(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchSplitMessageParameters(env, parameters, parameterCount), "type mismatch");
     auto context = std::make_unique<SplitMessageContext>().release();
-    TELEPHONY_LOGI("napi_sms splitMessage start！");
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at SplitMessageContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
+    TELEPHONY_LOGI("napi_sms splitMessage start!");
     context->content = Get64StringFromValue(env, parameters[0]);
     TELEPHONY_LOGI("napi_sms splitMessage context->content = %{public}s", context->content.c_str());
     if (parameterCount == 2) {
@@ -1209,6 +1281,12 @@ static napi_value GetSmsSegmentsInfo(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     NAPI_ASSERT(env, MatchGetSmsSegmentsInfoParameters(env, parameters, parameterCount), "type mismatch");
     auto context = std::make_unique<GetSmsSegmentsInfoContext>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at GetSmsSegmentsInfoContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     napi_get_value_int32(env, parameters[0], &context->slotId);
     context->content = NapiUtil::GetStringFromValue(env, parameters[1]);
     napi_get_value_bool(env, parameters[2], &context->force7BitCode);
@@ -1265,6 +1343,12 @@ static napi_value IsImsSmsSupported(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &paramsCount, params, &arg, &data);
     NAPI_ASSERT(env, MatchIsImsSmsSupportedParameters(env, params, paramsCount), "IsImsSmsSupported type mismatch");
     auto context = std::make_unique<SingleValueContext<bool>>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at SingleValueContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     if (paramsCount == 1) {
         napi_create_reference(env, params[0], DEFAULT_REF_COUNT, &context->callbackRef);
     }
@@ -1314,6 +1398,12 @@ static napi_value GetImsShortMessageFormat(napi_env env, napi_callback_info info
     NAPI_ASSERT(
         env, MatchIsImsSmsSupportedParameters(env, params, paramsCount), "GetImsShortMessageFormat type mismatch");
     auto context = std::make_unique<SingleValueContext<std::u16string>>().release();
+    if (context == nullptr) {
+        std::string errorCode = std::to_string(napi_generic_failure);
+        std::string errorMessage = "error at SingleValueContext is nullptr";
+        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return nullptr;
+    }
     if (paramsCount == 1) {
         napi_create_reference(env, params[0], DEFAULT_REF_COUNT, &context->callbackRef);
     }

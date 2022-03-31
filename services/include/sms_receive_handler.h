@@ -27,7 +27,6 @@
 #include "sms_base_message.h"
 #include "sms_common.h"
 #include "sms_receive_indexer.h"
-#include "sms_wap_push_handler.h"
 #include "sms_persist_helper.h"
 #include "sms_wap_push_handler.h"
 
