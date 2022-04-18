@@ -20,11 +20,13 @@ config("sms_native_config") {
     "include",
     "$SUBSYSTEM_DIR/sms_mms/interfaces/innerkits",
     "$SUBSYSTEM_DIR/sms_mms:tel_sms_mms_config",
+    "$SUBSYSTEM_DIR/sms_mms/interfaces/innerkits/ims",
   ]
 }
 
 ohos_source_set("sms_native_source") {
   sources = [
+    "//base/telephony/sms_mms/services/ims_service_interaction/src/ims_sms_callback_proxy.cpp",
     "src/delivery_short_message_callback_stub.cpp",
     "src/send_short_message_callback_stub.cpp",
     "src/short_message.cpp",
@@ -47,6 +49,7 @@ ohos_source_set("sms_native_source") {
   ]
 
   external_deps = [
+    "core_service:tel_core_service_api",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
