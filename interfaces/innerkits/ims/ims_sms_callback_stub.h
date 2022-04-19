@@ -31,11 +31,15 @@ public:
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
     /****************** sms basic ******************/
-    int32_t ImsSendMessageResponse(const ImsResponseInfo &info) override;
+    int32_t ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result) override;
+    int32_t ImsSetSmsConfigResponse(const ImsResponseInfo &info) override;
+    int32_t ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig) override;
     
 private:
     /****************** sms basic ******************/
     int32_t OnImsSendMessageResponseInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnImsSetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnImsGetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply);
     
 private:
     using RequestFuncType = int32_t (ImsSmsCallbackStub::*)(MessageParcel &data, MessageParcel &reply);

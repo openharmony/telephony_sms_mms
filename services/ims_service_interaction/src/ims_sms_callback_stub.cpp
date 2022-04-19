@@ -36,6 +36,8 @@ void ImsSmsCallbackStub::InitSmsBasicFuncMap()
 {
     /****************** sms basic ******************/
     requestFuncMap_[IMS_SEND_MESSAGE] = &ImsSmsCallbackStub::OnImsSendMessageResponseInner;
+    requestFuncMap_[IMS_SET_SMS_CONFIG] = &ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner;
+    requestFuncMap_[IMS_GET_SMS_CONFIG] = &ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner;
 }
 
 ImsSmsCallbackStub::~ImsSmsCallbackStub()
@@ -71,13 +73,55 @@ int32_t ImsSmsCallbackStub::OnImsSendMessageResponseInner(MessageParcel &data, M
         TELEPHONY_LOGE("OnImsSendMessageResponseInner return, info is nullptr.");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    reply.WriteInt32(ImsSendMessageResponse(*info));
+    auto result = (SendSmsResultInfo *)data.ReadRawData(sizeof(SendSmsResultInfo));
+    if (result == nullptr) {
+        TELEPHONY_LOGE("OnImsSendMessageResponseInner return, result is nullptr.");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    reply.WriteInt32(ImsSendMessageResponse(*info, *result));
     return TELEPHONY_SUCCESS;
 }
 
-int32_t ImsSmsCallbackStub::ImsSendMessageResponse(const ImsResponseInfo &info)
+int32_t ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply)
+{
+    TELEPHONY_LOGI("ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner entry");
+    auto info = (ImsResponseInfo *)data.ReadRawData(sizeof(ImsResponseInfo));
+    if (info == nullptr) {
+        TELEPHONY_LOGE("OnImsSetSmsConfigResponseInner return, info is nullptr.");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    reply.WriteInt32(ImsSetSmsConfigResponse(*info));
+    return TELEPHONY_SUCCESS;
+}
+
+int32_t ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply)
+{
+    TELEPHONY_LOGI("ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner entry");
+    auto info = (ImsResponseInfo *)data.ReadRawData(sizeof(ImsResponseInfo));
+    if (info == nullptr) {
+        TELEPHONY_LOGE("OnImsGetSmsConfigResponseInner, info is nullptr.");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    int32_t imsSmsConfig = data.ReadInt32();
+    reply.WriteInt32(ImsGetSmsConfigResponse(*info, imsSmsConfig));
+    return TELEPHONY_SUCCESS;
+}
+
+int32_t ImsSmsCallbackStub::ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsSendMessageResponse entry");
+    return TELEPHONY_SUCCESS;
+}
+
+int32_t ImsSmsCallbackStub::ImsSetSmsConfigResponse(const ImsResponseInfo &info)
+{
+    TELEPHONY_LOGI("ImsSmsCallbackStub::ImsSetSmsConfigResponse entry");
+    return TELEPHONY_SUCCESS;
+}
+
+int32_t ImsSmsCallbackStub::ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig)
+{
+    TELEPHONY_LOGI("ImsSmsCallbackStub::ImsGetSmsConfigResponse entry");
     return TELEPHONY_SUCCESS;
 }
 } // namespace Telephony

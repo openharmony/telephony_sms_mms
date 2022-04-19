@@ -19,6 +19,7 @@
 #include "iremote_proxy.h"
 #include "ims_sms_callback_interface.h"
 #include "telephony_errors.h"
+#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -28,7 +29,9 @@ public:
     virtual ~ImsSmsCallbackProxy() = default;
 
     /****************** sms basic ******************/
-    int32_t ImsSendMessageResponse(const ImsResponseInfo &info) override;
+    int32_t ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result) override;
+    int32_t ImsSetSmsConfigResponse(const ImsResponseInfo &info) override;
+    int32_t ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig) override;
 
 private:
     static inline BrokerDelegator<ImsSmsCallbackProxy> delegator_;
