@@ -24,8 +24,12 @@ namespace Telephony {
 class ImsSmsInterface : public IRemoteBroker {
 public:
     enum {
-        /****************** basic ******************/
+        /****************** sms basic ******************/
         IMS_SEND_MESSAGE = 0,
+
+        /****************** sms config ******************/
+        IMS_SET_SMS_CONFIG = 100,
+        IMS_GET_SMS_CONFIG,
 
         /****************** callback ******************/
         IMS_SMS_REGISTER_CALLBACK = 500,
@@ -34,10 +38,28 @@ public:
     /**
      * IMS send message interface
      *
-     * @param tobeDefined
+     * @param slotId
+     * @param imsMessageInfo
      * @return Returns TELEPHONY_SUCCESS on success, others on failure.
      */
-    virtual int32_t ImsSendMessage() = 0;
+    virtual int32_t ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo) = 0;
+
+    /**
+     * IMS set ims sms config interface
+     *
+     * @param slotId
+     * @param imsSmsConfig 1:enable ims sms, 0:disable ims sms
+     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     */
+    virtual int32_t ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig) = 0;
+
+    /**
+     * IMS get sms config interface
+     *
+     * @param slotId
+     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     */
+    virtual int32_t ImsGetSmsConfig(int32_t slotId) = 0;
 
     /**
      * Register CallBack

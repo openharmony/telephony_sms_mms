@@ -43,7 +43,9 @@ public:
     int32_t RegisterImsSmsCallback();
 
     /****************** sms basic ******************/
-    int32_t ImsSendMessage();
+    int32_t ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo);
+    int32_t ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig);
+    int32_t ImsGetSmsConfig(int32_t slotId);
 
 private:
     sptr<ImsCoreServiceInterface> imsCoreServiceProxy_ = nullptr;

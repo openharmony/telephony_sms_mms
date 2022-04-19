@@ -29,15 +29,37 @@ public:
     enum {
         /****************** sms basic ******************/
         IMS_SEND_MESSAGE = 0,
+
+        /****************** sms config ******************/
+        IMS_SET_SMS_CONFIG,
+        IMS_GET_SMS_CONFIG,
     };
 
     /**
      * ImsSendMessageResponse
      *
      * @param ImsResponseInfo
+     * @param SendSmsResultInfo defined in hril_sms_parcel.h
      * @return Returns TELEPHONY_SUCCESS on success, others on failure.
      */
-    virtual int32_t ImsSendMessageResponse(const ImsResponseInfo &info) = 0;
+    virtual int32_t ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result) = 0;
+
+    /**
+     * ImsSetSmsConfigResponse
+     *
+     * @param info ImsResponseInfo
+     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     */
+    virtual int32_t ImsSetSmsConfigResponse(const ImsResponseInfo &info) = 0;
+
+    /**
+     * GetImsSmsConfigResponse
+     *
+     * @param info ImsResponseInfo
+     * @param imsSmsConfig 1:ims sms is enabled, 0:ims sms is disabled
+     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     */
+    virtual int32_t ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig) = 0;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.Telephony.ImsSmsCallback");
