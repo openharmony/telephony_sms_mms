@@ -60,8 +60,8 @@ ohos_source_set("mms_native_source") {
 
   external_deps = [
     "ability_base:want",
-    "ces_standard:cesfwk_innerkits",
-    "ces_standard:cesfwk_services",
+    "common_event_service:cesfwk_innerkits",
+    "common_event_service:cesfwk_services",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
   ]
