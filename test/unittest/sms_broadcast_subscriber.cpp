@@ -55,7 +55,7 @@ void SmsBroadcastSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventDat
                 std::cout << "Sms Receive::OnReceiveEvent pdus = " << pdus[index] << std::endl;
             }
         }
-    } else if (action == CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_COMPLETED ||
+    } else if (action == CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED ||
         action == CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED) {
         CbMessageTest(want);
     } else if (action == "usual.event.SMS_WAPPUSH_RECEIVE_COMPLETED") {
