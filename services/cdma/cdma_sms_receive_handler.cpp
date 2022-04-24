@@ -160,7 +160,7 @@ bool CdmaSmsReceiveHandler::SendCBBroadcast(const std::shared_ptr<SmsBaseMessage
     EventFwk::Want want;
     EventFwk::CommonEventData data;
     if (isMergency) {
-        want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_COMPLETED);
+        want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
     } else {
         want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
     }
