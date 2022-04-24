@@ -27,7 +27,9 @@ class ImsSmsProxy : public IRemoteProxy<ImsSmsInterface> {
 public:
     explicit ImsSmsProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<ImsSmsInterface>(impl) {}
     ~ImsSmsProxy() = default;
-    int32_t ImsSendMessage() override;
+    int32_t ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo) override;
+    int32_t ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig) override;
+    int32_t ImsGetSmsConfig(int32_t slotId) override;
     int32_t RegisterImsSmsCallback(const sptr<ImsSmsCallbackInterface> &callback) override;
 
 private:

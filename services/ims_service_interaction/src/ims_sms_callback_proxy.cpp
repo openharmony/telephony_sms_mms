@@ -23,7 +23,29 @@ namespace Telephony {
 ImsSmsCallbackProxy::ImsSmsCallbackProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<ImsSmsCallbackInterface>(impl) {}
 
-int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(const ImsResponseInfo &info)
+int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result)
+{
+    MessageOption option;
+    MessageParcel in;
+    MessageParcel out;
+    if (!in.WriteInterfaceToken(ImsSmsCallbackProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("write descriptor token fail!");
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!in.WriteRawData((const void *)&info, sizeof(ImsResponseInfo))) {
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    if (!in.WriteRawData((const void *)&result, sizeof(SendSmsResultInfo))) {
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t error = Remote()->SendRequest(IMS_SEND_MESSAGE, in, out, option);
+    if (error == ERR_NONE) {
+        return out.ReadInt32();
+    }
+    return error;
+}
+
+int32_t ImsSmsCallbackProxy::ImsSetSmsConfigResponse(const ImsResponseInfo &info)
 {
     MessageOption option;
     MessageParcel in;
@@ -34,7 +56,30 @@ int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(const ImsResponseInfo &info)
     if (!in.WriteRawData((const void *)&info, sizeof(ImsResponseInfo))) {
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
-    int32_t error = Remote()->SendRequest(IMS_SEND_MESSAGE, in, out, option);
+    int32_t error = Remote()->SendRequest(IMS_SET_SMS_CONFIG, in, out, option);
+    if (error == ERR_NONE) {
+        return out.ReadInt32();
+    }
+    return error;
+}
+
+int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig)
+{
+    MessageOption option;
+    MessageParcel in;
+    MessageParcel out;
+    if (!in.WriteInterfaceToken(ImsSmsCallbackProxy::GetDescriptor())) {
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!in.WriteRawData((const void *)&info, sizeof(ImsResponseInfo))) {
+        TELEPHONY_LOGE("write info fail!");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    if (!in.WriteInt32(imsSmsConfig)) {
+        TELEPHONY_LOGE("write imsSmsConfig fail!");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t error = Remote()->SendRequest(IMS_GET_SMS_CONFIG, in, out, option);
     if (error == ERR_NONE) {
         return out.ReadInt32();
     }
