@@ -100,10 +100,30 @@ int32_t ImsSmsClient::RegisterImsSmsCallback()
     return TELEPHONY_SUCCESS;
 }
 
-int32_t ImsSmsClient::ImsSendMessage()
+int32_t ImsSmsClient::ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo)
 {
     if (imsSmsProxy_ != nullptr) {
-        return imsSmsProxy_->ImsSendMessage();
+        return imsSmsProxy_->ImsSendMessage(slotId, imsMessageInfo);
+    } else {
+        TELEPHONY_LOGE("imsSmsProxy_ is null!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+}
+
+int32_t ImsSmsClient::ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig)
+{
+    if (imsSmsProxy_ != nullptr) {
+        return imsSmsProxy_->ImsSetSmsConfig(slotId, imsSmsConfig);
+    } else {
+        TELEPHONY_LOGE("imsSmsProxy_ is null!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+}
+
+int32_t ImsSmsClient::ImsGetSmsConfig(int32_t slotId)
+{
+    if (imsSmsProxy_ != nullptr) {
+        return imsSmsProxy_->ImsGetSmsConfig(slotId);
     } else {
         TELEPHONY_LOGE("imsSmsProxy_ is null!");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;

@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace Telephony {
-int32_t ImsSmsProxy::ImsSendMessage()
+int32_t ImsSmsProxy::ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo)
 {
     MessageOption option;
     MessageParcel in;
@@ -30,9 +30,63 @@ int32_t ImsSmsProxy::ImsSendMessage()
         TELEPHONY_LOGE("ImsSmsProxy::ImsSendMessage return, write descriptor token fail!");
         return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
+    if (!in.WriteInt32(slotId)) {
+        TELEPHONY_LOGE("ImsSmsProxy::ImsSendMessage return, write slotId fail!");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    if (!in.WriteRawData((const void *)&imsMessageInfo, sizeof(imsMessageInfo))) {
+        TELEPHONY_LOGE("ImsSmsProxy::ImsSendMessage return, write imsMessageInfo fail!");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
     int32_t error = Remote()->SendRequest(IMS_SEND_MESSAGE, in, out, option);
     if (error == ERR_NONE) {
         TELEPHONY_LOGI("ImsSmsProxy::ImsSendMessage return, send request success!");
+        return out.ReadInt32();
+    }
+    return error;
+}
+
+int32_t ImsSmsProxy::ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig)
+{
+    MessageOption option;
+    MessageParcel in;
+    MessageParcel out;
+    if (!in.WriteInterfaceToken(ImsSmsProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("ImsSmsProxy::ImsSetSmsConfig return, write descriptor token fail!");
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!in.WriteInt32(slotId)) {
+        TELEPHONY_LOGE("ImsSmsProxy::ImsSetSmsConfig return, write slotId fail!");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    if (!in.WriteInt32(imsSmsConfig)) {
+        TELEPHONY_LOGE("ImsSmsProxy::ImsSetSmsConfig return, write enabled fail!");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t error = Remote()->SendRequest(IMS_SET_SMS_CONFIG, in, out, option);
+    if (error == ERR_NONE) {
+        TELEPHONY_LOGI("ImsSmsProxy::ImsSetSmsConfig return, send request success!");
+        return out.ReadInt32();
+    }
+    return error;
+}
+
+int32_t ImsSmsProxy::ImsGetSmsConfig(int32_t slotId)
+{
+    MessageOption option;
+    MessageParcel in;
+    MessageParcel out;
+    if (!in.WriteInterfaceToken(ImsSmsProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("ImsSmsProxy::ImsGetSmsConfig return, write descriptor token fail!");
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!in.WriteInt32(slotId)) {
+        TELEPHONY_LOGE("ImsSmsProxy::ImsGetSmsConfig return, write slotId fail!");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t error = Remote()->SendRequest(IMS_GET_SMS_CONFIG, in, out, option);
+    if (error == ERR_NONE) {
+        TELEPHONY_LOGI("ImsSmsProxy::ImsGetSmsConfig return, send request success!");
         return out.ReadInt32();
     }
     return error;
