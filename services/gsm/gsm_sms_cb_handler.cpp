@@ -336,7 +336,7 @@ bool GsmSmsCbHandler::SetWantData(EventFwk::Want &want, const std::shared_ptr<Sm
     want.SetParam(SmsCbData::CID, static_cast<int>(cid_));
     want.SetParam(SmsCbData::WARNING_TYPE, static_cast<int>(sendData.warnType));
     if (sendData.isPrimary) {
-        want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_COMPLETED);
+        want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
     } else {
         want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
     }
