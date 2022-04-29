@@ -592,10 +592,10 @@ bool GsmSmsSenderTest::RequestPermissions() const
     permissions.emplace_back("ohos.permission.GET_TELEPHONY_STATE");
     permissions.emplace_back("ohos.permission.SEND_MESSAGES");
     permissions.emplace_back("ohos.permission.RECEIVE_SMS");
-
+    std::vector<int> permissionsState(permissions.size(), -1);
     deal->SetApplicationInfo(appInfo);
     context->AttachBaseContext(deal);
-    context->RequestPermissionsFromUser(permissions, requestCodes);
+    context->RequestPermissionsFromUser(permissions, permissionsState, requestCodes);
     std::cout << "RequestPermissions Ok." << std::endl;
     return true;
 }

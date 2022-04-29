@@ -54,6 +54,10 @@ SendCallback::~SendCallback()
 void CompleteSmsSendWork(uv_work_t *work, int status)
 {
     TELEPHONY_LOGI("CompleteSmsSendWork start");
+    if (work == nullptr) {
+        TELEPHONY_LOGE("CompleteSmsSendWork work is nullptr!");
+        return;
+    }
     std::unique_ptr<SendCallbackContext> pContext(static_cast<SendCallbackContext *>(work->data));
     if (pContext == nullptr) {
         TELEPHONY_LOGE("CompleteSmsSendWork pContext is nullptr!");
