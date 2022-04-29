@@ -660,7 +660,7 @@ int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, Sm
 {
     int decodeLen = 0;
     int dataLen = static_cast<int>(msgText.length());
-    const int maxDecodeLen = len;
+    const unsigned int maxDecodeLen = len;
     const unsigned char *pMsgText = (const unsigned char *)msgText.c_str();
 
     MsgTextConvert *textCvt = MsgTextConvert::Instance();

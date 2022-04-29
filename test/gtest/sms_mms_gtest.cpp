@@ -424,6 +424,76 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level3)
     }
 }
 
+/**
+ * @tc.number   Telephony_SmsMmsGtest_AddSimMessage_0001
+ * @tc.name     Add Sim Message
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
+{
+    bool result = false;
+    if (g_telephonyService != nullptr) {
+        int32_t slotId = DEFAULT_SIM_SLOT_ID;
+        std::u16string smscData(u"");
+        std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
+        uint32_t status = 3;
+        result = g_telephonyService->AddSimMessage(slotId, smscData, pduData,
+        static_cast<ISmsServiceInterface::SimMessageStatus>(status));
+        EXPECT_TRUE(result);
+    }
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GetAllSimMessages_0001
+ * @tc.name     Get All Sim Messages
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
+{
+    std::vector<ShortMessage> result;
+    if (g_telephonyService != nullptr) {
+        int32_t slotId = DEFAULT_SIM_SLOT_ID;
+        result = g_telephonyService->GetAllSimMessages(slotId);
+        EXPECT_TRUE(true);
+    }
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_DelSimMessage_0001
+ * @tc.name     Del Sim Message
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
+{
+    bool result = false;
+    if (g_telephonyService != nullptr) {
+        int32_t slotId = DEFAULT_SIM_SLOT_ID;
+        uint32_t msgIndex = 0;
+        result = g_telephonyService->DelSimMessage(slotId, msgIndex);
+        EXPECT_TRUE(result);
+    }
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_UpdateSimMessage_0001
+ * @tc.name     Update Sim Message
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
+{
+    bool result = false;
+    if (g_telephonyService != nullptr) {
+        int32_t slotId = DEFAULT_SIM_SLOT_ID;
+        uint32_t msgIndex = 0;
+        std::u16string smscData(u"");
+        std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
+        uint32_t status = 3;
+        result = g_telephonyService->UpdateSimMessage(
+        slotId, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
+        EXPECT_TRUE(result);
+    }
+}
+
 #else // TEL_TEST_UNSUPPORT
 /**
  * @tc.number   Telephony_SmsMms_MockTest_0001
