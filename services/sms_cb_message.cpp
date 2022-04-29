@@ -305,7 +305,7 @@ void SmsCbMessage::Decode3g7Bit(const std::vector<unsigned char> &pdu)
         TELEPHONY_LOGE("pdu size is invalid.");
         return;
     }
-    int offset = 0;
+    unsigned int offset = 0;
     int dataLen = 0;
     const int pduLen = static_cast<int>(pdu.size());
     const unsigned char *tpdu = pdu.data();
@@ -338,7 +338,7 @@ void SmsCbMessage::Decode3gUCS2(const std::vector<unsigned char> &pdu)
         return;
     }
     int dataLen = 0;
-    int offset = 0;
+    unsigned int offset = 0;
     const int pduLen = static_cast<int>(pdu.size());
     const unsigned char *tpdu = pdu.data();
     for (unsigned char i = 0; i < cbHeader_->totalPages; ++i) {
