@@ -49,6 +49,7 @@ ohos_source_set("mms_native_source") {
     "//third_party/glib/glib",
     "//third_party/glib",
     "//third_party/glib/gmodule",
+    "//third_party/gettext/gettext-runtime/intl",
   ]
 
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
