@@ -50,7 +50,7 @@ ohos_shared_library("sms") {
     "ril_adapter:hril_innerkits",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
-    "startup_l2:syspara",
+    "init:libbegetutil",
   ]
 
   if (is_standard_system) {
