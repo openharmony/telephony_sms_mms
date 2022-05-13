@@ -244,7 +244,8 @@ void SmsCbMessage::Decode2gCbMsg(const std::vector<unsigned char> &pdu)
         case SMS_CODING_7BIT: {
             dataLen = (dataLen * BYTE_BIT) / ENCODE_GSM_BIT;
             unsigned char pageData[MAX_CBMSG_PAGE_SIZE * BYTE_BIT / ENCODE_GSM_BIT] = {0};
-            int unpackLen = SmsCommonUtils::Unpack7bitChar(pdu.data(), dataLen, 0x00, pageData);
+            int unpackLen = SmsCommonUtils::Unpack7bitChar(pdu.data(), dataLen, 0x00, pageData,
+                MAX_CBMSG_PAGE_SIZE * BYTE_BIT / ENCODE_GSM_BIT);
 
             if (cbHeader_->dcs.iso639Lang[0]) {
                 unpackLen = unpackLen - SmsCbMessage::SMS_CB_IOS639LANG_SIZE;
@@ -326,7 +327,8 @@ void SmsCbMessage::Decode3g7Bit(const std::vector<unsigned char> &pdu)
         int unpackLen = 0;
         dataLen = (dataLen * BYTE_BIT) / ENCODE_GSM_BIT;
         unsigned char pageData[MAX_CBMSG_PAGE_SIZE * BYTE_BIT / ENCODE_GSM_BIT] = {0};
-        unpackLen = SmsCommonUtils::Unpack7bitChar(&tpdu[offset], dataLen, 0x00, pageData);
+        unpackLen = SmsCommonUtils::Unpack7bitChar(&tpdu[offset], dataLen, 0x00, pageData,
+            MAX_CBMSG_PAGE_SIZE * BYTE_BIT / ENCODE_GSM_BIT);
         messageRaw_.insert(messageRaw_.size(), (const char *)pageData, unpackLen);
     }
 }
