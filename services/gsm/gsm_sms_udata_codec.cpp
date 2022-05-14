@@ -135,7 +135,7 @@ int GsmSmsUDataCodec::EncodeGSMData(const struct SmsUserData *pUserData, char *p
     TELEPHONY_LOGI("fillBits [%{public}d] dataLen [%{public}d]", fillBits, pUserData->length);
     /* Set UDL, UDHL */
     if (udhl > 0) {
-        pEncodeData[0] = ((((int)udhl + 1) * 0x08) + fillBits + (pUserData->length * 0x07)) / 0x07;
+        pEncodeData[0] = (unsigned char)(((((int)udhl + 1) * 0x08) + fillBits + (pUserData->length * 0x07)) / 0x07);
         pEncodeData[1] = udhl;
     } else {
         pEncodeData[0] = (char)pUserData->length;
@@ -171,7 +171,7 @@ int GsmSmsUDataCodec::Encode8bitData(const struct SmsUserData *pUserData, char *
     TELEPHONY_LOGI("dataLen [%{public}d]", pUserData->length);
     /* Set UDL, UDHL */
     if (udhl > 0) {
-        pEncodeData[0] = ((int)udhl + 1) + fillBits + pUserData->length;
+        pEncodeData[0] = (unsigned char)(((int)udhl + 1) + fillBits + pUserData->length);
         pEncodeData[1] = udhl;
     } else {
         pEncodeData[0] = (char)pUserData->length;
@@ -206,7 +206,7 @@ int GsmSmsUDataCodec::EncodeUCS2Data(const struct SmsUserData *pUserData, char *
     TELEPHONY_LOGI("fillBits [%{public}d] dataLen [%{public}d]", fillBits, pUserData->length);
     /* Set UDL, UDHL */
     if (udhl > 0) {
-        pEncodeData[0] = ((int)udhl + 1) + fillBits + pUserData->length;
+        pEncodeData[0] = (unsigned char)(((int)udhl + 1) + fillBits + pUserData->length);
         pEncodeData[1] = udhl;
     } else {
         pEncodeData[0] = (char)pUserData->length;
