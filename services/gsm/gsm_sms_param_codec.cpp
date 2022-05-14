@@ -280,7 +280,7 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
         }
         int tmplength = 0;
         tmplength = SmsCommonUtils::Unpack7bitChar(
-            &(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00, (unsigned char *)tmpAddress);
+            &(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00, (unsigned char *)tmpAddress, MAX_ADDRESS_LEN);
         MsgLangInfo langInfo = {0};
         langInfo.bSingleShift = false;
         langInfo.bLockingShift = false;
