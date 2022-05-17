@@ -738,6 +738,10 @@ void CdmaSmsPduCodec::DecodeP2PDeliverMsg(const unsigned char *pduStr, int pduLe
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
+                if (tempLen >= pduLen + 1) {
+                    TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+                    break;
+                }
                 error = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
                 if (error != EOK) {
                     TELEPHONY_LOGE("SMS_BEARER_USER_DATA memset_s err.");
@@ -983,6 +987,10 @@ void CdmaSmsPduCodec::DecodeP2PSubmitMsg(const unsigned char *pduStr, int pduLen
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
+                if (tempLen >= pduLen + 1) {
+                    TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+                    break;
+                }
                 (void)memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
                 if (memcpy_s(tempStr, sizeof(tempStr), pduStr + offset, tempLen) == EOK) {
                     bool headerInd = subMsg.msgId.headerInd;
@@ -1071,6 +1079,10 @@ void CdmaSmsPduCodec::DecodeP2PUserAckMsg(
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
+                if (tempLen >= pduLen + 1) {
+                    TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+                    break;
+                }
                 error = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
                 if (error != EOK) {
                     TELEPHONY_LOGE("UserAckMsg memset_s err.");
@@ -1121,6 +1133,10 @@ void CdmaSmsPduCodec::DecodeP2PReadAckMsg(
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
+                if (tempLen >= pduLen + 1) {
+                    TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+                    break;
+                }
                 error = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
                 if (error != EOK) {
                     TELEPHONY_LOGE("ReadAckMsg memset_s err.");
@@ -1168,6 +1184,10 @@ void CdmaSmsPduCodec::DecodeP2PSubmitReportMsg(
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
+                if (tempLen >= pduLen + 1) {
+                    TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+                    break;
+                }
                 error = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
                 if (error != EOK) {
                     TELEPHONY_LOGE("SubmitReportMsg memset_s err.");
@@ -1213,6 +1233,10 @@ void CdmaSmsPduCodec::DecodeP2PDeliveryAckMsg(
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tmpLen = pduStr[offset - 1];
+                if (tmpLen >= pduLen + 1) {
+                    TELEPHONY_LOGE("length err tmpLen:%{public}d, pduLen:%{public}d.", tmpLen, pduLen);
+                    break;
+                }
                 error = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
                 if (error != EOK) {
                     TELEPHONY_LOGE("DeliveryAckMsg memset_s err.");
@@ -1259,6 +1283,10 @@ void CdmaSmsPduCodec::DecodeCBBearerData(
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
+                if (tempLen >= pduLen + 1) {
+                    TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+                    break;
+                }
                 error = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
                 if (error != EOK) {
                     TELEPHONY_LOGE("BearerData memset_s err.");
