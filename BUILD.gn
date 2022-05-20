@@ -13,6 +13,7 @@
 # GLIB - Library of useful routines for C programming
 
 import("//base/telephony/core_service/telephony.gni")
+import("//base/telephony/sms_mms/sms_mms_aafwk.gni")
 import("//build/ohos.gni")
 SOURCE_DIR = "//base/telephony/sms_mms"
 
@@ -81,12 +82,12 @@ ohos_shared_library("tel_sms_mms") {
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
 
   deps = [
+    "${aafwk_inner_api_path}/ability_manager:ability_manager",
+    "${aafwk_kits_path}/ability/native:abilitykit_native",
     "//base/global/resource_management/frameworks/resmgr:global_resmgr",
     "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
     "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms/frameworks/native/mms:mms_native_source",
-    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//third_party/glib:glib_packages",
     "//utils/native/base:utils",
   ]
