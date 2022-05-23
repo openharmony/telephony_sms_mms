@@ -38,11 +38,11 @@ public:
     /**
      * ImsSendMessageResponse
      *
-     * @param ImsResponseInfo
+     * @param int32_t
      * @param SendSmsResultInfo defined in hril_sms_parcel.h
      * @return Returns TELEPHONY_SUCCESS on success, others on failure.
      */
-    virtual int32_t ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result) = 0;
+    virtual int32_t ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result) = 0;
 
     /**
      * ImsSetSmsConfigResponse

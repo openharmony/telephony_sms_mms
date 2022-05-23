@@ -18,6 +18,7 @@
 #include "core_manager_inner.h"
 #include "radio_event.h"
 #include "telephony_log_wrapper.h"
+#include "ims_reg_types.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -111,7 +112,8 @@ NetWorkType SmsNetworkPolicyManager::GetNetWorkType()
 void SmsNetworkPolicyManager::GetRadioState()
 {
     netWorkType_ = static_cast<NetWorkType>(CoreManagerInner::GetInstance().GetPhoneType(slotId_));
-    isImsNetDomain_ = CoreManagerInner::GetInstance().GetImsRegStatus(slotId_);
+    isImsNetDomain_ = CoreManagerInner::GetInstance().GetImsRegStatus(slotId_,
+        ImsServiceType::TYPE_SMS).imsRegState == ImsRegState::IMS_REGISTERED;
     voiceServiceState_ = CoreManagerInner::GetInstance().GetCsRegState(slotId_);
     TELEPHONY_LOGI("netWorkType_ = %{public}d isImsNetDomain_ = %{public}s GetCsRegStatus = %{public}d",
         netWorkType_, isImsNetDomain_ ? "true" : "false", voiceServiceState_);
