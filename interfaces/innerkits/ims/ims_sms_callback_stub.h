@@ -31,7 +31,7 @@ public:
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
     /****************** sms basic ******************/
-    int32_t ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result) override;
+    int32_t ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result) override;
     int32_t ImsSetSmsConfigResponse(const ImsResponseInfo &info) override;
     int32_t ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig) override;
     

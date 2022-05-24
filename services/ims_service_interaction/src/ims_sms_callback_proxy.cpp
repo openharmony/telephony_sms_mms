@@ -23,7 +23,7 @@ namespace Telephony {
 ImsSmsCallbackProxy::ImsSmsCallbackProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<ImsSmsCallbackInterface>(impl) {}
 
-int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result)
+int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result)
 {
     MessageOption option;
     MessageParcel in;
@@ -32,7 +32,7 @@ int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(const ImsResponseInfo &info,
         TELEPHONY_LOGE("write descriptor token fail!");
         return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    if (!in.WriteRawData((const void *)&info, sizeof(ImsResponseInfo))) {
+    if (!in.WriteInt32(slotId)) {
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
     if (!in.WriteRawData((const void *)&result, sizeof(SendSmsResultInfo))) {

@@ -51,6 +51,7 @@ private:
     sptr<ImsCoreServiceInterface> imsCoreServiceProxy_ = nullptr;
     sptr<ImsSmsInterface> imsSmsProxy_ = nullptr;
     sptr<ImsSmsCallbackInterface> imsSmsCallback_ = nullptr;
+    int32_t ReConnectService();
 };
 } // namespace Telephony
 } // namespace OHOS

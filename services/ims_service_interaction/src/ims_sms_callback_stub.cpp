@@ -68,17 +68,13 @@ int32_t ImsSmsCallbackStub::OnRemoteRequest(
 int32_t ImsSmsCallbackStub::OnImsSendMessageResponseInner(MessageParcel &data, MessageParcel &reply)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::OnImsSendMessageResponseInner entry");
-    auto info = (ImsResponseInfo *)data.ReadRawData(sizeof(ImsResponseInfo));
-    if (info == nullptr) {
-        TELEPHONY_LOGE("OnImsSendMessageResponseInner return, info is nullptr.");
-        return TELEPHONY_ERR_ARGUMENT_INVALID;
-    }
+    int32_t slotId = data.ReadInt32();
     auto result = (SendSmsResultInfo *)data.ReadRawData(sizeof(SendSmsResultInfo));
     if (result == nullptr) {
         TELEPHONY_LOGE("OnImsSendMessageResponseInner return, result is nullptr.");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    reply.WriteInt32(ImsSendMessageResponse(*info, *result));
+    reply.WriteInt32(ImsSendMessageResponse(slotId, *result));
     return TELEPHONY_SUCCESS;
 }
 
@@ -107,7 +103,7 @@ int32_t ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner(MessageParcel &data, 
     return TELEPHONY_SUCCESS;
 }
 
-int32_t ImsSmsCallbackStub::ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result)
+int32_t ImsSmsCallbackStub::ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsSendMessageResponse entry");
     return TELEPHONY_SUCCESS;
