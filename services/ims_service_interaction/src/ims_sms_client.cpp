@@ -37,8 +37,6 @@ void ImsSmsClient::Init()
     if (!IsConnect()) {
         GetImsSmsProxy();
     }
-    // register callback
-    RegisterImsSmsCallback();
 }
 
 sptr<ImsSmsInterface> ImsSmsClient::GetImsSmsProxy()
@@ -71,6 +69,8 @@ sptr<ImsSmsInterface> ImsSmsClient::GetImsSmsProxy()
         TELEPHONY_LOGE("GetImsSmsProxy return, iface_cast<imsSmsProxy_> failed!");
         return nullptr;
     }
+    // register callback
+    RegisterImsSmsCallback();
     TELEPHONY_LOGI("GetImsSmsProxy success.");
     return imsSmsProxy_;
 }
@@ -112,22 +112,33 @@ int32_t ImsSmsClient::ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMe
 
 int32_t ImsSmsClient::ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig)
 {
-    if (imsSmsProxy_ != nullptr) {
-        return imsSmsProxy_->ImsSetSmsConfig(slotId, imsSmsConfig);
-    } else {
-        TELEPHONY_LOGE("imsSmsProxy_ is null!");
-        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    if (ReConnectService() != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("ipc reconnect failed!");
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
+    return imsSmsProxy_->ImsSetSmsConfig(slotId, imsSmsConfig);
 }
 
 int32_t ImsSmsClient::ImsGetSmsConfig(int32_t slotId)
 {
-    if (imsSmsProxy_ != nullptr) {
-        return imsSmsProxy_->ImsGetSmsConfig(slotId);
-    } else {
-        TELEPHONY_LOGE("imsSmsProxy_ is null!");
-        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    if (ReConnectService() != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("ipc reconnect failed!");
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
+    return imsSmsProxy_->ImsGetSmsConfig(slotId);
+}
+
+int32_t ImsSmsClient::ReConnectService()
+{
+    if (imsSmsProxy_ == nullptr) {
+        TELEPHONY_LOGI("try to reconnect ims sms service now...");
+        GetImsSmsProxy();
+        if (imsSmsProxy_ == nullptr) {
+            TELEPHONY_LOGE("Connect service failed");
+            return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+        }
+    }
+    return TELEPHONY_SUCCESS;
 }
 } // namespace Telephony
 } // namespace OHOS
