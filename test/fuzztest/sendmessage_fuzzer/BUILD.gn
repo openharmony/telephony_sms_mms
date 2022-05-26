@@ -1,0 +1,78 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//base/telephony/core_service/telephony.gni")
+import("//build/config/features.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+
+##############################fuzztest##########################################
+ohos_fuzztest("SendMessageFuzzTest") {
+  module_output_path = "sms_mms/SendMessageFuzzTest"
+  module_out_path = module_output_path
+  fuzz_config_file = "//base/telephony/sms_mms/test/fuzztest/sendmessage_fuzzer"
+
+  include_dirs = [
+    "//base/telephony/core_service/frameworks/js/napi",
+    "//base/telephony/core_service/interfaces/innerkits/include",
+    "//base/telephony/sms_mms/frameworks/js/napi/include",
+  ]
+
+  configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
+
+  deps = [
+    "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
+    "//foundation/arkui/napi:ace_napi",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = [
+    "core_service:tel_core_service_api",
+    "ipc:ipc_core",
+    "ril_adapter:hril_innerkits",
+    "safwk:system_ability_fwk",
+    "samgr_standard:samgr_proxy",
+    "startup_l2:syspara",
+  ]
+
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+  sources = [
+    "//base/telephony/core_service/frameworks/js/napi/napi_util.cpp",
+    "delivery_send_call_back_stub.cpp",
+    "send_call_back_stub.cpp",
+    "sendmessage_fuzzer.cpp",
+  ]
+}
+
+###############################################################################
+group("fuzztest") {
+  testonly = true
+  deps = []
+  deps += [
+    # deps file
+    ":SendMessageFuzzTest",
+  ]
+}
+###############################################################################

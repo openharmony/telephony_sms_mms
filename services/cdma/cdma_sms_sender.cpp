@@ -264,6 +264,23 @@ void CdmaSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     }
 }
 
+bool CdmaSmsSender::IsImsSmsSupported()
+{
+    return false;
+}
+
+bool CdmaSmsSender::SetImsSmsConfig(int32_t enable)
+{
+    return false;
+}
+void CdmaSmsSender::StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event)
+{
+    if (event == nullptr) {
+        TELEPHONY_LOGE("gsm_sms_sender: StatusReportSetImsSms event nullptr error.");
+        return;
+    }
+}
+
 void CdmaSmsSender::Init() {}
 
 void CdmaSmsSender::ReceiveStatusReport(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer)

@@ -142,6 +142,15 @@ bool SmsInterfaceManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t 
     return smsMiscManager_->SetCBConfig(enable, fromMsgId, toMsgId, netType);
 }
 
+bool SmsInterfaceManager::SetImsSmsConfig(int32_t enable)
+{
+    if (smsMiscManager_ == nullptr) {
+        TELEPHONY_LOGE("smsMiscManager nullptr error.");
+        return false;
+    }
+    return smsSendManager_->SetImsSmsConfig(enable);
+}
+
 bool SmsInterfaceManager::SetDefaultSmsSlotId(int32_t slotId)
 {
     if (smsMiscManager_ == nullptr) {

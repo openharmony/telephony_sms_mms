@@ -21,6 +21,7 @@
 #include "radio_event.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
+#include "ims_sms_client.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -219,16 +220,49 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         }
     } else {
         TELEPHONY_LOGI("ims network domain send sms interface.!");
-        smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
-        smsData.pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
-        if (smsIndexer->GetHasMore()) {
-            CoreManagerInner::GetInstance().SendSmsMoreMode(slotId_,
-                RadioEvent::RADIO_SEND_SMS_EXPECT_MORE, smsData, shared_from_this());
-        } else {
-            CoreManagerInner::GetInstance().SendGsmSms(slotId_,
-                RadioEvent::RADIO_SEND_SMS, smsData, shared_from_this());
+        if (DelayedSingleton<ImsSmsClient>::GetInstance() == nullptr) {
+            TELEPHONY_LOGE("SendSmsToRil return, ImsSmsClient is nullptr.");
+            return;
         }
+        ImsMessageInfo imsMessageInfo;
+        imsMessageInfo.refId = smsData.refId;
+        imsMessageInfo.smscPdu = smsData.smscPdu;
+        imsMessageInfo.pdu = smsData.pdu;
+        int32_t  reply = DelayedSingleton<ImsSmsClient>::GetInstance()->ImsSendMessage(slotId_, imsMessageInfo);
+        TELEPHONY_LOGI("SendIMSSms reply = %{public}d", reply);
     }
+}
+
+bool GsmSmsSender::IsImsSmsSupported()
+{
+    TELEPHONY_LOGI("check ims sms support");
+    if (DelayedSingleton<ImsSmsClient>::GetInstance() == nullptr) {
+        TELEPHONY_LOGE("IsImsSmsSupported return, ImsSmsClient is nullptr.");
+        return false;
+    }
+    std::unique_lock<std::mutex> lck(ctx_);
+    resISMSReady_ = false;
+    int32_t reply = DelayedSingleton<ImsSmsClient>::GetInstance()->ImsGetSmsConfig(slotId_);
+    TELEPHONY_LOGI("SendIMSSms reply = %{public}d", reply);
+    while (resISMSReady_) {
+        TELEPHONY_LOGI("ISmsSupport::wait(), resISMSReady_ = false");
+        cv_.wait(lck);
+    }
+    bool ret = (imsSmsCfg_ == 1);
+    TELEPHONY_LOGI("GsmSmsSender::ISmsSupport(), %{public}d:", ret);
+    return ret;
+}
+
+bool GsmSmsSender::SetImsSmsConfig(int32_t enable)
+{
+    TELEPHONY_LOGI("enable or disable ims sms support");
+    if (DelayedSingleton<ImsSmsClient>::GetInstance() == nullptr) {
+        TELEPHONY_LOGE("SetImsSmsConfig return, ImsSmsClient is nullptr.");
+        return false;
+    }
+    int32_t reply = DelayedSingleton<ImsSmsClient>::GetInstance()->ImsSetSmsConfig(slotId_, enable);
+    TELEPHONY_LOGI("SetImsSmsConfig reply = %{public}d", reply);
+    return true;
 }
 
 void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event)
@@ -270,6 +304,16 @@ void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &e
     }
 }
 
+void GsmSmsSender::StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event)
+{
+    if (event == nullptr) {
+        TELEPHONY_LOGE("gsm_sms_sender: StatusReportSetImsSms event nullptr error.");
+        return;
+    }
+    std::shared_ptr<int32_t> imsSmsInfo = event->GetSharedObject<int32_t>();
+    imsSmsCfg_ = *imsSmsInfo;
+}
+
 void GsmSmsSender::SetSendIndexerInfo(const std::shared_ptr<SmsSendIndexer> &indexer,
     const std::shared_ptr<struct EncodeInfo> &encodeInfo, unsigned char msgRef8bit)
 {
@@ -294,6 +338,13 @@ bool GsmSmsSender::RegisterHandler()
 {
     CoreManagerInner::GetInstance().RegisterCoreNotify(
         slotId_, shared_from_this(), RadioEvent::RADIO_SMS_STATUS, nullptr);
+
+    if (DelayedSingleton<ImsSmsClient>::GetInstance() == nullptr) {
+        TELEPHONY_LOGE("RegisterHandler return, ImsSmsClient is nullptr.");
+    } else {
+        DelayedSingleton<ImsSmsClient>::GetInstance()->RegisterImsSmsCallbackHandler(slotId_, shared_from_this());
+    }
+
     return true;
 }
 

@@ -46,6 +46,9 @@ public:
     void SendSmsToRil(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
     void ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
     void ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
+    bool IsImsSmsSupported() override;
+    bool SetImsSmsConfig(int32_t enable) override;
+    void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
 
 protected:
     void StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event) override;
