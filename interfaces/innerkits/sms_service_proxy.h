@@ -134,6 +134,16 @@ public:
      */
     bool SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) override;
 
+        /**
+     * @brief SetImsSmsConfig
+     * enable or disable IMS SMS.
+     * @param slotId [in]
+     * @param enable [in]
+     * @return true: enable or disable Ims Sms success,
+     * false: enable or disable Ims Sms fail
+     */
+    bool SetImsSmsConfig(int32_t slotId, int32_t enable) override;
+
     /**
      * @brief SetDefaultSmsSlotId
      * Set the Default Sms Slot Id To SmsService

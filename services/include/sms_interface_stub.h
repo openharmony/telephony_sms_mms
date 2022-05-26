@@ -53,6 +53,7 @@ private:
     void OnGetAllSimMessages(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSetCBRangeConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSetCBConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnSetImsSmsConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSetDefaultSmsSlotId(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetDefaultSmsSlotId(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSplitMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option);

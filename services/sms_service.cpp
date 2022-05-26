@@ -326,6 +326,16 @@ bool SmsService::SetCBConfig(
     return interfaceManager->SetCBConfig(enable, fromMsgId, toMsgId, netType);
 }
 
+bool SmsService::SetImsSmsConfig(int32_t slotId, int32_t enable)
+{
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("SmsService::SetImsSmsConfig interfaceManager nullptr error.");
+        return false;
+    }
+    return interfaceManager->SetImsSmsConfig(enable);
+}
+
 bool SmsService::SetDefaultSmsSlotId(int32_t slotId)
 {
     bool result = false;

@@ -37,6 +37,7 @@ public:
         UPDATE_SIM_MESSAGE,
         GET_ALL_SIM_MESSAGE,
         SET_CB_CONFIG,
+        SET_IMS_SMS_CONFIG,
         SET_DEFAULT_SMS_SLOT_ID,
         GET_DEFAULT_SMS_SLOT_ID,
         SPLIT_MESSAGE,
@@ -188,6 +189,16 @@ public:
      */
     virtual bool SetCBConfig(
         int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) = 0;
+
+     /**
+     * @brief SetImsSmsConfig
+     * enable or disable IMS SMS.
+     * @param slotId [in]
+     * @param enable [in]
+     * @return true: enable or disable Ims Sms success,
+     * false: enable or disable Ims Sms fail
+     */
+    virtual bool SetImsSmsConfig(int32_t slotId, int32_t enable) = 0;
 
     /**
      * @brief SetDefaultSmsSlotId

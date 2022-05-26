@@ -20,6 +20,9 @@
 #include "ims_sms_interface.h"
 #include "ims_core_service_interface.h"
 
+#include "event_handler.h"
+#include "event_runner.h"
+
 namespace OHOS {
 namespace Telephony {
 class ImsSmsClient {
@@ -46,12 +49,23 @@ public:
     int32_t ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo);
     int32_t ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig);
     int32_t ImsGetSmsConfig(int32_t slotId);
+    int32_t RegisterImsSmsCallbackHandler(int32_t slotId, const std::shared_ptr<AppExecFwk::EventHandler> &handler);
+
+    /**
+     * Get Handler
+     *
+     * @param slotId
+     * @return AppExecFwk::EventHandler
+     */
+    std::shared_ptr<AppExecFwk::EventHandler> GetHandler(int32_t slotId);
 
 private:
     sptr<ImsCoreServiceInterface> imsCoreServiceProxy_ = nullptr;
     sptr<ImsSmsInterface> imsSmsProxy_ = nullptr;
     sptr<ImsSmsCallbackInterface> imsSmsCallback_ = nullptr;
     int32_t ReConnectService();
+    std::map<int32_t, std::shared_ptr<AppExecFwk::EventHandler>> handlerMap_;
+    std::mutex mutex_;
 };
 } // namespace Telephony
 } // namespace OHOS

@@ -64,7 +64,8 @@
                 }
             ],
             "test": [
-                "//base/telephony/sms_mms/test:unittest"
+                "//base/telephony/sms_mms/test:unittest",
+                "//base/telephony/sms_mms/test/fuzztest:fuzztest"
             ]
         }
     }

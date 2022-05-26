@@ -34,6 +34,7 @@ SmsInterfaceStub::SmsInterfaceStub()
     memberFuncMap_[UPDATE_SIM_MESSAGE] = &SmsInterfaceStub::OnUpdateSimMessage;
     memberFuncMap_[GET_ALL_SIM_MESSAGE] = &SmsInterfaceStub::OnGetAllSimMessages;
     memberFuncMap_[SET_CB_CONFIG] = &SmsInterfaceStub::OnSetCBConfig;
+    memberFuncMap_[SET_IMS_SMS_CONFIG] = &SmsInterfaceStub::OnSetImsSmsConfig;
     memberFuncMap_[SET_DEFAULT_SMS_SLOT_ID] = &SmsInterfaceStub::OnSetDefaultSmsSlotId;
     memberFuncMap_[GET_DEFAULT_SMS_SLOT_ID] = &SmsInterfaceStub::OnGetDefaultSmsSlotId;
     memberFuncMap_[SPLIT_MESSAGE] = &SmsInterfaceStub::OnSplitMessage;
@@ -213,6 +214,16 @@ void SmsInterfaceStub::OnSetCBConfig(MessageParcel &data, MessageParcel &reply, 
     uint8_t ranType = data.ReadUint8();
     result = SetCBConfig(slotId, enable, fromMsgId, toMsgId, ranType);
     TELEPHONY_LOGI("OnSetCBConfig result %{public}d", result);
+    reply.WriteBool(result);
+}
+
+void SmsInterfaceStub::OnSetImsSmsConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+    int32_t slotId = data.ReadInt32();
+    int32_t enable = data.ReadInt32();
+    result = SetImsSmsConfig(slotId, enable);
+    TELEPHONY_LOGI("SetImsSmsConfig result %{public}d", result);
     reply.WriteBool(result);
 }
 
