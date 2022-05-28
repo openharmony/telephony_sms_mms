@@ -23,6 +23,7 @@
 #include "sms_service_proxy.h"
 #include "system_ability_definition.h"
 #include "telephony_types.h"
+#include "telephony_log_wrapper.h"
 
 #include "core_service_client.h"
 #include "string_utils.h"
@@ -85,7 +86,9 @@ sptr<ISmsServiceInterface> SmsMmsGtest::GetProxy()
  */
 HWTEST_F(SmsMmsGtest, GetProxy_0001, Function | MediumTest | Level0)
 {
+    TELEPHONY_LOGI("TelSMSMMSTest::GetProxy_0001 -->");
     g_telephonyService = SmsMmsGtest::GetProxy();
+    TELEPHONY_LOGI("TelSMSMMSTest::GetProxy_0001 -->finished");
     EXPECT_FALSE(g_telephonyService == nullptr);
 }
 
@@ -96,14 +99,16 @@ HWTEST_F(SmsMmsGtest, GetProxy_0001, Function | MediumTest | Level0)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0001, Function | MediumTest | Level1)
 {
-    bool result = false;
+    bool result = true;
     if (g_telephonyService != nullptr) {
         int32_t slotId = -1;
         bool enable = true;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 10;
         uint8_t netType = 1;
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->finished");
         EXPECT_FALSE(result);
     }
 }
@@ -115,14 +120,16 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0001, Function | MediumTest | Level1)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0002, Function | MediumTest | Level2)
 {
-    bool result = false;
+    bool result = true;
     if (g_telephonyService != nullptr) {
         int32_t slotId = DEFAULT_SIM_SLOT_ID;
         bool enable = true;
         uint32_t fromMsgId = 20;
         uint32_t toMsgId = 10;
         uint8_t netType = 1;
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->finished");
         EXPECT_FALSE(result);
     }
 }
@@ -134,14 +141,16 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0002, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
 {
-    bool result = false;
+    bool result = true;
     if (g_telephonyService != nullptr) {
         int32_t slotId = DEFAULT_SIM_SLOT_ID;
         bool enable = true;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 10;
         uint8_t netType = 3;
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->finished");
         EXPECT_FALSE(result);
     }
 }
@@ -160,7 +169,9 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 10;
         uint8_t netType = 1;
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -179,7 +190,9 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 1000;
         uint8_t netType = 1;
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -198,7 +211,9 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level4)
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 0;
         uint8_t netType = 1;
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -210,14 +225,16 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level4)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0001, Function | MediumTest | Level1)
 {
-    bool result = false;
+    bool result = true;
     if (g_telephonyService != nullptr) {
         int32_t slotId = -1;
         bool enable = false;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 10;
         uint8_t netType = 1;
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->finished");
         EXPECT_FALSE(result);
     }
 }
@@ -229,14 +246,16 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0001, Function | MediumTest | Level1)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0002, Function | MediumTest | Level2)
 {
-    bool result = false;
+    bool result = true;
     if (g_telephonyService != nullptr) {
         int32_t slotId = DEFAULT_SIM_SLOT_ID;
         bool enable = false;
         uint32_t fromMsgId = 20;
         uint32_t toMsgId = 10;
         uint8_t netType = 1;
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->finished");
         EXPECT_FALSE(result);
     }
 }
@@ -248,14 +267,16 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0002, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
 {
-    bool result = false;
+    bool result = true;
     if (g_telephonyService != nullptr) {
         int32_t slotId = DEFAULT_SIM_SLOT_ID;
         bool enable = false;
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 10;
         uint8_t netType = 3;
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003 -->finished");
         EXPECT_FALSE(result);
     }
 }
@@ -274,7 +295,9 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 10;
         uint8_t netType = 1;
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -293,7 +316,9 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 1000;
         uint8_t netType = 1;
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -312,7 +337,9 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level4)
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 0;
         uint8_t netType = 1;
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->");
         result = g_telephonyService->SetCBConfig(slotId, enable, fromMsgId, toMsgId, netType);
+        TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -327,7 +354,9 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
     bool result = false;
     int32_t slotId = 0;
     if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
+        TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0001 -->");
         result = g_telephonyService->SetDefaultSmsSlotId(slotId);
+        TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0001 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -342,7 +371,9 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level3)
     bool result = false;
     int32_t slotId = 1;
     if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
+        TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0002 -->");
         result = g_telephonyService->SetDefaultSmsSlotId(slotId);
+        TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0002 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -357,7 +388,9 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0003, Function | MediumTest | Level3)
     bool result = false;
     int32_t slotId = 2;
     if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
+        TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0003 -->");
         result = g_telephonyService->SetDefaultSmsSlotId(slotId);
+        TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0003 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -372,7 +405,9 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0004, Function | MediumTest | Level3)
     bool result = false;
     int32_t slotId = 3;
     if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
+        TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0004 -->");
         result = g_telephonyService->SetDefaultSmsSlotId(slotId);
+        TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0004 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -387,7 +422,9 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0005, Function | MediumTest | Level3)
     bool result = false;
     int32_t slotId = 4;
     if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
+        TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0005 -->");
         result = g_telephonyService->SetDefaultSmsSlotId(slotId);
+        TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0005 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -402,7 +439,9 @@ HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
     const int32_t error = -1;
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if ((g_telephonyService != nullptr) && SmsMmsGtest::HasSimCard(slotId)) {
+        TELEPHONY_LOGI("TelSMSMMSTest::GetDefaultSmsSlotId_0001 -->");
         slotId = g_telephonyService->GetDefaultSmsSlotId();
+        TELEPHONY_LOGI("TelSMSMMSTest::GetDefaultSmsSlotId_0001 -->finished");
         EXPECT_TRUE(slotId != error);
     }
 }
@@ -414,12 +453,14 @@ HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level3)
 {
-    bool result = false;
+    bool result = true;
     if (g_telephonyService != nullptr) {
         int32_t slotId = -1;
         // invalid slotID scenario, a invalid smsc addr is OKAY
         std::string scAddr("1234");
+        TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0001 -->");
         result = g_telephonyService->SetSmscAddr(slotId, StringUtils::ToUtf16(scAddr));
+        TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0001 -->finished");
         EXPECT_FALSE(result);
     }
 }
@@ -437,8 +478,10 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
         std::u16string smscData(u"");
         std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
         uint32_t status = 3;
+        TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0001 -->");
         result = g_telephonyService->AddSimMessage(slotId, smscData, pduData,
         static_cast<ISmsServiceInterface::SimMessageStatus>(status));
+        TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0001 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -453,7 +496,9 @@ HWTEST_F(SmsMmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
     std::vector<ShortMessage> result;
     if (g_telephonyService != nullptr) {
         int32_t slotId = DEFAULT_SIM_SLOT_ID;
+        TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0001 -->");
         result = g_telephonyService->GetAllSimMessages(slotId);
+        TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0001 -->finished");
         EXPECT_TRUE(true);
     }
 }
@@ -469,7 +514,9 @@ HWTEST_F(SmsMmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
     if (g_telephonyService != nullptr) {
         int32_t slotId = DEFAULT_SIM_SLOT_ID;
         uint32_t msgIndex = 0;
+        TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0001 -->");
         result = g_telephonyService->DelSimMessage(slotId, msgIndex);
+        TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0001 -->finished");
         EXPECT_TRUE(result);
     }
 }
@@ -488,9 +535,45 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
         std::u16string smscData(u"");
         std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
         uint32_t status = 3;
+        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
         result = g_telephonyService->UpdateSimMessage(
         slotId, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
+        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
         EXPECT_TRUE(result);
+    }
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SetImsSmsConfig_0001
+ * @tc.name     Enable IMS SMS
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level3)
+{
+    bool result = false;
+    if (g_telephonyService != nullptr) {
+        int32_t slotId = DEFAULT_SIM_SLOT_ID;
+        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
+        result = g_telephonyService->SetImsSmsConfig(slotId, 1);
+        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
+        EXPECT_TRUE(true);
+    }
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SetImsSmsConfig_0001
+ * @tc.name     Disable IMS SMS
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level3)
+{
+    bool result = false;
+    if (g_telephonyService != nullptr) {
+        int32_t slotId = DEFAULT_SIM_SLOT_ID;
+        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
+        result = g_telephonyService->SetImsSmsConfig(slotId, 0);
+        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
+        EXPECT_TRUE(true);
     }
 }
 

@@ -19,6 +19,8 @@
 #include <map>
 #include "iremote_stub.h"
 #include "ims_sms_callback_interface.h"
+#include "event_handler.h"
+#include "event_runner.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -44,6 +46,7 @@ private:
 private:
     using RequestFuncType = int32_t (ImsSmsCallbackStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, RequestFuncType> requestFuncMap_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_[2];
 };
 } // namespace Telephony
 } // namespace OHOS

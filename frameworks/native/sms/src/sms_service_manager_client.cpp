@@ -167,6 +167,14 @@ bool SmsServiceManagerClient::SetCBConfig(
     return false;
 }
 
+bool SmsServiceManagerClient::SetImsSmsConfig(int32_t slotId, int32_t enable)
+{
+    if (InitSmsServiceProxy()) {
+        return smsServiceInterface_->SetImsSmsConfig(slotId, enable);
+    }
+    return false;
+}
+
 std::vector<std::u16string> SmsServiceManagerClient::SplitMessage(const std::u16string &message)
 {
     if (InitSmsServiceProxy()) {

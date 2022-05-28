@@ -128,6 +128,26 @@ int32_t ImsSmsClient::ImsGetSmsConfig(int32_t slotId)
     return imsSmsProxy_->ImsGetSmsConfig(slotId);
 }
 
+int32_t ImsSmsClient::RegisterImsSmsCallbackHandler(int32_t slotId,
+    const std::shared_ptr<AppExecFwk::EventHandler> &handler)
+{
+    if (handler == nullptr) {
+        TELEPHONY_LOGE("RegisterImsSmsCallbackHandler return, handler is null.");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    handlerMap_.insert(std::make_pair(slotId, handler));
+    TELEPHONY_LOGI("RegisterImsSmsCallbackHandler success.");
+    return TELEPHONY_SUCCESS;
+}
+
+std::shared_ptr<AppExecFwk::EventHandler> ImsSmsClient::GetHandler(int32_t slotId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return handlerMap_[slotId];
+}
+
 int32_t ImsSmsClient::ReConnectService()
 {
     if (imsSmsProxy_ == nullptr) {
