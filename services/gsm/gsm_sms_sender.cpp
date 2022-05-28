@@ -228,14 +228,13 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         imsMessageInfo.refId = smsData.refId;
         imsMessageInfo.smscPdu = smsData.smscPdu;
         imsMessageInfo.pdu = smsData.pdu;
-        int32_t  reply = DelayedSingleton<ImsSmsClient>::GetInstance()->ImsSendMessage(slotId_, imsMessageInfo);
+        int32_t reply = DelayedSingleton<ImsSmsClient>::GetInstance()->ImsSendMessage(slotId_, imsMessageInfo);
         TELEPHONY_LOGI("SendIMSSms reply = %{public}d", reply);
     }
 }
 
 bool GsmSmsSender::IsImsSmsSupported()
 {
-    TELEPHONY_LOGI("check ims sms support");
     if (DelayedSingleton<ImsSmsClient>::GetInstance() == nullptr) {
         TELEPHONY_LOGE("IsImsSmsSupported return, ImsSmsClient is nullptr.");
         return false;
@@ -255,7 +254,6 @@ bool GsmSmsSender::IsImsSmsSupported()
 
 bool GsmSmsSender::SetImsSmsConfig(int32_t enable)
 {
-    TELEPHONY_LOGI("enable or disable ims sms support");
     if (DelayedSingleton<ImsSmsClient>::GetInstance() == nullptr) {
         TELEPHONY_LOGE("SetImsSmsConfig return, ImsSmsClient is nullptr.");
         return false;

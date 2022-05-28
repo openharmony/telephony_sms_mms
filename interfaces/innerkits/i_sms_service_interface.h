@@ -190,13 +190,13 @@ public:
     virtual bool SetCBConfig(
         int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) = 0;
 
-     /**
-     * @brief SetImsSmsConfig
-     * enable or disable IMS SMS.
-     * @param slotId [in]
-     * @param enable [in]
-     * @return true: enable or disable Ims Sms success,
-     * false: enable or disable Ims Sms fail
+    /**
+     * @brief SetImsSmsConfig enable or disable IMS SMS.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param enable Indicates enable or disable Ims sms
+     * ranging {@code 0} disable Ims sms {@code 1} enable Ims sms
+     * @return Returns {@code true} if enable or disable Ims Sms success; returns {@code false} otherwise.
      */
     virtual bool SetImsSmsConfig(int32_t slotId, int32_t enable) = 0;
 

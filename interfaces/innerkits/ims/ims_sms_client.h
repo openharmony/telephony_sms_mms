@@ -54,7 +54,8 @@ public:
     /**
      * Get Handler
      *
-     * @param slotId
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
      * @return AppExecFwk::EventHandler
      */
     std::shared_ptr<AppExecFwk::EventHandler> GetHandler(int32_t slotId);

@@ -297,16 +297,16 @@ bool SmsSendManager::IsImsSmsSupported()
     }
 
     NetWorkType newNetWorkType = networkManager_->GetNetWorkType();
-    result =  networkManager_->IsImsNetDomain();
+    result = networkManager_->IsImsNetDomain();
     switch (newNetWorkType) {
-        case NetWorkType::NET_TYPE_CDMA:
-             return result;
         case NetWorkType::NET_TYPE_GSM:
             result = result && gsmSmsSender_->IsImsSmsSupported();
-            return result;
+            break;
+        case NetWorkType::NET_TYPE_CDMA:
+            break;
         default:
-            TELEPHONY_LOGI("network unknown send error.");
-            return result;
+            TELEPHONY_LOGE("network unknown send error.");
+            break;
     }
     return result;
 }

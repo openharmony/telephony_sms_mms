@@ -38,10 +38,7 @@ ohos_fuzztest("SendMessageFuzzTest") {
   ]
 
   external_deps = [
-    "core_service:tel_core_service_api",
     "ipc:ipc_core",
-    "ril_adapter:hril_innerkits",
-    "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "startup_l2:syspara",
   ]
