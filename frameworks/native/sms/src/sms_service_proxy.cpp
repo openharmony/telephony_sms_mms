@@ -228,6 +228,26 @@ bool SmsServiceProxy::SetCBConfig(
     return replyParcel.ReadBool();
 }
 
+bool SmsServiceProxy::SetImsSmsConfig(
+    int32_t slotId, int32_t enable)
+{
+    bool result = false;
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        return result;
+    }
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteInt32(enable);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(SET_IMS_SMS_CONFIG, dataParcel, replyParcel, option);
+    return replyParcel.ReadBool();
+}
+
 bool SmsServiceProxy::SetDefaultSmsSlotId(int32_t slotId)
 {
     bool result = false;

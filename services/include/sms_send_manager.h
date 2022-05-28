@@ -44,6 +44,7 @@ public:
     std::vector<std::string> SplitMessage(const std::string &message);
     bool GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
     bool IsImsSmsSupported();
+    bool SetImsSmsConfig(int32_t enable);
     std::string GetImsShortMessageFormat();
 
 private:

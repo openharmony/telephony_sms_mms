@@ -290,7 +290,30 @@ bool SmsSendManager::IsImsSmsSupported()
         TELEPHONY_LOGE("networkManager is nullptr error.");
         return result;
     }
-    return networkManager_->IsImsNetDomain();
+
+    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr || networkManager_ == nullptr) {
+        TELEPHONY_LOGE("Sender or network nullptr error.");
+        return result;
+    }
+
+    NetWorkType newNetWorkType = networkManager_->GetNetWorkType();
+    result = networkManager_->IsImsNetDomain();
+    switch (newNetWorkType) {
+        case NetWorkType::NET_TYPE_GSM:
+            result = result && gsmSmsSender_->IsImsSmsSupported();
+            break;
+        case NetWorkType::NET_TYPE_CDMA:
+            break;
+        default:
+            TELEPHONY_LOGE("network unknown send error.");
+            break;
+    }
+    return result;
+}
+
+bool SmsSendManager::SetImsSmsConfig(int32_t enable)
+{
+    return gsmSmsSender_->SetImsSmsConfig(enable);
 }
 
 std::string SmsSendManager::GetImsShortMessageFormat()

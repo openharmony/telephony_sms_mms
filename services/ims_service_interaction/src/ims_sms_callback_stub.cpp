@@ -18,6 +18,7 @@
 #include "telephony_log_wrapper.h"
 #include "telephony_errors.h"
 #include "radio_event.h"
+#include "ims_sms_client.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -106,18 +107,26 @@ int32_t ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner(MessageParcel &data, 
 int32_t ImsSmsCallbackStub::ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsSendMessageResponse entry");
+    std::shared_ptr<SendSmsResultInfo> sendSmsResultInfo = std::make_shared<SendSmsResultInfo>(result);
+    uint32_t item = RadioEvent::RADIO_SEND_IMS_GSM_SMS;
+    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(
+        item, sendSmsResultInfo);
     return TELEPHONY_SUCCESS;
 }
 
 int32_t ImsSmsCallbackStub::ImsSetSmsConfigResponse(const ImsResponseInfo &info)
 {
-    TELEPHONY_LOGI("ImsSmsCallbackStub::ImsSetSmsConfigResponse entry");
+    TELEPHONY_LOGI("ImsSmsCallbackStub::ImsSetSmsConfigResponse error:%{public}d", info.error);
     return TELEPHONY_SUCCESS;
 }
 
 int32_t ImsSmsCallbackStub::ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsGetSmsConfigResponse entry");
+    std::shared_ptr<int32_t> imsSmsCfg = std::make_shared<int32_t>(imsSmsConfig);
+    uint32_t item = RadioEvent::RADIO_SET_IMS_SMS;
+        DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(info.slotId)->SendEvent(
+            item, imsSmsCfg);
     return TELEPHONY_SUCCESS;
 }
 } // namespace Telephony
