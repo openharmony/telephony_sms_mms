@@ -397,18 +397,18 @@ enum class MmsEncodeErrcode {
     MMS_BUFF_ERR
 };
 
-using MmsHeaderCategDes = struct {
+struct MmsHeaderCategDes {
     unsigned char fieldId;
     MmsFieldOptType fieldOpt;
     MmsFieldValueType valueType;
 };
 
-using KeyString = struct {
+struct KeyString {
     unsigned char key;
     const char *value;
 };
 
-using MmsFieldDes = struct {
+struct MmsFieldDes {
     unsigned char fieldId;
     MmsFieldValueType type;
 };

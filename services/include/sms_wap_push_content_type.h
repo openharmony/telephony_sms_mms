@@ -111,7 +111,7 @@ enum class WapPushContentTypes {
     CONTENT_TYPE_UNDOWN                          = 0xFF
 };
 
-using WapKeyValue = struct {
+struct WapKeyValue {
     WapPushContentTypes key;
     const char *value;
 };

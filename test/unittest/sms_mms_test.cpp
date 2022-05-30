@@ -30,13 +30,13 @@
 using namespace OHOS;
 using namespace OHOS::Telephony;
 
-using TestStruct = struct FunStruct {
+struct TestStruct {
     std::string funName;
     std::function<void(void)> fun = nullptr;
     FunStruct(const std::string &name, const std::function<void(void)> &function) : funName(name), fun(function) {}
 };
 
-using TestParam = struct Param {
+struct TestParam {
     GsmSmsSenderTest gsmSmsSenderTest;
     ShortMessageTest shortMessageTest;
     SmsCbMessageTest smsCbMessageTest;
