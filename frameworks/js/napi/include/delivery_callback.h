@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace Telephony {
-using DeliveryCallbackContext = struct {
+struct DeliveryCallbackContext {
     napi_env env;
     napi_ref thisVarRef;
     napi_ref callbackRef;

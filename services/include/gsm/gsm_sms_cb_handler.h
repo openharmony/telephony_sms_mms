@@ -33,12 +33,12 @@ enum SmsCbType { SMS_CB_TYPE = 0, SMS_ETWS_TYPE };
 
 namespace OHOS {
 namespace Telephony {
-using SmsCbInfo = struct CbInfo {
-    CbInfo(const std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> &headPtr,
+struct SmsCbInfo {
+    SmsCbInfo(const std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> &headPtr,
         const std::map<unsigned char, std::shared_ptr<SmsCbMessage>> &cbPtr)
         : header(headPtr), cbMsgs(cbPtr)
     {}
-    CbInfo() {}
+    SmsCbInfo() {}
     std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> header;
     std::map<unsigned char, std::shared_ptr<SmsCbMessage>> cbMsgs;
     std::u16string plmn_;
