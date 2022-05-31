@@ -55,10 +55,9 @@ enum MsgLanguageId {
     MSG_ID_URDU_LANG,
 };
 
-using MsgLangInfo = struct {
+struct MsgLangInfo {
     bool bSingleShift;
     bool bLockingShift;
-
     MSG_LANGUAGE_ID_T singleLang;
     MSG_LANGUAGE_ID_T lockingLang;
 };
