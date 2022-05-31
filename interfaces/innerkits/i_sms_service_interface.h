@@ -69,7 +69,7 @@ public:
         SMS_ENCODING_16BIT,
     };
 
-    using SmsSegmentsInfo = struct {
+    struct SmsSegmentsInfo {
         int32_t msgSegCount = 0;
         int32_t msgEncodingCount = 0;
         int32_t msgRemainCount = 0;
