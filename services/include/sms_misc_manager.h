@@ -36,7 +36,7 @@ public:
         SET_SMSC_ADDR_FINISH,
         GET_SMSC_ADDR_FINISH,
     };
-    struct gsmCBRangeInfo {
+    using gsmCBRangeInfo = struct RangeInfo {
         RangeInfo(uint32_t fromId, uint32_t toId)
         {
             fromMsgId = fromId;
@@ -44,7 +44,7 @@ public:
         }
         uint32_t fromMsgId = 0;
         uint32_t toMsgId = 0;
-        bool operator<(const gsmCBRangeInfo &other) const
+        bool operator<(const RangeInfo &other) const
         {
             return fromMsgId < other.fromMsgId;
         }
@@ -82,7 +82,7 @@ private:
     static constexpr uint8_t GSM_TYPE = 1;
     static constexpr uint8_t MIN_SMSC_LEN = 2;
     static constexpr uint32_t RANG_MAX = 65535;
-    struct infoData {
+    using infoData = struct info {
         info(uint32_t fromMsgId, uint32_t toMsgId)
         {
             startPos = fromMsgId;
