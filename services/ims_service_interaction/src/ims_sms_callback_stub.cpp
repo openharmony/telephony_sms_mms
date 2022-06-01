@@ -82,51 +82,66 @@ int32_t ImsSmsCallbackStub::OnImsSendMessageResponseInner(MessageParcel &data, M
 int32_t ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner entry");
-    auto info = (ImsResponseInfo *)data.ReadRawData(sizeof(ImsResponseInfo));
+    int32_t slotId = data.ReadInt32();
+    auto info = (HRilRadioResponseInfo *)data.ReadRawData(sizeof(HRilRadioResponseInfo));
     if (info == nullptr) {
         TELEPHONY_LOGE("OnImsSetSmsConfigResponseInner return, info is nullptr.");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    reply.WriteInt32(ImsSetSmsConfigResponse(*info));
+    reply.WriteInt32(ImsSetSmsConfigResponse(slotId, *info));
     return TELEPHONY_SUCCESS;
 }
 
 int32_t ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner entry");
-    auto info = (ImsResponseInfo *)data.ReadRawData(sizeof(ImsResponseInfo));
-    if (info == nullptr) {
-        TELEPHONY_LOGE("OnImsGetSmsConfigResponseInner, info is nullptr.");
-        return TELEPHONY_ERR_ARGUMENT_INVALID;
-    }
+    int32_t slotId = data.ReadInt32();
     int32_t imsSmsConfig = data.ReadInt32();
-    reply.WriteInt32(ImsGetSmsConfigResponse(*info, imsSmsConfig));
+    reply.WriteInt32(ImsGetSmsConfigResponse(slotId, imsSmsConfig));
     return TELEPHONY_SUCCESS;
 }
 
 int32_t ImsSmsCallbackStub::ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsSendMessageResponse entry");
-    std::shared_ptr<SendSmsResultInfo> sendSmsResultInfo = std::make_shared<SendSmsResultInfo>(result);
+    std::unique_ptr<SendSmsResultInfo> sendSmsResultInfo = std::make_unique<SendSmsResultInfo>();
+    if (sendSmsResultInfo == nullptr) {
+        TELEPHONY_LOGE("make_unique SendSmsResultInfo failed!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    *sendSmsResultInfo = result;
     uint32_t item = RadioEvent::RADIO_SEND_IMS_GSM_SMS;
     DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(
-        item, sendSmsResultInfo);
+        item, std::move(sendSmsResultInfo));
     return TELEPHONY_SUCCESS;
 }
 
-int32_t ImsSmsCallbackStub::ImsSetSmsConfigResponse(const ImsResponseInfo &info)
+int32_t ImsSmsCallbackStub::ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsSetSmsConfigResponse error:%{public}d", info.error);
+    uint32_t item = RadioEvent::RADIO_SET_IMS_SMS;
+    std::unique_ptr<HRilRadioResponseInfo> para = std::make_unique<HRilRadioResponseInfo>();
+    if (para == nullptr) {
+        TELEPHONY_LOGE("make_unique HRilRadioResponseInfo failed!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    *para = info;
+    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(item, std::move(para));
     return TELEPHONY_SUCCESS;
 }
 
-int32_t ImsSmsCallbackStub::ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig)
+int32_t ImsSmsCallbackStub::ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsGetSmsConfigResponse entry");
-    std::shared_ptr<int32_t> imsSmsCfg = std::make_shared<int32_t>(imsSmsConfig);
-    uint32_t item = RadioEvent::RADIO_SET_IMS_SMS;
-        DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(info.slotId)->SendEvent(
-            item, imsSmsCfg);
+    std::unique_ptr<int32_t> imsSmsCfg = std::make_unique<int32_t>();
+    if (imsSmsCfg == nullptr) {
+        TELEPHONY_LOGE("make_unique imsSmsConfig failed!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    *imsSmsCfg = imsSmsConfig;
+    uint32_t item = RadioEvent::RADIO_GET_IMS_SMS;
+    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(
+        item, std::move(imsSmsCfg));
     return TELEPHONY_SUCCESS;
 }
 } // namespace Telephony
