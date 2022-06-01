@@ -42,6 +42,7 @@ ohos_shared_library("tel_sms_mms") {
     "$SOURCE_DIR/services/gsm/gsm_sms_udata_codec.cpp",
     "$SOURCE_DIR/services/ims_service_interaction/src/ims_sms_callback_stub.cpp",
     "$SOURCE_DIR/services/ims_service_interaction/src/ims_sms_client.cpp",
+    "$SOURCE_DIR/services/ims_service_interaction/src/ims_sms_death_recipient.cpp",
     "$SOURCE_DIR/services/ims_service_interaction/src/ims_sms_proxy.cpp",
     "$SOURCE_DIR/services/proxy/sms_delivery_short_message_proxy.cpp",
     "$SOURCE_DIR/services/proxy/sms_send_short_message_proxy.cpp",
