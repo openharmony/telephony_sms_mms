@@ -19,6 +19,7 @@
 #include "ims_sms_callback_stub.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_errors.h"
+#include "ims_sms_death_recipient.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -64,6 +65,16 @@ sptr<ImsSmsInterface> ImsSmsClient::GetImsSmsProxy()
         TELEPHONY_LOGE("GetImsSmsProxy return, ImsCallRemoteObjectPtr is nullptr.");
         return nullptr;
     }
+    death_ = sptr<OHOS::IPCObjectStub::DeathRecipient>(new ImsSmsDeathRecipient());
+    if (death_ == nullptr) {
+        TELEPHONY_LOGE("GetImsSmsProxy return, death_ is nullptr.");
+        return nullptr;
+    }
+    if (!imsSmsRemoteObjectPtr->AddDeathRecipient(death_)) {
+        TELEPHONY_LOGE("GetImsSmsProxy return, AddDeathRecipient failed");
+        return nullptr;
+    }
+
     imsSmsProxy_ = iface_cast<ImsSmsInterface>(imsSmsRemoteObjectPtr);
     if (imsSmsProxy_ == nullptr) {
         TELEPHONY_LOGE("GetImsSmsProxy return, iface_cast<imsSmsProxy_> failed!");
@@ -159,6 +170,27 @@ int32_t ImsSmsClient::ReConnectService()
         }
     }
     return TELEPHONY_SUCCESS;
+}
+
+void ImsSmsClient::Clean()
+{
+    Utils::UniqueWriteGuard<Utils::RWLock> guard(rwClientLock_);
+    if (death_ != nullptr) {
+        death_.clear();
+        death_ = nullptr;
+    }
+    if (imsCoreServiceProxy_ != nullptr) {
+        imsCoreServiceProxy_.clear();
+        imsCoreServiceProxy_ = nullptr;
+    }
+    if (imsSmsProxy_ != nullptr) {
+        imsSmsProxy_.clear();
+        imsSmsProxy_ = nullptr;
+    }
+    if (imsSmsCallback_ != nullptr) {
+        imsSmsCallback_.clear();
+        imsSmsCallback_ = nullptr;
+    }
 }
 } // namespace Telephony
 } // namespace OHOS
