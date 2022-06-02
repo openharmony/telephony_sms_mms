@@ -60,7 +60,7 @@ void SmsSender::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
             StatusReportAnalysis(event);
             break;
         }
-        case RadioEvent::RADIO_SET_IMS_SMS: {
+        case RadioEvent::RADIO_GET_IMS_SMS: {
             StatusReportSetImsSms(event);
             SyncSwitchISmsResponse();
             break;
