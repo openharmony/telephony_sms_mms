@@ -103,7 +103,7 @@ ohos_shared_library("tel_sms_mms") {
     "ipc:ipc_core",
     "relational_store:native_appdatafwk",
     "relational_store:native_rdb",
-    "ril_adapter:hril_innerkits",
+    "ril_device_driver_interface:hril_innerkits",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
   ]
