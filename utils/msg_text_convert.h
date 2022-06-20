@@ -63,7 +63,7 @@ using MsgLangInfo = struct {
     MSG_LANGUAGE_ID_T lockingLang;
 };
 
-static const WCHAR g_GSM7BitToUCS2[] = {
+const WCHAR g_GSM7BitToUCS2[] = {
     /* @ */
     0x0040, 0x00A3, 0x0024, 0x00A5, 0x00E8, 0x00E9, 0x00F9, 0x00EC, 0x00F2, 0x00C7, 0x000A, 0x00D8, 0x00F8, 0x000D,
     0x00C5, 0x00E5, 0x0394, 0x005F, 0x03A6, 0x0393, 0x039B, 0x03A9, 0x03A0, 0x03A8, 0x03A3, 0x0398, 0x039E, 0x001B,
@@ -85,7 +85,7 @@ static const WCHAR g_GSM7BitToUCS2[] = {
 };
 
 /* GSM 7 bit Default Alphabet Extension Table -> UCS2 */
-static const WCHAR g_GSM7BitExtToUCS2[] = {
+const WCHAR g_GSM7BitExtToUCS2[] = {
     /* 0x0020 -> (SP) for invalid code */
     /* Page Break */
     0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x000C, 0x0020, 0x0020, 0x0020,
@@ -109,7 +109,7 @@ static const WCHAR g_GSM7BitExtToUCS2[] = {
 };
 
 /* Turkish National Language Single Shift Table -> UCS2 */
-static const WCHAR g_TurkishSingleToUCS2[] = {
+const WCHAR g_TurkishSingleToUCS2[] = {
     /* 0x0020 -> (SP) for invalid code */
     /* Page Break */
     0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x000C, 0x0020, 0x0020, 0x0020,
@@ -133,7 +133,7 @@ static const WCHAR g_TurkishSingleToUCS2[] = {
 };
 
 /* Turkish National Language Locking Shift Table -> UCS2 */
-static const WCHAR g_TurkishLockingToUCS2[] = {
+const WCHAR g_TurkishLockingToUCS2[] = {
     /* @ */
     0x0040, 0x00A3, 0x0024, 0x00A5, 0x20AC, 0x00E9, 0x00F9, 0x00EC, 0x00F2, 0x00C7, 0x000A, 0x011E, 0x011F, 0x000D,
     0x00C5, 0x00E5, 0x0394, 0x005F, 0x03A6, 0x0393, 0x039B, 0x03A9, 0x03A0, 0x03A8, 0x03A3, 0x0398, 0x039E, 0x001B,
@@ -157,7 +157,7 @@ static const WCHAR g_TurkishLockingToUCS2[] = {
 };
 
 /* Spanish National Language Single Shift Table -> UCS2 */
-static const WCHAR g_SpanishSingleToUCS2[] = {
+const WCHAR g_SpanishSingleToUCS2[] = {
     /* 0x0020 -> (SP) for invalid code */
     /* Page Break */
     0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00E7, 0x000C, 0x0020, 0x0020, 0x0020,
@@ -181,7 +181,7 @@ static const WCHAR g_SpanishSingleToUCS2[] = {
 };
 
 /* Portuguese National Language Single Shift Table -> UCS2 */
-static const WCHAR g_PortuSingleToUCS2[] = {
+const WCHAR g_PortuSingleToUCS2[] = {
     /* 0x0020 -> (SP) for invalid code */
     /* Page Break */
     0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00EA, 0x0020, 0x0020, 0x0020, 0x00E7, 0x000C, 0x00D4, 0x00F4, 0x0020,
@@ -205,7 +205,7 @@ static const WCHAR g_PortuSingleToUCS2[] = {
 };
 
 /* Portuguese National Language Locking Shift Table -> UCS2 */
-static const WCHAR g_PortuLockingToUCS2[] = {
+const WCHAR g_PortuLockingToUCS2[] = {
     /* @ */
     0x0040, 0x00A3, 0x0024, 0x00A5, 0x00EA, 0x00E9, 0x00FA, 0x00ED, 0x00F3, 0x00E7, 0x000A, 0x00D4, 0x00F4, 0x000D,
     0x00C1, 0x00E1, 0x0394, 0x005F, 0x0020, 0x00C7, 0x00C0, 0x0020, 0x005E, 0x005C, 0x20AC, 0x00D3, 0x007C, 0x001B,
