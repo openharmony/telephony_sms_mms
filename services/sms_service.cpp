@@ -22,6 +22,7 @@
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
+#include "ims_sms_client.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -51,6 +52,7 @@ void SmsService::OnStart()
 
 bool SmsService::Init()
 {
+    DelayedSingleton<ImsSmsClient>::GetInstance()->Init();
     if (!registerToService_) {
         bool ret = Publish(DelayedSingleton<SmsService>::GetInstance().get());
         if (!ret) {
@@ -70,6 +72,7 @@ void SmsService::OnStop()
 {
     state_ = ServiceRunningState::STATE_NOT_START;
     registerToService_ = false;
+    DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
     TELEPHONY_LOGI("SmsService::OnStop stop service.");
 }
 

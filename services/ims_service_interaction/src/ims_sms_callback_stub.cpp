@@ -15,10 +15,10 @@
 
 #include "ims_sms_callback_stub.h"
 
-#include "telephony_log_wrapper.h"
-#include "telephony_errors.h"
-#include "radio_event.h"
 #include "ims_sms_client.h"
+#include "radio_event.h"
+#include "telephony_errors.h"
+#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -104,15 +104,14 @@ int32_t ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner(MessageParcel &data, 
 int32_t ImsSmsCallbackStub::ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsSendMessageResponse entry");
-    std::unique_ptr<SendSmsResultInfo> sendSmsResultInfo = std::make_unique<SendSmsResultInfo>();
+    std::shared_ptr<SendSmsResultInfo> sendSmsResultInfo = std::make_shared<SendSmsResultInfo>();
     if (sendSmsResultInfo == nullptr) {
-        TELEPHONY_LOGE("make_unique SendSmsResultInfo failed!");
+        TELEPHONY_LOGE("make_shared SendSmsResultInfo failed!");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     *sendSmsResultInfo = result;
     uint32_t item = RadioEvent::RADIO_SEND_IMS_GSM_SMS;
-    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(
-        item, std::move(sendSmsResultInfo));
+    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(item, sendSmsResultInfo);
     return TELEPHONY_SUCCESS;
 }
 
@@ -120,28 +119,21 @@ int32_t ImsSmsCallbackStub::ImsSetSmsConfigResponse(int32_t slotId, const HRilRa
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsSetSmsConfigResponse error:%{public}d", info.error);
     uint32_t item = RadioEvent::RADIO_SET_IMS_SMS;
-    std::unique_ptr<HRilRadioResponseInfo> para = std::make_unique<HRilRadioResponseInfo>();
-    if (para == nullptr) {
-        TELEPHONY_LOGE("make_unique HRilRadioResponseInfo failed!");
+    std::shared_ptr<HRilRadioResponseInfo> hRilRadioResponseInfo = std::make_shared<HRilRadioResponseInfo>();
+    if (hRilRadioResponseInfo == nullptr) {
+        TELEPHONY_LOGE("make_shared HRilRadioResponseInfo failed!");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    *para = info;
-    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(item, std::move(para));
+    *hRilRadioResponseInfo = info;
+    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(item, hRilRadioResponseInfo);
     return TELEPHONY_SUCCESS;
 }
 
 int32_t ImsSmsCallbackStub::ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsGetSmsConfigResponse entry");
-    std::unique_ptr<int32_t> imsSmsCfg = std::make_unique<int32_t>();
-    if (imsSmsCfg == nullptr) {
-        TELEPHONY_LOGE("make_unique imsSmsConfig failed!");
-        return TELEPHONY_ERR_LOCAL_PTR_NULL;
-    }
-    *imsSmsCfg = imsSmsConfig;
     uint32_t item = RadioEvent::RADIO_GET_IMS_SMS;
-    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(
-        item, std::move(imsSmsCfg));
+    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(item, imsSmsConfig);
     return TELEPHONY_SUCCESS;
 }
 } // namespace Telephony
