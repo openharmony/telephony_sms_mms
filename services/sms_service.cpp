@@ -20,8 +20,8 @@
 #include "core_manager_inner.h"
 #include "sms_dump_helper.h"
 #include "string_utils.h"
-#include "telephony_permission.h"
 #include "telephony_log_wrapper.h"
+#include "telephony_permission.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -57,9 +57,9 @@ bool SmsService::Init()
             TELEPHONY_LOGE("SmsService::Init Publish failed!");
             return false;
         }
-        bindTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch())
-                        .count();
+        bindTime_ =
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+                .count();
         registerToService_ = true;
         WaitCoreServiceToInit();
     }
@@ -103,7 +103,6 @@ void SmsService::WaitCoreServiceToInit()
 {
     std::thread connectTask([&]() {
         while (true) {
-            TELEPHONY_LOGI("connect core service ...");
             if (CoreManagerInner::GetInstance().IsInitFinished()) {
                 InitModule();
                 TELEPHONY_LOGI("SmsService Connection successful");
@@ -120,9 +119,8 @@ std::string SmsService::GetBindTime()
     return std::to_string(bindTime_);
 }
 
-void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr,
-    const u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr, const u16string text,
+    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -156,8 +154,8 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
         TELEPHONY_LOGE("SmsService::SendMessage interfaceManager nullptr error.");
         return;
     }
-    interfaceManager->DataBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr), port, data,
-        dataLen, sendCallback, deliveryCallback);
+    interfaceManager->DataBasedSmsDelivery(
+        StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr), port, data, dataLen, sendCallback, deliveryCallback);
 }
 
 bool SmsService::IsImsSmsSupported()
@@ -309,8 +307,7 @@ std::vector<ShortMessage> SmsService::GetAllSimMessages(int32_t slotId)
     return interfaceManager->GetAllSimMessages();
 }
 
-bool SmsService::SetCBConfig(
-    int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
+bool SmsService::SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
 {
     bool result = false;
     if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
