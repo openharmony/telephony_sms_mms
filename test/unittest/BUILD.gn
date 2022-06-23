@@ -32,8 +32,8 @@ ohos_executable("tel_sms_mms_test") {
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
 
   deps = [
-    "${aafwk_inner_api_path}/ability_manager:ability_manager",
-    "${aafwk_kits_path}/ability/native:abilitykit_native",
+    "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
     "//base/telephony/sms_mms:tel_sms_mms",
     "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
     "//utils/native/base:utils",
