@@ -246,6 +246,5 @@ void ImsSmsClient::SystemAbilityListener::OnRemoveSystemAbility(int32_t systemAb
 
     imsSmsClient->Clean();
 }
-
 } // namespace Telephony
 } // namespace OHOS
