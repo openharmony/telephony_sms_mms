@@ -33,7 +33,7 @@ ohos_executable("tel_sms_mms_test") {
 
   deps = [
     "${aafwk_inner_api_path}/ability_manager:ability_manager",
-    "${aafwk_kits_path}/ability/native:abilitykit_native",
+    "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
     "//base/telephony/sms_mms:tel_sms_mms",
     "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
     "//utils/native/base:utils",
