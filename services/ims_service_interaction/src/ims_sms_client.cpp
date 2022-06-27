@@ -19,7 +19,6 @@
 #include "ims_sms_callback_stub.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_errors.h"
-#include "ims_sms_death_recipient.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -27,17 +26,49 @@ ImsSmsClient::ImsSmsClient() = default;
 
 ImsSmsClient::~ImsSmsClient()
 {
-    if (imsSmsProxy_ != nullptr) {
-        imsSmsProxy_.clear();
-        imsSmsProxy_ = nullptr;
-    }
+    UnInit();
 }
 
 void ImsSmsClient::Init()
 {
-    if (!IsConnect()) {
-        GetImsSmsProxy();
+    TELEPHONY_LOGI("Init start");
+    if (IsConnect()) {
+        TELEPHONY_LOGE("Init, IsConnect return true");
+        return;
     }
+
+    GetImsSmsProxy();
+    if (imsSmsProxy_ == nullptr) {
+        TELEPHONY_LOGE("Init, get ims sms proxy failed!");
+    }
+
+    statusChangeListener_ = new (std::nothrow) SystemAbilityListener();
+    if (statusChangeListener_ == nullptr) {
+        TELEPHONY_LOGE("Init, failed to create statusChangeListener.");
+        return;
+    }
+    auto managerPtr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (managerPtr == nullptr) {
+        TELEPHONY_LOGE("Init, get system ability manager error.");
+        return;
+    }
+    int32_t ret = managerPtr->SubscribeSystemAbility(TELEPHONY_IMS_SYS_ABILITY_ID,
+        statusChangeListener_);
+    if (ret) {
+        TELEPHONY_LOGE("Init, failed to subscribe sa:%{public}d", TELEPHONY_IMS_SYS_ABILITY_ID);
+        return;
+    }
+    TELEPHONY_LOGI("Init successfully");
+}
+
+void ImsSmsClient::UnInit()
+{
+    Clean();
+    if (statusChangeListener_ != nullptr) {
+        statusChangeListener_.clear();
+        statusChangeListener_ = nullptr;
+    }
+    handlerMap_.clear();
 }
 
 sptr<ImsSmsInterface> ImsSmsClient::GetImsSmsProxy()
@@ -63,15 +94,6 @@ sptr<ImsSmsInterface> ImsSmsClient::GetImsSmsProxy()
     sptr<IRemoteObject> imsSmsRemoteObjectPtr = imsCoreServiceProxy_->GetProxyObjectPtr(PROXY_IMS_SMS);
     if (imsSmsRemoteObjectPtr == nullptr) {
         TELEPHONY_LOGE("GetImsSmsProxy return, ImsCallRemoteObjectPtr is nullptr.");
-        return nullptr;
-    }
-    death_ = sptr<OHOS::IPCObjectStub::DeathRecipient>(new ImsSmsDeathRecipient());
-    if (death_ == nullptr) {
-        TELEPHONY_LOGE("GetImsSmsProxy return, death_ is nullptr.");
-        return nullptr;
-    }
-    if (!imsSmsRemoteObjectPtr->AddDeathRecipient(death_)) {
-        TELEPHONY_LOGE("GetImsSmsProxy return, AddDeathRecipient failed");
         return nullptr;
     }
 
@@ -175,10 +197,6 @@ int32_t ImsSmsClient::ReConnectService()
 void ImsSmsClient::Clean()
 {
     Utils::UniqueWriteGuard<Utils::RWLock> guard(rwClientLock_);
-    if (death_ != nullptr) {
-        death_.clear();
-        death_ = nullptr;
-    }
     if (imsCoreServiceProxy_ != nullptr) {
         imsCoreServiceProxy_.clear();
         imsCoreServiceProxy_ = nullptr;
@@ -191,6 +209,42 @@ void ImsSmsClient::Clean()
         imsSmsCallback_.clear();
         imsSmsCallback_ = nullptr;
     }
+}
+
+void ImsSmsClient::SystemAbilityListener::OnAddSystemAbility(int32_t systemAbilityId,
+    const std::string& deviceId)
+{
+    TELEPHONY_LOGI("SA:%{public}d is added!", systemAbilityId);
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        TELEPHONY_LOGE("add SA:%{public}d is invalid!", systemAbilityId);
+        return;
+    }
+
+    auto imsSmsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
+    if (imsSmsClient->IsConnect()) {
+        TELEPHONY_LOGI("SA:%{public}d already connected!", systemAbilityId);
+        return;
+    }
+
+    imsSmsClient->Clean();
+    int32_t res = imsSmsClient->ReConnectService();
+    if (res != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("SA:%{public}d reconnect service failed!", systemAbilityId);
+        return;
+    }
+    TELEPHONY_LOGI("SA:%{public}d reconnect service successfully!", systemAbilityId);
+}
+
+void ImsSmsClient::SystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId,
+    const std::string& deviceId)
+{
+    TELEPHONY_LOGI("SA:%{public}d is removed!", systemAbilityId);
+    auto imsSmsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
+    if (!imsSmsClient->IsConnect()) {
+        return;
+    }
+
+    imsSmsClient->Clean();
 }
 } // namespace Telephony
 } // namespace OHOS
