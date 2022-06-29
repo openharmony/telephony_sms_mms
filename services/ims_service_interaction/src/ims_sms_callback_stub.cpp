@@ -132,8 +132,14 @@ int32_t ImsSmsCallbackStub::ImsSetSmsConfigResponse(int32_t slotId, const HRilRa
 int32_t ImsSmsCallbackStub::ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig)
 {
     TELEPHONY_LOGI("ImsSmsCallbackStub::ImsGetSmsConfigResponse entry");
+    std::shared_ptr<int32_t> imsSmsCfg = std::make_shared<int32_t>();
+    if (imsSmsCfg == nullptr) {
+        TELEPHONY_LOGE("make_shared imsSmsConfig failed!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    *imsSmsCfg = imsSmsConfig;
     uint32_t item = RadioEvent::RADIO_GET_IMS_SMS;
-    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(item, imsSmsConfig);
+    DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId)->SendEvent(item, imsSmsCfg);
     return TELEPHONY_SUCCESS;
 }
 } // namespace Telephony
