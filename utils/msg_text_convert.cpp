@@ -692,7 +692,6 @@ int MsgTextConvert::ConvertUTF8ToUCS2(
     /* nullptr terminated string */
     if (srcTextLen == -1) {
         textLen = strlen(reinterpret_cast<char *>(const_cast<unsigned char *>(pSrcText)));
-        srcTextLen = textLen;
     } else {
         textLen = srcTextLen;
     }
@@ -853,7 +852,6 @@ int MsgTextConvert::ConvertUCS2ToUTF8(
 
     if (srcTextLen == -1) {
         textLen = strlen(reinterpret_cast<char *>(const_cast<unsigned char *>(pSrcText)));
-        srcTextLen = textLen;
     } else {
         textLen = srcTextLen;
     }
@@ -898,7 +896,6 @@ int MsgTextConvert::ConvertEUCKRToUTF8(
     }
     if (srcTextLen == -1) {
         textLen = strlen(reinterpret_cast<char *>(const_cast<unsigned char *>(pSrcText)));
-        srcTextLen = textLen;
     } else {
         textLen = srcTextLen;
     }
@@ -943,7 +940,6 @@ int MsgTextConvert::ConvertSHIFTJISToUTF8(
     }
     if (srcTextLen == -1) {
         textLen = strlen(reinterpret_cast<char *>(const_cast<unsigned char *>(pSrcText)));
-        srcTextLen = textLen;
     } else {
         textLen = srcTextLen;
     }
