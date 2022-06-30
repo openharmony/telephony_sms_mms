@@ -842,10 +842,10 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
     int ret = 0;
     int offset = 1;
     int tempOff = 0;
-    int tempLen = pduStr[offset++];
+    offset++;
     unsigned char tempStr[pduLen + 1];
     offset++;
-    tempLen = pduStr[offset++];
+    int tempLen = pduStr[offset++];
     int error = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
     if (error != EOK) {
         TELEPHONY_LOGE("DecodeP2PEnhancedVmn memset_s err.");
@@ -930,9 +930,7 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
             TELEPHONY_LOGE("enhancedVmn cliChar memcpy_s fail.");
             return;
         }
-        tempOff += enhancedVmn.cliNumField;
     }
-    offset += tempLen;
 }
 
 void CdmaSmsPduCodec::DecodeP2PDeliverVmnAck(
@@ -1461,8 +1459,7 @@ int CdmaSmsPduCodec::DecodeAddress(const unsigned char *pduStr, int pduLen, stru
         }
     } else {
         transAddr.addrLen = tempStr[0];
-        int bcdLen = transAddr.addrLen / HEX_BYTE_STEP;
-        bcdLen = (transAddr.addrLen % HEX_BYTE_STEP == 0) ? transAddr.addrLen : transAddr.addrLen + 1;
+        int bcdLen = (transAddr.addrLen % HEX_BYTE_STEP == 0) ? transAddr.addrLen : transAddr.addrLen + 1;
 
         SmsCommonUtils::BcdToDigitCdma(&(tempStr[1]), bcdLen, transAddr.szData);
         transAddr.szData[transAddr.addrLen] = '\0';
@@ -1884,7 +1881,6 @@ void CdmaSmsPduCodec::DecodeUserData(
                 userData.userData.data[i] = pduStr[offset] >> SHIFT_1BITS;
                 ShiftNBitForDecode(&pduStr[offset], pduLen, SHIFT_7BITS);
             }
-            offset += userData.userData.length;
             break;
         case SMS_ENCODE_GSM7BIT:
             fillBits = headerInd ? ((udhlBytes + 1) * BYTE_BIT) % ENCODE_BYTE_BIT : 0;
@@ -1914,14 +1910,12 @@ void CdmaSmsPduCodec::DecodeUserData(
                 userData.userData.length) != EOK) {
                 TELEPHONY_LOGE("SMS_ENCODE_UNICODE memcpy_s err.");
             }
-            offset += userData.userData.length;
             break;
         default:
             if (memcpy_s(userData.userData.data, sizeof(userData.userData.data), pduStr + offset,
                 userData.userData.length) != EOK) {
                 TELEPHONY_LOGE("unkown encodeType memcpy_s err.");
             }
-            offset += userData.userData.length;
             break;
     }
 }
