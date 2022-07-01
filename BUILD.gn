@@ -82,9 +82,9 @@ ohos_shared_library("tel_sms_mms") {
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
 
   deps = [
-    "${aafwk_inner_api_path}/ability_manager:ability_manager",
-    "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/native/ability/native:data_ability_helper",
+    "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
+    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/native/ability/native:data_ability_helper",
     "//base/global/resource_management/frameworks/resmgr:global_resmgr",
     "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
     "//base/telephony/core_service/utils:libtel_common",
