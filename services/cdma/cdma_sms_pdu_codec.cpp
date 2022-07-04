@@ -540,6 +540,9 @@ int CdmaSmsPduCodec::DecodeMsg(const unsigned char *pduStr, int pduLen, struct S
     }
 
     char mti = pduStr[offset++] & 0xff;
+    if (pduLen < offset) {
+        return decodelen;
+    }
     switch (mti) {
         case SMS_TRANS_P2P_MSG:
             transMsg.type = SMS_TRANS_P2P_MSG;
@@ -822,6 +825,10 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
     enhancedVmn.passwordReq = (pduStr[offset] & 0x20) ? true : false;
     enhancedVmn.setupReq = (pduStr[offset] & 0x10) ? true : false;
     enhancedVmn.pwChangeReq = (pduStr[offset] & 0x08) ? true : false;
+    if (tempLen >= pduLen + 1) {
+        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+        return;
+    }
     ShiftNBitForDecode(tempStr, tempLen, SHIFT_5BITS);
     if (enhancedVmn.setupReq || enhancedVmn.pwChangeReq) {
         enhancedVmn.minPwLen = tempStr[tempOff] >> SHIFT_4BITS;
@@ -906,6 +913,10 @@ void CdmaSmsPduCodec::DecodeP2PDeliverVmnAck(
     enhancedVmnAck.vmNumUnheardMsg = tempStr[offset++];
     enhancedVmnAck.numDeleteAck = tempStr[offset] >> SHIFT_5BITS;
     enhancedVmnAck.numPlayAck = (tempStr[offset] & 0x1c) >> SHIFT_2BITS;
+    if (tempLen >= pduLen + 1) {
+        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+        return;
+    }
     ShiftNBitForDecode(tempStr, tempLen, SHIFT_6BITS);
     for (int i = 0; i < enhancedVmnAck.numDeleteAck; i++) {
         enhancedVmnAck.daVmMsgId[i] = (tempStr[offset] << SHIFT_8BITS) | tempStr[offset + 1];
@@ -1314,6 +1325,10 @@ int CdmaSmsPduCodec::DecodeAddress(const unsigned char *pduStr, int pduLen, stru
         return offset;
     }
 
+    if (tempLen >= pduLen + 1) {
+        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+        return offset;
+    }
     offset += tempLen;
     transAddr.digitMode = (tempStr[0] & 0x80) ? true : false;
     transAddr.numberMode = (tempStr[0] & 0x40) ? true : false;
@@ -1357,7 +1372,10 @@ int CdmaSmsPduCodec::DecodeSubAddress(const unsigned char *pduStr, int pduLen, s
         TELEPHONY_LOGE("DecodeSubAddress memcpy_s err.");
         return offset;
     }
-
+    if (tempLen >= pduLen + 1) {
+        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+        return offset;
+    }
     offset += tempLen;
     switch (tempStr[tempOffset] & 0xe0) {
         case 0x00:
@@ -1549,6 +1567,10 @@ int CdmaSmsPduCodec::DecodeCMASType0Data(unsigned char *pduStr, int pduLen, stru
     TELEPHONY_LOGD("Type 0 length = [%{public}d]", tempLen);
     (void)memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
     if (memcpy_s(tempStr, sizeof(tempStr), pduStr + offset, tempLen) != EOK) {
+        if (tempLen >= pduLen + 1) {
+            TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+            return offset;
+        }
         cmasData.encodeType = FindMsgEncodeType(tempStr[0] & 0xf8);
         ShiftNBitForDecode(tempStr, tempLen, SHIFT_5BITS);
         switch (cmasData.encodeType) {
@@ -1599,6 +1621,10 @@ void CdmaSmsPduCodec::DecodeUserData(unsigned char *pduStr, int pduLen, struct S
     switch (userData.encodeType) {
         case SMS_ENCODE_7BIT_ASCII:
         case SMS_ENCODE_IA5:
+            if (pduLen < offset) {
+                TELEPHONY_LOGE("data length error, pduLen %{public}d  offset %{public}d", pduLen, offset);
+                return;
+            }
             for (unsigned int i = 0; i < userData.dataLen; i++) {
                 userData.userData[i] = pduStr[offset] >> SHIFT_1BITS;
                 ShiftNBitForDecode(&pduStr[offset], pduLen, SHIFT_7BITS);
@@ -1606,7 +1632,12 @@ void CdmaSmsPduCodec::DecodeUserData(unsigned char *pduStr, int pduLen, struct S
             }
             break;
         case SMS_ENCODE_GSM7BIT:
-            SmsCommonUtils::Unpack7bitChar(&(pduStr[offset]), userData.dataLen, 0x00, userData.userData);
+            if (pduLen < offset) {
+                TELEPHONY_LOGE("data length error, pduLen %{public}d  offset %{public}d", pduLen, offset);
+                return;
+            }
+            SmsCommonUtils::Unpack7bitChar(&(pduStr[offset]), userData.dataLen, 0x00,
+                                           userData.userData, MAX_USER_DATA_LEN + 1);
             break;
         case SMS_ENCODE_EPM:
         case SMS_ENCODE_GSMDCS:
