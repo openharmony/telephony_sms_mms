@@ -27,8 +27,8 @@ namespace Telephony {
 class SmsCommonUtils {
 public:
     static int Pack7bitChar(const unsigned char *userData, int dataLen, int fillBits, unsigned char *packData);
-    static int Unpack7bitChar(
-        const unsigned char *tpdu, unsigned char dataLen, int fillBits, unsigned char *unpackData);
+    static int Unpack7bitChar(const unsigned char *tpdu, unsigned char dataLen, int fillBits,
+        unsigned char *unpackData, unsigned int unpackDataLen);
     static int DigitToBcd(const char *digit, int digitLen, unsigned char *bcd);
     static int BcdToDigit(const unsigned char *bcd, int bcdLen, char *digit);
     static int ConvertDigitToDTMF(const char *digit, int digitLen, int startBit, unsigned char *dtmf);
