@@ -38,7 +38,7 @@ int GsmSmsParamCodec::EncodeAddress(const struct SmsAddress *pAddress, char **pp
         return offset;
     }
     const char *temp = static_cast<const char *>(pAddress->address);
-    unsigned char ton = pAddress->ton;
+    unsigned char ton = 0;
 
     char *tempParam = new (std::nothrow) char[MAX_ADD_PARAM_LEN];
     if (tempParam == nullptr) {
@@ -168,7 +168,6 @@ int GsmSmsParamCodec::EncodeTime(const struct SmsTimeStamp *pTimeStamp, char **p
             (pTimeStamp->time.absolute.second / NUMBER_TEN);
 
         if (timeZone < 0) {
-            timeZone *= -1;
             (*ppParam)[offset] = 0x08;
         }
         (*ppParam)[offset++] += ((unsigned int)(pTimeStamp->time.absolute.timeZone % NUMBER_TEN) << 0x04) +
@@ -280,7 +279,7 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
         }
         int tmplength = 0;
         tmplength = SmsCommonUtils::Unpack7bitChar(
-            &(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00, (unsigned char *)tmpAddress);
+            &(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00, (unsigned char *)tmpAddress, MAX_ADDRESS_LEN);
         MsgLangInfo langInfo = {0};
         langInfo.bSingleShift = false;
         langInfo.bLockingShift = false;

@@ -29,9 +29,9 @@ public:
     virtual ~ImsSmsCallbackProxy() = default;
 
     /****************** sms basic ******************/
-    int32_t ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result) override;
-    int32_t ImsSetSmsConfigResponse(const ImsResponseInfo &info) override;
-    int32_t ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig) override;
+    int32_t ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result) override;
+    int32_t ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
+    int32_t ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig) override;
 
 private:
     static inline BrokerDelegator<ImsSmsCallbackProxy> delegator_;

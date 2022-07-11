@@ -60,13 +60,13 @@ int SmsCommonUtils::Pack7bitChar(const unsigned char *userData, int dataLen, int
     return dstIdx;
 }
 
-int SmsCommonUtils::Unpack7bitChar(
-    const unsigned char *tpdu, unsigned char dataLen, int fillBits, unsigned char *unpackData)
+int SmsCommonUtils::Unpack7bitChar(const unsigned char *tpdu, unsigned char dataLen, int fillBits,
+    unsigned char *unpackData, unsigned int unpackDataLen)
 {
     int srcIdx = 0;
     int dstIdx = 0;
     auto shift = static_cast<unsigned int>(fillBits);
-    if (unpackData == nullptr || tpdu == nullptr) {
+    if (unpackData == nullptr || tpdu == nullptr || dataLen > unpackDataLen) {
         return dstIdx;
     }
     if (shift > 0) {

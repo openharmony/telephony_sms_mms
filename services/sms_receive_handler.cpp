@@ -23,6 +23,7 @@
 #include "string_utils.h"
 #include "gsm_sms_message.h"
 #include "telephony_log_wrapper.h"
+#include "telephony_permission.h"
 #include "radio_event.h"
 
 namespace OHOS {
@@ -205,6 +206,9 @@ void SmsReceiveHandler::SendBroadcast(
     }
     CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(true);
+    std::vector<std::string> smsPermissions;
+    smsPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
+    publishInfo.SetSubscriberPermissions(smsPermissions);
     bool publishResult = CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     if (!publishResult) {
         TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");

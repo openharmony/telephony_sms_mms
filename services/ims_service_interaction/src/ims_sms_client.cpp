@@ -26,19 +26,49 @@ ImsSmsClient::ImsSmsClient() = default;
 
 ImsSmsClient::~ImsSmsClient()
 {
-    if (imsSmsProxy_ != nullptr) {
-        imsSmsProxy_.clear();
-        imsSmsProxy_ = nullptr;
-    }
+    UnInit();
 }
 
 void ImsSmsClient::Init()
 {
-    if (!IsConnect()) {
-        GetImsSmsProxy();
+    TELEPHONY_LOGI("Init start");
+    if (IsConnect()) {
+        TELEPHONY_LOGE("Init, IsConnect return true");
+        return;
     }
-    // register callback
-    RegisterImsSmsCallback();
+
+    GetImsSmsProxy();
+    if (imsSmsProxy_ == nullptr) {
+        TELEPHONY_LOGE("Init, get ims sms proxy failed!");
+    }
+
+    statusChangeListener_ = new (std::nothrow) SystemAbilityListener();
+    if (statusChangeListener_ == nullptr) {
+        TELEPHONY_LOGE("Init, failed to create statusChangeListener.");
+        return;
+    }
+    auto managerPtr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (managerPtr == nullptr) {
+        TELEPHONY_LOGE("Init, get system ability manager error.");
+        return;
+    }
+    int32_t ret = managerPtr->SubscribeSystemAbility(TELEPHONY_IMS_SYS_ABILITY_ID,
+        statusChangeListener_);
+    if (ret) {
+        TELEPHONY_LOGE("Init, failed to subscribe sa:%{public}d", TELEPHONY_IMS_SYS_ABILITY_ID);
+        return;
+    }
+    TELEPHONY_LOGI("Init successfully");
+}
+
+void ImsSmsClient::UnInit()
+{
+    Clean();
+    if (statusChangeListener_ != nullptr) {
+        statusChangeListener_.clear();
+        statusChangeListener_ = nullptr;
+    }
+    handlerMap_.clear();
 }
 
 sptr<ImsSmsInterface> ImsSmsClient::GetImsSmsProxy()
@@ -66,11 +96,14 @@ sptr<ImsSmsInterface> ImsSmsClient::GetImsSmsProxy()
         TELEPHONY_LOGE("GetImsSmsProxy return, ImsCallRemoteObjectPtr is nullptr.");
         return nullptr;
     }
+
     imsSmsProxy_ = iface_cast<ImsSmsInterface>(imsSmsRemoteObjectPtr);
     if (imsSmsProxy_ == nullptr) {
         TELEPHONY_LOGE("GetImsSmsProxy return, iface_cast<imsSmsProxy_> failed!");
         return nullptr;
     }
+    // register callback
+    RegisterImsSmsCallback();
     TELEPHONY_LOGI("GetImsSmsProxy success.");
     return imsSmsProxy_;
 }
@@ -112,22 +145,106 @@ int32_t ImsSmsClient::ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMe
 
 int32_t ImsSmsClient::ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig)
 {
-    if (imsSmsProxy_ != nullptr) {
-        return imsSmsProxy_->ImsSetSmsConfig(slotId, imsSmsConfig);
-    } else {
-        TELEPHONY_LOGE("imsSmsProxy_ is null!");
-        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    if (ReConnectService() != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("ipc reconnect failed!");
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
+    return imsSmsProxy_->ImsSetSmsConfig(slotId, imsSmsConfig);
 }
 
 int32_t ImsSmsClient::ImsGetSmsConfig(int32_t slotId)
 {
-    if (imsSmsProxy_ != nullptr) {
-        return imsSmsProxy_->ImsGetSmsConfig(slotId);
-    } else {
-        TELEPHONY_LOGE("imsSmsProxy_ is null!");
+    if (ReConnectService() != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("ipc reconnect failed!");
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    return imsSmsProxy_->ImsGetSmsConfig(slotId);
+}
+
+int32_t ImsSmsClient::RegisterImsSmsCallbackHandler(int32_t slotId,
+    const std::shared_ptr<AppExecFwk::EventHandler> &handler)
+{
+    if (handler == nullptr) {
+        TELEPHONY_LOGE("RegisterImsSmsCallbackHandler return, handler is null.");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    handlerMap_.insert(std::make_pair(slotId, handler));
+    TELEPHONY_LOGI("RegisterImsSmsCallbackHandler success.");
+    return TELEPHONY_SUCCESS;
+}
+
+std::shared_ptr<AppExecFwk::EventHandler> ImsSmsClient::GetHandler(int32_t slotId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return handlerMap_[slotId];
+}
+
+int32_t ImsSmsClient::ReConnectService()
+{
+    if (imsSmsProxy_ == nullptr) {
+        TELEPHONY_LOGI("try to reconnect ims sms service now...");
+        GetImsSmsProxy();
+        if (imsSmsProxy_ == nullptr) {
+            TELEPHONY_LOGE("Connect service failed");
+            return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+        }
+    }
+    return TELEPHONY_SUCCESS;
+}
+
+void ImsSmsClient::Clean()
+{
+    Utils::UniqueWriteGuard<Utils::RWLock> guard(rwClientLock_);
+    if (imsCoreServiceProxy_ != nullptr) {
+        imsCoreServiceProxy_.clear();
+        imsCoreServiceProxy_ = nullptr;
+    }
+    if (imsSmsProxy_ != nullptr) {
+        imsSmsProxy_.clear();
+        imsSmsProxy_ = nullptr;
+    }
+    if (imsSmsCallback_ != nullptr) {
+        imsSmsCallback_.clear();
+        imsSmsCallback_ = nullptr;
+    }
+}
+
+void ImsSmsClient::SystemAbilityListener::OnAddSystemAbility(int32_t systemAbilityId,
+    const std::string& deviceId)
+{
+    TELEPHONY_LOGI("SA:%{public}d is added!", systemAbilityId);
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        TELEPHONY_LOGE("add SA:%{public}d is invalid!", systemAbilityId);
+        return;
+    }
+
+    auto imsSmsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
+    if (imsSmsClient->IsConnect()) {
+        TELEPHONY_LOGI("SA:%{public}d already connected!", systemAbilityId);
+        return;
+    }
+
+    imsSmsClient->Clean();
+    int32_t res = imsSmsClient->ReConnectService();
+    if (res != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("SA:%{public}d reconnect service failed!", systemAbilityId);
+        return;
+    }
+    TELEPHONY_LOGI("SA:%{public}d reconnect service successfully!", systemAbilityId);
+}
+
+void ImsSmsClient::SystemAbilityListener::OnRemoveSystemAbility(int32_t systemAbilityId,
+    const std::string& deviceId)
+{
+    TELEPHONY_LOGI("SA:%{public}d is removed!", systemAbilityId);
+    auto imsSmsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
+    if (!imsSmsClient->IsConnect()) {
+        return;
+    }
+
+    imsSmsClient->Clean();
 }
 } // namespace Telephony
 } // namespace OHOS

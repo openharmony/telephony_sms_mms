@@ -36,7 +36,8 @@
                 "core_service",
                 "dmsfwk_standard",
                 "ipc",
-                "native_appdatamgr",
+                "dataability",
+                "relational_store",
                 "ril_adapter",
                 "safwk",
                 "samgr_standard",
@@ -63,7 +64,8 @@
                 }
             ],
             "test": [
-                "//base/telephony/sms_mms/test:unittest"
+                "//base/telephony/sms_mms/test:unittest",
+                "//base/telephony/sms_mms/test/fuzztest:fuzztest"
             ]
         }
     }

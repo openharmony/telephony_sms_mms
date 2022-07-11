@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Telephony {
 class SmsCbData {
 public:
-    using CbData = struct {
+    struct CbData {
         int32_t slotId = -1;
         std::string msgBody;
         uint16_t serial = 0;

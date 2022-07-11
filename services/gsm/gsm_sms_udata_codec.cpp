@@ -135,7 +135,7 @@ int GsmSmsUDataCodec::EncodeGSMData(const struct SmsUserData *pUserData, char *p
     TELEPHONY_LOGI("fillBits [%{public}d] dataLen [%{public}d]", fillBits, pUserData->length);
     /* Set UDL, UDHL */
     if (udhl > 0) {
-        pEncodeData[0] = ((((int)udhl + 1) * 0x08) + fillBits + (pUserData->length * 0x07)) / 0x07;
+        pEncodeData[0] = (unsigned char)(((((int)udhl + 1) * 0x08) + fillBits + (pUserData->length * 0x07)) / 0x07);
         pEncodeData[1] = udhl;
     } else {
         pEncodeData[0] = (char)pUserData->length;
@@ -171,7 +171,7 @@ int GsmSmsUDataCodec::Encode8bitData(const struct SmsUserData *pUserData, char *
     TELEPHONY_LOGI("dataLen [%{public}d]", pUserData->length);
     /* Set UDL, UDHL */
     if (udhl > 0) {
-        pEncodeData[0] = ((int)udhl + 1) + fillBits + pUserData->length;
+        pEncodeData[0] = (unsigned char)(((int)udhl + 1) + fillBits + pUserData->length);
         pEncodeData[1] = udhl;
     } else {
         pEncodeData[0] = (char)pUserData->length;
@@ -206,7 +206,7 @@ int GsmSmsUDataCodec::EncodeUCS2Data(const struct SmsUserData *pUserData, char *
     TELEPHONY_LOGI("fillBits [%{public}d] dataLen [%{public}d]", fillBits, pUserData->length);
     /* Set UDL, UDHL */
     if (udhl > 0) {
-        pEncodeData[0] = ((int)udhl + 1) + fillBits + pUserData->length;
+        pEncodeData[0] = (unsigned char)(((int)udhl + 1) + fillBits + pUserData->length);
         pEncodeData[1] = udhl;
     } else {
         pEncodeData[0] = (char)pUserData->length;
@@ -253,7 +253,7 @@ int GsmSmsUDataCodec::DecodeGSMData(const unsigned char *pTpdu, const int tpduLe
         udhl = pTpdu[offset++];
         TELEPHONY_LOGI("udhl = %{public}d", udhl);
         pUserData->headerCnt = 0;
-        for (int i = 0; offset < udhl; i++) {
+        for (int i = 0; offset < udhl && i < MAX_UD_HEADER_NUM; i++) {
             headerLen = DecodeHeader(&(pTpdu[offset]), &(pUserData->header[i]));
             if (headerLen <= 0) {
                 TELEPHONY_LOGE("Error to Header. headerLen [%{public}d]", headerLen);
@@ -279,8 +279,8 @@ int GsmSmsUDataCodec::DecodeGSMData(const unsigned char *pTpdu, const int tpduLe
     }
     TELEPHONY_LOGI("fillBits = %{public}d udhl = %{public}d udl = %{public}d offset = %{public}d", fillBits, udhl,
         udl, offset);
-    pUserData->length =
-        SmsCommonUtils::Unpack7bitChar(&(pTpdu[offset]), udl, fillBits, (unsigned char *)pUserData->data);
+    pUserData->length = SmsCommonUtils::Unpack7bitChar(&(pTpdu[offset]), udl, fillBits,
+        (unsigned char *)pUserData->data, MAX_USER_DATA_LEN + 1);
     return pUserData->length;
 }
 
@@ -323,7 +323,7 @@ int GsmSmsUDataCodec::Decode8bitData(
         udhl = pTpdu[offset++];
         TELEPHONY_LOGI("udhl = %{public}d", udhl);
         pUserData->headerCnt = 0;
-        for (int i = 0; offset < udhl; i++) {
+        for (int i = 0; offset < udhl && i < MAX_UD_HEADER_NUM; i++) {
             headerLen = DecodeHeader(&(pTpdu[offset]), &(pUserData->header[i]));
             if (headerLen <= 0) {
                 pUserData->length = 0;
@@ -385,7 +385,7 @@ int GsmSmsUDataCodec::DecodeUCS2Data(const unsigned char *pTpdu, const int tpduL
         /* UDHL */
         udhl = pTpdu[offset++];
         pUserData->headerCnt = 0;
-        for (int i = 0; offset < udhl; i++) {
+        for (int i = 0; offset < udhl && i < MAX_UD_HEADER_NUM; i++) {
             headerLen = DecodeHeader(&(pTpdu[offset]), &(pUserData->header[i]));
             if (headerLen <= 0) {
                 ResetUserData(*pUserData);

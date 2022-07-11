@@ -17,8 +17,14 @@
 #define TELEPHONY_IMS_SMS_CLIENT_H
 
 #include "singleton.h"
+#include "rwlock.h"
 #include "ims_sms_interface.h"
 #include "ims_core_service_interface.h"
+
+#include "event_handler.h"
+#include "event_runner.h"
+#include "iremote_stub.h"
+#include "system_ability_status_change_stub.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -40,17 +46,45 @@ public:
      */
     bool IsConnect() const;
     void Init();
+    void UnInit();
     int32_t RegisterImsSmsCallback();
 
     /****************** sms basic ******************/
     int32_t ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo);
     int32_t ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig);
     int32_t ImsGetSmsConfig(int32_t slotId);
+    int32_t RegisterImsSmsCallbackHandler(int32_t slotId, const std::shared_ptr<AppExecFwk::EventHandler> &handler);
+
+    /**
+     * Get Handler
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @return AppExecFwk::EventHandler
+     */
+    std::shared_ptr<AppExecFwk::EventHandler> GetHandler(int32_t slotId);
+
+    int32_t ReConnectService();
+    void Clean();
+
+private:
+    class SystemAbilityListener : public SystemAbilityStatusChangeStub {
+    public:
+        SystemAbilityListener() {}
+        ~SystemAbilityListener() {}
+    public:
+        void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+        void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    };
 
 private:
     sptr<ImsCoreServiceInterface> imsCoreServiceProxy_ = nullptr;
     sptr<ImsSmsInterface> imsSmsProxy_ = nullptr;
     sptr<ImsSmsCallbackInterface> imsSmsCallback_ = nullptr;
+    std::map<int32_t, std::shared_ptr<AppExecFwk::EventHandler>> handlerMap_;
+    Utils::RWLock rwClientLock_;
+    std::mutex mutex_;
+    sptr<ISystemAbilityStatusChange> statusChangeListener_ = nullptr;
 };
 } // namespace Telephony
 } // namespace OHOS

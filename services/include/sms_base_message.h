@@ -57,7 +57,7 @@ struct SplitInfo {
     MSG_LANGUAGE_ID_T langId;
 };
 
-using LengthInfo = struct {
+struct LengthInfo {
     uint8_t dcs = 0;
     uint8_t msgSegCount = 0;
     uint16_t msgEncodeCount = 0;

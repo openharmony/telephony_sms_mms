@@ -55,6 +55,9 @@ public:
     virtual void Init() = 0;
     virtual void ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) = 0;
     virtual void ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) = 0;
+    virtual bool IsImsSmsSupported() = 0;
+    virtual bool SetImsSmsConfig(int32_t enable) = 0;
+    virtual void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) = 0;
 
     static void SendResultCallBack(
         const std::shared_ptr<SmsSendIndexer> &indexer, ISendShortMessageCallback::SmsSendResult result);
@@ -63,6 +66,13 @@ public:
     void SetNetworkState(bool isImsNetDomain, int32_t voiceServiceState);
     std::optional<int32_t> GetNetworkId();
     void SetNetworkId(std::optional<int32_t> &id);
+    void SyncSwitchISmsResponse();
+
+public:
+    bool resISMSReady_ = false;
+    int32_t imsSmsCfg_ = 0;
+    std::mutex ctx_;
+    std::condition_variable cv_;
 
 protected:
     void SendCacheMapTimeoutCheck();
