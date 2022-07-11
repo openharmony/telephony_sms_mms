@@ -186,33 +186,28 @@ void SmsPersistHelper::ConvertIntToIndexer(
 {
     int32_t columnInt;
     int columnIndex;
-    int32_t ret = resultSet->GetColumnIndex(SmsMmsData::FORMAT, columnIndex);
-    ret = resultSet->GetInt(columnIndex, columnInt);
-    if (ret == 0) {
+    resultSet->GetColumnIndex(SmsMmsData::FORMAT, columnIndex);
+    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
         info.SetIsCdma(columnInt != 0);
     }
 
-    ret = resultSet->GetColumnIndex(SmsMmsData::SMS_SUBSECTION_ID, columnIndex);
-    ret = resultSet->GetInt(columnIndex, columnInt);
-    if (ret == 0) {
+    resultSet->GetColumnIndex(SmsMmsData::SMS_SUBSECTION_ID, columnIndex);
+    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
         info.SetMsgRefId(columnInt);
     }
 
-    ret = resultSet->GetColumnIndex(SmsMmsData::SIZE, columnIndex);
-    ret = resultSet->GetInt(columnIndex, columnInt);
-    if (ret == 0) {
+    resultSet->GetColumnIndex(SmsMmsData::SIZE, columnIndex);
+    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
         info.SetMsgCount(columnInt);
     }
 
-    ret = resultSet->GetColumnIndex(SmsMmsData::SUBSECTION_INDEX, columnIndex);
-    ret = resultSet->GetInt(columnIndex, columnInt);
-    if (ret == 0) {
+    resultSet->GetColumnIndex(SmsMmsData::SUBSECTION_INDEX, columnIndex);
+    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
         info.SetMsgSeqId(columnInt);
     }
 
-    ret = resultSet->GetColumnIndex(SmsMmsData::DEST_PORT, columnIndex);
-    ret = resultSet->GetInt(columnIndex, columnInt);
-    if (ret == 0) {
+    resultSet->GetColumnIndex(SmsMmsData::DEST_PORT, columnIndex);
+    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
         info.SetDestPort(columnInt);
     }
 }
@@ -222,31 +217,26 @@ void SmsPersistHelper::ConvertStringToIndexer(
 {
     int columnIndex;
     std::string columnValue;
-    int32_t ret = resultSet->GetColumnIndex(SmsMmsData::RECEIVER_NUMBER, columnIndex);
-    ret = resultSet->GetString(columnIndex, columnValue);
-    if (ret == 0) {
+    resultSet->GetColumnIndex(SmsMmsData::RECEIVER_NUMBER, columnIndex);
+    if (resultSet->GetString(columnIndex, columnValue) == 0) {
         info.SetVisibleAddress(columnValue);
     }
-    ret = resultSet->GetColumnIndex(SmsMmsData::SENDER_NUMBER, columnIndex);
-    ret = resultSet->GetString(columnIndex, columnValue);
-    if (ret == 0) {
+    resultSet->GetColumnIndex(SmsMmsData::SENDER_NUMBER, columnIndex);
+    if (resultSet->GetString(columnIndex, columnValue) == 0) {
         info.SetOriginatingAddress(columnValue);
     }
 
-    ret = resultSet->GetColumnIndex(SmsMmsData::START_TIME, columnIndex);
-    ret = resultSet->GetString(columnIndex, columnValue);
-    if (ret == 0) {
+    resultSet->GetColumnIndex(SmsMmsData::START_TIME, columnIndex);
+    if (resultSet->GetString(columnIndex, columnValue) == 0) {
         info.SetTimestamp(std::stol(columnValue));
     }
-    ret = resultSet->GetColumnIndex(SmsMmsData::END_TIME, columnIndex);
-    ret = resultSet->GetString(columnIndex, columnValue);
-    if (ret == 0) {
+    resultSet->GetColumnIndex(SmsMmsData::END_TIME, columnIndex);
+    if (resultSet->GetString(columnIndex, columnValue) == 0) {
         info.SetTimestamp(std::stol(columnValue));
     }
 
-    ret = resultSet->GetColumnIndex(SmsMmsData::RAW_PUD, columnIndex);
-    ret = resultSet->GetString(columnIndex, columnValue);
-    if (ret == 0) {
+    resultSet->GetColumnIndex(SmsMmsData::RAW_PUD, columnIndex);
+    if (resultSet->GetString(columnIndex, columnValue) == 0) {
         info.SetPdu(StringUtils::HexToByteVector(columnValue));
     }
 }

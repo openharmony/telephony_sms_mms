@@ -38,6 +38,7 @@ ohos_unittest("tel_sms_mms_gtest") {
     defines += [ "TEL_TEST_UNSUPPORT" ]
   }
   deps = [
+    "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms:tel_sms_mms",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",

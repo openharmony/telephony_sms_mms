@@ -369,8 +369,7 @@ void ParseAddressArr(napi_env env, napi_value outValue, std::string name, std::v
         napi_value addressObj = nullptr;
         napi_create_object(env, &addressObj);
         NapiUtil::SetPropertyStringUtf8(env, addressObj, "address", addressArr[i].GetAddressString());
-        NapiUtil::SetPropertyInt32(
-            env, addressObj, "charset", static_cast<int32_t>(addressArr[i].GetAddressCharset()));
+        NapiUtil::SetPropertyInt32(env, addressObj, "charset", static_cast<int32_t>(addressArr[i].GetAddressCharset()));
         napi_set_element(env, toArr, i, addressObj);
     }
     napi_set_named_property(env, outValue, name.c_str(), toArr);
@@ -394,8 +393,7 @@ void ParseSendReqValue(napi_env env, napi_value object, MmsSendReqContext &sendR
     NapiUtil::SetPropertyInt32(env, sendReqObj, "priority", static_cast<int32_t>(sendReqContext.priority));
     NapiUtil::SetPropertyInt32(
         env, sendReqObj, "senderVisibility", static_cast<int32_t>(sendReqContext.senderVisibility));
-    NapiUtil::SetPropertyInt32(
-        env, sendReqObj, "deliveryReport", static_cast<int32_t>(sendReqContext.deliveryReport));
+    NapiUtil::SetPropertyInt32(env, sendReqObj, "deliveryReport", static_cast<int32_t>(sendReqContext.deliveryReport));
     NapiUtil::SetPropertyInt32(env, sendReqObj, "readReport", static_cast<int32_t>(sendReqContext.readReport));
     NapiUtil::SetPropertyStringUtf8(env, sendReqObj, "contentType", sendReqContext.contentType);
     napi_set_named_property(env, object, mmsTypeKey.c_str(), sendReqObj);
@@ -407,8 +405,7 @@ void ParseSendConfValue(napi_env env, napi_value object, MmsSendConfContext &sen
     TELEPHONY_LOGI("napi_mms  ParseSendConfValue start");
     napi_value sendConfObj = nullptr;
     napi_create_object(env, &sendConfObj);
-    NapiUtil::SetPropertyInt32(
-        env, sendConfObj, "responseState", static_cast<int32_t>(sendConfContext.responseState));
+    NapiUtil::SetPropertyInt32(env, sendConfObj, "responseState", static_cast<int32_t>(sendConfContext.responseState));
     NapiUtil::SetPropertyStringUtf8(env, sendConfObj, "transactionId", sendConfContext.transactionId);
     NapiUtil::SetPropertyInt32(env, sendConfObj, "version", sendConfContext.version);
     NapiUtil::SetPropertyStringUtf8(env, sendConfObj, "messageId", sendConfContext.messageId);
@@ -446,8 +443,7 @@ void ParseRespIndValue(napi_env env, napi_value object, MmsRespIndContext &respI
     NapiUtil::SetPropertyStringUtf8(env, respIndObj, "transactionId", respIndContext.transactionId);
     NapiUtil::SetPropertyInt32(env, respIndObj, "status", static_cast<int32_t>(respIndContext.status));
     NapiUtil::SetPropertyInt32(env, respIndObj, "version", static_cast<int32_t>(respIndContext.version));
-    NapiUtil::SetPropertyInt32(
-        env, respIndObj, "reportAllowed", static_cast<int32_t>(respIndContext.reportAllowed));
+    NapiUtil::SetPropertyInt32(env, respIndObj, "reportAllowed", static_cast<int32_t>(respIndContext.reportAllowed));
     napi_set_named_property(env, object, mmsTypeKey.c_str(), respIndObj);
     TELEPHONY_LOGI("napi_mms  ParseRespIndValue end");
 }
@@ -465,8 +461,7 @@ void ParseRetrieveConfValue(napi_env env, napi_value object, MmsRetrieveConfCont
     ParseAddress(env, retrieveConfObj, "from", retrieveConfContext.from);
     ParseAddressArr(env, retrieveConfObj, "cc", retrieveConfContext.cc);
     NapiUtil::SetPropertyStringUtf8(env, retrieveConfObj, "subject", retrieveConfContext.subject);
-    NapiUtil::SetPropertyInt32(
-        env, retrieveConfObj, "priority", static_cast<int32_t>(retrieveConfContext.priority));
+    NapiUtil::SetPropertyInt32(env, retrieveConfObj, "priority", static_cast<int32_t>(retrieveConfContext.priority));
     NapiUtil::SetPropertyInt32(
         env, retrieveConfObj, "deliveryReport", static_cast<int32_t>(retrieveConfContext.deliveryReport));
     NapiUtil::SetPropertyInt32(
@@ -516,8 +511,7 @@ void ParseReadOrigIndValue(napi_env env, napi_value object, MmsReadOrigIndContex
     ParseAddressArr(env, readOrigIndObj, "to", readOrigIndContext.to);
     ParseAddress(env, readOrigIndObj, "from", readOrigIndContext.from);
     NapiUtil::SetPropertyInt64(env, readOrigIndObj, "date", readOrigIndContext.date);
-    NapiUtil::SetPropertyInt32(
-        env, readOrigIndObj, "readStatus", static_cast<int32_t>(readOrigIndContext.readStatus));
+    NapiUtil::SetPropertyInt32(env, readOrigIndObj, "readStatus", static_cast<int32_t>(readOrigIndContext.readStatus));
     napi_set_named_property(env, object, mmsTypeKey.c_str(), readOrigIndObj);
     TELEPHONY_LOGI("napi_mms  ParseReadOrigIndValue end");
 }
@@ -532,8 +526,7 @@ void ParseReadRecIndValue(napi_env env, napi_value object, MmsReadRecIndContext 
     ParseAddressArr(env, readRecIndObj, "to", readRecIndContext.to);
     ParseAddress(env, readRecIndObj, "from", readRecIndContext.from);
     NapiUtil::SetPropertyInt64(env, readRecIndObj, "date", readRecIndContext.date);
-    NapiUtil::SetPropertyInt32(
-        env, readRecIndObj, "readStatus", static_cast<int32_t>(readRecIndContext.readStatus));
+    NapiUtil::SetPropertyInt32(env, readRecIndObj, "readStatus", static_cast<int32_t>(readRecIndContext.readStatus));
     napi_set_named_property(env, object, mmsTypeKey.c_str(), readRecIndObj);
     TELEPHONY_LOGI("napi_mms  ParseReadRecIndValue end");
 }
@@ -589,8 +582,7 @@ void DecodeMmsCallback(napi_env env, napi_status status, void *data)
     }
     auto decodeMmsContext = static_cast<DecodeMmsContext *>(data);
     napi_value callbackValue = nullptr;
-    callbackValue =
-        NapiUtil::CreateErrorMessage(env, "decode mms error,cause napi_status = " + std::to_string(status));
+
     if (status == napi_ok) {
         if (decodeMmsContext->resolved) {
             callbackValue = CreateDecodeMmsValue(env, *decodeMmsContext);
@@ -909,8 +901,7 @@ bool ReadEncodeMmsType(napi_env env, napi_value napiValue, MmsNotificationIndCon
     notificationInd.deliveryReport = GetNapiUint8Value(env, napiValue, "deliveryReport");
     notificationInd.contentLocation = GetNapiStringValue(env, napiValue, "contentLocation");
     notificationInd.contentClass = GetNapiInt32Value(env, napiValue, "contentClass");
-    notificationInd.charset =
-        GetNapiUint32Value(env, napiValue, "charset", static_cast<uint32_t>(MmsCharSets::UTF_8));
+    notificationInd.charset = GetNapiUint32Value(env, napiValue, "charset", static_cast<uint32_t>(MmsCharSets::UTF_8));
     return true;
 }
 
@@ -1012,8 +1003,7 @@ MmsAttachmentContext BuildMmsAttachment(napi_env env, napi_value value)
     attachmentContext.fileName = GetNapiStringValue(env, value, "fileName");
     attachmentContext.contentId = GetNapiStringValue(env, value, "contentId");
     attachmentContext.contentLocation = GetNapiStringValue(env, value, "contentLocation");
-    attachmentContext.contentDisposition =
-        parseDispositionValue(GetNapiInt32Value(env, value, "contentDisposition"));
+    attachmentContext.contentDisposition = parseDispositionValue(GetNapiInt32Value(env, value, "contentDisposition"));
     attachmentContext.contentTransferEncoding = GetNapiStringValue(env, value, "contentTransferEncoding");
     attachmentContext.contentType = GetNapiStringValue(env, value, "contentType");
     attachmentContext.isSmil = GetNapiBooleanValue(env, value, "isSmil");
@@ -1357,8 +1347,7 @@ void EncodeMmsCallback(napi_env env, napi_status status, void *data)
             callbackValue = NapiUtil::CreateErrorMessage(env, "EncodeMms error by ipc");
         }
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "EncodeMms  error,napi_status = " + std ::to_string(status));
+        callbackValue = NapiUtil::CreateErrorMessage(env, "EncodeMms  error,napi_status = " + std ::to_string(status));
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }

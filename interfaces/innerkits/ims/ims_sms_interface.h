@@ -25,14 +25,14 @@ class ImsSmsInterface : public IRemoteBroker {
 public:
     enum {
         /****************** sms basic ******************/
-        IMS_SEND_MESSAGE = 0,
+        IMS_SEND_MESSAGE = 6000,
 
         /****************** sms config ******************/
-        IMS_SET_SMS_CONFIG = 100,
+        IMS_SET_SMS_CONFIG = 6100,
         IMS_GET_SMS_CONFIG,
 
         /****************** callback ******************/
-        IMS_SMS_REGISTER_CALLBACK = 500,
+        IMS_SMS_REGISTER_CALLBACK = 6500,
     };
     
     /**

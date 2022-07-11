@@ -19,6 +19,7 @@
 #include "iremote_broker.h"
 
 #include "ims_sms_types.h"
+#include "hril_types.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -36,30 +37,35 @@ public:
     };
 
     /**
-     * ImsSendMessageResponse
+     * @brief ImsSendMessageResponse the result of send the sms by IMS.
      *
-     * @param ImsResponseInfo
-     * @param SendSmsResultInfo defined in hril_sms_parcel.h
-     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param result Indicates the result of send action.
+     * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
-    virtual int32_t ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result) = 0;
+    virtual int32_t ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result) = 0;
 
     /**
-     * ImsSetSmsConfigResponse
+     * @brief ImsSetSmsConfigResponse the result for enable or disable IMS SMS.
      *
-     * @param info ImsResponseInfo
-     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param info Indicates set action was success or failure.
+     * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
-    virtual int32_t ImsSetSmsConfigResponse(const ImsResponseInfo &info) = 0;
+    virtual int32_t ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) = 0;
 
     /**
-     * GetImsSmsConfigResponse
+     * @brief ImsGetSmsConfigResponse the result for get IMS SMS config.
      *
-     * @param info ImsResponseInfo
-     * @param imsSmsConfig 1:ims sms is enabled, 0:ims sms is disabled
-     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param imsSmsConfig Indicates Ims sms was enabled or disabled.
+     * ranging {@code 0} Ims sms was disabled {@code 1} Ims sms was enabled.
+     * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
-    virtual int32_t ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig) = 0;
+    virtual int32_t ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig) = 0;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.Telephony.ImsSmsCallback");

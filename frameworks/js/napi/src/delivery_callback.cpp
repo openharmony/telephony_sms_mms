@@ -36,6 +36,10 @@ DeliveryCallback::~DeliveryCallback()
 void CompleteSmsDeliveryWork(uv_work_t *work, int status)
 {
     TELEPHONY_LOGI("CompleteSmsDeliveryWork start");
+    if (work == nullptr) {
+        TELEPHONY_LOGE("CompleteSmsDeliveryWork work is nullptr");
+        return;
+    }
     std::unique_ptr<DeliveryCallbackContext> pContext(static_cast<DeliveryCallbackContext *>(work->data));
     if (pContext == nullptr) {
         TELEPHONY_LOGE("CompleteSmsDeliveryWork pContext is nullptr!");
@@ -80,9 +84,8 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     napi_delete_reference(env_, thisVarRef_);
     napi_delete_reference(env_, callbackRef_);
     napi_close_handle_scope(env_, scope);
-    if (work != nullptr) {
-        delete work;
-    }
+    delete work;
+    work = nullptr;
     TELEPHONY_LOGI("CompleteSmsDeliveryWork end");
 }
 

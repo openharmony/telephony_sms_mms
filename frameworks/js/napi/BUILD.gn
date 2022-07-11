@@ -45,10 +45,10 @@ ohos_shared_library("sms") {
 
   external_deps = [
     "core_service:tel_core_service_api",
+    "drivers_interface_ril:hril_innerkits",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "ril_adapter:hril_innerkits",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
   ]

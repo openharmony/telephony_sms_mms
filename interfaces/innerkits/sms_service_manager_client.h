@@ -51,6 +51,7 @@ public:
     std::vector<ShortMessage> GetAllSimMessages(int32_t slotId);
     bool SetCBConfig(
         int32_t slotId, bool enable, uint32_t startMessageId, uint32_t endMessageId, uint8_t ranType);
+    bool SetImsSmsConfig(int32_t slotId, int32_t enable);
     std::vector<std::u16string> SplitMessage(const std::u16string &message);
     bool GetSmsSegmentsInfo(int32_t slotId, const std::u16string &message, bool force7BitCode,
         ISmsServiceInterface::SmsSegmentsInfo &segInfo);

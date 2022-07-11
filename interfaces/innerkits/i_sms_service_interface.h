@@ -37,6 +37,7 @@ public:
         UPDATE_SIM_MESSAGE,
         GET_ALL_SIM_MESSAGE,
         SET_CB_CONFIG,
+        SET_IMS_SMS_CONFIG,
         SET_DEFAULT_SMS_SLOT_ID,
         GET_DEFAULT_SMS_SLOT_ID,
         SPLIT_MESSAGE,
@@ -68,7 +69,7 @@ public:
         SMS_ENCODING_16BIT,
     };
 
-    using SmsSegmentsInfo = struct {
+    struct SmsSegmentsInfo {
         int32_t msgSegCount = 0;
         int32_t msgEncodingCount = 0;
         int32_t msgRemainCount = 0;
@@ -188,6 +189,16 @@ public:
      */
     virtual bool SetCBConfig(
         int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) = 0;
+
+    /**
+     * @brief SetImsSmsConfig enable or disable IMS SMS.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param enable Indicates enable or disable Ims sms
+     * ranging {@code 0} disable Ims sms {@code 1} enable Ims sms
+     * @return Returns {@code true} if enable or disable Ims Sms success; returns {@code false} otherwise.
+     */
+    virtual bool SetImsSmsConfig(int32_t slotId, int32_t enable) = 0;
 
     /**
      * @brief SetDefaultSmsSlotId

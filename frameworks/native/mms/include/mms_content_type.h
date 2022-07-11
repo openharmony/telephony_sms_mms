@@ -110,7 +110,7 @@ enum class ContentTypes {
     CONTENT_TYPE_UNDOWN                          = 0xFF
 };
 
-using KeyValue = struct {
+struct KeyValue {
     ContentTypes key;
     const char *value;
 };

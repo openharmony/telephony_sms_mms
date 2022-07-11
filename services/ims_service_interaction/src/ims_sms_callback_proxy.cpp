@@ -23,7 +23,7 @@ namespace Telephony {
 ImsSmsCallbackProxy::ImsSmsCallbackProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<ImsSmsCallbackInterface>(impl) {}
 
-int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result)
+int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result)
 {
     MessageOption option;
     MessageParcel in;
@@ -32,7 +32,7 @@ int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(const ImsResponseInfo &info,
         TELEPHONY_LOGE("write descriptor token fail!");
         return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    if (!in.WriteRawData((const void *)&info, sizeof(ImsResponseInfo))) {
+    if (!in.WriteInt32(slotId)) {
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
     if (!in.WriteRawData((const void *)&result, sizeof(SendSmsResultInfo))) {
@@ -45,7 +45,7 @@ int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(const ImsResponseInfo &info,
     return error;
 }
 
-int32_t ImsSmsCallbackProxy::ImsSetSmsConfigResponse(const ImsResponseInfo &info)
+int32_t ImsSmsCallbackProxy::ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info)
 {
     MessageOption option;
     MessageParcel in;
@@ -53,7 +53,12 @@ int32_t ImsSmsCallbackProxy::ImsSetSmsConfigResponse(const ImsResponseInfo &info
     if (!in.WriteInterfaceToken(ImsSmsCallbackProxy::GetDescriptor())) {
         return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    if (!in.WriteRawData((const void *)&info, sizeof(ImsResponseInfo))) {
+    if (!in.WriteInt32(slotId)) {
+        TELEPHONY_LOGE("write slotId fail!");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    if (!in.WriteRawData((const void *)&info, sizeof(HRilRadioResponseInfo))) {
+        TELEPHONY_LOGE("write HRilRadioResponseInfo fail!");
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
     int32_t error = Remote()->SendRequest(IMS_SET_SMS_CONFIG, in, out, option);
@@ -63,7 +68,7 @@ int32_t ImsSmsCallbackProxy::ImsSetSmsConfigResponse(const ImsResponseInfo &info
     return error;
 }
 
-int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig)
+int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig)
 {
     MessageOption option;
     MessageParcel in;
@@ -71,8 +76,8 @@ int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(const ImsResponseInfo &info
     if (!in.WriteInterfaceToken(ImsSmsCallbackProxy::GetDescriptor())) {
         return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    if (!in.WriteRawData((const void *)&info, sizeof(ImsResponseInfo))) {
-        TELEPHONY_LOGE("write info fail!");
+    if (!in.WriteInt32(slotId)) {
+        TELEPHONY_LOGE("write slotId fail!");
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
     if (!in.WriteInt32(imsSmsConfig)) {

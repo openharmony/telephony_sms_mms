@@ -60,10 +60,24 @@ void SmsSender::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
             StatusReportAnalysis(event);
             break;
         }
+        case RadioEvent::RADIO_GET_IMS_SMS: {
+            StatusReportSetImsSms(event);
+            SyncSwitchISmsResponse();
+            break;
+        }
         default:
             TELEPHONY_LOGE("SmsSender::ProcessEvent Unknown %{public}d", eventId);
             break;
     }
+}
+
+void SmsSender::SyncSwitchISmsResponse()
+{
+    std::unique_lock<std::mutex> lck(ctx_);
+    resISMSReady_ = true;
+    TELEPHONY_LOGI(
+        "resISMSReady_ = %{public}d", resISMSReady_);
+    cv_.notify_one();
 }
 
 void SmsSender::HandleMessageResponse(const shared_ptr<SmsSendIndexer> &smsIndexer)

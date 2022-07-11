@@ -19,6 +19,8 @@
 #include <map>
 #include "iremote_stub.h"
 #include "ims_sms_callback_interface.h"
+#include "event_handler.h"
+#include "event_runner.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -31,9 +33,9 @@ public:
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
     /****************** sms basic ******************/
-    int32_t ImsSendMessageResponse(const ImsResponseInfo &info, const SendSmsResultInfo &result) override;
-    int32_t ImsSetSmsConfigResponse(const ImsResponseInfo &info) override;
-    int32_t ImsGetSmsConfigResponse(const ImsResponseInfo &info, int32_t imsSmsConfig) override;
+    int32_t ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result) override;
+    int32_t ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
+    int32_t ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig) override;
     
 private:
     /****************** sms basic ******************/
@@ -44,6 +46,7 @@ private:
 private:
     using RequestFuncType = int32_t (ImsSmsCallbackStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, RequestFuncType> requestFuncMap_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_[2];
 };
 } // namespace Telephony
 } // namespace OHOS
