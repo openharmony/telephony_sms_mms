@@ -61,8 +61,8 @@ ohos_executable("tel_sms_mms_test") {
   }
 
   defines = [
-    "TELEPHONY_LOG_TAG = \"SMS_MMS\"",
-    "LOG_DOMAIN = 0xD002B01",
+    "TELEPHONY_LOG_TAG = \"SmsMmmsUTest\"",
+    "LOG_DOMAIN = 0xD000F00",
   ]
 
   part_name = "sms_mms"
