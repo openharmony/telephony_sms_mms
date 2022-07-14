@@ -57,8 +57,8 @@ ohos_source_set("sms_native_source") {
   ]
 
   defines = [
-    "TELEPHONY_LOG_TAG = \"SMS_MMS\"",
-    "LOG_DOMAIN = 0xD002B01",
+    "TELEPHONY_LOG_TAG = \"SmsApi\"",
+    "LOG_DOMAIN = 0xD001F06",
   ]
 
   public_configs = [ ":sms_native_config" ]

@@ -109,8 +109,8 @@ ohos_shared_library("tel_sms_mms") {
   ]
 
   defines += [
-    "TELEPHONY_LOG_TAG = \"SMS_MMS\"",
-    "LOG_DOMAIN = 0xD002B01",
+    "TELEPHONY_LOG_TAG = \"SmsMms\"",
+    "LOG_DOMAIN = 0xD001F06",
   ]
 
   public_configs = [ ":tel_sms_mms_config" ]
