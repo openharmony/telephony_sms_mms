@@ -68,8 +68,8 @@ ohos_source_set("mms_native_source") {
   ]
 
   defines = [
-    "TELEPHONY_LOG_TAG = \"SMS_MMS\"",
-    "LOG_DOMAIN = 0xD002B01",
+    "TELEPHONY_LOG_TAG = \"MmsApi\"",
+    "LOG_DOMAIN = 0xD001F06",
   ]
 
   if (is_standard_system) {

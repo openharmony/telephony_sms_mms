@@ -39,8 +39,8 @@ ohos_shared_library("sms") {
   ]
 
   defines += [
-    "TELEPHONY_LOG_TAG = \"SMS_MMS_API\"",
-    "LOG_DOMAIN = 0xD002B01",
+    "TELEPHONY_LOG_TAG = \"SmsMmsJsApi\"",
+    "LOG_DOMAIN = 0xD001F06",
   ]
 
   external_deps = [
