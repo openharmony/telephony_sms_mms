@@ -64,8 +64,9 @@ using SmsCbInfo = struct CbInfo {
 class GsmSmsCbHandler : public AppExecFwk::EventHandler {
 public:
     GsmSmsCbHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
-    ~GsmSmsCbHandler();
+    ~GsmSmsCbHandler() = default;
     void Init();
+    void UnRegisterHandler();
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 
     static constexpr uint16_t MAX_CB_MSG_TEXT_LEN = 4200;

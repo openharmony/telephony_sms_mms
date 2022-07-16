@@ -120,11 +120,6 @@ std::shared_ptr<SmsBaseMessage> CdmaSmsReceiveHandler::TransformMessageInfo(
     return baseMessage;
 }
 
-CdmaSmsReceiveHandler::~CdmaSmsReceiveHandler()
-{
-    UnRegisterHandler();
-}
-
 void CdmaSmsReceiveHandler::Init()
 {
     if (!RegisterHandler()) {

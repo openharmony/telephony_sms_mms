@@ -32,7 +32,9 @@ GsmSmsReceiveHandler::GsmSmsReceiveHandler(const shared_ptr<AppExecFwk::EventRun
 
 GsmSmsReceiveHandler::~GsmSmsReceiveHandler()
 {
-    UnRegisterHandler();
+    if (smsCbHandler_ != nullptr) {
+        smsCbHandler_->UnRegisterHandler();
+    }
 }
 
 void GsmSmsReceiveHandler::Init()
