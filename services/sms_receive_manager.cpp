@@ -33,6 +33,14 @@ SmsReceiveManager::~SmsReceiveManager()
     if (cdmaSmsReceiveRunner_ != nullptr) {
         cdmaSmsReceiveRunner_->Stop();
     }
+
+    if (gsmSmsReceiveHandler_ != nullptr) {
+        gsmSmsReceiveHandler_->UnRegisterHandler();
+    }
+
+    if (cdmaSmsReceiveHandler_ != nullptr) {
+        cdmaSmsReceiveHandler_->UnRegisterHandler();
+    }
 }
 
 void SmsReceiveManager::Init()

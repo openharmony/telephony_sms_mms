@@ -30,6 +30,7 @@ public:
     GsmSmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
     ~GsmSmsReceiveHandler() override;
     void Init();
+    void UnRegisterHandler();
 
 protected:
     virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage) override;
@@ -38,7 +39,6 @@ protected:
 
 private:
     bool RegisterHandler();
-    void UnRegisterHandler();
 
     std::shared_ptr<GsmSmsCbHandler> smsCbHandler_;
     std::shared_ptr<AppExecFwk::EventRunner> smsCbRunner_;

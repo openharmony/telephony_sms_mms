@@ -42,6 +42,9 @@ SmsSendManager::~SmsSendManager()
             networkManager_->NetworkUnregister(id.value());
         }
     }
+    if (networkManager_ != nullptr) {
+        networkManager_->UnRegisterHandler();
+    }
 }
 
 void SmsSendManager::Init()

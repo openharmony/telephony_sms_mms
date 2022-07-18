@@ -32,18 +32,17 @@ GsmSmsCbHandler::GsmSmsCbHandler(const std::shared_ptr<AppExecFwk::EventRunner> 
     TELEPHONY_LOGI("GsmSmsCbHandler Create slotId (%{public}d)", slotId_);
 }
 
-GsmSmsCbHandler::~GsmSmsCbHandler()
-{
-    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_CELL_BROADCAST);
-}
-
 void GsmSmsCbHandler::Init()
 {
     cbMsgList_.clear();
     CoreManagerInner::GetInstance().RegisterCoreNotify(
         slotId_, shared_from_this(), RadioEvent::RADIO_CELL_BROADCAST, nullptr);
     TELEPHONY_LOGI("GsmSmsCbHandler::RegisterHandler::slotId= %{public}d", slotId_);
+}
+
+void GsmSmsCbHandler::UnRegisterHandler()
+{
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_CELL_BROADCAST);
 }
 
 bool GsmSmsCbHandler::CheckCbActive(const std::shared_ptr<SmsCbMessage> &cbMessage)
