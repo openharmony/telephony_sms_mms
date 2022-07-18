@@ -30,9 +30,10 @@ namespace Telephony {
 class CdmaSmsReceiveHandler : public SmsReceiveHandler {
 public:
     CdmaSmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
-    virtual ~CdmaSmsReceiveHandler() override;
+    virtual ~CdmaSmsReceiveHandler() override = default;
     void SetCdmaSender(const std::weak_ptr<SmsSender> &smsSender);
     void Init();
+    void UnRegisterHandler();
 
 protected:
     virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage) override;
@@ -42,7 +43,6 @@ protected:
 
 private:
     bool RegisterHandler();
-    void UnRegisterHandler();
     bool SendCBBroadcast(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage);
     void GetCBData(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage, SmsCbData::CbData &sendData,
         bool &isEmergency);

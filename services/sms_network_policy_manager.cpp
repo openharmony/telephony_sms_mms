@@ -27,11 +27,6 @@ SmsNetworkPolicyManager::SmsNetworkPolicyManager(
     : AppExecFwk::EventHandler(runner), slotId_(slotId)
 {}
 
-SmsNetworkPolicyManager::~SmsNetworkPolicyManager()
-{
-    UnRegisterHandler();
-}
-
 void SmsNetworkPolicyManager::Init()
 {
     RegisterHandler();

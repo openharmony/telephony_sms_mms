@@ -31,11 +31,12 @@ namespace Telephony {
 class SmsNetworkPolicyManager : public AppExecFwk::EventHandler {
 public:
     SmsNetworkPolicyManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
-    virtual ~SmsNetworkPolicyManager();
+    virtual ~SmsNetworkPolicyManager() = default;
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
     bool IsImsSmsSupported();
     std::string GetImsShortMessageFormat();
     void Init();
+    void UnRegisterHandler();
     NetWorkType GetNetWorkType();
     bool IsImsNetDomain() const;
     int32_t GetVoiceServiceState() const;
@@ -49,7 +50,6 @@ protected:
     void HandlerRadioState(const AppExecFwk::InnerEvent::Pointer &event);
     void GetRadioState();
     void RegisterHandler();
-    void UnRegisterHandler();
 
 private:
     int32_t GetId();
