@@ -34,7 +34,7 @@
                 "appexecfwk_standard",
                 "common_event_service",
                 "core_service",
-                "dmsfwk_standard",
+                "dmsfwk",
                 "ipc",
                 "dataability",
                 "relational_store",
