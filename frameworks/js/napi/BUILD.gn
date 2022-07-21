@@ -35,7 +35,6 @@ ohos_shared_library("sms") {
     "$SUBSYSTEM_DIR/sms_mms:tel_sms_mms",
     "$SUBSYSTEM_DIR/sms_mms/frameworks/native:tel_sms_mms_api",
     "//foundation/arkui/napi:ace_napi",
-    "//utils/native/base:utils",
   ]
 
   defines += [
@@ -44,6 +43,7 @@ ohos_shared_library("sms") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "core_service:tel_core_service_api",
     "drivers_interface_ril:hril_innerkits",
     "eventhandler:libeventhandler",
