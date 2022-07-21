@@ -35,10 +35,10 @@ ohos_fuzztest("SendMessageDataFuzzTest") {
   deps = [
     "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
     "//foundation/arkui/napi:ace_napi",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
+    "c_utils:utils",
     "init:libbegetutil",
     "ipc:ipc_core",
     "samgr_standard:samgr_proxy",

@@ -41,10 +41,10 @@ ohos_unittest("tel_sms_mms_gtest") {
     "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms:tel_sms_mms",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
+    "c_utils:utils",
     "core_service:tel_core_service_api",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
