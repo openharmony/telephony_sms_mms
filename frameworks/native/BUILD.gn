@@ -21,7 +21,7 @@ ohos_shared_library("tel_sms_mms_api") {
 
   external_deps = [
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   defines = [
