@@ -16,8 +16,9 @@
 #ifndef SMS_WAP_PUSH_BUFFER_H
 #define SMS_WAP_PUSH_BUFFER_H
 
-#include <string>
 #include <memory>
+#include <set>
+#include <string>
 
 namespace OHOS {
 namespace Telephony {
