@@ -15,9 +15,9 @@
 
 #include "sms_wap_push_buffer.h"
 
-#include "telephony_log_wrapper.h"
-#include "string_utils.h"
 #include "securec.h"
+#include "string_utils.h"
+#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -320,28 +320,9 @@ bool SmsWapPushBuffer::CharIsToken(uint8_t oneByte)
     if (oneByte < minToken || oneByte > maxToken) {
         return false;
     }
-    switch (oneByte) {
-        case '"':
-        case '(':
-        case ')':
-        case ',':
-        case '/':
-        case ':':
-        case ';':
-        case '<':
-        case '=':
-        case '>':
-        case '?':
-        case '@':
-        case '[':
-        case '\\':
-        case ']':
-        case '{':
-        case '}':
-            return false;
-        default:
-            return true;
-    }
+
+    std::set<uint8_t> token = { '"', '(', ')', '/', ',', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '{', '}' };
+    return !token.count(oneByte);
 }
 
 /**
