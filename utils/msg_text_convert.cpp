@@ -39,7 +39,7 @@ inline void UniquePtrDeleterOneDimension(T **(&ptr))
     }
 }
 
-const WCHAR g_GSM7BitToUCS2[] = {
+const WCHAR g_gsm7BitToUCS2[] = {
     /* @ */
     0x0040, 0x00A3, 0x0024, 0x00A5, 0x00E8, 0x00E9, 0x00F9, 0x00EC, 0x00F2, 0x00C7, 0x000A, 0x00D8, 0x00F8, 0x000D,
     0x00C5, 0x00E5, 0x0394, 0x005F, 0x03A6, 0x0393, 0x039B, 0x03A9, 0x03A0, 0x03A8, 0x03A3, 0x0398, 0x039E, 0x001B,
@@ -60,168 +60,26 @@ const WCHAR g_GSM7BitToUCS2[] = {
     0x00FC, 0x00E0
 };
 
-/* GSM 7 bit Default Alphabet Extension Table -> UCS2 */
-const WCHAR g_GSM7BitExtToUCS2[] = {
-    /* 0x0020 -> (SP) for invalid code */
-    /* Page Break */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x000C, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020,
-    /* ^ */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x005E, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x001B, 0x0020, 0x0020,
-    0x0020, 0x0020,
-    /* { */ /* } */
-    /* \ */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x007B, 0x007D, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x005C,
-    /* [ */ /* ~ */ /* ] */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x005B, 0x007E,
-    0x005D, 0x0020,
-    /* | */
-    0x007C, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x20AC, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020
-};
-
-/* Turkish National Language Single Shift Table -> UCS2 */
-const WCHAR g_TurkishSingleToUCS2[] = {
-    /* 0x0020 -> (SP) for invalid code */
-    /* Page Break */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x000C, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020,
-    /* ^ */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x005E, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x001B, 0x0020, 0x0020,
-    0x0020, 0x0020,
-    /* { */ /* } */
-    /* \ */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x007B, 0x007D, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x005C,
-    /* [ */ /* ~ */ /* ] */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x005B, 0x007E,
-    0x005D, 0x0020,
-    /* | */
-    0x007C, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x011E, 0x0020, 0x0130, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x015E, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00E7, 0x0020, 0x20AC, 0x0020, 0x011F, 0x0020, 0x0131,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x015F, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020
-};
-
-/* Turkish National Language Locking Shift Table -> UCS2 */
-const WCHAR g_TurkishLockingToUCS2[] = {
-    /* @ */
-    0x0040, 0x00A3, 0x0024, 0x00A5, 0x20AC, 0x00E9, 0x00F9, 0x00EC, 0x00F2, 0x00C7, 0x000A, 0x011E, 0x011F, 0x000D,
-    0x00C5, 0x00E5, 0x0394, 0x005F, 0x03A6, 0x0393, 0x039B, 0x03A9, 0x03A0, 0x03A8, 0x03A3, 0x0398, 0x039E, 0x001B,
-    0x015E, 0x015F, 0x00DF, 0x00C9,
-    /* SP */
-    0x0020, 0x0021, 0x0022, 0x0023, 0x00A4, 0x0025, 0x0026, 0x0027, 0x0028, 0x0029, 0x002A, 0x002B, 0x002C, 0x002D,
-    0x002E, 0x002F,
-    /* 0 */
-    0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x003A, 0x003B, 0x003C, 0x003D,
-    0x003E, 0x003F, 0x0130, 0x0041, 0x0042, 0x0043, 0x0044, 0x0045, 0x0046, 0x0047, 0x0048, 0x0049, 0x004A, 0x004B,
-    0x004C, 0x004D, 0x004E, 0x004F,
-    /* P */
-    0x0050, 0x0051, 0x0052, 0x0053, 0x0054, 0x0055, 0x0056, 0x0057, 0x0058, 0x0059, 0x005A, 0x00C4, 0x00D6, 0x00D1,
-    0x00DC, 0x00A7,
-    /* c */
-    0x00E7, 0x0061, 0x0062, 0x0063, 0x0064, 0x0065, 0x0066, 0x0067, 0x0068, 0x0069, 0x006A, 0x006B, 0x006C, 0x006D,
-    0x006E, 0x006F,
-    /* p */
-    0x0070, 0x0071, 0x0072, 0x0073, 0x0074, 0x0075, 0x0076, 0x0077, 0x0078, 0x0079, 0x007A, 0x00E4, 0x00F6, 0x00F1,
-    0x00FC, 0x00E0
-};
-
-/* Spanish National Language Single Shift Table -> UCS2 */
-const WCHAR g_SpanishSingleToUCS2[] = {
-    /* 0x0020 -> (SP) for invalid code */
-    /* Page Break */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00E7, 0x000C, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020,
-    /* ^ */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x005E, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x001B, 0x0020, 0x0020,
-    0x0020, 0x0020,
-    /* { */ /* } */
-    /* \ */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x007B, 0x007D, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x005C,
-    /* [ */ /* ~ */ /* ] */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x005B, 0x007E,
-    0x005D, 0x0020,
-    /* | */
-    0x007C, 0x00C1, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00CD, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x00D3, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00DA, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00E1, 0x0020, 0x0020, 0x0020, 0x20AC, 0x0020, 0x0020, 0x0020, 0x00ED,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00F3, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00FA, 0x0020, 0x0020,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020
-};
-
-/* Portuguese National Language Single Shift Table -> UCS2 */
-const WCHAR g_PortuSingleToUCS2[] = {
-    /* 0x0020 -> (SP) for invalid code */
-    /* Page Break */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00EA, 0x0020, 0x0020, 0x0020, 0x00E7, 0x000C, 0x00D4, 0x00F4, 0x0020,
-    0x00C1, 0x00E1,
-    /* ^ */
-    0x0020, 0x0020, 0x03A6, 0x0393, 0x005E, 0x03A9, 0x03A0, 0x03A8, 0x03A3, 0x0398, 0x0020, 0x001B, 0x0020, 0x0020,
-    0x0020, 0x00CA,
-    /* { */ /* } */
-    /* \ */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x007B, 0x007D, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x005C,
-    /* [ */ /* ~ */ /* ] */
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x005B, 0x007E,
-    0x005D, 0x0020,
-    /* | */
-    0x007C, 0x00C0, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00CD, 0x0020, 0x0020, 0x0020, 0x0020,
-    0x0020, 0x00D3, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00DA, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00C3,
-    0x00D5, 0x0020, 0x0020, 0x0020, 0x0020, 0x00C2, 0x0020, 0x0020, 0x0020, 0x20AC, 0x0020, 0x0020, 0x0020, 0x00ED,
-    0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00F3, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00FA, 0x0020, 0x0020,
-    0x0020, 0x0020, 0x0020, 0x00E3, 0x00F5, 0x0020, 0x0020, 0x00E2
-};
-
-/* Portuguese National Language Locking Shift Table -> UCS2 */
-const WCHAR g_PortuLockingToUCS2[] = {
-    /* @ */
-    0x0040, 0x00A3, 0x0024, 0x00A5, 0x00EA, 0x00E9, 0x00FA, 0x00ED, 0x00F3, 0x00E7, 0x000A, 0x00D4, 0x00F4, 0x000D,
-    0x00C1, 0x00E1, 0x0394, 0x005F, 0x0020, 0x00C7, 0x00C0, 0x0020, 0x005E, 0x005C, 0x20AC, 0x00D3, 0x007C, 0x001B,
-    0x00C2, 0x00E2, 0x00CA, 0x00C9,
-    /* SP */
-    0x0020, 0x0021, 0x0022, 0x0023, 0x00A4, 0x0025, 0x0026, 0x0027, 0x0028, 0x0029, 0x002A, 0x002B, 0x002C, 0x002D,
-    0x002E, 0x002F,
-    /* 0 */
-    0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x003A, 0x003B, 0x003C, 0x003D,
-    0x003E, 0x003F, 0x00CD, 0x0041, 0x0042, 0x0043, 0x0044, 0x0045, 0x0046, 0x0047, 0x0048, 0x0049, 0x004A, 0x004B,
-    0x004C, 0x004D, 0x004E, 0x004F,
-    /* P */
-    0x0050, 0x0051, 0x0052, 0x0053, 0x0054, 0x0055, 0x0056, 0x0057, 0x0058, 0x0059, 0x005A, 0x00C3, 0x00D5, 0x00DA,
-    0x00DC, 0x00A7, 0x00BF, 0x0061, 0x0062, 0x0063, 0x0064, 0x0065, 0x0066, 0x0067, 0x0068, 0x0069, 0x006A, 0x006B,
-    0x006C, 0x006D, 0x006E, 0x006F,
-    /* p */
-    0x0070, 0x0071, 0x0072, 0x0073, 0x0074, 0x0075, 0x0076, 0x0077, 0x0078, 0x0079, 0x007A, 0x00E3, 0x00F5, 0x0020,
-    0x00FC, 0x00E0
-};
-
 MsgTextConvert::MsgTextConvert()
 {
-    InitExtCharList();
-    InitUCS2ToGSM7DefList();
-    InitUCS2ToExtList();
-    InitUCS2ToTurkishList();
-    InitUCS2ToSpanishList();
-    InitUCS2ToPortuList();
-    InitUCS2ToReplaceCharList();
+    InitExtCharMap();
+    InitUCS2ToGSM7DefMap();
+    InitUCS2ToExtMap();
+    InitUCS2ToTurkishMap();
+    InitUCS2ToSpanishMap();
+    InitUCS2ToPortuMap();
+    InitUCS2ToReplaceCharMap();
 }
 
 MsgTextConvert::~MsgTextConvert()
 {
-    extCharList_.clear();
-    ucs2toGSM7DefList_.clear();
-    ucs2toGSM7ExtList_.clear();
-    ucs2toTurkishList_.clear();
-    ucs2toSpanishList_.clear();
-    ucs2toPortuList_.clear();
-    replaceCharList_.clear();
+    extCharMap_.clear();
+    ucs2toGSM7DefMap_.clear();
+    ucs2toGSM7ExtMap_.clear();
+    ucs2toTurkishMap_.clear();
+    ucs2toSpanishMap_.clear();
+    ucs2toPortuMap_.clear();
+    replaceCharMap_.clear();
 }
 
 MsgTextConvert *MsgTextConvert::Instance()
@@ -234,400 +92,110 @@ MsgTextConvert *MsgTextConvert::Instance()
     return instance_.get();
 }
 
-void MsgTextConvert::InitExtCharList()
+void MsgTextConvert::InitExtCharMap()
 {
-    extCharList_.clear();
-    extCharList_[0x000C] = MSG_GSM7EXT_CHAR;
-    extCharList_[0x005B] = MSG_GSM7EXT_CHAR;
-    extCharList_[0x005C] = MSG_GSM7EXT_CHAR;
-    extCharList_[0x005D] = MSG_GSM7EXT_CHAR;
-    extCharList_[0x005E] = MSG_GSM7EXT_CHAR;
-    extCharList_[0x007B] = MSG_GSM7EXT_CHAR;
-    extCharList_[0x007C] = MSG_GSM7EXT_CHAR;
-    extCharList_[0x007D] = MSG_GSM7EXT_CHAR;
-    extCharList_[0x007E] = MSG_GSM7EXT_CHAR;
-    extCharList_[0x20AC] = MSG_GSM7EXT_CHAR;
-
-    extCharList_[0x00E7] = MSG_TURKISH_CHAR;
-    extCharList_[0x011E] = MSG_TURKISH_CHAR;
-    extCharList_[0x011F] = MSG_TURKISH_CHAR;
-    extCharList_[0x01E6] = MSG_TURKISH_CHAR;
-    extCharList_[0x01E7] = MSG_TURKISH_CHAR;
-    extCharList_[0x0130] = MSG_TURKISH_CHAR;
-    extCharList_[0x0131] = MSG_TURKISH_CHAR;
-    extCharList_[0x015E] = MSG_TURKISH_CHAR;
-    extCharList_[0x015F] = MSG_TURKISH_CHAR;
-
-    extCharList_[0x00C1] = MSG_SPANISH_CHAR;
-    extCharList_[0x00E1] = MSG_SPANISH_CHAR;
-    extCharList_[0x00CD] = MSG_SPANISH_CHAR;
-    extCharList_[0x00ED] = MSG_SPANISH_CHAR;
-    extCharList_[0x00D3] = MSG_SPANISH_CHAR;
-    extCharList_[0x00F3] = MSG_SPANISH_CHAR;
-    extCharList_[0x00DA] = MSG_SPANISH_CHAR;
-    extCharList_[0x00FA] = MSG_SPANISH_CHAR;
-
-    extCharList_[0x00D4] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00F4] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00CA] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00EA] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00C0] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00E7] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00C3] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00E3] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00D5] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00F5] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00C2] = MSG_PORTUGUESE_CHAR;
-    extCharList_[0x00E2] = MSG_PORTUGUESE_CHAR;
+    extCharMap_.clear();
+    extCharMap_ = { { 0x000C, MSG_GSM7EXT_CHAR }, { 0x005B, MSG_GSM7EXT_CHAR }, { 0x005C, MSG_GSM7EXT_CHAR },
+        { 0x005D, MSG_GSM7EXT_CHAR }, { 0x005E, MSG_GSM7EXT_CHAR }, { 0x007B, MSG_GSM7EXT_CHAR },
+        { 0x007C, MSG_GSM7EXT_CHAR }, { 0x007D, MSG_GSM7EXT_CHAR }, { 0x007E, MSG_GSM7EXT_CHAR },
+        { 0x20AC, MSG_GSM7EXT_CHAR }, { 0x00E7, MSG_TURKISH_CHAR }, { 0x011E, MSG_TURKISH_CHAR },
+        { 0x011F, MSG_TURKISH_CHAR }, { 0x01E6, MSG_TURKISH_CHAR }, { 0x01E7, MSG_TURKISH_CHAR },
+        { 0x0130, MSG_TURKISH_CHAR }, { 0x0131, MSG_TURKISH_CHAR }, { 0x015E, MSG_TURKISH_CHAR },
+        { 0x015F, MSG_TURKISH_CHAR }, { 0x00C1, MSG_SPANISH_CHAR }, { 0x00E1, MSG_SPANISH_CHAR },
+        { 0x00CD, MSG_SPANISH_CHAR }, { 0x00ED, MSG_SPANISH_CHAR }, { 0x00D3, MSG_SPANISH_CHAR },
+        { 0x00F3, MSG_SPANISH_CHAR }, { 0x00DA, MSG_SPANISH_CHAR }, { 0x00FA, MSG_SPANISH_CHAR },
+        { 0x00D4, MSG_PORTUGUESE_CHAR }, { 0x00F4, MSG_PORTUGUESE_CHAR }, { 0x00CA, MSG_PORTUGUESE_CHAR },
+        { 0x00EA, MSG_PORTUGUESE_CHAR }, { 0x00C0, MSG_PORTUGUESE_CHAR }, { 0x00E7, MSG_PORTUGUESE_CHAR },
+        { 0x00C3, MSG_PORTUGUESE_CHAR }, { 0x00E3, MSG_PORTUGUESE_CHAR }, { 0x00D5, MSG_PORTUGUESE_CHAR },
+        { 0x00F5, MSG_PORTUGUESE_CHAR }, { 0x00C2, MSG_PORTUGUESE_CHAR }, { 0x00E2, MSG_PORTUGUESE_CHAR } };
 }
 
-void MsgTextConvert::InitUCS2ToGSM7DefList()
+void MsgTextConvert::InitUCS2ToGSM7DefMap()
 {
     uint8_t gsm7DefListLen = 128;
-    ucs2toGSM7DefList_.clear();
+    ucs2toGSM7DefMap_.clear();
     for (unsigned char i = 0; i < gsm7DefListLen; i++) {
-        ucs2toGSM7DefList_[g_GSM7BitToUCS2[i]] = i;
+        ucs2toGSM7DefMap_[g_gsm7BitToUCS2[i]] = i;
     }
 }
 
-void MsgTextConvert::InitUCS2ToExtList()
+void MsgTextConvert::InitUCS2ToExtMap()
 {
-    ucs2toGSM7ExtList_.clear();
-    ucs2toGSM7ExtList_[0x005B] = 0x3C; /* [ */
-    ucs2toGSM7ExtList_[0x005D] = 0x3E; /* ] */
-    ucs2toGSM7ExtList_[0x007B] = 0x28; /* { */
-    ucs2toGSM7ExtList_[0x007D] = 0x29; /* } */
-    ucs2toGSM7ExtList_[0x000C] = 0x0A; /* Page Break */
-    ucs2toGSM7ExtList_[0x005C] = 0x2F; /* \ */
-    ucs2toGSM7ExtList_[0x005E] = 0x14; /* ^ */
-    ucs2toGSM7ExtList_[0x007C] = 0x40; /* | */
-    ucs2toGSM7ExtList_[0x007E] = 0x3D; /* ~ */
-    ucs2toGSM7ExtList_[0x20AC] = 0x65; /* € */
+    ucs2toGSM7ExtMap_.clear();
+    ucs2toGSM7ExtMap_ = { { 0x005B, 0x3C }, { 0x005D, 0x3E }, { 0x007B, 0x28 }, { 0x007D, 0x29 }, { 0x000C, 0x0A },
+        { 0x005C, 0x2F }, { 0x005E, 0x14 }, { 0x007C, 0x40 }, { 0x007E, 0x3D }, { 0x20AC, 0x65 } };
 }
 
-void MsgTextConvert::InitUCS2ToTurkishList()
+void MsgTextConvert::InitUCS2ToTurkishMap()
 {
     /* Turkish */
-    ucs2toTurkishList_.clear();
-    ucs2toTurkishList_[0x005B] = 0x3C; /* [ */
-    ucs2toTurkishList_[0x005D] = 0x3E; /* ] */
-    ucs2toTurkishList_[0x007B] = 0x28; /* { */
-    ucs2toTurkishList_[0x007D] = 0x29; /* } */
-    ucs2toTurkishList_[0x000C] = 0x0A; /* Page Break */
-    ucs2toTurkishList_[0x005C] = 0x2F; /* \ */
-    ucs2toTurkishList_[0x005E] = 0x14; /* ^ */
-    ucs2toTurkishList_[0x007C] = 0x40; /* | */
-    ucs2toTurkishList_[0x007E] = 0x3D; /* ~ */
-    ucs2toTurkishList_[0x20AC] = 0x65; /* € */
-    ucs2toTurkishList_[0x00E7] = 0x63; /* c LATIN SMALL LETTER S WITH CEDILLA */
-    ucs2toTurkishList_[0x011E] = 0x47; /* G LATIN CAPITAL LETTER G WITH BREVE */
-    ucs2toTurkishList_[0x011F] = 0x67; /* g LATIN SMALL LETTER G WITH BREVE */
-    ucs2toTurkishList_[0x01E6] = 0x47; /* G LATIN CAPITAL LETTER G WITH CARON */
-    ucs2toTurkishList_[0x01E7] = 0x67; /* g LATIN SMALL LETTER G WITH CARON */
-    ucs2toTurkishList_[0x0130] = 0x49; /* I LATIN CAPITAL LETTER I WITH DOT ABOVE */
-    ucs2toTurkishList_[0x0131] = 0x69; /* i LATIN SMALL LETTER DOTLESS */
-    ucs2toTurkishList_[0x015E] = 0x53; /* S LATIN CAPITAL LETTER S WITH CEDILLA */
-    ucs2toTurkishList_[0x015F] = 0x73; /* s LATIN SMALL LETTER S WITH CEDILLA */
+    ucs2toTurkishMap_.clear();
+    ucs2toTurkishMap_ = { { 0x005B, 0x3C }, { 0x005D, 0x3E }, { 0x007B, 0x28 }, { 0x007D, 0x29 }, { 0x000C, 0x0A },
+        { 0x005C, 0x2F }, { 0x005E, 0x14 }, { 0x007C, 0x40 }, { 0x007E, 0x3D }, { 0x20AC, 0x65 }, { 0x00E7, 0x63 },
+        { 0x011E, 0x47 }, { 0x011F, 0x67 }, { 0x01E6, 0x47 }, { 0x01E7, 0x67 }, { 0x0130, 0x49 }, { 0x0131, 0x69 },
+        { 0x015E, 0x53 }, { 0x015F, 0x73 } };
 }
 
-void MsgTextConvert::InitUCS2ToSpanishList()
+void MsgTextConvert::InitUCS2ToSpanishMap()
 {
     /* Spanish */
-    ucs2toSpanishList_.clear();
-    ucs2toSpanishList_[0x005B] = 0x3C; /* [ */
-    ucs2toSpanishList_[0x005D] = 0x3E; /* ] */
-    ucs2toSpanishList_[0x007B] = 0x28; /* { */
-    ucs2toSpanishList_[0x007D] = 0x29; /* } */
-    ucs2toSpanishList_[0x000C] = 0x0A; /* Page Break */
-    ucs2toSpanishList_[0x005C] = 0x2F; /* \ */
-    ucs2toSpanishList_[0x005E] = 0x14; /* ^ */
-    ucs2toSpanishList_[0x007C] = 0x40; /* | */
-    ucs2toSpanishList_[0x007E] = 0x3D; /* ~ */
-    ucs2toSpanishList_[0x20AC] = 0x65; /* € */
-    ucs2toSpanishList_[0x00C1] = 0x41; /* A LATIN CAPITAL LETTER A WITH ACUTE */
-    ucs2toSpanishList_[0x00E1] = 0x61; /* a LATIN SMALL LETTER A WITH ACUTE */
-    ucs2toSpanishList_[0x00CD] = 0x49; /* I LATIN CAPITAL LETTER I WITH ACUTE */
-    ucs2toSpanishList_[0x00ED] = 0x69; /* i LATIN SMALL LETTER I WITH ACUTE */
-    ucs2toSpanishList_[0x00D3] = 0x4F; /* O LATIN CAPITAL LETTER O WITH ACUTE */
-    ucs2toSpanishList_[0x00F3] = 0x6F; /* o LATIN SMALL LETTER O WITH ACUTE */
-    ucs2toSpanishList_[0x00DA] = 0x55; /* U LATIN CAPITAL LETTER U WITH ACUTE */
-    ucs2toSpanishList_[0x00FA] = 0x75; /* u LATIN SMALL LETTER U WITH ACUTE */
+    ucs2toSpanishMap_.clear();
+    ucs2toSpanishMap_ = { { 0x005B, 0x3C }, { 0x005D, 0x3E }, { 0x007B, 0x28 }, { 0x007D, 0x29 }, { 0x000C, 0x0A },
+        { 0x005C, 0x2F }, { 0x005E, 0x14 }, { 0x007C, 0x40 }, { 0x007E, 0x3D }, { 0x20AC, 0x65 }, { 0x00C1, 0x41 },
+        { 0x00E1, 0x61 }, { 0x00CD, 0x49 }, { 0x00ED, 0x69 }, { 0x00D3, 0x4F }, { 0x00F3, 0x6F }, { 0x00DA, 0x55 },
+        { 0x00FA, 0x75 } };
 }
 
-void MsgTextConvert::InitUCS2ToPortuList()
+void MsgTextConvert::InitUCS2ToPortuMap()
 {
     /* Portuguese */
-    ucs2toPortuList_.clear();
-    ucs2toPortuList_[0x005B] = 0x3C; /* [ */
-    ucs2toPortuList_[0x005D] = 0x3E; /* ] */
-    ucs2toPortuList_[0x007B] = 0x28; /* { */
-    ucs2toPortuList_[0x007D] = 0x29; /* } */
-    ucs2toPortuList_[0x000C] = 0x0A; /* Page Break */
-    ucs2toPortuList_[0x005C] = 0x2F; /* \ */
-    ucs2toPortuList_[0x005E] = 0x14; /* ^ */
-    ucs2toPortuList_[0x007C] = 0x40; /* | */
-    ucs2toPortuList_[0x007E] = 0x3D; /* ~ */
-    ucs2toPortuList_[0x20AC] = 0x65; /* € */
-    ucs2toPortuList_[0x00D4] = 0x0B; /* O LATIN CAPITAL LETTER O WITH CIRCUMFLEX */
-    ucs2toPortuList_[0x00F4] = 0x0C; /* o LATIN SMALL LETTER O WITH CIRCUMFLEX */
-    ucs2toPortuList_[0x00C1] = 0x0E; /* A LATIN CAPITAL LETTER A WITH ACUTE */
-    ucs2toPortuList_[0x00E1] = 0x0F; /* a LATIN SMALL LETTER A WITH ACUTE */
-    ucs2toPortuList_[0x00CA] = 0x1F; /* E LATIN CAPITAL LETTER E WITH CIRCUMFLEX */
-    ucs2toPortuList_[0x00EA] = 0x05; /* e LATIN SMALL LETTER E WITH CIRCUMFLEX */
-    ucs2toPortuList_[0x00C0] = 0x41; /* A LATIN CAPITAL LETTER A WITH GRAVE */
-    ucs2toPortuList_[0x00E7] = 0x09; /* c LATIN SMALL LETTER C WITH CEDILLA */
-    ucs2toPortuList_[0x00CD] = 0x49; /* I LATIN CAPITAL LETTER I WITH ACUTE */
-    ucs2toPortuList_[0x00ED] = 0x69; /* i LATIN SMALL LETTER I WITH ACUTE */
-    ucs2toPortuList_[0x00D3] = 0x4F; /* O LATIN CAPITAL LETTER O WITH ACUTE */
-    ucs2toPortuList_[0x00F3] = 0x6F; /* o LATIN SMALL LETTER O WITH ACUTE */
-    ucs2toPortuList_[0x00DA] = 0x55; /* U LATIN CAPITAL LETTER U WITH ACUTE */
-    ucs2toPortuList_[0x00FA] = 0x75; /* u LATIN SMALL LETTER U WITH ACUTE */
-    ucs2toPortuList_[0x00C3] = 0x61; /* A LATIN CAPITAL LETTER A WITH TILDE */
-    ucs2toPortuList_[0x00E3] = 0x7B; /* a LATIN SMALL LETTER A WITH TILDE */
-    ucs2toPortuList_[0x00D5] = 0x5C; /* O LATIN CAPITAL LETTER O WITH TILDE */
-    ucs2toPortuList_[0x00F5] = 0x7C; /* o LATIN SMALL LETTER O WITH TILDE */
-    ucs2toPortuList_[0x00C2] = 0x61; /* A LATIN CAPITAL LETTER A WITH CIRCUMFLEX */
-    ucs2toPortuList_[0x00E2] = 0x7F; /* a LATIN SMALL LETTER A WITH CIRCUMFLEX */
-    ucs2toPortuList_[0x03A6] = 0x12; /* Φ GREEK CAPITAL LETTER PHI */
-    ucs2toPortuList_[0x0393] = 0x13; /* Γ GREEK CAPITAL LETTER GAMMA */
-    ucs2toPortuList_[0x03A9] = 0x15; /* Ω GREEK CAPITAL LETTER OMEGA */
-    ucs2toPortuList_[0x03A0] = 0x16; /* Π GREEK CAPITAL LETTER PI */
-    ucs2toPortuList_[0x03A8] = 0x17; /* Ψ GREEK CAPITAL LETTER PSI */
-    ucs2toPortuList_[0x03A3] = 0x18; /* Σ GREEK CAPITAL LETTER SIGMA */
-    ucs2toPortuList_[0x0398] = 0x19; /* Θ GREEK CAPITAL LETTER THETA */
+    ucs2toPortuMap_.clear();
+    ucs2toPortuMap_ = { { 0x005B, 0x3C }, { 0x005D, 0x3E }, { 0x007B, 0x28 }, { 0x007D, 0x29 }, { 0x000C, 0x0A },
+        { 0x005C, 0x2F }, { 0x005E, 0x14 }, { 0x007C, 0x40 }, { 0x007E, 0x3D }, { 0x20AC, 0x65 }, { 0x00D4, 0x0B },
+        { 0x00F4, 0x0C }, { 0x00C1, 0x0E }, { 0x00E1, 0x0F }, { 0x00CA, 0x1F }, { 0x00EA, 0x05 }, { 0x00C0, 0x41 },
+        { 0x00E7, 0x09 }, { 0x00CD, 0x49 }, { 0x00ED, 0x69 }, { 0x00D3, 0x4F }, { 0x00F3, 0x6F }, { 0x00DA, 0x55 },
+        { 0x00FA, 0x75 }, { 0x00C3, 0x61 }, { 0x00E3, 0x7B }, { 0x00D5, 0x5C }, { 0x00F5, 0x7C }, { 0x00C2, 0x61 },
+        { 0x00E2, 0x7F }, { 0x03A6, 0x12 }, { 0x0393, 0x13 }, { 0x03A9, 0x15 }, { 0x03A0, 0x16 }, { 0x03A8, 0x17 },
+        { 0x03A3, 0x18 }, { 0x0398, 0x19 } };
 }
 
-void MsgTextConvert::InitUCS2ToReplaceCharList()
+void MsgTextConvert::InitUCS2ToReplaceCharMap()
 {
     /* character replacement table */
-    replaceCharList_.clear();
-    replaceCharList_[0x00E0] = 0x61; /* a LATIN SMALL LETTER A WITH GRAVE */
-    replaceCharList_[0x00E1] = 0x61; /* a LATIN SMALL LETTER A WITH ACUTE */
-    replaceCharList_[0x00E2] = 0x61; /* a LATIN SMALL LETTER A WITH CIRCUMFLEX */
-    replaceCharList_[0x00E3] = 0x61; /* a LATIN SMALL LETTER A WITH TILDE */
-    replaceCharList_[0x00E4] = 0x61; /* a LATIN SMALL LETTER A WITH DIAERESIS */
-    replaceCharList_[0x00E5] = 0x61; /* a LATIN SMALL LETTER A WITH RING ABOVE */
-    replaceCharList_[0x00E6] = 0x61; /* a LATIN SMALL LETTER AE */
-    replaceCharList_[0x0101] = 0x61; /* a LATIN SMALL LETTER A WITH MACRON */
-    replaceCharList_[0x0103] = 0x61; /* a LATIN SMALL LETTER A WITH BREVE */
-    replaceCharList_[0x0105] = 0x61; /* a LATIN SMALL LETTER A WITH OGONEK */
-    replaceCharList_[0x01CE] = 0x61; /* a LATIN SMALL LETTER A WITH CARON */
-
-    replaceCharList_[0x00C0] = 0x41; /* A LATIN CAPITAL LETTER A WITH GRAVE */
-    replaceCharList_[0x00C1] = 0x41; /* A LATIN CAPITAL LETTER A WITH ACUTE */
-    replaceCharList_[0x00C2] = 0x41; /* A LATIN CAPITAL LETTER A WITH CIRCUMFLEX */
-    replaceCharList_[0x00C3] = 0x41; /* A LATIN CAPITAL LETTER A WITH TILDE */
-    replaceCharList_[0x00C4] = 0x41; /* A LATIN CAPITAL LETTER A WITH DIAERESIS */
-    replaceCharList_[0x00C5] = 0x41; /* A LATIN CAPITAL LETTER A WITH RING ABOVE */
-    replaceCharList_[0x00C6] = 0x41; /* A LATIN CAPITAL LETTER AE */
-    replaceCharList_[0x0100] = 0x41; /* A LATIN CAPITAL LETTER A WITH MACRON */
-    replaceCharList_[0x0102] = 0x41; /* A LATIN CAPITAL LETTER A WITH BREVE */
-    replaceCharList_[0x0104] = 0x41; /* A LATIN CAPITAL LETTER A WITH OGONEK */
-    replaceCharList_[0x01CD] = 0x41; /* A LATIN CAPITAL LETTER A WITH CARON */
-
-    replaceCharList_[0x00E7] = 0x63; /* c LATIN SMALL LETTER C WITH CEDILLA */
-    replaceCharList_[0x0107] = 0x63; /* c LATIN SMALL LETTER C WITH ACUTE */
-    replaceCharList_[0x0109] = 0x63; /* c LATIN SMALL LETTER C WITH CIRCUMFLEX */
-    replaceCharList_[0x010B] = 0x63; /* c LATIN SMALL LETTER C WITH DOT ABOVE */
-    replaceCharList_[0x010D] = 0x63; /* c LATIN SMALL LETTER C WITH CARON */
-
-    replaceCharList_[0x00C7] = 0x43; /* C LATIN CAPITAL LETTER C WITH CEDILLA */
-    replaceCharList_[0x0106] = 0x43; /* C LATIN CAPITAL LETTER C WITH ACUTE */
-    replaceCharList_[0x0108] = 0x43; /* C LATIN CAPITAL LETTER C WITH CIRCUMFLEX */
-    replaceCharList_[0x010A] = 0x43; /* C LATIN CAPITAL LETTER C WITH DOT ABOVE */
-    replaceCharList_[0x010C] = 0x43; /* C LATIN CAPITAL LETTER C WITH CARON */
-
-    replaceCharList_[0x010F] = 0x64; /* d LATIN SMALL LETTER D WITH CARON */
-    replaceCharList_[0x0111] = 0x64; /* d LATIN SMALL LETTER D WITH STROKE */
-
-    replaceCharList_[0x010E] = 0x44; /* D LATIN CAPITAL LETTER D WITH CARON */
-    replaceCharList_[0x0110] = 0x44; /* D LATIN CAPITAL LETTER D WITH STROKE */
-
-    replaceCharList_[0x00E8] = 0x65; /* e LATIN SMALL LETTER E WITH GRAVE */
-    replaceCharList_[0x00E9] = 0x65; /* e LATIN SMALL LETTER E WITH ACUTE */
-    replaceCharList_[0x00EA] = 0x65; /* e LATIN SMALL LETTER E WITH CIRCUMFLEX */
-    replaceCharList_[0x00EB] = 0x65; /* e LATIN SMALL LETTER E WITH DIAERESIS */
-    replaceCharList_[0x0113] = 0x65; /* e LATIN SMALL LETTER E WITH MACRON */
-    replaceCharList_[0x0115] = 0x65; /* e LATIN SMALL LETTER E WITH BREVE */
-    replaceCharList_[0x0117] = 0x65; /* e LATIN SMALL LETTER E WITH DOT ABOVE */
-    replaceCharList_[0x0119] = 0x65; /* e LATIN SMALL LETTER E WITH OGONEK */
-    replaceCharList_[0x011B] = 0x65; /* e LATIN SMALL LETTER E WITH CARON */
-    replaceCharList_[0x0259] = 0x65; /* e LATIN SMALL LETTER SCHWA */
-
-    replaceCharList_[0x00C8] = 0x45; /* E LATIN CAPITAL LETTER E WITH GRAVE */
-    replaceCharList_[0x00C9] = 0x45; /* E LATIN CAPITAL LETTER E WITH ACUTE */
-    replaceCharList_[0x00CA] = 0x45; /* E LATIN CAPITAL LETTER E WITH CIRCUMFLEX */
-    replaceCharList_[0x00CB] = 0x45; /* E LATIN CAPITAL LETTER E WITH DIAERESIS */
-    replaceCharList_[0x0112] = 0x45; /* E LATIN CAPITAL LETTER E WITH MACRON */
-    replaceCharList_[0x0114] = 0x45; /* E LATIN CAPITAL LETTER E WITH BREVE */
-    replaceCharList_[0x0116] = 0x45; /* E LATIN CAPITAL LETTER E WITH DOT ABOVE */
-    replaceCharList_[0x0118] = 0x45; /* E LATIN CAPITAL LETTER E WITH OGONEK */
-    replaceCharList_[0x011A] = 0x45; /* E LATIN CAPITAL LETTER E WITH CARON */
-    replaceCharList_[0x018F] = 0x45; /* E LATIN CAPITAL LETTER SCHWA */
-
-    replaceCharList_[0x011D] = 0x67; /* g LATIN SMALL LETTER G WITH CIRCUMFLEX */
-    replaceCharList_[0x011F] = 0x67; /* g LATIN SMALL LETTER G WITH BREVE */
-    replaceCharList_[0x0121] = 0x67; /* g LATIN SMALL LETTER G WITH DOT ABOVE */
-    replaceCharList_[0x0123] = 0x67; /* g LATIN SMALL LETTER G WITH CEDILLA */
-    replaceCharList_[0x01E7] = 0x67; /* g LATIN SMALL LETTER G WITH CARON */
-    replaceCharList_[0x01F5] = 0x67; /* g LATIN SMALL LETTER G WITH ACUTE */
-    replaceCharList_[0x1E21] = 0x67; /* g LATIN SMALL LETTER G WITH MACRON */
-
-    replaceCharList_[0x011C] = 0x47; /* G LATIN CAPITAL LETTER G WITH CIRCUMFLEX */
-    replaceCharList_[0x011E] = 0x47; /* G LATIN CAPITAL LETTER G WITH BREVE */
-    replaceCharList_[0x0120] = 0x47; /* G LATIN CAPITAL LETTER G WITH DOT ABOVE */
-    replaceCharList_[0x0122] = 0x47; /* G LATIN CAPITAL LETTER G WITH CEDILLA */
-    replaceCharList_[0x01E6] = 0x47; /* G LATIN CAPITAL LETTER G WITH CARON */
-    replaceCharList_[0x01F4] = 0x47; /* G LATIN CAPITAL LETTER G WITH ACUTE */
-    replaceCharList_[0x1E20] = 0x47; /* G LATIN CAPITAL LETTER G WITH MACRON */
-
-    replaceCharList_[0x00EC] = 0x69; /* i LATIN SMALL LETTER I WITH GRAVE */
-    replaceCharList_[0x00ED] = 0x69; /* i LATIN SMALL LETTER I WITH ACUTE */
-    replaceCharList_[0x00EE] = 0x69; /* i LATIN SMALL LETTER I WITH CIRCUMFLEX */
-    replaceCharList_[0x00EF] = 0x69; /* i LATIN SMALL LETTER I WITH DIAERESIS */
-    replaceCharList_[0x0129] = 0x69; /* i LATIN SMALL LETTER I WITH TILDE */
-    replaceCharList_[0x012B] = 0x69; /* i LATIN SMALL LETTER I WITH MACRON */
-    replaceCharList_[0x012D] = 0x69; /* i LATIN SMALL LETTER I WITH BREVE */
-    replaceCharList_[0x012F] = 0x69; /* i LATIN SMALL LETTER I WITH OGONEK */
-    replaceCharList_[0x01D0] = 0x69; /* i LATIN SMALL LETTER I WITH CARON */
-    replaceCharList_[0x0131] = 0x69; /* i LATIN SMALL LETTER DOTLESS I */
-
-    replaceCharList_[0x00CC] = 0x49; /* I LATIN CAPITAL LETTER I WITH GRAVE */
-    replaceCharList_[0x00CD] = 0x49; /* I LATIN CAPITAL LETTER I WITH ACUTE */
-    replaceCharList_[0x00CE] = 0x49; /* I LATIN CAPITAL LETTER I WITH CIRCUMFLEX */
-    replaceCharList_[0x00CF] = 0x49; /* I LATIN CAPITAL LETTER I WITH DIAERESIS */
-    replaceCharList_[0x0128] = 0x49; /* I LATIN CAPITAL LETTER I WITH TILDE */
-    replaceCharList_[0x012A] = 0x49; /* I LATIN CAPITAL LETTER I WITH MACRON */
-    replaceCharList_[0x012C] = 0x49; /* I LATIN CAPITAL LETTER I WITH BREVE */
-    replaceCharList_[0x012E] = 0x49; /* I LATIN CAPITAL LETTER I WITH OGONEK */
-    replaceCharList_[0x0130] = 0x49; /* I LATIN CAPITAL LETTER I WITH DOT ABOVE */
-
-    replaceCharList_[0x0137] = 0x6B; /* k LATIN SMALL LETTER K WITH CEDILLA */
-
-    replaceCharList_[0x0136] = 0x4B; /* K LATIN CAPITAL LETTER K WITH CEDILLA */
-
-    replaceCharList_[0x013A] = 0x6C; /* l LATIN SMALL LETTER L WITH ACUTE */
-    replaceCharList_[0x013C] = 0x6C; /* l LATIN SMALL LETTER L WITH CEDILLA */
-    replaceCharList_[0x013E] = 0x6C; /* l LATIN SMALL LETTER L WITH CARON */
-    replaceCharList_[0x0140] = 0x6C; /* l LATIN SMALL LETTER L WITH MIDDLE DOT */
-    replaceCharList_[0x0142] = 0x6C; /* l LATIN SMALL LETTER L WITH STROKE */
-
-    replaceCharList_[0x0139] = 0x4C; /* L LATIN CAPITAL LETTER L WITH ACUTE */
-    replaceCharList_[0x013B] = 0x4C; /* L LATIN CAPITAL LETTER L WITH CEDILLA */
-    replaceCharList_[0x013D] = 0x4C; /* L LATIN CAPITAL LETTER L WITH CARON */
-    replaceCharList_[0x013F] = 0x4C; /* L LATIN CAPITAL LETTER L WITH MIDDLE DOT */
-    replaceCharList_[0x0141] = 0x4C; /* L LATIN CAPITAL LETTER L WITH STROKE */
-
-    replaceCharList_[0x00F1] = 0x6E; /* n LATIN SMALL LETTER N WITH TILDE */
-    replaceCharList_[0x0144] = 0x6E; /* n LATIN SMALL LETTER N WITH ACUTE */
-    replaceCharList_[0x0146] = 0x6E; /* n LATIN SMALL LETTER N WITH CEDILLA */
-    replaceCharList_[0x0148] = 0x6E; /* n LATIN SMALL LETTER N WITH CARON */
-
-    replaceCharList_[0x00D1] = 0x4E; /* N LATIN CAPITAL LETTER N WITH TILDE */
-    replaceCharList_[0x0143] = 0x4E; /* N LATIN CAPITAL LETTER N WITH ACUTE */
-    replaceCharList_[0x0145] = 0x4E; /* N LATIN CAPITAL LETTER N WITH CEDILLA */
-    replaceCharList_[0x0147] = 0x4E; /* N LATIN CAPITAL LETTER N WITH CARON */
-
-    replaceCharList_[0x00F2] = 0x6F; /* o LATIN SMALL LETTER O WITH GRAVE */
-    replaceCharList_[0x00F3] = 0x6F; /* o LATIN SMALL LETTER O WITH ACUTE */
-    replaceCharList_[0x00F4] = 0x6F; /* o LATIN SMALL LETTER O WITH CIRCUMFLEX */
-    replaceCharList_[0x00F5] = 0x6F; /* o LATIN SMALL LETTER O WITH TILDE */
-    replaceCharList_[0x00F6] = 0x6F; /* o LATIN SMALL LETTER O WITH DIAERESIS */
-    replaceCharList_[0x00F8] = 0x6F; /* o LATIN SMALL LETTER O WITH STROKE */
-    replaceCharList_[0x014D] = 0x6F; /* o LATIN SMALL LETTER O WITH MACRON */
-    replaceCharList_[0x014F] = 0x6F; /* o LATIN SMALL LETTER O WITH BREVE */
-    replaceCharList_[0x01D2] = 0x6F; /* o LATIN SMALL LETTER O WITH CARON */
-    replaceCharList_[0x01EB] = 0x6F; /* o LATIN SMALL LETTER O WITH OGONEK */
-    replaceCharList_[0x0151] = 0x6F; /* o LATIN SMALL LETTER O WITH DOUBLE ACUTE */
-    replaceCharList_[0x0153] = 0x6F; /* LATIN SMALL LIGATURE OE */
-
-    replaceCharList_[0x00D2] = 0x4F; /* O LATIN CAPITAL LETTER O WITH GRAVE */
-    replaceCharList_[0x00D3] = 0x4F; /* O LATIN CAPITAL LETTER O WITH ACUTE */
-    replaceCharList_[0x00D4] = 0x4F; /* O LATIN CAPITAL LETTER O WITH CIRCUMFLEX */
-    replaceCharList_[0x00D5] = 0x4F; /* O LATIN CAPITAL LETTER O WITH TILDE */
-    replaceCharList_[0x00D6] = 0x4F; /* O LATIN CAPITAL LETTER O WITH DIAERESIS */
-    replaceCharList_[0x00D8] = 0x4F; /* O LATIN CAPITAL LETTER O WITH STROKE */
-    replaceCharList_[0x014C] = 0x4F; /* O LATIN CAPITAL LETTER O WITH MACRON */
-    replaceCharList_[0x014E] = 0x4F; /* O LATIN CAPITAL LETTER O WITH BREVE */
-    replaceCharList_[0x01D1] = 0x4F; /* O LATIN CAPITAL LETTER O WITH CARON */
-    replaceCharList_[0x01EA] = 0x4F; /* O LATIN CAPITAL LETTER O WITH OGONEK */
-    replaceCharList_[0x0150] = 0x4F; /* O LATIN CAPITAL LETTER O WITH DOUBLE ACUTE */
-    replaceCharList_[0x0152] = 0x4F; /* LATIN CAPITAL LIGATURE OE */
-
-    replaceCharList_[0x0155] = 0x72; /* r LATIN SMALL LETTER R WITH ACUTE */
-    replaceCharList_[0x0157] = 0x72; /* r LATIN SMALL LETTER R WITH CEDILLA */
-    replaceCharList_[0x0159] = 0x72; /* r LATIN SMALL LETTER R WITH CARON */
-
-    replaceCharList_[0x0154] = 0x52; /* R LATIN CAPITAL LETTER R WITH ACUTE */
-    replaceCharList_[0x0156] = 0x52; /* R LATIN CAPITAL LETTER R WITH CEDILLA */
-    replaceCharList_[0x0158] = 0x52; /* R LATIN CAPITAL LETTER R WITH CARON */
-
-    replaceCharList_[0x015B] = 0x73; /* s LATIN SMALL LETTER S WITH ACUTE */
-    replaceCharList_[0x015D] = 0x73; /* s LATIN SMALL LETTER S WITH CIRCUMFLEX */
-    replaceCharList_[0x015F] = 0x73; /* s LATIN SMALL LETTER S WITH CEDILLA */
-    replaceCharList_[0x0161] = 0x73; /* s LATIN SMALL LETTER S WITH CARON */
-
-    replaceCharList_[0x015A] = 0x53; /* S LATIN CAPITAL LETTER S WITH ACUTE */
-    replaceCharList_[0x015C] = 0x53; /* S LATIN CAPITAL LETTER S WITH CIRCUMFLEX */
-    replaceCharList_[0x015E] = 0x53; /* S LATIN CAPITAL LETTER S WITH CEDILLA */
-    replaceCharList_[0x0160] = 0x53; /* S LATIN CAPITAL LETTER S WITH CARON */
-
-    replaceCharList_[0x00FE] = 0x74; /* t LATIN CAPITAL LETTER THORN */
-    replaceCharList_[0x0163] = 0x74; /* t LATIN SMALL LETTER T WITH CEDILLA */
-    replaceCharList_[0x0165] = 0x74; /* t LATIN SMALL LETTER T WITH CARON */
-    replaceCharList_[0x0167] = 0x74; /* t LATIN SMALL LETTER T WITH STROKE */
-    replaceCharList_[0x021B] = 0x74; /* t LATIN SMALL LETTER T WITH COMMA BELOW */
-
-    replaceCharList_[0x00DE] = 0x54; /* T LATIN CAPITAL LETTER THORN */
-    replaceCharList_[0x0162] = 0x54; /* T LATIN CAPITAL LETTER T WITH CEDILLA */
-    replaceCharList_[0x0164] = 0x54; /* T LATIN CAPITAL LETTER T WITH CARON */
-    replaceCharList_[0x0166] = 0x54; /* T LATIN CAPITAL LETTER T WITH STROKE */
-
-    replaceCharList_[0x00F9] = 0x75; /* u LATIN SMALL LETTER U WITH GRAVE */
-    replaceCharList_[0x00FA] = 0x75; /* u LATIN SMALL LETTER U WITH ACUTE */
-    replaceCharList_[0x00FB] = 0x75; /* u LATIN SMALL LETTER U WITH CIRCUMFLEX */
-    replaceCharList_[0x00FC] = 0x75; /* u LATIN SMALL LETTER U WITH DIAERESIS */
-    replaceCharList_[0x0169] = 0x75; /* u LATIN SMALL LETTER U WITH TILDE */
-    replaceCharList_[0x016B] = 0x75; /* u LATIN SMALL LETTER U WITH MACRON */
-    replaceCharList_[0x016D] = 0x75; /* u LATIN SMALL LETTER U WITH BREVE */
-    replaceCharList_[0x016F] = 0x75; /* u LATIN SMALL LETTER U WITH RING ABOVE */
-    replaceCharList_[0x0171] = 0x75; /* u LATIN SMALL LETTER U WITH DOUBLE ACUTE */
-    replaceCharList_[0x0173] = 0x75; /* u LATIN SMALL LETTER U WITH OGONEK */
-    replaceCharList_[0x01D4] = 0x75; /* u LATIN SMALL LETTER U WITH CARON */
-
-    replaceCharList_[0x00D9] = 0x55; /* U LATIN CAPITAL LETTER U WITH GRAVE */
-    replaceCharList_[0x00DA] = 0x55; /* U LATIN CAPITAL LETTER U WITH ACUTE */
-    replaceCharList_[0x00DB] = 0x55; /* U LATIN CAPITAL LETTER U WITH CIRCUMFLEX */
-    replaceCharList_[0x00DC] = 0x55; /* U LATIN CAPITAL LETTER U WITH DIAERESIS */
-    replaceCharList_[0x0168] = 0x55; /* U LATIN CAPITAL LETTER U WITH TILDE */
-    replaceCharList_[0x016A] = 0x55; /* U LATIN CAPITAL LETTER U WITH MACRON */
-    replaceCharList_[0x016C] = 0x55; /* U LATIN CAPITAL LETTER U WITH BREVE */
-    replaceCharList_[0x016E] = 0x55; /* U LATIN CAPITAL LETTER U WITH RING ABOVE */
-    replaceCharList_[0x0170] = 0x55; /* U LATIN CAPITAL LETTER U WITH DOUBLE ACUTE */
-    replaceCharList_[0x0172] = 0x55; /* U LATIN CAPITAL LETTER U WITH OGONEK */
-    replaceCharList_[0x01D3] = 0x55; /* U LATIN CAPITAL LETTER U WITH CARON */
-
-    replaceCharList_[0x00FD] = 0x79; /* y LATIN SMALL LETTER Y WITH ACUTE */
-    replaceCharList_[0x00FF] = 0x79; /* y LATIN SMALL LETTER Y WITH DIAERESIS */
-    replaceCharList_[0x0177] = 0x79; /* y LATIN SMALL LETTER Y WITH CIRCUMFLEX */
-    replaceCharList_[0x0233] = 0x79; /* y LATIN SMALL LETTER Y WITH MACRON */
-    replaceCharList_[0x1EF3] = 0x79; /* y LATIN SMALL LETTER Y WITH GRAVE */
-    replaceCharList_[0x1EF9] = 0x79; /* y LATIN SMALL LETTER Y WITH TILDE */
-
-    replaceCharList_[0x00DD] = 0x59; /* Y LATIN CAPITAL LETTER Y WITH ACUTE */
-    replaceCharList_[0x0176] = 0x59; /* Y LATIN CAPITAL LETTER Y WITH CIRCUMFLEX */
-    replaceCharList_[0x0178] = 0x59; /* Y LATIN CAPITAL LETTER Y WITH DIAERESIS */
-    replaceCharList_[0x0232] = 0x59; /* Y LATIN CAPITAL LETTER Y WITH MACRON */
-    replaceCharList_[0x1EF2] = 0x59; /* Y LATIN CAPITAL LETTER Y WITH GRAVE */
-    replaceCharList_[0x1EF8] = 0x59; /* Y LATIN CAPITAL LETTER Y WITH TILDE */
-
-    replaceCharList_[0x017A] = 0x7A; /* z LATIN SMALL LETTER Z WITH ACUTE */
-    replaceCharList_[0x017C] = 0x7A; /* z LATIN SMALL LETTER Z WITH DOT ABOVE */
-    replaceCharList_[0x017E] = 0x7A; /* z LATIN SMALL LETTER Z WITH CARON */
-
-    replaceCharList_[0x0179] = 0x5A; /* Z LATIN CAPITAL LETTER Z WITH ACUTE */
-    replaceCharList_[0x017B] = 0x5A; /* Z LATIN CAPITAL LETTER Z WITH DOT ABOVE */
-    replaceCharList_[0x017D] = 0x5A; /* Z LATIN CAPITAL LETTER Z WITH CARON */
+    replaceCharMap_.clear();
+    replaceCharMap_ = { { 0x00E0, 0x61 }, { 0x00E1, 0x61 }, { 0x00E2, 0x61 }, { 0x00E3, 0x61 }, { 0x00E4, 0x61 },
+        { 0x00E5, 0x61 }, { 0x00E6, 0x61 }, { 0x0101, 0x61 }, { 0x0103, 0x61 }, { 0x0105, 0x61 }, { 0x01CE, 0x61 },
+        { 0x00C0, 0x41 }, { 0x00C1, 0x41 }, { 0x00C2, 0x41 }, { 0x00C3, 0x41 }, { 0x00C4, 0x41 }, { 0x00C5, 0x41 },
+        { 0x00C6, 0x41 }, { 0x0100, 0x41 }, { 0x0102, 0x41 }, { 0x0104, 0x41 }, { 0x01CD, 0x41 }, { 0x00E7, 0x63 },
+        { 0x0107, 0x63 }, { 0x0109, 0x63 }, { 0x010B, 0x63 }, { 0x010D, 0x63 }, { 0x00C7, 0x43 }, { 0x0106, 0x43 },
+        { 0x0108, 0x43 }, { 0x010A, 0x43 }, { 0x010C, 0x43 }, { 0x010F, 0x64 }, { 0x0111, 0x64 }, { 0x010E, 0x44 },
+        { 0x0110, 0x44 }, { 0x00E8, 0x65 }, { 0x00E9, 0x65 }, { 0x00EA, 0x65 }, { 0x00EB, 0x65 }, { 0x0113, 0x65 },
+        { 0x0115, 0x65 }, { 0x0117, 0x65 }, { 0x0119, 0x65 }, { 0x011B, 0x65 }, { 0x0259, 0x65 }, { 0x00C8, 0x45 },
+        { 0x00C9, 0x45 }, { 0x00CA, 0x45 }, { 0x00CB, 0x45 }, { 0x0112, 0x45 }, { 0x0114, 0x45 }, { 0x0116, 0x45 },
+        { 0x0118, 0x45 }, { 0x011A, 0x45 }, { 0x018F, 0x45 }, { 0x011D, 0x67 }, { 0x011F, 0x67 }, { 0x0121, 0x67 },
+        { 0x0123, 0x67 }, { 0x01E7, 0x67 }, { 0x01F5, 0x67 }, { 0x1E21, 0x67 }, { 0x011C, 0x47 }, { 0x011E, 0x47 },
+        { 0x0120, 0x47 }, { 0x0122, 0x47 }, { 0x01E6, 0x47 }, { 0x01F4, 0x47 }, { 0x1E20, 0x47 }, { 0x00EC, 0x69 },
+        { 0x00ED, 0x69 }, { 0x00EE, 0x69 }, { 0x00EF, 0x69 }, { 0x0129, 0x69 }, { 0x012B, 0x69 }, { 0x012D, 0x69 },
+        { 0x012F, 0x69 }, { 0x01D0, 0x69 }, { 0x0131, 0x69 }, { 0x00CC, 0x49 }, { 0x00CD, 0x49 }, { 0x00CE, 0x49 },
+        { 0x00CF, 0x49 }, { 0x0128, 0x49 }, { 0x012A, 0x49 }, { 0x012C, 0x49 }, { 0x012E, 0x49 }, { 0x0130, 0x49 },
+        { 0x0137, 0x6B }, { 0x0136, 0x4B }, { 0x013A, 0x6C }, { 0x013C, 0x6C }, { 0x013E, 0x6C }, { 0x0140, 0x6C },
+        { 0x0142, 0x6C }, { 0x0139, 0x4C }, { 0x013B, 0x4C }, { 0x013D, 0x4C }, { 0x013F, 0x4C }, { 0x0141, 0x4C },
+        { 0x00F1, 0x6E }, { 0x0144, 0x6E }, { 0x0146, 0x6E }, { 0x0148, 0x6E }, { 0x00D1, 0x4E }, { 0x0143, 0x4E },
+        { 0x0145, 0x4E }, { 0x0147, 0x4E }, { 0x00F2, 0x6F }, { 0x00F3, 0x6F }, { 0x00F4, 0x6F }, { 0x00F5, 0x6F },
+        { 0x00F6, 0x6F }, { 0x00F8, 0x6F }, { 0x014D, 0x6F }, { 0x014F, 0x6F }, { 0x01D2, 0x6F }, { 0x01EB, 0x6F },
+        { 0x0151, 0x6F }, { 0x0153, 0x6F }, { 0x00D2, 0x4F }, { 0x00D3, 0x4F }, { 0x00D4, 0x4F }, { 0x00D5, 0x4F },
+        { 0x00D6, 0x4F }, { 0x00D8, 0x4F }, { 0x014C, 0x4F }, { 0x014E, 0x4F }, { 0x01D1, 0x4F }, { 0x01EA, 0x4F },
+        { 0x0150, 0x4F }, { 0x0152, 0x4F }, { 0x0155, 0x72 }, { 0x0157, 0x72 }, { 0x0159, 0x72 }, { 0x0154, 0x52 },
+        { 0x0156, 0x52 }, { 0x0158, 0x52 }, { 0x015B, 0x73 }, { 0x015D, 0x73 }, { 0x015F, 0x73 }, { 0x0161, 0x73 },
+        { 0x015A, 0x53 }, { 0x015C, 0x53 }, { 0x015E, 0x53 }, { 0x0160, 0x53 }, { 0x00FE, 0x74 }, { 0x0163, 0x74 },
+        { 0x0165, 0x74 }, { 0x0167, 0x74 }, { 0x021B, 0x74 }, { 0x00DE, 0x54 }, { 0x0162, 0x54 }, { 0x0164, 0x54 },
+        { 0x0166, 0x54 }, { 0x00F9, 0x75 }, { 0x00FA, 0x75 }, { 0x00FB, 0x75 }, { 0x00FC, 0x75 }, { 0x0169, 0x75 },
+        { 0x016B, 0x75 }, { 0x016D, 0x75 }, { 0x016F, 0x75 }, { 0x0171, 0x75 }, { 0x0173, 0x75 }, { 0x01D4, 0x75 },
+        { 0x00D9, 0x55 }, { 0x00DA, 0x55 }, { 0x00DB, 0x55 }, { 0x00DC, 0x55 }, { 0x0168, 0x55 }, { 0x016A, 0x55 },
+        { 0x016C, 0x55 }, { 0x016E, 0x55 }, { 0x0170, 0x55 }, { 0x0172, 0x55 }, { 0x01D3, 0x55 }, { 0x00FD, 0x79 },
+        { 0x00FF, 0x79 }, { 0x0177, 0x79 }, { 0x0233, 0x79 }, { 0x1EF3, 0x79 }, { 0x1EF9, 0x79 }, { 0x00DD, 0x59 },
+        { 0x0176, 0x59 }, { 0x0178, 0x59 }, { 0x0232, 0x59 }, { 0x1EF2, 0x59 }, { 0x1EF8, 0x59 }, { 0x017A, 0x7A },
+        { 0x017C, 0x7A }, { 0x017E, 0x7A }, { 0x0179, 0x5A }, { 0x017B, 0x5A }, { 0x017D, 0x5A } };
 }
 
 /**
@@ -984,8 +552,8 @@ int MsgTextConvert::ConvertUCS2ToGSM7bit(OUT unsigned char *pDestText, IN int ma
         upperByte = pSrcText[index++];
         lowerByte = pSrcText[index];
         inText = ((upperByte << 0x08) & 0xFF00) | lowerByte;
-        itChar = ucs2toGSM7DefList_.find(inText); /* Check Default Char */
-        if (itChar != ucs2toGSM7DefList_.end()) {
+        itChar = ucs2toGSM7DefMap_.find(inText); /* Check Default Char */
+        if (itChar != ucs2toGSM7DefMap_.end()) {
             pDestText[outTextLen++] = static_cast<unsigned char>(itChar->second);
         } else {
             switch (currType) {
@@ -1047,12 +615,12 @@ int MsgTextConvert::ConvertUCS2ToGSM7bitAuto(OUT unsigned char *pDestText, IN in
         inText = (upperByte << 0x08) & 0xFF00;
         inText = inText | lowerByte;
         /* Check Default Char */
-        itChar = ucs2toGSM7DefList_.find(inText);
-        if (itChar != ucs2toGSM7DefList_.end()) {
+        itChar = ucs2toGSM7DefMap_.find(inText);
+        if (itChar != ucs2toGSM7DefMap_.end()) {
             pDestText[outTextLen++] = static_cast<unsigned char>(itChar->second);
         } else {
-            itExt = ucs2toGSM7ExtList_.find(inText);
-            if (itExt == ucs2toGSM7ExtList_.end()) {
+            itExt = ucs2toGSM7ExtMap_.find(inText);
+            if (itExt == ucs2toGSM7ExtMap_.end()) {
                 TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
                 *pUnknown = true;
                 return 0;
@@ -1139,13 +707,14 @@ unsigned char MsgTextConvert::GetLangType(const unsigned char *pSrcText, int src
         lowerByte = pSrcText[index];
         inText = (upperByte << 0x08) & 0xFF00;
         inText = inText | lowerByte;
-        itExt = extCharList_.find(inText);
-        if (itExt != extCharList_.end()) {
-            newType = static_cast<unsigned char>(itExt->second);
-            if (newType >= currType) {
-                bool isTurkisk = (inText == 0x00e7 && currType <= MSG_TURKISH_CHAR);
-                currType = isTurkisk ? MSG_TURKISH_CHAR : newType;
-            }
+        itExt = extCharMap_.find(inText);
+        if (itExt == extCharMap_.end()) {
+            continue;
+        }
+        newType = static_cast<unsigned char>(itExt->second);
+        if (newType >= currType) {
+            bool isTurkisk = (inText == 0x00e7 && currType <= MSG_TURKISH_CHAR);
+            currType = isTurkisk ? MSG_TURKISH_CHAR : newType;
         }
     }
     TELEPHONY_LOGI("charType : [%{public}hhu]", currType);
@@ -1161,22 +730,22 @@ int MsgTextConvert::FindUCS2toGSM7Ext(
         return outTextLen;
     }
 
-    auto itExt = ucs2toGSM7ExtList_.find(inText);
-    if (itExt != ucs2toGSM7ExtList_.end()) {
-        /* prevent buffer overflow */
-        if (maxLength <= outTextLen + 1) {
-            TELEPHONY_LOGE("Buffer Full.");
-            return outTextLen;
-        }
-        pDestText[outTextLen++] = 0x1B;
-        pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
-    } else {
+    auto itExt = ucs2toGSM7ExtMap_.find(inText);
+    if (itExt == ucs2toGSM7ExtMap_.end()) {
         pDestText[outTextLen++] = FindUCS2ReplaceChar(inText);
         abnormalChar = true;
 #ifdef CONVERT_DUMP
         TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
 #endif
+        return outTextLen;
     }
+    /* prevent buffer overflow */
+    if (maxLength <= outTextLen + 1) {
+        TELEPHONY_LOGE("Buffer Full.");
+        return outTextLen;
+    }
+    pDestText[outTextLen++] = 0x1B;
+    pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
     return outTextLen;
 }
 
@@ -1189,22 +758,22 @@ int MsgTextConvert::FindUCS2toTurkish(
         return outTextLen;
     }
 
-    auto itExt = ucs2toTurkishList_.find(inText);
-    if (itExt != ucs2toTurkishList_.end()) {
-        /* prevent buffer overflow */
-        if (maxLength <= outTextLen + 1) {
-            TELEPHONY_LOGE("Buffer Full.");
-            return outTextLen;
-        }
-        pDestText[outTextLen++] = 0x1B;
-        pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
-    } else {
+    auto itExt = ucs2toTurkishMap_.find(inText);
+    if (itExt == ucs2toTurkishMap_.end()) {
         pDestText[outTextLen++] = FindUCS2ReplaceChar(inText);
         abnormalChar = true;
 #ifdef CONVERT_DUMP
         TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
 #endif
+        return outTextLen;
     }
+    /* prevent buffer overflow */
+    if (maxLength <= outTextLen + 1) {
+        TELEPHONY_LOGE("Buffer Full.");
+        return outTextLen;
+    }
+    pDestText[outTextLen++] = 0x1B;
+    pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
     return outTextLen;
 }
 
@@ -1217,22 +786,22 @@ int MsgTextConvert::FindUCS2toSpanish(
         return outTextLen;
     }
 
-    auto itExt = ucs2toSpanishList_.find(inText);
-    if (itExt != ucs2toSpanishList_.end()) {
-        /* prevent buffer overflow */
-        if (maxLength <= outTextLen + 1) {
-            TELEPHONY_LOGE("Buffer Full.");
-            return outTextLen;
-        }
-        pDestText[outTextLen++] = 0x1B;
-        pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
-    } else {
+    auto itExt = ucs2toSpanishMap_.find(inText);
+    if (itExt == ucs2toSpanishMap_.end()) {
         pDestText[outTextLen++] = FindUCS2ReplaceChar(inText);
         abnormalChar = true;
 #ifdef CONVERT_DUMP
         TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
 #endif
+        return outTextLen;
     }
+    /* prevent buffer overflow */
+    if (maxLength <= outTextLen + 1) {
+        TELEPHONY_LOGE("Buffer Full.");
+        return outTextLen;
+    }
+    pDestText[outTextLen++] = 0x1B;
+    pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
     return outTextLen;
 }
 
@@ -1245,30 +814,29 @@ int MsgTextConvert::FindUCS2toPortu(
         return outTextLen;
     }
 
-    auto itExt = ucs2toPortuList_.find(inText);
-    if (itExt != ucs2toPortuList_.end()) {
-        /* prevent buffer overflow */
-        if (maxLength <= outTextLen + 1) {
-            TELEPHONY_LOGE("Buffer Full.");
-            return outTextLen;
-        }
-        pDestText[outTextLen++] = 0x1B;
-        pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
-    } else {
+    auto itExt = ucs2toPortuMap_.find(inText);
+    if (itExt == ucs2toPortuMap_.end()) {
         pDestText[outTextLen++] = FindUCS2ReplaceChar(inText);
         abnormalChar = true;
 #ifdef CONVERT_DUMP
         TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
 #endif
+        return outTextLen;
     }
+    /* prevent buffer overflow */
+    if (maxLength <= outTextLen + 1) {
+        TELEPHONY_LOGE("Buffer Full.");
+        return outTextLen;
+    }
+    pDestText[outTextLen++] = 0x1B;
+    pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
     return outTextLen;
 }
-
 unsigned char MsgTextConvert::FindUCS2ReplaceChar(const unsigned short inText)
 {
     unsigned char result = 0;
-    auto itReplace = replaceCharList_.find(inText);
-    if (itReplace != replaceCharList_.end()) {
+    auto itReplace = replaceCharMap_.find(inText);
+    if (itReplace != replaceCharMap_.end()) {
         result = static_cast<unsigned char>(itReplace->second);
     } else {
         result = 0x3F;
@@ -1331,15 +899,37 @@ int MsgTextConvert::EscapeTurkishLockingToUCS2(
     if (pSrcText == nullptr || srcLen <= 0) {
         return index;
     }
+    /* Turkish National Language Locking Shift Table -> UCS2 */
+    const WCHAR g_turkishLockingToUCS2[] = { /* @ */
+        0x0040, 0x00A3, 0x0024, 0x00A5, 0x20AC, 0x00E9, 0x00F9, 0x00EC, 0x00F2, 0x00C7, 0x000A, 0x011E, 0x011F, 0x000D,
+        0x00C5, 0x00E5, 0x0394, 0x005F, 0x03A6, 0x0393, 0x039B, 0x03A9, 0x03A0, 0x03A8, 0x03A3, 0x0398, 0x039E, 0x001B,
+        0x015E, 0x015F, 0x00DF, 0x00C9,
+        /* SP */
+        0x0020, 0x0021, 0x0022, 0x0023, 0x00A4, 0x0025, 0x0026, 0x0027, 0x0028, 0x0029, 0x002A, 0x002B, 0x002C, 0x002D,
+        0x002E, 0x002F,
+        /* 0 */
+        0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x003A, 0x003B, 0x003C, 0x003D,
+        0x003E, 0x003F, 0x0130, 0x0041, 0x0042, 0x0043, 0x0044, 0x0045, 0x0046, 0x0047, 0x0048, 0x0049, 0x004A, 0x004B,
+        0x004C, 0x004D, 0x004E, 0x004F,
+        /* P */
+        0x0050, 0x0051, 0x0052, 0x0053, 0x0054, 0x0055, 0x0056, 0x0057, 0x0058, 0x0059, 0x005A, 0x00C4, 0x00D6, 0x00D1,
+        0x00DC, 0x00A7,
+        /* c */
+        0x00E7, 0x0061, 0x0062, 0x0063, 0x0064, 0x0065, 0x0066, 0x0067, 0x0068, 0x0069, 0x006A, 0x006B, 0x006C, 0x006D,
+        0x006E, 0x006F,
+        /* p */
+        0x0070, 0x0071, 0x0072, 0x0073, 0x0074, 0x0075, 0x0076, 0x0077, 0x0078, 0x0079, 0x007A, 0x00E4, 0x00F6, 0x00F1,
+        0x00FC, 0x00E0
+    };
     /* Check Escape */
-    if (g_TurkishLockingToUCS2[pSrcText[index]] == 0x001B) {
+    if (g_turkishLockingToUCS2[pSrcText[index]] == 0x001B) {
         index++;
         if (index > srcLen) {
             return index;
         }
         result = EscapeToUCS2(pSrcText[index], pLangInfo);
     } else { /* TURKISH - National Language Locking Shift */
-        result = g_TurkishLockingToUCS2[pSrcText[index]];
+        result = g_turkishLockingToUCS2[pSrcText[index]];
     }
     return index;
 }
@@ -1351,14 +941,34 @@ int MsgTextConvert::EscapePortuLockingToUCS2(
     if (pSrcText == nullptr || srcLen <= 0) {
         return index;
     }
-    if (g_PortuLockingToUCS2[pSrcText[index]] == 0x001B) {
+    /* Portuguese National Language Locking Shift Table -> UCS2 */
+    const WCHAR g_portuLockingToUCS2[] = { /* @ */
+        0x0040, 0x00A3, 0x0024, 0x00A5, 0x00EA, 0x00E9, 0x00FA, 0x00ED, 0x00F3, 0x00E7, 0x000A, 0x00D4, 0x00F4, 0x000D,
+        0x00C1, 0x00E1, 0x0394, 0x005F, 0x0020, 0x00C7, 0x00C0, 0x0020, 0x005E, 0x005C, 0x20AC, 0x00D3, 0x007C, 0x001B,
+        0x00C2, 0x00E2, 0x00CA, 0x00C9,
+        /* SP */
+        0x0020, 0x0021, 0x0022, 0x0023, 0x00A4, 0x0025, 0x0026, 0x0027, 0x0028, 0x0029, 0x002A, 0x002B, 0x002C, 0x002D,
+        0x002E, 0x002F,
+        /* 0 */
+        0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x003A, 0x003B, 0x003C, 0x003D,
+        0x003E, 0x003F, 0x00CD, 0x0041, 0x0042, 0x0043, 0x0044, 0x0045, 0x0046, 0x0047, 0x0048, 0x0049, 0x004A, 0x004B,
+        0x004C, 0x004D, 0x004E, 0x004F,
+        /* P */
+        0x0050, 0x0051, 0x0052, 0x0053, 0x0054, 0x0055, 0x0056, 0x0057, 0x0058, 0x0059, 0x005A, 0x00C3, 0x00D5, 0x00DA,
+        0x00DC, 0x00A7, 0x00BF, 0x0061, 0x0062, 0x0063, 0x0064, 0x0065, 0x0066, 0x0067, 0x0068, 0x0069, 0x006A, 0x006B,
+        0x006C, 0x006D, 0x006E, 0x006F,
+        /* p */
+        0x0070, 0x0071, 0x0072, 0x0073, 0x0074, 0x0075, 0x0076, 0x0077, 0x0078, 0x0079, 0x007A, 0x00E3, 0x00F5, 0x0020,
+        0x00FC, 0x00E0
+    };
+    if (g_portuLockingToUCS2[pSrcText[index]] == 0x001B) {
         index++;
         if (index > srcLen) {
             return index;
         }
         result = EscapeToUCS2(pSrcText[index], pLangInfo);
     } else { /* PORTUGUESE - National Language Locking Shift */
-        result = g_PortuLockingToUCS2[pSrcText[index]];
+        result = g_portuLockingToUCS2[pSrcText[index]];
     }
     return index;
 }
@@ -1370,14 +980,14 @@ int MsgTextConvert::EscapeGSM7BitToUCS2(
     if (pSrcText == nullptr || srcLen <= 0) {
         return index;
     }
-    if (g_GSM7BitToUCS2[pSrcText[index]] == 0x001B) {
+    if (g_gsm7BitToUCS2[pSrcText[index]] == 0x001B) {
         index++;
         if (index > srcLen) {
             return index;
         }
         result = EscapeToUCS2(pSrcText[index], pLangInfo);
     } else {
-        result = g_GSM7BitToUCS2[pSrcText[index]];
+        result = g_gsm7BitToUCS2[pSrcText[index]];
     }
     return index;
 }
@@ -1389,22 +999,130 @@ unsigned short MsgTextConvert::EscapeToUCS2(const unsigned char srcText, const M
         TELEPHONY_LOGI("Single Shift [%{public}d]", pLangInfo.singleLang);
         switch (pLangInfo.singleLang) {
             case MSG_ID_TURKISH_LANG:
-                result = g_TurkishSingleToUCS2[srcText];
+                GetTurkishSingleToUCS2(srcText, result);
                 break;
             case MSG_ID_SPANISH_LANG:
-                result = g_SpanishSingleToUCS2[srcText];
+                GetSpanishSingleToUCS2(srcText, result);
                 break;
             case MSG_ID_PORTUGUESE_LANG:
-                result = g_PortuSingleToUCS2[srcText];
+                GetPortuSingleToUCS2(srcText, result);
                 break;
             default:
-                result = g_GSM7BitExtToUCS2[srcText];
+                GetGsm7BitExtToUCS2(srcText, result);
                 break;
         }
     } else { /* GSM 7 bit Default Alphabet Extension Table */
-        result = g_GSM7BitExtToUCS2[srcText];
+        GetGsm7BitExtToUCS2(srcText, result);
     }
     return result;
+}
+
+void MsgTextConvert::GetTurkishSingleToUCS2(const unsigned char &srcText, unsigned short &result)
+{
+    /* Turkish National Language Single Shift Table -> UCS2 */
+    const WCHAR g_turkishSingleToUCS2[] = { /* 0x0020 -> (SP) for invalid code */
+        /* Page Break */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x000C, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020,
+        /* ^ */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x005E, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x001B, 0x0020, 0x0020,
+        0x0020, 0x0020,
+        /* { */ /* } */
+        /* \ */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x007B, 0x007D, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x005C,
+        /* [ */ /* ~ */ /* ] */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x005B, 0x007E,
+        0x005D, 0x0020,
+        /* | */
+        0x007C, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x011E, 0x0020, 0x0130, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x015E, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00E7, 0x0020, 0x20AC, 0x0020, 0x011F, 0x0020, 0x0131,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x015F, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020
+    };
+    result = g_turkishSingleToUCS2[srcText];
+}
+
+void MsgTextConvert::GetSpanishSingleToUCS2(const unsigned char &srcText, unsigned short &result)
+{
+    /* Spanish National Language Single Shift Table -> UCS2 */
+    const WCHAR g_spanishSingleToUCS2[] = { /* 0x0020 -> (SP) for invalid code */
+        /* Page Break */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00E7, 0x000C, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020,
+        /* ^ */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x005E, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x001B, 0x0020, 0x0020,
+        0x0020, 0x0020,
+        /* { */ /* } */
+        /* \ */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x007B, 0x007D, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x005C,
+        /* [ */ /* ~ */ /* ] */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x005B, 0x007E,
+        0x005D, 0x0020,
+        /* | */
+        0x007C, 0x00C1, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00CD, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x00D3, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00DA, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00E1, 0x0020, 0x0020, 0x0020, 0x20AC, 0x0020, 0x0020, 0x0020, 0x00ED,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00F3, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00FA, 0x0020, 0x0020,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020
+    };
+    result = g_spanishSingleToUCS2[srcText];
+}
+
+void MsgTextConvert::GetGsm7BitExtToUCS2(const unsigned char &srcText, unsigned short &result)
+{
+    /* GSM 7 bit Default Alphabet Extension Table -> UCS2 */
+    const WCHAR g_gsm7BitExtToUCS2[] = { /* 0x0020 -> (SP) for invalid code */
+        /* Page Break */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x000C, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020,
+        /* ^ */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x005E, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x001B, 0x0020, 0x0020,
+        0x0020, 0x0020,
+        /* { */ /* } */
+        /* \ */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x007B, 0x007D, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x005C,
+        /* [ */ /* ~ */ /* ] */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x005B, 0x007E,
+        0x005D, 0x0020,
+        /* | */
+        0x007C, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x20AC, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020
+    };
+    result = g_gsm7BitExtToUCS2[srcText];
+}
+
+void MsgTextConvert::GetPortuSingleToUCS2(const unsigned char &srcText, unsigned short &result)
+{
+    /* Portuguese National Language Single Shift Table -> UCS2 */
+    const WCHAR g_portuSingleToUCS2[] = { /* 0x0020 -> (SP) for invalid code */
+        /* Page Break */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00EA, 0x0020, 0x0020, 0x0020, 0x00E7, 0x000C, 0x00D4, 0x00F4, 0x0020,
+        0x00C1, 0x00E1,
+        /* ^ */
+        0x0020, 0x0020, 0x03A6, 0x0393, 0x005E, 0x03A9, 0x03A0, 0x03A8, 0x03A3, 0x0398, 0x0020, 0x001B, 0x0020, 0x0020,
+        0x0020, 0x00CA,
+        /* { */ /* } */
+        /* \ */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x007B, 0x007D, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x005C,
+        /* [ */ /* ~ */ /* ] */
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x005B, 0x007E,
+        0x005D, 0x0020,
+        /* | */
+        0x007C, 0x00C0, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00CD, 0x0020, 0x0020, 0x0020, 0x0020,
+        0x0020, 0x00D3, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00DA, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00C3,
+        0x00D5, 0x0020, 0x0020, 0x0020, 0x0020, 0x00C2, 0x0020, 0x0020, 0x0020, 0x20AC, 0x0020, 0x0020, 0x0020, 0x00ED,
+        0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00F3, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x00FA, 0x0020, 0x0020,
+        0x0020, 0x0020, 0x0020, 0x00E3, 0x00F5, 0x0020, 0x0020, 0x00E2
+    };
+    result = g_portuSingleToUCS2[srcText];
 }
 
 void MsgTextConvert::ConvertDumpTextToHex(const unsigned char *pText, int length)
