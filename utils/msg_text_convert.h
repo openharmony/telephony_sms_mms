@@ -109,22 +109,27 @@ private:
         const unsigned char *pSrcText, int srcLen, const MsgLangInfo &pLangInfo, unsigned short &result);
     unsigned short EscapeToUCS2(const unsigned char srcText, const MsgLangInfo &pLangInfo);
 
-    void InitExtCharList();
-    void InitUCS2ToGSM7DefList();
-    void InitUCS2ToExtList();
-    void InitUCS2ToTurkishList();
-    void InitUCS2ToSpanishList();
-    void InitUCS2ToPortuList();
-    void InitUCS2ToReplaceCharList();
+    void GetTurkishSingleToUCS2(const unsigned char &srcText, unsigned short &result);
+    void GetSpanishSingleToUCS2(const unsigned char &srcText, unsigned short &result);
+    void GetGsm7BitExtToUCS2(const unsigned char &srcText, unsigned short &result);
+    void GetPortuSingleToUCS2(const unsigned char &srcText, unsigned short &result);
+
+    void InitExtCharMap();
+    void InitUCS2ToGSM7DefMap();
+    void InitUCS2ToExtMap();
+    void InitUCS2ToTurkishMap();
+    void InitUCS2ToSpanishMap();
+    void InitUCS2ToPortuMap();
+    void InitUCS2ToReplaceCharMap();
 
     static std::shared_ptr<MsgTextConvert> instance_;
-    std::map<unsigned short, unsigned char> extCharList_;
-    std::map<unsigned short, unsigned char> ucs2toGSM7DefList_;
-    std::map<unsigned short, unsigned char> ucs2toGSM7ExtList_;
-    std::map<unsigned short, unsigned char> ucs2toTurkishList_;
-    std::map<unsigned short, unsigned char> ucs2toSpanishList_;
-    std::map<unsigned short, unsigned char> ucs2toPortuList_;
-    std::map<unsigned short, unsigned char> replaceCharList_;
+    std::map<unsigned short, unsigned char> extCharMap_;
+    std::map<unsigned short, unsigned char> ucs2toGSM7DefMap_;
+    std::map<unsigned short, unsigned char> ucs2toGSM7ExtMap_;
+    std::map<unsigned short, unsigned char> ucs2toTurkishMap_;
+    std::map<unsigned short, unsigned char> ucs2toSpanishMap_;
+    std::map<unsigned short, unsigned char> ucs2toPortuMap_;
+    std::map<unsigned short, unsigned char> replaceCharMap_;
     static constexpr uint8_t GSM7_DEFLIST_LEN = 128;
 };
 } // namespace Telephony
