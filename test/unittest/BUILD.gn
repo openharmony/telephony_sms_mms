@@ -36,12 +36,12 @@ ohos_executable("tel_sms_mms_test") {
     "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
     "//base/telephony/sms_mms:tel_sms_mms",
     "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "common_event_service:cesfwk_services",
     "core_service:tel_core_service_api",

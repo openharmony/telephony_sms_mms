@@ -90,12 +90,12 @@ ohos_shared_library("tel_sms_mms") {
     "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms/frameworks/native/mms:mms_native_source",
     "//third_party/glib:glib_packages",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "common_event_service:cesfwk_services",
     "drivers_interface_ril:hril_innerkits",

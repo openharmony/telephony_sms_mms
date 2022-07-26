@@ -54,13 +54,11 @@ ohos_source_set("mms_native_source") {
 
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
 
-  deps = [
-    "//third_party/glib:glib_packages",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "//third_party/glib:glib_packages" ]
 
   external_deps = [
     "ability_base:want",
+    "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "common_event_service:cesfwk_services",
     "safwk:system_ability_fwk",
