@@ -203,7 +203,7 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     GsmSimMessageParam smsData;
     smsData.refId = refId;
     smsData.smscPdu = StringUtils::StringToHex(smsIndexer->GetEncodeSmca());
-    if (!isImsNetDomain_ && smsIndexer->GetPsResendCount() == 0) {
+    if (true) {
         uint8_t tryCount = smsIndexer->GetCsResendCount();
         if (tryCount > 0) {
             smsIndexer->UpdatePduForResend();
