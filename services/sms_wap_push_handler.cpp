@@ -30,6 +30,7 @@
 
 namespace OHOS {
 namespace Telephony {
+using namespace OHOS::EventFwk;
 SmsWapPushHandler::SmsWapPushHandler(int32_t slotId) : slotId_(slotId) {}
 
 SmsWapPushHandler::~SmsWapPushHandler() {}
@@ -299,7 +300,7 @@ bool SmsWapPushHandler::DecodeXWapAbandonHeaderValue(SmsWapPushBuffer &decodeBuf
 bool SmsWapPushHandler::SendWapPushMessageBroadcast()
 {
     EventFwk::Want want;
-    want.SetAction("usual.event.SMS_WAPPUSH_RECEIVE_COMPLETED");
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
 
     want.SetParam("slotId", static_cast<int>(slotId_));
     want.SetParam("pushType", static_cast<int>(pushType_));
