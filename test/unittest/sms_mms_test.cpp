@@ -22,13 +22,14 @@
 #include "iservice_registry.h"
 
 #include "gsm_sms_sender_test.h"
+#include "mms_msg_test.h"
 #include "short_message_test.h"
 #include "sms_broadcast_subscriber.h"
 #include "sms_cb_message_test.h"
-#include "mms_msg_test.h"
 
 using namespace OHOS;
 using namespace OHOS::Telephony;
+using namespace OHOS::EventFwk;
 
 using TestStruct = struct FunStruct {
     std::string funName;
@@ -49,7 +50,7 @@ void TestRecev()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
-    matchingSkills.AddEvent("usual.event.SMS_WAPPUSH_RECEIVE_COMPLETED");
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
     // make subcriber info
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     // make a subcriber object
