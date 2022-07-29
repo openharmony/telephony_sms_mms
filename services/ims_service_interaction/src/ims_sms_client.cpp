@@ -15,10 +15,11 @@
 
 #include "ims_sms_client.h"
 
-#include "iservice_registry.h"
 #include "ims_sms_callback_stub.h"
-#include "telephony_log_wrapper.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 #include "telephony_errors.h"
+#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
