@@ -22,23 +22,28 @@
 
 #include "event_handler.h"
 #include "event_runner.h"
-
-#include "sms_common.h"
+#include "ims_reg_state_callback_stub.h"
 #include "network_state.h"
+#include "sms_common.h"
 
 namespace OHOS {
 namespace Telephony {
+enum NotificationType {
+    NOTIFICATION_TYPE_IMS = 600,
+};
+
 class SmsNetworkPolicyManager : public AppExecFwk::EventHandler {
 public:
     SmsNetworkPolicyManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
     virtual ~SmsNetworkPolicyManager() = default;
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
-    bool IsImsSmsSupported();
+    bool IsImsSmsSupported(int32_t slotId);
     std::string GetImsShortMessageFormat();
     void Init();
     void UnRegisterHandler();
     NetWorkType GetNetWorkType();
     bool IsImsNetDomain() const;
+    void GetRadioState();
     int32_t GetVoiceServiceState() const;
     std::optional<int32_t> NetworkRegister(
         const std::function<void(bool isImsNetDomain, int32_t serviceState)> &callback);
@@ -48,11 +53,11 @@ public:
 
 protected:
     void HandlerRadioState(const AppExecFwk::InnerEvent::Pointer &event);
-    void GetRadioState();
     void RegisterHandler();
 
 private:
     int32_t GetId();
+    void GetImsRegState();
 
     int32_t slotId_;
     enum NetWorkType netWorkType_ = NetWorkType::NET_TYPE_UNKNOWN;
@@ -60,6 +65,7 @@ private:
     int32_t voiceServiceState_ = static_cast<int32_t>(RegServiceState::REG_STATE_UNKNOWN);
     std::map<int32_t, const std::function<void(bool isImsNetDomain, int32_t serviceState)>> callbackMap_;
     int32_t id_ = 0;
+    sptr<ImsRegInfoCallback> callback_ = nullptr;
 };
 } // namespace Telephony
 } // namespace OHOS

@@ -195,7 +195,7 @@ public:
      * @return true
      * @return false
      */
-    bool IsImsSmsSupported() override;
+    bool IsImsSmsSupported(int32_t slotId) override;
 
     /**
      * @brief GetImsShortMessageFormat

@@ -49,12 +49,12 @@ public:
     bool SetSmscAddr(const std::string &scAddr);
     std::string GetSmscAddr();
     bool SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType);
-    bool SetImsSmsConfig(int32_t enable);
+    bool SetImsSmsConfig(int32_t slotId, int32_t enable);
     bool SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
     std::vector<std::string> SplitMessage(const std::string &message);
     bool GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &outInfo);
-    bool IsImsSmsSupported();
+    bool IsImsSmsSupported(int32_t slotId);
     std::string GetImsShortMessageFormat();
     bool HasSmsCapability();
 

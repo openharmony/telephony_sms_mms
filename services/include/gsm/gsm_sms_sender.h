@@ -18,16 +18,17 @@
 
 #include <functional>
 #include <memory>
-#include <string>
 #include <mutex>
+#include <string>
 
 #include "event_runner.h"
-
 #include "gsm_sms_message.h"
 #include "i_delivery_short_message_callback.h"
 #include "i_send_short_message_callback.h"
+#include "ims_sms_client.h"
 #include "sms_send_indexer.h"
 #include "sms_sender.h"
+#include "telephony_types.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -46,9 +47,9 @@ public:
     void SendSmsToRil(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
     void ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
     void ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
-    bool IsImsSmsSupported() override;
-    bool SetImsSmsConfig(int32_t enable) override;
+    bool IsImsSmsSupported(int32_t slotId) override;
     void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
+    void StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
 
 protected:
     void StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event) override;
@@ -58,6 +59,8 @@ private:
         const std::shared_ptr<struct EncodeInfo> &encodeInfo, unsigned char msgRef8bit);
     bool RegisterHandler();
     bool SetPduInfo(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSmsMessage &gsmSmsMessage, bool &isMore);
+    void SendImsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSimMessageParam smsData);
+    void SendCsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSimMessageParam smsData);
 
     std::mutex mutex_;
 };

@@ -193,10 +193,10 @@ bool SmsServiceManagerClient::GetSmsSegmentsInfo(int32_t slotId, const std::u16s
     return false;
 }
 
-bool SmsServiceManagerClient::IsImsSmsSupported()
+bool SmsServiceManagerClient::IsImsSmsSupported(int32_t slotId)
 {
     if (InitSmsServiceProxy()) {
-        return smsServiceInterface_->IsImsSmsSupported();
+        return smsServiceInterface_->IsImsSmsSupported(slotId);
     }
     return false;
 }

@@ -551,30 +551,68 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
 HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = DEFAULT_SIM_SLOT_ID;
-        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
-        result = g_telephonyService->SetImsSmsConfig(slotId, 1);
-        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
-        EXPECT_TRUE(true);
+    if (g_telephonyService == nullptr) {
+        EXPECT_TRUE(result);
     }
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0001 -->");
+    result = g_telephonyService->SetImsSmsConfig(slotId, 1);
+    TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0001 -->finished");
+    EXPECT_TRUE(result);
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_SetImsSmsConfig_0001
- * @tc.name     Disable IMS SMS
+ * @tc.number   Telephony_SmsMmsGtest_IsImsSmsSupported_0001
+ * @tc.name     Get Ims Sms Config
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, IsImsSmsSupported_0001, Function | MediumTest | Level3)
+{
+    bool result = false;
+    if (g_telephonyService == nullptr) {
+        EXPECT_TRUE(result);
+    }
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    TELEPHONY_LOGI("TelSMSMMSTest::IsImsSmsSupported_0001 -->");
+    result = g_telephonyService->IsImsSmsSupported(slotId);
+    TELEPHONY_LOGI("TelSMSMMSTest::IsImsSmsSupported_0001 -->finished");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SetImsSmsConfig_0002
+ * @tc.name     Disable Ims Sms
  * @tc.desc     Function test
  */
 HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level3)
 {
     bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = DEFAULT_SIM_SLOT_ID;
-        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
-        result = g_telephonyService->SetImsSmsConfig(slotId, 0);
-        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
-        EXPECT_TRUE(true);
+    if (g_telephonyService == nullptr) {
+        EXPECT_TRUE(result);
     }
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0002 -->");
+    result = g_telephonyService->SetImsSmsConfig(slotId, 0);
+    TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0002 -->finished");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_IsImsSmsSupported_0002
+ * @tc.name     Get Ims Sms Config
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, IsImsSmsSupported_0002, Function | MediumTest | Level3)
+{
+    bool result = false;
+    if (g_telephonyService == nullptr) {
+        EXPECT_TRUE(result);
+    }
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    TELEPHONY_LOGI("TelSMSMMSTest::IsImsSmsSupported_0002 -->");
+    result = g_telephonyService->IsImsSmsSupported(slotId);
+    TELEPHONY_LOGI("TelSMSMMSTest::IsImsSmsSupported_0002 -->finished");
+    EXPECT_FALSE(result);
 }
 
 #else // TEL_TEST_UNSUPPORT

@@ -16,9 +16,10 @@
 #include "sms_network_policy_manager.h"
 
 #include "core_manager_inner.h"
+#include "core_service_client.h"
+#include "ims_reg_info_callback_stub.h"
 #include "radio_event.h"
 #include "telephony_log_wrapper.h"
-#include "ims_reg_types.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -52,6 +53,7 @@ void SmsNetworkPolicyManager::RegisterHandler()
     CoreManagerInner::GetInstance().RegisterCoreNotify(
         slotId_, shared_from_this(), RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED, nullptr);
     GetRadioState();
+    GetImsRegState();
 }
 
 void SmsNetworkPolicyManager::UnRegisterHandler()
@@ -92,6 +94,7 @@ void SmsNetworkPolicyManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer
         case RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED:
         case RadioEvent::RADIO_PS_CONNECTION_DETACHED:
         case RadioEvent::RADIO_PS_CONNECTION_ATTACHED:
+        case NotificationType::NOTIFICATION_TYPE_IMS:
             GetRadioState();
             break;
         default:
@@ -121,6 +124,14 @@ void SmsNetworkPolicyManager::GetRadioState()
         TELEPHONY_LOGI("update network info.");
         item.second(isImsNetDomain_, voiceServiceState_);
     }
+}
+
+void SmsNetworkPolicyManager::GetImsRegState()
+{
+    ImsServiceType imsSrvType = TYPE_VOICE;
+    callback_ = (std::make_unique<ImsRegStateCallbackStub>(shared_from_this())).release();
+    int32_t ret = CoreServiceClient::GetInstance().RegisterImsRegInfoCallback(slotId_, imsSrvType, callback_);
+    TELEPHONY_LOGI("SmsNetworkPolicyManager::GetImsRegState ret:%{public}d", ret);
 }
 
 bool SmsNetworkPolicyManager::IsImsNetDomain() const
