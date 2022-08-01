@@ -118,9 +118,6 @@ ohos_shared_library("tel_sms_mms") {
   if (is_standard_system) {
     external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
     external_deps += [ "init:libbegetutil" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-    external_deps += [ "startup:syspara" ]
   }
 
   part_name = "sms_mms"
