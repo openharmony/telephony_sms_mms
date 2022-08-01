@@ -45,6 +45,8 @@ constexpr int32_t DEFAULT_PORT = 8888;
 constexpr size_t BUFF_LENGTH = 31;
 constexpr int32_t PROPERTY_NAME_SIZE = 32;
 constexpr int32_t NORMAL_STRING_SIZE = 64;
+constexpr int32_t ONE_PARAMETER = 1;
+constexpr int32_t TWO_PARAMETERS = 2;
 
 enum class ShortMessageClass {
     /** Indicates an unknown type. */
@@ -109,6 +111,11 @@ struct CreateMessageContext : BaseContext {
 };
 
 struct SetDefaultSmsSlotIdContext : BaseContext {
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    bool setResult = false;
+};
+
+struct IsImsSmsSupportedContext : BaseContext {
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     bool setResult = false;
 };

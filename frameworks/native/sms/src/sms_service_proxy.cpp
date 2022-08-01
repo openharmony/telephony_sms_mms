@@ -334,7 +334,7 @@ bool SmsServiceProxy::GetSmsSegmentsInfo(int32_t slotId, const std::u16string &m
     return true;
 }
 
-bool SmsServiceProxy::IsImsSmsSupported()
+bool SmsServiceProxy::IsImsSmsSupported(int32_t slotId)
 {
     bool result = false;
     MessageParcel dataParcel;
@@ -343,6 +343,7 @@ bool SmsServiceProxy::IsImsSmsSupported()
     if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
         return result;
     }
+    dataParcel.WriteInt32(slotId);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         return result;

@@ -55,7 +55,7 @@ public:
     std::vector<std::u16string> SplitMessage(const std::u16string &message);
     bool GetSmsSegmentsInfo(int32_t slotId, const std::u16string &message, bool force7BitCode,
         ISmsServiceInterface::SmsSegmentsInfo &segInfo);
-    bool IsImsSmsSupported();
+    bool IsImsSmsSupported(int32_t slotId);
     std::u16string GetImsShortMessageFormat();
     bool HasSmsCapability();
 private:

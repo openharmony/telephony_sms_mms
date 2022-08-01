@@ -277,7 +277,8 @@ void SmsInterfaceStub::OnGetSmsSegmentsInfo(MessageParcel &data, MessageParcel &
 
 void SmsInterfaceStub::OnIsImsSmsSupported(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    reply.WriteBool(IsImsSmsSupported());
+    int32_t slotId = data.ReadInt32();
+    reply.WriteBool(IsImsSmsSupported(slotId));
 }
 
 void SmsInterfaceStub::OnGetImsShortMessageFormat(MessageParcel &data, MessageParcel &reply, MessageOption &option)

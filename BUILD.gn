@@ -40,6 +40,7 @@ ohos_shared_library("tel_sms_mms") {
     "$SOURCE_DIR/services/gsm/gsm_sms_sender.cpp",
     "$SOURCE_DIR/services/gsm/gsm_sms_tpdu_codec.cpp",
     "$SOURCE_DIR/services/gsm/gsm_sms_udata_codec.cpp",
+    "$SOURCE_DIR/services/ims_reg_state_callback_stub.cpp",
     "$SOURCE_DIR/services/ims_service_interaction/src/ims_sms_callback_stub.cpp",
     "$SOURCE_DIR/services/ims_service_interaction/src/ims_sms_client.cpp",
     "$SOURCE_DIR/services/ims_service_interaction/src/ims_sms_proxy.cpp",
