@@ -55,9 +55,9 @@ public:
     virtual void Init() = 0;
     virtual void ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) = 0;
     virtual void ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) = 0;
-    virtual bool IsImsSmsSupported() = 0;
-    virtual bool SetImsSmsConfig(int32_t enable) = 0;
+    virtual bool IsImsSmsSupported(int32_t slotId) = 0;
     virtual void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) = 0;
+    virtual void StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event) = 0;
 
     static void SendResultCallBack(
         const std::shared_ptr<SmsSendIndexer> &indexer, ISendShortMessageCallback::SmsSendResult result);
@@ -67,10 +67,11 @@ public:
     std::optional<int32_t> GetNetworkId();
     void SetNetworkId(std::optional<int32_t> &id);
     void SyncSwitchISmsResponse();
+    bool SetImsSmsConfig(int32_t slotId, int32_t enable);
 
 public:
-    bool resISMSReady_ = false;
-    int32_t imsSmsCfg_ = 0;
+    bool resIsSmsReady_ = false;
+    int32_t imsSmsCfg_ = IMS_SMS_ENABLE;
     std::mutex ctx_;
     std::condition_variable cv_;
 
@@ -90,14 +91,22 @@ protected:
     int32_t slotId_ = -1;
     std::list<std::shared_ptr<SmsSendIndexer>> reportList_;
     bool isImsNetDomain_ = false;
+    bool enableImsSmsOnceWhenImsReg_ = true;
     int32_t voiceServiceState_ = static_cast<int32_t>(RegServiceState::REG_STATE_UNKNOWN);
+    int32_t lastSmsDomain_ = CS_DOMAIN;
+    static constexpr uint8_t MAX_SEND_RETRIES = 3;
+    static constexpr uint8_t INITIAL_COUNT = 0;
+    static constexpr int32_t IMS_SMS_ENABLE = 1;
+    static constexpr int32_t IMS_SMS_DISABLE = 0;
+    static constexpr int32_t CS_DOMAIN = 0;
+    static constexpr int32_t IMS_DOMAIN = 1;
+    static constexpr int32_t WAIT_TIME_SECOND = 1;
 
 private:
     static constexpr uint16_t EXPIRED_TIME = 60 * 3;
     static constexpr uint16_t DELAY_MAX_TIME_MSCE = 2000;
     static constexpr uint8_t MSG_QUEUE_LIMIT = 25;
     static constexpr uint8_t MAX_REPORT_LIST_LIMIT = 25;
-    static constexpr uint8_t MAX_SEND_RETRIES = 3;
 
     SmsSender(const SmsSender &) = delete;
     SmsSender(const SmsSender &&) = delete;

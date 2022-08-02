@@ -253,39 +253,113 @@ void CdmaSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     }
 
     std::string pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
-    if (!isImsNetDomain_ && (smsIndexer->GetPsResendCount() == 0)) {
-        smsIndexer->SetCsResendCount(smsIndexer->GetCsResendCount() + 1);
-        CoreManagerInner::GetInstance().SendCdmaSms(
-            slotId_, RadioEvent::RADIO_SEND_CDMA_SMS, pdu, refId, shared_from_this());
-        TELEPHONY_LOGI("SendSmsToRil pdu = %{public}s", pdu.c_str());
+
+    bool sendCsSMS = false;
+    if ((!isImsNetDomain_ || !imsSmsCfg_) ||
+        (lastSmsDomain_ == IMS_DOMAIN && smsIndexer->GetPsResendCount() == MAX_SEND_RETRIES)) {
+        sendCsSMS = true;
+    }
+
+    if (sendCsSMS) {
+        SendCsSms(smsIndexer, refId, pdu);
     } else {
-        smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
-        TELEPHONY_LOGI("ims network domain send unsupported.!");
+        SendImsSms(smsIndexer, refId, pdu);
     }
 }
 
-bool CdmaSmsSender::IsImsSmsSupported()
+void CdmaSmsSender::SendCsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu)
 {
-    return false;
+    lastSmsDomain_ = CS_DOMAIN;
+    smsIndexer->SetPsResendCount(INITIAL_COUNT);
+    CoreManagerInner::GetInstance().SendCdmaSms(
+        slotId_, RadioEvent::RADIO_SEND_CDMA_SMS, pdu, refId, shared_from_this());
+    TELEPHONY_LOGI("SendCsSms pdu = %{public}s", pdu.c_str());
 }
 
-bool CdmaSmsSender::SetImsSmsConfig(int32_t enable)
+void CdmaSmsSender::SendImsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu)
 {
-    return false;
+    TELEPHONY_LOGI("ims network domain send sms interface.!");
+    auto smsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
+    if (smsClient == nullptr) {
+        TELEPHONY_LOGE("SendImsSms return, ImsSmsClient is nullptr.");
+        return;
+    }
+    lastSmsDomain_ = IMS_DOMAIN;
+    smsIndexer->SetCsResendCount(INITIAL_COUNT);
+    ImsMessageInfo imsMessageInfo;
+    imsMessageInfo.refId = refId;
+    imsMessageInfo.smscPdu = "";
+    imsMessageInfo.pdu = pdu;
+    imsMessageInfo.tech = SMS_RADIO_TECH_3GPP2;
+    int32_t reply = smsClient->ImsSendMessage(slotId_, imsMessageInfo);
+    TELEPHONY_LOGI("SendImsSms reply = %{public}d", reply);
 }
+
+bool CdmaSmsSender::IsImsSmsSupported(int32_t slotId)
+{
+    auto smsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
+    if (smsClient == nullptr) {
+        TELEPHONY_LOGE("IsImsSmsSupported return, ImsSmsClient is nullptr.");
+        return false;
+    }
+    std::unique_lock<std::mutex> lck(ctx_);
+    resIsSmsReady_ = false;
+    int32_t reply = smsClient->ImsGetSmsConfig(slotId);
+    TELEPHONY_LOGI("IsImsSmsSupported reply = %{public}d", reply);
+    while (resIsSmsReady_) {
+        TELEPHONY_LOGI("IsImsSmsSupported::wait(), resIsSmsReady_ = false");
+        if (cv_.wait_for(lck, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
+            break;
+        }
+    }
+    TELEPHONY_LOGI("CdmaSmsSender::IsImsSmsSupported(), imsSmsCfg_:%{public}d", imsSmsCfg_);
+    return (imsSmsCfg_ == IMS_SMS_ENABLE);
+}
+
 void CdmaSmsSender::StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event)
 {
     if (event == nullptr) {
-        TELEPHONY_LOGE("gsm_sms_sender: StatusReportSetImsSms event nullptr error.");
+        TELEPHONY_LOGE("cdma_sms_sender: StatusReportSetImsSms event nullptr error.");
         return;
+    }
+    std::shared_ptr<HRilRadioResponseInfo> imsResponseInfo = event->GetSharedObject<HRilRadioResponseInfo>();
+
+    if (imsResponseInfo->error != HRilErrType::NONE) {
+        imsSmsCfg_ = IMS_SMS_DISABLE;
     }
 }
 
-void CdmaSmsSender::Init() {}
+void CdmaSmsSender::StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event)
+{
+    if (event == nullptr) {
+        TELEPHONY_LOGE("CdmaSmsSender: StatusReportGetImsSms event nullptr error.");
+        return;
+    }
+    std::shared_ptr<int32_t> imsSmsInfo = event->GetSharedObject<int32_t>();
+    imsSmsCfg_ = *imsSmsInfo;
+}
+
+void CdmaSmsSender::Init()
+{
+    if (!RegisterHandler()) {
+        TELEPHONY_LOGI("CdmaSmsSender::Init Register fail.");
+    }
+}
 
 void CdmaSmsSender::ReceiveStatusReport(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer)
 {
     SendEvent(RadioEvent::RADIO_SMS_STATUS, smsIndexer);
+}
+
+bool CdmaSmsSender::RegisterHandler()
+{
+    auto smsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
+    if (smsClient == nullptr) {
+        TELEPHONY_LOGE("RegisterHandler return, ImsSmsClient is nullptr.");
+        return false;
+    }
+    smsClient->RegisterImsSmsCallbackHandler(slotId_, shared_from_this());
+    return true;
 }
 
 uint8_t CdmaSmsSender::GetSeqNum()

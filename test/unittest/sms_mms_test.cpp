@@ -106,6 +106,8 @@ void InitGsmFun(const std::unique_ptr<std::vector<TestStruct>> &funArray, const 
         std::bind(&GsmSmsSenderTest::TestGetSmsSegmentsInfo, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back("TestIsImsSmsSupported",
         std::bind(&GsmSmsSenderTest::TestIsImsSmsSupported, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back(
+        "TestSetImsSmsConfig", std::bind(&GsmSmsSenderTest::TestSetImsSmsConfig, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back("TestGetImsShortMessageFormat",
         std::bind(&GsmSmsSenderTest::TestGetImsShortMessageFormat, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back(

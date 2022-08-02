@@ -16,6 +16,7 @@
 #include "sms_sender.h"
 
 #include "core_manager_inner.h"
+#include "ims_sms_client.h"
 #include "radio_event.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
@@ -60,8 +61,13 @@ void SmsSender::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
             StatusReportAnalysis(event);
             break;
         }
-        case RadioEvent::RADIO_GET_IMS_SMS: {
+        case RadioEvent::RADIO_SET_IMS_SMS: {
             StatusReportSetImsSms(event);
+            SyncSwitchISmsResponse();
+            break;
+        }
+        case RadioEvent::RADIO_GET_IMS_SMS: {
+            StatusReportGetImsSms(event);
             SyncSwitchISmsResponse();
             break;
         }
@@ -74,9 +80,8 @@ void SmsSender::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
 void SmsSender::SyncSwitchISmsResponse()
 {
     std::unique_lock<std::mutex> lck(ctx_);
-    resISMSReady_ = true;
-    TELEPHONY_LOGI(
-        "resISMSReady_ = %{public}d", resISMSReady_);
+    resIsSmsReady_ = true;
+    TELEPHONY_LOGI("resIsSmsReady_ = %{public}d", resIsSmsReady_);
     cv_.notify_one();
 }
 
@@ -260,6 +265,29 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
     return smsIndexer;
 }
 
+bool SmsSender::SetImsSmsConfig(int32_t slotId, int32_t enable)
+{
+    auto smsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
+    if (smsClient == nullptr) {
+        TELEPHONY_LOGE("SetImsSmsConfig return, ImsSmsClient is nullptr.");
+        return false;
+    }
+    imsSmsCfg_ = enable;
+    std::unique_lock<std::mutex> lck(ctx_);
+    resIsSmsReady_ = false;
+
+    int32_t reply = smsClient->ImsSetSmsConfig(slotId, enable);
+    TELEPHONY_LOGI("SetImsSmsConfig reply = %{public}d", reply);
+    while (resIsSmsReady_) {
+        TELEPHONY_LOGI("SetImsSmsConfig::wait(), resIsSmsReady_ = false");
+        if (cv_.wait_for(lck, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
+            break;
+        }
+    }
+    TELEPHONY_LOGI("SmsSender::SetImsSmsConfig(), %{public}d:", imsSmsCfg_);
+    return true;
+}
+
 void SmsSender::HandleResend(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
 {
     if (smsIndexer == nullptr) {
@@ -267,10 +295,25 @@ void SmsSender::HandleResend(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
         return;
     }
     // resending mechanism
-    if (((smsIndexer->GetErrorCode() == HRIL_ERR_GENERIC_FAILURE) ||
-        (smsIndexer->GetErrorCode() == HRIL_ERR_CMD_SEND_FAILURE)) &&
-        smsIndexer->GetCsResendCount() < MAX_SEND_RETRIES) {
-        smsIndexer->SetCsResendCount(smsIndexer->GetCsResendCount() + 1);
+    bool errorCode = false;
+    if ((smsIndexer->GetErrorCode() == HRIL_ERR_GENERIC_FAILURE) ||
+        (smsIndexer->GetErrorCode() == HRIL_ERR_CMD_SEND_FAILURE)) {
+        errorCode = true;
+    }
+    bool csResend = false;
+    if (!lastSmsDomain_ && smsIndexer->GetCsResendCount() < MAX_SEND_RETRIES) {
+        csResend = true;
+    }
+    bool psResend = false;
+    if (lastSmsDomain_ && smsIndexer->GetPsResendCount() <= MAX_SEND_RETRIES) {
+        psResend = true;
+    }
+    if (errorCode && (csResend || psResend)) {
+        if (lastSmsDomain_) {
+            smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
+        } else {
+            smsIndexer->SetCsResendCount(smsIndexer->GetCsResendCount() + 1);
+        }
         SendEvent(MSG_SMS_RETRY_DELIVERY, smsIndexer, DELAY_MAX_TIME_MSCE);
     } else {
         SendMessageFailed(smsIndexer);
@@ -291,6 +334,10 @@ void SmsSender::SetNetworkState(bool isImsNetDomain, int32_t voiceServiceState)
 {
     isImsNetDomain_ = isImsNetDomain;
     voiceServiceState_ = voiceServiceState;
+    if (enableImsSmsOnceWhenImsReg_ && isImsNetDomain_) {
+        SetImsSmsConfig(slotId_, IMS_SMS_ENABLE);
+        enableImsSmsOnceWhenImsReg_ = false;
+    }
     TELEPHONY_LOGI("isImsNetDomain = %{public}s voiceServiceState = %{public}d",
         isImsNetDomain_ ? "true" : "false", voiceServiceState_);
 }

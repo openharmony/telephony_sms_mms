@@ -49,6 +49,7 @@ public:
     void TestSplitMessage(const sptr<ISmsServiceInterface> &smsService) const;
     void TestGetSmsSegmentsInfo(const sptr<ISmsServiceInterface> &smsService) const;
     void TestIsImsSmsSupported(const sptr<ISmsServiceInterface> &smsService) const;
+    void TestSetImsSmsConfig(const sptr<ISmsServiceInterface> &smsService) const;
     void TestGetImsShortMessageFormat(const sptr<ISmsServiceInterface> &smsService) const;
     void TestAddBlockPhone() const;
     void TestRemoveBlockPhone() const;

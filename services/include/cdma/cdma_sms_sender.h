@@ -18,8 +18,9 @@
 
 #include <memory>
 
-#include "sms_sender.h"
+#include "ims_sms_client.h"
 #include "sms_receive_indexer.h"
+#include "sms_sender.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -39,9 +40,9 @@ public:
     void ReceiveStatusReport(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
     void ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
     void ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
-    bool IsImsSmsSupported() override;
-    bool SetImsSmsConfig(int32_t enable) override;
+    bool IsImsSmsSupported(int32_t slotId) override;
     void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
+    void StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
 
 protected:
     void StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event) override;
@@ -55,6 +56,10 @@ private:
     uint8_t GetSubmitMsgId();
     void SetPduSeqInfo(const std::shared_ptr<SmsSendIndexer> &smsIndexer, const std::size_t size,
         const std::unique_ptr<SmsTransMsg> &transMsg, const std::size_t index, const uint8_t msgRef8bit);
+
+    void SendCsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu);
+    void SendImsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu);
+    bool RegisterHandler();
 
     uint8_t msgSeqNum_ = 0;
     uint8_t msgSubmitId_ = 0;
