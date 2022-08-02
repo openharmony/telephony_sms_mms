@@ -182,13 +182,13 @@ public:
         ISmsServiceInterface::SmsSegmentsInfo &segInfo) override;
 
     /**
-     * @brief IsImsSmsSupported
      * Check Sms Is supported Ims newtwork
      * Hide this for inner system use
-     * @return true
-     * @return false
+     * @param slotId Indicates the card slot index number, ranging from {@code 0} to the maximum card slot index number
+     * supported by the device.
+     * @return If support Ims Sms return true, otherwise return false
      */
-    bool IsImsSmsSupported() override;
+    bool IsImsSmsSupported(int32_t slotId) override;
 
     /**
      * @brief GetImsShortMessageFormat

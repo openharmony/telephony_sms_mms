@@ -21,10 +21,15 @@
 
 namespace OHOS {
 namespace Telephony {
+typedef enum {
+    SMS_RADIO_TECH_3GPP = 1, /* 3GPP Technologies - GSM, WCDMA */
+    SMS_RADIO_TECH_3GPP2 = 2 /* 3GPP2 Technologies - CDMA */
+} SmsRadioTechnologyFamily;
 struct ImsMessageInfo {
     int64_t refId;
     std::string smscPdu;
     std::string pdu;
+    SmsRadioTechnologyFamily tech;
 };
 } // namespace Telephony
 } // namespace OHOS

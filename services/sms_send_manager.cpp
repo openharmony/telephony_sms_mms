@@ -286,7 +286,7 @@ std::shared_ptr<SmsSender> SmsSendManager::GetCdmaSmsSender() const
     return cdmaSmsSender_;
 }
 
-bool SmsSendManager::IsImsSmsSupported()
+bool SmsSendManager::IsImsSmsSupported(int32_t slotId)
 {
     bool result = false;
     if (networkManager_ == nullptr) {
@@ -300,12 +300,12 @@ bool SmsSendManager::IsImsSmsSupported()
     }
 
     NetWorkType newNetWorkType = networkManager_->GetNetWorkType();
-    result = networkManager_->IsImsNetDomain();
     switch (newNetWorkType) {
         case NetWorkType::NET_TYPE_GSM:
-            result = result && gsmSmsSender_->IsImsSmsSupported();
+            result = gsmSmsSender_->IsImsSmsSupported(slotId);
             break;
         case NetWorkType::NET_TYPE_CDMA:
+            result = cdmaSmsSender_->IsImsSmsSupported(slotId);
             break;
         default:
             TELEPHONY_LOGE("network unknown send error.");
@@ -314,9 +314,27 @@ bool SmsSendManager::IsImsSmsSupported()
     return result;
 }
 
-bool SmsSendManager::SetImsSmsConfig(int32_t enable)
+bool SmsSendManager::SetImsSmsConfig(int32_t slotId, int32_t enable)
 {
-    return gsmSmsSender_->SetImsSmsConfig(enable);
+    bool result = false;
+    if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr || networkManager_ == nullptr) {
+        TELEPHONY_LOGE("Sender or network nullptr error.");
+        return result;
+    }
+    NetWorkType newNetWorkType = networkManager_->GetNetWorkType();
+
+    switch (newNetWorkType) {
+        case NetWorkType::NET_TYPE_GSM:
+            result = gsmSmsSender_->SetImsSmsConfig(slotId, enable);
+            break;
+        case NetWorkType::NET_TYPE_CDMA:
+            result = cdmaSmsSender_->SetImsSmsConfig(slotId, enable);
+            break;
+        default:
+            TELEPHONY_LOGE("network unknown send error.");
+            break;
+    }
+    return result;
 }
 
 std::string SmsSendManager::GetImsShortMessageFormat()

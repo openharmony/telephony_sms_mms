@@ -142,13 +142,13 @@ bool SmsInterfaceManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t 
     return smsMiscManager_->SetCBConfig(enable, fromMsgId, toMsgId, netType);
 }
 
-bool SmsInterfaceManager::SetImsSmsConfig(int32_t enable)
+bool SmsInterfaceManager::SetImsSmsConfig(int32_t slotId, int32_t enable)
 {
     if (smsMiscManager_ == nullptr) {
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
         return false;
     }
-    return smsSendManager_->SetImsSmsConfig(enable);
+    return smsSendManager_->SetImsSmsConfig(slotId, enable);
 }
 
 bool SmsInterfaceManager::SetDefaultSmsSlotId(int32_t slotId)
@@ -189,14 +189,14 @@ bool SmsInterfaceManager::GetSmsSegmentsInfo(const std::string &message, bool fo
     return smsSendManager_->GetSmsSegmentsInfo(message, force7BitCode, outInfo);
 }
 
-bool SmsInterfaceManager::IsImsSmsSupported()
+bool SmsInterfaceManager::IsImsSmsSupported(int32_t slotId)
 {
     bool result = false;
     if (smsSendManager_ == nullptr) {
         TELEPHONY_LOGE("smsSendManager is nullptr error.");
         return result;
     }
-    return smsSendManager_->IsImsSmsSupported();
+    return smsSendManager_->IsImsSmsSupported(slotId);
 }
 
 std::string SmsInterfaceManager::GetImsShortMessageFormat()

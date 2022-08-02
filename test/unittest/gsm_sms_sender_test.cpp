@@ -487,8 +487,32 @@ void GsmSmsSenderTest::TestIsImsSmsSupported(const sptr<ISmsServiceInterface> &s
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    std::string res = smsService->IsImsSmsSupported() ? "true" : "false";
+    int32_t slotId;
+    std::string input;
+    std::cout << "Please enter Slot Id" << std::endl;
+    std::getline(std::cin, input);
+    slotId = std::atoi(input.c_str());
+    std::string res = smsService->IsImsSmsSupported(slotId) ? "true" : "false";
     std::cout << "IsImsSmsSupported:" << res << std::endl;
+}
+
+void GsmSmsSenderTest::TestSetImsSmsConfig(const sptr<ISmsServiceInterface> &smsService) const
+{
+    if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
+        return;
+    }
+    int32_t slotId;
+    std::string input;
+    std::cout << "Please enter Slot Id" << std::endl;
+    std::getline(std::cin, input);
+    slotId = std::atoi(input.c_str());
+    int32_t enable;
+    std::cout << "Please enter enable" << std::endl;
+    std::getline(std::cin, input);
+    enable = std::atoi(input.c_str());
+    std::string res = smsService->SetImsSmsConfig(slotId, enable) ? "true" : "false";
+    std::cout << "SetImsSmsConfig:" << res << std::endl;
 }
 
 void GsmSmsSenderTest::TestGetImsShortMessageFormat(const sptr<ISmsServiceInterface> &smsService) const

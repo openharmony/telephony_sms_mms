@@ -161,16 +161,15 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
         StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr), port, data, dataLen, sendCallback, deliveryCallback);
 }
 
-bool SmsService::IsImsSmsSupported()
+bool SmsService::IsImsSmsSupported(int32_t slotId)
 {
     bool result = false;
-    int32_t slotId = GetDefaultSmsSlotId();
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("interfaceManager is nullptr.");
         return result;
     }
-    return interfaceManager->IsImsSmsSupported();
+    return interfaceManager->IsImsSmsSupported(slotId);
 }
 
 std::u16string SmsService::GetImsShortMessageFormat()
@@ -333,7 +332,7 @@ bool SmsService::SetImsSmsConfig(int32_t slotId, int32_t enable)
         TELEPHONY_LOGE("SmsService::SetImsSmsConfig interfaceManager nullptr error.");
         return false;
     }
-    return interfaceManager->SetImsSmsConfig(enable);
+    return interfaceManager->SetImsSmsConfig(slotId, enable);
 }
 
 bool SmsService::SetDefaultSmsSlotId(int32_t slotId)

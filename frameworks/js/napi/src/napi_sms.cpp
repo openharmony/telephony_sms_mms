@@ -1300,29 +1300,33 @@ static napi_value GetSmsSegmentsInfo(napi_env env, napi_callback_info info)
 
 static bool MatchIsImsSmsSupportedParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
-    if (parameterCount > 1) {
-        return false;
+    switch (parameterCount) {
+        case ONE_PARAMETER: {
+            return NapiUtil::MatchParameters(env, parameters, { napi_number });
+        }
+        case TWO_PARAMETERS: {
+            return NapiUtil::MatchParameters(env, parameters, { napi_number, napi_function });
+        }
+        default: {
+            return false;
+        }
     }
-    if (parameterCount == 1) {
-        return NapiUtil::MatchParameters(env, parameters, {napi_function});
-    }
-    return true;
 }
 
 static void NativeIsImsSmsSupported(napi_env env, void *data)
 {
-    auto context = static_cast<SingleValueContext<bool> *>(data);
-    context->value = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported();
+    auto context = static_cast<IsImsSmsSupportedContext *>(data);
+    context->setResult = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(context->slotId);
     context->resolved = true;
 }
 
 static void IsImsSmsSupportedCallback(napi_env env, napi_status status, void *data)
 {
-    auto context = static_cast<SingleValueContext<bool> *>(data);
+    auto context = static_cast<IsImsSmsSupportedContext *>(data);
     napi_value callbackValue = nullptr;
     if (status == napi_ok) {
         if (context->resolved) {
-            napi_get_boolean(env, context->value, &callbackValue);
+            napi_get_boolean(env, context->setResult, &callbackValue);
         } else {
             callbackValue = NapiUtil::CreateErrorMessage(env, "IsImsSmsSupported error by ipc");
         }
@@ -1336,21 +1340,22 @@ static void IsImsSmsSupportedCallback(napi_env env, napi_status status, void *da
 static napi_value IsImsSmsSupported(napi_env env, napi_callback_info info)
 {
     TELEPHONY_LOGI("napi_sms IsImsSmsSupported method start");
-    size_t paramsCount = 1;
-    napi_value params[1] = {0};
+    size_t paramsCount = 2;
+    napi_value params[2] = { 0 };
     napi_value arg = nullptr;
     void *data = nullptr;
     napi_get_cb_info(env, info, &paramsCount, params, &arg, &data);
     NAPI_ASSERT(env, MatchIsImsSmsSupportedParameters(env, params, paramsCount), "IsImsSmsSupported type mismatch");
-    auto context = std::make_unique<SingleValueContext<bool>>().release();
+    auto context = std::make_unique<IsImsSmsSupportedContext>().release();
     if (context == nullptr) {
         std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at SingleValueContext is nullptr";
+        std::string errorMessage = "error at IsImsSmsSupportedContext is nullptr";
         NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
         return nullptr;
     }
-    if (paramsCount == 1) {
-        napi_create_reference(env, params[0], DEFAULT_REF_COUNT, &context->callbackRef);
+    napi_get_value_int32(env, params[0], &context->slotId);
+    if (paramsCount == TWO_PARAMETERS) {
+        napi_create_reference(env, params[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     napi_value result = NapiUtil::HandleAsyncWork(
         env, context, "IsImsSmsSupported", NativeIsImsSmsSupported, IsImsSmsSupportedCallback);
