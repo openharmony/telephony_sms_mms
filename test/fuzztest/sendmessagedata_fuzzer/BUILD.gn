@@ -41,7 +41,7 @@ ohos_fuzztest("SendMessageDataFuzzTest") {
     "c_utils:utils",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
   defines += [
     "TELEPHONY_LOG_TAG = \"SmsMmmsFuzzTest\"",

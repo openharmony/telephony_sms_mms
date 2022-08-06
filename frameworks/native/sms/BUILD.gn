@@ -51,7 +51,7 @@ ohos_source_set("sms_native_source") {
     "drivers_interface_ril:hril_innerkits",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   defines = [
