@@ -41,12 +41,14 @@ const int32_t MESSAGE_PARAMETER_NOT_MATCH = 0;
 const int32_t TEXT_MESSAGE_PARAMETER_MATCH = 1;
 const int32_t RAW_DATA_MESSAGE_PARAMETER_MATCH = 2;
 constexpr int32_t MAX_TEXT_SHORT_MESSAGE_LENGTH = 4096;
-constexpr int32_t DEFAULT_PORT = 8888;
 constexpr size_t BUFF_LENGTH = 31;
 constexpr int32_t PROPERTY_NAME_SIZE = 32;
 constexpr int32_t NORMAL_STRING_SIZE = 64;
 constexpr int32_t ONE_PARAMETER = 1;
 constexpr int32_t TWO_PARAMETERS = 2;
+constexpr int32_t INVALID_PORT = -1;
+constexpr int32_t MIN_PORT = 0;
+constexpr int32_t MAX_PORT = 0xffff;
 
 enum class ShortMessageClass {
     /** Indicates an unknown type. */

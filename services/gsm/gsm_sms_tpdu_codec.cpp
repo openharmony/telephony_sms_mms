@@ -177,6 +177,7 @@ int GsmSmsTpduCodec::EncodeSubmitTpduType(const struct SmsSubmit &pSubmit, unsig
     if (pSubmit.bHeaderInd == true) {
         pTpdu[offset] |= 0x40;
     }
+    TELEPHONY_LOGI("TP-SRR pSubmit->bHeaderInd: =%{public}d", pSubmit.bHeaderInd);
     /* TP-RP */
     if (pSubmit.bReplyPath == true) {
         pTpdu[offset] |= 0x80;

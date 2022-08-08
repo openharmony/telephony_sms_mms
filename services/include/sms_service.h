@@ -218,6 +218,8 @@ private:
     int64_t bindTime_ = 0L;
     bool Init();
     void WaitCoreServiceToInit();
+    bool NoPermissionOrParametersCheckFail(
+        int32_t slotId, const std::u16string desAddr, const sptr<ISendShortMessageCallback> &sendCallback);
 
     bool registerToService_ = false;
     ServiceRunningState state_ = ServiceRunningState::STATE_NOT_START;

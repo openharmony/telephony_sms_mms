@@ -71,7 +71,7 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
             napi_set_element(env_, arrayValue, i, element);
         }
         std::string pduStr = "pdu";
-        napi_set_named_property(env_, callbackValues[1], pduStr_.c_str(), arrayValue);
+        napi_set_named_property(env_, callbackValues[1], pduStr.c_str(), arrayValue);
     } else {
         callbackValues[0] = NapiUtil::CreateErrorMessage(env_, "pdu empty");
         callbackValues[1] = NapiUtil::CreateUndefined(env_);

@@ -125,12 +125,9 @@ std::string SmsService::GetBindTime()
 void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr, const u16string text,
     const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
-        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
+    if (NoPermissionOrParametersCheckFail(slotId, desAddr, sendCallback)) {
         return;
     }
-
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -145,12 +142,9 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
     const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
-        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
+    if (NoPermissionOrParametersCheckFail(slotId, desAddr, sendCallback)) {
         return;
     }
-
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -159,6 +153,27 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
     }
     interfaceManager->DataBasedSmsDelivery(
         StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr), port, data, dataLen, sendCallback, deliveryCallback);
+}
+
+bool SmsService::NoPermissionOrParametersCheckFail(
+    int32_t slotId, const u16string desAddr, const sptr<ISendShortMessageCallback> &sendCallback)
+{
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
+        return true;
+    }
+    if (CoreManagerInner::GetInstance().GetCsRegState(slotId) <= 0) {
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_RADIO_OFF);
+        TELEPHONY_LOGE("SmsService::SendMessage radio off");
+        return true;
+    }
+    if (desAddr.empty()) {
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("SmsService::SendMessage desAddr invalid.");
+        return true;
+    }
+    return false;
 }
 
 bool SmsService::IsImsSmsSupported(int32_t slotId)
@@ -186,7 +201,8 @@ std::u16string SmsService::GetImsShortMessageFormat()
 
 bool SmsService::HasSmsCapability()
 {
-    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager();
+    int32_t slotId = GetDefaultSmsSlotId();
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("Get SmsInterfaceManager is nullptr error.");
         return true;
