@@ -29,6 +29,8 @@ const std::string g_destinationPortStr = "destinationPort";
 const std::string g_sendCallbackStr = "sendCallback";
 const std::string g_deliveryCallbackStr = "deliveryCallback";
 static const int32_t DEFAULT_REF_COUNT = 1;
+
+static bool validPort_ = false;
 } // namespace
 
 static void SetPropertyArray(napi_env env, napi_value object, std::string name, std::vector<unsigned char> pdu)
@@ -70,6 +72,11 @@ static int32_t GetDefaultSmsSlotId()
     return DEFAULT_SIM_SLOT_ID;
 }
 
+static bool IsValidSlotId(int32_t slotId)
+{
+    return slotId >= DEFAULT_SIM_SLOT_ID && slotId < SIM_SLOT_COUNT;
+}
+
 static bool MatchObjectProperty(
     napi_env env, napi_value object, std::initializer_list<std::pair<std::string, napi_valuetype>> pairList)
 {
@@ -108,12 +115,23 @@ static std::u16string GetU16StrFromNapiValue(napi_env env, napi_value value)
     return NapiUtil::ToUtf16(str8);
 }
 
+static bool InValidSlotIdOrInValidPort(int32_t slotId, uint16_t port)
+{
+    if (!IsValidSlotId(slotId)) {
+        TELEPHONY_LOGE("InValidSlotIdOrInValidPort invalid slotid");
+        return true;
+    }
+
+    if (!validPort_) {
+        TELEPHONY_LOGE("InValidSlotIdOrInValidPort invalid port");
+        return true;
+    }
+    validPort_ = false;
+    return false;
+}
+
 static bool ActuallySendMessage(napi_env env, SendMessageContext &parameter)
 {
-    if (parameter.slotId < 0) {
-        TELEPHONY_LOGI("ActuallySendMessage parameter.slotId < 0 illegal slotId");
-        return false;
-    }
     bool hasSendCallback = parameter.sendCallbackRef != nullptr;
     std::unique_ptr<SendCallback> sendCallback =
         std::make_unique<SendCallback>(hasSendCallback, env, parameter.thisVarRef, parameter.sendCallbackRef);
@@ -140,6 +158,11 @@ static bool ActuallySendMessage(napi_env env, SendMessageContext &parameter)
             return false;
         }
     } else if (parameter.messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
+        if (InValidSlotIdOrInValidPort(parameter.slotId, parameter.destinationPort)) {
+            auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
+            sendCallback.release()->OnSmsSendResult(result);
+            return false;
+        }
         if (parameter.rawDataContent.size() > 0) {
             uint16_t arrayLength = static_cast<uint16_t>(parameter.rawDataContent.size());
             int32_t sendResult = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->
@@ -237,10 +260,14 @@ static void ParseMessageParameter(
         context.textContent = NapiUtil::ToUtf16(text);
     }
     if (messageMatchResult == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
-        int32_t destinationPort = DEFAULT_PORT;
+        int32_t destinationPort = INVALID_PORT;
         napi_value destinationPortValue = nullptr;
         napi_get_named_property(env, object, g_destinationPortStr.data(), &destinationPortValue);
         napi_get_value_int32(env, destinationPortValue, &destinationPort);
+        TELEPHONY_LOGI("SendMessage destinationPort: %{public}d", destinationPort);
+        if (destinationPort >= MIN_PORT && destinationPort <= MAX_PORT) {
+            validPort_ = true;
+        }
         context.destinationPort = static_cast<uint16_t>(destinationPort);
         napi_value elementValue = nullptr;
         int32_t element = 0;
