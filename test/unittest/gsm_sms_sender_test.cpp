@@ -51,7 +51,7 @@ void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &sm
     uint16_t port = 100;
     uint8_t data[] = "hello world";
     smsService->SendMessage(slotId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
-        sizeof(data) / sizeof(data[0]), sendCallBackPtr, deliveryCallBackPtr);
+        (sizeof(data) / sizeof(data[0]) - 1), sendCallBackPtr, deliveryCallBackPtr);
     std::cout << "TestGsmSendShortData" << std::endl;
 }
 
