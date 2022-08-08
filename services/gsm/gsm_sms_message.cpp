@@ -264,12 +264,14 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
         }
     }
     smsTpdu_->data.submit.userData.data[endcodeLen] = 0;
+    smsTpdu_->data.submit.userData.length = dataLen;
     smsTpdu_->data.submit.msgRef = msgRef8bit;
     /* Set User Data Header Port Information */
     smsTpdu_->data.submit.userData.header[headerCnt].udhType = SMS_UDH_APP_PORT_16BIT;
     smsTpdu_->data.submit.userData.header[headerCnt].udh.appPort16bit.destPort = ((unsigned short)port & 0xFFFF);
     smsTpdu_->data.submit.userData.header[headerCnt].udh.appPort16bit.originPort = 0;
     headerCnt++;
+    smsTpdu_->data.submit.bHeaderInd = (headerCnt > 0) ? true : false;
     /* Set User Data Header for Alternate Reply Address */
     headerCnt += SetHeaderReply(headerCnt);
     /* Set User Data Header for National Language Single Shift */
