@@ -24,22 +24,25 @@
 -   短信接收管理类： SmsReceiveManager 负责短信接收，监听来自RIL层的新短信信息；创建GSM\(GsmSmsReceiveHandler\) 和CDMA\(CdmaSmsReceiveHandler\) 对象；创建SmsWapPushHandler 和SmsCellBroadcastHandler 对象。
 -   彩信编解码类：负责彩信PDU的编解码处理。
 -   Misc管理类：负责Sim卡短信操作、小区广播配置、短信服务中心地址配置和默认卡槽配置等。
+-   IMS短信管理类：ImsSmsClient 负责IMS短信发送，及设置/获取IMS短信配置信息。
 
 ## 目录<a name="section125mcpsimp"></a>
 
 ```
 /base/telephony/sms_mms
-├─ frameworks               # 短彩信内部框架接口层
-├─ interfaces               # 对外暴露的接口
+├─ frameworks                   # 短彩信内部框架接口层
+├─ interfaces                   # 对外暴露的接口
 │  ├─ innerkits
+|  |  ├─ ims                    # IMS短彩信处理接口
 │  └─ kits
-├─ sa_profile               # 启动配置文件
-├─ services                 # 服务内部代码
-│  ├─ include               # 头文件目录
-│  ├─ cdma                  # CDMA制式源文件
-│  └─ gsm                   # GSM制式源文件
-├─ test                     # 单元测试目录
-└─ utils                    # 通用工具相关
+├─ sa_profile                   # 启动配置文件
+├─ services                     # 服务内部代码
+|  ├─ ims_service_interaction   # IMS短彩信源文件
+│  ├─ include                   # 头文件目录
+│  ├─ cdma                      # CDMA制式源文件
+│  └─ gsm                       # GSM制式源文件
+├─ test                         # 单元测试目录
+└─ utils                        # 通用工具相关
 ```
 
 ## 约束<a name="section129mcpsimp"></a>
