@@ -18,11 +18,12 @@
 #include <string>
 
 #include "core_manager_inner.h"
+#include "ims_sms_client.h"
 #include "sms_dump_helper.h"
+#include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
-#include "ims_sms_client.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -126,11 +127,15 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
     const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (NoPermissionOrParametersCheckFail(slotId, desAddr, sendCallback)) {
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_PERMISSION_ERROR, Permission::SEND_MESSAGES);
         return;
     }
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "text sms interfaceManager is nullptr");
         TELEPHONY_LOGE("SmsService::SendMessage interfaceManager nullptr error.");
         return;
     }
@@ -143,12 +148,16 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (NoPermissionOrParametersCheckFail(slotId, desAddr, sendCallback)) {
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_PERMISSION_ERROR, Permission::SEND_MESSAGES);
         return;
     }
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("SmsService::SendMessage interfaceManager nullptr error.");
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "data sms interfaceManager is nullptr");
         return;
     }
     interfaceManager->DataBasedSmsDelivery(

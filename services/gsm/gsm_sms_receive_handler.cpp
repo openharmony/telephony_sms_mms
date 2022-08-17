@@ -21,6 +21,7 @@
 #include "sms_base_message.h"
 #include "sms_receive_indexer.h"
 #include "string_utils.h"
+#include "sms_hisysevent.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -89,6 +90,8 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> &
     }
     if (!CheckSmsCapable()) {
         TELEPHONY_LOGI("sms receive capable unSupport");
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "sms receive capable unsupported");
         return AckIncomeCause::SMS_ACK_PROCESSED;
     }
 
@@ -115,6 +118,8 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> &
     indexer->SetRawUserData(message->GetRawUserData());
     if (indexer->GetIsText() && IsRepeatedMessagePart(indexer)) {
         TELEPHONY_LOGE("Ack repeated error.");
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_REPEATED_ERROR, "gsm message repeated error");
         return AckIncomeCause::SMS_ACK_REPEATED_ERROR;
     }
     if (!AddMsgToDB(indexer)) {

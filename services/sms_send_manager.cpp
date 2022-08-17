@@ -22,6 +22,7 @@
 #include "gsm_sms_message.h"
 #include "gsm_sms_tpdu_codec.h"
 #include "i_sms_service_interface.h"
+#include "sms_hisysevent.h"
 #include "sms_receive_manager.h"
 #include "telephony_log_wrapper.h"
 
@@ -137,8 +138,9 @@ void SmsSendManager::TextBasedSmsDelivery(const string &desAddr, const string &s
     } else if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
         cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
     } else {
-        SmsSender::SendResultCallBack(
-            sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_UNKNOWN_NETWORK_TYPE, "text sms network unknown send error");
         TELEPHONY_LOGI("network unknown send error.");
     }
 }
@@ -169,8 +171,9 @@ void SmsSendManager::DataBasedSmsDelivery(const string &desAddr, const string &s
     } else if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
         cdmaSmsSender_->DataBasedSmsDelivery(desAddr, scAddr, port, data, dataLen, sendCallback, deliveryCallback);
     } else {
-        SmsSender::SendResultCallBack(
-            sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_UNKNOWN_NETWORK_TYPE, "data sms network unknown send error");
         TELEPHONY_LOGI("network unknown send error.");
     }
 }
