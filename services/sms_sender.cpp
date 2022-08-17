@@ -18,6 +18,7 @@
 #include "core_manager_inner.h"
 #include "ims_sms_client.h"
 #include "radio_event.h"
+#include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -131,6 +132,9 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
             }
         }
         SendResultCallBack(smsIndexer->GetSendCallback(), messageType);
+        if (messageType == ISendShortMessageCallback::SEND_SMS_SUCCESS) {
+            SmsHiSysEvent::WriteSmsSendBehaviorEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE);
+        }
     }
 }
 

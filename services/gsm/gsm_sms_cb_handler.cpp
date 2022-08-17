@@ -20,6 +20,7 @@
 
 #include "core_manager_inner.h"
 #include "radio_event.h"
+#include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -224,6 +225,8 @@ void GsmSmsCbHandler::HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &messa
     std::shared_ptr<SmsCbMessage> cbMessage = SmsCbMessage::CreateCbMessage(pdu);
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("create Sms CbMessage fail, pdu %{public}s", pdu.c_str());
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::CELL_BROAD_CAST,
+            SmsMmsErrorCode::SMS_ERROR_CELL_BROADCAST_PUD_ANALYSIS_FAIL, "publish cell broadcast event fail");
         return;
     }
     std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> header = cbMessage->GetCbHeader();
@@ -262,6 +265,8 @@ bool GsmSmsCbHandler::SendCbMessageBroadcast(const std::shared_ptr<SmsCbMessage>
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     if (!publishResult) {
         TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::CELL_BROAD_CAST,
+            SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish cell broadcast event fail");
         return false;
     }
     return true;

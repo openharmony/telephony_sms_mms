@@ -18,13 +18,13 @@
 #include "common_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
-#include "want.h"
-
-#include "string_utils.h"
 #include "gsm_sms_message.h"
+#include "radio_event.h"
+#include "sms_hisysevent.h"
+#include "string_utils.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
-#include "radio_event.h"
+#include "want.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -137,7 +137,10 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
     }
     if (indexer->GetIsWapPushMsg()) {
         if (smsWapPushHandler_ != nullptr) {
-            smsWapPushHandler_->DecodeWapPushPdu(userDataRaw);
+            if (!smsWapPushHandler_->DecodeWapPushPdu(userDataRaw)) {
+                SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::WPA_PUSH,
+                    SmsMmsErrorCode::SMS_ERROR_PDU_DECODE_FAIL, "Wap push decode wap push fail");
+            }
         }
         return;
     }
@@ -212,7 +215,10 @@ void SmsReceiveHandler::SendBroadcast(
     bool publishResult = CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     if (!publishResult) {
         TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish short message broadcast event fail");
     }
+    SmsHiSysEvent::WriteSmsReceiveBehaviorEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE);
 }
 
 bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer)
@@ -235,7 +241,12 @@ bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &ind
     bucket.PutInt(SmsMmsData::SMS_SUBSECTION_ID, indexer->GetMsgRefId());
     bucket.PutInt(SmsMmsData::SIZE, indexer->GetMsgCount());
     bucket.PutInt(SmsMmsData::SUBSECTION_INDEX, indexer->GetMsgSeqId());
-    return DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(bucket);
+    bool ret = DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(bucket);
+    if (!ret) {
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_ADD_TO_DATABASE_FAIL, "add msg to database error");
+    }
+    return ret;
 }
 
 bool SmsReceiveHandler::CheckBlockPhone(const std::shared_ptr<SmsReceiveIndexer> &indexer)
