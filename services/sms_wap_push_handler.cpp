@@ -25,6 +25,7 @@
 
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
+#include "sms_hisysevent.h"
 #include "sms_persist_helper.h"
 #include "mms_msg.h"
 
@@ -319,6 +320,8 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast()
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     if (!publishResult) {
         TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::WPA_PUSH,
+            SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish wpa push broadcast event fail");
     }
     return true;
 }

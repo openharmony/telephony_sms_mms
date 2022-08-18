@@ -57,6 +57,7 @@ ohos_shared_library("tel_sms_mms") {
     "$SOURCE_DIR/services/sms_wap_push_buffer.cpp",
     "$SOURCE_DIR/services/sms_wap_push_content_type.cpp",
     "$SOURCE_DIR/services/sms_wap_push_handler.cpp",
+    "$SOURCE_DIR/utils/sms_hisysevent.cpp",
     "$SOURCE_DIR/utils/string_utils.cpp",
     "//base/telephony/sms_mms/frameworks/native/sms/src/short_message.cpp",
   ]
@@ -90,6 +91,7 @@ ohos_shared_library("tel_sms_mms") {
     "common_event_service:cesfwk_services",
     "drivers_interface_ril:hril_innerkits",
     "eventhandler:libeventhandler",
+    "hisysevent_native:libhisysevent",
     "ipc:ipc_core",
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",

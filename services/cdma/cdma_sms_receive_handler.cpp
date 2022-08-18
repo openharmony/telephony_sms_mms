@@ -25,6 +25,7 @@
 #include "cdma_sms_types.h"
 #include "core_manager_inner.h"
 #include "radio_event.h"
+#include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -87,6 +88,8 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
     if (indexer->GetIsText() && IsRepeatedMessagePart(indexer)) {
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_REPEATED_ERROR, "cdma message repeated error");
         return AckIncomeCause::SMS_ACK_REPEATED_ERROR;
     }
     if (!AddMsgToDB(indexer)) {

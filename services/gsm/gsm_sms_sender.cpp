@@ -18,6 +18,7 @@
 #include "core_manager_inner.h"
 #include "radio_event.h"
 #include "securec.h"
+#include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -58,12 +59,16 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
     if (tpdu == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("TextBasedSmsDelivery tpdu nullptr error.");
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_PDU_ENCODEING_FAIL, "text sms gsm tpdu nullptr error");
         return;
     }
     cellsInfosSize = static_cast<int>(cellsInfos.size());
     if (cellsInfosSize > MAX_SEGMENT_NUM) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("message exceed the limit.");
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_EXCEED_MAX_SEGMENT_NUM, "text sms gsm message cellsInfosSize exceed the limit");
         return;
     }
     msgRef8bit = GetMsgRef8Bit();
@@ -148,6 +153,8 @@ void GsmSmsSender::DataBasedSmsDelivery(const std::string &desAddr, const std::s
     if (encodeInfo == nullptr || tpdu == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("DataBasedSmsDelivery encodeInfo or tpdu nullptr error.");
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_PDU_ENCODEING_FAIL, "data sms gsm tpdu nullptr error");
         return;
     }
     shared_ptr<SmsSendIndexer> indexer = nullptr;
@@ -190,6 +197,8 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     if (!isImsNetDomain_ && (voiceServiceState_ != static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE))) {
         SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
         TELEPHONY_LOGE("gsm_sms_sender: SendSms not in service");
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_SENDSMS_NOT_IN_SERVICE, "gsm send sms not in service");
         return;
     }
     int64_t refId = GetMsgRef64Bit();

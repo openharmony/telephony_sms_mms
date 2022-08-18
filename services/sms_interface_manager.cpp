@@ -15,6 +15,7 @@
 
 #include "sms_interface_manager.h"
 
+#include "sms_hisysevent.h"
 #include "sms_misc_manager.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
@@ -58,6 +59,8 @@ void SmsInterfaceManager::TextBasedSmsDelivery(const string &desAddr, const stri
 {
     if (desAddr.empty() || text.empty() || (smsSendManager_ == nullptr)) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "text sms arges is empty is nullptr");
         TELEPHONY_LOGE("TextBasedSmsDelivery failed to send.");
         return;
     }
@@ -70,6 +73,8 @@ void SmsInterfaceManager::DataBasedSmsDelivery(const string &desAddr, const stri
 {
     if (desAddr.empty() || (smsSendManager_ == nullptr) || (data == nullptr)) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "data sms arges is empty is nullptr");
         TELEPHONY_LOGE("DataBasedSmsDelivery failed to send.");
         return;
     }

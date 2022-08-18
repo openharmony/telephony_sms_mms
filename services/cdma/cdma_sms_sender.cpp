@@ -21,6 +21,7 @@
 #include "core_manager_inner.h"
 #include "radio_event.h"
 #include "string_utils.h"
+#include "sms_hisysevent.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -44,6 +45,8 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
     if (splits.size() > MAX_SEGMENT_NUM) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("message exceed the limit.");
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_EXCEED_MAX_SEGMENT_NUM, "text sms cdma message exceed the limit");
         return;
     }
     std::unique_ptr<SmsTransMsg> transMsg = nullptr;
@@ -175,6 +178,8 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     if (len <= 0) {
         TELEPHONY_LOGE("EncodeMsg Error len = %{public}d", len);
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_PDU_ENCODEING_FAIL, "cdma encode msg data len error");
         return;
     }
 
@@ -245,6 +250,8 @@ void CdmaSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     if ((!isImsNetDomain_ && voiceServiceState_ != static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE))) {
         SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
         TELEPHONY_LOGE("cdma_sms_sender: SendSms not in service");
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_SENDSMS_NOT_IN_SERVICE, "cdma send sms not in service");
         return;
     }
     int64_t refId = GetMsgRef64Bit();
