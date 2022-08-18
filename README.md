@@ -19,26 +19,31 @@ The SMS and MMS module provides the capabilities of sending and receiving short 
 **Figure  1**  Architecture of the SMS and MMS module<a name="fig420553511549"></a>
 ![](figures/en-us_architecture-of-the-sms-and-mms-module.png)
 
-The SMS and MMS module consists of four major parts:
+The SMS and MMS module consists of the following parts:
 
 -   SmsInterfaceManager: provides external APIs for sending SMS messages and managing SIM SMS records. It can be used to create  **SmsSendManager**  and  **SmsReceiveManager**  objects.
 -   SmsSendManager: sends SMS messages and listens to IMS network status changes. It can be used to create  **GsmSmsSender**  and  **CdmaSmsSender**  objects and schedule either object based on the radio access technology \(RAT\) to send SMS messages.
 -   SmsReceiveManager: receives SMS messages and listens to new SMS messages from the RIL Adapter layer. It can be used to create  **GsmSmsReceiveHandler**  and  **CdmaSmsReceiveHandler**  objects as well as the  **SmsWapPushHandler**  and  **SmsCellBroadcastHandler**  objects.
 -   MmsPduProcessor: encodes and decodes MMS PDUs.
+-   ImsSmsClient: sends IMS SMS messages, and sets and obtains IMS SMS configuration information.
 
 ## Directory Structure<a name="section125mcpsimp"></a>
 
 ```
 /base/telephony/sms_mms
-├─ interfaces               # External APIs
+├─ frameworks                   # Frameworks
+├─ interfaces                   # External APIs
+│  ├─ innerkits
+│  ├─ ims                      # IMS SMS/MMS APIs
 │  └─ kits
-├─ sa_profile               # SA profile
-├─ services                 # Service code
-│  ├─ include               # Header files
-│  ├─ cdma                  # CDMA source files
-│  └─ gsm                   # GSM source files
-├─ test                     # Unit test code
-└─ utils                    # Utilities
+├─ sa_profile                   # SA profile
+├─ services                     # Service code
+│  ├─ ims_service_interaction  # IMS service interaction (for SMS/MMS)
+│  ├─ include                  # Header files
+│  ├─ cdma                     # CDMA-specific source files
+│  └─ gsm                      # GSM-specific source files
+├─ test                         # Unit test code
+└─ utils                        # Utilities
 ```
 
 ## Constraints<a name="section129mcpsimp"></a>
