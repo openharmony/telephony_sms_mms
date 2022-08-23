@@ -450,7 +450,7 @@ HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
  * @tc.number   Telephony_SmsMmsGtest_SetSmscAddr_0001
  * @tc.name     Set smsc addr slotId is invalid
  * @tc.desc     Function test
- * @tc.require: issueI5K12U
+ * @tc.require: issueI5JI0H
  */
 HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level3)
 {
@@ -470,7 +470,6 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level3)
  * @tc.number   Telephony_SmsMmsGtest_AddSimMessage_0001
  * @tc.name     Add Sim Message
  * @tc.desc     Function test
- * @tc.require: issueI5K12U
  */
 HWTEST_F(SmsMmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
 {
@@ -492,7 +491,6 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
  * @tc.number   Telephony_SmsMmsGtest_GetAllSimMessages_0001
  * @tc.name     Get All Sim Messages
  * @tc.desc     Function test
- * @tc.require: issueI5K12U
  */
 HWTEST_F(SmsMmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
 {
@@ -510,7 +508,6 @@ HWTEST_F(SmsMmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
  * @tc.number   Telephony_SmsMmsGtest_DelSimMessage_0001
  * @tc.name     Del Sim Message
  * @tc.desc     Function test
- * @tc.require: issueI5K12U
  */
 HWTEST_F(SmsMmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
 {
@@ -529,7 +526,6 @@ HWTEST_F(SmsMmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
  * @tc.number   Telephony_SmsMmsGtest_UpdateSimMessage_0001
  * @tc.name     Update Sim Message
  * @tc.desc     Function test
- * @tc.require: issueI5K12U
  */
 HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
 {
