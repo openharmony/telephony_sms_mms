@@ -450,6 +450,7 @@ HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
  * @tc.number   Telephony_SmsMmsGtest_SetSmscAddr_0001
  * @tc.name     Set smsc addr slotId is invalid
  * @tc.desc     Function test
+ * @tc.require: issueI5JI0H
  */
 HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level3)
 {
@@ -547,6 +548,7 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
  * @tc.number   Telephony_SmsMmsGtest_SetImsSmsConfig_0001
  * @tc.name     Enable IMS SMS
  * @tc.desc     Function test
+ * @tc.require: issueI5K12U
  */
 HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level3)
 {
@@ -565,6 +567,7 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level3)
  * @tc.number   Telephony_SmsMmsGtest_IsImsSmsSupported_0001
  * @tc.name     Get Ims Sms Config
  * @tc.desc     Function test
+ * @tc.require: issueI5K12U
  */
 HWTEST_F(SmsMmsGtest, IsImsSmsSupported_0001, Function | MediumTest | Level3)
 {
@@ -583,6 +586,7 @@ HWTEST_F(SmsMmsGtest, IsImsSmsSupported_0001, Function | MediumTest | Level3)
  * @tc.number   Telephony_SmsMmsGtest_SetImsSmsConfig_0002
  * @tc.name     Disable Ims Sms
  * @tc.desc     Function test
+ * @tc.require: issueI5K12U
  */
 HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level3)
 {
@@ -601,6 +605,7 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level3)
  * @tc.number   Telephony_SmsMmsGtest_IsImsSmsSupported_0002
  * @tc.name     Get Ims Sms Config
  * @tc.desc     Function test
+ * @tc.require: issueI5K12U
  */
 HWTEST_F(SmsMmsGtest, IsImsSmsSupported_0002, Function | MediumTest | Level3)
 {
