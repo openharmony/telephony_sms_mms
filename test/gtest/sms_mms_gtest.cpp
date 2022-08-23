@@ -547,7 +547,7 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
 /**
  * @tc.number   Telephony_SmsMmsGtest_SetImsSmsConfig_0001
  * @tc.name     Enable IMS SMS
- * @tc.desc     Function test\
+ * @tc.desc     Function test
  * @tc.require: issueI5K12U
  */
 HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level3)
