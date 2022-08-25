@@ -79,14 +79,6 @@ void InitGsmFun(const std::unique_ptr<std::vector<TestStruct>> &funArray, const 
         "TestSetSmscAddr", std::bind(&GsmSmsSenderTest::TestSetSmscAddr, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back(
         "TestGetSmscAddr", std::bind(&GsmSmsSenderTest::TestGetSmscAddr, param.gsmSmsSenderTest, smsService));
-    funArray->emplace_back(
-        "TestAddSimMessage", std::bind(&GsmSmsSenderTest::TestAddSimMessage, param.gsmSmsSenderTest, smsService));
-    funArray->emplace_back(
-        "TestDelSimMessage", std::bind(&GsmSmsSenderTest::TestDelSimMessage, param.gsmSmsSenderTest, smsService));
-    funArray->emplace_back("TestUpdateSimMessage",
-        std::bind(&GsmSmsSenderTest::TestUpdateSimMessage, param.gsmSmsSenderTest, smsService));
-    funArray->emplace_back("TestGetAllSimMessages",
-        std::bind(&GsmSmsSenderTest::TestGetAllSimMessages, param.gsmSmsSenderTest, smsService));
     funArray->emplace_back("TestCbMessage", std::bind(&SmsCbMessageTest::ProcessTest, param.smsCbMessageTest));
     funArray->emplace_back("TestEnableCBRangeConfig",
         std::bind(&GsmSmsSenderTest::TestEnableCBRangeConfig, param.gsmSmsSenderTest, smsService));
@@ -118,6 +110,19 @@ void InitGsmFun(const std::unique_ptr<std::vector<TestStruct>> &funArray, const 
         std::bind(&GsmSmsSenderTest::TestHasSmsCapability, param.gsmSmsSenderTest, smsService));
 }
 
+void InitSimMessageFun(const std::unique_ptr<std::vector<TestStruct>> &funArray, const TestParam &param,
+    const sptr<ISmsServiceInterface> &smsService)
+{
+    funArray->emplace_back(
+        "TestAddSimMessage", std::bind(&GsmSmsSenderTest::TestAddSimMessage, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back(
+        "TestDelSimMessage", std::bind(&GsmSmsSenderTest::TestDelSimMessage, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestUpdateSimMessage",
+        std::bind(&GsmSmsSenderTest::TestUpdateSimMessage, param.gsmSmsSenderTest, smsService));
+    funArray->emplace_back("TestGetAllSimMessages",
+        std::bind(&GsmSmsSenderTest::TestGetAllSimMessages, param.gsmSmsSenderTest, smsService));
+}
+
 void InitShortMessageFun(const std::unique_ptr<std::vector<TestStruct>> &funArray, const TestParam &param,
     const sptr<ISmsServiceInterface> &smsService)
 {
@@ -141,6 +146,7 @@ void InitFunArray(const std::unique_ptr<std::vector<TestStruct>> &funArray, cons
     const sptr<ISmsServiceInterface> &smsService)
 {
     InitGsmFun(funArray, param, smsService);
+    InitSimMessageFun(funArray, param, smsService);
     InitShortMessageFun(funArray, param, smsService);
     InitMmsFun(funArray, param, smsService);
 }

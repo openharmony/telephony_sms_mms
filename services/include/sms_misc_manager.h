@@ -82,6 +82,7 @@ private:
     static constexpr uint8_t GSM_TYPE = 1;
     static constexpr uint8_t MIN_SMSC_LEN = 2;
     static constexpr uint32_t RANG_MAX = 65535;
+    constexpr static const int32_t WAIT_TIME_SECOND = 1;
     using infoData = struct info {
         info(uint32_t fromMsgId, uint32_t toMsgId)
         {

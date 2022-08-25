@@ -264,7 +264,7 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
         }
     }
     smsTpdu_->data.submit.userData.data[endcodeLen] = 0;
-    smsTpdu_->data.submit.userData.length = dataLen;
+    smsTpdu_->data.submit.userData.length = (int)dataLen;
     smsTpdu_->data.submit.msgRef = msgRef8bit;
     /* Set User Data Header Port Information */
     smsTpdu_->data.submit.userData.header[headerCnt].udhType = SMS_UDH_APP_PORT_16BIT;
