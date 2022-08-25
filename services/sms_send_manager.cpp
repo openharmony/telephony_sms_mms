@@ -135,8 +135,10 @@ void SmsSendManager::TextBasedSmsDelivery(const string &desAddr, const string &s
     TELEPHONY_LOGI("netWorkType = %{public}d.", netWorkType);
     if (netWorkType == NetWorkType::NET_TYPE_GSM) {
         gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+		gsmSmsSender_->RegisterImsHandler();
     } else if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
         cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+		gsmSmsSender_->RegisterImsHandler();
     } else {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
