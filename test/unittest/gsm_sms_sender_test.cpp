@@ -459,12 +459,12 @@ void GsmSmsSenderTest::TestSplitMessage(const sptr<ISmsServiceInterface> &smsSer
 void GsmSmsSenderTest::TestGetSmsSegmentsInfo(const sptr<ISmsServiceInterface> &smsService) const
 {
     if (smsService == nullptr) {
-        std::cout << "smsService is nullptr." << std::endl;
+        std::cout << "TestGetSmsSegmentsInfo smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId;
     std::string input;
-    std::cout << "Please enter Slot Id" << std::endl;
+    std::cout << "TestGetSmsSegmentsInfo Please enter Slot Id" << std::endl;
     std::getline(std::cin, input);
     slotId = std::atoi(input.c_str());
     input.clear();
@@ -484,12 +484,12 @@ void GsmSmsSenderTest::TestGetSmsSegmentsInfo(const sptr<ISmsServiceInterface> &
 void GsmSmsSenderTest::TestIsImsSmsSupported(const sptr<ISmsServiceInterface> &smsService) const
 {
     if (smsService == nullptr) {
-        std::cout << "smsService is nullptr." << std::endl;
+        std::cout << "TestIsImsSmsSupported smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId;
     std::string input;
-    std::cout << "Please enter Slot Id" << std::endl;
+    std::cout << "TestIsImsSmsSupported Please enter Slot Id" << std::endl;
     std::getline(std::cin, input);
     slotId = std::atoi(input.c_str());
     std::string res = smsService->IsImsSmsSupported(slotId) ? "true" : "false";
@@ -499,12 +499,12 @@ void GsmSmsSenderTest::TestIsImsSmsSupported(const sptr<ISmsServiceInterface> &s
 void GsmSmsSenderTest::TestSetImsSmsConfig(const sptr<ISmsServiceInterface> &smsService) const
 {
     if (smsService == nullptr) {
-        std::cout << "smsService is nullptr." << std::endl;
+        std::cout << "TestSetImsSmsConfig smsService is nullptr." << std::endl;
         return;
     }
     int32_t slotId;
     std::string input;
-    std::cout << "Please enter Slot Id" << std::endl;
+    std::cout << "TestSetImsSmsConfig Please enter Slot Id" << std::endl;
     std::getline(std::cin, input);
     slotId = std::atoi(input.c_str());
     int32_t enable;

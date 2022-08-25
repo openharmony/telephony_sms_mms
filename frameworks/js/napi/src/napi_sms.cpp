@@ -30,7 +30,7 @@ const std::string g_sendCallbackStr = "sendCallback";
 const std::string g_deliveryCallbackStr = "deliveryCallback";
 static const int32_t DEFAULT_REF_COUNT = 1;
 
-static bool validPort_ = false;
+static bool g_validPort = false;
 } // namespace
 
 static void SetPropertyArray(napi_env env, napi_value object, std::string name, std::vector<unsigned char> pdu)
@@ -123,11 +123,11 @@ static bool InValidSlotIdOrInValidPort(int32_t slotId, uint16_t port)
         return true;
     }
 
-    if (!validPort_) {
+    if (!g_validPort) {
         TELEPHONY_LOGE("InValidSlotIdOrInValidPort invalid port");
         return true;
     }
-    validPort_ = false;
+    g_validPort = false;
     return false;
 }
 
@@ -267,7 +267,7 @@ static void ParseMessageParameter(
         napi_get_value_int32(env, destinationPortValue, &destinationPort);
         TELEPHONY_LOGI("SendMessage destinationPort: %{public}d", destinationPort);
         if (destinationPort >= MIN_PORT && destinationPort <= MAX_PORT) {
-            validPort_ = true;
+            g_validPort = true;
         }
         context.destinationPort = static_cast<uint16_t>(destinationPort);
         napi_value elementValue = nullptr;

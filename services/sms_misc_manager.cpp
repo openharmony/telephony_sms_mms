@@ -298,7 +298,12 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list)
         CBConfigParam cbData {.mode = enable ? 0 : 1, .idList = RangeListToString(list), .dcsList = codeScheme_};
         CoreManagerInner::GetInstance().SetCBConfig(
             slotId_, SmsMiscManager::SET_CB_CONFIG_FINISH, cbData, shared_from_this());
-        condVar_.wait(lock, [&]() { return fairVar_ == condition; });
+        while (!isSuccess_) {
+            TELEPHONY_LOGI("SendDataToRil::wait(), isSuccess_ = false");
+            if (condVar_.wait_for(lock, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
+                break;
+            }
+        }
         return isSuccess_;
     } else {
         return true;
