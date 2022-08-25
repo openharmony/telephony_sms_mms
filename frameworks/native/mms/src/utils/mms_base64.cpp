@@ -16,9 +16,9 @@
 #include "mms_base64.h"
 
 #include <glib.h>
-#include <glib/gi18n.h>
+#include <glib/gtypes.h>
 
-#include "securec.h"
+#include "string"
 
 namespace OHOS {
 namespace Telephony {

@@ -15,10 +15,9 @@
 
 #include "mms_address.h"
 
-#include <glib.h>
-
-#include "utils/mms_charset.h"
-#include "mms_charset.h"
+#include "iosfwd"
+#include "mms_codec_type.h"
+#include "string"
 
 namespace OHOS {
 namespace Telephony {

@@ -16,7 +16,7 @@
 #ifndef MMS_BASE64_H
 #define MMS_BASE64_H
 
-#include <string>
+#include "iosfwd"
 
 namespace OHOS {
 namespace Telephony {
