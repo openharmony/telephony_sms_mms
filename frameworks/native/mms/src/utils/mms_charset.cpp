@@ -15,6 +15,10 @@
 
 #include "mms_charset.h"
 
+#include "cstdint"
+#include "map"
+#include "utility"
+
 namespace OHOS {
 namespace Telephony {
 MmsCharSet::MmsCharSet()

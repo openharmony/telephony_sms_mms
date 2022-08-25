@@ -16,7 +16,7 @@
 #ifndef MMS_QUOTED_PRINTABLE_H
 #define MMS_QUOTED_PRINTABLE_H
 
-#include <string>
+#include "iosfwd"
 
 namespace OHOS {
 namespace Telephony {
