@@ -1083,19 +1083,56 @@ void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
 {
-    bool result = false;
-    if (g_telephonyService != nullptr) {
-        int32_t slotId = DEFAULT_SIM_SLOT_ID;
-        uint32_t msgIndex = 0;
-        std::u16string smscData(u"");
-        std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
-        uint32_t status = 3;
-        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
-        result = g_telephonyService->UpdateSimMessage(
-        slotId, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
-        TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
-        EXPECT_TRUE(result);
+    TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
+    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
+        g_telephonyService = SmsMmsGtest::GetProxy();
+        ASSERT_TRUE(true);
+        return;
+     }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(UpdateSimMessageTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("UpdateSimMessageTestFuc out of time");
+        ASSERT_TRUE(false);
     }
+    TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
+    ASSERT_TRUE(helper.GetBoolResult());
+    }
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_UpdateSimMessage_0002
+ * @tc.name     Update Sim Message
+ * @tc.desc     Function test
+ * @tc.require: issueI5K12U
+ */
+HWTEST_F(SmsMmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->");
+    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
+        g_telephonyService = SmsMmsGtest::GetProxy();
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!helper.Run(UpdateSimMessageTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("UpdateSimMessageTestFuc2 out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->finished");
+    ASSERT_TRUE(helper.GetBoolResult());
+}
+
+void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
+{
+    bool result = false;
+    g_telephonyService->SetImsSmsConfig(helper.slotId, 1);
+    result = g_telephonyService->IsImsSmsSupported(helper.slotId);
+    helper.SetBoolResult(result);
+    helper.NotifyAll();
 }
 
 /**
@@ -1106,34 +1143,30 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level3)
 {
-    bool result = false;
-    if (g_telephonyService == nullptr) {
-        EXPECT_TRUE(result);
-    }
-    int32_t slotId = DEFAULT_SIM_SLOT_ID;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0001 -->");
-    result = g_telephonyService->SetImsSmsConfig(slotId, 1);
+    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
+        g_telephonyService = SmsMmsGtest::GetProxy();
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(SetImsSmsConfigTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("SetImsSmsConfigTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0001 -->finished");
-    EXPECT_TRUE(result);
+    ASSERT_TRUE(helper.GetBoolResult());
 }
 
-/**
- * @tc.number   Telephony_SmsMmsGtest_IsImsSmsSupported_0001
- * @tc.name     Get Ims Sms Config
- * @tc.desc     Function test
- * @tc.require: issueI5K12U
- */
-HWTEST_F(SmsMmsGtest, IsImsSmsSupported_0001, Function | MediumTest | Level3)
+void SetImsSmsConfigTestFuc2(SmsMmsTestHelper &helper)
 {
-    bool result = false;
-    if (g_telephonyService == nullptr) {
-        EXPECT_TRUE(result);
-    }
-    int32_t slotId = DEFAULT_SIM_SLOT_ID;
-    TELEPHONY_LOGI("TelSMSMMSTest::IsImsSmsSupported_0001 -->");
-    result = g_telephonyService->IsImsSmsSupported(slotId);
-    TELEPHONY_LOGI("TelSMSMMSTest::IsImsSmsSupported_0001 -->finished");
-    EXPECT_TRUE(result);
+    bool result = true;
+    g_telephonyService->SetImsSmsConfig(helper.slotId, 0);
+    result = g_telephonyService->IsImsSmsSupported(helper.slotId);
+    helper.SetBoolResult(result);
+    helper.NotifyAll();
 }
 
 /**
