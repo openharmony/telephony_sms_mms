@@ -16,10 +16,13 @@
 #ifndef MMS_CHARSET_H
 #define MMS_CHARSET_H
 
-#include "singleton.h"
-
-#include <stdint.h>
 #include <map>
+
+#include "__functional_base"
+#include "iosfwd"
+#include "singleton.h"
+#include "stdint.h"
+#include "string"
 
 namespace OHOS {
 namespace Telephony {

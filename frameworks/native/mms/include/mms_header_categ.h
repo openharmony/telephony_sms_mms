@@ -18,7 +18,9 @@
 
 #include <map>
 
+#include "__functional_base"
 #include "mms_codec_type.h"
+#include "stdint.h"
 
 namespace OHOS {
 namespace Telephony {

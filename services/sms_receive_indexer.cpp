@@ -15,6 +15,12 @@
 
 #include "sms_receive_indexer.h"
 
+#include "cstdint"
+#include "iosfwd"
+#include "string"
+#include "type_traits"
+#include "vector"
+
 namespace OHOS {
 namespace Telephony {
 SmsReceiveIndexer::SmsReceiveIndexer()
