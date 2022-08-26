@@ -1098,7 +1098,6 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
     ASSERT_TRUE(helper.GetBoolResult());
-    }
 }
 
 /**
