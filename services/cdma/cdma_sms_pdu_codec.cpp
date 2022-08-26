@@ -1803,7 +1803,6 @@ void CdmaSmsPduCodec::DecodeUserData(
                 userData.userData.data[i] = pduStr[offset] >> SHIFT_1BITS;
                 ShiftNBitForDecode(&pduStr[offset], pduLen, SHIFT_7BITS);
             }
-            offset += userData.userData.length;
             break;
         case SMS_ENCODE_GSM7BIT:
             fillBits = headerInd ? ((udhlBytes + 1) * BYTE_BIT) % ENCODE_BYTE_BIT : 0;
@@ -1833,14 +1832,12 @@ void CdmaSmsPduCodec::DecodeUserData(
                 userData.userData.length) != EOK) {
                 TELEPHONY_LOGE("SMS_ENCODE_UNICODE memcpy_s err.");
             }
-            offset += userData.userData.length;
             break;
         default:
             if (memcpy_s(userData.userData.data, sizeof(userData.userData.data), pduStr + offset,
                 userData.userData.length) != EOK) {
                 TELEPHONY_LOGE("unkown encodeType memcpy_s err.");
             }
-            offset += userData.userData.length;
             break;
     }
 }
