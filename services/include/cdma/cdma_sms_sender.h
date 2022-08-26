@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "gsm_sms_message.h"
 #include "ims_sms_client.h"
 #include "sms_receive_indexer.h"
 #include "sms_sender.h"
@@ -32,9 +33,26 @@ public:
     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
         const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
-    void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, int32_t port,
-        const uint8_t *data, uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
+    void TextBasedSmsDeliveryViaIms(const std::string &desAddr, const std::string &scAddr, const std::string &text,
+        const sptr<ISendShortMessageCallback> &sendCallback,
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
+    bool TpduNullOrSmsPageOverNormalOrSmsEncodeFail(std::vector<struct SplitInfo> cellsInfos,
+        std::shared_ptr<struct SmsTpdu> tpdu, std::shared_ptr<uint8_t> unSentCellCount,
+        std::shared_ptr<bool> hasCellFailed, const sptr<ISendShortMessageCallback> &sendCallback);
+    void SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo> cellsInfos, const std::string &desAddr,
+        const std::string &scAddr, std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage gsmSmsMessage,
+        std::shared_ptr<uint8_t> unSentCellCount, std::shared_ptr<bool> hasCellFailed, SmsCodingScheme codingType,
+        const sptr<ISendShortMessageCallback> &sendCallback,
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
+    void ReadySendSms(GsmSmsMessage gsmSmsMessage, const std::string &scAddr, bool isMore,
+        std::shared_ptr<SmsSendIndexer> indexer, uint8_t msgRef8bit, std::shared_ptr<uint8_t> unSentCellCount,
+        std::shared_ptr<bool> hasCellFailed);
+    void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, int32_t port, const uint8_t *data,
+        uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
+    void DataBasedSmsDeliveryViaIms(const std::string &desAddr, const std::string &scAddr, int32_t port,
+        const uint8_t *data, uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
     void SendSmsToRil(const std::shared_ptr<SmsSendIndexer> &smsIndexer) override;
     void Init() override;
     void ReceiveStatusReport(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
@@ -43,6 +61,9 @@ public:
     bool IsImsSmsSupported(int32_t slotId) override;
     void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
     void StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
+    void RegisterImsHandler() override;
+    void SetSendIndexerInfo(const std::shared_ptr<SmsSendIndexer> &indexer,
+        const std::shared_ptr<struct EncodeInfo> &encodeInfo, unsigned char msgRef8bit);
 
 protected:
     void StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event) override;
@@ -59,10 +80,12 @@ private:
 
     void SendCsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu);
     void SendImsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu);
-    bool RegisterHandler();
 
     uint8_t msgSeqNum_ = 0;
     uint8_t msgSubmitId_ = 0;
+
+    std::mutex mutex_;
+    bool isImsCdmaHandlerRegistered = false;
 };
 } // namespace Telephony
 } // namespace OHOS

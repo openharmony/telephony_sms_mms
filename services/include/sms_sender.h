@@ -58,6 +58,7 @@ public:
     virtual bool IsImsSmsSupported(int32_t slotId) = 0;
     virtual void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) = 0;
     virtual void StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event) = 0;
+    virtual void RegisterImsHandler() = 0;
 
     static void SendResultCallBack(
         const std::shared_ptr<SmsSendIndexer> &indexer, ISendShortMessageCallback::SmsSendResult result);
