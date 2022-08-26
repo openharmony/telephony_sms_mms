@@ -19,9 +19,7 @@
 #include "core_manager_inner.h"
 #include "radio_event.h"
 #include "securec.h"
-#include "sms_hisysevent.h"
 #include "string_utils.h"
-#include "sms_hisysevent.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
