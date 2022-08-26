@@ -358,13 +358,23 @@ bool GsmSmsSender::RegisterHandler()
 {
     CoreManagerInner::GetInstance().RegisterCoreNotify(
         slotId_, shared_from_this(), RadioEvent::RADIO_SMS_STATUS, nullptr);
+    return true;
+}
+
+void GsmSmsSender::RegisterImsHandler()
+{
+    if (isImsGsmHandlerRegistered) {
+        return;
+    }
     auto smsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
     if (smsClient == nullptr) {
         TELEPHONY_LOGE("RegisterHandler return, ImsSmsClient is nullptr.");
-        return false;
+        return;
     }
+
     smsClient->RegisterImsSmsCallbackHandler(slotId_, shared_from_this());
-    return true;
+    TELEPHONY_LOGE("RegisterHandler  gsm ImsSmsClient successs");
+    isImsGsmHandlerRegistered = true;
 }
 
 void GsmSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
