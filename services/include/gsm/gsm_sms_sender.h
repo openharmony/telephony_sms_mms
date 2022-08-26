@@ -50,6 +50,7 @@ public:
     bool IsImsSmsSupported(int32_t slotId) override;
     void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
     void StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
+    void RegisterImsHandler() override;
 
 protected:
     void StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event) override;
@@ -63,6 +64,7 @@ private:
     void SendCsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSimMessageParam smsData);
 
     std::mutex mutex_;
+    bool isImsGsmHandlerRegistered = false;
 };
 } // namespace Telephony
 } // namespace OHOS

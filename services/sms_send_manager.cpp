@@ -133,8 +133,10 @@ void SmsSendManager::TextBasedSmsDelivery(const string &desAddr, const string &s
     NetWorkType netWorkType = networkManager_->GetNetWorkType();
     TELEPHONY_LOGI("netWorkType = %{public}d.", netWorkType);
     if (netWorkType == NetWorkType::NET_TYPE_GSM) {
+        gsmSmsSender_->RegisterImsHandler();
         gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
     } else if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
+        cdmaSmsSender_->RegisterImsHandler();
         cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
     } else {
         SmsSender::SendResultCallBack(

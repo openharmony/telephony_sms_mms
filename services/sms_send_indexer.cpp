@@ -54,6 +54,11 @@ void SmsSendIndexer::SetEncodePdu(const std::vector<uint8_t> &pdu)
     pdu_ = pdu;
 }
 
+void SmsSendIndexer::SetImsSmsForCdma(const bool isImsSms)
+{
+    isCdmaIms_ = isImsSms;
+}
+
 void SmsSendIndexer::SetEncodePdu(const std::vector<uint8_t> &&pdu)
 {
     pdu_ = std::forward<const std::vector<uint8_t>>(pdu);
@@ -62,6 +67,11 @@ void SmsSendIndexer::SetEncodePdu(const std::vector<uint8_t> &&pdu)
 const std::vector<uint8_t>& SmsSendIndexer::GetEncodePdu() const
 {
     return pdu_;
+}
+
+const bool &SmsSendIndexer::IsImsSmsForCdma() const
+{
+    return isCdmaIms_;
 }
 
 bool SmsSendIndexer::GetIsFailure() const
