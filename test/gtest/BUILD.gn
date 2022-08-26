@@ -22,6 +22,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   sources = [
     "//base/telephony/sms_mms/frameworks/native/sms/src/sms_service_proxy.cpp",
     "sms_mms_gtest.cpp",
+    "sms_mms_test_helper.cpp",
   ]
 
   include_dirs = [

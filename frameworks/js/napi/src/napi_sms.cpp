@@ -130,51 +130,78 @@ static bool InValidSlotIdOrInValidPort(int32_t slotId, uint16_t port)
     return false;
 }
 
-static bool ActuallySendMessage(napi_env env, SendMessageContext &parameter)
+static bool ActuallySendTextMessage(SendMessageContext &parameter, std::shared_ptr<SendCallback> sendCallback,
+    std::shared_ptr<DeliveryCallback> deliveryCallback)
 {
-    bool hasSendCallback = parameter.sendCallbackRef != nullptr;
-    std::unique_ptr<SendCallback> sendCallback =
-        std::make_unique<SendCallback>(hasSendCallback, env, parameter.thisVarRef, parameter.sendCallbackRef);
-    if (sendCallback == nullptr) {
-        TELEPHONY_LOGI("ActuallySendMessage sendCallback == nullptr");
+    if (!IsValidSlotId(parameter.slotId)) {
+        auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
+        sendCallback.get()->OnSmsSendResult(result);
         return false;
     }
-    bool hasDeliveryCallback = parameter.deliveryCallbackRef != nullptr;
-    std::unique_ptr<DeliveryCallback> deliveryCallback = std::make_unique<DeliveryCallback>(
-        hasDeliveryCallback, env, parameter.thisVarRef, parameter.deliveryCallbackRef);
-    if (deliveryCallback == nullptr) {
-        TELEPHONY_LOGI("ActuallySendMessage deliveryCallback == nullptr");
-        return false;
-    }
-    if (parameter.messageType == TEXT_MESSAGE_PARAMETER_MATCH) {
-        int32_t sendResult = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(
-            parameter.slotId, parameter.destinationHost, parameter.serviceCenter, parameter.textContent,
-            sendCallback.release(), deliveryCallback.release());
+    int32_t sendResult = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(parameter.slotId,
+        parameter.destinationHost, parameter.serviceCenter, parameter.textContent, sendCallback.get(),
+        deliveryCallback.get());
 
-        TELEPHONY_LOGI("NativeSendMessage SendTextMessage execResult = %{public}d", sendResult);
+    TELEPHONY_LOGI("ActuallySendTextMessage SendTextMessage execResult = %{public}d", sendResult);
+    if (sendResult == ERROR_NONE) {
+        return true;
+    } else {
+        return false;
+    }
+    return false;
+}
+
+static bool ActuallySendDataMessage(SendMessageContext &parameter, std::shared_ptr<SendCallback> sendCallback,
+    std::shared_ptr<DeliveryCallback> deliveryCallback)
+{
+    if (InValidSlotIdOrInValidPort(parameter.slotId, parameter.destinationPort)) {
+        auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
+        sendCallback.get()->OnSmsSendResult(result);
+        deliveryCallback.get()->OnSmsDeliveryResult(u"");
+        return false;
+    }
+    if (parameter.rawDataContent.size() > 0) {
+        uint16_t arrayLength = static_cast<uint16_t>(parameter.rawDataContent.size());
+        int32_t sendResult = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(parameter.slotId,
+            parameter.destinationHost, parameter.serviceCenter, parameter.destinationPort, &parameter.rawDataContent[0],
+            arrayLength, sendCallback.get(), deliveryCallback.get());
+        TELEPHONY_LOGI("ActuallySendDataMessage SendRawDataMessage execResult = %{public}d", sendResult);
         if (sendResult == ERROR_NONE) {
             return true;
         } else {
             return false;
         }
-    } else if (parameter.messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
-        if (InValidSlotIdOrInValidPort(parameter.slotId, parameter.destinationPort)) {
-            auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
-            sendCallback.release()->OnSmsSendResult(result);
+    }
+    return false;
+}
+
+static bool ActuallySendMessage(napi_env env, SendMessageContext &parameter)
+{
+    bool hasSendCallback = parameter.sendCallbackRef != nullptr;
+    std::shared_ptr<SendCallback> sendCallback =
+        std::make_shared<SendCallback>(hasSendCallback, env, parameter.thisVarRef, parameter.sendCallbackRef);
+    if (sendCallback == nullptr) {
+        TELEPHONY_LOGE("ActuallySendMessage sendCallback == nullptr");
+        return false;
+    }
+    bool hasDeliveryCallback = parameter.deliveryCallbackRef != nullptr;
+    std::shared_ptr<DeliveryCallback> deliveryCallback = std::make_shared<DeliveryCallback>(
+        hasDeliveryCallback, env, parameter.thisVarRef, parameter.deliveryCallbackRef);
+    if (deliveryCallback == nullptr) {
+        TELEPHONY_LOGE("ActuallySendMessage deliveryCallback == nullptr");
+        return false;
+    }
+    if (parameter.messageType == TEXT_MESSAGE_PARAMETER_MATCH) {
+        if (ActuallySendTextMessage(parameter, sendCallback, deliveryCallback)) {
+            return true;
+        } else {
             return false;
         }
-        if (parameter.rawDataContent.size() > 0) {
-            uint16_t arrayLength = static_cast<uint16_t>(parameter.rawDataContent.size());
-            int32_t sendResult = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->
-                SendMessage(parameter.slotId, parameter.destinationHost, parameter.serviceCenter,
-                parameter.destinationPort, &parameter.rawDataContent[0],
-                arrayLength, sendCallback.release(), deliveryCallback.release());
-            TELEPHONY_LOGI("NativeSendMessage SendRawDataMessage execResult = %{public}d", sendResult);
-            if (sendResult == ERROR_NONE) {
-                return true;
-            } else {
-                return false;
-            }
+    } else if (parameter.messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
+        if (ActuallySendDataMessage(parameter, sendCallback, deliveryCallback)) {
+            return true;
+        } else {
+            return false;
         }
     }
     return false;

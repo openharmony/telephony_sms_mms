@@ -163,11 +163,6 @@ bool SmsService::NoPermissionOrParametersCheckFail(
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
         return true;
     }
-    if (CoreManagerInner::GetInstance().GetCsRegState(slotId) <= 0) {
-        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_RADIO_OFF);
-        TELEPHONY_LOGE("SmsService::SendMessage radio off");
-        return true;
-    }
     if (desAddr.empty()) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("SmsService::SendMessage desAddr invalid.");
