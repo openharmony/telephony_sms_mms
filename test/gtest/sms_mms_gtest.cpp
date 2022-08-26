@@ -1089,7 +1089,7 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
         g_telephonyService = SmsMmsGtest::GetProxy();
         ASSERT_TRUE(true);
         return;
-     }
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(UpdateSimMessageTestFuc, std::ref(helper))) {
@@ -1177,7 +1177,6 @@ void SetImsSmsConfigTestFuc2(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level3)
 {
-
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0002 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
