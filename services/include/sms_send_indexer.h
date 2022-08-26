@@ -80,6 +80,8 @@ public:
     const std::vector<uint8_t>& GetEncodeSmca() const;
     void SetEncodePdu(const std::vector<uint8_t> &pdu);
     const std::vector<uint8_t>& GetEncodePdu() const;
+    void SetImsSmsForCdma(const bool isImsSms);
+    const bool &IsImsSmsForCdma() const;
     void UpdatePduForResend();
     void SetEncodePdu(const std::vector<uint8_t> &&pdu);
     void SetEncodeSmca(const std::vector<uint8_t> &&smca);
@@ -107,6 +109,7 @@ private:
     std::string scAddr_;
     std::string destAddr_;
     int32_t destPort_ = 0;
+    bool isCdmaIms_ = false;
     bool hasMore_ = false;
     long timeStamp_ = 0;
     uint8_t csResendCount_ = 0;
