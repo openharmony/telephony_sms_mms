@@ -48,8 +48,8 @@ protected:
     bool AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer);
     bool CheckBlockPhone(const std::shared_ptr<SmsReceiveIndexer> &indexer);
     bool CheckSmsCapable();
-
     int32_t slotId_ = -1;
+
 private:
     constexpr static uint16_t PDU_POS_OFFSET = 1;
     constexpr static int32_t TEXT_MSG_RECEIVE_CODE = 0;

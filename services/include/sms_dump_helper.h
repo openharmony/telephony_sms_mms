@@ -29,10 +29,8 @@ public:
 
 private:
     void ShowHelp(std::string &result) const;
-
     void ShowSmsInfo(std::string &result) const;
-
-private:
+    bool WhetherHasSimCard(const int32_t slotId) const;
 };
 } // namespace Telephony
 } // namespace OHOS
