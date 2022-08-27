@@ -15,8 +15,9 @@
 
 #include "sms_dump_helper.h"
 
-#include "telephony_log_wrapper.h"
+#include "core_service_client.h"
 #include "sms_service.h"
+#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -33,6 +34,16 @@ SmsDumpHelper::SmsDumpHelper()
     TELEPHONY_LOGI("SmsDumpHelper() entry.");
 }
 
+static std::string to_utf8(std::u16string str16)
+{
+    return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> {}.to_bytes(str16);
+}
+
+bool SmsDumpHelper::WhetherHasSimCard(const int32_t slotId) const
+{
+    return DelayedRefSingleton<CoreServiceClient>::GetInstance().HasSimCard(slotId);
+}
+
 void SmsDumpHelper::ShowHelp(std::string &result) const
 {
     result.append("Usage:dump <command> [options]\n")
@@ -47,10 +58,38 @@ void SmsDumpHelper::ShowHelp(std::string &result) const
 
 void SmsDumpHelper::ShowSmsInfo(std::string &result) const
 {
-    result.append("Ohos sms_mms service: ")
-        .append(",    Ohos sms_mms bind time:  ")
-        .append(DelayedSingleton<SmsService>::GetInstance()->GetBindTime())
-        .append("\n");
+    result.append("SmsService: \n");
+    result.append("BindTime = ");
+    result.append(DelayedSingleton<SmsService>::GetInstance()->GetBindTime());
+    result.append("\n");
+    result.append("SpendTime = ");
+    result.append(std::to_string(DelayedSingleton<SmsService>::GetInstance()->GetSpendTime()));
+    result.append("\n");
+    result.append("EndTime = ");
+    result.append(std::to_string(DelayedSingleton<SmsService>::GetInstance()->GetEndTime()));
+    result.append("\n");
+    result.append("ServiceRunningState: ");
+    result.append(std::to_string(DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState()));
+    result.append("\n");
+    result.append("DefaultSmsSlotId = ");
+    result.append(std::to_string(DelayedSingleton<SmsService>::GetInstance()->GetDefaultSmsSlotId()));
+    result.append("\n");
+    result.append("HasSmsCapability = ");
+    result.append(std::to_string(DelayedSingleton<SmsService>::GetInstance()->HasSmsCapability()));
+    result.append("\n");
+    for (int32_t i = 0; i < SIM_SLOT_COUNT; i++) {
+        if (WhetherHasSimCard(i)) {
+            result.append("SlotId = ");
+            result.append(std::to_string(i));
+            result.append("\n");
+            result.append("IsImsSmsSupported = ");
+            result.append(std::to_string(DelayedSingleton<SmsService>::GetInstance()->IsImsSmsSupported(i)));
+            result.append("\n");
+            result.append("ImsShortMessageFormat = ");
+            result.append(to_utf8(DelayedSingleton<SmsService>::GetInstance()->GetImsShortMessageFormat()));
+            result.append("\n");
+        }
+    }
 }
 } // namespace Telephony
 } // namespace OHOS

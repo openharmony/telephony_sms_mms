@@ -15,8 +15,6 @@
 
 #include "sms_service.h"
 
-#include <string>
-
 #include "core_manager_inner.h"
 #include "ims_sms_client.h"
 #include "sms_dump_helper.h"
@@ -39,6 +37,9 @@ SmsService::~SmsService() {}
 void SmsService::OnStart()
 {
     TELEPHONY_LOGI("SmsService::OnStart start service Enter.");
+    bindTime_ =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
     if (state_ == ServiceRunningState::STATE_RUNNING) {
         TELEPHONY_LOGE("msService has already started.");
         return;
@@ -48,6 +49,9 @@ void SmsService::OnStart()
         return;
     }
     state_ = ServiceRunningState::STATE_RUNNING;
+    endTime_ =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
     TELEPHONY_LOGI("SmsService::OnStart start service Exit.");
 }
 
@@ -60,9 +64,6 @@ bool SmsService::Init()
             TELEPHONY_LOGE("SmsService::Init Publish failed!");
             return false;
         }
-        bindTime_ =
-            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
-                .count();
         registerToService_ = true;
         WaitCoreServiceToInit();
     }
@@ -439,6 +440,22 @@ bool SmsService::GetSmsSegmentsInfo(
             break;
     }
     return true;
+}
+
+int32_t SmsService::GetServiceRunningState()
+{
+    return static_cast<int32_t>(state_);
+}
+
+int64_t SmsService::GetEndTime()
+{
+    return endTime_;
+}
+
+int64_t SmsService::GetSpendTime()
+{
+    spendTime_ = endTime_ - bindTime_;
+    return spendTime_;
 }
 } // namespace Telephony
 } // namespace OHOS
