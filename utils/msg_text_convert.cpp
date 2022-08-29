@@ -832,6 +832,7 @@ int MsgTextConvert::FindUCS2toPortu(
     pDestText[outTextLen++] = static_cast<unsigned char>(itExt->second);
     return outTextLen;
 }
+
 unsigned char MsgTextConvert::FindUCS2ReplaceChar(const unsigned short inText)
 {
     unsigned char result = 0;
