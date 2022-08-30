@@ -39,20 +39,8 @@ public:
      */
     sptr<ImsSmsInterface> GetImsSmsProxy();
 
-    /**
-     * Is Connect ImsSms Remote Object
-     *
-     * @return bool
-     */
-    bool IsConnect() const;
     void Init();
     void UnInit();
-    int32_t RegisterImsSmsCallback();
-
-    /****************** sms basic ******************/
-    int32_t ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo);
-    int32_t ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig);
-    int32_t ImsGetSmsConfig(int32_t slotId);
     int32_t RegisterImsSmsCallbackHandler(int32_t slotId, const std::shared_ptr<AppExecFwk::EventHandler> &handler);
 
     /**
@@ -64,8 +52,10 @@ public:
      */
     std::shared_ptr<AppExecFwk::EventHandler> GetHandler(int32_t slotId);
 
-    int32_t ReConnectService();
-    void Clean();
+    /****************** sms basic ******************/
+    int32_t ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo);
+    int32_t ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig);
+    int32_t ImsGetSmsConfig(int32_t slotId);
 
 private:
     class SystemAbilityListener : public SystemAbilityStatusChangeStub {
@@ -76,6 +66,16 @@ private:
         void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
         void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     };
+
+    /**
+     * Is Connect ImsSms Remote Object
+     *
+     * @return bool
+     */
+    bool IsConnect() const;
+    int32_t RegisterImsSmsCallback();
+    int32_t ReConnectService();
+    void Clean();
 
 private:
     sptr<ImsCoreServiceInterface> imsCoreServiceProxy_ = nullptr;
