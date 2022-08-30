@@ -28,8 +28,6 @@ class ImsSmsCallbackStub : public IRemoteStub<ImsSmsCallbackInterface> {
 public:
     ImsSmsCallbackStub();
     virtual ~ImsSmsCallbackStub();
-    void InitFuncMap();
-    void InitSmsBasicFuncMap();
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
     /****************** sms basic ******************/
@@ -38,6 +36,9 @@ public:
     int32_t ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig) override;
     
 private:
+    void InitFuncMap();
+    void InitSmsBasicFuncMap();
+
     /****************** sms basic ******************/
     int32_t OnImsSendMessageResponseInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnImsSetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply);
