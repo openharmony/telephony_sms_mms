@@ -26,7 +26,7 @@ enum class SmsMmsMessageType {
     SMS_SHORT_MESSAGE,
     MMS_SHORT_MESSAGE,
     CELL_BROAD_CAST,
-    WPA_PUSH,
+    WAP_PUSH,
 };
 
 class SmsHiSysEvent : public TelephonyHiSysEvent {
@@ -37,6 +37,17 @@ public:
         const int32_t slotId, const SmsMmsMessageType type, const SmsMmsErrorCode errorCode, const std::string &desc);
     static void WriteSmsReceiveFaultEvent(
         const int32_t slotId, const SmsMmsMessageType type, const SmsMmsErrorCode errorCode, const std::string &desc);
+    void SetSmsBroadcastStartTime();
+    void JudgingSmsBroadcastTimeOut(const int32_t slotId, const SmsMmsMessageType type);
+    void SetCbBroadcastStartTime();
+    void JudgingCbBroadcastTimeOut(const int32_t slotId, const SmsMmsMessageType type);
+    void SetWapPushBroadcastStartTime();
+    void JudgingWapPushBroadcastTimeOut(const int32_t slotId, const SmsMmsMessageType type);
+
+private:
+    int64_t smsBroadcastStartTime_ = 0L;
+    int64_t cbBroadcastStartTime_ = 0L;
+    int64_t wapPushBroadcastStartTime_ = 0L;
 };
 } // namespace Telephony
 } // namespace OHOS

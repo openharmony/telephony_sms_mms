@@ -21,6 +21,7 @@
 #include "sms_interface_stub.h"
 #include "system_ability.h"
 #include "system_ability_definition.h"
+#include "sms_state_handler.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -245,6 +246,7 @@ private:
         int32_t slotId, const std::u16string desAddr, const sptr<ISendShortMessageCallback> &sendCallback);
     bool registerToService_ = false;
     ServiceRunningState state_ = ServiceRunningState::STATE_NOT_START;
+    std::shared_ptr<SmsStateHandler> smsStateHandler_;
 };
 } // namespace Telephony
 } // namespace OHOS

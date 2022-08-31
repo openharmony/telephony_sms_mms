@@ -20,6 +20,7 @@
 #include "common_event_support.h"
 #include "gsm_sms_message.h"
 #include "radio_event.h"
+#include "singleton.h"
 #include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
@@ -138,7 +139,7 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
     if (indexer->GetIsWapPushMsg()) {
         if (smsWapPushHandler_ != nullptr) {
             if (!smsWapPushHandler_->DecodeWapPushPdu(userDataRaw)) {
-                SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::WPA_PUSH,
+                SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::WAP_PUSH,
                     SmsMmsErrorCode::SMS_ERROR_PDU_DECODE_FAIL, "Wap push decode wap push fail");
             }
         }
@@ -195,6 +196,7 @@ void SmsReceiveHandler::SendBroadcast(
     }
     Want want;
     want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    want.SetParam("slotId", static_cast<int>(slotId_));
     want.SetParam("pdus", newPdus);
     want.SetParam("isCdma", indexer->GetIsCdma());
     CommonEventData data;
@@ -218,7 +220,7 @@ void SmsReceiveHandler::SendBroadcast(
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish short message broadcast event fail");
     }
-    SmsHiSysEvent::WriteSmsReceiveBehaviorEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE);
+    DelayedSingleton<SmsHiSysEvent>::GetInstance()->SetSmsBroadcastStartTime();
 }
 
 bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer)
