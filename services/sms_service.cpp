@@ -67,6 +67,7 @@ bool SmsService::Init()
         registerToService_ = true;
         WaitCoreServiceToInit();
     }
+    DelayedSingleton<SmsStateHandler>::GetInstance()->Init();
     return true;
 }
 
@@ -75,6 +76,7 @@ void SmsService::OnStop()
     state_ = ServiceRunningState::STATE_NOT_START;
     registerToService_ = false;
     DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
+    DelayedSingleton<SmsStateHandler>::GetInstance()->UnInit();
     TELEPHONY_LOGI("SmsService::OnStop stop service.");
 }
 

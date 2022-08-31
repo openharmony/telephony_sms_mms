@@ -44,6 +44,7 @@ protected:
 private:
     bool RegisterHandler();
     bool SendCBBroadcast(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage);
+    bool SetCBBroadcastParam(AppExecFwk::Want &want, SmsCbData::CbData &sendData);
     void GetCBData(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage, SmsCbData::CbData &sendData,
         bool &isEmergency);
     std::weak_ptr<SmsSender> cdmaSmsSender_;

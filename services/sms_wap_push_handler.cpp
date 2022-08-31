@@ -17,17 +17,16 @@
 
 #include <memory>
 
-#include "securec.h"
 #include "common_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
-#include "want.h"
-
-#include "string_utils.h"
-#include "telephony_log_wrapper.h"
+#include "mms_msg.h"
+#include "securec.h"
 #include "sms_hisysevent.h"
 #include "sms_persist_helper.h"
-#include "mms_msg.h"
+#include "string_utils.h"
+#include "telephony_log_wrapper.h"
+#include "want.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -320,9 +319,10 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast()
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     if (!publishResult) {
         TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
-        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::WPA_PUSH,
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::WAP_PUSH,
             SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish wpa push broadcast event fail");
     }
+    DelayedSingleton<SmsHiSysEvent>::GetInstance()->SetWapPushBroadcastStartTime();
     return true;
 }
 } // namespace Telephony

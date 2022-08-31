@@ -54,6 +54,8 @@ ohos_shared_library("tel_sms_mms") {
     "$SOURCE_DIR/services/sms_send_manager.cpp",
     "$SOURCE_DIR/services/sms_sender.cpp",
     "$SOURCE_DIR/services/sms_service.cpp",
+    "$SOURCE_DIR/services/sms_state_handler.cpp",
+    "$SOURCE_DIR/services/sms_state_observer.cpp",
     "$SOURCE_DIR/services/sms_wap_push_buffer.cpp",
     "$SOURCE_DIR/services/sms_wap_push_content_type.cpp",
     "$SOURCE_DIR/services/sms_wap_push_handler.cpp",
