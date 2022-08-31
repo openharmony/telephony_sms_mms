@@ -128,16 +128,17 @@ void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const stri
     }
 
     std::unique_lock<std::mutex> lock(mutex_);
+    uint8_t msgRef8bit = GetMsgRef8Bit();
     for (int i = 0; i < cellsInfosSize; i++) {
         SendSmsForEveryIndexer(i, cellsInfos, desAddr, scAddr, tpdu, gsmSmsMessage, unSentCellCount, hasCellFailed,
-            codingType, sendCallback, deliveryCallback);
+            codingType, msgRef8bit, sendCallback, deliveryCallback);
     }
     return;
 }
 
 void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo> cellsInfos, const string &desAddr,
     const string &scAddr, std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage gsmSmsMessage,
-    shared_ptr<uint8_t> unSentCellCount, shared_ptr<bool> hasCellFailed, SmsCodingScheme codingType,
+    shared_ptr<uint8_t> unSentCellCount, shared_ptr<bool> hasCellFailed, SmsCodingScheme codingType, uint8_t msgRef8bit,
     const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     std::string segmentText;
@@ -157,7 +158,6 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
         return;
     }
 
-    uint8_t msgRef8bit = GetMsgRef8Bit();
     tpdu->data.submit.userData.length = cellsInfos[i].encodeData.size();
     tpdu->data.submit.userData.data[cellsInfos[i].encodeData.size()] = 0;
     tpdu->data.submit.msgRef = msgRef8bit;
