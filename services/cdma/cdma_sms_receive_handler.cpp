@@ -25,6 +25,7 @@
 #include "cdma_sms_types.h"
 #include "core_manager_inner.h"
 #include "radio_event.h"
+#include "singleton.h"
 #include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
@@ -151,8 +152,7 @@ bool CdmaSmsReceiveHandler::SendCBBroadcast(const std::shared_ptr<SmsBaseMessage
         TELEPHONY_LOGE("smsBaseMessage is nullptr.");
         return false;
     }
-    const int lac = -1;
-    const int cid = -1;
+
     bool isMergency = false;
     SmsCbData::CbData sendData;
     GetCBData(smsBaseMessage, sendData, isMergency);
@@ -163,6 +163,25 @@ bool CdmaSmsReceiveHandler::SendCBBroadcast(const std::shared_ptr<SmsBaseMessage
     } else {
         want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
     }
+    SetCBBroadcastParam(want, sendData);
+    data.SetWant(want);
+    EventFwk::CommonEventPublishInfo publishInfo;
+    publishInfo.SetOrdered(true);
+    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
+    if (!publishResult) {
+        TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::CELL_BROAD_CAST,
+            SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish cell broadcast event fail");
+        return false;
+    }
+    DelayedSingleton<SmsHiSysEvent>::GetInstance()->SetCbBroadcastStartTime();
+    return true;
+}
+
+bool CdmaSmsReceiveHandler::SetCBBroadcastParam(AppExecFwk::Want &want, SmsCbData::CbData &sendData)
+{
+    const int lac = -1;
+    const int cid = -1;
     want.SetParam(SmsCbData::GEO_SCOPE, static_cast<char>(sendData.geoScope));
     want.SetParam(SmsCbData::CMAS_RESPONSE, static_cast<char>(sendData.cmasRes));
     want.SetParam(SmsCbData::SLOT_ID, static_cast<int>(slotId_));
@@ -182,21 +201,12 @@ bool CdmaSmsReceiveHandler::SendCBBroadcast(const std::shared_ptr<SmsBaseMessage
     want.SetParam(SmsCbData::SERIAL_NUM, static_cast<int>(sendData.serial));
     want.SetParam(SmsCbData::RECV_TIME, std::to_string(sendData.recvTime));
     want.SetParam(SmsCbData::DCS, static_cast<char>(sendData.dcs));
-
     want.SetParam(SmsCbData::IS_ETWS_PRIMARY, sendData.isPrimary);
     want.SetParam(SmsCbData::IS_ETWS_MESSAGE, sendData.isEtws);
     want.SetParam(SmsCbData::PLMN, StringUtils::ToUtf8(plmn_));
     want.SetParam(SmsCbData::LAC, static_cast<int>(lac));
     want.SetParam(SmsCbData::CID, static_cast<int>(cid));
     want.SetParam(SmsCbData::WARNING_TYPE, static_cast<int>(sendData.warnType));
-    data.SetWant(want);
-    EventFwk::CommonEventPublishInfo publishInfo;
-    publishInfo.SetOrdered(true);
-    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
-    if (!publishResult) {
-        TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
-        return false;
-    }
     return true;
 }
 
