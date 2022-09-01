@@ -20,6 +20,7 @@
 
 #include "core_manager_inner.h"
 #include "radio_event.h"
+#include "singleton.h"
 #include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
@@ -269,6 +270,7 @@ bool GsmSmsCbHandler::SendCbMessageBroadcast(const std::shared_ptr<SmsCbMessage>
             SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish cell broadcast event fail");
         return false;
     }
+    DelayedSingleton<SmsHiSysEvent>::GetInstance()->SetCbBroadcastStartTime();
     return true;
 }
 
