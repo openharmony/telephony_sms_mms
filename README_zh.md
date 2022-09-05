@@ -30,18 +30,25 @@
 
 ```
 /base/telephony/sms_mms
+├─ common                       # 内部公共代码
+├─ figures                      # Readme资源文件
 ├─ frameworks                   # 短彩信内部框架接口层
-├─ interfaces                   # 对外暴露的接口
-│  ├─ innerkits
-|  |  ├─ ims                    # IMS短彩信处理接口
-│  └─ kits
-├─ sa_profile                   # 启动配置文件
-├─ services                     # 服务内部代码
-|  ├─ ims_service_interaction   # IMS短彩信源文件
+│  ├─ js                        # js相关代码
+│  └─ native                    # native相关代码
+├─ interfaces                   # 接口目录
+│  ├─ innerkits                 # 部件间的内部接口
+│  │ └─  ims                    # IMS短信接口定义
+│  └─ kits                      # 对应用提供的接口（例如JS接口）
+├─ sa_profile                   # 短信服务的启动文件目录
+├─ services                     # 短彩信服务实现代码
+│  ├─ ims_service_interaction   # IMS短信服务交互层
 │  ├─ include                   # 头文件目录
 │  ├─ cdma                      # CDMA制式源文件
 │  └─ gsm                       # GSM制式源文件
 ├─ test                         # 单元测试目录
+│  ├─ fuzztest                  # 模糊测试相关代码
+│  ├─ gtest                     # 自动化测试相关代码
+│  └─ unittest                  # 单元测试相关代码
 └─ utils                        # 通用工具相关
 ```
 
