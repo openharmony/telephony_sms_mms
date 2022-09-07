@@ -28,7 +28,7 @@ The SMS and MMS module consists of the following parts:
 ├─ interfaces                   # APIs
 │  ├─ innerkits                 # Internal APIs
 │  │ └─  ims                    # IMS SMS service APIs
-│  └─ kits                      # External APIs \(such as JS APIs\)
+│  └─ kits                      # External APIs (such as JS APIs)
 ├─ sa_profile                   # SA profile
 ├─ services                     # Sample code for IMS SMS and MMS service implementation
 │  ├─ ims_service_interaction   # IMS SMS and MMS service interaction
