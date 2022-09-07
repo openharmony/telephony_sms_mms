@@ -30,8 +30,8 @@ The SMS and MMS module consists of the following parts:
 │  │ └─  ims                    # IMS SMS service APIs
 │  └─ kits                      # External APIs (such as JS APIs)
 ├─ sa_profile                   # SA profile
-├─ services                     # Sample code for IMS SMS and MMS service implementation
-│  ├─ ims_service_interaction   # IMS SMS and MMS service interaction
+├─ services                     # IMS service code (for SMS and MMS)
+│  ├─ ims_service_interaction   # IMS service interaction (for SMS and MMS)
 │  ├─ include                   # Header files
 │  ├─ cdma                      # CDMA-specific source files
 │  └─ gsm                       # GSM-specific source files
