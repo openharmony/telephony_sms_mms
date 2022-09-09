@@ -1,16 +1,5 @@
 # SMS and MMS<a name="EN-US_TOPIC_0000001105544742"></a>
 
-- [SMS and MMS<a name="EN-US_TOPIC_0000001105544742"></a>](#sms-and-mms)
-  - [Introduction<a name="section117mcpsimp"></a>](#introduction)
-  - [Directory Structure<a name="section125mcpsimp"></a>](#directory-structure)
-  - [Constraints<a name="section129mcpsimp"></a>](#constraints)
-  - [Available APIs<a name="section134mcpsimp"></a>](#available-apis)
-  - [Usage Guidelines<a name="section170mcpsimp"></a>](#usage-guidelines)
-    - [Sending SMS Messages<a name="section172mcpsimp"></a>](#sending-sms-messages)
-    - [Creating a ShortMessage Object<a name="section181mcpsimp"></a>](#creating-a-shortmessage-object)
-  - [Repositories Involved<a name="section189mcpsimp"></a>](#repositories-involved)
-
--   [Repositories Involved](#section189mcpsimp)
 
 ## Introduction<a name="section117mcpsimp"></a>
 
@@ -31,18 +20,25 @@ The SMS and MMS module consists of the following parts:
 
 ```
 /base/telephony/sms_mms
+├─ common                       # Common code
+├─ figures                      # Figures of readme files
 ├─ frameworks                   # Frameworks
-├─ interfaces                   # External APIs
-│  ├─ innerkits
-│  ├─ ims                      # IMS SMS/MMS APIs
-│  └─ kits
+│  ├─ js                        # JS code
+│  └─ native                    # Native code
+├─ interfaces                   # APIs
+│  ├─ innerkits                 # Internal APIs
+│  │ └─  ims                    # IMS SMS service APIs
+│  └─ kits                      # External APIs (such as JS APIs)
 ├─ sa_profile                   # SA profile
-├─ services                     # Service code
-│  ├─ ims_service_interaction  # IMS service interaction (for SMS/MMS)
-│  ├─ include                  # Header files
-│  ├─ cdma                     # CDMA-specific source files
-│  └─ gsm                      # GSM-specific source files
+├─ services                     # IMS service code (for SMS and MMS)
+│  ├─ ims_service_interaction   # IMS service interaction (for SMS and MMS)
+│  ├─ include                   # Header files
+│  ├─ cdma                      # CDMA-specific source files
+│  └─ gsm                       # GSM-specific source files
 ├─ test                         # Unit test code
+│  ├─ fuzztest                  # Fuzzy test
+│  ├─ gtest                     # Automated test
+│  └─ unittest                  # Unit test
 └─ utils                        # Utilities
 ```
 
