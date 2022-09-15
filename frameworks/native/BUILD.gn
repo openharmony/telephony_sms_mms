@@ -19,10 +19,7 @@ ohos_shared_library("tel_sms_mms_api") {
     "//base/telephony/sms_mms/frameworks/native/sms:sms_native_source",
   ]
 
-  external_deps = [
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
-  ]
+  external_deps = [ "samgr:samgr_proxy" ]
 
   defines = [
     "TELEPHONY_LOG_TAG = \"SmsMmsApi\"",
