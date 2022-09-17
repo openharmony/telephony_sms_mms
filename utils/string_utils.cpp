@@ -18,6 +18,13 @@
 #include <sstream>
 #include <string_ex.h>
 
+#include "cstddef"
+#include "cstdint"
+#include "cstdlib"
+#include "ostream"
+#include "string"
+#include "vector"
+
 namespace OHOS {
 namespace Telephony {
 StringUtils::StringUtils() {}
