@@ -19,6 +19,8 @@
 #include <string>
 #include <vector>
 
+#include "cstdint"
+#include "iosfwd"
 namespace OHOS {
 namespace Telephony {
 class StringUtils {
