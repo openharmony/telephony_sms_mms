@@ -31,20 +31,21 @@
         "deps": {
             "components": [
                 "ability_base",
-                "appexecfwk_standard",
+                "ability_runtime",
+                "c_utils",
                 "common_event_service",
                 "core_service",
-                "dmsfwk",
+                "drivers_interface_ril",
+                "eventhandler",
+                "hisysevent_native",
+                "hiviewdfx_hilog_native",
+                "init",
                 "ipc",
-                "dataability",
+                "napi",
                 "relational_store",
-                "ril_adapter",
+                "resource_management",
                 "safwk",
-                "samgr",
-                "utils_base"
-            ],
-            "third_party": [
-                "glib"
+                "samgr"
             ]
         },
         "build": {
