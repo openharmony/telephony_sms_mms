@@ -25,70 +25,92 @@ ImsSmsCallbackProxy::ImsSmsCallbackProxy(const sptr<IRemoteObject> &impl)
 
 int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result)
 {
-    MessageOption option;
     MessageParcel in;
-    MessageParcel out;
-    if (!in.WriteInterfaceToken(ImsSmsCallbackProxy::GetDescriptor())) {
-        TELEPHONY_LOGE("write descriptor token fail!");
-        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-    if (!in.WriteInt32(slotId)) {
-        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    int32_t ret = WriteCommonInfo(in, slotId);
+    if (ret != TELEPHONY_SUCCESS) {
+        return ret;
     }
     if (!in.WriteRawData((const void *)&result, sizeof(SendSmsResultInfo))) {
+        TELEPHONY_LOGE("[slot%{public}d]Write SendSmsResultInfo fail!", slotId);
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
+    MessageParcel out;
+    MessageOption option;
     int32_t error = Remote()->SendRequest(IMS_SEND_MESSAGE, in, out, option);
     if (error == ERR_NONE) {
         return out.ReadInt32();
     }
-    return error;
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+}
+
+int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(int32_t slotId, const HRilRadioResponseInfo &info)
+{
+    return SendHRilRadioResponseInfo(slotId, IMS_SEND_MESSAGE, info);
 }
 
 int32_t ImsSmsCallbackProxy::ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info)
 {
-    MessageOption option;
-    MessageParcel in;
-    MessageParcel out;
-    if (!in.WriteInterfaceToken(ImsSmsCallbackProxy::GetDescriptor())) {
-        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-    if (!in.WriteInt32(slotId)) {
-        TELEPHONY_LOGE("write slotId fail!");
-        return TELEPHONY_ERR_WRITE_DATA_FAIL;
-    }
-    if (!in.WriteRawData((const void *)&info, sizeof(HRilRadioResponseInfo))) {
-        TELEPHONY_LOGE("write HRilRadioResponseInfo fail!");
-        return TELEPHONY_ERR_WRITE_DATA_FAIL;
-    }
-    int32_t error = Remote()->SendRequest(IMS_SET_SMS_CONFIG, in, out, option);
-    if (error == ERR_NONE) {
-        return out.ReadInt32();
-    }
-    return error;
+    return SendHRilRadioResponseInfo(slotId, IMS_SET_SMS_CONFIG, info);
 }
 
 int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig)
 {
-    MessageOption option;
     MessageParcel in;
-    MessageParcel out;
-    if (!in.WriteInterfaceToken(ImsSmsCallbackProxy::GetDescriptor())) {
-        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-    if (!in.WriteInt32(slotId)) {
-        TELEPHONY_LOGE("write slotId fail!");
-        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    int32_t ret = WriteCommonInfo(in, slotId);
+    if (ret != TELEPHONY_SUCCESS) {
+        return ret;
     }
     if (!in.WriteInt32(imsSmsConfig)) {
-        TELEPHONY_LOGE("write imsSmsConfig fail!");
+        TELEPHONY_LOGE("[slot%{public}d]Write imsSmsConfig fail!", slotId);
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
+    MessageParcel out;
+    MessageOption option;
     int32_t error = Remote()->SendRequest(IMS_GET_SMS_CONFIG, in, out, option);
     if (error == ERR_NONE) {
         return out.ReadInt32();
     }
-    return error;
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+}
+
+int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info)
+{
+    return SendHRilRadioResponseInfo(slotId, IMS_GET_SMS_CONFIG, info);
+}
+
+int32_t ImsSmsCallbackProxy::WriteCommonInfo(MessageParcel &in, int32_t slotId)
+{
+    if (!in.WriteInterfaceToken(ImsSmsCallbackProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("[slot%{public}d]Write descriptor token fail!", slotId);
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!in.WriteInt32(slotId)) {
+        TELEPHONY_LOGE("[slot%{public}d]Write slotId fail!", slotId);
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    return TELEPHONY_SUCCESS;
+}
+
+int32_t ImsSmsCallbackProxy::SendHRilRadioResponseInfo(
+    int32_t slotId, int32_t eventId, const HRilRadioResponseInfo &info)
+{
+    TELEPHONY_LOGI("[slot%{public}d]Send HRilRadioResponseInfo for eventId:%{public}d", slotId, eventId);
+    MessageParcel in;
+    int32_t ret = WriteCommonInfo(in, slotId);
+    if (ret != TELEPHONY_SUCCESS) {
+        return ret;
+    }
+    if (!in.WriteRawData((const void *)&info, sizeof(HRilRadioResponseInfo))) {
+        TELEPHONY_LOGE("[slot%{public}d]Write HRilRadioResponseInfo fail!", slotId);
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    MessageParcel out;
+    MessageOption option;
+    int32_t error = Remote()->SendRequest(eventId, in, out, option);
+    if (error == ERR_NONE) {
+        return out.ReadInt32();
+    }
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 } // namespace Telephony
 } // namespace OHOS

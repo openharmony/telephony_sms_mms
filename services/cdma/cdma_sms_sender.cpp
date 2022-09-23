@@ -543,6 +543,10 @@ void CdmaSmsSender::StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer 
         return;
     }
     std::shared_ptr<int32_t> imsSmsInfo = event->GetSharedObject<int32_t>();
+    if (imsSmsInfo == nullptr) {
+        TELEPHONY_LOGE("CdmaSmsSender: StatusReportGetImsSms imsSmsInfo nullptr error.");
+        return;
+    }
     imsSmsCfg_ = *imsSmsInfo;
 }
 
