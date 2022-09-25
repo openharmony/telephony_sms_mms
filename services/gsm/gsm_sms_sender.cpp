@@ -340,6 +340,10 @@ void GsmSmsSender::StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &
         return;
     }
     std::shared_ptr<int32_t> imsSmsInfo = event->GetSharedObject<int32_t>();
+    if (imsSmsInfo == nullptr) {
+        TELEPHONY_LOGE("GsmSmsSender: StatusReportGetImsSms imsSmsInfo nullptr error.");
+        return;
+    }
     imsSmsCfg_ = *imsSmsInfo;
 }
 

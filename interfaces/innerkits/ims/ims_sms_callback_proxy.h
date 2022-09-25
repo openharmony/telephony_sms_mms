@@ -30,8 +30,14 @@ public:
 
     /****************** sms basic ******************/
     int32_t ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result) override;
+    int32_t ImsSendMessageResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
     int32_t ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
     int32_t ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig) override;
+    int32_t ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
+
+private:
+    int32_t WriteCommonInfo(MessageParcel &in, int32_t slotId);
+    int32_t SendHRilRadioResponseInfo(int32_t slotId, int32_t eventId, const HRilRadioResponseInfo &info);
 
 private:
     static inline BrokerDelegator<ImsSmsCallbackProxy> delegator_;
