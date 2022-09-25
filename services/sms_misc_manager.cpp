@@ -23,6 +23,11 @@
 
 namespace OHOS {
 namespace Telephony {
+static constexpr int32_t WAIT_TIME_SECOND = 1;
+static constexpr uint8_t GSM_TYPE = 1;
+static constexpr uint8_t MIN_SMSC_LEN = 2;
+static constexpr uint32_t RANG_MAX = 65535;
+
 SmsMiscManager::SmsMiscManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
     : AppExecFwk::EventHandler(runner), slotId_(slotId)
 {}

@@ -21,6 +21,8 @@
 
 namespace OHOS {
 namespace Telephony {
+constexpr static const int32_t WAIT_TIME_SECOND = 5;
+
 bool SmsMmsTestHelper::Run(void (*func)(SmsMmsTestHelper &), SmsMmsTestHelper &helper)
 {
     std::thread t(func, std::ref(helper));
