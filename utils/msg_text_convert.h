@@ -130,7 +130,6 @@ private:
     std::map<unsigned short, unsigned char> ucs2toSpanishMap_;
     std::map<unsigned short, unsigned char> ucs2toPortuMap_;
     std::map<unsigned short, unsigned char> replaceCharMap_;
-    static constexpr uint8_t GSM7_DEFLIST_LEN = 128;
 };
 } // namespace Telephony
 } // namespace OHOS

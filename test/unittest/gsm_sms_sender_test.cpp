@@ -608,7 +608,6 @@ bool GsmSmsSenderTest::RequestPermissions() const
         return false;
     }
 
-    const int32_t requestCodes = 10048;
     std::string name = "sms_mms_test";
     appInfo->bundleName = name;
     std::vector<std::string> permissions;
@@ -619,7 +618,8 @@ bool GsmSmsSenderTest::RequestPermissions() const
     std::vector<int> permissionsState(permissions.size(), -1);
     deal->SetApplicationInfo(appInfo);
     context->AttachBaseContext(deal);
-    context->RequestPermissionsFromUser(permissions, permissionsState, requestCodes);
+    auto task = [](const std::vector<std::string> &permissions, const std::vector<int> &grantResults) {};
+    context->RequestPermissionsFromUser(permissions, permissionsState, std::move(task));
     std::cout << "RequestPermissions Ok." << std::endl;
     return true;
 }

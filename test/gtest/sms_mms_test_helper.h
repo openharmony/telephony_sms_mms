@@ -38,7 +38,6 @@ private:
     std::string strResult_ = "";
     std::mutex mtx_;
     std::condition_variable cv_;
-    constexpr static const int32_t WAIT_TIME_SECOND = 5;
 };
 } // namespace Telephony
 } // namespace OHOS
