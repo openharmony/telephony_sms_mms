@@ -606,10 +606,10 @@ static napi_value GetDefaultSmsSlotId(napi_env env, napi_callback_info info)
 static bool MatchSetSmscAddrParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
     switch (parameterCount) {
-        case 2: {
+        case TWO_PARAMETERS: {
             return NapiUtil::MatchParameters(env, parameters, {napi_number, napi_string});
         }
-        case 3: {
+        case THREE_PARAMETERS: {
             return NapiUtil::MatchParameters(env, parameters, {napi_number, napi_string, napi_function});
         }
         default: {
@@ -858,10 +858,10 @@ static napi_value AddSimMessage(napi_env env, napi_callback_info info)
 static bool MatchDelSimMessageParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
     switch (parameterCount) {
-        case 2: {
+        case TWO_PARAMETERS: {
             return NapiUtil::MatchParameters(env, parameters, {napi_number, napi_number});
         }
-        case 3: {
+        case THREE_PARAMETERS: {
             return NapiUtil::MatchParameters(env, parameters, {napi_number, napi_number, napi_function});
         }
         default: {
@@ -1311,9 +1311,9 @@ static napi_value HasSmsCapability(napi_env env, napi_callback_info info)
 static bool MatchGetSmsSegmentsInfoParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
     switch (parameterCount) {
-        case 3:
+        case THREE_PARAMETERS:
             return NapiUtil::MatchParameters(env, parameters, {napi_number, napi_string, napi_boolean});
-        case 4:
+        case FOUR_PARAMETERS:
             return NapiUtil::MatchParameters(
                 env, parameters, {napi_number, napi_string, napi_boolean, napi_function});
         default:
