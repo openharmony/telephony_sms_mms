@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef SENDMESSAGEDATA_FUZZER_H_
-#define SENDMESSAGEDATA_FUZZER_H_
+#ifndef SENDMESSAGEDATA_FUZZER_H
+#define SENDMESSAGEDATA_FUZZER_H
 
 #define FUZZ_PROJECT_NAME "sendmessagedata_fuzzer"
 
-#endif // SENDMESSAGEDATA_FUZZER_H_
-
+#endif // SENDMESSAGEDATA_FUZZER_H

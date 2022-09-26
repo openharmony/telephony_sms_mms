@@ -29,6 +29,7 @@ namespace Telephony {
 using msg_encode_type_t = unsigned char;
 using namespace std;
 std::shared_ptr<MsgTextConvert> MsgTextConvert::instance_ = nullptr;
+static constexpr uint8_t GSM7_DEFLIST_LEN = 128;
 
 template<typename T>
 inline void UniquePtrDeleterOneDimension(T **(&ptr))
@@ -39,7 +40,7 @@ inline void UniquePtrDeleterOneDimension(T **(&ptr))
     }
 }
 
-const WCHAR g_gsm7BitToUCS2[] = {
+const WCHAR GSM7_BIT_TO_UC_S2[] = {
     /* @ */
     0x0040, 0x00A3, 0x0024, 0x00A5, 0x00E8, 0x00E9, 0x00F9, 0x00EC, 0x00F2, 0x00C7, 0x000A, 0x00D8, 0x00F8, 0x000D,
     0x00C5, 0x00E5, 0x0394, 0x005F, 0x03A6, 0x0393, 0x039B, 0x03A9, 0x03A0, 0x03A8, 0x03A3, 0x0398, 0x039E, 0x001B,
@@ -112,10 +113,9 @@ void MsgTextConvert::InitExtCharMap()
 
 void MsgTextConvert::InitUCS2ToGSM7DefMap()
 {
-    uint8_t gsm7DefListLen = 128;
     ucs2toGSM7DefMap_.clear();
-    for (unsigned char i = 0; i < gsm7DefListLen; i++) {
-        ucs2toGSM7DefMap_[g_gsm7BitToUCS2[i]] = i;
+    for (unsigned char i = 0; i < GSM7_DEFLIST_LEN; i++) {
+        ucs2toGSM7DefMap_[GSM7_BIT_TO_UC_S2[i]] = i;
     }
 }
 
@@ -981,14 +981,14 @@ int MsgTextConvert::EscapeGSM7BitToUCS2(
     if (pSrcText == nullptr || srcLen <= 0) {
         return index;
     }
-    if (g_gsm7BitToUCS2[pSrcText[index]] == 0x001B) {
+    if (GSM7_BIT_TO_UC_S2[pSrcText[index]] == 0x001B) {
         index++;
         if (index > srcLen) {
             return index;
         }
         result = EscapeToUCS2(pSrcText[index], pLangInfo);
     } else {
-        result = g_gsm7BitToUCS2[pSrcText[index]];
+        result = GSM7_BIT_TO_UC_S2[pSrcText[index]];
     }
     return index;
 }
