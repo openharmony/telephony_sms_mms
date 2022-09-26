@@ -47,6 +47,16 @@ public:
     virtual int32_t ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result) = 0;
 
     /**
+     * @brief ImsSendMessageResponse the fail result of send the sms by IMS.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param info Indicates details of failure.
+     * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
+     */
+    virtual int32_t ImsSendMessageResponse(int32_t slotId, const HRilRadioResponseInfo &info) = 0;
+
+    /**
      * @brief ImsSetSmsConfigResponse the result for enable or disable IMS SMS.
      *
      * @param slotId Indicates the card slot index number,
@@ -66,6 +76,16 @@ public:
      * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
     virtual int32_t ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig) = 0;
+
+    /**
+     * @brief ImsGetSmsConfigResponse the fail result for get IMS SMS config.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param info Indicates details of failure.
+     * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
+     */
+    virtual int32_t ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) = 0;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.Telephony.ImsSmsCallback");
