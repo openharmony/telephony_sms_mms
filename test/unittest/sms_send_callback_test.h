@@ -28,9 +28,8 @@ class SmsSendCallbackTest : public IRemoteStub<ISendShortMessageCallback> {
 public:
     SmsSendCallbackTest() = default;
     virtual ~SmsSendCallbackTest() = default;
-    virtual void OnSmsSendResult(const ISendShortMessageCallback::SmsSendResult result) override;
-    int OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override final;
+    void OnSmsSendResult(const ISendShortMessageCallback::SmsSendResult result) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) final;
 };
 } // namespace Telephony
 } // namespace OHOS

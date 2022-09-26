@@ -21,6 +21,10 @@
 
 namespace OHOS {
 namespace Telephony {
+static constexpr char HEX_TABLE[] = "0123456789ABCDEF";
+static constexpr uint8_t HEX_OFFSET = 4;
+static constexpr uint8_t MAX_LINE_NUM = 16;
+
 MmsMsgTest::MmsMsgTest() {}
 
 MmsMsgTest::~MmsMsgTest() {}
@@ -849,9 +853,6 @@ void MmsMsgTest::MmsReadOrigIndDecodeTest(MmsMsg &decodeMsg) const
 
 std::string MmsMsgTest::BuffToHex(const std::unique_ptr<char[]> &buff, uint32_t len) const
 {
-    static constexpr char HEX_TABLE[] = "0123456789ABCDEF";
-    static constexpr uint8_t HEX_OFFSET = 4;
-    static constexpr uint8_t MAX_LINE_NUM = 16;
     std::string str("");
     std::stringstream ss;
     for (std::size_t i = 0; i < len; ++i) {
