@@ -15,8 +15,9 @@
 #ifndef SMS_MMS_GTEST_H
 #define SMS_MMS_GTEST_H
 
-#include "gtest/gtest.h"
+#include "accesstoken_kit.h"
 #include "core_service_client.h"
+#include "gtest/gtest.h"
 #include "i_sms_service_interface.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
@@ -27,6 +28,7 @@
 #include "system_ability_definition.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_types.h"
+#include "token_setproc.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -34,6 +36,121 @@ namespace {
 sptr<ISmsServiceInterface> g_telephonyService = nullptr;
 } // namespace
 using namespace testing::ext;
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
+
+HapInfoParams testMmsInfoParams = {
+    .bundleName = "tel_sms_mms_gtest",
+    .userID = 1,
+    .instIndex = 0,
+    .appIDDesc = "test",
+};
+
+PermissionDef testPermReceiveSmsDef = {
+    .permissionName = "ohos.permission.RECEIVE_SMS",
+    .bundleName = "tel_sms_mms_gtest",
+    .grantMode = 1, // SYSTEM_GRANT
+    .label = "label",
+    .labelId = 1,
+    .description = "Test sms manager",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+};
+
+PermissionStateFull testReceiveSmsState = {
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.RECEIVE_SMS",
+    .resDeviceID = { "local" },
+};
+
+PermissionDef testPermSendSmsDef = {
+    .permissionName = "ohos.permission.SEND_MESSAGES",
+    .bundleName = "tel_sms_mms_gtest",
+    .grantMode = 1, // SYSTEM_GRANT
+    .label = "label",
+    .labelId = 1,
+    .description = "Test sms manager",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+};
+
+PermissionStateFull testSendSmsState = {
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.SEND_MESSAGES",
+    .resDeviceID = { "local" },
+};
+
+PermissionDef testPermSetTelephonyDef = {
+    .permissionName = "ohos.permission.SET_TELEPHONY_STATE",
+    .bundleName = "tel_sms_mms_gtest",
+    .grantMode = 1, // SYSTEM_GRANT
+    .label = "label",
+    .labelId = 1,
+    .description = "Test sms manager",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+};
+
+PermissionStateFull testSetTelephonyState = {
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.SET_TELEPHONY_STATE",
+    .resDeviceID = { "local" },
+};
+
+PermissionDef testPermGetTelephonyDef = {
+    .permissionName = "ohos.permission.GET_TELEPHONY_STATE",
+    .bundleName = "tel_sms_mms_gtest",
+    .grantMode = 1, // SYSTEM_GRANT
+    .label = "label",
+    .labelId = 1,
+    .description = "Test sms manager",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+};
+
+PermissionStateFull testGetTelephonyState = {
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.GET_TELEPHONY_STATE",
+    .resDeviceID = { "local" },
+};
+
+HapPolicyParams testMmsPolicyParams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = { testPermReceiveSmsDef, testPermSendSmsDef, testPermSetTelephonyDef, testPermGetTelephonyDef },
+    .permStateList = { testReceiveSmsState, testSendSmsState, testSetTelephonyState, testGetTelephonyState },
+};
+
+class AccessMmsToken {
+public:
+    AccessMmsToken()
+    {
+        currentID_ = GetSelfTokenID();
+        TELEPHONY_LOGI("AccessMmsToken currentID_%{public}d", currentID_);
+        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testMmsInfoParams, testMmsPolicyParams);
+        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
+        SetSelfTokenID(accessID_);
+    }
+    ~AccessMmsToken()
+    {
+        TELEPHONY_LOGI("AccessMmsToken  ~AccessMmsToken");
+        AccessTokenKit::DeleteToken(accessID_);
+        SetSelfTokenID(currentID_);
+    }
+
+private:
+    AccessTokenID currentID_ = 0;
+    AccessTokenID accessID_ = 0;
+};
+
 class SmsMmsGtest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -114,6 +231,7 @@ void OpenCellBroadcastTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0001, Function | MediumTest | Level1)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->");
     if (g_telephonyService == nullptr) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -150,6 +268,7 @@ void OpenCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0002, Function | MediumTest | Level2)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -186,6 +305,7 @@ void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -222,6 +342,7 @@ void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -258,6 +379,7 @@ void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -294,6 +416,7 @@ void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level4)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -318,6 +441,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level4)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0007, Function | MediumTest | Level2)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -342,6 +466,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0007, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0008 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -366,6 +491,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -390,6 +516,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -414,6 +541,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0011, Function | MediumTest | Level4)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -450,6 +578,7 @@ void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0001, Function | MediumTest | Level1)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->");
     if (g_telephonyService == nullptr) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -486,6 +615,7 @@ void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0002, Function | MediumTest | Level2)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -522,6 +652,7 @@ void CloseCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -558,6 +689,7 @@ void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -594,6 +726,7 @@ void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -630,6 +763,7 @@ void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level4)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -654,6 +788,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level4)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0007, Function | MediumTest | Level2)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -678,6 +813,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0007, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0008 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -702,6 +838,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -726,6 +863,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -750,6 +888,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, CloseCellBroadcast_00011, Function | MediumTest | Level4)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->");
     if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -782,6 +921,7 @@ void SetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0001 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -806,6 +946,7 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0002 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -872,6 +1013,7 @@ void SetSmscAddrTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0001 -->");
     if (g_telephonyService == nullptr) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -908,6 +1050,7 @@ void AddSimMessageTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0001 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -932,6 +1075,7 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0002 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -965,6 +1109,7 @@ void GetAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0001 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -989,6 +1134,7 @@ HWTEST_F(SmsMmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, GetAllSimMessages_0002, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0002 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -1022,6 +1168,7 @@ void DelSimMessageTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0001 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -1046,6 +1193,7 @@ HWTEST_F(SmsMmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, DelSimMessage_0002, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0002 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -1083,6 +1231,7 @@ void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
@@ -1108,6 +1257,7 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsMmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService Remote service is null");
