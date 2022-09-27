@@ -15,6 +15,8 @@
 
 #include "sms_service.h"
 
+#include <regex>
+
 #include "core_manager_inner.h"
 #include "ims_sms_client.h"
 #include "sms_dump_helper.h"
@@ -142,6 +144,10 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
         TELEPHONY_LOGE("SmsService::SendMessage interfaceManager nullptr error.");
         return;
     }
+    if (!ValidDestinationAddress(StringUtils::ToUtf8(desAddr))) {
+        TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
+        return;
+    }
     interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
         StringUtils::ToUtf8(text), sendCallback, deliveryCallback);
 }
@@ -161,6 +167,10 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
         TELEPHONY_LOGE("SmsService::SendMessage interfaceManager nullptr error.");
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "data sms interfaceManager is nullptr");
+        return;
+    }
+    if (!ValidDestinationAddress(StringUtils::ToUtf8(desAddr))) {
+        TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
         return;
     }
     interfaceManager->DataBasedSmsDelivery(
@@ -452,6 +462,13 @@ int32_t SmsService::GetServiceRunningState()
 int64_t SmsService::GetEndTime()
 {
     return endTime_;
+}
+
+bool SmsService::ValidDestinationAddress(std::string desAddr)
+{
+    // Allow address start with '+' and number, Address length range 3 to 20
+    std::regex regexMode("^([0-9_+]{1})([0-9]{2,19})$");
+    return std::regex_match(desAddr, regexMode);
 }
 
 int64_t SmsService::GetSpendTime()
