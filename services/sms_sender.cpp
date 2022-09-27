@@ -125,6 +125,8 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         }
     }
     if (isLastPart) {
+        smsIndexer->SetPsResendCount(INITIAL_COUNT);
+        smsIndexer->SetCsResendCount(INITIAL_COUNT);
         ISendShortMessageCallback::SmsSendResult messageType = ISendShortMessageCallback::SEND_SMS_SUCCESS;
         if (smsIndexer->GetHasCellFailed() != nullptr) {
             if (*smsIndexer->GetHasCellFailed()) {
@@ -159,6 +161,8 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         isLastPart = true;
     }
     if (isLastPart) {
+        smsIndexer->SetPsResendCount(INITIAL_COUNT);
+        smsIndexer->SetCsResendCount(INITIAL_COUNT);
         // save to db and update state
         sptr<ISendShortMessageCallback> sendCallback = smsIndexer->GetSendCallback();
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -313,12 +317,13 @@ void SmsSender::HandleResend(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
         psResend = true;
     }
     if (errorCode && (csResend || psResend)) {
-        if (lastSmsDomain_) {
+        if (lastSmsDomain_ && psResend) {
             smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
-        } else {
+            SendEvent(MSG_SMS_RETRY_DELIVERY, smsIndexer, DELAY_MAX_TIME_MSCE);
+        } else if (csResend) {
             smsIndexer->SetCsResendCount(smsIndexer->GetCsResendCount() + 1);
+            SendEvent(MSG_SMS_RETRY_DELIVERY, smsIndexer, DELAY_MAX_TIME_MSCE);
         }
-        SendEvent(MSG_SMS_RETRY_DELIVERY, smsIndexer, DELAY_MAX_TIME_MSCE);
     } else {
         SendMessageFailed(smsIndexer);
     }
