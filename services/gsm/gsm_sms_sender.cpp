@@ -212,8 +212,7 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     smsData.smscPdu = StringUtils::StringToHex(smsIndexer->GetEncodeSmca());
     smsData.pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
     bool sendCsSMS = false;
-    if ((!isImsNetDomain_ || !imsSmsCfg_) ||
-        (lastSmsDomain_ == IMS_DOMAIN && smsIndexer->GetPsResendCount() == MAX_SEND_RETRIES)) {
+    if ((!isImsNetDomain_ || !imsSmsCfg_) || (smsIndexer->GetPsResendCount() == MAX_SEND_RETRIES)) {
         sendCsSMS = true;
     }
     if (sendCsSMS) {
@@ -227,7 +226,6 @@ void GsmSmsSender::SendCsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, GsmSi
 {
     uint8_t tryCount = smsIndexer->GetCsResendCount();
     lastSmsDomain_ = CS_DOMAIN;
-    smsIndexer->SetPsResendCount(INITIAL_COUNT);
     if (tryCount > 0) {
         smsIndexer->UpdatePduForResend();
     }
@@ -250,7 +248,6 @@ void GsmSmsSender::SendImsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, GsmS
         return;
     }
     lastSmsDomain_ = IMS_DOMAIN;
-    smsIndexer->SetCsResendCount(INITIAL_COUNT);
     ImsMessageInfo imsMessageInfo;
     imsMessageInfo.refId = smsData.refId;
     imsMessageInfo.smscPdu = smsData.smscPdu;
