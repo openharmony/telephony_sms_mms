@@ -244,6 +244,7 @@ private:
     void WaitCoreServiceToInit();
     bool NoPermissionOrParametersCheckFail(
         int32_t slotId, const std::u16string desAddr, const sptr<ISendShortMessageCallback> &sendCallback);
+    bool ValidDestinationAddress(std::string desAddr);
     bool registerToService_ = false;
     ServiceRunningState state_ = ServiceRunningState::STATE_NOT_START;
     std::shared_ptr<SmsStateHandler> smsStateHandler_;
