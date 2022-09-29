@@ -477,7 +477,6 @@ void CdmaSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
 void CdmaSmsSender::SendCsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu)
 {
     lastSmsDomain_ = CS_DOMAIN;
-    smsIndexer->SetPsResendCount(INITIAL_COUNT);
     CoreManagerInner::GetInstance().SendCdmaSms(
         slotId_, RadioEvent::RADIO_SEND_CDMA_SMS, pdu, refId, shared_from_this());
     TELEPHONY_LOGI("SendCsSms pdu = %{public}s", pdu.c_str());
@@ -492,7 +491,6 @@ void CdmaSmsSender::SendImsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, int
         return;
     }
     lastSmsDomain_ = IMS_DOMAIN;
-    smsIndexer->SetCsResendCount(INITIAL_COUNT);
     ImsMessageInfo imsMessageInfo;
     imsMessageInfo.refId = refId;
     imsMessageInfo.smscPdu = "";
