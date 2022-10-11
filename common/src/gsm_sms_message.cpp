@@ -215,7 +215,7 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDefaultSubmitSmsTpdu(const 
 }
 
 std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std::string &desAddr,
-    const std::string &scAddr, int32_t port, const uint8_t *data, uint32_t dataLen, uint16_t msgRef8bit,
+    const std::string &scAddr, int32_t port, const uint8_t *data, uint32_t dataLen, uint8_t msgRef8bit,
     bool bStatusReport)
 {
     SetSmscAddr(scAddr);
@@ -225,7 +225,6 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
     int endcodeLen = 0;
     bool bAbnormal = false;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
-    SmsCodingScheme pCodingType = SMS_CODING_7BIT;
     const int bufSize = (MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1;
     unsigned char encodeData[bufSize];
     MsgTextConvert *textCvt = MsgTextConvert::Instance();
@@ -244,7 +243,6 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
         TELEPHONY_LOGE("smsTpdu_ is nullptr!");
         return nullptr;
     }
-    int headerCnt = 0;
     if (memset_s(smsTpdu_->data.submit.userData.data, sizeof(smsTpdu_->data.submit.userData.data), 0x00,
         sizeof(smsTpdu_->data.submit.userData.data)) != EOK) {
         TELEPHONY_LOGE("memset_s is error!");
@@ -266,17 +264,6 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
     smsTpdu_->data.submit.userData.data[endcodeLen] = 0;
     smsTpdu_->data.submit.userData.length = (int)dataLen;
     smsTpdu_->data.submit.msgRef = msgRef8bit;
-    /* Set User Data Header Port Information */
-    smsTpdu_->data.submit.userData.header[headerCnt].udhType = SMS_UDH_APP_PORT_16BIT;
-    smsTpdu_->data.submit.userData.header[headerCnt].udh.appPort16bit.destPort = ((unsigned short)port & 0xFFFF);
-    smsTpdu_->data.submit.userData.header[headerCnt].udh.appPort16bit.originPort = 0;
-    headerCnt++;
-    smsTpdu_->data.submit.bHeaderInd = (headerCnt > 0) ? true : false;
-    /* Set User Data Header for Alternate Reply Address */
-    headerCnt += SetHeaderReply(headerCnt);
-    /* Set User Data Header for National Language Single Shift */
-    headerCnt += SetHeaderLang(headerCnt, pCodingType, langId);
-    smsTpdu_->data.submit.userData.headerCnt = headerCnt;
     return smsTpdu_;
 }
 
