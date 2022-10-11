@@ -48,7 +48,7 @@ public:
     std::shared_ptr<struct SmsTpdu> CreateDefaultSubmitSmsTpdu(const std::string &dest, const std::string &sc,
         const std::string &text, bool bStatusReport, const SmsCodingScheme codingScheme);
     std::shared_ptr<struct SmsTpdu> CreateDataSubmitSmsTpdu(const std::string &desAddr, const std::string &scAddr,
-        int32_t port, const uint8_t *data, uint32_t dataLen, uint16_t msgRef8bit, bool bStatusReport);
+        int32_t port, const uint8_t *data, uint32_t dataLen, uint8_t msgRef8bit, bool bStatusReport);
 
     std::shared_ptr<struct EncodeInfo> GetSubmitEncodeInfo(const std::string &sc, bool bMore);
     std::shared_ptr<struct SmsTpdu> CreateDeliverSmsTpdu();

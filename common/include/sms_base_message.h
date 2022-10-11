@@ -93,10 +93,10 @@ public:
     virtual bool IsWapPushMsg();
     virtual void ConvertMessageClass(enum SmsMessageClass msgClass);
     virtual int GetMsgRef();
-    virtual int GetSegmentSize(SmsCodingScheme &codingScheme, int dataLen, bool bPortNum,
-        MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
-    virtual void SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text,
-        bool force7BitCode, SmsCodingScheme &codingType);
+    virtual int GetSegmentSize(
+        SmsCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
+    virtual void SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text, bool force7BitCode,
+        SmsCodingScheme &codingType, bool bPortNum);
     virtual int32_t GetIndexOnSim() const;
     virtual void SetIndexOnSim(int32_t index);
     virtual bool GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);

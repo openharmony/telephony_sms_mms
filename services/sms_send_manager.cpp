@@ -244,12 +244,12 @@ std::vector<std::string> SmsSendManager::SplitMessage(const std::string &message
     switch (netWorkType) {
         case NetWorkType::NET_TYPE_CDMA: {
             GsmSmsMessage gsmSmsMessage;
-            gsmSmsMessage.SplitMessage(cellsInfos, message, false, codingType);
+            gsmSmsMessage.SplitMessage(cellsInfos, message, false, codingType, false);
             break;
         }
         case NetWorkType::NET_TYPE_GSM: {
             CdmaSmsMessage cdmaSmsMessage;
-            cdmaSmsMessage.SplitMessage(cellsInfos, message, false, codingType);
+            cdmaSmsMessage.SplitMessage(cellsInfos, message, false, codingType, false);
             break;
         }
         default:
