@@ -36,8 +36,10 @@ public:
     int32_t ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
 
 private:
-    int32_t WriteCommonInfo(MessageParcel &in, int32_t slotId);
-    int32_t SendHRilRadioResponseInfo(int32_t slotId, int32_t eventId, const HRilRadioResponseInfo &info);
+    int32_t WriteCommonInfo(std::string funcName, MessageParcel &in, int32_t slotId);
+    int32_t SendHRilRadioResponseInfo(
+        std::string funcName, int32_t slotId, int32_t eventId, const HRilRadioResponseInfo &info);
+    int32_t SendRequest(MessageParcel &in, int32_t slotId, int32_t eventId);
 
 private:
     static inline BrokerDelegator<ImsSmsCallbackProxy> delegator_;
