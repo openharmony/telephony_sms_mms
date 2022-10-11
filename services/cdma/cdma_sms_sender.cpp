@@ -44,7 +44,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
     CdmaSmsMessage message;
     SmsCodingScheme codingType;
     std::vector<struct SplitInfo> splits;
-    message.SplitMessage(splits, text, CheckForce7BitEncodeType(), codingType);
+    message.SplitMessage(splits, text, CheckForce7BitEncodeType(), codingType, false);
     if (splits.size() > MAX_SEGMENT_NUM) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("message exceed the limit.");
@@ -115,12 +115,11 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
 void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    bool isStatusReport = false;
     SmsCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
     std::vector<struct SplitInfo> cellsInfos;
-    gsmSmsMessage.SplitMessage(cellsInfos, text, CheckForce7BitEncodeType(), codingType);
-    isStatusReport = (deliveryCallback == nullptr) ? false : true;
+    gsmSmsMessage.SplitMessage(cellsInfos, text, CheckForce7BitEncodeType(), codingType, false);
+    bool isStatusReport = (deliveryCallback == nullptr) ? false : true;
     std::shared_ptr<struct SmsTpdu> tpdu =
         gsmSmsMessage.CreateDefaultSubmitSmsTpdu(desAddr, scAddr, text, isStatusReport, codingType);
     int cellsInfosSize = static_cast<int>(cellsInfos.size());
@@ -296,7 +295,7 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     SmsCodingScheme codingType;
     std::vector<struct SplitInfo> splits;
     std::string text((char *)data, dataLen);
-    message.SplitMessage(splits, text, false, codingType);
+    message.SplitMessage(splits, text, false, codingType, true);
     if (splits.size() == 0) {
         TELEPHONY_LOGE("splits fail.");
         return;

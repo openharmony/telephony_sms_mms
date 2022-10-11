@@ -370,7 +370,7 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
 }
 
 void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text,
-    bool force7BitCode, SmsCodingScheme &codingType)
+    bool force7BitCode, SmsCodingScheme &codingType, bool bPortNum)
 {
     std::string msgText(text);
     unsigned char decodeData[(MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1];
@@ -392,7 +392,7 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
     int index = 0;
     int segSize = 0;
     int segCount = 0;
-    segSize = GetSegmentSize(codingType, encodeLen, false, langId, MAX_ADD_PARAM_LEN);
+    segSize = GetSegmentSize(codingType, encodeLen, bPortNum, langId, MAX_ADD_PARAM_LEN);
     if (segSize > 0) {
         segCount = ceil((double)encodeLen / (double)segSize);
     }

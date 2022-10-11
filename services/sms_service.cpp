@@ -146,6 +146,7 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
     }
     if (!ValidDestinationAddress(StringUtils::ToUtf8(desAddr))) {
         TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         return;
     }
     interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
@@ -170,7 +171,8 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
         return;
     }
     if (!ValidDestinationAddress(StringUtils::ToUtf8(desAddr))) {
-        TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
+        TELEPHONY_LOGE("SmsService::SendMessage desAddr does not match the regular specification");
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         return;
     }
     interfaceManager->DataBasedSmsDelivery(
