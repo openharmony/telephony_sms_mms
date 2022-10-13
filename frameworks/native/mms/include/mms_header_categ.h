@@ -17,10 +17,10 @@
 #define MMS_HEADER_CATEG_H
 
 #include <map>
+#include <stdint.h>
 
 #include "__functional_base"
 #include "mms_codec_type.h"
-#include "stdint.h"
 
 namespace OHOS {
 namespace Telephony {
