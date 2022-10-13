@@ -17,11 +17,11 @@
 #define MMS_CHARSET_H
 
 #include <map>
+#include <stdint.h>
 
 #include "__functional_base"
 #include "iosfwd"
 #include "singleton.h"
-#include "stdint.h"
 #include "string"
 
 namespace OHOS {

@@ -362,6 +362,10 @@ bool SmsService::SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, ui
 
 bool SmsService::SetImsSmsConfig(int32_t slotId, int32_t enable)
 {
+    if (!TelephonyPermission::CheckPermission(Permission::SET_TELEPHONY_STATE)) {
+        TELEPHONY_LOGE("Check permission failed.");
+        return false;
+    }
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("SmsService::SetImsSmsConfig interfaceManager nullptr error.");
