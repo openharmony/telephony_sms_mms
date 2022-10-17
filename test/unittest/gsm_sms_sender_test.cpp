@@ -17,22 +17,138 @@
 
 #include <iostream>
 
+#include "ability_context.h"
+#include "ability_info.h"
+#include "accesstoken_kit.h"
+#include "context_deal.h"
 #include "data_ability_predicates.h"
 #include "iservice_registry.h"
-#include "values_bucket.h"
-
-#include "ability_context.h"
-#include "context_deal.h"
-#include "ability_info.h"
-
 #include "sms_delivery_callback_test.h"
 #include "sms_send_callback_test.h"
 #include "string_utils.h"
+#include "token_setproc.h"
+#include "values_bucket.h"
 
 namespace OHOS {
 namespace Telephony {
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
+
+HapInfoParams testMmsInfoParams = {
+    .bundleName = "tel_sms_mms_test",
+    .userID = 1,
+    .instIndex = 0,
+    .appIDDesc = "test",
+};
+
+PermissionDef testPermReceiveSmsDef = {
+    .permissionName = "ohos.permission.RECEIVE_SMS",
+    .bundleName = "tel_sms_mms_test",
+    .grantMode = 1, // SYSTEM_GRANT
+    .label = "label",
+    .labelId = 1,
+    .description = "Test sms manager",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+};
+
+PermissionStateFull testReceiveSmsState = {
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.RECEIVE_SMS",
+    .resDeviceID = { "local" },
+};
+
+PermissionDef testPermSendSmsDef = {
+    .permissionName = "ohos.permission.SEND_MESSAGES",
+    .bundleName = "tel_sms_mms_test",
+    .grantMode = 1, // SYSTEM_GRANT
+    .label = "label",
+    .labelId = 1,
+    .description = "Test sms manager",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+};
+
+PermissionStateFull testSendSmsState = {
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.SEND_MESSAGES",
+    .resDeviceID = { "local" },
+};
+
+PermissionDef testPermSetTelephonyDef = {
+    .permissionName = "ohos.permission.SET_TELEPHONY_STATE",
+    .bundleName = "tel_sms_mms_test",
+    .grantMode = 1, // SYSTEM_GRANT
+    .label = "label",
+    .labelId = 1,
+    .description = "Test sms manager",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+};
+
+PermissionStateFull testSetTelephonyState = {
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.SET_TELEPHONY_STATE",
+    .resDeviceID = { "local" },
+};
+
+PermissionDef testPermGetTelephonyDef = {
+    .permissionName = "ohos.permission.GET_TELEPHONY_STATE",
+    .bundleName = "tel_sms_mms_test",
+    .grantMode = 1, // SYSTEM_GRANT
+    .label = "label",
+    .labelId = 1,
+    .description = "Test sms manager",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+};
+
+PermissionStateFull testGetTelephonyState = {
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.GET_TELEPHONY_STATE",
+    .resDeviceID = { "local" },
+};
+
+HapPolicyParams testMmsPolicyParams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = { testPermReceiveSmsDef, testPermSendSmsDef, testPermSetTelephonyDef, testPermGetTelephonyDef },
+    .permStateList = { testReceiveSmsState, testSendSmsState, testSetTelephonyState, testGetTelephonyState },
+};
+
+class AccessMmsToken {
+public:
+    AccessMmsToken()
+    {
+        currentID_ = GetSelfTokenID();
+        std::cout << "AccessMmsToken currentID_" << currentID_ << std::endl;
+        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testMmsInfoParams, testMmsPolicyParams);
+        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
+        SetSelfTokenID(accessID_);
+    }
+    ~AccessMmsToken()
+    {
+        std::cout << "AccessMmsToken  ~AccessMmsToken" << std::endl;
+        AccessTokenKit::DeleteToken(accessID_);
+        SetSelfTokenID(currentID_);
+    }
+
+private:
+    AccessTokenID currentID_ = 0;
+    AccessTokenID accessID_ = 0;
+};
+
 void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -57,6 +173,7 @@ void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &sm
 
 void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -88,10 +205,7 @@ void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &sms
 
 void GsmSmsSenderTest::TestSendShortText(const sptr<ISmsServiceInterface> &smsService) const
 {
-    if (!RequestPermissions()) {
-        std::cout << "RequestPermissions failed." << std::endl;
-        return;
-    }
+    AccessMmsToken token;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -118,6 +232,7 @@ void GsmSmsSenderTest::TestSendShortText(const sptr<ISmsServiceInterface> &smsSe
 
 void GsmSmsSenderTest::TestSendLongText(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -147,6 +262,7 @@ void GsmSmsSenderTest::TestSendLongText(const sptr<ISmsServiceInterface> &smsSer
 
 void GsmSmsSenderTest::TestSetSmscAddr(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -171,6 +287,7 @@ void GsmSmsSenderTest::TestSetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
 
 void GsmSmsSenderTest::TestGetSmscAddr(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     std::string result;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -188,6 +305,7 @@ void GsmSmsSenderTest::TestGetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
 
 void GsmSmsSenderTest::TestAddSimMessage(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -220,6 +338,7 @@ void GsmSmsSenderTest::TestAddSimMessage(const sptr<ISmsServiceInterface> &smsSe
 
 void GsmSmsSenderTest::TestDelSimMessage(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -245,6 +364,7 @@ void GsmSmsSenderTest::TestDelSimMessage(const sptr<ISmsServiceInterface> &smsSe
 
 void GsmSmsSenderTest::TestUpdateSimMessage(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -282,6 +402,7 @@ void GsmSmsSenderTest::TestUpdateSimMessage(const sptr<ISmsServiceInterface> &sm
 
 void GsmSmsSenderTest::TestGetAllSimMessages(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     std::vector<ShortMessage> result;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -305,6 +426,7 @@ void GsmSmsSenderTest::TestGetAllSimMessages(const sptr<ISmsServiceInterface> &s
 
 void GsmSmsSenderTest::TestEnableCBRangeConfig(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -334,6 +456,7 @@ void GsmSmsSenderTest::TestEnableCBRangeConfig(const sptr<ISmsServiceInterface> 
 
 void GsmSmsSenderTest::TestDisableCBRangeConfig(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -363,6 +486,7 @@ void GsmSmsSenderTest::TestDisableCBRangeConfig(const sptr<ISmsServiceInterface>
 
 void GsmSmsSenderTest::TestEnableCBConfig(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -388,6 +512,7 @@ void GsmSmsSenderTest::TestEnableCBConfig(const sptr<ISmsServiceInterface> &smsS
 
 void GsmSmsSenderTest::TestDisableCBConfig(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -413,6 +538,7 @@ void GsmSmsSenderTest::TestDisableCBConfig(const sptr<ISmsServiceInterface> &sms
 
 void GsmSmsSenderTest::TestSetDefaultSmsSlotId(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -441,6 +567,7 @@ void GsmSmsSenderTest::TestGetDefaultSmsSlotId(const sptr<ISmsServiceInterface> 
 
 void GsmSmsSenderTest::TestSplitMessage(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     std::vector<std::u16string> result;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
@@ -498,6 +625,7 @@ void GsmSmsSenderTest::TestIsImsSmsSupported(const sptr<ISmsServiceInterface> &s
 
 void GsmSmsSenderTest::TestSetImsSmsConfig(const sptr<ISmsServiceInterface> &smsService) const
 {
+    AccessMmsToken token;
     if (smsService == nullptr) {
         std::cout << "TestSetImsSmsConfig smsService is nullptr." << std::endl;
         return;
