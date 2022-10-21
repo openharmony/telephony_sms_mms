@@ -295,25 +295,19 @@ void SmsInterfaceStub::OnHasSmsCapability(MessageParcel &data, MessageParcel &re
 int SmsInterfaceStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    int32_t result = 0;
-    TELEPHONY_LOGI("###################################### OnRemoteRequest");
     std::u16string myDescripter = SmsInterfaceStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
-    if (myDescripter == remoteDescripter) {
-        auto itFunc = memberFuncMap_.find(code);
-        if (itFunc != memberFuncMap_.end()) {
-            auto memberFunc = itFunc->second;
-            if (memberFunc != nullptr) {
-                (this->*memberFunc)(data, reply, option);
-            } else {
-                TELEPHONY_LOGE("memberFunc is nullptr");
-            }
-        } else {
-            TELEPHONY_LOGE("itFunc was not found");
-        }
-    } else {
+    if (myDescripter != remoteDescripter) {
         TELEPHONY_LOGE("descriptor checked fail");
-        return result;
+        return TELEPHONY_ERR_DESCRIPTOR_MISMATCH;
+    }
+
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto memberFunc = itFunc->second;
+        if (memberFunc != nullptr) {
+            (this->*memberFunc)(data, reply, option);
+        }
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
