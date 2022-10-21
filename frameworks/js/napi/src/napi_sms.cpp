@@ -965,7 +965,7 @@ static void NativeUpdateSimMessage(napi_env env, void *data)
     TELEPHONY_LOGI("NativeUpdateSimMessage newStatus = %{public}d", newStatus);
     if (!context->pdu.empty() && (newStatus > -1)) {
         std::string msgPud(context->pdu.begin(), context->pdu.end());
-        TELEPHONY_LOGI("NativeUpdateSimMessage msgPud = %{public}s", msgPud.c_str());
+        TELEPHONY_LOGD("NativeUpdateSimMessage msgPud = %{private}s", msgPud.c_str());
         context->resolved = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->UpdateSimMessage(context->slotId,
             context->msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(context->newStatus),
             NapiUtil::ToUtf16(context->pdu), NapiUtil::ToUtf16(context->smsc));
@@ -1027,7 +1027,7 @@ static napi_value UpdateSimMessage(napi_env env, napi_callback_info info)
     if (pudValue != nullptr) {
         context->pdu = NapiUtil::GetStringFromValue(env, pudValue);
     }
-    TELEPHONY_LOGI("UpdateSimMessage pdu = %{public}s", context->pdu.c_str());
+    TELEPHONY_LOGD("UpdateSimMessage pdu = %{private}s", context->pdu.c_str());
     napi_value smscValue = NapiUtil::GetNamedProperty(env, parameters[0], "smsc");
     if (smscValue != nullptr) {
         context->smsc = Get64StringFromValue(env, smscValue);
@@ -1292,7 +1292,7 @@ static napi_value SplitMessage(napi_env env, napi_callback_info info)
         return nullptr;
     }
     context->content = Get64StringFromValue(env, parameters[0]);
-    TELEPHONY_LOGI("napi_sms splitMessage context->content = %{public}s", context->content.c_str());
+    TELEPHONY_LOGD("napi_sms splitMessage context->content = %{private}s", context->content.c_str());
     if (parameterCount == 2) {
         napi_create_reference(env, parameters[1], MAX_TEXT_SHORT_MESSAGE_LENGTH, &context->callbackRef);
     }

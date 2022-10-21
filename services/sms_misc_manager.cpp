@@ -326,7 +326,7 @@ bool SmsMiscManager::AddSimMessage(
         smscAddr.clear();
         smscAddr.insert(0, "00");
     }
-    TELEPHONY_LOGI("smscAddr = %{public}s", smscAddr.c_str());
+    TELEPHONY_LOGD("smscAddr = %{private}s", smscAddr.c_str());
     return CoreManagerInner::GetInstance().AddSmsToIcc(
         slotId_, static_cast<int>(status), const_cast<std::string &>(pdu), smscAddr);
 }
