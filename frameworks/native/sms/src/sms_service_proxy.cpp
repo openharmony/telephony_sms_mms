@@ -20,6 +20,7 @@
 
 namespace OHOS {
 namespace Telephony {
+const int32_t MAX_LEN = 10000;
 SmsServiceProxy::SmsServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<ISmsServiceInterface>(impl) {}
 
 void SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
@@ -224,6 +225,10 @@ std::vector<ShortMessage> SmsServiceProxy::GetAllSimMessages(int32_t slotId)
     remote->SendRequest(GET_ALL_SIM_MESSAGE, dataParcel, replyParcel, option);
 
     int32_t resultLen = replyParcel.ReadInt32();
+    if (resultLen >= MAX_LEN) {
+        TELEPHONY_LOGE("GetAllSimMessages resultLen over max");
+        return result;
+    }
     for (int32_t i = 0; i < resultLen; i++) {
         result.emplace_back(ShortMessage::UnMarshalling(replyParcel));
     }
@@ -339,6 +344,10 @@ std::vector<std::u16string> SmsServiceProxy::SplitMessage(const std::u16string &
     }
     remote->SendRequest(SPLIT_MESSAGE, dataParcel, replyParcel, option);
     int32_t resultLen = replyParcel.ReadInt32();
+    if (resultLen >= MAX_LEN) {
+        TELEPHONY_LOGE("SplitMessage resultLen over max");
+        return result;
+    }
     for (int32_t i = 0; i < resultLen; ++i) {
         result.emplace_back(replyParcel.ReadString16());
     }
