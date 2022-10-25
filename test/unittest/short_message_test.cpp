@@ -81,8 +81,8 @@ void ShortMessageTest::TestShowShortMessage() const
               << std::endl;
     std::cout << "GetVisibleRawAddress = " << StringUtils::ToUtf8(shortMessage_->GetVisibleRawAddress())
               << std::endl;
-    long time = shortMessage_->GetScTimestamp();
-    std::cout << "GetScTimestamp = " << ctime((time_t *)&(time));
+    int64_t time = shortMessage_->GetScTimestamp();
+    std::cout << "GetScTimestamp = " << ctime(static_cast<time_t *>(&(time)));
     std::cout << "GetProtocolId = " << shortMessage_->GetProtocolId() << std::endl;
     std::cout << "GetStatus = " << shortMessage_->GetStatus() << std::endl;
     std::cout << "GetMessageClass = " << shortMessage_->GetMessageClass() << std::endl;
