@@ -592,7 +592,7 @@ int GsmSmsUDataCodec::DecodeHeader(const unsigned char *pTpdu, struct SmsUDH *pH
                 return 0;
             }
             offset += GsmSmsParamCodec::DecodeAddress(&pTpdu[offset], &(pHeader->udh.alternateAddress));
-            TELEPHONY_LOGI("alternate reply address [%{public}s]", pHeader->udh.alternateAddress.address);
+            TELEPHONY_LOGD("alternate reply address [%{private}s]", pHeader->udh.alternateAddress.address);
             break;
         }
         case SMS_UDH_SINGLE_SHIFT: {
@@ -640,13 +640,13 @@ void GsmSmsUDataCodec::DebugDecodeHeader(const struct SmsUDH *pHeader)
             break;
         }
         case SMS_UDH_APP_PORT_8BIT: {
-            TELEPHONY_LOGI("appPort8bit.destPort [%{public}02x]", pHeader->udh.appPort8bit.destPort);
-            TELEPHONY_LOGI("appPort8bit.originPort [%{public}02x]", pHeader->udh.appPort8bit.originPort);
+            TELEPHONY_LOGD("appPort8bit.destPort [%{private}02x]", pHeader->udh.appPort8bit.destPort);
+            TELEPHONY_LOGD("appPort8bit.originPort [%{private}02x]", pHeader->udh.appPort8bit.originPort);
             break;
         }
         case SMS_UDH_APP_PORT_16BIT: {
-            TELEPHONY_LOGI("appPort16bit.destPort [%{public}04x]", pHeader->udh.appPort16bit.destPort);
-            TELEPHONY_LOGI("appPort16bit.originPort [%{public}04x]", pHeader->udh.appPort16bit.originPort);
+            TELEPHONY_LOGD("appPort16bit.destPort [%{private}04x]", pHeader->udh.appPort16bit.destPort);
+            TELEPHONY_LOGD("appPort16bit.originPort [%{private}04x]", pHeader->udh.appPort16bit.originPort);
             break;
         }
         case SMS_UDH_SPECIAL_SMS: {
