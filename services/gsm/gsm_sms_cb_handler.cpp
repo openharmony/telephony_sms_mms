@@ -168,7 +168,7 @@ bool GsmSmsCbHandler::InitLocation(SmsCbInfo &info)
     sptr<GsmCellLocation> gsmLocation = sptr<GsmCellLocation>(static_cast<GsmCellLocation *>(location.GetRefPtr()));
     info.lac_ = gsmLocation->GetLac();
     info.cid_ = gsmLocation->GetCellId();
-    TELEPHONY_LOGI("plmn = %{public}s lac = %{public}s cid = %{public}s", StringUtils::ToUtf8(info.plmn_).c_str(),
+    TELEPHONY_LOGD("plmn = %{private}s lac = %{private}s cid = %{private}s", StringUtils::ToUtf8(info.plmn_).c_str(),
         std::to_string(info.lac_).c_str(), std::to_string(info.cid_).c_str());
     switch (info.header->serialNum.geoScope) {
         case LaWide:
@@ -225,7 +225,7 @@ void GsmSmsCbHandler::HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &messa
     std::string pdu(message->pdu);
     std::shared_ptr<SmsCbMessage> cbMessage = SmsCbMessage::CreateCbMessage(pdu);
     if (cbMessage == nullptr) {
-        TELEPHONY_LOGE("create Sms CbMessage fail, pdu %{public}s", pdu.c_str());
+        TELEPHONY_LOGE("create Sms CbMessage fail, pdu %{private}s", pdu.c_str());
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::CELL_BROAD_CAST,
             SmsMmsErrorCode::SMS_ERROR_CELL_BROADCAST_PUD_ANALYSIS_FAIL, "publish cell broadcast event fail");
         return;
