@@ -365,7 +365,7 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
         }
     }
     visibleMessageBody_.insert(0, (char *)buff, dataSize);
-    TELEPHONY_LOGI("AnalsisDeliverMsg userData == %{public}s", visibleMessageBody_.c_str());
+    TELEPHONY_LOGD("AnalsisDeliverMsg userData == %{private}s", visibleMessageBody_.c_str());
 }
 
 void CdmaSmsMessage::AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver)

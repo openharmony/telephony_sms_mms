@@ -58,7 +58,7 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
             std::shared_ptr<SmsBaseMessage> message = nullptr;
             message = TransformMessageInfo(event->GetSharedObject<SmsMessageInfo>());
             if (message != nullptr) {
-                TELEPHONY_LOGI("[raw pdu] =%{public}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
+                TELEPHONY_LOGD("[raw pdu] =%{private}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
             }
             HandleReceivedSms(message);
             break;
@@ -257,7 +257,7 @@ bool SmsReceiveHandler::CheckBlockPhone(const std::shared_ptr<SmsReceiveIndexer>
         TELEPHONY_LOGE("CheckBlockPhone sms indexer nullptr error.");
         return false;
     }
-    TELEPHONY_LOGI("indexer originating =%{public}s", indexer->GetOriginatingAddress().c_str());
+    TELEPHONY_LOGD("indexer originating =%{private}s", indexer->GetOriginatingAddress().c_str());
     return DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryBlockPhoneNumber(
         indexer->GetOriginatingAddress());
 }
