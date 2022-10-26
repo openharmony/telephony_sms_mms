@@ -366,7 +366,7 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
     }
 
     split.text.insert(0, (char *)buff, dataSize);
-    TELEPHONY_LOGI("split text == %{public}s", split.text.c_str());
+    TELEPHONY_LOGI("split text");
 }
 
 void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text,
