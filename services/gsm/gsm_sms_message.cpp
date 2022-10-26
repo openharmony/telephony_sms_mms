@@ -106,9 +106,6 @@ int GsmSmsMessage::CalcReplyEncodeAddress(const std::string &replyAddress)
             return addrLen;
         }
         addrLen = GsmSmsParamCodec::EncodeAddress(&replyAddr, &encodedAddr);
-        if (encodedAddr != nullptr) {
-            delete encodedAddr;
-        }
     }
     return addrLen;
 }
