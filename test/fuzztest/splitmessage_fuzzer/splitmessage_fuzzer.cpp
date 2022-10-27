@@ -30,23 +30,22 @@
 
 using namespace OHOS::Telephony;
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size <= 0) {
-            return false;
-        }
-
-        auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-        if (!smsServerClient) {
-            return false;
-        }
-
-        std::string message(reinterpret_cast<const char*>(data), size);
-        auto messageU16 = Str8ToStr16(message);
-        std::vector<std::u16string> result = smsServerClient->SplitMessage(messageU16);
-
-        return true;
+void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size <= 0) {
+        return;
     }
+
+    auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    if (!smsServerClient) {
+        return;
+    }
+    std::string message(reinterpret_cast<const char *>(data), size);
+    auto messageU16 = Str8ToStr16(message);
+    std::vector<std::u16string> result = smsServerClient->SplitMessage(messageU16);
+
+    return;
+}
 }  // namespace OHOS
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

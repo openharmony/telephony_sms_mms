@@ -28,30 +28,30 @@
 
 using namespace OHOS::Telephony;
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size <= 0) {
-            return false;
-        }
-
-        auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-        if (!smsServerClient) {
-            return false;
-        }
-
-        std::unique_ptr<SendCallbackStub> sendCallBack = std::make_unique<SendCallbackStub>();
-
-        std::unique_ptr<DeliverySendCallbackStub> deliveryCallBack = std::make_unique<DeliverySendCallbackStub>();
-        int32_t slotId = static_cast<int32_t>(size % 2);
-
-        std::string desAddr(reinterpret_cast<const char*>(data), size);
-        std::string scAddr(reinterpret_cast<const char*>(data), size);
-
-        smsServerClient->SendMessage(slotId, Str8ToStr16(desAddr), Str8ToStr16(scAddr),
-            size, data, size, sendCallBack.release(), deliveryCallBack.release());
-
-        return true;
+void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size <= 0) {
+        return;
     }
+
+    auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    if (!smsServerClient) {
+        return;
+    }
+
+    std::unique_ptr<SendCallbackStub> sendCallBack = std::make_unique<SendCallbackStub>();
+
+    std::unique_ptr<DeliverySendCallbackStub> deliveryCallBack = std::make_unique<DeliverySendCallbackStub>();
+    int32_t slotId = static_cast<int32_t>(size % 2);
+
+    std::string desAddr(reinterpret_cast<const char *>(data), size);
+    std::string scAddr(reinterpret_cast<const char *>(data), size);
+
+    smsServerClient->SendMessage(slotId, Str8ToStr16(desAddr), Str8ToStr16(scAddr), size, data, size,
+        sendCallBack.release(), deliveryCallBack.release());
+
+    return;
+}
 }  // namespace OHOS
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
