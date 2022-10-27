@@ -29,15 +29,15 @@
 
 using namespace OHOS::Telephony;
 namespace OHOS {
-bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size <= 0) {
-        return false;
+        return;
     }
 
     auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
     if (!smsServerClient) {
-        return false;
+        return;
     }
 
     std::string message(reinterpret_cast<const char *>(data), size);
@@ -46,8 +46,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 
     bool force7BitCode = slotId == 1 ? true : false;
     ISmsServiceInterface::SmsSegmentsInfo segInfo;
-    bool result = smsServerClient->GetSmsSegmentsInfo(slotId, messageU16, force7BitCode, segInfo);
-    return result;
+    smsServerClient->GetSmsSegmentsInfo(slotId, messageU16, force7BitCode, segInfo);
+    return;
 }
 }  // namespace OHOS
 /* Fuzzer entry point */
