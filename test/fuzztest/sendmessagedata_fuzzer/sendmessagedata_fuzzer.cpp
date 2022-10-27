@@ -14,14 +14,17 @@
  */
 
 #include "sendmessagedata_fuzzer.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <string_ex.h>
+
+#include "addsmstoken_fuzzer.h"
+#include "delivery_send_call_back_stub.h"
 #include "napi/native_api.h"
+#include "send_call_back_stub.h"
 #include "sms_service_manager_client.h"
 #include "system_ability_definition.h"
-#include "send_call_back_stub.h"
-#include "delivery_send_call_back_stub.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
@@ -53,6 +56,7 @@ namespace OHOS {
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    OHOS::AddSmsTokenFuzzer token;
     /* Run your code on data */
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
