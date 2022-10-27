@@ -14,16 +14,19 @@
  */
 
 #include "updatesimmessage_fuzzer.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <string_ex.h>
-#include "sms_service_manager_client.h"
-#include "system_ability_definition.h"
-#include "sms_service_interface_death_recipient.h"
+
+#include "addsmstoken_fuzzer.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
-#include "telephony_log_wrapper.h"
 #include "napi_util.h"
+#include "sms_service_interface_death_recipient.h"
+#include "sms_service_manager_client.h"
+#include "system_ability_definition.h"
+#include "telephony_log_wrapper.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
@@ -53,6 +56,7 @@ namespace OHOS {
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    OHOS::AddSmsTokenFuzzer token;
     /* Run your code on data */
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;

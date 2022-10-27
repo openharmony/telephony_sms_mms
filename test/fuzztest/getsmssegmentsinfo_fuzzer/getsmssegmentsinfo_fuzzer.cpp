@@ -14,38 +14,41 @@
  */
 
 #include "getsmssegmentsinfo_fuzzer.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <string_ex.h>
-#include "napi_util.h"
-#include "sms_service_manager_client.h"
-#include "system_ability_definition.h"
-#include "sms_service_interface_death_recipient.h"
+
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
+#include "napi_util.h"
+#include "sms_service_interface_death_recipient.h"
+#include "sms_service_manager_client.h"
+#include "system_ability_definition.h"
 #include "telephony_log_wrapper.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size <= 0) {
-            return false;
-        }
-
-        auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-        if (!smsServerClient) {
-            return false;
-        }
-
-        std::string message(reinterpret_cast<const char*>(data), size);
-        auto messageU16 = Str8ToStr16(message);
-        int32_t slotId = static_cast<int32_t>(size % 2);
-        bool force7BitCode = slotId == 1 ? true : false;
-        ISmsServiceInterface::SmsSegmentsInfo segInfo;
-        bool result = smsServerClient->GetSmsSegmentsInfo(slotId, messageU16, force7BitCode, segInfo);
-        return result;
+bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size <= 0) {
+        return false;
     }
+
+    auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    if (!smsServerClient) {
+        return false;
+    }
+
+    std::string message(reinterpret_cast<const char *>(data), size);
+    auto messageU16 = Str8ToStr16(message);
+    int32_t slotId = static_cast<int32_t>(size % 2);
+
+    bool force7BitCode = slotId == 1 ? true : false;
+    ISmsServiceInterface::SmsSegmentsInfo segInfo;
+    bool result = smsServerClient->GetSmsSegmentsInfo(slotId, messageU16, force7BitCode, segInfo);
+    return result;
+}
 }  // namespace OHOS
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
