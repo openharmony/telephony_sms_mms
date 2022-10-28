@@ -109,6 +109,7 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
         if (pContext == nullptr) {
             TELEPHONY_LOGE("OnSmsSendResult pContext is nullptr!");
             delete work;
+            work = nullptr;
             return;
         }
         pContext->env = env_;
