@@ -196,7 +196,7 @@ void GsmSmsSender::DataBasedSmsDeliveryPacketSplitPage(GsmSmsMessage &gsmSmsMess
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback, std::shared_ptr<SmsSendIndexer> indexer,
     std::vector<struct SplitInfo> cellsInfos)
 {
-    tpdu->data.submit.userData.length = cellsInfos[indexData].encodeData.size();
+    tpdu->data.submit.userData.length = static_cast<int>(cellsInfos[indexData].encodeData.size());
     tpdu->data.submit.userData.data[cellsInfos[indexData].encodeData.size()] = 0;
     tpdu->data.submit.msgRef = msgRef8bit;
 
