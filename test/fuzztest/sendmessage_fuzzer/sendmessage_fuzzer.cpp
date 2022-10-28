@@ -26,15 +26,15 @@
 
 using namespace OHOS::Telephony;
 namespace OHOS {
-bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size <= 0) {
-        return false;
+        return;
     }
 
     auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
     if (!smsServerClient) {
-        return false;
+        return;
     }
 
     std::unique_ptr<SendCallbackStub> sendCallback = std::make_unique<SendCallbackStub>();
@@ -50,7 +50,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     smsServerClient->SendMessage(slotId, Str8ToStr16(desAddr), Str8ToStr16(scAddr), Str8ToStr16(text),
         sendCallback.release(), deliveryCallback.release());
 
-    return true;
+    return;
 }
 } // namespace OHOS
 

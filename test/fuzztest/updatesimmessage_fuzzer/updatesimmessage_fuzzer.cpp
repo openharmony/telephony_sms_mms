@@ -30,28 +30,28 @@
 
 using namespace OHOS::Telephony;
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size <= 0) {
-            return false;
-        }
-
-        auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-        if (!smsServerClient) {
-            return false;
-        }
-
-        std::string smsc(reinterpret_cast<const char*>(data), size);
-        auto smscU16 = Str8ToStr16(smsc);
-        std::string pdu(reinterpret_cast<const char*>(data), size);
-        auto pduU16 = Str8ToStr16(pdu);
-        int32_t soltId = static_cast<int32_t>(size % 2);
-        ISmsServiceInterface::SimMessageStatus status = (ISmsServiceInterface::SimMessageStatus)(size % 4);
-
-        bool result = smsServerClient->UpdateSimMessage(soltId, size, status, pduU16, smscU16);
-
-        return result;
+void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size <= 0) {
+        return;
     }
+
+    auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    if (!smsServerClient) {
+        return;
+    }
+
+    std::string smsc(reinterpret_cast<const char *>(data), size);
+    auto smscU16 = Str8ToStr16(smsc);
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    auto pduU16 = Str8ToStr16(pdu);
+    int32_t soltId = static_cast<int32_t>(size % 2);
+    ISmsServiceInterface::SimMessageStatus status = (ISmsServiceInterface::SimMessageStatus)(size % 4);
+
+    smsServerClient->UpdateSimMessage(soltId, size, status, pduU16, smscU16);
+
+    return;
+}
 }  // namespace OHOS
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

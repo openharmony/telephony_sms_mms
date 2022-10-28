@@ -30,15 +30,15 @@
 
 using namespace OHOS::Telephony;
 namespace OHOS {
-bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size <= 0) {
-        return false;
+        return;
     }
 
     auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
     if (!smsServerClient) {
-        return false;
+        return;
     }
 
     std::string smsc(reinterpret_cast<const char *>(data), size);
@@ -48,9 +48,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 
     int32_t soltId = static_cast<int32_t>(size % 2);
     ISmsServiceInterface::SimMessageStatus status = static_cast<ISmsServiceInterface::SimMessageStatus>(size % 4);
-    bool result = smsServerClient->AddSimMessage(soltId, smscU16, pduU16, status);
+    smsServerClient->HasSmsCapability();
+    smsServerClient->IsImsSmsSupported(soltId);
+    smsServerClient->GetDefaultSmsSlotId();
+    smsServerClient->AddSimMessage(soltId, smscU16, pduU16, status);
 
-    return result;
+    return;
 }
 }  // namespace OHOS
 /* Fuzzer entry point */
