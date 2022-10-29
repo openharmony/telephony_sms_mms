@@ -51,6 +51,8 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     smsServerClient->HasSmsCapability();
     smsServerClient->IsImsSmsSupported(soltId);
     smsServerClient->GetDefaultSmsSlotId();
+    smsServerClient->GetAllSimMessages(soltId);
+    smsServerClient->GetImsShortMessageFormat();
     smsServerClient->AddSimMessage(soltId, smscU16, pduU16, status);
 
     return;
