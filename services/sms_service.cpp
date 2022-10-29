@@ -30,6 +30,7 @@ namespace Telephony {
 using namespace std;
 using namespace AppExecFwk;
 using namespace HiviewDFX;
+constexpr static uint32_t CONNECT_SERVICE_WAIT_TIME = 2000;
 bool g_registerResult = SystemAbility::MakeAndRegisterAbility(DelayedSingleton<SmsService>::GetInstance().get());
 
 SmsService::SmsService() : SystemAbility(TELEPHONY_SMS_MMS_SYS_ABILITY_ID, true) {}
