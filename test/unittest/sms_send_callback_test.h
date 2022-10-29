@@ -18,9 +18,8 @@
 
 #include <cstdint>
 
-#include "iremote_stub.h"
-
 #include "i_send_short_message_callback.h"
+#include "iremote_stub.h"
 
 namespace OHOS {
 namespace Telephony {

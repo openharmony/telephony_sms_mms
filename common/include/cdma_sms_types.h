@@ -360,21 +360,21 @@ enum SmsSvcCtgResult : unsigned char {
 };
 
 enum SmsTpFailureCause {
-    /*	0x00 ~ 0x7f reserved			*/
+    /* 0x00 ~ 0x7f reserved */
     SMS_TP_CAUSE_RESERVED,
 
-    /*	0x80 ~ 0x8f TP-PID errors	*/
+    /* 0x80 ~ 0x8f TP-PID errors */
     SMS_TP_CAUSE_TELEMATIC_INTERWORKING_NOT_SUPPORTED = 0x80,
     SMS_TP_CAUSE_SHORT_MSG_TYPE_0_NOT_SUPPORTED = 0x81,
     SMS_TP_CAUSE_CANNOT_REPLACE_SHORT_MSG = 0x82,
     SMS_TP_CAUSE_UNSPECIFIED_TP_PID_ERROR = 0x8f,
 
-    /* 0x90 ~ 0x9f TP-DCS errors	*/
+    /* 0x90 ~ 0x9f TP-DCS errors */
     SMS_TP_CAUSE_DCS_NOT_SPPORTED = 0x90,
     SMS_TP_CAUSE_MSG_CLASS_NOT_SUPPORTED = 0x91,
     SMS_TP_CAUSE_UNSPECIFIED_TP_DCS_ERROR = 0x9f,
 
-    /* 0xa0 ~ 0xaf TP-Command Errors	*/
+    /* 0xa0 ~ 0xaf TP-Command Errors */
     SMS_TP_CAUSE_CMD_CANNOT_BE_ACTIONED = 0xa0,
     SMS_TP_CAUSE_CMD_UNSUPPORTED = 0xa1,
     SMS_TP_CAUSE_UNSPECIFIED_TP_CMD_ERROR = 0xaf,
@@ -397,7 +397,7 @@ enum SmsTpFailureCause {
     SMS_TP_CAUSE_SIM_APPLICATION_TOOLKIT_BUSY = 0xd4,
     SMS_TP_CAUSE_SIM_DATA_DOWNLOAD_ERROR = 0xd5,
 
-    /* 0xe0 ~ 0xfe Values specific to an application	*/
+    /* 0xe0 ~ 0xfe Values specific to an application */
     SMS_TP_CAUSE_SPECIFIC_TO_APPLICATION_MIN = 0xe0,
     SMS_TP_CAUSE_SPECIFIC_TO_APPLICATION_MAX = 0xfe,
 
@@ -533,7 +533,7 @@ struct SmsTeleSvcDeliver {
     enum SmsDisplayMode displayMode;
     SmsEncodingSpecific multiEncodeData;
     unsigned short depositId;
-    /* sms_svc_ctg_program_data_s	svc_ctg */
+    /* sms_svc_ctg_program_data_s svc_ctg */
     SmsEnhancedVmn enhancedVmn;
     SmsEnhancedVmnAck enhancedVmnAck;
 };
@@ -551,7 +551,7 @@ struct SmsTeleSvcSubmit {
     SmsTeleSvcAddr callbackNumber;
     SmsEncodingSpecific multiEncodeData;
     unsigned char depositId;
-    /* sms_svc_ctg_program_data_s	svc_ctg */
+    /* sms_svc_ctg_program_data_s svc_ctg */
 };
 
 struct SmsTeleSvcCancel {

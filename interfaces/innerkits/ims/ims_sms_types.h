@@ -16,8 +16,8 @@
 #ifndef TELEPHONY_IMS_SMS_TYPES_H
 #define TELEPHONY_IMS_SMS_TYPES_H
 
-#include "ims_core_service_types.h"
 #include "hril_sms_parcel.h"
+#include "ims_core_service_types.h"
 
 namespace OHOS {
 namespace Telephony {
