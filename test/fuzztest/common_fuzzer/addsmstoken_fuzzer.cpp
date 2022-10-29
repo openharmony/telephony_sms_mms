@@ -40,12 +40,10 @@ AddSmsTokenFuzzer::AddSmsTokenFuzzer()
         .aplStr = "system_basic",
     };
     currentID_ = GetAccessTokenId(&testMmsInfoParams);
-    std::cout << "AddSmsTokenFuzzer currentID_ : " << currentID_ << std::endl;
     SetSelfTokenID(currentID_);
     Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
 AddSmsTokenFuzzer::~AddSmsTokenFuzzer()
 {
-    std::cout << "AddSmsTokenFuzzer ~AddSmsTokenFuzzer" << std::endl;
 }
 } // namespace OHOS
