@@ -104,6 +104,7 @@ void DeliveryCallback::OnSmsDeliveryResult(const std::u16string pdu)
         if (pContext == nullptr) {
             TELEPHONY_LOGE("OnSmsDeliveryResult pContext is nullptr!");
             delete work;
+            work = nullptr;
             return;
         }
         pContext->env = env_;
