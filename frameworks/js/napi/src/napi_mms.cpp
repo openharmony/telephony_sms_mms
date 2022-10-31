@@ -352,7 +352,7 @@ napi_value CreateAttachmentValue(napi_env env, MmsAttachmentContext &context)
     return attachment;
 }
 
-void ParseAddress(napi_env env, napi_value outValue, std::string name, MmsAddress mmsAddress)
+void ParseAddress(napi_env env, napi_value outValue, const std::string &name, MmsAddress mmsAddress)
 {
     napi_value addressObj = nullptr;
     napi_create_object(env, &addressObj);
@@ -361,7 +361,7 @@ void ParseAddress(napi_env env, napi_value outValue, std::string name, MmsAddres
     napi_set_named_property(env, outValue, name.c_str(), addressObj);
 }
 
-void ParseAddressArr(napi_env env, napi_value outValue, std::string name, std::vector<MmsAddress> addressArr)
+void ParseAddressArr(napi_env env, napi_value outValue, const std::string &name, std::vector<MmsAddress> addressArr)
 {
     napi_value toArr = nullptr;
     napi_create_array(env, &toArr);
