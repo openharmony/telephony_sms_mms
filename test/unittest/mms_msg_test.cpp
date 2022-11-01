@@ -865,7 +865,7 @@ std::string MmsMsgTest::BuffToHex(const std::unique_ptr<char[]> &buff, uint32_t 
 }
 
 bool MmsMsgTest::WriteBufferToFile(
-    const std::unique_ptr<char[]> &buff, uint32_t len, const std::string strPathName) const
+    const std::unique_ptr<char[]> &buff, uint32_t len, const std::string &strPathName) const
 {
     FILE *pFile = nullptr;
     pFile = fopen(strPathName.c_str(), "wb");
