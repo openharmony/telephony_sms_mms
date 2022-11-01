@@ -48,7 +48,7 @@ int GsmSmsParamCodec::EncodeAddress(const struct SmsAddress *pAddress, char **pp
 
     if (memset_s(tempParam, sizeof(char) * MAX_ADD_PARAM_LEN, 0x00, sizeof(char) * MAX_ADD_PARAM_LEN) != EOK) {
         TELEPHONY_LOGE("textData memset_s error!");
-        delete [] tempParam;
+        delete[] tempParam;
         return offset;
     }
     if (temp[0] == '+') {

@@ -51,7 +51,7 @@ bool SmsWapPushHandler::DecodeWapPushPduData(SmsWapPushBuffer &decodeBuffer, uin
 
     uint32_t posData = 0;
     uint32_t dataLength = 0;
-    if (contentType_.GetContentType() == CONTENT_MIME_TYPE_B_PUSH_CO) {
+    if (contentType_.GetContentType() == std::string(CONTENT_MIME_TYPE_B_PUSH_CO)) {
         dataLength = decodeBuffer.GetSize();
     } else {
         dataLength = decodeBuffer.GetSize() - startHeader - headerLength;

@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include "common_event.h"
 #include "common_event_manager.h"
 
 namespace OHOS {

@@ -21,12 +21,11 @@
 #include <string>
 #include <vector>
 
-#include "securec.h"
-
-#include "string_utils.h"
-#include "sms_common_utils.h"
 #include "cdma_sms_pdu_codec.h"
 #include "gsm_sms_tpdu_codec.h"
+#include "securec.h"
+#include "sms_common_utils.h"
+#include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -140,17 +139,6 @@ protected:
     int32_t indexOnSim_ = -1;
 
 private:
-    constexpr static uint8_t PID_87 = 0xc0;
-    constexpr static uint8_t PID_7 = 0x40;
-    constexpr static uint8_t PID_10_LOW = 0x3f;
-    constexpr static int16_t WAP_PUSH_PORT = 2948;
-    static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
-    static constexpr uint8_t MAX_UCS2_DATA_LEN = 140;
-    static constexpr uint8_t BYTE_BITS = 8;
-    static constexpr uint8_t MAX_ADD_PARAM_LEN = 12;
-    static constexpr uint16_t TAPI_TEXT_SIZE_MAX = 520;
-    static constexpr uint8_t GSM_BEAR_DATA_LEN = 140;
-    static constexpr uint8_t CHARSET_7BIT_BITS = 7;
     virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
             const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
     void ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType);

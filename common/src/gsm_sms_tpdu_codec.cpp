@@ -16,16 +16,16 @@
 
 #include "gsm_sms_tpdu_codec.h"
 
-#include "securec.h"
-
-#include "telephony_log_wrapper.h"
-
 #include "gsm_sms_param_codec.h"
 #include "gsm_sms_udata_codec.h"
+#include "securec.h"
+#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
 using namespace std;
+static constexpr uint8_t HEX_BYTE_STEP = 2;
+
 template<typename T>
 inline void UniquePtrDeleterOneDimension(T **(&ptr))
 {
@@ -112,7 +112,7 @@ int GsmSmsTpduCodec::EncodeSubmit(const struct SmsSubmit *pSubmit, char *pTpdu)
         return offset;
     }
     offset += length;
-    TELEPHONY_LOGI("TP-DA len:=%{public}d,TP-MR msgRef:=%{public}d", length, pSubmit->msgRef);
+    TELEPHONY_LOGI("TP-DA len: =%{public}d,TP-MR msgRef:=%{public}d", length, pSubmit->msgRef);
     /* TP-PID */
     pTpdu[offset++] = pSubmit->pid;
     TELEPHONY_LOGI("TP-PID pSubmit->pid : =%{public}d", pSubmit->pid);
@@ -602,16 +602,6 @@ void GsmSmsTpduCodec::DebugTpdu(const unsigned char *pTpdu, int TpduLen, const e
             TELEPHONY_LOGE("DebugTpdu snprintf_s error");
             return;
         }
-    }
-    switch (type) {
-        case DECODE_SUBMIT_TYPE:
-            break;
-        case DECODE_DELIVER_TYPE:
-            break;
-        case DECODE_STATUS_REP_TYPE:
-            break;
-        default:
-            break;
     }
 }
 } // namespace Telephony

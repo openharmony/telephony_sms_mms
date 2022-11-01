@@ -52,9 +52,9 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
             SmsMmsErrorCode::SMS_ERROR_EXCEED_MAX_SEGMENT_NUM, "text sms cdma message exceed the limit");
         return;
     }
-    std::unique_ptr<SmsTransMsg> transMsg = nullptr;
     bool bStatusReport = (deliveryCallback == nullptr) ? false : true;
-    transMsg = message.CreateSubmitTransMsg(desAddr, scAddr, text, bStatusReport, codingType);
+    std::unique_ptr<SmsTransMsg> transMsg =
+        message.CreateSubmitTransMsg(desAddr, scAddr, text, bStatusReport, codingType);
     if (transMsg == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("CreateSubmitTransMsg nullptr fail.");

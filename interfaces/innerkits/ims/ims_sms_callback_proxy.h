@@ -16,8 +16,8 @@
 #ifndef TELEPHONY_IMS_SMS_CALLBACK_PROXY_H
 #define TELEPHONY_IMS_SMS_CALLBACK_PROXY_H
 
-#include "iremote_proxy.h"
 #include "ims_sms_callback_interface.h"
+#include "iremote_proxy.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
