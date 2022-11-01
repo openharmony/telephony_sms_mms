@@ -34,7 +34,7 @@ public:
         /****************** callback ******************/
         IMS_SMS_REGISTER_CALLBACK = 6500,
     };
-    
+
     /**
      * IMS send message interface
      *

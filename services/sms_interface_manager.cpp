@@ -18,6 +18,7 @@
 #include "sms_hisysevent.h"
 #include "sms_misc_manager.h"
 #include "string_utils.h"
+#include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -112,8 +113,8 @@ bool SmsInterfaceManager::UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterfa
 
 vector<ShortMessage> SmsInterfaceManager::GetAllSimMessages()
 {
-    std::vector<ShortMessage> ret;
     if (smsMiscManager_ == nullptr) {
+        std::vector<ShortMessage> ret;
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
         return ret;
     }
@@ -167,10 +168,9 @@ bool SmsInterfaceManager::SetDefaultSmsSlotId(int32_t slotId)
 
 int32_t SmsInterfaceManager::GetDefaultSmsSlotId()
 {
-    int32_t result = -1;
     if (smsMiscManager_ == nullptr) {
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
-        return result;
+        return TELEPHONY_ERROR;
     }
     return smsMiscManager_->GetDefaultSmsSlotId();
 }
@@ -196,10 +196,9 @@ bool SmsInterfaceManager::GetSmsSegmentsInfo(const std::string &message, bool fo
 
 bool SmsInterfaceManager::IsImsSmsSupported(int32_t slotId)
 {
-    bool result = false;
     if (smsSendManager_ == nullptr) {
         TELEPHONY_LOGE("smsSendManager is nullptr error.");
-        return result;
+        return false;
     }
     return smsSendManager_->IsImsSmsSupported(slotId);
 }

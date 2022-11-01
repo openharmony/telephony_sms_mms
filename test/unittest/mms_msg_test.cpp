@@ -853,7 +853,6 @@ void MmsMsgTest::MmsReadOrigIndDecodeTest(MmsMsg &decodeMsg) const
 
 std::string MmsMsgTest::BuffToHex(const std::unique_ptr<char[]> &buff, uint32_t len) const
 {
-    std::string str("");
     std::stringstream ss;
     for (std::size_t i = 0; i < len; ++i) {
         unsigned char temp = static_cast<unsigned char>(buff[i]) >> HEX_OFFSET;
@@ -865,7 +864,8 @@ std::string MmsMsgTest::BuffToHex(const std::unique_ptr<char[]> &buff, uint32_t 
     return ss.str();
 }
 
-bool MmsMsgTest::WriteBufferToFile(const std::unique_ptr<char[]> &buff, uint32_t len, std::string strPathName) const
+bool MmsMsgTest::WriteBufferToFile(
+    const std::unique_ptr<char[]> &buff, uint32_t len, const std::string &strPathName) const
 {
     FILE *pFile = nullptr;
     pFile = fopen(strPathName.c_str(), "wb");

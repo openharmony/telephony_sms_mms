@@ -32,7 +32,6 @@ public:
     void Init();
     void SetCdmaSender(const std::weak_ptr<SmsSender> &smsSender);
 
-protected:
 private:
     std::shared_ptr<GsmSmsReceiveHandler> gsmSmsReceiveHandler_;
     std::shared_ptr<CdmaSmsReceiveHandler> cdmaSmsReceiveHandler_;

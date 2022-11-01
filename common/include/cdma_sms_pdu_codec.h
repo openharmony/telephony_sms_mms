@@ -33,28 +33,6 @@ public:
     static int DecodeMsg(const unsigned char *pduStr, int pduLen, struct SmsTransMsg &transMsg);
 
 private:
-    static constexpr uint8_t MSG_UDID_PARAM_LEN = 3;
-    static constexpr uint8_t BYTE_BITS = 8;
-    static constexpr uint8_t SHIFT_1BITS = 1;
-    static constexpr uint8_t SHIFT_2BITS = 2;
-    static constexpr uint8_t SHIFT_3BITS = 3;
-    static constexpr uint8_t SHIFT_4BITS = 4;
-    static constexpr uint8_t SHIFT_5BITS = 5;
-    static constexpr uint8_t SHIFT_6BITS = 6;
-    static constexpr uint8_t SHIFT_7BITS = 7;
-    static constexpr uint8_t SHIFT_8BITS = 8;
-
-    static constexpr uint8_t BYTE_STEP = 1;
-    static constexpr uint8_t HALF_BYTE = 4;
-    static constexpr uint8_t MIN_PDU_LEN = 2;
-    static constexpr uint8_t HEX_BYTE_STEP = 2;
-    static constexpr uint8_t MAX_MSG_ID_LEN = 5;
-    static constexpr uint8_t DECIMAL_NUM = 10;
-    static constexpr uint8_t ENCODE_GSM_BIT = 7;
-    static constexpr uint8_t ENCODE_BYTE_BIT = 7;
-    static constexpr uint8_t BYTE_BIT = 8;
-    static constexpr uint8_t MAX_TPDU_DATA_LEN = 255;
-
     static int EncodeP2PMsg(const struct SmsTransP2PMsg &p2pMsg, unsigned char *pduStr);
     static int EncodeAckMsg(const struct SmsTransAckMsg &ackMsg, unsigned char *pduStr);
     static int EncodeCBMsg(const struct SmsTransBroadCastMsg &cbMsg, unsigned char *pduStr);

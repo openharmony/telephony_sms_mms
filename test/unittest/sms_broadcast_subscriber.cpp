@@ -16,9 +16,8 @@
 #include "sms_broadcast_subscriber.h"
 
 #include "common_event_support.h"
-
-#include "sms_cb_data.h"
 #include "short_message.h"
+#include "sms_cb_data.h"
 #include "string_utils.h"
 
 namespace OHOS {

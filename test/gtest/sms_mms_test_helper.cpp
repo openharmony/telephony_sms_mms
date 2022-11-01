@@ -59,7 +59,7 @@ void SmsMmsTestHelper::SetIntResult(int32_t result)
     result_ = result;
 }
 
-void SmsMmsTestHelper::SetStringResult(std::string &str)
+void SmsMmsTestHelper::SetStringResult(const std::string &str)
 {
     strResult_ = str;
 }

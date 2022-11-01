@@ -20,6 +20,18 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
+static constexpr uint8_t PID_87 = 0xc0;
+static constexpr uint8_t PID_7 = 0x40;
+static constexpr uint8_t PID_10_LOW = 0x3f;
+static constexpr int16_t WAP_PUSH_PORT = 2948;
+static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
+static constexpr uint8_t MAX_UCS2_DATA_LEN = 140;
+static constexpr uint8_t BYTE_BITS = 8;
+static constexpr uint8_t MAX_ADD_PARAM_LEN = 12;
+static constexpr uint8_t GSM_BEAR_DATA_LEN = 140;
+static constexpr uint8_t CHARSET_7BIT_BITS = 7;
+static constexpr uint16_t TAPI_TEXT_SIZE_MAX = 520;
+
 string SmsBaseMessage::GetSmscAddr() const
 {
     return scAddress_;
