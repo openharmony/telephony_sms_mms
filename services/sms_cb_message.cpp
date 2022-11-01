@@ -318,7 +318,7 @@ void SmsCbMessage::Decode3g7Bit(const std::vector<unsigned char> &pdu)
             return;
         }
         dataLen = tpdu[pageLenOffset];
-        offset = (i * MAX_CBMSG_PAGE_SIZE) + i;
+        offset = static_cast<unsigned int>((i * MAX_CBMSG_PAGE_SIZE) + i);
         if (dataLen > MAX_CBMSG_PAGE_SIZE) {
             TELEPHONY_LOGE("CB Msg Size is over MAX [%{pulbic}d]", dataLen);
             messageRaw_.clear();
@@ -355,7 +355,7 @@ void SmsCbMessage::Decode3gUCS2(const std::vector<unsigned char> &pdu)
             offset = (i * MAX_CBMSG_PAGE_SIZE) + i + 0x02;
         } else {
             dataLen = tpdu[pageLenOffset];
-            offset = (i * MAX_CBMSG_PAGE_SIZE) + i;
+            offset = static_cast<unsigned int>((i * MAX_CBMSG_PAGE_SIZE) + i);
         }
         if (dataLen > 0 && dataLen <= MAX_CBMSG_PAGE_SIZE) {
             messageRaw_.insert(messageRaw_.size(), (const char *)&tpdu[offset], dataLen);

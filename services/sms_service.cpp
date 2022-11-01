@@ -392,9 +392,9 @@ bool SmsService::SetDefaultSmsSlotId(int32_t slotId)
 
 int32_t SmsService::GetDefaultSmsSlotId()
 {
-    int32_t result = -1;
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager();
     if (interfaceManager == nullptr) {
+        int32_t result = -1;
         TELEPHONY_LOGE("SmsService::SetCBConfig interfaceManager nullptr error.");
         return result;
     }

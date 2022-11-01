@@ -720,36 +720,5 @@ std::shared_ptr<AppExecFwk::DataAbilityHelper> GsmSmsSenderTest::CreateDataAHelp
     }
     return AppExecFwk::DataAbilityHelper::Creator(remoteObj, dataAbilityUri);
 }
-
-bool GsmSmsSenderTest::RequestPermissions() const
-{
-    std::shared_ptr<AppExecFwk::AbilityContext> context = std::make_shared<AppExecFwk::AbilityContext>();
-    if (context == nullptr) {
-        std::cout << "make AbilityContext Error." << std::endl;
-        return false;
-    }
-
-    std::shared_ptr<AppExecFwk::ApplicationInfo> appInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
-    std::shared_ptr<AppExecFwk::ContextDeal> deal = std::make_shared<AppExecFwk::ContextDeal>();
-    if (appInfo == nullptr || deal == nullptr) {
-        std::cout << "make ApplicationInfo ContextDeal Error." << std::endl;
-        return false;
-    }
-
-    std::string name = "sms_mms_test";
-    appInfo->bundleName = name;
-    std::vector<std::string> permissions;
-    permissions.emplace_back("ohos.permission.SET_TELEPHONY_STATE");
-    permissions.emplace_back("ohos.permission.GET_TELEPHONY_STATE");
-    permissions.emplace_back("ohos.permission.SEND_MESSAGES");
-    permissions.emplace_back("ohos.permission.RECEIVE_SMS");
-    std::vector<int> permissionsState(permissions.size(), -1);
-    deal->SetApplicationInfo(appInfo);
-    context->AttachBaseContext(deal);
-    auto task = [](const std::vector<std::string> &permissions, const std::vector<int> &grantResults) {};
-    context->RequestPermissionsFromUser(permissions, permissionsState, std::move(task));
-    std::cout << "RequestPermissions Ok." << std::endl;
-    return true;
-}
 } // namespace Telephony
 } // namespace OHOS

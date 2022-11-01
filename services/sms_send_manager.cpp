@@ -33,12 +33,12 @@ SmsSendManager::SmsSendManager(int32_t slotId) : slotId_(slotId) {}
 
 SmsSendManager::~SmsSendManager()
 {
-    if (gsmSmsSender_ != nullptr) {
+    if (gsmSmsSender_ != nullptr && networkManager_ != nullptr) {
         if (auto id = gsmSmsSender_->GetNetworkId(); id.has_value()) {
             networkManager_->NetworkUnregister(id.value());
         }
     }
-    if (cdmaSmsSender_ != nullptr) {
+    if (cdmaSmsSender_ != nullptr && networkManager_ != nullptr) {
         if (auto id = cdmaSmsSender_->GetNetworkId(); id.has_value()) {
             networkManager_->NetworkUnregister(id.value());
         }

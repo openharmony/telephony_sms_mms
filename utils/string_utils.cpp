@@ -62,7 +62,6 @@ std::string StringUtils::StringToHex(const std::string &data)
 
 std::string StringUtils::StringToHex(const char *data, int byteLength)
 {
-    std::string str("");
     std::stringstream ss;
     for (int i = 0; i < byteLength; ++i) {
         unsigned char temp = static_cast<unsigned char>(data[i]) >> HEX_OFFSET;
@@ -73,7 +72,6 @@ std::string StringUtils::StringToHex(const char *data, int byteLength)
 
 std::string StringUtils::StringToHex(const std::vector<uint8_t> &data)
 {
-    std::string str("");
     std::stringstream ss;
     for (std::size_t i = 0; i < data.size(); ++i) {
         unsigned char temp = static_cast<unsigned char>(data[i]) >> HEX_OFFSET;
@@ -118,8 +116,8 @@ std::vector<uint8_t> StringUtils::HexToByteVector(const std::string &str)
 
 std::string StringUtils::ToUtf8(const std::u16string &str16)
 {
-    std::string ret;
     if (str16.empty()) {
+        std::string ret;
         return ret;
     }
     return Str16ToStr8(str16);
@@ -127,8 +125,8 @@ std::string StringUtils::ToUtf8(const std::u16string &str16)
 
 std::u16string StringUtils::ToUtf16(const std::string &str)
 {
-    std::u16string ret;
     if (str.empty()) {
+        std::u16string ret;
         return ret;
     }
     return Str8ToStr16(str);
