@@ -34,7 +34,6 @@ public:
      */
     void OnSmsSendResult(const SmsSendResult result) override;
 
-protected:
 private:
     static inline BrokerDelegator<SmsSendShortMessageProxy> delegator_;
 };

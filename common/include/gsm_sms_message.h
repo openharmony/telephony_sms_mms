@@ -16,8 +16,8 @@
 #ifndef GSM_SMS_MESSAGE_H
 #define GSM_SMS_MESSAGE_H
 
-#include <stdint.h>
 #include <memory>
+#include <stdint.h>
 #include <string>
 #include <vector>
 

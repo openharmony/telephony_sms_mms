@@ -38,8 +38,6 @@ public:
     static int DecodeTpdu(const unsigned char *pTpdu, int TpduLen, struct SmsTpdu *pSmsTpdu);
 
 private:
-    static constexpr uint8_t HEX_BYTE_STEP = 2;
-
     static int EncodeSubmit(const struct SmsSubmit *pSubmit, char *pTpdu);
     static int EncodeDeliver(const struct SmsDeliver *pDeliver, char *pTpdu);
     static int EncodeDeliverReport(const struct SmsDeliverReport *pDeliverRep, char *pTpdu);

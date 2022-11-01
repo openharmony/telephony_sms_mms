@@ -163,6 +163,10 @@ int GsmSmsMessage::SetHeaderReply(int index)
                 TELEPHONY_LOGE("SetHeaderReply memset_s error!");
                 return ret;
             }
+            if (sizeof(smsTpdu_->data.submit.userData.header[index].udh.alternateAddress.address) < reply.length()) {
+                TELEPHONY_LOGE("reply length exceed maxinum");
+                return ret;
+            }
             ret = memcpy_s(smsTpdu_->data.submit.userData.header[index].udh.alternateAddress.address,
                 sizeof(smsTpdu_->data.submit.userData.header[index].udh.alternateAddress.address), reply.c_str(),
                 reply.length());
@@ -393,6 +397,10 @@ bool GsmSmsMessage::PduAnalysis(const string &pdu)
     }
 
     unsigned char tempPdu[TAPI_TEXT_SIZE_MAX + 1] = {0};
+    if (sizeof(tempPdu) < (static_cast<int>(pdu.length()) - smscLen)) {
+        TELEPHONY_LOGE("pdu length exceed maxinum");
+        return false;
+    }
     if (memcpy_s(tempPdu, sizeof(tempPdu), (pdu.c_str() + smscLen),
         (static_cast<int>(pdu.length()) - smscLen)) != EOK) {
         TELEPHONY_LOGE("PduAnalysis memset_s error!");
