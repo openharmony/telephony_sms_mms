@@ -83,7 +83,7 @@ std::shared_ptr<SmsInterfaceManager> SmsInterfaceStub::GetSmsInterfaceManager(in
 std::shared_ptr<SmsInterfaceManager> SmsInterfaceStub::GetSmsInterfaceManager()
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    for (auto &iter : slotSmsInterfaceManagerMap_) {
+    for (const auto &iter : slotSmsInterfaceManagerMap_) {
         if (iter.second != nullptr) {
             return iter.second;
         }

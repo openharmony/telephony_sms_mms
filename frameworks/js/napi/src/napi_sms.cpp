@@ -33,7 +33,7 @@ static const int32_t DEFAULT_REF_COUNT = 1;
 static bool g_validPort = false;
 } // namespace
 
-static void SetPropertyArray(napi_env env, napi_value object, std::string name, std::vector<unsigned char> pdu)
+static void SetPropertyArray(napi_env env, napi_value object, const std::string &name, std::vector<unsigned char> pdu)
 {
     napi_value array = nullptr;
     napi_create_array(env, &array);
