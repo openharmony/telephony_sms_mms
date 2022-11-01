@@ -18,103 +18,122 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "telephony_errors.h"
+#include "telephony_permission.h"
 
 namespace OHOS {
 namespace Telephony {
 int32_t ImsSmsProxy::ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo)
 {
-    MessageOption option;
-    MessageParcel in;
-    MessageParcel out;
-    if (!in.WriteInterfaceToken(ImsSmsProxy::GetDescriptor())) {
-        TELEPHONY_LOGE("ImsSmsProxy::ImsSendMessage return, write descriptor token fail!");
-        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
+        TELEPHONY_LOGE("[slot%{public}d]Permission denied!", slotId);
+        return TELEPHONY_ERR_PERMISSION_ERR;
     }
-    if (!in.WriteInt32(slotId)) {
-        TELEPHONY_LOGE("ImsSmsProxy::ImsSendMessage return, write slotId fail!");
-        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    MessageParcel in;
+    int32_t ret = WriteCommonInfo(__FUNCTION__, in, slotId);
+    if (ret != TELEPHONY_SUCCESS) {
+        return ret;
     }
     if (!in.WriteRawData((const void *)&imsMessageInfo, sizeof(imsMessageInfo))) {
-        TELEPHONY_LOGE("ImsSmsProxy::ImsSendMessage return, write imsMessageInfo fail!");
+        TELEPHONY_LOGE("[slot%{public}d]Write imsMessageInfo fail!", slotId);
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
-    int32_t error = Remote()->SendRequest(IMS_SEND_MESSAGE, in, out, option);
-    if (error == ERR_NONE) {
-        TELEPHONY_LOGI("ImsSmsProxy::ImsSendMessage return, send request success!");
-        return out.ReadInt32();
-    }
-    return error;
+    return SendRequest(in, slotId, IMS_GET_SMS_CONFIG);
 }
 
 int32_t ImsSmsProxy::ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig)
 {
-    MessageOption option;
-    MessageParcel in;
-    MessageParcel out;
-    if (!in.WriteInterfaceToken(ImsSmsProxy::GetDescriptor())) {
-        TELEPHONY_LOGE("ImsSmsProxy::ImsSetSmsConfig return, write descriptor token fail!");
-        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    if (!TelephonyPermission::CheckPermission(Permission::SET_TELEPHONY_STATE)) {
+        TELEPHONY_LOGE("[slot%{public}d]Permission denied!", slotId);
+        return TELEPHONY_ERR_PERMISSION_ERR;
     }
-    if (!in.WriteInt32(slotId)) {
-        TELEPHONY_LOGE("ImsSmsProxy::ImsSetSmsConfig return, write slotId fail!");
-        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    MessageParcel in;
+    int32_t ret = WriteCommonInfo(__FUNCTION__, in, slotId);
+    if (ret != TELEPHONY_SUCCESS) {
+        return ret;
     }
     if (!in.WriteInt32(imsSmsConfig)) {
-        TELEPHONY_LOGE("ImsSmsProxy::ImsSetSmsConfig return, write enabled fail!");
+        TELEPHONY_LOGE("[slot%{public}d]Write imsSmsConfig fail!", slotId);
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
-    int32_t error = Remote()->SendRequest(IMS_SET_SMS_CONFIG, in, out, option);
-    if (error == ERR_NONE) {
-        TELEPHONY_LOGI("ImsSmsProxy::ImsSetSmsConfig return, send request success!");
-        return out.ReadInt32();
-    }
-    return error;
+    return SendRequest(in, slotId, IMS_GET_SMS_CONFIG);
 }
 
 int32_t ImsSmsProxy::ImsGetSmsConfig(int32_t slotId)
 {
-    MessageOption option;
     MessageParcel in;
-    MessageParcel out;
-    if (!in.WriteInterfaceToken(ImsSmsProxy::GetDescriptor())) {
-        TELEPHONY_LOGE("ImsSmsProxy::ImsGetSmsConfig return, write descriptor token fail!");
-        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    int32_t ret = WriteCommonInfo(__FUNCTION__, in, slotId);
+    if (ret != TELEPHONY_SUCCESS) {
+        return ret;
     }
-    if (!in.WriteInt32(slotId)) {
-        TELEPHONY_LOGE("ImsSmsProxy::ImsGetSmsConfig return, write slotId fail!");
-        return TELEPHONY_ERR_WRITE_DATA_FAIL;
-    }
-    int32_t error = Remote()->SendRequest(IMS_GET_SMS_CONFIG, in, out, option);
-    if (error == ERR_NONE) {
-        TELEPHONY_LOGI("ImsSmsProxy::ImsGetSmsConfig return, send request success!");
-        return out.ReadInt32();
-    }
-    return error;
+    return SendRequest(in, slotId, IMS_GET_SMS_CONFIG);
 }
 
 int32_t ImsSmsProxy::RegisterImsSmsCallback(const sptr<ImsSmsCallbackInterface> &callback)
 {
+    if (!TelephonyPermission::CheckPermission(Permission::SET_TELEPHONY_STATE)) {
+        TELEPHONY_LOGE("Permission denied!");
+        return TELEPHONY_ERR_PERMISSION_ERR;
+    }
     if (callback == nullptr) {
-        TELEPHONY_LOGE("ImsSmsProxy::RegisterImsSmsCallback return, callback is nullptr");
+        TELEPHONY_LOGE("callback is nullptr!");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
     MessageOption option;
     MessageParcel in;
     MessageParcel out;
     if (!in.WriteInterfaceToken(ImsSmsProxy::GetDescriptor())) {
-        TELEPHONY_LOGE("ImsSmsProxy::RegisterImsSmsCallback return, write descriptor token fail!");
+        TELEPHONY_LOGE("Write descriptor token fail!");
         return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!in.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        TELEPHONY_LOGE("ImsSmsProxy::RegisterImsSmsCallback return, write data fail!");
+        TELEPHONY_LOGE("Write ImsSmsCallbackInterface fail!");
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
 
-    int32_t error = Remote()->SendRequest(IMS_SMS_REGISTER_CALLBACK, in, out, option);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TELEPHONY_LOGE("Remote is null");
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    int32_t error = remote->SendRequest(IMS_SMS_REGISTER_CALLBACK, in, out, option);
     if (error == ERR_NONE) {
         return out.ReadInt32();
     }
-    return error;
+    TELEPHONY_LOGE("SendRequest fail, error:%{public}d", error);
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+}
+
+int32_t ImsSmsProxy::WriteCommonInfo(std::string funcName, MessageParcel &in, int32_t slotId)
+{
+    if (!in.WriteInterfaceToken(ImsSmsProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("[slot%{public}d] %{public}s Write descriptor token fail!", slotId, funcName.c_str());
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!in.WriteInt32(slotId)) {
+        TELEPHONY_LOGE("[slot%{public}d] %{public}s Write slotId fail!", slotId, funcName.c_str());
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    return TELEPHONY_SUCCESS;
+}
+
+int32_t ImsSmsProxy::SendRequest(MessageParcel &in, int32_t slotId, int32_t eventId)
+{
+    MessageParcel out;
+    MessageOption option;
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TELEPHONY_LOGE("[slot%{public}d]Remote is null, eventId:%{public}d", slotId, eventId);
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    int32_t error = remote->SendRequest(eventId, in, out, option);
+    if (error == ERR_NONE) {
+        return out.ReadInt32();
+    }
+    TELEPHONY_LOGE("[slot%{public}d]SendRequest fail, eventId:%{public}d, error:%{public}d", slotId, eventId, error);
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 } // namespace Telephony
 } // namespace OHOS

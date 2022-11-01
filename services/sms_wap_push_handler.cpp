@@ -51,7 +51,7 @@ bool SmsWapPushHandler::DecodeWapPushPduData(SmsWapPushBuffer &decodeBuffer, uin
 
     uint32_t posData = 0;
     uint32_t dataLength = 0;
-    if (contentType_.GetContentType() == CONTENT_MIME_TYPE_B_PUSH_CO) {
+    if (contentType_.GetContentType() == std::string(CONTENT_MIME_TYPE_B_PUSH_CO)) {
         dataLength = decodeBuffer.GetSize();
     } else {
         dataLength = decodeBuffer.GetSize() - startHeader - headerLength;
@@ -94,7 +94,13 @@ bool SmsWapPushHandler::DecodeWapPushPdu(std::string &wapPdu)
         TELEPHONY_LOGE("Wap push DecodeContentType fail.");
         return false;
     }
-    uint32_t headersLen = headerLength - decodeBuffer.GetCurPosition() + startHeader;
+    uint32_t headersLen = 0;
+    uint32_t curentPosition = decodeBuffer.GetCurPosition();
+    if (headerLength + startHeader <= curentPosition) {
+        TELEPHONY_LOGE("Wap push headersLen fail.");
+        return false;
+    }
+    headersLen = headerLength - curentPosition + startHeader;
     DecodeXWapApplication(decodeBuffer, headersLen);
 
     if (!DecodeWapPushPduData(decodeBuffer, startHeader, headerLength)) {

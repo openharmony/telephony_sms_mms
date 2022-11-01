@@ -16,12 +16,14 @@
 #include "cdma_sms_message.h"
 
 #include "securec.h"
-#include "string_utils.h"
 #include "sms_common_utils.h"
+#include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
+static constexpr uint16_t CDMA_MAX_UD_HEADER_NUM = 7;
+
 std::unique_ptr<SmsTransMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::string &dest, const std::string &sc,
     const std::string &text, bool bStatusReport, const SmsCodingScheme codingScheme)
 {

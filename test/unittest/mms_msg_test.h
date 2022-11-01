@@ -50,7 +50,7 @@ private:
     bool MmsAddAttachment(
         MmsMsg &msg, std::string pathName, std::string contentId, std::string contenType, bool isSmil) const;
     std::string BuffToHex(const std::unique_ptr<char[]> &buff, uint32_t len) const;
-    bool WriteBufferToFile(const std::unique_ptr<char[]> &buff, uint32_t len, std::string strPathName) const;
+    bool WriteBufferToFile(const std::unique_ptr<char[]> &buff, uint32_t len, const std::string &strPathName) const;
 };
 } // namespace Telephony
 } // namespace OHOS

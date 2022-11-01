@@ -43,5 +43,7 @@ AddSmsTokenFuzzer::AddSmsTokenFuzzer()
     SetSelfTokenID(currentID_);
     Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
-AddSmsTokenFuzzer::~AddSmsTokenFuzzer() {}
+AddSmsTokenFuzzer::~AddSmsTokenFuzzer()
+{
+}
 } // namespace OHOS

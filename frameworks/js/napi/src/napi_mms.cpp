@@ -352,7 +352,7 @@ napi_value CreateAttachmentValue(napi_env env, MmsAttachmentContext &context)
     return attachment;
 }
 
-void ParseAddress(napi_env env, napi_value outValue, std::string name, MmsAddress mmsAddress)
+void ParseAddress(napi_env env, napi_value outValue, const std::string &name, MmsAddress mmsAddress)
 {
     napi_value addressObj = nullptr;
     napi_create_object(env, &addressObj);
@@ -361,7 +361,7 @@ void ParseAddress(napi_env env, napi_value outValue, std::string name, MmsAddres
     napi_set_named_property(env, outValue, name.c_str(), addressObj);
 }
 
-void ParseAddressArr(napi_env env, napi_value outValue, std::string name, std::vector<MmsAddress> addressArr)
+void ParseAddressArr(napi_env env, napi_value outValue, const std::string &name, std::vector<MmsAddress> addressArr)
 {
     napi_value toArr = nullptr;
     napi_create_array(env, &toArr);
@@ -1369,7 +1369,11 @@ napi_value NapiMms::EncodeMms(napi_env env, napi_callback_info info)
         NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
         return nullptr;
     }
-    NAPI_ASSERT(env, ParseEncodeMmsParam(env, parameters[0], *context), "missing required arguments");
+    if (!ParseEncodeMmsParam(env, parameters[0], *context)) {
+        free(context);
+        context = nullptr;
+        NAPI_ASSERT(env, false, "missing required arguments");
+    }
     if (parameterCount == 2) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
