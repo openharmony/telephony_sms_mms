@@ -16,6 +16,7 @@
 #include "ims_reg_state_callback_stub.h"
 
 #include "sms_network_policy_manager.h"
+#include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -27,6 +28,10 @@ ImsRegStateCallbackStub::ImsRegStateCallbackStub(const std::shared_ptr<AppExecFw
 int32_t ImsRegStateCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        TELEPHONY_LOGE("descriptor checked fail");
+        return TELEPHONY_ERR_DESCRIPTOR_MISMATCH;
+    }
     TELEPHONY_LOGI("Code is %{public}d", code);
     int32_t slotId = data.ReadInt32();
     int32_t imsRegState = data.ReadInt32();
