@@ -629,6 +629,11 @@ void CdmaSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &sm
 
 void CdmaSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
 {
+    if (smsIndexer == nullptr) {
+        TELEPHONY_LOGI("ResendDataDelivery::smsIndexer is nullptr error.");
+        return;
+    }
+
     CdmaSmsMessage message;
     std::unique_ptr<SmsTransMsg> transMsg = nullptr;
     bool bStatusReport = (smsIndexer->GetDeliveryCallback() == nullptr) ? false : true;
