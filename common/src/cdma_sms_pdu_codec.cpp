@@ -16,14 +16,35 @@
 
 #include "cdma_sms_pdu_codec.h"
 
-#include "securec.h"
 #include "gsm_sms_udata_codec.h"
 #include "msg_text_convert.h"
+#include "securec.h"
 #include "sms_common_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
+static constexpr uint8_t MSG_UDID_PARAM_LEN = 3;
+static constexpr uint8_t BYTE_BITS = 8;
+static constexpr uint8_t SHIFT_1BITS = 1;
+static constexpr uint8_t SHIFT_2BITS = 2;
+static constexpr uint8_t SHIFT_3BITS = 3;
+static constexpr uint8_t SHIFT_4BITS = 4;
+static constexpr uint8_t SHIFT_5BITS = 5;
+static constexpr uint8_t SHIFT_6BITS = 6;
+static constexpr uint8_t SHIFT_7BITS = 7;
+static constexpr uint8_t SHIFT_8BITS = 8;
+
+static constexpr uint8_t BYTE_STEP = 1;
+static constexpr uint8_t MIN_PDU_LEN = 2;
+static constexpr uint8_t HEX_BYTE_STEP = 2;
+static constexpr uint8_t MAX_MSG_ID_LEN = 5;
+static constexpr uint8_t DECIMAL_NUM = 10;
+static constexpr uint8_t ENCODE_GSM_BIT = 7;
+static constexpr uint8_t ENCODE_BYTE_BIT = 7;
+static constexpr uint8_t BYTE_BIT = 8;
+static constexpr uint8_t MAX_TPDU_DATA_LEN = 255;
+
 void CdmaSmsPduCodec::ShiftNBit(unsigned char *src, unsigned int nBytes, unsigned int nShiftBit)
 {
     unsigned char temp;
@@ -946,6 +967,10 @@ void CdmaSmsPduCodec::DecodeP2PDeliverVmnAck(
     int error = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
     if (error != EOK) {
         TELEPHONY_LOGE("DeliverVmnAck memset_s err.");
+        return;
+    }
+    if (tempLen >= pduLen + 1) {
+        TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
         return;
     }
     if (memcpy_s(tempStr, sizeof(tempStr), pduStr + offset, tempLen) != EOK) {

@@ -30,6 +30,7 @@ namespace Telephony {
 using namespace std;
 using namespace AppExecFwk;
 using namespace HiviewDFX;
+constexpr static uint32_t CONNECT_SERVICE_WAIT_TIME = 2000;
 bool g_registerResult = SystemAbility::MakeAndRegisterAbility(DelayedSingleton<SmsService>::GetInstance().get());
 
 SmsService::SmsService() : SystemAbility(TELEPHONY_SMS_MMS_SYS_ABILITY_ID, true) {}
@@ -197,11 +198,10 @@ bool SmsService::NoPermissionOrParametersCheckFail(
 
 bool SmsService::IsImsSmsSupported(int32_t slotId)
 {
-    bool result = false;
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("interfaceManager is nullptr.");
-        return result;
+        return false;
     }
     return interfaceManager->IsImsSmsSupported(slotId);
 }
@@ -231,7 +231,6 @@ bool SmsService::HasSmsCapability()
 
 bool SmsService::SetSmscAddr(int32_t slotId, const std::u16string &scAddr)
 {
-    bool result = false;
     if (!TelephonyPermission::CheckPermission(Permission::SET_TELEPHONY_STATE)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Set State Permisson.");
         return false;
@@ -240,7 +239,7 @@ bool SmsService::SetSmscAddr(int32_t slotId, const std::u16string &scAddr)
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("interfaceManager is nullptr error.");
-        return result;
+        return false;
     }
     string sca = StringUtils::ToUtf8(scAddr);
     return interfaceManager->SetSmscAddr(sca);
@@ -265,20 +264,19 @@ std::u16string SmsService::GetSmscAddr(int32_t slotId)
 bool SmsService::AddSimMessage(
     int32_t slotId, const std::u16string &smsc, const std::u16string &pdu, SimMessageStatus status)
 {
-    bool result = false;
     if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
-        return result;
+        return false;
     }
     if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
-        return result;
+        return false;
     }
 
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("SmsService::AddSimMessage interfaceManager nullptr error");
-        return result;
+        return false;
     }
     std::string smscData = StringUtils::ToUtf8(smsc);
     std::string pduData = StringUtils::ToUtf8(pdu);
@@ -287,20 +285,19 @@ bool SmsService::AddSimMessage(
 
 bool SmsService::DelSimMessage(int32_t slotId, uint32_t msgIndex)
 {
-    bool result = false;
     if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
-        return result;
+        return false;
     }
     if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
-        return result;
+        return false;
     }
 
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("SmsService::DelSimMessage interfaceManager nullptr error.");
-        return result;
+        return false;
     }
     return interfaceManager->DelSimMessage(msgIndex);
 }
@@ -308,20 +305,19 @@ bool SmsService::DelSimMessage(int32_t slotId, uint32_t msgIndex)
 bool SmsService::UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessageStatus newStatus,
     const std::u16string &pdu, const std::u16string &smsc)
 {
-    bool result = false;
     if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
-        return result;
+        return false;
     }
     if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
-        return result;
+        return false;
     }
 
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("SmsService::UpdateSimMessage interfaceManager nullptr error.");
-        return result;
+        return false;
     }
     std::string pduData = StringUtils::ToUtf8(pdu);
     std::string smscData = StringUtils::ToUtf8(smsc);
@@ -346,16 +342,15 @@ std::vector<ShortMessage> SmsService::GetAllSimMessages(int32_t slotId)
 
 bool SmsService::SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
 {
-    bool result = false;
     if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
-        return result;
+        return false;
     }
 
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("SmsService::SetCBConfig interfaceManager nullptr error.");
-        return result;
+        return false;
     }
     return interfaceManager->SetCBConfig(enable, fromMsgId, toMsgId, netType);
 }
@@ -376,27 +371,25 @@ bool SmsService::SetImsSmsConfig(int32_t slotId, int32_t enable)
 
 bool SmsService::SetDefaultSmsSlotId(int32_t slotId)
 {
-    bool result = false;
     if (!TelephonyPermission::CheckPermission(Permission::SET_TELEPHONY_STATE)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Set State Permisson.");
-        return result;
+        return false;
     }
 
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager();
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("SmsService::SetCBConfig interfaceManager nullptr error.");
-        return result;
+        return false;
     }
     return interfaceManager->SetDefaultSmsSlotId(slotId);
 }
 
 int32_t SmsService::GetDefaultSmsSlotId()
 {
-    int32_t result = -1;
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager();
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("SmsService::SetCBConfig interfaceManager nullptr error.");
-        return result;
+        return TELEPHONY_ERROR;
     }
     return interfaceManager->GetDefaultSmsSlotId();
 }

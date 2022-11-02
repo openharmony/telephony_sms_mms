@@ -15,8 +15,8 @@
 
 #ifndef CDMA_SMS_MESSAGE_H
 #define CDMA_SMS_MESSAGE_H
-#include <stdint.h>
 #include <memory>
+#include <stdint.h>
 #include <string>
 #include <vector>
 
@@ -64,11 +64,23 @@ public:
         const uint8_t *data, uint32_t dataLen, bool bStatusReport);
 
 private:
-    static constexpr uint16_t DEFAULT_PORT = -1;
-    static constexpr uint16_t CDMA_MAX_UD_HEADER_NUM = 7;
-    static constexpr uint16_t TAPI_NETTEXT_SMDATA_SIZE_MAX = 255;
-    static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
+    SmsEncodingType CovertEncodingType(const SmsCodingScheme &codingScheme);
+    bool PduAnalysis(const std::string &pduHex);
+    void AnalysisP2pMsg(const SmsTransP2PMsg &p2pMsg);
+    void AnalysisCbMsg(const SmsTransBroadCastMsg &cbMsg);
+    void AnalsisAckMsg(const SmsTransAckMsg &ackMsg);
+    void AnalsisDeliverMwi(const SmsTransP2PMsg &p2pMsg);
+    void AnalsisDeliverMsg(const SmsTeleSvcDeliver &deliver);
+    void AnalsisDeliverAck(const SmsTeleSvcDeliverAck &deliverAck);
+    void AnalsisSubmitReport(const SmsTeleSvcDeliverReport &report);
+    void AnalsisSubmitMsg(const SmsTeleSvcSubmit &submit);
+    void AnalsisUserData(const SmsTeleSvcUserData &userData);
+    void AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver);
+    void AnalsisHeader(const SmsTeleSvcUserData &userData);
+    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
+        const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
 
+private:
     uint16_t destPort_ = -1;
     std::unique_ptr<SmsTransAddr> address_;
     std::unique_ptr<SmsTeleSvcAddr> callbackNumber_;
@@ -87,21 +99,6 @@ private:
 
     std::unique_ptr<struct SmsTransMsg> transMsg_;
     std::unique_ptr<struct SmsTransMsg> GreateTransMsg();
-    SmsEncodingType CovertEncodingType(const SmsCodingScheme &codingScheme);
-    bool PduAnalysis(const std::string &pduHex);
-    void AnalysisP2pMsg(const SmsTransP2PMsg &p2pMsg);
-    void AnalysisCbMsg(const SmsTransBroadCastMsg &cbMsg);
-    void AnalsisAckMsg(const SmsTransAckMsg &ackMsg);
-    void AnalsisDeliverMwi(const SmsTransP2PMsg &p2pMsg);
-    void AnalsisDeliverMsg(const SmsTeleSvcDeliver &deliver);
-    void AnalsisDeliverAck(const SmsTeleSvcDeliverAck &deliverAck);
-    void AnalsisSubmitReport(const SmsTeleSvcDeliverReport &report);
-    void AnalsisSubmitMsg(const SmsTeleSvcSubmit &submit);
-    void AnalsisUserData(const SmsTeleSvcUserData &userData);
-    void AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver);
-    void AnalsisHeader(const SmsTeleSvcUserData &userData);
-    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
-    const std::string &msgText,   bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
 };
 } // namespace Telephony
 } // namespace OHOS

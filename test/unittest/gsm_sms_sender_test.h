@@ -54,9 +54,9 @@ public:
     void TestAddBlockPhone() const;
     void TestRemoveBlockPhone() const;
     void TestHasSmsCapability(const sptr<ISmsServiceInterface> &smsService) const;
+
 private:
     std::shared_ptr<AppExecFwk::DataAbilityHelper> CreateDataAHelper() const;
-    bool RequestPermissions() const;
 };
 } // namespace Telephony
 } // namespace OHOS

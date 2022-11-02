@@ -47,13 +47,6 @@ public:
     static void ResetUserData(struct SmsUserData &userData);
 
 private:
-    static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
-    static constexpr uint8_t MAX_UCS2_DATA_LEN = 140;
-    static constexpr uint8_t MAX_TPDU_DATA_LEN = 255;
-    static constexpr uint8_t BYTE_BIT = 8;
-    static constexpr uint8_t ENCODE_BYTE_BIT = 7;
-    static constexpr uint8_t HEX_BYTE_STEP = 2;
-
     static int EncodeHeaderConcat(const struct SmsUDH header, char *pEncodeHeader);
     static void DebugDecodeHeader(const struct SmsUDH *pHeader);
 };

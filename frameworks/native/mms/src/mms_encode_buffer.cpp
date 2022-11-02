@@ -67,11 +67,11 @@ bool MmsEncodeBuffer::WriteByte(uint8_t value)
 
 bool MmsEncodeBuffer::WriteBuffer(MmsEncodeBuffer &buff)
 {
-    if (curPosition_ >= CODE_BUFFER_MAX_SIZE) {
+    uint32_t len = buff.GetCurPosition();
+    if (curPosition_ + len >= CODE_BUFFER_MAX_SIZE) {
         TELEPHONY_LOGE("Encode buffer current position invalid.");
         return false;
     }
-    uint32_t len = buff.GetCurPosition();
     if (memcpy_s(pduBuffer_.get() + curPosition_, len, buff.pduBuffer_.get(), len) != EOK) {
         TELEPHONY_LOGE("Encode buffer memcpy_s fail.");
         return false;
