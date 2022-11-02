@@ -16,12 +16,12 @@
 #include "gsm_sms_receive_handler.h"
 
 #include "core_manager_inner.h"
-#include "radio_event.h"
 #include "gsm_sms_message.h"
+#include "radio_event.h"
 #include "sms_base_message.h"
+#include "sms_hisysevent.h"
 #include "sms_receive_indexer.h"
 #include "string_utils.h"
-#include "sms_hisysevent.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {

@@ -16,14 +16,13 @@
 #ifndef TELEPHONY_IMS_SMS_CLIENT_H
 #define TELEPHONY_IMS_SMS_CLIENT_H
 
-#include "singleton.h"
-#include "rwlock.h"
-#include "ims_sms_interface.h"
-#include "ims_core_service_interface.h"
-
 #include "event_handler.h"
 #include "event_runner.h"
+#include "ims_core_service_interface.h"
+#include "ims_sms_interface.h"
 #include "iremote_stub.h"
+#include "rwlock.h"
+#include "singleton.h"
 #include "system_ability_status_change_stub.h"
 
 namespace OHOS {

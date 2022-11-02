@@ -75,19 +75,19 @@ bool SmsMiscManager::ExpandMsgId(
         data.endPos = (*oldIter).toMsgId;
         rangeList_.erase(oldIter);
         return true;
-    } else if (toMsgId <= (*oldIter).toMsgId) {
+    } else if (toMsgId > (*oldIter).fromMsgId) {
         data.endPos = (*oldIter).toMsgId;
         rangeList_.erase(oldIter);
         return true;
     } else if ((static_cast<int32_t>(toMsgId) == static_cast<int32_t>((*oldIter).fromMsgId) - 1) ||
-        (toMsgId == (*oldIter).fromMsgId)) {
+               (toMsgId == (*oldIter).fromMsgId)) {
         data.endPos = (*oldIter).toMsgId;
         rangeList_.erase(oldIter);
         return false;
     } else if (((fromMsgId >= (*oldIter).fromMsgId && fromMsgId <= (*oldIter).toMsgId &&
-        toMsgId > (*oldIter).toMsgId) ||
-        (static_cast<int32_t>(fromMsgId) - 1 == static_cast<int32_t>((*oldIter).toMsgId)) ||
-        ((fromMsgId < (*oldIter).fromMsgId) && (toMsgId > (*oldIter).toMsgId)))) {
+                    toMsgId > (*oldIter).toMsgId) ||
+                   (static_cast<int32_t>(fromMsgId) - 1 == static_cast<int32_t>((*oldIter).toMsgId)) ||
+                   ((fromMsgId < (*oldIter).fromMsgId) && (toMsgId > (*oldIter).toMsgId)))) {
         data.isMerge = true;
         data.startPos = (data.startPos < (*oldIter).fromMsgId) ? data.startPos : (*oldIter).fromMsgId;
         rangeList_.erase(oldIter);
@@ -275,7 +275,7 @@ std::string SmsMiscManager::RangeListToString(const std::list<gsmCBRangeInfo> &r
 {
     std::string ret;
     bool isFirst = true;
-    for (auto &item : rangeList) {
+    for (const auto &item : rangeList) {
         if (isFirst) {
             isFirst = false;
         } else {

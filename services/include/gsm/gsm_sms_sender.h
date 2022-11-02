@@ -77,6 +77,7 @@ private:
     void SendImsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSimMessageParam smsData);
     void SendCsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSimMessageParam smsData);
 
+private:
     std::mutex mutex_;
     bool isImsGsmHandlerRegistered = false;
 };

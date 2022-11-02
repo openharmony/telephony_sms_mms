@@ -122,6 +122,7 @@ private:
     void InitUCS2ToPortuMap();
     void InitUCS2ToReplaceCharMap();
 
+private:
     static std::shared_ptr<MsgTextConvert> instance_;
     std::map<unsigned short, unsigned char> extCharMap_;
     std::map<unsigned short, unsigned char> ucs2toGSM7DefMap_;

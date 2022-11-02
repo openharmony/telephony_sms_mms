@@ -236,15 +236,16 @@ public:
     int64_t GetEndTime();
 
 private:
-    constexpr static uint32_t CONNECT_SERVICE_WAIT_TIME = 2000; // ms
-    int64_t bindTime_ = 0;
-    int64_t endTime_ = 0;
-    int64_t spendTime_ = 0;
     bool Init();
     void WaitCoreServiceToInit();
     bool NoPermissionOrParametersCheckFail(
         int32_t slotId, const std::u16string desAddr, const sptr<ISendShortMessageCallback> &sendCallback);
     bool ValidDestinationAddress(std::string desAddr);
+
+private:
+    int64_t bindTime_ = 0;
+    int64_t endTime_ = 0;
+    int64_t spendTime_ = 0;
     bool registerToService_ = false;
     ServiceRunningState state_ = ServiceRunningState::STATE_NOT_START;
     std::shared_ptr<SmsStateHandler> smsStateHandler_;
