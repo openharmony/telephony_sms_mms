@@ -15,6 +15,7 @@
 
 #include "delivery_short_message_callback_stub.h"
 
+#include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -29,7 +30,7 @@ int DeliveryShortMessageCallbackStub::OnRemoteRequest(
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         TELEPHONY_LOGE("descriptor checked fail");
-        return SMS_DEFAULT_ERROR;
+        return TELEPHONY_ERR_DESCRIPTOR_MISMATCH;
     }
     switch (code) {
         case ON_SMS_DELIVERY_RESULT: {
