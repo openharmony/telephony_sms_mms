@@ -63,6 +63,10 @@ int GsmSmsUDataCodec::DecodeUserData(const unsigned char *pTpdu, const int tpduL
     SmsCodingScheme CodingScheme, struct SmsUserData *pUserData)
 {
     int decodeSize = 0;
+    if (pTpdu == nullptr) {
+        TELEPHONY_LOGE("pTpdu is nullptr.");
+        return decodeSize;
+    }
     if (memset_s(pUserData, sizeof(struct SmsUserData), 0x00, sizeof(struct SmsUserData)) != EOK) {
         TELEPHONY_LOGE("memset_s error.");
         return decodeSize;
@@ -88,6 +92,10 @@ int GsmSmsUDataCodec::DecodeUserData(const unsigned char *pTpdu, const int tpduL
     SmsCodingScheme CodingScheme, struct SmsUserData *pUserData, struct SmsTpud *pTPUD)
 {
     int decodeSize = 0;
+    if (pTpdu == nullptr) {
+        TELEPHONY_LOGE("pTpdu is nullptr.");
+        return decodeSize;
+    }
     if (memset_s(pUserData, sizeof(struct SmsUserData), 0x00, sizeof(struct SmsUserData)) != EOK) {
         TELEPHONY_LOGE("memset_s error.");
         return decodeSize;
