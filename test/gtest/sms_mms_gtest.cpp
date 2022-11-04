@@ -229,7 +229,7 @@ void OpenCellBroadcastTestFuc(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast slotId is -1
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0001, Function | MediumTest | Level1)
+HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0001, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->");
@@ -266,7 +266,7 @@ void OpenCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast fromMsgId less than toMsgId
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0002, Function | MediumTest | Level2)
+HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0002, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->");
@@ -414,7 +414,7 @@ void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level4)
+HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->");
@@ -439,7 +439,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level4)
  * @tc.name     Open cellBroadcast fromMsgId less than toMsgId
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0007, Function | MediumTest | Level2)
+HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0007, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->");
@@ -539,7 +539,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0011, Function | MediumTest | Level4)
+HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0011, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->");
@@ -576,7 +576,7 @@ void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast slotId is -1
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0001, Function | MediumTest | Level1)
+HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0001, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->");
@@ -613,7 +613,7 @@ void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast fromMsgId less than toMsgId
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0002, Function | MediumTest | Level2)
+HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0002, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->");
@@ -761,7 +761,7 @@ void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level4)
+HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->");
@@ -786,7 +786,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level4)
  * @tc.name     Close cellBroadcast fromMsgId less than toMsgId
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0007, Function | MediumTest | Level2)
+HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0007, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->");
@@ -886,7 +886,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, CloseCellBroadcast_00011, Function | MediumTest | Level4)
+HWTEST_F(SmsMmsGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->");
@@ -919,7 +919,7 @@ void SetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
  * @tc.name     Set Default Sms SlotId slotId is valid
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
+HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0001 -->");
@@ -944,7 +944,7 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
  * @tc.name     Set Default Sms SlotId slotId is valid
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level3)
+HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0002 -->");
@@ -976,7 +976,7 @@ void GetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
  * @tc.name     Get Default Sms SlotId
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
+HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::GetDefaultSmsSlotId_0001 -->");
     if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -1011,7 +1011,7 @@ void SetSmscAddrTestFuc(SmsMmsTestHelper &helper)
  * @tc.desc     Function test
  * @tc.require: issueI5JI0H
  */
-HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level3)
+HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0001 -->");
@@ -1290,7 +1290,7 @@ void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
  * @tc.desc     Function test
  * @tc.require: issueI5K12U
  */
-HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level3)
+HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0001 -->");
@@ -1325,7 +1325,7 @@ void SetImsSmsConfigTestFuc2(SmsMmsTestHelper &helper)
  * @tc.desc     Function test
  * @tc.require: issueI5K12U
  */
-HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level3)
+HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0002 -->");
@@ -1351,7 +1351,7 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level3)
  * @tc.desc     Function test
  * @tc.require: issueI5K12U
  */
-HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0003, Function | MediumTest | Level3)
+HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0003, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0003 -->");
@@ -1376,7 +1376,7 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0003, Function | MediumTest | Level3)
  * @tc.name     Disable Ims Sms
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0004, Function | MediumTest | Level3)
+HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0004, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0004 -->");
