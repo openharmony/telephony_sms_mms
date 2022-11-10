@@ -31,6 +31,7 @@ using namespace std;
 using namespace AppExecFwk;
 using namespace HiviewDFX;
 constexpr static uint32_t CONNECT_SERVICE_WAIT_TIME = 2000;
+constexpr static size_t MIN_LEN = 1;
 bool g_registerResult = SystemAbility::MakeAndRegisterAbility(DelayedSingleton<SmsService>::GetInstance().get());
 
 SmsService::SmsService() : SystemAbility(TELEPHONY_SMS_MMS_SYS_ABILITY_ID, true) {}
@@ -242,7 +243,25 @@ bool SmsService::SetSmscAddr(int32_t slotId, const std::u16string &scAddr)
         return false;
     }
     string sca = StringUtils::ToUtf8(scAddr);
+    TrimSmscAddr(sca);
+    if (sca.empty() || sca.length() == 0) {
+        TELEPHONY_LOGE("sca is empty");
+        return false;
+    }
     return interfaceManager->SetSmscAddr(sca);
+}
+
+void SmsService::TrimSmscAddr(std::string &sca)
+{
+    if (sca.length() < MIN_LEN) {
+        return;
+    }
+    if (sca[0] == ' ') {
+        sca.erase(0, 1);
+    }
+    if (sca.length() > MIN_LEN && sca[sca.length() - 1] == ' ') {
+        sca.erase(sca.length() - 1, 1);
+    }
 }
 
 std::u16string SmsService::GetSmscAddr(int32_t slotId)
