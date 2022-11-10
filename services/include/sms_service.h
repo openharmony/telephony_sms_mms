@@ -241,6 +241,7 @@ private:
     bool NoPermissionOrParametersCheckFail(
         int32_t slotId, const std::u16string desAddr, const sptr<ISendShortMessageCallback> &sendCallback);
     bool ValidDestinationAddress(std::string desAddr);
+    void TrimSmscAddr(std::string &sca);
 
 private:
     int64_t bindTime_ = 0;
