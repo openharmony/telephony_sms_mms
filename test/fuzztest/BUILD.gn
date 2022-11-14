@@ -18,9 +18,11 @@ group("fuzztest") {
   testonly = true
   deps = []
   deps += [ "addsimmessage_fuzzer:fuzztest" ]
+  deps += [ "databasedsmsdelivery_fuzzer:fuzztest" ]
   deps += [ "updatesimmessage_fuzzer:fuzztest" ]
   deps += [ "splitmessage_fuzzer:fuzztest" ]
   deps += [ "getsmssegmentsinfo_fuzzer:fuzztest" ]
   deps += [ "sendmessage_fuzzer:fuzztest" ]
   deps += [ "sendmessagedata_fuzzer:fuzztest" ]
+  deps += [ "textbasedsmsdelivery_fuzzer:fuzztest" ]
 }

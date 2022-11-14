@@ -15,38 +15,73 @@
 
 #include "splitmessage_fuzzer.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <string_ex.h>
-
+#define private public
 #include "addsmstoken_fuzzer.h"
-#include "if_system_ability_manager.h"
-#include "iservice_registry.h"
 #include "napi_util.h"
-#include "sms_service_interface_death_recipient.h"
-#include "sms_service_manager_client.h"
-#include "system_ability_definition.h"
-#include "telephony_log_wrapper.h"
+#include "sms_interface_stub.h"
+#include "sms_service.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
+static bool g_isInited = false;
+
+bool IsServiceInited()
+{
+    if (!g_isInited) {
+        DelayedSingleton<SmsService>::GetInstance()->OnStart();
+        if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
+            static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
+            g_isInited = true;
+        }
+    }
+    return g_isInited;
+}
+
+void SplitMessage(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    std::string message(reinterpret_cast<const char *>(data), size);
+    auto messageU16 = Str8ToStr16(message);
+    dataParcel.WriteString16(messageU16);
+    dataParcel.RewindRead(0);
+
+    DelayedSingleton<SmsService>::GetInstance()->OnSplitMessage(dataParcel, replyParcel, option);
+}
+
+void GetImsShortMessageFormat(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    dataParcel.WriteBuffer(data, size);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetImsShortMessageFormat(dataParcel, replyParcel, option);
+    return;
+}
+
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size <= 0) {
         return;
     }
 
-    auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-    if (!smsServerClient) {
-        return;
-    }
-    std::string message(reinterpret_cast<const char *>(data), size);
-    auto messageU16 = Str8ToStr16(message);
-    std::vector<std::u16string> result = smsServerClient->SplitMessage(messageU16);
-
-    return;
+    SplitMessage(data, size);
+    GetImsShortMessageFormat(data, size);
 }
 }  // namespace OHOS
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {

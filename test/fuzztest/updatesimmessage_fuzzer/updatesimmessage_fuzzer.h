@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef UPDATESIMMESSAGE_FUZZER_H_
-#define UPDATESIMMESSAGE_FUZZER_H_
+#ifndef UPDATESIMMESSAGE_FUZZER_H
+#define UPDATESIMMESSAGE_FUZZER_H
 
 #define FUZZ_PROJECT_NAME "updatesimmessage_fuzzer"
 
-#endif // UPDATESIMMESSAGE_FUZZER_H_
-
+#endif // UPDATESIMMESSAGE_FUZZER_H

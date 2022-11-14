@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef GETSMSSEGMENTSINFO_FUZZER_H_
-#define GETSMSSEGMENTSINFO_FUZZER_H_
+#ifndef GETSMSSEGMENTSINFO_FUZZER_H
+#define GETSMSSEGMENTSINFO_FUZZER_H
 
 #define FUZZ_PROJECT_NAME "getsmssegmentsinfo_fuzzer"
 
-#endif // GETSMSSEGMENTSINFO_fuzzer_H_
-
+#endif // GETSMSSEGMENTSINFO_fuzzer_H
