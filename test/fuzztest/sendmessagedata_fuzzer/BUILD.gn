@@ -27,15 +27,26 @@ ohos_fuzztest("SendMessageDataFuzzTest") {
   include_dirs = [
     "//base/telephony/core_service/frameworks/js/napi",
     "//base/telephony/core_service/interfaces/innerkits/include",
+    "//base/telephony/core_service/interfaces/innerkits/ims/include",
     "//base/telephony/sms_mms/frameworks/js/napi/include",
+    "//base/telephony/sms_mms/services/include",
     "//base/telephony/sms_mms/test/fuzztest/common_fuzzer",
+    "//base/telephony/sms_mms/interfaces/innerkits/",
+    "//base/telephony/sms_mms/interfaces/innerkits/ims",
+    "//third_party/curl/include",
+    "//foundation/communication/netmanager_base/services/netconnmanager/include",
   ]
 
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
 
   deps = [
+    "//base/telephony/sms_mms:tel_sms_mms",
     "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
+    "//foundation/ability/ability_runtime/frameworks/native/ability/native:data_ability_helper",
+    "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:ability_manager",
     "//foundation/arkui/napi:ace_napi",
+    "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
+    "//third_party/curl:curl",
   ]
 
   external_deps = [
@@ -43,9 +54,10 @@ ohos_fuzztest("SendMessageDataFuzzTest") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "c_utils:utils",
-    "init:libbegetutil",
+    "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
     "ipc:ipc_core",
-    "samgr:samgr_proxy",
+    "netmanager_base:net_conn_manager_if",
   ]
   defines += [
     "TELEPHONY_LOG_TAG = \"SmsMmsFuzzTest\"",
@@ -64,7 +76,6 @@ ohos_fuzztest("SendMessageDataFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
-    "//base/telephony/core_service/frameworks/js/napi/napi_util.cpp",
     "//base/telephony/sms_mms/test/fuzztest/common_fuzzer/addsmstoken_fuzzer.cpp",
     "delivery_send_call_back_stub.cpp",
     "send_call_back_stub.cpp",
