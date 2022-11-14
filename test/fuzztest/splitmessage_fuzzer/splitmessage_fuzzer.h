@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef SPLITMESSAGE_FUZZER_H_
-#define SPLITMESSAGE_FUZZER_H_
+#ifndef SPLITMESSAGE_FUZZER_H
+#define SPLITMESSAGE_FUZZER_H
 
 #define FUZZ_PROJECT_NAME "splitmessage_fuzzer"
 
-#endif // SPLITMESSAGE_FUZZER_H_
-
+#endif // SPLITMESSAGE_FUZZER_H

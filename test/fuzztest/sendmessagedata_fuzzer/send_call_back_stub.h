@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SEND_CALL_BACK_STUB_H_
-#define SEND_CALL_BACK_STUB_H_
+#ifndef SEND_CALL_BACK_STUB_H
+#define SEND_CALL_BACK_STUB_H
 #include "napi/native_api.h"
 #include "napi_sms.h"
 #include "send_short_message_callback_stub.h"
@@ -30,4 +30,4 @@ public:
 }  // namespace Telephony
 }  // namespace OHOS
 
-#endif  // SEND_CALL_BACK_STUB_H_
+#endif  // SEND_CALL_BACK_STUB_H

@@ -18,10 +18,11 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("SendMessageFuzzTest") {
-  module_output_path = "sms_mms/SendMessageFuzzTest"
+ohos_fuzztest("DataBasedSmsDeliveryFuzzTest") {
+  module_output_path = "sms_mms/DataBasedSmsDeliveryFuzzTest"
   module_out_path = module_output_path
-  fuzz_config_file = "//base/telephony/sms_mms/test/fuzztest/sendmessage_fuzzer"
+  fuzz_config_file =
+      "//base/telephony/sms_mms/test/fuzztest/databasedsmsdelivery_fuzzer"
 
   include_dirs = [
     "//base/telephony/core_service/frameworks/js/napi",
@@ -36,14 +37,11 @@ ohos_fuzztest("SendMessageFuzzTest") {
     "//foundation/communication/netmanager_base/services/netconnmanager/include",
   ]
 
-  configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
-
   deps = [
     "//base/telephony/sms_mms:tel_sms_mms",
     "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
     "//foundation/ability/ability_runtime/frameworks/native/ability/native:data_ability_helper",
     "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:ability_manager",
-    "//foundation/arkui/napi:ace_napi",
     "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
     "//third_party/curl:curl",
   ]
@@ -74,11 +72,10 @@ ohos_fuzztest("SendMessageFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
+
   sources = [
     "//base/telephony/sms_mms/test/fuzztest/common_fuzzer/addsmstoken_fuzzer.cpp",
-    "delivery_send_call_back_stub.cpp",
-    "send_call_back_stub.cpp",
-    "sendmessage_fuzzer.cpp",
+    "databasedsmsdelivery_fuzzer.cpp",
   ]
 }
 
@@ -88,7 +85,7 @@ group("fuzztest") {
   deps = []
   deps += [
     # deps file
-    ":SendMessageFuzzTest",
+    ":DataBasedSmsDeliveryFuzzTest",
   ]
 }
 ###############################################################################
