@@ -15,41 +15,79 @@
 
 #include "getsmssegmentsinfo_fuzzer.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <string_ex.h>
-
-#include "if_system_ability_manager.h"
-#include "iservice_registry.h"
+#define private public
+#include "addsmstoken_fuzzer.h"
 #include "napi_util.h"
-#include "sms_service_interface_death_recipient.h"
-#include "sms_service_manager_client.h"
-#include "system_ability_definition.h"
-#include "telephony_log_wrapper.h"
+#include "sms_interface_stub.h"
+#include "sms_service.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
+static bool g_isInited = false;
+constexpr int32_t SLOT_NUM = 2;
+
+bool IsServiceInited()
+{
+    if (!g_isInited) {
+        DelayedSingleton<SmsService>::GetInstance()->OnStart();
+        if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
+            static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
+            g_isInited = true;
+        }
+    }
+    return g_isInited;
+}
+
+void GetSmsSegmentsInfo(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    std::string message(reinterpret_cast<const char *>(data), size);
+    auto messageU16 = Str8ToStr16(message);
+    bool force7BitCode = slotId == 1 ? true : false;
+
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteString16(messageU16);
+    dataParcel.WriteBool(force7BitCode);
+    dataParcel.RewindRead(0);
+
+    DelayedSingleton<SmsService>::GetInstance()->OnGetSmsSegmentsInfo(dataParcel, replyParcel, option);
+}
+
+void IsImsSmsSupported(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    dataParcel.WriteBuffer(data, size);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnIsImsSmsSupported(dataParcel, replyParcel, option);
+    return;
+}
+
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size <= 0) {
         return;
     }
 
-    auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-    if (!smsServerClient) {
-        return;
-    }
-
-    std::string message(reinterpret_cast<const char *>(data), size);
-    auto messageU16 = Str8ToStr16(message);
-    int32_t slotId = static_cast<int32_t>(size % 2);
-
-    bool force7BitCode = slotId == 1 ? true : false;
-    ISmsServiceInterface::SmsSegmentsInfo segInfo;
-    smsServerClient->GetSmsSegmentsInfo(slotId, messageU16, force7BitCode, segInfo);
-    return;
+    GetSmsSegmentsInfo(data, size);
+    IsImsSmsSupported(data, size);
 }
 }  // namespace OHOS
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
