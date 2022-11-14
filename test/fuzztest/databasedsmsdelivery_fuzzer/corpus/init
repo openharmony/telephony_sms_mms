@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-#ifndef ADDSIMMESSAGE_FUZZER_H
-#define ADDSIMMESSAGE_FUZZER_H
-
-#define FUZZ_PROJECT_NAME "addsimmessage_fuzzer"
-
-#endif // ADDSIMMESSAGE_fuzzer_H
+/*
+ * corpus is necessary
+ */
+FUZZ

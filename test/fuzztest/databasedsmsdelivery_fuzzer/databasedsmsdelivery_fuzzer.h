@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef ADDSIMMESSAGE_FUZZER_H
-#define ADDSIMMESSAGE_FUZZER_H
+#ifndef DATABASEDSMSDELIVERY_FUZZER_H
+#define DATABASEDSMSDELIVERY_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "addsimmessage_fuzzer"
+#define FUZZ_PROJECT_NAME "databasedsmsdelivery_fuzzer"
 
-#endif // ADDSIMMESSAGE_fuzzer_H
+#endif // DATABASEDSMSDELIVERY_FUZZER_H

@@ -15,49 +15,109 @@
 
 #include "addsimmessage_fuzzer.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <string_ex.h>
-
+#define private public
 #include "addsmstoken_fuzzer.h"
-#include "if_system_ability_manager.h"
-#include "iservice_registry.h"
+#include "i_sms_service_interface.h"
 #include "napi_util.h"
-#include "sms_service_interface_death_recipient.h"
-#include "sms_service_manager_client.h"
-#include "system_ability_definition.h"
-#include "telephony_log_wrapper.h"
+#include "sms_interface_stub.h"
+#include "sms_service.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
+static bool g_isInited = false;
+constexpr int32_t SLOT_NUM = 2;
+
+bool IsServiceInited()
+{
+    if (!g_isInited) {
+        DelayedSingleton<SmsService>::GetInstance()->OnStart();
+        if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
+            static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
+            g_isInited = true;
+        }
+    }
+    return g_isInited;
+}
+
+void OnRemoteRequest(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    if (!dataParcel.WriteInterfaceToken(SmsInterfaceStub::GetDescriptor())) {
+        TELEPHONY_LOGE("OnRemoteRequest WriteInterfaceToken is false");
+        return;
+    }
+
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    size_t dataSize = size - sizeof(uint32_t);
+    dataParcel.WriteBuffer(data + sizeof(uint32_t), dataSize);
+    dataParcel.RewindRead(0);
+    uint32_t code = static_cast<uint32_t>(size);
+
+    DelayedSingleton<SmsService>::GetInstance()->OnRemoteRequest(code, dataParcel, replyParcel, option);
+    return;
+}
+
+void AddSimMessage(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    std::string smsc(reinterpret_cast<const char *>(data), size);
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    auto smscU16 = Str8ToStr16(smsc);
+    auto pduU16 = Str8ToStr16(pdu);
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    ISmsServiceInterface::SimMessageStatus status = static_cast<ISmsServiceInterface::SimMessageStatus>(size % 4);
+
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteString16(smscU16);
+    dataParcel.WriteString16(pduU16);
+    dataParcel.WriteUint32(status);
+    dataParcel.RewindRead(0);
+
+    DelayedSingleton<SmsService>::GetInstance()->OnAddSimMessage(dataParcel, replyParcel, option);
+    return;
+}
+
+void HasSmsCapability(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    dataParcel.WriteBuffer(data, size);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnHasSmsCapability(dataParcel, replyParcel, option);
+    return;
+}
+
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size <= 0) {
         return;
     }
 
-    auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-    if (!smsServerClient) {
-        return;
-    }
-
-    std::string smsc(reinterpret_cast<const char *>(data), size);
-    std::string pdu(reinterpret_cast<const char *>(data), size);
-    auto smscU16 = Str8ToStr16(smsc);
-    auto pduU16 = Str8ToStr16(pdu);
-
-    int32_t soltId = static_cast<int32_t>(size % 2);
-    ISmsServiceInterface::SimMessageStatus status = static_cast<ISmsServiceInterface::SimMessageStatus>(size % 4);
-    smsServerClient->HasSmsCapability();
-    smsServerClient->IsImsSmsSupported(soltId);
-    smsServerClient->GetDefaultSmsSlotId();
-    smsServerClient->GetAllSimMessages(soltId);
-    smsServerClient->GetImsShortMessageFormat();
-    smsServerClient->AddSimMessage(soltId, smscU16, pduU16, status);
-
-    return;
+    OnRemoteRequest(data, size);
+    AddSimMessage(data, size);
+    HasSmsCapability(data, size);
 }
-}  // namespace OHOS
+} // namespace OHOS
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {

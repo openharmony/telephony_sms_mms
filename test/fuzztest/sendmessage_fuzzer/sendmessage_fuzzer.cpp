@@ -15,50 +15,100 @@
 
 #include "sendmessage_fuzzer.h"
 
-#include <string_ex.h>
+#define private public
 
 #include "addsmstoken_fuzzer.h"
 #include "delivery_send_call_back_stub.h"
-#include "napi/native_api.h"
+#include "napi_util.h"
 #include "send_call_back_stub.h"
-#include "sms_service_manager_client.h"
-#include "system_ability_definition.h"
+#include "sms_interface_stub.h"
+#include "sms_service.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
+static bool g_isInited = false;
+constexpr int32_t SLOT_NUM = 2;
+
+bool IsServiceInited()
+{
+    if (!g_isInited) {
+        DelayedSingleton<SmsService>::GetInstance()->OnStart();
+        if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
+            static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
+            g_isInited = true;
+        }
+    }
+    return g_isInited;
+}
+
+void SendSmsTextRequest(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    std::string desAddr(reinterpret_cast<const char *>(data), size);
+    std::string scAddr(reinterpret_cast<const char *>(data), size);
+    std::string text(reinterpret_cast<const char *>(data), size);
+    auto desAddrU16 = Str8ToStr16(desAddr);
+    auto scAddrU16 = Str8ToStr16(scAddr);
+    auto textU16 = Str8ToStr16(text);
+
+    std::unique_ptr<SendCallbackStub> sendCallback = std::make_unique<SendCallbackStub>();
+    std::unique_ptr<DeliverySendCallbackStub> deliveryCallback = std::make_unique<DeliverySendCallbackStub>();
+
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteString16(desAddrU16);
+    dataParcel.WriteString16(scAddrU16);
+    dataParcel.WriteString16(textU16);
+    if (sendCallback != nullptr) {
+        dataParcel.WriteRemoteObject(sendCallback.release()->AsObject().GetRefPtr());
+    }
+    if (deliveryCallback != nullptr) {
+        dataParcel.WriteRemoteObject(deliveryCallback.release()->AsObject().GetRefPtr());
+    }
+    dataParcel.RewindRead(0);
+
+    DelayedSingleton<SmsService>::GetInstance()->OnSendSmsTextRequest(dataParcel, replyParcel, option);
+}
+
+void GetDefaultSmsSlotId(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    dataParcel.WriteBuffer(data, size);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetDefaultSmsSlotId(dataParcel, replyParcel, option);
+    return;
+}
+
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size <= 0) {
         return;
     }
 
-    auto smsServerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-    if (!smsServerClient) {
-        return;
-    }
-
-    std::unique_ptr<SendCallbackStub> sendCallback = std::make_unique<SendCallbackStub>();
-
-    std::unique_ptr<DeliverySendCallbackStub> deliveryCallback = std::make_unique<DeliverySendCallbackStub>();
-
-    int32_t slotId = static_cast<int32_t>(size % 2);
-
-    std::string desAddr(reinterpret_cast<const char *>(data), size);
-    std::string scAddr(reinterpret_cast<const char *>(data), size);
-    std::string text(reinterpret_cast<const char *>(data), size);
-
-    smsServerClient->SendMessage(slotId, Str8ToStr16(desAddr), Str8ToStr16(scAddr), Str8ToStr16(text),
-        sendCallback.release(), deliveryCallback.release());
-
-    return;
+    SendSmsTextRequest(data, size);
+    GetDefaultSmsSlotId(data, size);
 }
 } // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::AddSmsTokenFuzzer token;
     /* Run your code on data */
+    OHOS::AddSmsTokenFuzzer token;
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
