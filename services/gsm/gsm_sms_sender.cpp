@@ -244,10 +244,9 @@ void GsmSmsSender::DataBasedSmsDeliveryPacketSplitPage(GsmSmsMessage &gsmSmsMess
     if (cellsInfosSize > 1 && indexData < (cellsInfosSize - 1)) {
         tpdu->data.submit.bStatusReport = false;
     } else {
-        bool isStatusReport = (deliveryCallback == nullptr) ? false : true;
-        tpdu->data.submit.bStatusReport = isStatusReport;
+        tpdu->data.submit.bStatusReport = (deliveryCallback == nullptr) ? false : true;
     }
-    encodeInfo->isMore_ = true;
+    encodeInfo->isMore_ = (cellsInfosSize > 1) ? true : false;
     DataBasedSmsDeliverySendSplitPage(encodeInfo, sendCallback, indexer, msgRef8bit, cellsInfosSize);
 }
 
