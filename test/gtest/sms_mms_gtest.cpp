@@ -325,12 +325,11 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
 
 void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
 {
-    bool result = false;
     bool enable = true;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -362,12 +361,11 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
 
 void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
 {
-    bool result = false;
     bool enable = true;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 1000;
     uint8_t netType = 1;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -399,12 +397,11 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
 
 void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
 {
-    bool result = false;
     bool enable = true;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 0;
     uint8_t netType = 1;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -672,12 +669,11 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
 {
-    bool result = false;
     bool enable = false;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -709,12 +705,11 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
 {
-    bool result = false;
     bool enable = false;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 1000;
     uint8_t netType = 1;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -746,12 +741,11 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
 {
-    bool result = false;
     bool enable = false;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 0;
     uint8_t netType = 1;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -908,8 +902,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
 
 void SetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
 {
-    bool result = false;
-    result = g_telephonyService->SetDefaultSmsSlotId(helper.slotId);
+    bool result = g_telephonyService->SetDefaultSmsSlotId(helper.slotId);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -1033,12 +1026,19 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level2)
 
 void AddSimMessageTestFuc(SmsMmsTestHelper &helper)
 {
-    bool result = false;
     std::u16string smscData(u"");
     std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
     uint32_t status = 3;
-    result = g_telephonyService->AddSimMessage(
+    bool result = g_telephonyService->AddSimMessage(
         helper.slotId, smscData, pduData, static_cast<ISmsServiceInterface::SimMessageStatus>(status));
+    helper.SetBoolResult(result);
+    helper.NotifyAll();
+}
+
+void DelSimMessageTestFuc(SmsMmsTestHelper &helper)
+{
+    uint32_t msgIndex = 0;
+    bool result = g_telephonyService->DelSimMessage(helper.slotId, msgIndex);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -1060,6 +1060,11 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(DelSimMessageTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("AddSimMessageTestFuc DelSimMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+
     if (!helper.Run(AddSimMessageTestFuc, std::ref(helper))) {
         TELEPHONY_LOGI("AddSimMessageTestFuc out of time");
         ASSERT_TRUE(false);
@@ -1085,6 +1090,11 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!helper.Run(DelSimMessageTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("AddSimMessageTestFuc2 DelSimMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+
     if (!helper.Run(AddSimMessageTestFuc, std::ref(helper))) {
         TELEPHONY_LOGI("AddSimMessageTestFuc2 out of time");
         ASSERT_TRUE(false);
@@ -1152,15 +1162,6 @@ HWTEST_F(SmsMmsGtest, GetAllSimMessages_0002, Function | MediumTest | Level3)
     EXPECT_FALSE(helper.GetBoolResult());
 }
 
-void DelSimMessageTestFuc(SmsMmsTestHelper &helper)
-{
-    bool result = false;
-    uint32_t msgIndex = 0;
-    result = g_telephonyService->DelSimMessage(helper.slotId, msgIndex);
-    helper.SetBoolResult(result);
-    helper.NotifyAll();
-}
-
 /**
  * @tc.number   Telephony_SmsMmsGtest_DelSimMessage_0001
  * @tc.name     Del Sim Message
@@ -1213,12 +1214,11 @@ HWTEST_F(SmsMmsGtest, DelSimMessage_0002, Function | MediumTest | Level3)
 
 void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
 {
-    bool result = false;
     uint32_t msgIndex = 0;
     std::u16string smscData(u"");
     std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
     uint32_t status = 3;
-    result = g_telephonyService->UpdateSimMessage(
+    bool result = g_telephonyService->UpdateSimMessage(
         helper.slotId, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
     helper.SetBoolResult(result);
     helper.NotifyAll();
@@ -1277,9 +1277,8 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
 
 void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
 {
-    bool result = false;
     g_telephonyService->SetImsSmsConfig(helper.slotId, 1);
-    result = g_telephonyService->IsImsSmsSupported(helper.slotId);
+    bool result = g_telephonyService->IsImsSmsSupported(helper.slotId);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
