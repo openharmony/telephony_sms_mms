@@ -35,9 +35,6 @@ ohos_unittest("tel_sms_mms_gtest") {
 
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
 
-  if ("${product_name}" == "rk3568" || "${product_name}" == "DAYU") {
-    defines += [ "TEL_TEST_UNSUPPORT" ]
-  }
   deps = [
     "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms:tel_sms_mms",
