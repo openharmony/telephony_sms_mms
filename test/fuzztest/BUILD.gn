@@ -24,5 +24,7 @@ group("fuzztest") {
   deps += [ "getsmssegmentsinfo_fuzzer:fuzztest" ]
   deps += [ "sendmessage_fuzzer:fuzztest" ]
   deps += [ "sendmessagedata_fuzzer:fuzztest" ]
+  deps += [ "smsrecvitem_fuzzer:fuzztest" ]
+  deps += [ "smseventissue_fuzzer:fuzztest" ]
   deps += [ "textbasedsmsdelivery_fuzzer:fuzztest" ]
 }
