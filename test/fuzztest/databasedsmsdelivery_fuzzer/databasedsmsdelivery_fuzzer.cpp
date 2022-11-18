@@ -15,6 +15,8 @@
 
 #include "databasedsmsdelivery_fuzzer.h"
 
+#define private public
+
 #include "addsmstoken_fuzzer.h"
 #include "delivery_short_message_callback_stub.h"
 #include "send_short_message_callback_stub.h"
@@ -43,10 +45,31 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 
     const sptr<ISendShortMessageCallback> sendCallback =
         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
+    if (sendCallback == nullptr) {
+        return;
+    }
     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
         iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+    if (deliveryCallback == nullptr) {
+        return;
+    }
 
     smsInterfaceManager->DataBasedSmsDelivery(desAddr, scAddr, port, data, size, sendCallback, deliveryCallback);
+    auto smsSendManager = std::make_shared<SmsSendManager>(soltId);
+    if (smsSendManager == nullptr) {
+        return;
+    }
+    smsSendManager->Init();
+    smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, port, data, size, sendCallback, deliveryCallback);
+
+    if (smsSendManager->gsmSmsSender_ != nullptr) {
+        smsSendManager->gsmSmsSender_->DataBasedSmsDelivery(
+            desAddr, scAddr, port, data, size, sendCallback, deliveryCallback);
+    }
+    if (smsSendManager->cdmaSmsSender_ != nullptr) {
+        smsSendManager->cdmaSmsSender_->DataBasedSmsDelivery(
+            desAddr, scAddr, port, data, size, sendCallback, deliveryCallback);
+    }
     return;
 }
 } // namespace OHOS
