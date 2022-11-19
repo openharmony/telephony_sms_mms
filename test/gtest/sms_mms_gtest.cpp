@@ -22,7 +22,10 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "sms_delivery_callback_gtest.h"
 #include "sms_mms_test_helper.h"
+#include "sms_send_callback_gtest.h"
+#include "sms_service_manager_client.h"
 #include "sms_service_proxy.h"
 #include "string_utils.h"
 #include "system_ability_definition.h"
@@ -174,6 +177,10 @@ void SmsMmsGtest::SetUp() {}
 void SmsMmsGtest::TearDown() {}
 
 const int32_t DEFAULT_SIM_SLOT_ID_1 = 1;
+const std::string DES_ADDR = "10086";
+const std::string TEXT_SMS_CONTENT = "hello world";
+const uint8_t DATA_SMS[] = "hello world";
+const uint16_t SMS_PORT = 100;
 
 void SmsMmsGtest::SetUpTestCase()
 {
@@ -182,6 +189,8 @@ void SmsMmsGtest::SetUpTestCase()
     if (g_telephonyService == nullptr) {
         return;
     }
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->ResetSmsServiceProxy();
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->InitSmsServiceProxy();
 }
 
 sptr<ISmsServiceInterface> SmsMmsGtest::GetProxy()
@@ -219,7 +228,8 @@ void OpenCellBroadcastTestFuc(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -233,10 +243,9 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0001, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->");
-    if (g_telephonyService == nullptr) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
-        ASSERT_TRUE(false);
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
         return;
     }
     SmsMmsTestHelper helper;
@@ -256,7 +265,8 @@ void OpenCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 20;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -270,9 +280,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0002, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -293,7 +302,8 @@ void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 3;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -307,9 +317,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -329,7 +338,8 @@ void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -343,9 +353,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -365,7 +374,8 @@ void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 1000;
     uint8_t netType = 1;
-    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -379,9 +389,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -401,7 +410,8 @@ void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 0;
     uint8_t netType = 1;
-    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -415,9 +425,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -440,9 +449,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0007, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -465,9 +473,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0008 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -490,9 +497,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -515,9 +521,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -540,9 +545,8 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0011, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -563,7 +567,8 @@ void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -577,10 +582,9 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0001, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->");
-    if (g_telephonyService == nullptr) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
-        ASSERT_TRUE(false);
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
         return;
     }
     SmsMmsTestHelper helper;
@@ -600,7 +604,8 @@ void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 20;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -614,9 +619,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0002, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -637,7 +641,8 @@ void CloseCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 3;
-    result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -651,9 +656,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -673,7 +677,8 @@ void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -687,9 +692,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -709,7 +713,8 @@ void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 1000;
     uint8_t netType = 1;
-    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -723,9 +728,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -745,7 +749,8 @@ void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 0;
     uint8_t netType = 1;
-    bool result = g_telephonyService->SetCBConfig(helper.slotId, enable, fromMsgId, toMsgId, netType);
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+        helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -759,9 +764,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -784,9 +788,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0007, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -809,9 +812,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0008 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -834,9 +836,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -859,9 +860,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -884,9 +884,8 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->");
-    if (g_telephonyService == nullptr || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -902,7 +901,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
 
 void SetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
 {
-    bool result = g_telephonyService->SetDefaultSmsSlotId(helper.slotId);
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetDefaultSmsSlotId(helper.slotId);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -916,9 +915,8 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0001 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -941,9 +939,8 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0002 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -959,7 +956,7 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level2)
 
 void GetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
 {
-    int32_t slotId = g_telephonyService->GetDefaultSmsSlotId();
+    int32_t slotId = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetDefaultSmsSlotId();
     helper.SetIntResult(slotId);
     helper.NotifyAll();
 }
@@ -972,9 +969,8 @@ void GetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
 HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::GetDefaultSmsSlotId_0001 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -993,7 +989,8 @@ void SetSmscAddrTestFuc(SmsMmsTestHelper &helper)
     bool result = true;
     // invalid slotID scenario, a invalid smsc addr is OKAY
     std::string scAddr("1234");
-    result = g_telephonyService->SetSmscAddr(helper.slotId, StringUtils::ToUtf16(scAddr));
+    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetScAddress(
+        helper.slotId, StringUtils::ToUtf16(scAddr));
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -1008,10 +1005,9 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0001 -->");
-    if (g_telephonyService == nullptr) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
-        ASSERT_TRUE(false);
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
         return;
     }
     SmsMmsTestHelper helper;
@@ -1029,7 +1025,7 @@ void AddSimMessageTestFuc(SmsMmsTestHelper &helper)
     std::u16string smscData(u"");
     std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
     uint32_t status = 3;
-    bool result = g_telephonyService->AddSimMessage(
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->AddSimMessage(
         helper.slotId, smscData, pduData, static_cast<ISmsServiceInterface::SimMessageStatus>(status));
     helper.SetBoolResult(result);
     helper.NotifyAll();
@@ -1038,7 +1034,7 @@ void AddSimMessageTestFuc(SmsMmsTestHelper &helper)
 void DelSimMessageTestFuc(SmsMmsTestHelper &helper)
 {
     uint32_t msgIndex = 0;
-    bool result = g_telephonyService->DelSimMessage(helper.slotId, msgIndex);
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DelSimMessage(helper.slotId, msgIndex);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -1052,9 +1048,8 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0001 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1082,9 +1077,8 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0002 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1106,7 +1100,7 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
 void GetAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
 {
     std::vector<ShortMessage> result;
-    result = g_telephonyService->GetAllSimMessages(helper.slotId);
+    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetAllSimMessages(helper.slotId);
     bool empty = result.empty();
     helper.SetBoolResult(empty);
     helper.NotifyAll();
@@ -1121,9 +1115,8 @@ HWTEST_F(SmsMmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0001 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1146,9 +1139,8 @@ HWTEST_F(SmsMmsGtest, GetAllSimMessages_0002, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0002 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1171,9 +1163,8 @@ HWTEST_F(SmsMmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0001 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1196,9 +1187,8 @@ HWTEST_F(SmsMmsGtest, DelSimMessage_0002, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0002 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1218,7 +1208,7 @@ void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
     std::u16string smscData(u"");
     std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
     uint32_t status = 3;
-    bool result = g_telephonyService->UpdateSimMessage(
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->UpdateSimMessage(
         helper.slotId, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
     helper.SetBoolResult(result);
     helper.NotifyAll();
@@ -1233,9 +1223,8 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1259,9 +1248,8 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1277,8 +1265,8 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
 
 void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
 {
-    g_telephonyService->SetImsSmsConfig(helper.slotId, 1);
-    bool result = g_telephonyService->IsImsSmsSupported(helper.slotId);
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetImsSmsConfig(helper.slotId, 1);
+    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -1293,9 +1281,8 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0001 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1312,8 +1299,8 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level2)
 void SetImsSmsConfigTestFuc2(SmsMmsTestHelper &helper)
 {
     bool result = true;
-    g_telephonyService->SetImsSmsConfig(helper.slotId, 0);
-    result = g_telephonyService->IsImsSmsSupported(helper.slotId);
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetImsSmsConfig(helper.slotId, 0);
+    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId);
     helper.SetBoolResult(result);
     helper.NotifyAll();
 }
@@ -1328,9 +1315,8 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0002 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1354,9 +1340,8 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0003, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0003 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1379,9 +1364,8 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0004, Function | MediumTest | Level2)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0004 -->");
-    if ((g_telephonyService == nullptr) || !(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService Remote service is null");
-        g_telephonyService = SmsMmsGtest::GetProxy();
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
     }
@@ -1393,6 +1377,151 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0004, Function | MediumTest | Level2)
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0004 -->finished");
     EXPECT_FALSE(helper.GetBoolResult());
+}
+
+void SetDataMessageTestFuc(SmsMmsTestHelper &helper)
+{
+    std::string dest = DES_ADDR;
+    std::string sca("");
+    OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
+    OHOS::sptr<SmsDeliveryCallbackGTest> deliveryCallBackPtr(new SmsDeliveryCallbackGTest(helper));
+    uint16_t port = SMS_PORT;
+    if (sendCallBackPtr == nullptr) {
+        TELEPHONY_LOGI("sendCallBackPtr is nullptr");
+        helper.SetBoolResult(false);
+        helper.NotifyAll();
+    }
+
+    if (deliveryCallBackPtr == nullptr) {
+        TELEPHONY_LOGI("deliveryCallBackPtr is nullptr");
+        helper.SetBoolResult(false);
+        helper.NotifyAll();
+    }
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
+        StringUtils::ToUtf16(sca), port, DATA_SMS, (sizeof(DATA_SMS) / sizeof(DATA_SMS[0]) - 1), sendCallBackPtr,
+        deliveryCallBackPtr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SendDataMessage_0001
+ * @tc.name     Send Data Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, SendDataMessage_0001, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0001 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+        TELEPHONY_LOGI("SetDataMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0001 -->finished");
+    ASSERT_TRUE(helper.GetSendSmsBoolResult() && helper.GetDeliverySmsBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SendDataMessage_0002
+ * @tc.name     Send Data Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, SendDataMessage_0002, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0002 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+        TELEPHONY_LOGI("SetDataMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0002 -->finished");
+    ASSERT_TRUE(helper.GetSendSmsBoolResult() && helper.GetDeliverySmsBoolResult());
+}
+
+void SetTextMessageTestFuc(SmsMmsTestHelper &helper)
+{
+    std::string dest = DES_ADDR;
+    std::string sca("");
+    OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
+    OHOS::sptr<SmsDeliveryCallbackGTest> deliveryCallBackPtr(new SmsDeliveryCallbackGTest(helper));
+    std::string text = TEXT_SMS_CONTENT;
+    if (sendCallBackPtr == nullptr) {
+        TELEPHONY_LOGI("sendCallBackPtr is nullptr");
+        helper.SetBoolResult(false);
+        helper.NotifyAll();
+    }
+
+    if (deliveryCallBackPtr == nullptr) {
+        TELEPHONY_LOGI("deliveryCallBackPtr is nullptr");
+        helper.SetBoolResult(false);
+        helper.NotifyAll();
+    }
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
+        StringUtils::ToUtf16(sca), StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SendTextMessage_0001
+ * @tc.name     Send Text Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, SendTextMessage_0001, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0001 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+        TELEPHONY_LOGI("SetTextMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0001 -->finished");
+    ASSERT_TRUE(helper.GetSendSmsBoolResult() && helper.GetDeliverySmsBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SendTextMessage_0002
+ * @tc.name     Send Text Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, SendTextMessage_0002, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0002 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+        TELEPHONY_LOGI("SetTextMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0001 -->finished");
+    ASSERT_TRUE(helper.GetSendSmsBoolResult() && helper.GetDeliverySmsBoolResult());
 }
 
 #else // TEL_TEST_UNSUPPORT
