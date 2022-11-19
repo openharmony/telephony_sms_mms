@@ -54,6 +54,18 @@ void SmsMmsTestHelper::SetBoolResult(bool result)
     TELEPHONY_LOGI("Set boolResult_ : %{public}d ", boolResult_);
 }
 
+void SmsMmsTestHelper::SetSendSmsBoolResult(bool result)
+{
+    sendSmsResult_ = result;
+    TELEPHONY_LOGI("Set sendSmsResult_ : %{public}d ", sendSmsResult_);
+}
+
+void SmsMmsTestHelper::SetDeliverySmsBoolResult(bool result)
+{
+    deliverySmsResult_ = result;
+    TELEPHONY_LOGI("Set deliverySmsResult_ : %{public}d ", deliverySmsResult_);
+}
+
 void SmsMmsTestHelper::SetIntResult(int32_t result)
 {
     result_ = result;
@@ -68,6 +80,18 @@ bool SmsMmsTestHelper::GetBoolResult()
 {
     TELEPHONY_LOGI("Get boolResult_ : %{public}d ", boolResult_);
     return boolResult_;
+}
+
+bool SmsMmsTestHelper::GetSendSmsBoolResult()
+{
+    TELEPHONY_LOGI("Get sendSmsResult_ : %{public}d ", sendSmsResult_);
+    return sendSmsResult_;
+}
+
+bool SmsMmsTestHelper::GetDeliverySmsBoolResult()
+{
+    TELEPHONY_LOGI("Get deliverySmsResult_ : %{public}d ", deliverySmsResult_);
+    return deliverySmsResult_;
 }
 
 int32_t SmsMmsTestHelper::GetIntResult()

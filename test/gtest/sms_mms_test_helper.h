@@ -26,15 +26,21 @@ public:
     void NotifyAll();
     bool WaitForResult(int32_t timeoutSecond);
     void SetBoolResult(bool result);
+    void SetSendSmsBoolResult(bool result);
+    void SetDeliverySmsBoolResult(bool result);
     void SetIntResult(int32_t result);
     void SetStringResult(const std::string &str);
     bool GetBoolResult();
+    bool GetSendSmsBoolResult();
+    bool GetDeliverySmsBoolResult();
     int32_t GetIntResult();
     std::string GetStringResult();
 
 private:
     int32_t result_ = 0;
     bool boolResult_ = false;
+    bool sendSmsResult_ = false;
+    bool deliverySmsResult_ = false;
     std::string strResult_ = "";
     std::mutex mtx_;
     std::condition_variable cv_;
