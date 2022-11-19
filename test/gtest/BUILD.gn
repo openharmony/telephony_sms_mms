@@ -21,8 +21,10 @@ ohos_unittest("tel_sms_mms_gtest") {
 
   sources = [
     "//base/telephony/sms_mms/frameworks/native/sms/src/sms_service_proxy.cpp",
+    "sms_delivery_callback_gtest.cpp",
     "sms_mms_gtest.cpp",
     "sms_mms_test_helper.cpp",
+    "sms_send_callback_gtest.cpp",
   ]
 
   include_dirs = [
@@ -38,6 +40,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   deps = [
     "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms:tel_sms_mms",
+    "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
     "//third_party/googletest:gtest_main",
   ]
 
