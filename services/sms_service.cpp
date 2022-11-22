@@ -256,10 +256,10 @@ void SmsService::TrimSmscAddr(std::string &sca)
     if (sca.length() < MIN_LEN) {
         return;
     }
-    if (sca[0] == ' ') {
+    while (sca.length() >= MIN_LEN && sca[0] == ' ') {
         sca.erase(0, 1);
     }
-    if (sca.length() > MIN_LEN && sca[sca.length() - 1] == ' ') {
+    while (sca.length() > MIN_LEN && sca[sca.length() - 1] == ' ') {
         sca.erase(sca.length() - 1, 1);
     }
 }
