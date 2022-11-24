@@ -27,6 +27,7 @@
 #include "telephony_log_wrapper.h"
 #include "sms_persist_helper.h"
 #include "mms_msg.h"
+#include "telephony_permission.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -315,6 +316,9 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast()
     data.SetCode(0);
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(true);
+    std::vector<std::string> wappushPermissions;
+    wappushPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
+    publishInfo.SetSubscriberPermissions(wappushPermissions);
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     if (!publishResult) {
         TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
