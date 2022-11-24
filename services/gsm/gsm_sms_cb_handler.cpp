@@ -16,12 +16,12 @@
 #include "gsm_sms_cb_handler.h"
 
 #include "common_event_support.h"
-#include "securec.h"
-
 #include "core_manager_inner.h"
 #include "radio_event.h"
+#include "securec.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
+#include "telephony_permission.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -260,6 +260,9 @@ bool GsmSmsCbHandler::SendCbMessageBroadcast(const std::shared_ptr<SmsCbMessage>
     data.SetWant(want);
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(true);
+    std::vector<std::string> gsmCbPermissions;
+    gsmCbPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
+    publishInfo.SetSubscriberPermissions(gsmCbPermissions);
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     if (!publishResult) {
         TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
