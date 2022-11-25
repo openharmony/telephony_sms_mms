@@ -169,8 +169,10 @@ void SmsSendManager::DataBasedSmsDelivery(const string &desAddr, const string &s
 
     NetWorkType netWorkType = networkManager_->GetNetWorkType();
     if (netWorkType == NetWorkType::NET_TYPE_GSM) {
+        gsmSmsSender_->RegisterImsHandler();
         gsmSmsSender_->DataBasedSmsDelivery(desAddr, scAddr, port, data, dataLen, sendCallback, deliveryCallback);
     } else if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
+        cdmaSmsSender_->RegisterImsHandler();
         cdmaSmsSender_->DataBasedSmsDelivery(desAddr, scAddr, port, data, dataLen, sendCallback, deliveryCallback);
     } else {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
