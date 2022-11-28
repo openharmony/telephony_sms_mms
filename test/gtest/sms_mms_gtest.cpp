@@ -1550,15 +1550,15 @@ HWTEST_F(SmsMmsGtest, MmsAddress_0001, Function | MediumTest | Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::MmsAddress_0001 -->");
     MmsAddress address;
-    address.SetMmsAddressString("+8613812345678/TYPE=PLMN");
-    address.SetMmsAddressString("+8613812345678/TYPE=IPv4");
-    address.SetMmsAddressString("+8613812345678/TYPE=IPv6");
-    address.SetMmsAddressString("+8613812345678/TYPE=EMAIL");
+    address.SetMmsAddressString("12345678/TYPE=PLMN");
+    address.SetMmsAddressString("12345678/TYPE=IPv4");
+    address.SetMmsAddressString("12345678/TYPE=IPv6");
+    address.SetMmsAddressString("12345678/TYPE=EMAIL");
     address.GetAddressCharset();
     address.GetAddressType();
-    address.SetMmsAddressString("+8613812345678/TYPE=UNKNOWN");
+    address.SetMmsAddressString("12345678/TYPE=UNKNOWN");
     std::string ret = address.GetAddressString();
-    EXPECT_STREQ(ret.c_str(), "+8613812345678/TYPE=UNKNOWN");
+    EXPECT_STREQ(ret.c_str(), "12345678/TYPE=UNKNOWN");
 }
 
 /**
