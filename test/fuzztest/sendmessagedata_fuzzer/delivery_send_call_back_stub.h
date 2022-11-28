@@ -25,7 +25,7 @@ class DeliverySendCallbackStub : public DeliveryShortMessageCallbackStub {
 public:
     DeliverySendCallbackStub() = default;
     ~DeliverySendCallbackStub() = default;
-    void OnSmsDeliveryResult(const std::u16string pdu) override;
+    void OnSmsDeliveryResult(const std::u16string &pdu) override;
 };
 }  // namespace Telephony
 }  // namespace OHOS

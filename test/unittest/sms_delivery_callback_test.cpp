@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace Telephony {
-void SmsDeliveryCallbackTest::OnSmsDeliveryResult(const std::u16string pdu)
+void SmsDeliveryCallbackTest::OnSmsDeliveryResult(const std::u16string &pdu)
 {
     std::cout << "SmsDeliveryCallbackTest OnSmsDeliveryResult = " << pdu.size() << std::endl;
 }
