@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Telephony {
-void DeliveryShortMessageCallbackStub::OnSmsDeliveryResult(const std::u16string pdu)
+void DeliveryShortMessageCallbackStub::OnSmsDeliveryResult(const std::u16string &pdu)
 {
     TELEPHONY_LOGI("DeliveryShortMessageCallbackStub OnSmsDeliveryResult pdu %{public}zu", pdu.size());
 }
