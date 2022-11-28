@@ -31,7 +31,7 @@ class DeliveryCallback : public DeliveryShortMessageCallbackStub {
 public:
     DeliveryCallback(bool hasCallback, napi_env env, napi_ref thisVarRef, napi_ref callbackRef);
     ~DeliveryCallback();
-    void OnSmsDeliveryResult(const std::u16string pdu) override;
+    void OnSmsDeliveryResult(const std::u16string &pdu) override;
 
 private:
     bool hasCallback_;
