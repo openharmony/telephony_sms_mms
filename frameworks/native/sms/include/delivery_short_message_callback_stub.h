@@ -27,7 +27,7 @@ class DeliveryShortMessageCallbackStub : public IRemoteStub<IDeliveryShortMessag
 public:
     DeliveryShortMessageCallbackStub() = default;
     virtual ~DeliveryShortMessageCallbackStub() = default;
-    virtual void OnSmsDeliveryResult(const std::u16string pdu) override;
+    virtual void OnSmsDeliveryResult(const std::u16string &pdu) override;
     int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override final;
 

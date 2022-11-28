@@ -28,7 +28,7 @@ class SmsDeliveryCallbackTest : public IRemoteStub<IDeliveryShortMessageCallback
 public:
     SmsDeliveryCallbackTest() = default;
     virtual ~SmsDeliveryCallbackTest() = default;
-    void OnSmsDeliveryResult(const std::u16string pdu) override;
+    void OnSmsDeliveryResult(const std::u16string &pdu) override;
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) final;
 };
 } // namespace Telephony

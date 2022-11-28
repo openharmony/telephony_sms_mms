@@ -32,7 +32,7 @@ public:
      * Status of the sent SMS on the recipient.
      * @param pdu [in]
      */
-    virtual void OnSmsDeliveryResult(const std::u16string pdu) override;
+    virtual void OnSmsDeliveryResult(const std::u16string &pdu) override;
 
 protected:
 private:
