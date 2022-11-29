@@ -19,13 +19,13 @@
 #include "addsmstoken_fuzzer.h"
 #include "i_sms_service_interface.h"
 #include "napi_util.h"
-#include "sms_interface_stub.h"
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
 static bool g_isInited = false;
 constexpr int32_t SLOT_NUM = 2;
+static int32_t STATUS_COUNT = 4;
 
 bool IsServiceInited()
 {
@@ -78,16 +78,33 @@ void AddSimMessage(const uint8_t *data, size_t size)
     auto smscU16 = Str8ToStr16(smsc);
     auto pduU16 = Str8ToStr16(pdu);
     int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
-    ISmsServiceInterface::SimMessageStatus status = static_cast<ISmsServiceInterface::SimMessageStatus>(size % 4);
+    auto status = static_cast<ISmsServiceInterface::SimMessageStatus>(size % STATUS_COUNT);
 
     dataParcel.WriteInt32(slotId);
     dataParcel.WriteString16(smscU16);
     dataParcel.WriteString16(pduU16);
     dataParcel.WriteUint32(status);
     dataParcel.RewindRead(0);
-
     DelayedSingleton<SmsService>::GetInstance()->OnAddSimMessage(dataParcel, replyParcel, option);
-    return;
+
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr");
+        return;
+    }
+    interfaceManager->AddSimMessage(smsc, pdu, status);
+
+    auto smsMiscRunner = AppExecFwk::EventRunner::Create("SmsMiscRunner");
+    if (smsMiscRunner == nullptr) {
+        TELEPHONY_LOGE("failed to create smsMiscRunner");
+        return;
+    }
+    std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(smsMiscRunner, slotId);
+    if (smsMiscManager == nullptr) {
+        TELEPHONY_LOGE("smsMiscManager nullptr");
+        return;
+    }
+    smsMiscManager->AddSimMessage(smsc, pdu, status);
 }
 
 void HasSmsCapability(const uint8_t *data, size_t size)
@@ -103,7 +120,14 @@ void HasSmsCapability(const uint8_t *data, size_t size)
     dataParcel.WriteBuffer(data, size);
     dataParcel.RewindRead(0);
     DelayedSingleton<SmsService>::GetInstance()->OnHasSmsCapability(dataParcel, replyParcel, option);
-    return;
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr error");
+        return;
+    }
+    interfaceManager->HasSmsCapability();
 }
 
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
