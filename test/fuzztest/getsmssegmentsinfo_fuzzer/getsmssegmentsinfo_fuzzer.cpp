@@ -17,8 +17,8 @@
 
 #define private public
 #include "addsmstoken_fuzzer.h"
+#include "cdma_sms_message.h"
 #include "napi_util.h"
-#include "sms_interface_stub.h"
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;
@@ -59,6 +59,25 @@ void GetSmsSegmentsInfo(const uint8_t *data, size_t size)
     dataParcel.RewindRead(0);
 
     DelayedSingleton<SmsService>::GetInstance()->OnGetSmsSegmentsInfo(dataParcel, replyParcel, option);
+
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr error");
+        return;
+    }
+    LengthInfo lenInfo;
+    interfaceManager->GetSmsSegmentsInfo(message, force7BitCode, lenInfo);
+
+    auto smsSendManager = std::make_unique<SmsSendManager>(slotId);
+    if (smsSendManager == nullptr) {
+        TELEPHONY_LOGE("failed to create SmsSendManager");
+        return;
+    }
+    smsSendManager->GetSmsSegmentsInfo(message, force7BitCode, lenInfo);
+    CdmaSmsMessage cdmaSmsMessage;
+    cdmaSmsMessage.GetSmsSegmentsInfo(message, force7BitCode, lenInfo);
+    GsmSmsMessage gsmSmsMessage;
+    gsmSmsMessage.GetSmsSegmentsInfo(message, force7BitCode, lenInfo);
 }
 
 void IsImsSmsSupported(const uint8_t *data, size_t size)
@@ -74,7 +93,20 @@ void IsImsSmsSupported(const uint8_t *data, size_t size)
     dataParcel.WriteBuffer(data, size);
     dataParcel.RewindRead(0);
     DelayedSingleton<SmsService>::GetInstance()->OnIsImsSmsSupported(dataParcel, replyParcel, option);
-    return;
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr error");
+        return;
+    }
+    interfaceManager->IsImsSmsSupported(slotId);
+    auto smsSendManager = std::make_unique<SmsSendManager>(slotId);
+    if (smsSendManager == nullptr) {
+        TELEPHONY_LOGE("failed to create SmsSendManager");
+        return;
+    }
+    smsSendManager->IsImsSmsSupported(slotId);
 }
 
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
@@ -92,6 +124,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
+    OHOS::AddSmsTokenFuzzer token;
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
