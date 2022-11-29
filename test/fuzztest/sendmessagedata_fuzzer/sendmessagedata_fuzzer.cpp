@@ -20,13 +20,13 @@
 #include "delivery_send_call_back_stub.h"
 #include "napi_util.h"
 #include "send_call_back_stub.h"
-#include "sms_interface_stub.h"
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
 static bool g_isInited = false;
 constexpr int32_t SLOT_NUM = 2;
+static int32_t MAX_PORT = 65535;
 
 bool IsServiceInited()
 {
@@ -55,7 +55,7 @@ void SendSmsDataRequest(const uint8_t *data, size_t size)
     std::string scAddr(reinterpret_cast<const char *>(data), size);
     auto desAddrU16 = Str8ToStr16(desAddr);
     auto scAddrU16 = Str8ToStr16(scAddr);
-    uint16_t port = static_cast<uint16_t>(size % 65535);
+    uint16_t port = static_cast<uint16_t>(size % MAX_PORT);
 
     std::unique_ptr<SendCallbackStub> sendCallback = std::make_unique<SendCallbackStub>();
     std::unique_ptr<DeliverySendCallbackStub> deliveryCallback = std::make_unique<DeliverySendCallbackStub>();
@@ -107,8 +107,8 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::AddSmsTokenFuzzer token;
     /* Run your code on data */
+    OHOS::AddSmsTokenFuzzer token;
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }

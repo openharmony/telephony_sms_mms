@@ -70,7 +70,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
         return;
     }
     smsReceiveManager->Init();
-    if (smsReceiveManager->gsmSmsReceiveHandler_ != nullptr || smsReceiveManager->cdmaSmsReceiveHandler_ == nullptr) {
+    if (smsReceiveManager->gsmSmsReceiveHandler_ == nullptr || smsReceiveManager->cdmaSmsReceiveHandler_ == nullptr) {
         return;
     }
     smsReceiveManager->gsmSmsReceiveHandler_->Init();

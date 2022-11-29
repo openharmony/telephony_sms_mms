@@ -95,7 +95,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
         return;
     }
     smsSendManager->Init();
-    if (smsSendManager->gsmSmsSender_ != nullptr || smsSendManager->cdmaSmsSender_ != nullptr) {
+    if (smsSendManager->gsmSmsSender_ == nullptr || smsSendManager->cdmaSmsSender_ == nullptr) {
         return;
     }
 
