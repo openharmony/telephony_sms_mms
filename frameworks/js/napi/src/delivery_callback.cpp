@@ -89,7 +89,7 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     TELEPHONY_LOGI("CompleteSmsDeliveryWork end");
 }
 
-void DeliveryCallback::OnSmsDeliveryResult(const std::u16string pdu)
+void DeliveryCallback::OnSmsDeliveryResult(const std::u16string &pdu)
 {
     TELEPHONY_LOGI("OnSmsDeliveryResult start");
     if (hasCallback_) {

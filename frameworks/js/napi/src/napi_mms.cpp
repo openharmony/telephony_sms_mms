@@ -23,7 +23,7 @@ const std::string attachmentKey = "attachment";
 static const int32_t DEFAULT_REF_COUNT = 1;
 } // namespace
 
-static void SetPropertyArray(napi_env env, napi_value object, std::string name, MmsAttachmentContext &context)
+static void SetPropertyArray(napi_env env, napi_value object, const std::string &name, MmsAttachmentContext &context)
 {
     napi_value array = nullptr;
     napi_create_array(env, &array);
@@ -122,7 +122,7 @@ std::string parseDispositionValue(int32_t value)
     }
 }
 
-int32_t formatDispositionValue(std::string value)
+int32_t formatDispositionValue(const std::string &value)
 {
     if (std::string("from-data") == value) {
         return FROM_DATA;
@@ -542,7 +542,7 @@ napi_value CreateDecodeMmsValue(napi_env env, DecodeMmsContext &asyncContext)
     if (asyncContext.attachment.size() > 0) {
         int i = 0;
         for (std::vector<MmsAttachmentContext>::iterator it = asyncContext.attachment.begin();
-             it != asyncContext.attachment.end(); it++) {
+             it != asyncContext.attachment.end(); ++it) {
             napi_value attachNapi = CreateAttachmentValue(env, *it);
             napi_set_element(env, attachmentArr, i, attachNapi);
             i++;
@@ -769,7 +769,7 @@ uint32_t GetNapiUint32Value(napi_env env, napi_value napiValue, std::string name
     return defValue;
 }
 
-uint8_t GetNapiUint8Value(napi_env env, napi_value napiValue, std::string name, uint8_t defValue = 0)
+uint8_t GetNapiUint8Value(napi_env env, napi_value napiValue, const std::string &name, uint8_t defValue = 0)
 {
     return uint8_t(GetNapiInt32Value(env, napiValue, name, defValue));
 }

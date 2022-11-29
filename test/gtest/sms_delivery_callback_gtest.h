@@ -28,7 +28,7 @@ class SmsDeliveryCallbackGTest : public IRemoteStub<IDeliveryShortMessageCallbac
 public:
     explicit SmsDeliveryCallbackGTest(SmsMmsTestHelper &helper);
     ~SmsDeliveryCallbackGTest();
-    void OnSmsDeliveryResult(const std::u16string pdu) override;
+    void OnSmsDeliveryResult(const std::u16string &pdu) override;
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) final;
 
 private:
