@@ -24,7 +24,7 @@ SmsDeliveryShortMessageProxy::SmsDeliveryShortMessageProxy(const sptr<IRemoteObj
     : IRemoteProxy<IDeliveryShortMessageCallback>(impl)
 {}
 
-void SmsDeliveryShortMessageProxy::OnSmsDeliveryResult(const std::u16string pdu)
+void SmsDeliveryShortMessageProxy::OnSmsDeliveryResult(const std::u16string &pdu)
 {
     MessageOption option;
     MessageParcel dataParcel;
