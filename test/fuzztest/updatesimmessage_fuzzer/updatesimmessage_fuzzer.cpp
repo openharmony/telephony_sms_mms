@@ -19,7 +19,6 @@
 #include "addsmstoken_fuzzer.h"
 #include "i_sms_service_interface.h"
 #include "napi_util.h"
-#include "sms_interface_stub.h"
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;
@@ -66,6 +65,25 @@ void UpdateSimMessage(const uint8_t *data, size_t size)
     dataParcel.RewindRead(0);
 
     DelayedSingleton<SmsService>::GetInstance()->OnUpdateSimMessage(dataParcel, replyParcel, option);
+
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr error");
+        return;
+    }
+    interfaceManager->UpdateSimMessage(size, status, pdu, smsc);
+
+    auto smsMiscRunner = AppExecFwk::EventRunner::Create("SmsMiscRunner");
+    if (smsMiscRunner == nullptr) {
+        TELEPHONY_LOGE("failed to create SmsCbRunner");
+        return;
+    }
+    std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(smsMiscRunner, slotId);
+    if (smsMiscManager == nullptr) {
+        TELEPHONY_LOGE("smsMiscManager nullptr error");
+        return;
+    }
+    smsMiscManager->UpdateSimMessage(size, status, pdu, smsc);
 }
 
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
