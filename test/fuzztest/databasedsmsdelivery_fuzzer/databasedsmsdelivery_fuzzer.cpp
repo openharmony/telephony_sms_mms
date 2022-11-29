@@ -59,7 +59,6 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     if (smsSendManager == nullptr) {
         return;
     }
-    smsSendManager->Init();
     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, port, data, size, sendCallback, deliveryCallback);
 
     if (smsSendManager->gsmSmsSender_ != nullptr) {

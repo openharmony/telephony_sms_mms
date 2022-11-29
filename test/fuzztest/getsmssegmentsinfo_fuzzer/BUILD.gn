@@ -76,7 +76,10 @@ ohos_fuzztest("GetSmsSegmentsInfoFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "getsmssegmentsinfo_fuzzer.cpp" ]
+  sources = [
+    "//base/telephony/sms_mms/test/fuzztest/common_fuzzer/addsmstoken_fuzzer.cpp",
+    "getsmssegmentsinfo_fuzzer.cpp",
+  ]
 }
 
 ###############################################################################
