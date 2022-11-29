@@ -17,13 +17,14 @@
 
 #define private public
 #include "addsmstoken_fuzzer.h"
+#include "cdma_sms_message.h"
 #include "napi_util.h"
-#include "sms_interface_stub.h"
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
 static bool g_isInited = false;
+static int32_t SLOT_NUM = 2;
 
 bool IsServiceInited()
 {
@@ -39,10 +40,6 @@ bool IsServiceInited()
 
 void SplitMessage(const uint8_t *data, size_t size)
 {
-    if (!IsServiceInited()) {
-        return;
-    }
-
     MessageParcel dataParcel;
     MessageParcel replyParcel;
     MessageOption option(MessageOption::TF_SYNC);
@@ -53,14 +50,33 @@ void SplitMessage(const uint8_t *data, size_t size)
     dataParcel.RewindRead(0);
 
     DelayedSingleton<SmsService>::GetInstance()->OnSplitMessage(dataParcel, replyParcel, option);
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr error");
+        return;
+    }
+
+    std::string messageData(reinterpret_cast<const char *>(data), size);
+    interfaceManager->SplitMessage(messageData);
+    auto smsSendManager = std::make_unique<SmsSendManager>(slotId);
+    if (smsSendManager == nullptr) {
+        TELEPHONY_LOGE("failed to create SmsSendManager");
+        return;
+    }
+    smsSendManager->SplitMessage(messageData);
+
+    SmsCodingScheme codingType;
+    std::vector<struct SplitInfo> cellsInfos;
+    GsmSmsMessage gsmSmsMessage;
+    gsmSmsMessage.SplitMessage(cellsInfos, messageData, false, codingType, false);
+    CdmaSmsMessage cdmaSmsMessage;
+    cdmaSmsMessage.SplitMessage(cellsInfos, messageData, false, codingType, false);
 }
 
 void GetImsShortMessageFormat(const uint8_t *data, size_t size)
 {
-    if (!IsServiceInited()) {
-        return;
-    }
-
     MessageParcel dataParcel;
     MessageParcel replyParcel;
     MessageOption option(MessageOption::TF_SYNC);
@@ -68,12 +84,30 @@ void GetImsShortMessageFormat(const uint8_t *data, size_t size)
     dataParcel.WriteBuffer(data, size);
     dataParcel.RewindRead(0);
     DelayedSingleton<SmsService>::GetInstance()->OnGetImsShortMessageFormat(dataParcel, replyParcel, option);
-    return;
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr error");
+        return;
+    }
+    interfaceManager->GetImsShortMessageFormat();
+
+    auto smsSendManager = std::make_unique<SmsSendManager>(slotId);
+    if (smsSendManager == nullptr) {
+        TELEPHONY_LOGE("failed to create SmsSendManager");
+        return;
+    }
+    smsSendManager->GetImsShortMessageFormat();
 }
 
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size <= 0) {
+        return;
+    }
+
+    if (!IsServiceInited()) {
         return;
     }
 
@@ -85,8 +119,8 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::AddSmsTokenFuzzer token;
     /* Run your code on data */
+    OHOS::AddSmsTokenFuzzer token;
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
