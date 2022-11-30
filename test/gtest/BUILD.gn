@@ -41,6 +41,8 @@ ohos_unittest("tel_sms_mms_gtest") {
     "//base/telephony/core_service/utils:libtel_common",
     "//base/telephony/sms_mms:tel_sms_mms",
     "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
+    "//foundation/ability/ability_runtime/frameworks/native/ability/native:data_ability_helper",
+    "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:ability_manager",
     "//third_party/googletest:gtest_main",
   ]
 
