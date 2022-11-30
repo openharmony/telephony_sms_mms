@@ -20,6 +20,7 @@
 #include "accesstoken_kit.h"
 #include "cdma_sms_message.h"
 #include "cdma_sms_pdu_codec.h"
+#include "cdma_sms_receive_handler.h"
 #include "core_service_client.h"
 #include "delivery_short_message_callback_stub.h"
 #include "gtest/gtest.h"
@@ -34,6 +35,7 @@
 #include "mms_body_part.h"
 #include "mms_body_part_header.h"
 #include "mms_charset.h"
+#include "mms_codec_type.h"
 #include "mms_decode_buffer.h"
 #include "mms_header.h"
 #include "mms_msg.h"
@@ -1554,12 +1556,14 @@ HWTEST_F(SmsMmsGtest, MmsAddress_0001, Function | MediumTest | Level1)
     address.SetMmsAddressString("12345678/TYPE=PLMN");
     address.SetMmsAddressString("12345678/TYPE=IPv4");
     address.SetMmsAddressString("12345678/TYPE=IPv6");
-    address.SetMmsAddressString("12345678/TYPE=EMAIL");
-    address.GetAddressCharset();
-    address.GetAddressType();
     address.SetMmsAddressString("12345678/TYPE=UNKNOWN");
+    address.SetMmsAddressString("12345678/TYPE=EMAIL");
     std::string ret = address.GetAddressString();
-    EXPECT_STREQ(ret.c_str(), "12345678/TYPE=UNKNOWN");
+    EXPECT_STREQ(ret.c_str(), "12345678/TYPE=EMAIL");
+    MmsAddress::MmsAddressType type = address.GetAddressType();
+    EXPECT_EQ(type, MmsAddress::MmsAddressType::ADDRESS_TYPE_PLMN);
+    MmsCharSets charset = address.GetAddressCharset();
+    EXPECT_EQ(charset, MmsCharSets::UTF_8);
 }
 
 /**
@@ -1573,41 +1577,82 @@ HWTEST_F(SmsMmsGtest, MmsAttachment_0001, Function | MediumTest | Level1)
     const std::string pathName = "/data/telephony/enSrc/618C0A89.smil";
     std::size_t pos = pathName.find_last_of('/');
     std::string fileName(pathName.substr(pos + 1));
-    uint32_t charset = 0;
-    uint32_t len = 300 * 1024;
     MmsAttachment attachment;
-    attachment.SetAttachmentFilePath("", false);
-    attachment.SetAttachmentFilePath(pathName, true);
-    attachment.GetAttachmentFilePath();
-    attachment.SetContentId("");
-    attachment.SetContentId("0000");
-    attachment.SetContentId("<0000>");
-    attachment.GetContentId();
-    attachment.SetContentLocation("");
-    attachment.SetContentLocation("SetContentLocation");
-    attachment.GetContentLocation();
-    attachment.SetContentDisposition("");
-    attachment.SetContentDisposition("attachment");
-    attachment.GetContentDisposition();
-    attachment.SetContentTransferEncoding("");
-    attachment.SetContentTransferEncoding("SetContentTransferEncoding");
-    attachment.GetContentTransferEncoding();
-    attachment.SetContentType("");
-    attachment.SetFileName(fileName);
-    attachment.GetFileName();
+    bool retBool;
+    std::string retStr;
+    retBool = attachment.SetAttachmentFilePath("", false);
+    EXPECT_EQ(false, retBool);
+    retBool = attachment.SetAttachmentFilePath(pathName, true);
+    EXPECT_EQ(true, retBool);
+    retStr = attachment.GetAttachmentFilePath();
+    EXPECT_STREQ(retStr.c_str(), pathName.c_str());
+    retBool = attachment.SetContentId("");
+    EXPECT_EQ(false, retBool);
+    retBool = attachment.SetContentId("0000");
+    EXPECT_EQ(true, retBool);
+    retBool = attachment.SetContentId("<0000>");
+    EXPECT_EQ(true, retBool);
+    retStr = attachment.GetContentId();
+    EXPECT_STREQ(retStr.c_str(), "<0000>");
+    retBool = attachment.SetContentLocation("");
+    EXPECT_EQ(false, retBool);
+    retBool = attachment.SetContentLocation("SetContentLocation");
+    EXPECT_EQ(true, retBool);
+    retStr = attachment.GetContentLocation();
+    EXPECT_STREQ(retStr.c_str(), "SetContentLocation");
+    retBool = attachment.SetContentDisposition("");
+    EXPECT_EQ(false, retBool);
+    retBool = attachment.SetContentDisposition("attachment");
+    EXPECT_EQ(true, retBool);
+    retStr = attachment.GetContentDisposition();
+    EXPECT_STREQ(retStr.c_str(), "attachment");
+    retBool = attachment.SetContentTransferEncoding("");
+    EXPECT_EQ(false, retBool);
+    retBool = attachment.SetFileName(fileName);
+    EXPECT_EQ(true, retBool);
+    retStr = attachment.GetFileName();
+    EXPECT_STREQ(retStr.c_str(), fileName.c_str());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsAttachment_0002
+ * @tc.name     Test MmsAttachment
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, MmsAttachment_0002, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::MmsAttachment_0002 -->");
+    MmsAttachment attachment;
+    bool retBool;
+    std::string retStr;
+    uint32_t retU32t;
+    uint32_t len = 300 * 1024;
+    uint32_t charset = 0;
+    retBool = attachment.SetContentTransferEncoding("SetContentTransferEncoding");
+    EXPECT_EQ(true, retBool);
+    retStr = attachment.GetContentTransferEncoding();
+    EXPECT_STREQ(retStr.c_str(), "SetContentTransferEncoding");
+    retBool = attachment.SetContentType("");
+    EXPECT_EQ(false, retBool);
     attachment.SetIsSmilFile(true);
-    attachment.IsSmilFile();
+    retBool = attachment.IsSmilFile();
+    EXPECT_EQ(true, retBool);
     attachment.SetCharSet(charset);
-    attachment.GetCharSet();
-    attachment.SetDataBuffer(nullptr, 0);
-    attachment.SetDataBuffer(std::make_unique<char[]>(len + 1), len + 1);
-    attachment.SetDataBuffer(std::make_unique<char[]>(len - 1), len - 1);
-    attachment.SetDataBuffer(std::make_unique<char[]>(len - 1), len + 1);
-    attachment.GetDataBuffer(len);
+    retU32t = attachment.GetCharSet();
+    EXPECT_EQ(charset, retU32t);
+    retBool = attachment.SetDataBuffer(nullptr, 0);
+    EXPECT_EQ(false, retBool);
+    retBool = attachment.SetDataBuffer(std::make_unique<char[]>(len + 1), len + 1);
+    EXPECT_EQ(false, retBool);
+    retBool = attachment.SetDataBuffer(std::make_unique<char[]>(len - 1), len - 1);
+    EXPECT_EQ(true, retBool);
+    retBool = attachment.SetDataBuffer(std::make_unique<char[]>(len - 1), len + 1);
+    EXPECT_EQ(false, retBool);
+    EXPECT_FALSE(attachment.GetDataBuffer(len) == nullptr);
     MmsAttachment attachment1(attachment);
     attachment1.SetContentType("application/smil");
-    std::string ret = attachment1.GetContentType();
-    EXPECT_STREQ(ret.c_str(), "application/smil");
+    retStr = attachment1.GetContentType();
+    EXPECT_STREQ(retStr.c_str(), "application/smil");
 }
 
 /**
@@ -1634,10 +1679,13 @@ HWTEST_F(SmsMmsGtest, MmsBodyPartHeader_0001, Function | MediumTest | Level1)
     mmsBodyPartHeader.DecodeApplicationHeader(decodeBuffer, len);
     mmsBodyPartHeader.SetContentId("contentId");
     mmsBodyPartHeader.GetContentId(testStr);
+    EXPECT_STREQ(testStr.c_str(), "contentId");
     mmsBodyPartHeader.SetContentTransferEncoding("contentTransferEncoding");
     mmsBodyPartHeader.GetContentTransferEncoding(testStr);
+    EXPECT_STREQ(testStr.c_str(), "contentTransferEncoding");
     mmsBodyPartHeader.SetContentLocation("contentLocation");
     mmsBodyPartHeader.GetContentLocation(testStr);
+    EXPECT_STREQ(testStr.c_str(), "contentLocation");
     MmsEncodeBuffer encodeBuffer;
     mmsBodyPartHeader.EncodeContentLocation(encodeBuffer);
     mmsBodyPartHeader.EncodeContentId(encodeBuffer);
@@ -1661,6 +1709,7 @@ HWTEST_F(SmsMmsGtest, MmsBodyPart_0001, Function | MediumTest | Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::MmsBodyPart_0001 -->");
     std::string testStr;
+    bool retBool;
     MmsBodyPart mmsBodyPart;
     MmsBodyPart mmsBodyPart2;
     mmsBodyPart2 = mmsBodyPart;
@@ -1668,44 +1717,49 @@ HWTEST_F(SmsMmsGtest, MmsBodyPart_0001, Function | MediumTest | Level1)
     mmsBodyPart.DecodePart(decodeBuffer);
     uint32_t lenMax = 300 * 1024;
     uint32_t len = 10;
+    mmsBodyPart.GetContentType();
+    mmsBodyPart.GetPartHeader();
+    mmsBodyPart.DecodeSetFileName();
     mmsBodyPart.DecodePartHeader(decodeBuffer, len);
     mmsBodyPart.DecodePartBody(decodeBuffer, len);
     mmsBodyPart.DecodePartBody(decodeBuffer, lenMax + 1);
     MmsAttachment attachment;
     mmsBodyPart.SetAttachment(attachment);
-    mmsBodyPart.IsSmilFile();
     mmsBodyPart.SetSmilFile(false);
+    retBool = mmsBodyPart.IsSmilFile();
+    EXPECT_EQ(false, retBool);
     mmsBodyPart.SetContentType("strContentType");
     mmsBodyPart.GetContentType(testStr);
+    EXPECT_STREQ(testStr.c_str(), "strContentType");
     mmsBodyPart.SetContentId("contentId");
     mmsBodyPart.GetContentId(testStr);
+    EXPECT_STREQ(testStr.c_str(), "contentId");
     mmsBodyPart.SetContentLocation("contentLocation");
-    mmsBodyPart.GetContentDisposition(testStr);
+    retBool = mmsBodyPart.GetContentDisposition(testStr);
+    EXPECT_EQ(true, retBool);
     MmsEncodeBuffer encodeBuffer;
     mmsBodyPart.EncodeMmsBodyPart(encodeBuffer);
-    mmsBodyPart.GetContentType();
-    mmsBodyPart.GetPartHeader();
     mmsBodyPart.ReadBodyPartBuffer(len);
     mmsBodyPart.WriteBodyFromAttachmentBuffer(attachment);
     mmsBodyPart.WriteBodyFromFile("path");
-    mmsBodyPart.DecodeSetFileName();
     mmsBodyPart.AssignBodyPart(mmsBodyPart2);
     mmsBodyPart.DumpMmsBodyPart();
     mmsBodyPart.SetContentDisposition("contentDisposition");
-    mmsBodyPart.GetContentLocation(testStr);
+    retBool = mmsBodyPart.GetContentLocation(testStr);
+    EXPECT_EQ(true, retBool);
     mmsBodyPart.SetFileName("fileName");
     std::string ret = mmsBodyPart.GetPartFileName();
     EXPECT_STREQ(ret.c_str(), "fileName");
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_MmsBody_0002
+ * @tc.number   Telephony_SmsMmsGtest_MmsBody_0001
  * @tc.name     Test MmsBody
  * @tc.desc     Function test
  */
-HWTEST_F(SmsMmsGtest, MmsBody_0002, Function | MediumTest | Level1)
+HWTEST_F(SmsMmsGtest, MmsBody_0001, Function | MediumTest | Level1)
 {
-    TELEPHONY_LOGI("TelSMSMMSTest::MmsBody_0002 -->");
+    TELEPHONY_LOGI("TelSMSMMSTest::MmsBody_0001 -->");
     MmsBody mmsBody;
     MmsDecodeBuffer decodeBuffer;
     MmsEncodeBuffer encodeBuffer;
@@ -1736,11 +1790,14 @@ HWTEST_F(SmsMmsGtest, MmsBuffer_0001, Function | MediumTest | Level1)
     TELEPHONY_LOGI("TelSMSMMSTest::MmsBuffer_0001 -->");
     MmsBuffer mmsBuffer;
     uint32_t len = 10;
+    bool retBool;
     std::string strPathName = "/data/telephony/enSrc/618C0A89.smil";
     mmsBuffer.ReadDataBuffer(len);
     mmsBuffer.ReadDataBuffer(len, len);
-    mmsBuffer.WriteDataBuffer(std::make_unique<char[]>(len), 0);
-    mmsBuffer.WriteDataBuffer(std::make_unique<char[]>(len), len);
+    retBool = mmsBuffer.WriteDataBuffer(std::make_unique<char[]>(len), 0);
+    EXPECT_EQ(false, retBool);
+    retBool = mmsBuffer.WriteDataBuffer(std::make_unique<char[]>(len), len);
+    EXPECT_EQ(true, retBool);
     mmsBuffer.WriteBufferFromFile(strPathName);
     mmsBuffer.GetCurPosition();
     uint32_t ret = mmsBuffer.GetSize();
@@ -1760,17 +1817,22 @@ HWTEST_F(SmsMmsGtest, MmsContentParam_0001, Function | MediumTest | Level1)
     uint8_t field = 1;
     uint32_t charset = 10;
     std::string testStr;
+    uint32_t retU32t;
     mmsContentParam.DumpContentParam();
     mmsContentParam.SetCharSet(charset);
-    mmsContentParam.GetCharSet();
+    retU32t = mmsContentParam.GetCharSet();
+    EXPECT_EQ(charset, retU32t);
     mmsContentParam.SetType("type");
-    mmsContentParam.GetType();
+    testStr = mmsContentParam.GetType();
+    EXPECT_STREQ(testStr.c_str(), "type");
     mmsContentParam.SetFileName("");
     mmsContentParam.SetStart("");
     mmsContentParam.SetStart("start");
     mmsContentParam.GetStart(testStr);
+    EXPECT_STREQ(testStr.c_str(), "start");
     mmsContentParam.AddNormalField(field, "value");
     mmsContentParam.GetNormalField(field, testStr);
+    EXPECT_STREQ(testStr.c_str(), "value");
     mmsContentParam.GetParamMap();
     mmsContentParam2 = mmsContentParam;
     mmsContentParam2.SetFileName("fileName");
@@ -2148,6 +2210,25 @@ HWTEST_F(SmsMmsGtest, CdmaSmsPduCodec_0001, Function | MediumTest | Level1)
     EXPECT_EQ(SmsNumberPlanType::SMS_NPI_UNKNOWN, ret);
 }
 
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CdmaSmsReceiveHandler_0001
+ * @tc.name     Test CdmaSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, CdmaSmsReceiveHandler_0001, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::CdmaSmsReceiveHandler_0001 -->");
+    int32_t retInt;
+    std::shared_ptr<SmsBaseMessage> retPtr;
+    std::string pdu = "01000B818176251308F4000007E8B0BCFD76E701";
+    std::shared_ptr<AppExecFwk::EventRunner> cdmaSmsReceiveRunner;
+    cdmaSmsReceiveRunner = AppExecFwk::EventRunner::Create("cdmaSmsReceiveHandler");
+    ASSERT_TRUE(cdmaSmsReceiveRunner != nullptr);
+    CdmaSmsReceiveHandler cdmaSmsReceiveHandler(cdmaSmsReceiveRunner, DEFAULT_SIM_SLOT_ID);
+    const std::shared_ptr<CdmaSmsMessage> smsCdmaMessage = CdmaSmsMessage::CreateMessage(pdu);
+    retInt = cdmaSmsReceiveHandler.HandleSmsByType(nullptr);
+    EXPECT_EQ(AckIncomeCause::SMS_ACK_UNKNOWN_ERROR, retInt);
+}
 #else // TEL_TEST_UNSUPPORT
 /**
  * @tc.number   Telephony_SmsMms_MockTest_0001
