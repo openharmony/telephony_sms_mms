@@ -27,7 +27,6 @@ declare namespace sms {
    *
    * <p>If the length of an SMS message exceeds the maximum length allowed (140 bytes),
    *     the SMS message is split into multiple segments for processing.
-   * <p>Applications must have the {@code ohos.permission.SEND_MESSAGES} permission to call this method.
    *
    * @param content Indicates the short message content, which cannot be {@code null}.
    * @param callback Returns a list of split segments, which can be combined into a complete SMS message;
@@ -59,8 +58,6 @@ declare namespace sms {
    *
    * <p>This method checks whether the length of an SMS message exceeds the maximum length. If the
    * maximum length is exceeded, the SMS message is split into multiple parts and sent separately.
-   * <p>You need to obtain the following permission before calling this method:
-   * {@code ohos.permission.SEND_MESSAGES}
    *
    * @param options Indicates the parameters and callback for sending the SMS message.
    * @permission ohos.permission.SEND_MESSAGES
@@ -93,8 +90,6 @@ declare namespace sms {
   /**
    * Sets the address for the Short Message Service Center (SMSC) based on a specified slot ID.
    *
-   * <p><b>Permissions: </b>{@link ohos.security.SystemPermission#SET_TELEPHONY_STATE}
-   *
    * @param slotId Indicates the ID of the slot holding the SIM card for sending SMS messages.
    * @param smscAddr Indicates the SMSC address.
    * @permission ohos.permission.SET_TELEPHONY_STATE
@@ -106,8 +101,6 @@ declare namespace sms {
 
   /**
    * Obtains the SMSC address based on a specified slot ID.
-   *
-   * <p><b>Permissions: </b>{@link ohos.security.SystemPermission#GET_TELEPHONY_STATE}
    *
    * @param slotId Indicates the ID of the slot holding the SIM card for sending SMS messages.
    * @param callback Returns the SMSC address.
@@ -121,14 +114,14 @@ declare namespace sms {
   /**
    * Returns whether a device is capable of sending and receiving SMS messages.
    *
-   * @return Returns {@code true} if the device is capable of sending and receiving SMS messages;
+   * @returns Returns {@code true} if the device is capable of sending and receiving SMS messages;
    *     returns {@code false} otherwise.
    * @since 7
    */
   function hasSmsCapability(): boolean;
 
   /**
-   * @permission ohos.permission.RECEIVE_SMS,ohos.permission.SEND_MESSAGES
+   * @permission ohos.permission.RECEIVE_SMS and ohos.permission.SEND_MESSAGES
    * @systemapi Hide this for inner system use.
    * @since 7
    */
@@ -136,7 +129,7 @@ declare namespace sms {
   function addSimMessage(options: SimMessageOptions): Promise<void>;
 
   /**
-   * @permission ohos.permission.RECEIVE_SMS,ohos.permission.SEND_MESSAGES
+   * @permission ohos.permission.RECEIVE_SMS and ohos.permission.SEND_MESSAGES
    * @systemapi Hide this for inner system use.
    * @since 7
    */
@@ -144,7 +137,7 @@ declare namespace sms {
   function delSimMessage(slotId: number, msgIndex: number): Promise<void>;
 
   /**
-   * @permission ohos.permission.RECEIVE_SMS,ohos.permission.SEND_MESSAGES
+   * @permission ohos.permission.RECEIVE_SMS and ohos.permission.SEND_MESSAGES
    * @systemapi Hide this for inner system use.
    * @since 7
    */
@@ -218,6 +211,52 @@ declare namespace sms {
     messageType: MessageType;
     mmsType: MmsSendReq | MmsSendConf | MmsNotificationInd | MmsRespInd | MmsRetrieveConf | MmsAcknowledgeInd | MmsDeliveryInd | MmsReadOrigInd | MmsReadRecInd;
     attachment?: Array<MmsAttachment>;
+  }
+
+  /**
+   * Sends a MMS message.
+   *
+   * @param mmsParam Indicates the parameters of the MMS message.
+   * @param callback Indicates the execution result. For error code, see MmsFailCode.
+   * @permission ohos.permission.SEND_MESSAGES
+   * @since 9
+   */
+  function sendMms(mmsParam: MmsParam, callback: AsyncCallback<void>): void;
+  function sendMms(mmsParam: MmsParam): Promise<void>;
+
+  /**
+   * Downloads a MMS message.
+   *
+   * @param mmsParam Indicates the parameters of the MMS message.
+   * @param callback Indicates the execution result. For error code, see MmsFailCode.
+   * @permission ohos.permission.RECEIVE_MMS
+   * @since 9
+   */
+  function downloadMms(mmsParam: MmsParam, callback: AsyncCallback<void>): void;
+  function downloadMms(mmsParam: MmsParam): Promise<void>;
+
+  /**
+   * @since 9
+   */
+  export interface MmsParam {
+    /** Indicates the ID of the SIM card slot used for sending the Mms message. */
+    slotId: number;
+    /** Indicates the Mmsc used for sending the Mms message. */
+    mmsc: string;
+    /** Indicates the Mms pdu url used for sending the Mms message. */
+    data: string;
+    /** Indicates the Mms UA and Mms UaProf used for sending the Mms message. */
+    mmsConfig?: MmsConfig;
+  }
+
+  /**
+   * @since 9
+   */
+  export interface MmsConfig {
+    /** Indicates the User Agent used for the Mms message. */
+    userAgent: string;
+    /** Indicates the User Agent Profile for the Mms message. */
+    userAgentProfile: string;
   }
 
   /**
@@ -390,6 +429,21 @@ declare namespace sms {
     TYPE_MMS_DELIVERY_IND,
     TYPE_MMS_READ_REC_IND,
     TYPE_MMS_READ_ORIG_IND,
+  }
+
+  /**
+   * @since 9
+   */
+  export enum MmsFailCode {
+    MMS_FAIL_NONE_ERROR = 0,
+    MMS_FAIL_UNKNOWN_ERROR,
+    MMS_FAIL_APN_INVALID,
+    MMS_FAIL_CONNECT_MMS_ERROR,
+    MMS_FAIL_HTTP_ERROR,
+    MMS_FAIL_IO_ERROR,
+    MMS_FAIL_RETRY_ERROR,
+    MMS_FAIL_CONFIGURATION_ERROR,
+    MMS_FAIL_DATA_NETWORK_ERROR,
   }
 
   /**
