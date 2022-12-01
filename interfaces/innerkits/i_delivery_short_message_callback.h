@@ -30,7 +30,7 @@ public:
      * Status of the sent SMS on the recipient.
      * @param pdu [in]
      */
-    virtual void OnSmsDeliveryResult(const std::u16string pdu) = 0;
+    virtual void OnSmsDeliveryResult(const std::u16string &pdu) = 0;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.Telephony.IDeliveryShortMessageCallback");
