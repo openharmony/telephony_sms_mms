@@ -33,7 +33,7 @@ SmsDeliveryCallbackGTest::SmsDeliveryCallbackGTest(SmsMmsTestHelper &helper)
 
 SmsDeliveryCallbackGTest::~SmsDeliveryCallbackGTest() {}
 
-void SmsDeliveryCallbackGTest::OnSmsDeliveryResult(const std::u16string pdu)
+void SmsDeliveryCallbackGTest::OnSmsDeliveryResult(const std::u16string &pdu)
 {
     std::string pduStr = StringUtils::ToUtf8(pdu);
     int32_t deliveryPduLen = static_cast<int32_t>(pduStr.size());
