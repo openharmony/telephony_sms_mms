@@ -579,6 +579,29 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0011, Function | MediumTest | Level4)
     ASSERT_TRUE(helper.GetBoolResult());
 }
 
+/**
+ * @tc.number   Telephony_SmsMmsGtest_OpenCellBroadcast_0012
+ * @tc.name     Open cellBroadcast parameter is valid
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0012, Function | MediumTest | Level3)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0012 -->");
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(OpenCellBroadcastTestFuc6, std::ref(helper))) {
+        TELEPHONY_LOGI("OpenCellBroadcastTestFuc12 out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0012 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
+}
+
 void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
 {
     bool result = true;
@@ -918,6 +941,29 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_00011, Function | MediumTest | Level4)
     ASSERT_TRUE(helper.GetBoolResult());
 }
 
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CloseCellBroadcast_0012
+ * @tc.name     Close cellBroadcast parameter is valid
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0012, Function | MediumTest | Level3)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0012 -->");
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(CloseCellBroadcastTestFuc6, std::ref(helper))) {
+        TELEPHONY_LOGI("CloseCellBroadcastTestFuc12 out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0012 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
+}
+
 void SetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
 {
     bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetDefaultSmsSlotId(helper.slotId);
@@ -934,7 +980,7 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level3)
 {
     AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0001 -->");
-    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
@@ -970,6 +1016,29 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0002 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SetDefaultSmsSlotId_0003
+ * @tc.name     Set Default Sms SlotId slotId is valid
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0003, Function | MediumTest | Level2)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0003 -->");
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(SetDefaultSmsSlotIdTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("SetDefaultSmsSlotIdTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0003 -->finished");
     EXPECT_FALSE(helper.GetBoolResult());
 }
 
@@ -1037,6 +1106,30 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0001 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SetSmscAddr_0002
+ * @tc.name     Set smsc addr slotId is invalid
+ * @tc.desc     Function test
+ * @tc.require: issueI5JI0H
+ */
+HWTEST_F(SmsMmsGtest, SetSmscAddr_0002, Function | MediumTest | Level2)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0002 -->");
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID_REMOVE;
+    if (!helper.Run(SetSmscAddrTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("SetSmscAddrTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0002 -->finished");
     EXPECT_FALSE(helper.GetBoolResult());
 }
 
@@ -1117,6 +1210,34 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
     ASSERT_TRUE(helper.GetBoolResult());
 }
 
+/**
+ * @tc.number   Telephony_SmsMmsGtest_AddSimMessage_0003
+ * @tc.name     Add Sim Message
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, AddSimMessage_0003, Function | MediumTest | Level3)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0003 -->");
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(DelSimMessageTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("AddSimMessageTestFuc DelSimMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+
+    if (!helper.Run(AddSimMessageTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("AddSimMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0003 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
+}
+
 void GetAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
 {
     std::vector<ShortMessage> result;
@@ -1175,6 +1296,29 @@ HWTEST_F(SmsMmsGtest, GetAllSimMessages_0002, Function | MediumTest | Level3)
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_GetAllSimMessages_0003
+ * @tc.name     Get All Sim Messages
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, GetAllSimMessages_0003, Function | MediumTest | Level3)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0003 -->");
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(GetAllSimMessagesTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("GetAllSimMessagesTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0003 -->finished");
+    ASSERT_TRUE(helper.GetBoolResult());
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_DelSimMessage_0001
  * @tc.name     Del Sim Message
  * @tc.desc     Function test
@@ -1220,6 +1364,29 @@ HWTEST_F(SmsMmsGtest, DelSimMessage_0002, Function | MediumTest | Level3)
     }
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0002 -->finished");
     ASSERT_TRUE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_DelSimMessage_0003
+ * @tc.name     Del Sim Message
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, DelSimMessage_0003, Function | MediumTest | Level3)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0003 -->");
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(DelSimMessageTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("DelSimMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0003 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
 }
 
 void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
@@ -1281,6 +1448,29 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->finished");
     ASSERT_TRUE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_UpdateSimMessage_0003
+ * @tc.name     Update Sim Message
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, UpdateSimMessage_0003, Function | MediumTest | Level3)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0003 -->");
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(UpdateSimMessageTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("UpdateSimMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0003 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
 }
 
 void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
@@ -1399,6 +1589,30 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0004, Function | MediumTest | Level3)
     EXPECT_FALSE(helper.GetBoolResult());
 }
 
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SetImsSmsConfig_0005
+ * @tc.name     Enable IMS SMS
+ * @tc.desc     Function test
+ * @tc.require: issueI5K12U
+ */
+HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0005, Function | MediumTest | Level2)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0005 -->");
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID;
+    if (!helper.Run(SetImsSmsConfigTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("SetImsSmsConfigTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0005 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
+}
+
 void SetDataMessageTestFuc(SmsMmsTestHelper &helper)
 {
     std::string dest = DES_ADDR;
@@ -1472,6 +1686,31 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0002, Function | MediumTest | Level2)
     ASSERT_TRUE(helper.GetSendSmsBoolResult() && helper.GetDeliverySmsBoolResult());
 }
 
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SendDataMessage_0003
+ * @tc.name     Send Data Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, SendDataMessage_0003, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0003 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+        TELEPHONY_LOGI("SetDataMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0003 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
+}
+
 void SetTextMessageTestFuc(SmsMmsTestHelper &helper)
 {
     std::string dest = DES_ADDR;
@@ -1542,6 +1781,126 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0002, Function | MediumTest | Level2)
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0001 -->finished");
     ASSERT_TRUE(helper.GetSendSmsBoolResult() && helper.GetDeliverySmsBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SendTextMessage_0003
+ * @tc.name     Send Text Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, SendTextMessage_0003, Function | MediumTest | Level2)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0003 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+        TELEPHONY_LOGI("SetTextMessageTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0003 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
+}
+
+void GetSmsSegmentsInfoTestFuc(SmsMmsTestHelper &helper)
+{
+    std::u16string message = u"";
+    bool force7BitCode = false;
+    ISmsServiceInterface::SmsSegmentsInfo result;
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetSmsSegmentsInfo(
+        helper.slotId, message, force7BitCode, result);
+    bool ret = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId);
+    helper.SetBoolResult(ret);
+    helper.NotifyAll();
+}
+
+void GetSmsSegmentsInfoTestFuc2(SmsMmsTestHelper &helper)
+{
+    std::u16string message = u"message";
+    bool force7BitCode = true;
+    ISmsServiceInterface::SmsSegmentsInfo result;
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetSmsSegmentsInfo(
+        helper.slotId, message, force7BitCode, result);
+    bool ret = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId);
+    helper.SetBoolResult(ret);
+    helper.NotifyAll();
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GetSmsSegmentsInfo_0001
+ * @tc.name     Send Text Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, GetSmsSegmentsInfo_0001, Function | MediumTest | Level2)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::GetSmsSegmentsInfo_0001 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+    if (!helper.Run(GetSmsSegmentsInfoTestFuc, helper)) {
+        TELEPHONY_LOGI("GetSmsSegmentsInfoTestFuc out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::GetSmsSegmentsInfo_0001 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GetSmsSegmentsInfo_0002
+ * @tc.name     Send Text Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, GetSmsSegmentsInfo_0002, Function | MediumTest | Level2)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::GetSmsSegmentsInfo_0002 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+    if (!helper.Run(GetSmsSegmentsInfoTestFuc2, helper)) {
+        TELEPHONY_LOGI("GetSmsSegmentsInfoTestFuc2 out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::GetSmsSegmentsInfo_0002 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GetSmsSegmentsInfo_0003
+ * @tc.name     Send Text Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, GetSmsSegmentsInfo_0003, Function | MediumTest | Level2)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::GetSmsSegmentsInfo_0003 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+    if (!helper.Run(GetSmsSegmentsInfoTestFuc, helper)) {
+        TELEPHONY_LOGI("GetSmsSegmentsInfoTestFuc3 out of time");
+        ASSERT_TRUE(false);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::GetSmsSegmentsInfo_0003 -->finished");
+    EXPECT_FALSE(helper.GetBoolResult());
 }
 
 /**
@@ -1698,86 +2057,6 @@ HWTEST_F(SmsMmsGtest, MmsBodyPartHeader_0001, Function | MediumTest | Level1)
     mmsBodyPartHeader2.SetContentDisposition("contentDisposition");
     mmsBodyPartHeader2.GetContentDisposition(testStr);
     EXPECT_STREQ(testStr.c_str(), "contentDisposition");
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_MmsBodyPart_0001
- * @tc.name     Test MmsBodyPart
- * @tc.desc     Function test
- */
-HWTEST_F(SmsMmsGtest, MmsBodyPart_0001, Function | MediumTest | Level1)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::MmsBodyPart_0001 -->");
-    std::string testStr;
-    bool retBool;
-    MmsBodyPart mmsBodyPart;
-    MmsBodyPart mmsBodyPart2;
-    mmsBodyPart2 = mmsBodyPart;
-    MmsDecodeBuffer decodeBuffer;
-    mmsBodyPart.DecodePart(decodeBuffer);
-    uint32_t lenMax = 300 * 1024;
-    uint32_t len = 10;
-    mmsBodyPart.GetContentType();
-    mmsBodyPart.GetPartHeader();
-    mmsBodyPart.DecodeSetFileName();
-    mmsBodyPart.DecodePartHeader(decodeBuffer, len);
-    mmsBodyPart.DecodePartBody(decodeBuffer, len);
-    mmsBodyPart.DecodePartBody(decodeBuffer, lenMax + 1);
-    MmsAttachment attachment;
-    mmsBodyPart.SetAttachment(attachment);
-    mmsBodyPart.SetSmilFile(false);
-    retBool = mmsBodyPart.IsSmilFile();
-    EXPECT_EQ(false, retBool);
-    mmsBodyPart.SetContentType("strContentType");
-    mmsBodyPart.GetContentType(testStr);
-    EXPECT_STREQ(testStr.c_str(), "strContentType");
-    mmsBodyPart.SetContentId("contentId");
-    mmsBodyPart.GetContentId(testStr);
-    EXPECT_STREQ(testStr.c_str(), "contentId");
-    mmsBodyPart.SetContentLocation("contentLocation");
-    retBool = mmsBodyPart.GetContentDisposition(testStr);
-    EXPECT_EQ(true, retBool);
-    MmsEncodeBuffer encodeBuffer;
-    mmsBodyPart.EncodeMmsBodyPart(encodeBuffer);
-    mmsBodyPart.ReadBodyPartBuffer(len);
-    mmsBodyPart.WriteBodyFromAttachmentBuffer(attachment);
-    mmsBodyPart.WriteBodyFromFile("path");
-    mmsBodyPart.AssignBodyPart(mmsBodyPart2);
-    mmsBodyPart.DumpMmsBodyPart();
-    mmsBodyPart.SetContentDisposition("contentDisposition");
-    retBool = mmsBodyPart.GetContentLocation(testStr);
-    EXPECT_EQ(true, retBool);
-    mmsBodyPart.SetFileName("fileName");
-    std::string ret = mmsBodyPart.GetPartFileName();
-    EXPECT_STREQ(ret.c_str(), "fileName");
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_MmsBody_0001
- * @tc.name     Test MmsBody
- * @tc.desc     Function test
- */
-HWTEST_F(SmsMmsGtest, MmsBody_0001, Function | MediumTest | Level1)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::MmsBody_0001 -->");
-    MmsBody mmsBody;
-    MmsDecodeBuffer decodeBuffer;
-    MmsEncodeBuffer encodeBuffer;
-    MmsHeader mmsHeader;
-    MmsBodyPart bodyPart;
-    mmsBody.DumpMmsBody();
-    mmsBody.DecodeMultipart(decodeBuffer);
-    mmsBody.DecodeMmsBody(decodeBuffer, mmsHeader);
-    mmsBody.EncodeMmsBody(encodeBuffer);
-    mmsBody.EncodeMmsHeaderContentType(mmsHeader, encodeBuffer);
-    mmsBody.GetBodyPartCount();
-    mmsBody.IsContentLocationPartExist("contentLocation");
-    mmsBody.IsBodyPartExist(bodyPart);
-    std::vector<MmsBodyPart> parts;
-    mmsBody.GetMmsBodyPart(parts);
-    mmsBody.AddMmsBodyPart(bodyPart);
-    bool ret = mmsBody.IsContentIdPartExist("testtest");
-    EXPECT_EQ(false, ret);
 }
 
 /**
@@ -1952,160 +2231,6 @@ HWTEST_F(SmsMmsGtest, MmsHeaderCateg_0001, Function | MediumTest | Level1)
     mmsHeaderCateg.FindSendConfOptType(fieldId);
     bool ret = mmsHeaderCateg.CheckIsValueLen(fieldId);
     EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_MmsHeader_0001
- * @tc.name     Test MmsHeader
- * @tc.desc     Function test
- */
-HWTEST_F(SmsMmsGtest, MmsHeader_0001, Function | MediumTest | Level1)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::MmsHeader_0001 -->");
-    uint8_t fieldId = 10;
-    uint8_t value = 10;
-    uint32_t charset = 10;
-    int32_t len = 10;
-    int64_t valueLong = 10;
-    std::string valueStr = "valueStr";
-    MmsEncodeString mmsEncodeString;
-    MmsHeader mmsHeader;
-    MmsDecodeBuffer decodeBuffer;
-    MmsEncodeBuffer encodeBuffer;
-    MmsAddress address;
-    std::vector<MmsAddress> addressValue;
-    mmsHeader.DumpMmsHeader();
-    mmsHeader.DecodeMmsHeader(decodeBuffer);
-    mmsHeader.EncodeMmsHeader(encodeBuffer);
-    mmsHeader.SetOctetValue(fieldId, value);
-    mmsHeader.GetOctetValue(fieldId, value);
-    mmsHeader.SetLongValue(fieldId, valueLong);
-    mmsHeader.GetLongValue(fieldId, valueLong);
-    mmsHeader.SetTextValue(fieldId, valueStr);
-    mmsHeader.GetTextValue(fieldId, valueStr);
-    mmsHeader.SetEncodeStringValue(fieldId, charset, valueStr);
-    mmsHeader.GetEncodeStringValue(fieldId, mmsEncodeString);
-    mmsHeader.GetHeaderAllAddressValue(fieldId, addressValue);
-    mmsHeader.AddHeaderAddressValue(fieldId, address);
-    mmsHeader.GetStringValue(fieldId, valueStr);
-    mmsHeader.GetHeaderContentType();
-    mmsHeader.FindHeaderFieldName(fieldId, valueStr);
-    mmsHeader.DecodeMmsMsgType(fieldId, decodeBuffer, len);
-    mmsHeader.DecodeFieldAddressModelValue(fieldId, decodeBuffer, len);
-    mmsHeader.DecodeFieldOctetValue(fieldId, decodeBuffer, len);
-    mmsHeader.DecodeFieldLongValue(fieldId, decodeBuffer, len);
-    mmsHeader.MakeTransactionId(charset);
-    mmsHeader.DecodeFieldTextStringValue(fieldId, decodeBuffer, len);
-    mmsHeader.DecodeFieldEncodedStringValue(fieldId, decodeBuffer, len);
-    mmsHeader.DecodeFromValue(fieldId, decodeBuffer, len);
-    mmsHeader.TrimString(valueStr);
-    mmsHeader.GetSmilFileName(valueStr);
-    mmsHeader.DecodeMmsContentType(fieldId, decodeBuffer, len);
-    mmsHeader.DecodeMmsMsgUnKnownField(decodeBuffer);
-    mmsHeader.DecodeFieldIntegerValue(fieldId, decodeBuffer, len);
-    mmsHeader.DecodeFieldDate(fieldId, decodeBuffer, len);
-    mmsHeader.DecodeFieldPreviouslySentDate(fieldId, decodeBuffer, len);
-    mmsHeader.DecodeFieldMBox(fieldId, decodeBuffer, len);
-    uint8_t errValue = -1;
-    bool ret = mmsHeader.DecodeFieldMMFlag(errValue, decodeBuffer, len);
-    EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_MmsHeader_0002
- * @tc.name     Test MmsHeader
- * @tc.desc     Function test
- */
-HWTEST_F(SmsMmsGtest, MmsHeader_0002, Function | MediumTest | Level1)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::MmsHeader_0002 -->");
-    MmsHeader mmsHeader;
-    MmsEncodeBuffer buff;
-    uint8_t fieldId = 10;
-    uint8_t value = 10;
-    int64_t valueLong = 10;
-    std::string valueStr = "valueStr";
-    MmsEncodeString mmsEncodeString;
-    mmsHeader.EncodeOctetValue(buff, fieldId, value);
-    mmsHeader.EncodeShortIntegerValue(buff, fieldId, valueLong);
-    mmsHeader.EncodeTextStringValue(buff, fieldId, valueStr);
-    mmsHeader.EncodeEncodeStringValue(buff, fieldId, mmsEncodeString);
-    mmsHeader.EncodeLongIntergerValue(buff, fieldId, valueLong);
-    mmsHeader.EncodeOctetValueFromMap(buff, fieldId);
-    mmsHeader.EncodeTextStringValueFromMap(buff, fieldId);
-    mmsHeader.EnocdeEncodeStringValueFromMap(buff, fieldId);
-    mmsHeader.EnocdeShortIntegerValueFromMap(buff, fieldId);
-    mmsHeader.EncodeLongIntergerValueFromMap(buff, fieldId);
-    mmsHeader.EncodeFieldExpriyValue(buff, valueLong);
-    std::vector<MmsAddress> addr;
-    mmsHeader.EncodeFieldFromValue(buff, addr);
-    mmsHeader.EncodeMultipleAddressValue(buff, fieldId, addr);
-    mmsHeader.EcondeFieldMessageClassValue(buff);
-    mmsHeader.EncodeCommontFieldValue(buff);
-    mmsHeader.EncodeMmsSendReq(buff);
-    mmsHeader.EncodeMmsSendConf(buff);
-    mmsHeader.EncodeMmsNotificationInd(buff);
-    mmsHeader.EnocdeMmsNotifyRespInd(buff);
-    mmsHeader.EnocdeMmsRetrieveConf(buff);
-    mmsHeader.EnocdeMmsAcknowledgeInd(buff);
-    mmsHeader.EnocdeMmsDeliveryInd(buff);
-    mmsHeader.EncodeMmsReadRecInd(buff);
-    mmsHeader.EncodeMmsReadOrigInd(buff);
-    mmsHeader.CheckResponseStatus(value);
-    mmsHeader.CheckRetrieveStatus(value);
-    mmsHeader.CheckStoreStatus(value);
-    mmsHeader.CheckBooleanValue(fieldId, value);
-    mmsHeader.IsHaveBody();
-    bool ret = mmsHeader.IsHaveTransactionId(MmsMsgType::MMS_MSGTYPE_SEND_REQ);
-    EXPECT_EQ(true, ret);
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_MmsMsg_0001
- * @tc.name     Test MmsMsg
- * @tc.desc     Function test
- */
-HWTEST_F(SmsMmsGtest, MmsMsg_0001, Function | MediumTest | Level1)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::MmsMsg_0001 -->");
-    uint8_t value8 = 10;
-    uint16_t value16 = 10;
-    uint32_t uValue32 = 10;
-    int32_t value32 = 10;
-    int64_t value64 = 10;
-    std::string valueStr = "valueStr";
-    MmsMsg mmsMsg;
-    mmsMsg.DumpMms();
-    mmsMsg.DecodeMsg("mmsFilePathName");
-    mmsMsg.DecodeMsg(std::make_unique<char[]>(uValue32 + 1), uValue32 + 1);
-    mmsMsg.EncodeMsg(uValue32);
-    mmsMsg.GetMmsVersion();
-    mmsMsg.SetMmsVersion(value16);
-    mmsMsg.SetMmsMessageType(value8);
-    mmsMsg.GetMmsMessageType();
-    mmsMsg.SetMmsTransactionId(valueStr);
-    mmsMsg.GetMmsTransactionId();
-    mmsMsg.SetMmsDate(value64);
-    mmsMsg.GetMmsDate();
-    mmsMsg.SetMmsSubject(valueStr);
-    mmsMsg.GetMmsSubject();
-    MmsAddress address;
-    mmsMsg.SetMmsFrom(address);
-    mmsMsg.GetMmsFrom();
-    std::vector<MmsAddress> toAddrs;
-    mmsMsg.SetMmsTo(toAddrs);
-    mmsMsg.GetMmsTo(toAddrs);
-    mmsMsg.SetHeaderOctetValue(value8, value8);
-    mmsMsg.GetHeaderOctetValue(value8);
-    mmsMsg.SetHeaderIntegerValue(value8, value32);
-    mmsMsg.GetHeaderIntegerValue(value8);
-    mmsMsg.SetHeaderStringValue(value8, valueStr);
-    MmsAttachment attachment;
-    mmsMsg.AddAttachment(attachment);
-    std::vector<MmsAttachment> attachments;
-    mmsMsg.GetAllAttachment(attachments);
-    std::string ret = mmsMsg.GetHeaderContentTypeStart();
-    EXPECT_STRNE(ret.c_str(), "test");
 }
 
 /**
