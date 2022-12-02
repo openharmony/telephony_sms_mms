@@ -32,8 +32,8 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
         return;
     }
 
-    int32_t soltId = static_cast<int32_t>(size % SLOT_NUM);
-    auto smsInterfaceManager = std::make_shared<SmsInterfaceManager>(soltId);
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    auto smsInterfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
     if (smsInterfaceManager == nullptr) {
         return;
     }
@@ -55,7 +55,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     }
 
     smsInterfaceManager->DataBasedSmsDelivery(desAddr, scAddr, port, data, size, sendCallback, deliveryCallback);
-    auto smsSendManager = std::make_shared<SmsSendManager>(soltId);
+    auto smsSendManager = std::make_shared<SmsSendManager>(slotId);
     if (smsSendManager == nullptr) {
         return;
     }
