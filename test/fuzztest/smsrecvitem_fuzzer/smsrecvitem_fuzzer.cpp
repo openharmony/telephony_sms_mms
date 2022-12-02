@@ -29,6 +29,7 @@ namespace OHOS {
 const std::int32_t MAX_EVENT = 1024;
 const std::int32_t MIDDLE_EVENT = 50;
 const std::int32_t EVERY_STEP = 100;
+constexpr int32_t SLOT_NUM = 2;
 
 void DoRecvItemsTest(const uint8_t *data, size_t size, std::shared_ptr<SmsReceiveManager> smsReceiveManager)
 {
@@ -58,14 +59,14 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
         return;
     }
 
-    int32_t soltId = static_cast<int32_t>(size % 2);
-    auto smsInterfaceManager = std::make_shared<SmsInterfaceManager>(soltId);
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    auto smsInterfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
     if (smsInterfaceManager == nullptr) {
         return;
     }
 
     smsInterfaceManager->InitInterfaceManager();
-    auto smsReceiveManager = std::make_shared<SmsReceiveManager>(soltId);
+    auto smsReceiveManager = std::make_shared<SmsReceiveManager>(slotId);
     if (smsReceiveManager == nullptr) {
         return;
     }
