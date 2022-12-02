@@ -13,19 +13,17 @@
  * limitations under the License.
  */
 
-#include "updatesimmessage_fuzzer.h"
+#include "setgetsmsc_fuzzer.h"
 
 #define private public
+
 #include "addsmstoken_fuzzer.h"
-#include "i_sms_service_interface.h"
-#include "napi_util.h"
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
 static bool g_isInited = false;
-constexpr int32_t SLOT_NUM = 2;
-constexpr int32_t SIM_MESSAGE_STATUE = 4;
+static int32_t SIM_COUNT = 2;
 
 bool IsServiceInited()
 {
@@ -39,7 +37,7 @@ bool IsServiceInited()
     return g_isInited;
 }
 
-void UpdateSimMessage(const uint8_t *data, size_t size)
+void SetSmscFuzz(const uint8_t *data, size_t size)
 {
     if (!IsServiceInited()) {
         return;
@@ -49,58 +47,64 @@ void UpdateSimMessage(const uint8_t *data, size_t size)
     MessageParcel replyParcel;
     MessageOption option(MessageOption::TF_SYNC);
 
+    int32_t slotId = static_cast<int32_t>(size % SIM_COUNT);
     std::string smsc(reinterpret_cast<const char *>(data), size);
-    std::string pdu(reinterpret_cast<const char *>(data), size);
     auto smscU16 = Str8ToStr16(smsc);
-    auto pduU16 = Str8ToStr16(pdu);
-    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
-    ISmsServiceInterface::SimMessageStatus status =
-        static_cast<ISmsServiceInterface::SimMessageStatus>(size % SIM_MESSAGE_STATUE);
 
     dataParcel.WriteInt32(slotId);
-    dataParcel.WriteUint32(size);
-    dataParcel.WriteUint32(status);
     dataParcel.WriteString16(smscU16);
-    dataParcel.WriteString16(pduU16);
+    size_t dataSize = size - sizeof(uint32_t);
+    dataParcel.WriteBuffer(data + sizeof(uint32_t), dataSize);
     dataParcel.RewindRead(0);
-
-    DelayedSingleton<SmsService>::GetInstance()->OnUpdateSimMessage(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnSetSmscAddr(dataParcel, replyParcel, option);
 
     std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
-    interfaceManager->UpdateSimMessage(size, status, pdu, smsc);
-
-    auto smsMiscRunner = AppExecFwk::EventRunner::Create("SmsMiscRunner");
-    if (smsMiscRunner == nullptr) {
-        TELEPHONY_LOGE("failed to create SmsMiscRunner");
-        return;
-    }
-    std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(smsMiscRunner, slotId);
-    if (smsMiscManager == nullptr) {
-        TELEPHONY_LOGE("smsMiscManager nullptr error");
-        return;
-    }
-    smsMiscManager->UpdateSimMessage(size, status, pdu, smsc);
+    interfaceManager->SetSmscAddr(smsc);
 }
 
-void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+void GetSmscFuzz(const uint8_t *data, size_t size)
 {
-    if (data == nullptr || size <= 0) {
+    if (!IsServiceInited()) {
         return;
     }
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
 
-    UpdateSimMessage(data, size);
+    int32_t slotId = static_cast<int32_t>(size % SIM_COUNT);
+    dataParcel.WriteInt32(slotId);
+    size_t dataSize = size - sizeof(uint32_t);
+    dataParcel.WriteBuffer(data + sizeof(uint32_t), dataSize);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetSmscAddr(dataParcel, replyParcel, option);
+
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr error");
+        return;
+    }
+    interfaceManager->GetSmscAddr();
 }
-}  // namespace OHOS
+
+void DoSetGetSmscMyAPI(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    SetSmscFuzz(data, size);
+    GetSmscFuzz(data, size);
+}
+} // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::AddSmsTokenFuzzer token;
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    OHOS::DoSetGetSmscMyAPI(data, size);
     return 0;
 }

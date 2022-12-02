@@ -96,7 +96,7 @@ void AddSimMessage(const uint8_t *data, size_t size)
 
     auto smsMiscRunner = AppExecFwk::EventRunner::Create("SmsMiscRunner");
     if (smsMiscRunner == nullptr) {
-        TELEPHONY_LOGE("failed to create smsMiscRunner");
+        TELEPHONY_LOGE("failed to create SmsMiscRunner");
         return;
     }
     std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(smsMiscRunner, slotId);
