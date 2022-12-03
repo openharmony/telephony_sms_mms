@@ -90,6 +90,7 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
     napi_close_handle_scope(env_, scope);
     if (work != nullptr) {
         delete work;
+        work = nullptr;
     }
     TELEPHONY_LOGI("CompleteSmsSendWork end");
 }

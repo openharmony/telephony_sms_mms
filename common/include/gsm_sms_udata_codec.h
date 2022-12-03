@@ -49,6 +49,7 @@ public:
 private:
     static int EncodeHeaderConcat(const struct SmsUDH header, char *pEncodeHeader);
     static void DebugDecodeHeader(const struct SmsUDH *pHeader);
+    static bool GetHeaderCnt(const unsigned char *pTpdu, struct SmsUserData *pUserData, int &offset, int &udhl, int i);
 };
 } // namespace Telephony
 } // namespace OHOS
