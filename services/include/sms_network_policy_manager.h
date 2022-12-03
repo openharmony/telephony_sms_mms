@@ -58,7 +58,9 @@ protected:
 private:
     int32_t GetId();
     void GetImsRegState();
+    bool IsCtSimCard();
 
+private:
     int32_t slotId_;
     enum NetWorkType netWorkType_ = NetWorkType::NET_TYPE_UNKNOWN;
     bool isImsNetDomain_ = false;
