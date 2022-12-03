@@ -425,7 +425,7 @@ bool MmsBodyPart::WriteBodyFromFile(std::string path)
         TELEPHONY_LOGE("path or realPath is NULL");
         return false;
     }
-    pFile = fopen(path.c_str(), "rb");
+    pFile = fopen(realPath, "rb");
     if (pFile == nullptr) {
         TELEPHONY_LOGI("Write Body Part from File notFind, try to use buffer");
         return false;

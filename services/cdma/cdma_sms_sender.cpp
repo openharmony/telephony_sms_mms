@@ -99,7 +99,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
             static_cast<int>(splits[i].encodeData.size());
         /* encode msg data */
         uint8_t pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = { 0 };
-        int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr);
+        int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr, TAPI_NETTEXT_SMDATA_SIZE_MAX + 1);
         std::vector<uint8_t> pdu(pduStr, pduStr + len);
         indexer->SetEncodePdu(std::move(pdu));
         indexer->SetMsgRefId(msgRef8bit);
@@ -330,7 +330,7 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     }
     /* encode msg data */
     uint8_t pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = { 0 };
-    int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr);
+    int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr, TAPI_NETTEXT_SMDATA_SIZE_MAX + 1);
     if (len <= 0) {
         TELEPHONY_LOGE("EncodeMsg Error len = %{public}d", len);
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -619,7 +619,7 @@ void CdmaSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &sm
     SetConcact(smsIndexer, transMsg);
     /* encode msg data */
     uint8_t pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = { 0 };
-    int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr);
+    int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr, TAPI_NETTEXT_SMDATA_SIZE_MAX + 1);
     std::vector<uint8_t> pdu(pduStr, pduStr + len);
     smsIndexer->SetEncodePdu(std::move(pdu));
     smsIndexer->SetNetWorkType(NET_TYPE_CDMA);
@@ -666,7 +666,7 @@ void CdmaSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sm
         static_cast<int>(smsIndexer->GetData().size());
     /* encode msg data */
     uint8_t pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = { 0 };
-    int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr);
+    int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr, TAPI_NETTEXT_SMDATA_SIZE_MAX + 1);
     std::vector<uint8_t> pdu(pduStr, pduStr + len);
     smsIndexer->SetEncodePdu(std::move(pdu));
     smsIndexer->SetNetWorkType(NET_TYPE_CDMA);
