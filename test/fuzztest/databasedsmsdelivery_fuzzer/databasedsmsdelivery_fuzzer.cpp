@@ -28,7 +28,7 @@ constexpr int32_t SLOT_NUM = 2;
 
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
-    if (data == nullptr || size <= 0) {
+    if (data == nullptr || size == 0) {
         return;
     }
 

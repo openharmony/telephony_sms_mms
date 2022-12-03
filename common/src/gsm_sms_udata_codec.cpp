@@ -309,13 +309,35 @@ void GsmSmsUDataCodec::ResetUserData(struct SmsUserData &userData)
     TELEPHONY_LOGI("ResetUserData memset_s ok!");
 }
 
+bool GsmSmsUDataCodec::GetHeaderCnt(
+    const unsigned char *pTpdu, struct SmsUserData *pUserData, int &offset, int &udhl, int i)
+{
+    int headerLen = DecodeHeader(&(pTpdu[offset]), &(pUserData->header[i]));
+    if (headerLen <= 0) {
+        pUserData->length = 0;
+        if (memset_s(pUserData->data, sizeof(pUserData->data), 0x00, sizeof(pUserData->data)) != EOK) {
+            TELEPHONY_LOGE("memset_s fail.");
+        }
+        return false;
+    }
+    offset += headerLen;
+    if (offset > (udhl + HEX_BYTE_STEP)) {
+        pUserData->length = 0;
+        if (memset_s(pUserData->data, sizeof(pUserData->data), 0x00, sizeof(pUserData->data)) != EOK) {
+            TELEPHONY_LOGE("memset_s fail.");
+        }
+        return false;
+    }
+    pUserData->headerCnt++;
+    return true;
+}
+
 int GsmSmsUDataCodec::Decode8bitData(
     const unsigned char *pTpdu, bool bHeaderInd, struct SmsUserData *pUserData, struct SmsTpud *pTPUD)
 {
     int offset = 0;
     int udl = 0;
     int udhl = 0;
-    int headerLen = 0;
     /* UDL */
     udl = pTpdu[offset++];
     if (udl > MAX_UCS2_DATA_LEN) {
@@ -339,23 +361,9 @@ int GsmSmsUDataCodec::Decode8bitData(
         TELEPHONY_LOGI("udhl = %{public}d", udhl);
         pUserData->headerCnt = 0;
         for (int i = 0; offset < udhl && i < MAX_UD_HEADER_NUM; i++) {
-            headerLen = DecodeHeader(&(pTpdu[offset]), &(pUserData->header[i]));
-            if (headerLen <= 0) {
-                pUserData->length = 0;
-                if (memset_s(pUserData->data, sizeof(pUserData->data), 0x00, sizeof(pUserData->data)) != EOK) {
-                    TELEPHONY_LOGE("memset_s fail.");
-                }
+            if (!GetHeaderCnt(pTpdu, pUserData, offset, udhl, i)) {
                 return 0;
             }
-            offset += headerLen;
-            if (offset > (udhl + HEX_BYTE_STEP)) {
-                pUserData->length = 0;
-                if (memset_s(pUserData->data, sizeof(pUserData->data), 0x00, sizeof(pUserData->data)) != EOK) {
-                    TELEPHONY_LOGE("memset_s fail.");
-                }
-                return 0;
-            }
-            pUserData->headerCnt++;
         }
     } else {
         pUserData->headerCnt = 0;
