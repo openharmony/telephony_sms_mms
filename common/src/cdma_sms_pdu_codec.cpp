@@ -54,6 +54,10 @@ void CdmaSmsPduCodec::ShiftNBit(unsigned char *src, unsigned int nBytes, unsigne
     }
 
     for (unsigned int index = 1; index < nBytes; index++) {
+        if (BYTE_BITS < nShiftBit) {
+            TELEPHONY_LOGE("ShiftNBit BYTE_BITS less than nShiftBit");
+            return;
+        }
         temp = src[index] >> (BYTE_BITS - nShiftBit);
         src[index - 1] |= temp;
         src[index] = (unsigned int)src[index] << nShiftBit;
@@ -71,6 +75,10 @@ void CdmaSmsPduCodec::ShiftRNBit(unsigned char *src, unsigned int nBytes, unsign
     for (unsigned int index = 0; index <= nBytes; index++) {
         temp = src[index] >> (nShiftBit);
         temp |= bit;
+        if (BYTE_BITS < nShiftBit) {
+            TELEPHONY_LOGE("ShiftRNBit BYTE_BITS less than nShiftBit");
+            return;
+        }
         bit = ((unsigned int)src[index] << (BYTE_BITS - nShiftBit));
         src[index] = temp;
     }
@@ -85,6 +93,10 @@ void CdmaSmsPduCodec::ShiftNBitForDecode(unsigned char *src, unsigned int nBytes
 
     for (unsigned int index = 0; index < nBytes; index++) {
         (src[index]) <<= nShiftBit;
+        if (BYTE_BITS < nShiftBit) {
+            TELEPHONY_LOGE("ShiftNBitForDecode BYTE_BITS less than nShiftBit");
+            return;
+        }
         src[index] |= (src[index + 1] >> (BYTE_BITS - nShiftBit));
     }
 }
@@ -166,7 +178,7 @@ bool CdmaSmsPduCodec::CheckInvalidPDU(const std::vector<unsigned char> &pduStr)
     return true;
 }
 
-int CdmaSmsPduCodec::EncodeMsg(const struct SmsTransMsg &transMsg, unsigned char *pduStr)
+int CdmaSmsPduCodec::EncodeMsg(const struct SmsTransMsg &transMsg, unsigned char *pduStr, size_t pduStrLen)
 {
     int encodeSize = 0;
     switch (transMsg.type) {
@@ -182,6 +194,11 @@ int CdmaSmsPduCodec::EncodeMsg(const struct SmsTransMsg &transMsg, unsigned char
         default:
             break;
     }
+    if (encodeSize > pduStrLen) {
+        TELEPHONY_LOGE("encodeSize should not more than pduStrLen");
+        return 0;
+    }
+
     return encodeSize;
 }
 
@@ -1821,10 +1838,10 @@ void CdmaSmsPduCodec::DecodeCMASData(unsigned char *pduStr, int pduLen, struct S
 int CdmaSmsPduCodec::DecodeCMASType0Data(unsigned char *pduStr, int pduLen, struct SmsTeleSvcCmasData &cmasData)
 {
     int offset = 0;
-    int tempLen = 0;
+    size_t tempLen = 0;
     unsigned char tempStr[pduLen + 1];
     tempLen = pduStr[offset++];
-    TELEPHONY_LOGI("Type 0 length = [%{public}d]", tempLen);
+    TELEPHONY_LOGI("Type 0 length = [%{public}u]", tempLen);
     int error = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
     if (error != EOK) {
         TELEPHONY_LOGE("DecodeCMASType0Data memset_s err.");
@@ -1851,7 +1868,7 @@ int CdmaSmsPduCodec::DecodeCMASType0Data(unsigned char *pduStr, int pduLen, stru
             case SMS_ENCODE_GSMDCS:
                 break;
             default:
-                cmasData.dataLen = tempLen - 1;
+                cmasData.dataLen = (tempLen == 0) ? 0 : (tempLen - 1);
                 if (memcpy_s(cmasData.alertText, sizeof(cmasData.alertText), tempStr + offset, tempLen - 1) != EOK) {
                     TELEPHONY_LOGE("cmasData alertText memcpy_s fail.");
                 }

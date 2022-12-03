@@ -98,7 +98,7 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         TELEPHONY_LOGE("path or realPath is NULL");
         return false;
     }
-    pFile = fopen(strPathName.c_str(), "rb");
+    pFile = fopen(realPath, "rb");
     if (pFile == nullptr) {
         TELEPHONY_LOGE("Open File Error :%{public}s", strPathName.c_str());
         return false;

@@ -29,7 +29,7 @@ public:
     virtual ~CdmaSmsPduCodec() = default;
 
     static bool CheckInvalidPDU(const std::vector<unsigned char> &pduStr);
-    static int EncodeMsg(const struct SmsTransMsg &transMsg, unsigned char *pduStr);
+    static int EncodeMsg(const struct SmsTransMsg &transMsg, unsigned char *pduStr, size_t pduStrLen);
     static int DecodeMsg(const unsigned char *pduStr, int pduLen, struct SmsTransMsg &transMsg);
 
 private:
