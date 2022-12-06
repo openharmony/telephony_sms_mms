@@ -21,17 +21,20 @@
 #include "token_setproc.h"
 
 namespace OHOS {
+const int PERMS_NUM = 4;
+
 AddSmsTokenFuzzer::AddSmsTokenFuzzer()
 {
-    const char **perms = new const char *[4];
-    perms[0] = "ohos.permission.SEND_MESSAGES";
-    perms[1] = "ohos.permission.RECEIVE_SMS";
-    perms[2] = "ohos.permission.SET_TELEPHONY_STATE";
-    perms[3] = "ohos.permission.GET_TELEPHONY_STATE";
+    const char *perms[PERMS_NUM] = {
+        "ohos.permission.SEND_MESSAGES",
+        "ohos.permission.RECEIVE_SMS",
+        "ohos.permission.SET_TELEPHONY_STATE",
+        "ohos.permission.GET_TELEPHONY_STATE",
+    };
 
     NativeTokenInfoParams testMmsInfoParams = {
         .dcapsNum = 0,
-        .permsNum = 4,
+        .permsNum = PERMS_NUM,
         .aclsNum = 0,
         .dcaps = nullptr,
         .perms = perms,

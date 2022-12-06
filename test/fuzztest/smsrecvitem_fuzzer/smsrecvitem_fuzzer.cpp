@@ -55,7 +55,7 @@ void DoRecvItemsTest(const uint8_t *data, size_t size, std::shared_ptr<SmsReceiv
 
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
-    if (data == nullptr || size <= 0) {
+    if (data == nullptr || size == 0) {
         return;
     }
 

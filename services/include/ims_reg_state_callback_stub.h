@@ -31,7 +31,6 @@ public:
     int32_t OnImsRegInfoChanged(int32_t slotId, ImsServiceType imsSrvType, const ImsRegInfo &info) override;
 
     std::shared_ptr<AppExecFwk::EventHandler> handle_;
-    int32_t slotId_;
 };
 } // namespace Telephony
 } // namespace OHOS
