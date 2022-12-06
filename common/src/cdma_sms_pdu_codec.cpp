@@ -1841,7 +1841,7 @@ int CdmaSmsPduCodec::DecodeCMASType0Data(unsigned char *pduStr, int pduLen, stru
     size_t tempLen = 0;
     unsigned char tempStr[pduLen + 1];
     tempLen = pduStr[offset++];
-    TELEPHONY_LOGI("Type 0 length = [%{public}u]", tempLen);
+    TELEPHONY_LOGI("Type 0 length = [%{public}zu]", tempLen);
     int error = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
     if (error != EOK) {
         TELEPHONY_LOGE("DecodeCMASType0Data memset_s err.");
@@ -1849,7 +1849,7 @@ int CdmaSmsPduCodec::DecodeCMASType0Data(unsigned char *pduStr, int pduLen, stru
     }
     if (memcpy_s(tempStr, sizeof(tempStr), pduStr + offset, tempLen) != EOK) {
         if (tempLen >= pduLen + 1) {
-            TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+            TELEPHONY_LOGE("data length invalid tempLen:%{public}zu, pduLen:%{public}d.", tempLen, pduLen);
             return offset;
         }
         cmasData.encodeType = FindMsgEncodeType(tempStr[0] & 0xf8);
