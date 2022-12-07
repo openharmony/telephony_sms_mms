@@ -78,6 +78,10 @@ std::unique_ptr<SmsTransMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::str
     transMsg->data.p2pMsg.address.numberMode = SMS_NUMBER_MODE_NONE_DATANETWORK;
     transMsg->data.p2pMsg.address.numberPlan = SMS_NPI_UNKNOWN;
     transMsg->data.p2pMsg.address.addrLen = dest.length();
+    if (dest.length() > SMS_TRANS_ADDRESS_MAX_LEN + 1) {
+        TELEPHONY_LOGE("CreateSubmitTransMsg data length invalid.");
+        return nullptr;
+    }
     if (strncpy_s(transMsg->data.p2pMsg.address.szData, sizeof(transMsg->data.p2pMsg.address.szData), dest.c_str(),
         dest.length()) != EOK) {
         transMsg->data.p2pMsg.address.addrLen = sizeof(transMsg->data.p2pMsg.address.szData) - 1;
@@ -385,6 +389,10 @@ void CdmaSmsMessage::AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver)
     (void)memset_s(&userData, sizeof(SmsTeleSvcUserData), 0x00, sizeof(SmsTeleSvcUserData));
     userData.userData.length = deliver.cmasData.dataLen;
     userData.encodeType = deliver.cmasData.encodeType;
+    if (deliver.cmasData.dataLen > sizeof(userData.userData.data)) {
+        TELEPHONY_LOGE("AnalsisCMASMsg memcpy_s data length invalid.");
+        return;
+    }
     if (memcpy_s(userData.userData.data, sizeof(userData.userData.data), deliver.cmasData.alertText,
         deliver.cmasData.dataLen) == EOK) {
         AnalsisUserData(userData);
@@ -551,6 +559,10 @@ int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, S
 
     switch (codingType) {
         case SMS_CODING_7BIT: {
+            if (static_cast<unsigned int>(dataLen) > maxDecodeLen) {
+                TELEPHONY_LOGE("DecodeMessage memcpy_s data length invalid.");
+                return decodeLen;
+            }
             if (memcpy_s(decodeData, maxDecodeLen, pMsgText, dataLen) != EOK) {
                 TELEPHONY_LOGE("SplitMessage SMS_CHARSET_8BIT memcpy_s error!");
                 return decodeLen;
