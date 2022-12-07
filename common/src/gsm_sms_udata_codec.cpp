@@ -191,6 +191,10 @@ int GsmSmsUDataCodec::Encode8bitData(const struct SmsUserData *pUserData, char *
     } else {
         pEncodeData[0] = (char)pUserData->length;
     }
+    if (pUserData->length > static_cast<int>(MAX_TPDU_DATA_LEN - offset)) {
+        TELEPHONY_LOGE("Encode8bitData data length invalid tempLen.");
+        return encodeLen;
+    }
     if (memcpy_s(&(pEncodeData[offset]), MAX_TPDU_DATA_LEN - offset, pUserData->data, pUserData->length) != EOK) {
         TELEPHONY_LOGE("Encode8bitData memcpy_s error");
         return encodeLen;
@@ -226,6 +230,10 @@ int GsmSmsUDataCodec::EncodeUCS2Data(const struct SmsUserData *pUserData, char *
     } else {
         pEncodeData[0] = (char)pUserData->length;
     }
+    if (pUserData->length > static_cast<int>(MAX_TPDU_DATA_LEN - offset)) {
+        TELEPHONY_LOGE("EncodeUCS2Data data length invalid");
+        return encodeLen;
+    }
     if (memcpy_s(&(pEncodeData[offset]), MAX_TPDU_DATA_LEN - offset, pUserData->data, pUserData->length) != EOK) {
         TELEPHONY_LOGE("EncodeUCS2Data memcpy_s error");
         return encodeLen;
@@ -256,6 +264,10 @@ int GsmSmsUDataCodec::DecodeGSMData(const unsigned char *pTpdu, const int tpduLe
     /* Setting for Wap Push */
     if (pTPUD != nullptr) {
         pTPUD->udl = udl;
+        if (static_cast<unsigned long>(udl) > sizeof(pTPUD->ud)) {
+            TELEPHONY_LOGE("DecodeGSMData data length invalid");
+            return 0;
+        }
         if (memcpy_s(pTPUD->ud, sizeof(pTPUD->ud), &(pTpdu[offset]), udl) != EOK) {
             TELEPHONY_LOGE("DecodeGSMData memcpy_s error");
             return 0;
@@ -347,6 +359,10 @@ int GsmSmsUDataCodec::Decode8bitData(
     /* Setting for Wap Push */
     if (pTPUD != nullptr) {
         pTPUD->udl = udl;
+        if (static_cast<unsigned long>(udl) > sizeof(pTPUD->ud)) {
+            TELEPHONY_LOGE("Decode8bitData data length invalid");
+            return 0;
+        }
         if (memcpy_s(pTPUD->ud, sizeof(pTPUD->ud), &(pTpdu[offset]), udl) != EOK) {
             TELEPHONY_LOGE("memcpy_s error.");
             return 0;
@@ -374,6 +390,10 @@ int GsmSmsUDataCodec::Decode8bitData(
         pUserData->length = udl;
     }
     TELEPHONY_LOGI("pUserData->length= %{public}d  offset= %{public}d", pUserData->length, offset);
+    if (static_cast<unsigned long>(udl) > sizeof(pTPUD->ud)) {
+        TELEPHONY_LOGE("Decode8bitData data length invalid");
+        return 0;
+    }
     if (memcpy_s(pUserData->data, sizeof(pUserData->data), &(pTpdu[offset]), pUserData->length) != EOK) {
         return 0;
     }
