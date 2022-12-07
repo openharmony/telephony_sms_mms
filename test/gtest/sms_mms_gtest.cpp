@@ -1653,7 +1653,7 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0001, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+    if (!helper.Run(SetTextMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SetDataMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
@@ -1678,7 +1678,7 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0002, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+    if (!helper.Run(SetTextMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SetDataMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
@@ -1703,7 +1703,7 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0003, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+    if (!helper.Run(SetTextMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SetDataMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
