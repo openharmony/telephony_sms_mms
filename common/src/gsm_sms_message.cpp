@@ -282,16 +282,14 @@ std::shared_ptr<struct EncodeInfo> GsmSmsMessage::GetSubmitEncodeInfo(const std:
     (void)memset_s(tpduBuf, sizeof(tpduBuf), 0x00, sizeof(tpduBuf));
     if ((!sc.empty()) && (sc.length() < MAX_SMSC_LEN)) {
         struct SmsAddress pAddress;
-        ret = memset_s(&pAddress.address, sizeof(pAddress.address), 0x00, sizeof(pAddress.address));
-        if (ret != EOK) {
+        if (memset_s(&pAddress.address, sizeof(pAddress.address), 0x00, sizeof(pAddress.address)) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo memset_s error!");
             return nullptr;
         }
         if (sc.length() > sizeof(pAddress.address)) {
             return nullptr;
         }
-        ret = memcpy_s(&pAddress.address, sizeof(pAddress.address), sc.data(), sc.length());
-        if (ret != EOK) {
+        if (memcpy_s(&pAddress.address, sizeof(pAddress.address), sc.data(), sc.length()) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo memcpy_s error!");
             return nullptr;
         }
@@ -311,13 +309,11 @@ std::shared_ptr<struct EncodeInfo> GsmSmsMessage::GetSubmitEncodeInfo(const std:
             TELEPHONY_LOGE("GetSubmitEncodeInfo data length invalid.");
             return nullptr;
         }
-        ret = memcpy_s(info->smcaData_, sizeof(info->smcaData_), encodeSmscAddr, encodeSmscLen);
-        if (ret != EOK) {
+        if (memcpy_s(info->smcaData_, sizeof(info->smcaData_), encodeSmscAddr, encodeSmscLen) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo encodeSmscAddr memcpy_s error!");
             return nullptr;
         }
-        ret = memcpy_s(info->tpduData_, sizeof(info->tpduData_), tpduBuf, bufLen);
-        if (ret != EOK) {
+        if (memcpy_s(info->tpduData_, sizeof(info->tpduData_), tpduBuf, bufLen) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo memcpy_s error!");
             return nullptr;
         }

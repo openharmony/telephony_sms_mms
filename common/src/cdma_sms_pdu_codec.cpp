@@ -1490,12 +1490,10 @@ int CdmaSmsPduCodec::DecodeAddress(const unsigned char *pduStr, int pduLen, stru
         if (transAddr.numberMode) {
             /* digit mode 1, number mode 1 */
             transAddr.numberType = DecodeDigitModeNumberType(tempStr[0] & 0xe0, true);
-            TELEPHONY_LOGI("numberType %{public}d ", transAddr.numberType);
             ShiftNBitForDecode(tempStr, tempLen, SHIFT_3BITS);
         } else {
             /* digit mode 1, number mode 0 */
             transAddr.numberType = DecodeDigitModeNumberType(tempStr[0] & 0xe0, false);
-            TELEPHONY_LOGI("numberType %{public}d ", transAddr.numberType);
             ShiftNBitForDecode(tempStr, tempLen, SHIFT_3BITS);
             transAddr.numberPlan = DecodeDigitModeNumberPlan((tempStr[0] >> SHIFT_4BITS) & 0x0f);
             ShiftNBitForDecode(tempStr, tempLen, SHIFT_4BITS);
