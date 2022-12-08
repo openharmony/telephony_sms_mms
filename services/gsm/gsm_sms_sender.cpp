@@ -89,6 +89,10 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
         indexer->SetDcs(cellsInfos[i].encodeType);
         headerCnt = 0;
         (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
+        if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1) {
+            TELEPHONY_LOGE("TextBasedSmsDelivery data length invalid.");
+            return;
+        }
         ret = memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, &cellsInfos[i].encodeData[0],
             cellsInfos[i].encodeData.size());
         if (ret != EOK) {
@@ -178,6 +182,10 @@ void GsmSmsSender::DataBasedSmsDeliverySplitPage(GsmSmsMessage &gsmSmsMessage, s
         }
 
         (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
+        if (cellsInfos[indexData].encodeData.size() > MAX_USER_DATA_LEN + 1) {
+            TELEPHONY_LOGE("DataBasedSmsDeliverySplitPage data length invalid.");
+            return;
+        }
         int ret = memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, &cellsInfos[indexData].encodeData[0],
             cellsInfos[indexData].encodeData.size());
         if (ret != EOK) {
@@ -591,6 +599,10 @@ bool GsmSmsSender::SetPduInfo(
         return ret;
     }
     (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
+    if (smsIndexer->GetText().length() > MAX_USER_DATA_LEN + 1) {
+        TELEPHONY_LOGE("SetPduInfo data length invalid.");
+        return ret;
+    }
     if (memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, smsIndexer->GetText().c_str(),
         smsIndexer->GetText().length()) != EOK) {
         SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);

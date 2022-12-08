@@ -79,6 +79,10 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
         (void)memset_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
             sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data), 0x00,
             sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data));
+        if (splits[i].encodeData.size() > sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data)) {
+            TELEPHONY_LOGE("data length invalid");
+            return;
+        }
         if (memcpy_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
             sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data),
             splits[i].encodeData.data(), splits[i].encodeData.size()) != EOK) {
@@ -154,6 +158,9 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
     indexer->SetDcs(cellsInfos[i].encodeType);
     (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
 
+    if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1) {
+        return;
+    }
     if (memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, &cellsInfos[i].encodeData[0],
         cellsInfos[i].encodeData.size()) != EOK) {
         SendResultCallBack(indexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -321,6 +328,10 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
     transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length =
         static_cast<int>(splits[0].encodeData.size());
+    if (splits[0].encodeData.size() > sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data)) {
+        TELEPHONY_LOGE("DataBasedSmsDelivery data length invalid.");
+        return;
+    }
     if (memcpy_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
         sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data),
         splits[0].encodeData.data(), splits[0].encodeData.size()) != EOK) {
@@ -610,6 +621,10 @@ void CdmaSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &sm
     (void)memset_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
         sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data), 0x00,
         sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data));
+    if (smsIndexer->GetText().length() > sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data)) {
+        TELEPHONY_LOGE("ResendTextDelivery data length invalid.");
+        return;
+    }
     if (memcpy_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
         sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data),
         smsIndexer->GetText().data(), smsIndexer->GetText().length()) != EOK) {
@@ -655,6 +670,10 @@ void CdmaSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sm
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
     transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.encodeType = SMS_ENCODE_OCTET;
+    if (smsIndexer->GetData().size() > sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data)) {
+        TELEPHONY_LOGE("ResendDataDelivery data length invalid.");
+        return;
+    }
     if (memcpy_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
         sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data),
         smsIndexer->GetData().data(), smsIndexer->GetData().size()) != EOK) {
