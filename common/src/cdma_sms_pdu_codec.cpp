@@ -1868,7 +1868,7 @@ int CdmaSmsPduCodec::DecodeCMASType0Data(unsigned char *pduStr, int pduLen, stru
         return offset;
     }
     if (tempLen > static_cast<size_t>(pduLen + 1)) {
-        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+        TELEPHONY_LOGE("data length invalid tempLen:%{public}zu, pduLen:%{public}d.", tempLen, pduLen);
         return offset;
     }
     if (memcpy_s(tempStr, sizeof(tempStr), pduStr + offset, tempLen) != EOK) {
