@@ -167,6 +167,10 @@ int GsmSmsMessage::SetHeaderReply(int index)
                 TELEPHONY_LOGE("reply length exceed maxinum");
                 return ret;
             }
+            if (reply.length() > sizeof(smsTpdu_->data.submit.userData.header[index].udh.alternateAddress.address)) {
+                TELEPHONY_LOGE("SetHeaderReply data length invalid.");
+                return ret;
+            }
             ret = memcpy_s(smsTpdu_->data.submit.userData.header[index].udh.alternateAddress.address,
                 sizeof(smsTpdu_->data.submit.userData.header[index].udh.alternateAddress.address), reply.c_str(),
                 reply.length());
@@ -278,13 +282,14 @@ std::shared_ptr<struct EncodeInfo> GsmSmsMessage::GetSubmitEncodeInfo(const std:
     (void)memset_s(tpduBuf, sizeof(tpduBuf), 0x00, sizeof(tpduBuf));
     if ((!sc.empty()) && (sc.length() < MAX_SMSC_LEN)) {
         struct SmsAddress pAddress;
-        ret = memset_s(&pAddress.address, sizeof(pAddress.address), 0x00, sizeof(pAddress.address));
-        if (ret != EOK) {
+        if ((ret = memset_s(&pAddress.address, sizeof(pAddress.address), 0x00, sizeof(pAddress.address))) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo memset_s error!");
             return nullptr;
         }
-        ret = memcpy_s(&pAddress.address, sizeof(pAddress.address), sc.data(), sc.length());
-        if (ret != EOK) {
+        if (sc.length() > sizeof(pAddress.address)) {
+            return nullptr;
+        }
+        if ((ret = memcpy_s(&pAddress.address, sizeof(pAddress.address), sc.data(), sc.length())) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo memcpy_s error!");
             return nullptr;
         }
@@ -300,13 +305,15 @@ std::shared_ptr<struct EncodeInfo> GsmSmsMessage::GetSubmitEncodeInfo(const std:
     std::shared_ptr<struct EncodeInfo> info = std::make_shared<struct EncodeInfo>();
     int bufLen = GsmSmsTpduCodec::EncodeTpdu(smsTpdu_.get(), tpduBuf, sizeof(tpduBuf));
     if (bufLen > 0 && info != nullptr) {
-        ret = memcpy_s(info->smcaData_, sizeof(info->smcaData_), encodeSmscAddr, encodeSmscLen);
-        if (ret != EOK) {
+        if (static_cast<unsigned long>(encodeSmscLen) > sizeof(info->smcaData_)) {
+            TELEPHONY_LOGE("GetSubmitEncodeInfo data length invalid.");
+            return nullptr;
+        }
+        if ((ret = memcpy_s(info->smcaData_, sizeof(info->smcaData_), encodeSmscAddr, encodeSmscLen)) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo encodeSmscAddr memcpy_s error!");
             return nullptr;
         }
-        ret = memcpy_s(info->tpduData_, sizeof(info->tpduData_), tpduBuf, bufLen);
-        if (ret != EOK) {
+        if ((ret = memcpy_s(info->tpduData_, sizeof(info->tpduData_), tpduBuf, bufLen)) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo memcpy_s error!");
             return nullptr;
         }
@@ -674,6 +681,10 @@ int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, Sm
             break;
         }
         case SMS_CODING_8BIT: {
+            if (static_cast<unsigned int>(dataLen) > maxDecodeLen) {
+                TELEPHONY_LOGE("DecodeMessage data length invalid.");
+                return decodeLen;
+            }
             if (memcpy_s(decodeData, maxDecodeLen, pMsgText, dataLen) != EOK) {
                 TELEPHONY_LOGE("SplitMessage SMS_CHARSET_8BIT memcpy_s error!");
                 return decodeLen;
