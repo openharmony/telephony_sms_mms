@@ -194,7 +194,7 @@ int CdmaSmsPduCodec::EncodeMsg(const struct SmsTransMsg &transMsg, unsigned char
         default:
             break;
     }
-    if (encodeSize > pduStrLen) {
+    if (static_cast<size_t>(encodeSize) > pduStrLen) {
         TELEPHONY_LOGE("encodeSize should not more than pduStrLen");
         return 0;
     }
@@ -776,7 +776,7 @@ void CdmaSmsPduCodec::DecodeP2PDeliverMsg(const unsigned char *pduStr, int pduLe
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
-                if (tempLen >= pduLen + 1) {
+                if (tempLen > pduLen + 1) {
                     TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
                     break;
                 }
@@ -889,6 +889,10 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
         TELEPHONY_LOGE("DecodeP2PEnhancedVmn memset_s err.");
         return;
     }
+    if (tempLen > pduLen + 1) {
+        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+        return;
+    }
     ret = memcpy_s(tempStr, sizeof(tempStr), pduStr + offset, tempLen);
     if (ret != EOK) {
         TELEPHONY_LOGE("DecodeP2PEnhancedVmn memcpy_s");
@@ -898,10 +902,7 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
     enhancedVmn.passwordReq = (pduStr[offset] & 0x20) ? true : false;
     enhancedVmn.setupReq = (pduStr[offset] & 0x10) ? true : false;
     enhancedVmn.pwChangeReq = (pduStr[offset] & 0x08) ? true : false;
-    if (tempLen >= pduLen + 1) {
-        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
-        return;
-    }
+
     ShiftNBitForDecode(tempStr, tempLen, SHIFT_5BITS);
     if (enhancedVmn.setupReq || enhancedVmn.pwChangeReq) {
         enhancedVmn.minPwLen = tempStr[tempOff] >> SHIFT_4BITS;
@@ -940,6 +941,10 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
             TELEPHONY_LOGE("enhancedVmn memset_s err.");
             return;
         }
+        if (static_cast<unsigned long>(enhancedVmn.anNumField) > sizeof(enhancedVmn.anChar)) {
+            TELEPHONY_LOGE("enhancedVmn memcpy_s data length invalid.");
+            return;
+        }
         ret = memcpy_s(enhancedVmn.anChar, sizeof(enhancedVmn.anChar), tempStr + tempOff, enhancedVmn.anNumField);
         if (ret != EOK) {
             TELEPHONY_LOGE("enhancedVmn memcpy_s err.");
@@ -963,6 +968,10 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
         ShiftNBitForDecode(tempStr, tempLen, SHIFT_4BITS);
         enhancedVmn.cliNumField = tempStr[tempOff++];
         (void)memset_s(enhancedVmn.cliChar, sizeof(enhancedVmn.cliChar), 0x00, sizeof(enhancedVmn.cliChar));
+        if (static_cast<unsigned long>(enhancedVmn.cliNumField) > sizeof(enhancedVmn.cliChar)) {
+            TELEPHONY_LOGE("enhancedVmn memcpy_s data length invalid.");
+            return;
+        }
         ret = memcpy_s(enhancedVmn.cliChar, sizeof(enhancedVmn.cliChar), tempStr + tempOff, enhancedVmn.cliNumField);
         if (ret != EOK) {
             TELEPHONY_LOGE("enhancedVmn cliChar memcpy_s fail.");
@@ -986,7 +995,7 @@ void CdmaSmsPduCodec::DecodeP2PDeliverVmnAck(
         TELEPHONY_LOGE("DeliverVmnAck memset_s err.");
         return;
     }
-    if (tempLen >= pduLen + 1) {
+    if (tempLen > pduLen + 1) {
         TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
         return;
     }
@@ -999,10 +1008,6 @@ void CdmaSmsPduCodec::DecodeP2PDeliverVmnAck(
     enhancedVmnAck.vmNumUnheardMsg = tempStr[offset++];
     enhancedVmnAck.numDeleteAck = tempStr[offset] >> SHIFT_5BITS;
     enhancedVmnAck.numPlayAck = (tempStr[offset] & 0x1c) >> SHIFT_2BITS;
-    if (tempLen >= pduLen + 1) {
-        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
-        return;
-    }
     ShiftNBitForDecode(tempStr, tempLen, SHIFT_6BITS);
     for (int i = 0; i < enhancedVmnAck.numDeleteAck; i++) {
         enhancedVmnAck.daVmMsgId[i] = (tempStr[offset] << SHIFT_8BITS) | tempStr[offset + 1];
@@ -1027,7 +1032,7 @@ void CdmaSmsPduCodec::DecodeP2PSubmitMsg(const unsigned char *pduStr, int pduLen
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
-                if (tempLen >= pduLen + 1) {
+                if (tempLen > pduLen + 1) {
                     TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
                     break;
                 }
@@ -1119,7 +1124,7 @@ void CdmaSmsPduCodec::DecodeP2PUserAckMsg(
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
-                if (tempLen >= pduLen + 1) {
+                if (tempLen > pduLen + 1) {
                     TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
                     break;
                 }
@@ -1173,7 +1178,7 @@ void CdmaSmsPduCodec::DecodeP2PReadAckMsg(
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
-                if (tempLen >= pduLen + 1) {
+                if (tempLen > pduLen + 1) {
                     TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
                     break;
                 }
@@ -1224,7 +1229,7 @@ void CdmaSmsPduCodec::DecodeP2PSubmitReportMsg(
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
-                if (tempLen >= pduLen + 1) {
+                if (tempLen > pduLen + 1) {
                     TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
                     break;
                 }
@@ -1273,7 +1278,7 @@ void CdmaSmsPduCodec::DecodeP2PDeliveryAckMsg(
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tmpLen = pduStr[offset - 1];
-                if (tmpLen >= pduLen + 1) {
+                if (tmpLen > pduLen + 1) {
                     TELEPHONY_LOGE("length err tmpLen:%{public}d, pduLen:%{public}d.", tmpLen, pduLen);
                     break;
                 }
@@ -1323,7 +1328,7 @@ void CdmaSmsPduCodec::DecodeCBBearerData(
             case SMS_BEARER_USER_DATA:
                 offset += HEX_BYTE_STEP;
                 tempLen = pduStr[offset - 1];
-                if (tempLen >= pduLen + 1) {
+                if (tempLen > pduLen + 1) {
                     TELEPHONY_LOGE("length err tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
                     break;
                 }
@@ -1462,6 +1467,10 @@ int CdmaSmsPduCodec::DecodeAddress(const unsigned char *pduStr, int pduLen, stru
         TELEPHONY_LOGE("DecodeAddress memset_s err.");
         return offset;
     }
+    if (tempLen > pduLen + 1) {
+        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+        return offset;
+    }
     if (memcpy_s(tempStr, sizeof(tempStr), pduStr + offset, tempLen) != EOK) {
         TELEPHONY_LOGE("DecodeAddress pduStr memcpy_s err.");
         return offset;
@@ -1472,10 +1481,6 @@ int CdmaSmsPduCodec::DecodeAddress(const unsigned char *pduStr, int pduLen, stru
         return offset;
     }
 
-    if (tempLen >= pduLen + 1) {
-        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
-        return offset;
-    }
     offset += tempLen;
     transAddr.digitMode = (tempStr[0] & 0x80) ? true : false;
     transAddr.numberMode = (tempStr[0] & 0x40) ? true : false;
@@ -1485,17 +1490,18 @@ int CdmaSmsPduCodec::DecodeAddress(const unsigned char *pduStr, int pduLen, stru
         if (transAddr.numberMode) {
             /* digit mode 1, number mode 1 */
             transAddr.numberType = DecodeDigitModeNumberType(tempStr[0] & 0xe0, true);
-            TELEPHONY_LOGI("numberType %{public}d ", transAddr.numberType);
             ShiftNBitForDecode(tempStr, tempLen, SHIFT_3BITS);
         } else {
             /* digit mode 1, number mode 0 */
             transAddr.numberType = DecodeDigitModeNumberType(tempStr[0] & 0xe0, false);
-            TELEPHONY_LOGI("numberType %{public}d ", transAddr.numberType);
             ShiftNBitForDecode(tempStr, tempLen, SHIFT_3BITS);
             transAddr.numberPlan = DecodeDigitModeNumberPlan((tempStr[0] >> SHIFT_4BITS) & 0x0f);
             ShiftNBitForDecode(tempStr, tempLen, SHIFT_4BITS);
         }
         transAddr.addrLen = tempStr[0];
+        if (transAddr.addrLen > sizeof(transAddr.szData)) {
+            TELEPHONY_LOGE("data length invalid.");
+        }
         if (memcpy_s(transAddr.szData, sizeof(transAddr.szData), &tempStr[1], transAddr.addrLen) != EOK) {
             TELEPHONY_LOGE("DecodeAddress memcpy_s error.");
         }
@@ -1527,12 +1533,12 @@ int CdmaSmsPduCodec::DecodeSubAddress(const unsigned char *pduStr, int pduLen, s
         TELEPHONY_LOGE("DecodeSubAddress memset_s err.");
         return offset;
     }
-    if (memcpy_s(tempStr, sizeof(tempStr), &pduStr[offset], tempLen) != EOK) {
-        TELEPHONY_LOGE("DecodeSubAddress memcpy_s err.");
+    if (tempLen > pduLen + 1) {
+        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
         return offset;
     }
-    if (tempLen >= pduLen + 1) {
-        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+    if (memcpy_s(tempStr, sizeof(tempStr), &pduStr[offset], tempLen) != EOK) {
+        TELEPHONY_LOGE("DecodeSubAddress memcpy_s err.");
         return offset;
     }
 
@@ -1553,6 +1559,9 @@ int CdmaSmsPduCodec::DecodeSubAddress(const unsigned char *pduStr, int pduLen, s
 
     int numfeilds = tempStr[tempOffset++];
     (void)memset_s(subAddr.szData, sizeof(subAddr.szData), 0x00, sizeof(subAddr.szData));
+    if (static_cast<unsigned long>(numfeilds) > sizeof(subAddr.szData)) {
+        TELEPHONY_LOGE("data length invalid.");
+    }
     if (memcpy_s(subAddr.szData, sizeof(subAddr.szData), tempStr + tempOffset, numfeilds) != EOK) {
         TELEPHONY_LOGE("DecodeSubAddress memcpy_s szdata error.");
     }
@@ -1568,6 +1577,10 @@ int CdmaSmsPduCodec::DecodeMsgId(const unsigned char *pduStr, int pduLen, struct
     ret = memset_s(tempStr, sizeof(tempStr), 0x00, sizeof(tempStr));
     if (ret != EOK) {
         TELEPHONY_LOGE("DecodeMsgId memset_s fail.");
+        return offset;
+    }
+    if (MSG_UDID_PARAM_LEN > static_cast<uint8_t>(pduLen + 1)) {
+        TELEPHONY_LOGE("data length invalid.");
         return offset;
     }
     ret = memcpy_s(tempStr, sizeof(tempStr), &pduStr[offset + HEX_BYTE_STEP], MSG_UDID_PARAM_LEN);
@@ -1595,9 +1608,12 @@ void CdmaSmsPduCodec::DecodeCallBackNum(const unsigned char *pduStr, int pduLen,
         svcAddr.numberType = DecodeDigitModeNumberType((pduStr[offset] << SHIFT_1BITS) & 0x70, false);
         svcAddr.numberPlan = DecodeDigitModeNumberPlan(pduStr[offset++] & 0x0f);
         svcAddr.addrLen = pduStr[offset++];
+        if (svcAddr.addrLen > sizeof(svcAddr.szData)) {
+            TELEPHONY_LOGE("DecodeCallBackNum data length invalid.");
+            return;
+        }
         if (svcAddr.numberType == SMS_NUMBER_TYPE_INTERNATIONAL) {
-            if (memcpy_s(&(svcAddr.szData[1]), sizeof(svcAddr.szData) - 1, pduStr + offset, svcAddr.addrLen) !=
-                EOK) {
+            if (memcpy_s(&(svcAddr.szData[1]), sizeof(svcAddr.szData) - 1, pduStr + offset, svcAddr.addrLen) != EOK) {
                 TELEPHONY_LOGE("DecodeCallBackNum pduStr memcpy_s err.");
                 return;
             }
@@ -1778,6 +1794,10 @@ int CdmaSmsPduCodec::EncodeUCS2Data(const struct SmsUserData &userData, unsigned
         dest[0] = (char)userData.length / HEX_BYTE_STEP;
     }
 
+    if (userData.length > static_cast<int>(MAX_TPDU_DATA_LEN - offset)) {
+        TELEPHONY_LOGE("data length invalid.");
+        return encodeLen;
+    }
     if (memcpy_s(&dest[offset], MAX_TPDU_DATA_LEN - offset, userData.data, userData.length) != EOK) {
         TELEPHONY_LOGE("EncodeUCS2Data memcpy_s error");
         return encodeLen;
@@ -1847,11 +1867,11 @@ int CdmaSmsPduCodec::DecodeCMASType0Data(unsigned char *pduStr, int pduLen, stru
         TELEPHONY_LOGE("DecodeCMASType0Data memset_s err.");
         return offset;
     }
+    if (tempLen > static_cast<size_t>(pduLen + 1)) {
+        TELEPHONY_LOGE("data length invalid tempLen:%{public}d, pduLen:%{public}d.", tempLen, pduLen);
+        return offset;
+    }
     if (memcpy_s(tempStr, sizeof(tempStr), pduStr + offset, tempLen) != EOK) {
-        if (tempLen >= pduLen + 1) {
-            TELEPHONY_LOGE("data length invalid tempLen:%{public}zu, pduLen:%{public}d.", tempLen, pduLen);
-            return offset;
-        }
         cmasData.encodeType = FindMsgEncodeType(tempStr[0] & 0xf8);
         ShiftNBitForDecode(tempStr, tempLen, SHIFT_5BITS);
         switch (cmasData.encodeType) {
@@ -1869,6 +1889,10 @@ int CdmaSmsPduCodec::DecodeCMASType0Data(unsigned char *pduStr, int pduLen, stru
                 break;
             default:
                 cmasData.dataLen = (tempLen == 0) ? 0 : (tempLen - 1);
+                if (tempLen - 1 > sizeof(cmasData.alertText)) {
+                    TELEPHONY_LOGE("data length invalid.");
+                    return offset;
+                }
                 if (memcpy_s(cmasData.alertText, sizeof(cmasData.alertText), tempStr + offset, tempLen - 1) != EOK) {
                     TELEPHONY_LOGE("cmasData alertText memcpy_s fail.");
                 }
@@ -1948,12 +1972,20 @@ void CdmaSmsPduCodec::DecodeUserData(
             } else {
                 userData.userData.length = numFields * HEX_BYTE_STEP;
             }
+            if (static_cast<unsigned long>(userData.userData.length) > sizeof(userData.userData.data)) {
+                TELEPHONY_LOGE("data length error.");
+                return;
+            }
             if (memcpy_s(userData.userData.data, sizeof(userData.userData.data), pduStr + offset,
                 userData.userData.length) != EOK) {
                 TELEPHONY_LOGE("SMS_ENCODE_UNICODE memcpy_s err.");
             }
             break;
         default:
+            if (static_cast<unsigned long>(userData.userData.length) > sizeof(userData.userData.data)) {
+                TELEPHONY_LOGE("data length error.");
+                return;
+            }
             if (memcpy_s(userData.userData.data, sizeof(userData.userData.data), pduStr + offset,
                 userData.userData.length) != EOK) {
                 TELEPHONY_LOGE("unkown encodeType memcpy_s err.");
