@@ -1749,7 +1749,7 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0001, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+    if (!helper.Run(SetTextMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SetTextMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
@@ -1774,7 +1774,7 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0002, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+    if (!helper.Run(SetTextMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SetTextMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
@@ -1789,6 +1789,7 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0002, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsMmsGtest, SendTextMessage_0003, Function | MediumTest | Level2)
 {
+    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0003 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(SmsMmsGtest::HasSimCard(slotId))) {
@@ -1798,7 +1799,7 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0003, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetDataMessageTestFuc, helper)) {
+    if (!helper.Run(SetTextMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SetTextMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
