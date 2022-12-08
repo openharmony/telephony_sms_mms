@@ -367,6 +367,10 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
             break;
         }
         default: {
+            if (split.encodeData.size() > sizeof(buff)) {
+                TELEPHONY_LOGE("AnalsisDeliverMsg data length invalid.");
+                return;
+            }
             if (memcpy_s(buff, sizeof(buff), split.encodeData.data(), split.encodeData.size()) != EOK) {
                 TELEPHONY_LOGE("AnalsisDeliverMsg memcpy_s fail.");
                 return;
