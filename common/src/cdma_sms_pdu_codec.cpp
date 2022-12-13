@@ -17,7 +17,6 @@
 #include "cdma_sms_pdu_codec.h"
 
 #include "gsm_sms_udata_codec.h"
-#include "msg_text_convert.h"
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "telephony_log_wrapper.h"

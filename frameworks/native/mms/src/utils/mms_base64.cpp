@@ -15,39 +15,22 @@
 
 #include "mms_base64.h"
 
-#include <glib.h>
-#include <glib/gtypes.h>
-
+#include "sms_service_manager_client.h"
 #include "string"
 
 namespace OHOS {
 namespace Telephony {
 std::string MmsBase64::Encode(const std::string src)
 {
-    gchar *encode_data = g_base64_encode((guchar *)src.data(), src.length());
-    if (encode_data == nullptr) {
-        return "";
-    }
-    gsize out_len = 0;
-    out_len = strlen(encode_data);
-    std::string dest((char *)encode_data, out_len);
-    if (encode_data != nullptr) {
-        g_free(encode_data);
-    }
+    std::string dest;
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetBase64Encode(src, dest);
     return dest;
 }
 
 std::string MmsBase64::Decode(const std::string src)
 {
-    gsize out_len = 0;
-    char *decode_data = (char *)g_base64_decode(src.data(), &out_len);
-    if (decode_data == nullptr) {
-        return "";
-    }
-    std::string dest(decode_data, out_len);
-    if (decode_data != nullptr) {
-        g_free(decode_data);
-    }
+    std::string dest;
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetBase64Decode(src, dest);
     return dest;
 }
 } // namespace Telephony

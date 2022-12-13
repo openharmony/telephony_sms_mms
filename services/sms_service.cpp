@@ -19,6 +19,7 @@
 
 #include "core_manager_inner.h"
 #include "ims_sms_client.h"
+#include "msg_text_convert.h"
 #include "sms_dump_helper.h"
 #include "sms_hisysevent.h"
 #include "string_utils.h"
@@ -493,6 +494,148 @@ int64_t SmsService::GetSpendTime()
 {
     spendTime_ = endTime_ - bindTime_;
     return spendTime_;
+}
+
+bool SmsService::ConvertGSM7bitToUTF8bit(
+    unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText, int32_t srcTextLen, int32_t &dataSize)
+{
+    MsgLangInfo langInfo = {
+        0,
+    };
+    langInfo.bSingleShift = false;
+    langInfo.bLockingShift = false;
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+    dataSize = textCvt->ConvertGSM7bitToUTF8(pDestText, maxLength, pSrcText, srcTextLen, &langInfo);
+    return true;
+};
+
+bool SmsService::ConvertEUCKRToUTF8bit(
+    unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText, int32_t srcTextLen, int32_t &dataSize)
+{
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+    dataSize = textCvt->ConvertEUCKRToUTF8(pDestText, maxLength, pSrcText, srcTextLen);
+    return true;
+};
+
+bool SmsService::ConvertSHIFTJISToUTF8bit(
+    unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText, int32_t srcTextLen, int32_t &dataSize)
+{
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+    dataSize = textCvt->ConvertSHIFTJISToUTF8(pDestText, maxLength, pSrcText, srcTextLen);
+    return true;
+};
+
+bool SmsService::ConvertUCS2ToUTF8bit(
+    unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText, int32_t srcTextLen, int32_t &dataSize)
+{
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+    dataSize = textCvt->ConvertUCS2ToUTF8(pDestText, maxLength, pSrcText, srcTextLen);
+    return true;
+};
+
+bool SmsService::ConvertUTF8ToUCS2bit(
+    unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText, int32_t srcTextLen, int32_t &dataSize)
+{
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+    dataSize = textCvt->ConvertUTF8ToUCS2(pDestText, maxLength, pSrcText, srcTextLen);
+    return true;
+};
+
+bool SmsService::ConvertCdmaUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+    int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize)
+{
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+    SmsCodingScheme pCharTypeValue = static_cast<SmsCodingScheme>(getCodingType);
+    SmsCodingScheme *pCharType = &pCharTypeValue;
+    dataSize = textCvt->ConvertCdmaUTF8ToAuto(pDestText, maxLength, pSrcText, srcTextLen, pCharType);
+    getCodingType = static_cast<int32_t>(pCharTypeValue);
+    return true;
+};
+
+bool SmsService::ConvertGsmUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+    int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize)
+{
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+    SmsCodingScheme pCharTypeValue = static_cast<SmsCodingScheme>(getCodingType);
+    SmsCodingScheme *pCharType = &pCharTypeValue;
+    dataSize = textCvt->ConvertGsmUTF8ToAuto(pDestText, maxLength, pSrcText, srcTextLen, pCharType);
+    getCodingType = static_cast<int32_t>(pCharTypeValue);
+    return true;
+};
+
+bool SmsService::ConvertUTF8ToGSM7bitfunc(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+    int32_t srcTextLen, int32_t &langIdVal, int32_t &abnormal, int32_t &decodeLen)
+{
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+    bool bAbnormal = false;
+    MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
+    MSG_LANGUAGE_ID_T *tLangId = &langId;
+    bool *pIncludeAbnormalChar = &bAbnormal;
+    std::tuple<unsigned char *, int, unsigned char *, int, MSG_LANGUAGE_ID_T *, bool *> paras(
+        pDestText, maxLength, const_cast<unsigned char *>(pSrcText), srcTextLen, tLangId, pIncludeAbnormalChar);
+
+    decodeLen = textCvt->ConvertUTF8ToGSM7bit(paras);
+    langIdVal = static_cast<int32_t>(*tLangId);
+    abnormal = static_cast<int32_t>(bAbnormal);
+    return true;
+};
+
+bool SmsService::GetBase64Encode(std::string src, std::string &dest)
+{
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+
+    textCvt->Base64Encode(src, dest);
+    return true;
+}
+
+bool SmsService::GetBase64Decode(std::string src, std::string &dest)
+{
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+
+    textCvt->Base64Decode(src, dest);
+    return true;
+}
+
+bool SmsService::GetEncodeStringFunc(
+    std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString)
+{
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return false;
+    }
+
+    textCvt->GetEncodeString(encodeString, charset, valLength, strEncodeString);
+    return true;
 }
 } // namespace Telephony
 } // namespace OHOS

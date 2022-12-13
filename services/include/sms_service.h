@@ -235,6 +235,133 @@ public:
      */
     int64_t GetEndTime();
 
+    /**
+     * transfer a string from GSM to UTF8
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertGSM7bitToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize) override;
+
+    /**
+     * transfer a string from EUCKR to UTF8
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertEUCKRToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize) override;
+
+    /**
+     * transfer a string from SHIFTJIS to UTF8
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertSHIFTJISToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize) override;
+
+    /**
+     * transfer a string from UCS2 to UTF8
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertUCS2ToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize) override;
+
+    /**
+     * transfer a string from UTF8 to UCS2
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertUTF8ToUCS2bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize) override;
+
+    /**
+     * transfer a string from CDMA UTF8 to AUTO
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param getCodingType Indicates return code type
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertCdmaUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize) override;
+
+    /**
+     * transfer a string from GSM UTF8 to AUTO
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param getCodingType Indicates return code type
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertGsmUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize) override;
+
+    /**
+     * transfer a string from UTF8 to GSM
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param langIdVal Indicates return language id
+     * @param abnormal Indicates return whether include abnormal character
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertUTF8ToGSM7bitfunc(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &langIdVal, int32_t &abnormal, int32_t &decodeLen) override;
+
+    /**
+     * mms base64 encode
+     * @param src Indicates source string,
+     * @param dest Indicates destination string
+     * @return Returns {@code true} if encode success; returns {@code false} otherwise
+     */
+    bool GetBase64Encode(std::string src, std::string &dest) override;
+
+    /**
+     * mms base64 decode
+     * @param src Indicates source string,
+     * @param dest Indicates destination string
+     * @return Returns {@code true} if decode success; returns {@code false} otherwise
+     */
+    bool GetBase64Decode(std::string src, std::string &dest) override;
+
+    /**
+     * Get Encode String
+     * @param encodeString Indicates output string,
+     * @param charset Indicates character set,
+     * @param valLength Indicates input string length,
+     * @param strEncodeString Indicates input string
+     * @return Returns {@code true} if decode success; returns {@code false} otherwise
+     */
+    bool GetEncodeStringFunc(
+        std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString) override;
+
 private:
     bool Init();
     void WaitCoreServiceToInit();
