@@ -18,9 +18,8 @@
 
 #include "i_delivery_short_message_callback.h"
 #include "i_send_short_message_callback.h"
-#include "short_message.h"
-
 #include "iremote_broker.h"
+#include "short_message.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -45,6 +44,19 @@ public:
         GET_IMS_SHORT_MESSAGE_FORMAT,
         IS_IMS_SMS_SUPPORTED,
         HAS_SMS_CAPABILITY,
+        SEND_MMS,
+        DOWNLOAD_MMS,
+        GSM7_TO_UTF8,
+        EUCKR_TO_UTF8,
+        SHIFTJIS_TO_UTF8,
+        UCS2_TO_UTF8,
+        UTF8_TO_UCS2,
+        CMDA_UTF8_TO_AUTO,
+        GSM_UTF8_TO_AUTO,
+        UTF8_TO_GSM,
+        MMS_BASE64_ENCODE,
+        MMS_BASE64_DECODE,
+        GET_ENCODE_STRING,
     };
 
     /**
@@ -261,6 +273,133 @@ public:
      * @return false
      */
     virtual bool HasSmsCapability() = 0;
+
+    /**
+     * transfer a string from GSM to UTF8
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    virtual bool ConvertGSM7bitToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize) = 0;
+
+    /**
+     * transfer a string from EUCKR to UTF8
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    virtual bool ConvertEUCKRToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize) = 0;
+
+    /**
+     * transfer a string from SHIFTJIS to UTF8
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    virtual bool ConvertSHIFTJISToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize) = 0;
+
+    /**
+     * transfer a string from UCS2 to UTF8
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    virtual bool ConvertUCS2ToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize) = 0;
+
+    /**
+     * transfer a string from UTF8 to UCS2
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    virtual bool ConvertUTF8ToUCS2bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize) = 0;
+
+    /**
+     * transfer a string from CDMA UTF8 to AUTO
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param getCodingType Indicates return code type
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    virtual bool ConvertCdmaUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize) = 0;
+
+    /**
+     * transfer a string from GSM UTF8 to AUTO
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param getCodingType Indicates return code type
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    virtual bool ConvertGsmUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize) = 0;
+
+    /**
+     * transfer a string from UTF8 to GSM
+     * @param pDestText Indicates destination char array,
+     * @param maxLength Indicates destination array max length
+     * @param pSrcText Indicates source char array
+     * @param srcTextLen Indicates source array length
+     * @param langIdVal Indicates return language id
+     * @param abnormal Indicates return whether include abnormal character
+     * @param dataSize Indicates return transfer length
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    virtual bool ConvertUTF8ToGSM7bitfunc(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &langIdVal, int32_t &abnormal, int32_t &decodeLen) = 0;
+
+    /**
+     * mms base64 encode
+     * @param src Indicates source string,
+     * @param dest Indicates destination string
+     * @return Returns {@code true} if encode success; returns {@code false} otherwise
+     */
+    virtual bool GetBase64Encode(std::string src, std::string &dest) = 0;
+
+    /**
+     * mms base64 decode
+     * @param src Indicates source string,
+     * @param dest Indicates destination string
+     * @return Returns {@code true} if decode success; returns {@code false} otherwise
+     */
+    virtual bool GetBase64Decode(std::string src, std::string &dest) = 0;
+
+    /**
+     * Get Encode String
+     * @param encodeString Indicates output string,
+     * @param charset Indicates character set,
+     * @param valLength Indicates input string length,
+     * @param strEncodeString Indicates input string
+     * @return Returns {@code true} if decode success; returns {@code false} otherwise
+     */
+    virtual bool GetEncodeStringFunc(
+        std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString) = 0;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.Telephony.ISmsServiceInterface");

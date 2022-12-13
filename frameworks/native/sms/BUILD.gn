@@ -35,7 +35,6 @@ ohos_source_set("sms_native_source") {
     "$SUBSYSTEM_DIR/sms_mms/common/src/gsm_sms_tpdu_codec.cpp",
     "$SUBSYSTEM_DIR/sms_mms/common/src/gsm_sms_udata_codec.cpp",
     "$SUBSYSTEM_DIR/sms_mms/common/src/sms_base_message.cpp",
-    "$SUBSYSTEM_DIR/sms_mms/utils/msg_text_convert.cpp",
     "$SUBSYSTEM_DIR/sms_mms/utils/sms_common_utils.cpp",
     "$SUBSYSTEM_DIR/sms_mms/utils/string_utils.cpp",
     "//base/telephony/sms_mms/services/ims_service_interaction/src/ims_sms_callback_proxy.cpp",
@@ -51,8 +50,6 @@ ohos_source_set("sms_native_source") {
     ":sms_native_config",
     "$SUBSYSTEM_DIR/core_service/frameworks/js/napi",
     "$SUBSYSTEM_DIR/core_service/interfaces/innerkits/common",
-    "//third_party/glib/glib",
-    "//third_party/glib",
   ]
 
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]

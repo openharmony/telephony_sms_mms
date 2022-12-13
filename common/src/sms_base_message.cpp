@@ -15,6 +15,7 @@
 
 #include "sms_base_message.h"
 
+#include "sms_service_manager_client.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -342,28 +343,18 @@ int SmsBaseMessage::GetMaxSegmentSize(
 
 void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType)
 {
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr || split.encodeData.size() <= 0) {
-        TELEPHONY_LOGE("MsgTextConvert Instance is nullptr");
-        return;
-    }
-
     int dataSize = 0;
     unsigned char buff[MAX_MSG_TEXT_LEN + 1] = {0};
+    auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
     switch (codingType) {
         case SMS_CODING_7BIT: {
-            MsgLangInfo langInfo = {
-                0,
-            };
-            langInfo.bSingleShift = false;
-            langInfo.bLockingShift = false;
-            dataSize = textCvt->ConvertGSM7bitToUTF8(
-                buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size(), &langInfo);
+            client->ConvertGSM7bitToUTF8bit(
+                buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size(), dataSize);
             break;
         }
         case SMS_CODING_UCS2: {
-            dataSize = textCvt->ConvertUCS2ToUTF8(
-                buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size());
+            client->ConvertUCS2ToUTF8bit(
+                buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size(), dataSize);
             break;
         }
         default: {
