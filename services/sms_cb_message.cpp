@@ -18,9 +18,9 @@
 
 #include <string>
 
-#include "securec.h"
-
 #include "cdma_sms_types.h"
+#include "msg_text_convert.h"
+#include "securec.h"
 #include "sms_common_utils.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"

@@ -43,6 +43,17 @@ SmsInterfaceStub::SmsInterfaceStub()
     memberFuncMap_[GET_IMS_SHORT_MESSAGE_FORMAT] = &SmsInterfaceStub::OnGetImsShortMessageFormat;
     memberFuncMap_[IS_IMS_SMS_SUPPORTED] = &SmsInterfaceStub::OnIsImsSmsSupported;
     memberFuncMap_[HAS_SMS_CAPABILITY] = &SmsInterfaceStub::OnHasSmsCapability;
+    memberFuncMap_[GSM7_TO_UTF8] = &SmsInterfaceStub::OnConvertGSM7bitToUTF8bit;
+    memberFuncMap_[EUCKR_TO_UTF8] = &SmsInterfaceStub::OnConvertEUCKRToUTF8bit;
+    memberFuncMap_[SHIFTJIS_TO_UTF8] = &SmsInterfaceStub::OnConvertSHIFTJISToUTF8bit;
+    memberFuncMap_[UCS2_TO_UTF8] = &SmsInterfaceStub::OnConvertUCS2ToUTF8bit;
+    memberFuncMap_[UTF8_TO_UCS2] = &SmsInterfaceStub::OnConvertUTF8ToUCS2bit;
+    memberFuncMap_[CMDA_UTF8_TO_AUTO] = &SmsInterfaceStub::OnConvertCdmaUTF8ToAutobit;
+    memberFuncMap_[GSM_UTF8_TO_AUTO] = &SmsInterfaceStub::OnConvertGsmUTF8ToAutobit;
+    memberFuncMap_[UTF8_TO_GSM] = &SmsInterfaceStub::OnConvertUTF8ToGSM7bitfunc;
+    memberFuncMap_[MMS_BASE64_ENCODE] = &SmsInterfaceStub::OnGetBase64Encode;
+    memberFuncMap_[MMS_BASE64_DECODE] = &SmsInterfaceStub::OnGetBase64Decode;
+    memberFuncMap_[GET_ENCODE_STRING] = &SmsInterfaceStub::OnGetEncodeStringFunc;
 }
 
 SmsInterfaceStub::~SmsInterfaceStub()
@@ -291,6 +302,252 @@ void SmsInterfaceStub::OnGetImsShortMessageFormat(MessageParcel &data, MessagePa
 void SmsInterfaceStub::OnHasSmsCapability(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     reply.WriteBool(HasSmsCapability());
+}
+
+void SmsInterfaceStub::OnConvertGSM7bitToUTF8bit(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+
+    int32_t maxLength = data.ReadInt32();
+    u16string pSrcText = data.ReadString16();
+    int32_t srcTextLen = data.ReadInt32();
+    int32_t dataSize = 0;
+
+    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
+    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(StringUtils::ToUtf8(pSrcText));
+    if (destText == nullptr || srcText == nullptr) {
+        TELEPHONY_LOGE("destText or srcText nullptr");
+        return;
+    }
+    result = ConvertGSM7bitToUTF8bit(destText.get(), maxLength, srcText.get(), srcTextLen, dataSize);
+
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(StringUtils::BytesConvertToString(destText.get(), 0, dataSize)));
+    reply.WriteInt32(dataSize);
+}
+
+void SmsInterfaceStub::OnConvertEUCKRToUTF8bit(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+
+    int32_t maxLength = data.ReadInt32();
+    u16string pSrcText = data.ReadString16();
+    int32_t srcTextLen = data.ReadInt32();
+    int32_t dataSize = 0;
+
+    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
+    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(StringUtils::ToUtf8(pSrcText));
+    if (destText == nullptr || srcText == nullptr) {
+        TELEPHONY_LOGE("destText or srcText nullptr");
+        return;
+    }
+    result = ConvertEUCKRToUTF8bit(destText.get(), maxLength, srcText.get(), srcTextLen, dataSize);
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(StringUtils::BytesConvertToString(destText.get(), 0, dataSize)));
+    reply.WriteInt32(dataSize);
+}
+
+void SmsInterfaceStub::OnConvertSHIFTJISToUTF8bit(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+
+    int32_t maxLength = data.ReadInt32();
+    u16string pSrcText = data.ReadString16();
+    int32_t srcTextLen = data.ReadInt32();
+    int32_t dataSize = 0;
+
+    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
+    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(StringUtils::ToUtf8(pSrcText));
+    if (destText == nullptr || srcText == nullptr) {
+        TELEPHONY_LOGE("destText or srcText nullptr");
+        return;
+    }
+    result = ConvertSHIFTJISToUTF8bit(destText.get(), maxLength, srcText.get(), srcTextLen, dataSize);
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(StringUtils::BytesConvertToString(destText.get(), 0, dataSize)));
+    reply.WriteInt32(dataSize);
+}
+
+void SmsInterfaceStub::OnConvertUCS2ToUTF8bit(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+
+    int32_t maxLength = data.ReadInt32();
+    u16string pSrcText = data.ReadString16();
+    int32_t srcTextLen = data.ReadInt32();
+    int32_t dataSize = 0;
+
+    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
+    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(StringUtils::ToUtf8(pSrcText));
+    if (destText == nullptr || srcText == nullptr) {
+        TELEPHONY_LOGE("destText or srcText nullptr");
+        return;
+    }
+    result = ConvertUCS2ToUTF8bit(destText.get(), maxLength, srcText.get(), srcTextLen, dataSize);
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(StringUtils::BytesConvertToString(destText.get(), 0, dataSize)));
+    reply.WriteInt32(dataSize);
+}
+
+void SmsInterfaceStub::OnConvertUTF8ToUCS2bit(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+
+    int32_t maxLength = data.ReadInt32();
+    u16string pSrcText = data.ReadString16();
+    int32_t srcTextLen = data.ReadInt32();
+    int32_t dataSize = 0;
+
+    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
+    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(StringUtils::ToUtf8(pSrcText));
+    if (destText == nullptr || srcText == nullptr) {
+        TELEPHONY_LOGE("destText or srcText nullptr");
+        return;
+    }
+    result = ConvertUTF8ToUCS2bit(destText.get(), maxLength, srcText.get(), srcTextLen, dataSize);
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(StringUtils::BytesConvertToString(destText.get(), 0, dataSize)));
+    reply.WriteInt32(dataSize);
+}
+
+void SmsInterfaceStub::OnConvertCdmaUTF8ToAutobit(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+
+    int32_t maxLength = data.ReadInt32();
+    u16string pSrcText = data.ReadString16();
+    int32_t srcTextLen = data.ReadInt32();
+    int32_t getCodingType = 0;
+    int32_t dataSize = 0;
+
+    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
+    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(StringUtils::ToUtf8(pSrcText));
+    if (destText == nullptr || srcText == nullptr) {
+        TELEPHONY_LOGE("destText or srcText nullptr");
+        return;
+    }
+    result = ConvertCdmaUTF8ToAutobit(destText.get(), maxLength, srcText.get(), srcTextLen, getCodingType, dataSize);
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(StringUtils::BytesConvertToString(destText.get(), 0, dataSize)));
+    reply.WriteInt32(getCodingType);
+    reply.WriteInt32(dataSize);
+}
+
+void SmsInterfaceStub::OnConvertGsmUTF8ToAutobit(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+
+    int32_t maxLength = data.ReadInt32();
+    u16string pSrcText = data.ReadString16();
+    int32_t srcTextLen = data.ReadInt32();
+    int32_t getCodingType = 0;
+    int32_t dataSize = 0;
+
+    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
+    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(StringUtils::ToUtf8(pSrcText));
+    if (destText == nullptr || srcText == nullptr) {
+        TELEPHONY_LOGE("destText or srcText nullptr");
+        return;
+    }
+    result = ConvertGsmUTF8ToAutobit(destText.get(), maxLength, srcText.get(), srcTextLen, getCodingType, dataSize);
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(StringUtils::BytesConvertToString(destText.get(), 0, dataSize)));
+    reply.WriteInt32(getCodingType);
+    reply.WriteInt32(dataSize);
+}
+
+void SmsInterfaceStub::OnConvertUTF8ToGSM7bitfunc(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+
+    int32_t maxLength = data.ReadInt32();
+    u16string pSrcText = data.ReadString16();
+    int32_t srcTextLen = data.ReadInt32();
+    int32_t langId = 0;
+    int32_t abnormal = 0;
+    int32_t decodeLen = 0;
+
+    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
+    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(StringUtils::ToUtf8(pSrcText));
+    if (destText == nullptr || srcText == nullptr) {
+        TELEPHONY_LOGE("destText or srcText nullptr");
+        return;
+    }
+    result =
+        ConvertUTF8ToGSM7bitfunc(destText.get(), maxLength, srcText.get(), srcTextLen, langId, abnormal, decodeLen);
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(StringUtils::BytesConvertToString(destText.get(), 0, decodeLen)));
+    reply.WriteInt32(langId);
+    reply.WriteInt32(abnormal);
+    reply.WriteInt32(decodeLen);
+}
+
+void SmsInterfaceStub::OnGetBase64Encode(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+
+    u16string src = data.ReadString16();
+    std::string dest;
+    result = GetBase64Encode(StringUtils::ToUtf8(src), dest);
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(dest));
+}
+
+void SmsInterfaceStub::OnGetBase64Decode(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+    u16string src = data.ReadString16();
+    std::string dest;
+    result = GetBase64Decode(StringUtils::ToUtf8(src), dest);
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(dest));
+}
+
+void SmsInterfaceStub::OnGetEncodeStringFunc(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    bool result = false;
+    uint32_t charset = data.ReadUint32();
+    uint32_t valLength = data.ReadUint32();
+    u16string strEncodeString = data.ReadString16();
+    std::string str = StringUtils::ToUtf8(strEncodeString);
+    std::string encodeString;
+
+    result = GetEncodeStringFunc(encodeString, charset, valLength, str);
+    reply.WriteBool(result);
+    if (!result) {
+        return;
+    }
+    reply.WriteString16(StringUtils::ToUtf16(encodeString));
 }
 
 int SmsInterfaceStub::OnRemoteRequest(

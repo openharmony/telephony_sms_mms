@@ -15,12 +15,10 @@
 
 #include "mms_encode_string.h"
 
-#include <glib.h>
-
-#include "telephony_log_wrapper.h"
-
-#include "utils/mms_charset.h"
 #include "mms_charset.h"
+#include "sms_service_manager_client.h"
+#include "telephony_log_wrapper.h"
+#include "utils/mms_charset.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -124,29 +122,8 @@ bool MmsEncodeString::EncodeEncodeString(MmsEncodeBuffer &encodeBuffer)
 
 bool MmsEncodeString::GetEncodeString(std::string &encodeString)
 {
-    bool ret = false;
-    char *pDest = nullptr;
-    gsize bytes_read = 0;
-    gsize bytes_written = 0;
-    GError *error = nullptr;
-    std::string strToCodeset("UTF-8");
-    std::string strFromCodeset;
-    auto charSetInstance = DelayedSingleton<MmsCharSet>::GetInstance();
-    if (charSetInstance == nullptr || (!charSetInstance->GetCharSetStrFromInt(strFromCodeset, charset_))) {
-        strFromCodeset = "UTF-8";
-    }
-    pDest = g_convert(strEncodeString_.c_str(), valLength_, strToCodeset.c_str(), strFromCodeset.c_str(),
-        &bytes_read, &bytes_written, &error);
-    if (!error) {
-        encodeString = std::string(pDest, bytes_written);
-        ret = true;
-    } else {
-        TELEPHONY_LOGE("EncodeString charset convert fail.");
-        ret = false;
-    }
-    if (pDest != nullptr) {
-        g_free(pDest);
-    }
+    auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    bool ret = client->GetEncodeStringFunc(encodeString, charset_, valLength_, strEncodeString_);
     return ret;
 }
 
