@@ -16,14 +16,13 @@
 #ifndef SMS_SERVICE_MANAGER_CLIENT_H
 #define SMS_SERVICE_MANAGER_CLIENT_H
 
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
-
-#include "singleton.h"
 
 #include "i_sms_service_interface.h"
 #include "refbase.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -58,6 +57,29 @@ public:
     bool IsImsSmsSupported(int32_t slotId);
     std::u16string GetImsShortMessageFormat();
     bool HasSmsCapability();
+    bool ConvertGSM7bitToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize);
+    bool ConvertEUCKRToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize);
+    bool ConvertSHIFTJISToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize);
+    bool ConvertUCS2ToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize);
+
+    bool ConvertUTF8ToUCS2bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &dataSize);
+    bool ConvertCdmaUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize);
+    bool ConvertGsmUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize);
+    bool ConvertUTF8ToGSM7bitfunc(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
+        int32_t srcTextLen, int32_t &langIdVal, int32_t &abnormal, int32_t &decodeLen);
+
+    bool GetBase64Encode(std::string src, std::string &dest);
+    bool GetBase64Decode(std::string src, std::string &dest);
+    bool GetEncodeStringFunc(
+        std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString);
+
 private:
     std::mutex mutex_;
     sptr<ISmsServiceInterface> smsServiceInterface_;

@@ -18,7 +18,6 @@
 #define GSM_SMS_TPDU_CODEC_H
 
 #include "gsm_sms_udata_codec.h"
-#include "msg_text_convert.h"
 
 namespace OHOS {
 namespace Telephony {
