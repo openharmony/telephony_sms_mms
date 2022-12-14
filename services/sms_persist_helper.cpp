@@ -134,28 +134,6 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
     return result;
 }
 
-bool SmsPersistHelper::QueryResourceBoolean(const std::string key, bool defValue)
-{
-    std::unique_ptr<Global::Resource::ResourceManager> resManager(Global::Resource::CreateResourceManager());
-    if (resManager == nullptr) {
-        TELEPHONY_LOGE("create resourceManager failed!");
-        return defValue;
-    }
-
-    bool result = resManager->AddResource(RES_PATH.c_str());
-    if (!result) {
-        TELEPHONY_LOGE("addResource failed!");
-        return defValue;
-    }
-
-    bool value = defValue;
-    if (resManager->GetBooleanByName(key.c_str(), value) != OHOS::Global::Resource::RState::SUCCESS) {
-        TELEPHONY_LOGE("get sms config capable fail");
-        return defValue;
-    }
-    return value;
-}
-
 bool SmsPersistHelper::QueryParamBoolean(const std::string key, bool defValue)
 {
     const int PARAM_SIZE = 64;
