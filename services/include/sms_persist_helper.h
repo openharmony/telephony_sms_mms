@@ -35,7 +35,6 @@ public:
     bool Query(NativeRdb::DataAbilityPredicates &predicates, std::vector<SmsReceiveIndexer> &indexers);
     bool Delete(NativeRdb::DataAbilityPredicates &predicates);
     bool QueryBlockPhoneNumber(const std::string &phoneNum);
-    bool QueryResourceBoolean(const std::string key, bool defValue);
     bool QueryParamBoolean(const std::string key, bool defValue);
 
     inline static const std::string SMS_CAPABLE_KEY = "sms_config_capable";
@@ -47,9 +46,6 @@ private:
     const std::string SMS_SUBSECTION = "dataability:///com.ohos.smsmmsability/sms_mms/sms_subsection";
     const std::string CONTACT_BLOCK =
         "dataability:///com.ohos.contactsdataability/contacts/contact_blocklist";
-    const std::string RES_PATH =
-        "/data/accounts/account_0/applications/ohos.global.systemres/ohos.global.systemres/assets/entry/"
-        "resources.index";
 
     std::shared_ptr<AppExecFwk::DataAbilityHelper> CreateDataAHelper();
     void ResultSetConvertToIndexer(
