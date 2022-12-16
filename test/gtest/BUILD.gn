@@ -25,6 +25,7 @@ ohos_unittest("tel_sms_mms_gtest") {
     "sms_mms_gtest.cpp",
     "sms_mms_test_helper.cpp",
     "sms_send_callback_gtest.cpp",
+    "zero_branch_test.cpp",
   ]
 
   include_dirs = [
