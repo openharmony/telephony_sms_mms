@@ -44,10 +44,12 @@
 #include "sms_delivery_callback_gtest.h"
 #include "sms_mms_test_helper.h"
 #include "sms_send_callback_gtest.h"
+#include "sms_service.h"
 #include "sms_service_manager_client.h"
 #include "sms_service_proxy.h"
 #include "string_utils.h"
 #include "system_ability_definition.h"
+#include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_types.h"
 #include "token_setproc.h"
@@ -2354,6 +2356,21 @@ HWTEST_F(SmsMmsGtest, CdmaSmsReceiveHandler_0001, Function | MediumTest | Level1
     retInt = cdmaSmsReceiveHandler.HandleSmsByType(nullptr);
     EXPECT_EQ(AckIncomeCause::SMS_ACK_UNKNOWN_ERROR, retInt);
 }
+
+/**
+ * @tc.number   Sms_TestDump_0100
+ * @tc.name    TestDump
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, Sms_TestDump_0001, Function | MediumTest | Level3)
+{
+    std::vector<std::u16string> emptyArgs = {};
+    std::vector<std::u16string> args = { u"test", u"test1" };
+    EXPECT_EQ(DelayedSingleton<SmsService>::GetInstance()->Dump(-1, args), TELEPHONY_ERR_FAIL);
+    EXPECT_EQ(DelayedSingleton<SmsService>::GetInstance()->Dump(0, emptyArgs), 0);
+    EXPECT_EQ(DelayedSingleton<SmsService>::GetInstance()->Dump(0, args), 0);
+}
+
 #else // TEL_TEST_UNSUPPORT
 /**
  * @tc.number   Telephony_SmsMms_MockTest_0001
