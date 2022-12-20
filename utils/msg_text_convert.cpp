@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "glib.h"
+#include "mms_charset.h"
 #include "securec.h"
 #include "telephony_log_wrapper.h"
 
@@ -1138,6 +1139,66 @@ void MsgTextConvert::ConvertDumpTextToHex(const unsigned char *pText, int length
         TELEPHONY_LOGI("[%{public}02x]", pText[i]);
     }
     TELEPHONY_LOGI("=======================================");
+}
+
+void MsgTextConvert::Base64Encode(const std::string src, std::string &dest)
+{
+    gchar *encode_data = g_base64_encode((guchar *)src.data(), src.length());
+    if (encode_data == nullptr) {
+        return;
+    }
+    gsize out_len = 0;
+    out_len = strlen(encode_data);
+    std::string temp((char *)encode_data, out_len);
+    dest = temp;
+
+    if (encode_data != nullptr) {
+        g_free(encode_data);
+    }
+}
+
+void MsgTextConvert::Base64Decode(const std::string src, std::string &dest)
+{
+    gsize out_len = 0;
+    char *decode_data = (char *)g_base64_decode(src.data(), &out_len);
+    if (decode_data == nullptr) {
+        return;
+    }
+    std::string temp(decode_data, out_len);
+    dest = temp;
+
+    if (decode_data != nullptr) {
+        g_free(decode_data);
+    }
+}
+
+bool MsgTextConvert::GetEncodeString(
+    std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString)
+{
+    bool ret = false;
+    char *pDest = nullptr;
+    gsize bytes_read = 0;
+    gsize bytes_written = 0;
+    GError *error = nullptr;
+    std::string strToCodeset("UTF-8");
+    std::string strFromCodeset;
+    auto charSetInstance = DelayedSingleton<MmsCharSet>::GetInstance();
+    if (charSetInstance == nullptr || (!charSetInstance->GetCharSetStrFromInt(strFromCodeset, charset))) {
+        strFromCodeset = "UTF-8";
+    }
+    pDest = g_convert(strEncodeString.c_str(), valLength, strToCodeset.c_str(), strFromCodeset.c_str(), &bytes_read,
+        &bytes_written, &error);
+    if (!error) {
+        encodeString = std::string(pDest, bytes_written);
+        ret = true;
+    } else {
+        TELEPHONY_LOGE("EncodeString charset convert fail.");
+        ret = false;
+    }
+    if (pDest != nullptr) {
+        g_free(pDest);
+    }
+    return ret;
 }
 } // namespace Telephony
 } // namespace OHOS

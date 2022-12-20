@@ -23,6 +23,7 @@
 
 #include "cdma_sms_pdu_codec.h"
 #include "gsm_sms_tpdu_codec.h"
+#include "msg_text_convert_common.h"
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "string_utils.h"
@@ -139,8 +140,8 @@ protected:
     int32_t indexOnSim_ = -1;
 
 private:
-    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
-            const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
+    virtual int DecodeMessage(std::string &decodeData, unsigned int length, SmsCodingScheme &codingType,
+        const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
     void ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType);
 };
 } // namespace Telephony
