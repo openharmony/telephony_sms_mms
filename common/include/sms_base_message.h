@@ -140,8 +140,8 @@ protected:
     int32_t indexOnSim_ = -1;
 
 private:
-    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
-            const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
+    virtual int DecodeMessage(std::string &decodeData, unsigned int length, SmsCodingScheme &codingType,
+        const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
     void ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType);
 };
 } // namespace Telephony

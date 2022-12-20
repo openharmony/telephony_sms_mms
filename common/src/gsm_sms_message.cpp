@@ -242,8 +242,17 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
 
     int abnormal = 0;
     int langIdVal = 0;
+    std::string destData;
+    std::string srcData;
+    int indexData = 0;
+    while (indexData < static_cast<int>(dataLen)) {
+        srcData += const_cast<unsigned char *>(pMsgText)[indexData];
+        indexData++;
+    }
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->ConvertUTF8ToGSM7bitfunc(
-        pDestText, bufSize, const_cast<unsigned char *>(pMsgText), (int)dataLen, langIdVal, abnormal, endcodeLen);
+        destData, bufSize, srcData, langIdVal, abnormal);
+    endcodeLen = static_cast<int>(destData.size());
+    pDestText = StringUtils::StringToBytes(destData).get();
     bAbnormal = abnormal == 1 ? true : false;
     langId = langIdVal;
     if (smsTpdu_ == nullptr) {
@@ -545,18 +554,17 @@ void GsmSmsMessage::ConvertUserData()
         return;
     }
     auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    std::string destData;
+    std::string srcData = StringUtils::BytesConvertToString((unsigned char *)smsUserData_.data, 0, smsUserData_.length);
     if (smsUserData_.length > 0) {
-        unsigned char buff[MAX_MSG_TEXT_LEN + 1] = {0};
-
         if (codingScheme_ == SMS_CODING_7BIT) {
-            client->ConvertGSM7bitToUTF8bit(
-                buff, MAX_MSG_TEXT_LEN, (unsigned char *)smsUserData_.data, smsUserData_.length, dataSize);
-
+            client->ConvertGSM7bitToUTF8bit(destData, MAX_MSG_TEXT_LEN, srcData);
+            dataSize = static_cast<int>(destData.size());
         } else if (codingScheme_ == SMS_CODING_UCS2) {
-            client->ConvertUCS2ToUTF8bit(
-                buff, MAX_MSG_TEXT_LEN, (unsigned char *)smsUserData_.data, smsUserData_.length, dataSize);
+            client->ConvertUCS2ToUTF8bit(destData, MAX_MSG_TEXT_LEN, srcData);
+            dataSize = static_cast<int>(destData.size());
         }
-        visibleMessageBody_.insert(0, (char *)buff, dataSize);
+        visibleMessageBody_ = destData;
         rawUserData_.insert(0, (char *)smsUserData_.data, smsUserData_.length);
     }
 }
@@ -652,7 +660,7 @@ bool GsmSmsMessage::IsSpecialMessage() const
     return result;
 }
 
-int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, SmsCodingScheme &codingType,
+int GsmSmsMessage::DecodeMessage(std::string &decodeData, unsigned int len, SmsCodingScheme &codingType,
     const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId)
 {
     int decodeLen = 0;
@@ -665,12 +673,16 @@ int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, Sm
     }
 
     auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    std::string destData;
+    std::string srcData = StringUtils::BytesConvertToString((unsigned char *)pMsgText, 0, dataLen);
     switch (codingType) {
         case SMS_CODING_7BIT: {
             int abnormal = 0;
             int langIdValue = 0;
-            client->ConvertUTF8ToGSM7bitfunc(decodeData, maxDecodeLen, const_cast<unsigned char *>(pMsgText), dataLen,
-                langIdValue, abnormal, decodeLen);
+
+            client->ConvertUTF8ToGSM7bitfunc(destData, maxDecodeLen, srcData, langIdValue, abnormal);
+            decodeLen = static_cast<int>(destData.size());
+            decodeData = destData;
             bAbnormal = abnormal == 1 ? true : false;
             langId = langIdValue;
             break;
@@ -680,7 +692,7 @@ int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, Sm
                 TELEPHONY_LOGE("DecodeMessage data length invalid.");
                 return decodeLen;
             }
-            if (memcpy_s(decodeData, maxDecodeLen, pMsgText, dataLen) != EOK) {
+            if (memcpy_s(StringUtils::StringToBytes(decodeData).get(), maxDecodeLen, pMsgText, dataLen) != EOK) {
                 TELEPHONY_LOGE("SplitMessage SMS_CHARSET_8BIT memcpy_s error!");
                 return decodeLen;
             }
@@ -688,13 +700,17 @@ int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, Sm
             break;
         }
         case SMS_CODING_UCS2: {
-            client->ConvertUTF8ToUCS2bit(decodeData, maxDecodeLen, pMsgText, dataLen, decodeLen);
+            client->ConvertUTF8ToUCS2bit(destData, maxDecodeLen, srcData);
+            decodeLen = static_cast<int>(destData.size());
+            decodeData = destData;
             break;
         }
         case SMS_CODING_AUTO:
         default: {
             int32_t getCodingType = 0;
-            client->ConvertGsmUTF8ToAutobit(decodeData, maxDecodeLen, pMsgText, dataLen, getCodingType, decodeLen);
+            client->ConvertGsmUTF8ToAutobit(destData, maxDecodeLen, srcData, getCodingType);
+            decodeLen = static_cast<int>(destData.size());
+            decodeData = destData;
             codingType = static_cast<SmsCodingScheme>(getCodingType);
             break;
         }

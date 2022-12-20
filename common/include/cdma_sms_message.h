@@ -77,7 +77,7 @@ private:
     void AnalsisUserData(const SmsTeleSvcUserData &userData);
     void AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver);
     void AnalsisHeader(const SmsTeleSvcUserData &userData);
-    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
+    virtual int DecodeMessage(std::string &decodeData, unsigned int length, SmsCodingScheme &codingType,
         const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
 
 private:

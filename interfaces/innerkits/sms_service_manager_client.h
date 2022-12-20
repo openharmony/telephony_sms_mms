@@ -57,23 +57,18 @@ public:
     bool IsImsSmsSupported(int32_t slotId);
     std::u16string GetImsShortMessageFormat();
     bool HasSmsCapability();
-    bool ConvertGSM7bitToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &dataSize);
-    bool ConvertEUCKRToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &dataSize);
-    bool ConvertSHIFTJISToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &dataSize);
-    bool ConvertUCS2ToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &dataSize);
+    bool ConvertGSM7bitToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText);
+    bool ConvertEUCKRToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText);
+    bool ConvertSHIFTJISToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText);
+    bool ConvertUCS2ToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText);
 
-    bool ConvertUTF8ToUCS2bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &dataSize);
-    bool ConvertCdmaUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize);
-    bool ConvertGsmUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize);
-    bool ConvertUTF8ToGSM7bitfunc(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &langIdVal, int32_t &abnormal, int32_t &decodeLen);
+    bool ConvertUTF8ToUCS2bit(std::string &pDestText, int32_t maxLength, std::string pSrcText);
+    bool ConvertCdmaUTF8ToAutobit(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType);
+    bool ConvertGsmUTF8ToAutobit(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType);
+    bool ConvertUTF8ToGSM7bitfunc(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &langIdVal, int32_t &abnormal);
 
     bool GetBase64Encode(std::string src, std::string &dest);
     bool GetBase64Decode(std::string src, std::string &dest);
