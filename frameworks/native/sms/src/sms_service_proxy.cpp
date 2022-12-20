@@ -16,6 +16,7 @@
 #include "sms_service_proxy.h"
 
 #include "parcel.h"
+#include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -446,6 +447,368 @@ bool SmsServiceProxy::HasSmsCapability()
     }
     remote->SendRequest(HAS_SMS_CAPABILITY, dataParcel, replyParcel, option);
     return replyParcel.ReadBool();
+}
+
+bool SmsServiceProxy::ConvertGSM7bitToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
+{
+    bool result = false;
+    if (pSrcText.empty() || maxLength <= 0) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("ConvertGSM7bitToUTF8bit WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteInt32(maxLength);
+    dataParcel.WriteString16(StringUtils::ToUtf16(pSrcText));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(GSM7_TO_UTF8, dataParcel, replyParcel, option);
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::ConvertGSM7bitToUTF8bit result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    pDestText = StringUtils::ToUtf8(replyParcel.ReadString16());
+
+    return result;
+}
+
+bool SmsServiceProxy::ConvertEUCKRToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
+{
+    bool result = false;
+    if (pSrcText.empty() || maxLength <= 0) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("ConvertEUCKRToUTF8bit WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteInt32(maxLength);
+    dataParcel.WriteString16(StringUtils::ToUtf16(pSrcText));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(EUCKR_TO_UTF8, dataParcel, replyParcel, option);
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::ConvertEUCKRToUTF8bit result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    pDestText = StringUtils::ToUtf8(replyParcel.ReadString16());
+    return result;
+}
+
+bool SmsServiceProxy::ConvertSHIFTJISToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
+{
+    bool result = false;
+    if (pSrcText.empty() || maxLength <= 0) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("ConvertSHIFTJISToUTF8bit WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteInt32(maxLength);
+    dataParcel.WriteString16(StringUtils::ToUtf16(pSrcText));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(SHIFTJIS_TO_UTF8, dataParcel, replyParcel, option);
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::ConvertSHIFTJISToUTF8bit result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    pDestText = StringUtils::ToUtf8(replyParcel.ReadString16());
+
+    return result;
+}
+
+bool SmsServiceProxy::ConvertUCS2ToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
+{
+    bool result = false;
+    if (pSrcText.empty() || maxLength <= 0) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("ConvertUCS2ToUTF8bit WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteInt32(maxLength);
+    dataParcel.WriteString16(StringUtils::ToUtf16(pSrcText));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(UCS2_TO_UTF8, dataParcel, replyParcel, option);
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::ConvertUCS2ToUTF8bit result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    pDestText = StringUtils::ToUtf8(replyParcel.ReadString16());
+    return result;
+}
+
+bool SmsServiceProxy::ConvertUTF8ToUCS2bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
+{
+    bool result = false;
+    if (pSrcText.empty() || maxLength <= 0) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("ConvertUTF8ToUCS2bit WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteInt32(maxLength);
+    dataParcel.WriteString16(StringUtils::ToUtf16(pSrcText));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(UTF8_TO_UCS2, dataParcel, replyParcel, option);
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::ConvertUTF8ToUCS2bit result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    pDestText = StringUtils::ToUtf8(replyParcel.ReadString16());
+    return result;
+}
+
+bool SmsServiceProxy::ConvertCdmaUTF8ToAutobit(
+    std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType)
+{
+    bool result = false;
+    if (pSrcText.empty() || maxLength <= 0) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("ConvertCdmaUTF8ToAutobit WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteInt32(maxLength);
+    dataParcel.WriteString16(StringUtils::ToUtf16(pSrcText));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(CMDA_UTF8_TO_AUTO, dataParcel, replyParcel, option);
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::ConvertCdmaUTF8ToAutobit result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    pDestText = StringUtils::ToUtf8(replyParcel.ReadString16());
+    getCodingType = replyParcel.ReadInt32();
+    return result;
+}
+
+bool SmsServiceProxy::ConvertGsmUTF8ToAutobit(
+    std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType)
+{
+    bool result = false;
+    if (pSrcText.empty() || maxLength <= 0) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("ConvertGsmUTF8ToAutobit WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteInt32(maxLength);
+    dataParcel.WriteString16(StringUtils::ToUtf16(pSrcText));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(GSM_UTF8_TO_AUTO, dataParcel, replyParcel, option);
+
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::ConvertGsmUTF8ToAutobit result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    pDestText = StringUtils::ToUtf8(replyParcel.ReadString16());
+    getCodingType = replyParcel.ReadInt32();
+    return result;
+}
+
+bool SmsServiceProxy::ConvertUTF8ToGSM7bitfunc(
+    std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &langIdVal, int32_t &abnormal)
+{
+    bool result = false;
+    if (pSrcText.empty() || maxLength <= 0) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("ConvertUTF8ToGSM7bitfunc WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteInt32(maxLength);
+    dataParcel.WriteString16(StringUtils::ToUtf16(pSrcText));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(UTF8_TO_GSM, dataParcel, replyParcel, option);
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::ConvertUTF8ToGSM7bitfunc result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    pDestText = StringUtils::ToUtf8(replyParcel.ReadString16());
+    langIdVal = replyParcel.ReadInt32();
+    abnormal = replyParcel.ReadInt32();
+    return result;
+}
+
+bool SmsServiceProxy::GetBase64Encode(std::string src, std::string &dest)
+{
+    bool result = false;
+    if (src.empty()) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("GetBase64Encode WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteString16(StringUtils::ToUtf16(src));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(MMS_BASE64_ENCODE, dataParcel, replyParcel, option);
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::GetBase64Encode result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    dest = StringUtils::ToUtf8(dataParcel.ReadString16());
+    return result;
+}
+
+bool SmsServiceProxy::GetBase64Decode(std::string src, std::string &dest)
+{
+    bool result = false;
+    if (src.empty()) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("GetBase64Decode WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteString16(StringUtils::ToUtf16(src));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(MMS_BASE64_DECODE, dataParcel, replyParcel, option);
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::GetBase64Decode result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    dest = StringUtils::ToUtf8(dataParcel.ReadString16());
+    return result;
+}
+
+bool SmsServiceProxy::GetEncodeStringFunc(
+    std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString)
+{
+    bool result = false;
+    if (strEncodeString.empty()) {
+        return result;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("GetEncodeStringFunc WriteInterfaceToken is false");
+        return result;
+    }
+
+    dataParcel.WriteUint32(charset);
+    dataParcel.WriteUint32(valLength);
+    dataParcel.WriteString16(StringUtils::ToUtf16(strEncodeString));
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return result;
+    }
+    remote->SendRequest(GET_ENCODE_STRING, dataParcel, replyParcel, option);
+    result = replyParcel.ReadBool();
+    TELEPHONY_LOGI("SmsServiceProxy::GetEncodeStringFunc result:%{public}d", result);
+    if (!result) {
+        return result;
+    }
+    encodeString = StringUtils::ToUtf8(dataParcel.ReadString16());
+    return result;
 }
 
 bool SmsServiceDeathRecipient::gotDeathRecipient_ = false;

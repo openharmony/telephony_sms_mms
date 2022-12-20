@@ -16,14 +16,13 @@
 #ifndef SMS_SERVICE_MANAGER_CLIENT_H
 #define SMS_SERVICE_MANAGER_CLIENT_H
 
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
-
-#include "singleton.h"
 
 #include "i_sms_service_interface.h"
 #include "refbase.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -58,6 +57,24 @@ public:
     bool IsImsSmsSupported(int32_t slotId);
     std::u16string GetImsShortMessageFormat();
     bool HasSmsCapability();
+    bool ConvertGSM7bitToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText);
+    bool ConvertEUCKRToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText);
+    bool ConvertSHIFTJISToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText);
+    bool ConvertUCS2ToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText);
+
+    bool ConvertUTF8ToUCS2bit(std::string &pDestText, int32_t maxLength, std::string pSrcText);
+    bool ConvertCdmaUTF8ToAutobit(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType);
+    bool ConvertGsmUTF8ToAutobit(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType);
+    bool ConvertUTF8ToGSM7bitfunc(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &langIdVal, int32_t &abnormal);
+
+    bool GetBase64Encode(std::string src, std::string &dest);
+    bool GetBase64Decode(std::string src, std::string &dest);
+    bool GetEncodeStringFunc(
+        std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString);
+
 private:
     std::mutex mutex_;
     sptr<ISmsServiceInterface> smsServiceInterface_;

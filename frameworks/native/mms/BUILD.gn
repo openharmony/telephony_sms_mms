@@ -44,17 +44,9 @@ ohos_source_set("mms_native_source") {
     "$SOURCE_DIR/src/utils/mms_quoted_printable.cpp",
   ]
 
-  include_dirs = [
-    ":mms_native_config",
-    "//third_party/glib/glib",
-    "//third_party/glib",
-    "//third_party/glib/gmodule",
-    "//third_party/gettext/gettext-runtime/intl",
-  ]
+  include_dirs = [ ":mms_native_config" ]
 
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
-
-  deps = [ "//third_party/glib:glib_packages" ]
 
   external_deps = [
     "c_utils:utils",
