@@ -218,77 +218,70 @@ bool SmsServiceManagerClient::HasSmsCapability()
     return false;
 }
 
-bool SmsServiceManagerClient::ConvertGSM7bitToUTF8bit(
-    unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText, int32_t srcTextLen, int32_t &dataSize)
+bool SmsServiceManagerClient::ConvertGSM7bitToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
 {
     if (InitSmsServiceProxy()) {
-        return smsServiceInterface_->ConvertGSM7bitToUTF8bit(pDestText, maxLength, pSrcText, srcTextLen, dataSize);
+        bool ret = smsServiceInterface_->ConvertGSM7bitToUTF8bit(pDestText, maxLength, pSrcText);
+        return ret;
     }
     return false;
 }
 
-bool SmsServiceManagerClient::ConvertEUCKRToUTF8bit(
-    unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText, int32_t srcTextLen, int32_t &dataSize)
+bool SmsServiceManagerClient::ConvertEUCKRToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
 {
     if (InitSmsServiceProxy()) {
-        return smsServiceInterface_->ConvertEUCKRToUTF8bit(pDestText, maxLength, pSrcText, srcTextLen, dataSize);
+        return smsServiceInterface_->ConvertEUCKRToUTF8bit(pDestText, maxLength, pSrcText);
     }
     return false;
 }
 
-bool SmsServiceManagerClient::ConvertSHIFTJISToUTF8bit(
-    unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText, int32_t srcTextLen, int32_t &dataSize)
+bool SmsServiceManagerClient::ConvertSHIFTJISToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
 {
     if (InitSmsServiceProxy()) {
-        return smsServiceInterface_->ConvertSHIFTJISToUTF8bit(pDestText, maxLength, pSrcText, srcTextLen, dataSize);
+        return smsServiceInterface_->ConvertSHIFTJISToUTF8bit(pDestText, maxLength, pSrcText);
     }
     return false;
 }
 
-bool SmsServiceManagerClient::ConvertUCS2ToUTF8bit(
-    unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText, int32_t srcTextLen, int32_t &dataSize)
+bool SmsServiceManagerClient::ConvertUCS2ToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
 {
     if (InitSmsServiceProxy()) {
-        return smsServiceInterface_->ConvertUCS2ToUTF8bit(pDestText, maxLength, pSrcText, srcTextLen, dataSize);
+        return smsServiceInterface_->ConvertUCS2ToUTF8bit(pDestText, maxLength, pSrcText);
     }
     return false;
 }
 
-bool SmsServiceManagerClient::ConvertUTF8ToUCS2bit(
-    unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText, int32_t srcTextLen, int32_t &dataSize)
+bool SmsServiceManagerClient::ConvertUTF8ToUCS2bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
 {
     if (InitSmsServiceProxy()) {
-        return smsServiceInterface_->ConvertUTF8ToUCS2bit(pDestText, maxLength, pSrcText, srcTextLen, dataSize);
+        return smsServiceInterface_->ConvertUTF8ToUCS2bit(pDestText, maxLength, pSrcText);
     }
     return false;
 }
 
-bool SmsServiceManagerClient::ConvertCdmaUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength,
-    const unsigned char *pSrcText, int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize)
+bool SmsServiceManagerClient::ConvertCdmaUTF8ToAutobit(
+    std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType)
 {
     if (InitSmsServiceProxy()) {
-        return smsServiceInterface_->ConvertCdmaUTF8ToAutobit(
-            pDestText, maxLength, pSrcText, srcTextLen, getCodingType, dataSize);
+        return smsServiceInterface_->ConvertCdmaUTF8ToAutobit(pDestText, maxLength, pSrcText, getCodingType);
     }
     return false;
 }
 
-bool SmsServiceManagerClient::ConvertGsmUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength,
-    const unsigned char *pSrcText, int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize)
+bool SmsServiceManagerClient::ConvertGsmUTF8ToAutobit(
+    std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType)
 {
     if (InitSmsServiceProxy()) {
-        return smsServiceInterface_->ConvertGsmUTF8ToAutobit(
-            pDestText, maxLength, pSrcText, srcTextLen, getCodingType, dataSize);
+        return smsServiceInterface_->ConvertGsmUTF8ToAutobit(pDestText, maxLength, pSrcText, getCodingType);
     }
     return false;
 }
 
-bool SmsServiceManagerClient::ConvertUTF8ToGSM7bitfunc(unsigned char *pDestText, int32_t maxLength,
-    const unsigned char *pSrcText, int32_t srcTextLen, int32_t &langIdVal, int32_t &abnormal, int32_t &dataSize)
+bool SmsServiceManagerClient::ConvertUTF8ToGSM7bitfunc(
+    std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &langIdVal, int32_t &abnormal)
 {
     if (InitSmsServiceProxy()) {
-        return smsServiceInterface_->ConvertUTF8ToGSM7bitfunc(
-            pDestText, maxLength, pSrcText, srcTextLen, langIdVal, abnormal, dataSize);
+        return smsServiceInterface_->ConvertUTF8ToGSM7bitfunc(pDestText, maxLength, pSrcText, langIdVal, abnormal);
     }
     return false;
 }
