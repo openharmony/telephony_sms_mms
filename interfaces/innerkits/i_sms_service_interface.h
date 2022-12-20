@@ -276,103 +276,82 @@ public:
 
     /**
      * transfer a string from GSM to UTF8
-     * @param pDestText Indicates destination char array,
-     * @param maxLength Indicates destination array max length
-     * @param pSrcText Indicates source char array
-     * @param srcTextLen Indicates source array length
-     * @param dataSize Indicates return transfer length
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
      * @return Returns {@code true} if transfer success; returns {@code false} otherwise
      */
-    virtual bool ConvertGSM7bitToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &dataSize) = 0;
+    virtual bool ConvertGSM7bitToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) = 0;
 
     /**
      * transfer a string from EUCKR to UTF8
-     * @param pDestText Indicates destination char array,
-     * @param maxLength Indicates destination array max length
-     * @param pSrcText Indicates source char array
-     * @param srcTextLen Indicates source array length
-     * @param dataSize Indicates return transfer length
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
      * @return Returns {@code true} if transfer success; returns {@code false} otherwise
      */
-    virtual bool ConvertEUCKRToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &dataSize) = 0;
+    virtual bool ConvertEUCKRToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) = 0;
 
     /**
      * transfer a string from SHIFTJIS to UTF8
-     * @param pDestText Indicates destination char array,
-     * @param maxLength Indicates destination array max length
-     * @param pSrcText Indicates source char array
-     * @param srcTextLen Indicates source array length
-     * @param dataSize Indicates return transfer length
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
      * @return Returns {@code true} if transfer success; returns {@code false} otherwise
      */
-    virtual bool ConvertSHIFTJISToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &dataSize) = 0;
+    virtual bool ConvertSHIFTJISToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) = 0;
 
     /**
      * transfer a string from UCS2 to UTF8
-     * @param pDestText Indicates destination char array,
-     * @param maxLength Indicates destination array max length
-     * @param pSrcText Indicates source char array
-     * @param srcTextLen Indicates source array length
-     * @param dataSize Indicates return transfer length
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
      * @return Returns {@code true} if transfer success; returns {@code false} otherwise
      */
-    virtual bool ConvertUCS2ToUTF8bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &dataSize) = 0;
+    virtual bool ConvertUCS2ToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) = 0;
 
     /**
      * transfer a string from UTF8 to UCS2
-     * @param pDestText Indicates destination char array,
-     * @param maxLength Indicates destination array max length
-     * @param pSrcText Indicates source char array
-     * @param srcTextLen Indicates source array length
-     * @param dataSize Indicates return transfer length
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
      * @return Returns {@code true} if transfer success; returns {@code false} otherwise
      */
-    virtual bool ConvertUTF8ToUCS2bit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &dataSize) = 0;
+    virtual bool ConvertUTF8ToUCS2bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) = 0;
 
     /**
      * transfer a string from CDMA UTF8 to AUTO
-     * @param pDestText Indicates destination char array,
-     * @param maxLength Indicates destination array max length
-     * @param pSrcText Indicates source char array
-     * @param srcTextLen Indicates source array length
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
      * @param getCodingType Indicates return code type
-     * @param dataSize Indicates return transfer length
      * @return Returns {@code true} if transfer success; returns {@code false} otherwise
      */
-    virtual bool ConvertCdmaUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize) = 0;
+    virtual bool ConvertCdmaUTF8ToAutobit(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType) = 0;
 
     /**
      * transfer a string from GSM UTF8 to AUTO
-     * @param pDestText Indicates destination char array,
-     * @param maxLength Indicates destination array max length
-     * @param pSrcText Indicates source char array
-     * @param srcTextLen Indicates source array length
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
      * @param getCodingType Indicates return code type
-     * @param dataSize Indicates return transfer length
      * @return Returns {@code true} if transfer success; returns {@code false} otherwise
      */
-    virtual bool ConvertGsmUTF8ToAutobit(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &getCodingType, int32_t &dataSize) = 0;
+    virtual bool ConvertGsmUTF8ToAutobit(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType) = 0;
 
     /**
      * transfer a string from UTF8 to GSM
-     * @param pDestText Indicates destination char array,
-     * @param maxLength Indicates destination array max length
-     * @param pSrcText Indicates source char array
-     * @param srcTextLen Indicates source array length
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
      * @param langIdVal Indicates return language id
      * @param abnormal Indicates return whether include abnormal character
-     * @param dataSize Indicates return transfer length
      * @return Returns {@code true} if transfer success; returns {@code false} otherwise
      */
-    virtual bool ConvertUTF8ToGSM7bitfunc(unsigned char *pDestText, int32_t maxLength, const unsigned char *pSrcText,
-        int32_t srcTextLen, int32_t &langIdVal, int32_t &abnormal, int32_t &decodeLen) = 0;
+    virtual bool ConvertUTF8ToGSM7bitfunc(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &langIdVal, int32_t &abnormal) = 0;
 
     /**
      * mms base64 encode
