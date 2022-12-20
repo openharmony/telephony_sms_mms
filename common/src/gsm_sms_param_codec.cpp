@@ -25,6 +25,7 @@
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "sms_service_manager_client.h"
+#include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -277,8 +278,16 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
         tmplength = SmsCommonUtils::Unpack7bitChar(
             &(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00, (unsigned char *)tmpAddress, MAX_ADDRESS_LEN);
         int dataSize = 0;
+        std::string destData;
+        std::string srcData = StringUtils::BytesConvertToString((unsigned char *)tmpAddress, 0, dataSize);
         DelayedSingleton<SmsServiceManagerClient>::GetInstance()->ConvertGSM7bitToUTF8bit(
-            (unsigned char *)pAddress->address, MAX_ADDRESS_LEN, (unsigned char *)tmpAddress, tmplength, dataSize);
+            destData, MAX_ADDRESS_LEN, srcData);
+        dataSize = static_cast<int>(destData.size());
+        int addressIndex = 0;
+        while (addressIndex++ < dataSize) {
+            pAddress->address[addressIndex] = static_cast<char>(destData[addressIndex]);
+        }
+
         if (tmpAddress) {
             delete[] tmpAddress;
         }
