@@ -32,8 +32,10 @@ ohos_unittest("tel_sms_mms_gtest") {
     "//base/telephony/sms_mms/services/include",
     "//base/telephony/sms_mms/interfaces/innerkits",
     "//base/telephony/sms_mms/interfaces/kits/native",
+    "//base/telephony/call_manager/services/telephony_interaction/include",
     "//base/telephony/sms_mms/frameworks/native/sms/include",
     "//base/telephony/sms_mms/utils",
+    "//third_party/curl/include",
   ]
 
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
@@ -44,6 +46,7 @@ ohos_unittest("tel_sms_mms_gtest") {
     "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
     "//foundation/ability/ability_runtime/frameworks/native/ability/native:data_ability_helper",
     "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:ability_manager",
+    "//third_party/curl:curl",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -52,10 +55,14 @@ ohos_unittest("tel_sms_mms_gtest") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
     "core_service:tel_core_service_api",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "netmanager_base:net_conn_manager_if",
+    "relational_store:native_dataability",
+    "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
