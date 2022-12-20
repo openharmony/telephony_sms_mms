@@ -206,6 +206,112 @@ public:
      */
     bool HasSmsCapability() override;
 
+    /**
+     * transfer a string from GSM to UTF8
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertGSM7bitToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) override;
+
+    /**
+     * transfer a string from EUCKR to UTF8
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertEUCKRToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) override;
+
+    /**
+     * transfer a string from SHIFTJIS to UTF8
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertSHIFTJISToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) override;
+
+    /**
+     * transfer a string from UCS2 to UTF8
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertUCS2ToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) override;
+
+    /**
+     * transfer a string from UTF8 to UCS2
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertUTF8ToUCS2bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) override;
+
+    /**
+     * transfer a string from CDMA to auto
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
+     * @param getCodingType Indicates return code type
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertCdmaUTF8ToAutobit(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType) override;
+
+    /**
+     * transfer a string from GSM utf8 to auto
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
+     * @param getCodingType Indicates return code type
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertGsmUTF8ToAutobit(
+        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType) override;
+
+    /**
+     * transfer a string from UTF8 to GSM
+     * @param pDestText Indicates destination string,
+     * @param maxLength Indicates destination string max length
+     * @param pSrcText Indicates source string
+     * @param langIdVal Indicates return language id
+     * @param abnormal Indicates return whether include abnormal character
+     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     */
+    bool ConvertUTF8ToGSM7bitfunc(std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &langIdVal,
+        int32_t &abnormal) override;
+
+    /**
+     * mms base64 encode
+     * @param src Indicates source string,
+     * @param dest Indicates destination string
+     * @return Returns {@code true} if encode success; returns {@code false} otherwise
+     */
+    bool GetBase64Encode(std::string src, std::string &dest) override;
+
+    /**
+     * mms base64 decode
+     * @param src Indicates source string,
+     * @param dest Indicates destination string
+     * @return Returns {@code true} if decode success; returns {@code false} otherwise
+     */
+    bool GetBase64Decode(std::string src, std::string &dest) override;
+
+    /**
+     * Get Encode String
+     * @param encodeString Indicates output string,
+     * @param charset Indicates character set,
+     * @param valLength Indicates input string length,
+     * @param strEncodeString Indicates input string
+     * @return Returns {@code true} if decode success; returns {@code false} otherwise
+     */
+    bool GetEncodeStringFunc(
+        std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString) override;
+
 private:
     static inline BrokerDelegator<SmsServiceProxy> delegator_;
 };

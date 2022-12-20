@@ -29,6 +29,7 @@ config("tel_sms_mms_config") {
 
 ohos_shared_library("tel_sms_mms") {
   sources = [
+    "$SOURCE_DIR/frameworks/native/sms/src/short_message.cpp",
     "$SOURCE_DIR/services/cdma/cdma_sms_receive_handler.cpp",
     "$SOURCE_DIR/services/cdma/cdma_sms_sender.cpp",
     "$SOURCE_DIR/services/gsm/gsm_sms_cb_handler.cpp",
@@ -59,9 +60,9 @@ ohos_shared_library("tel_sms_mms") {
     "$SOURCE_DIR/services/sms_wap_push_buffer.cpp",
     "$SOURCE_DIR/services/sms_wap_push_content_type.cpp",
     "$SOURCE_DIR/services/sms_wap_push_handler.cpp",
+    "$SOURCE_DIR/utils/msg_text_convert.cpp",
     "$SOURCE_DIR/utils/sms_hisysevent.cpp",
     "$SOURCE_DIR/utils/string_utils.cpp",
-    "//base/telephony/sms_mms/frameworks/native/sms/src/short_message.cpp",
   ]
 
   include_dirs = [
@@ -69,6 +70,8 @@ ohos_shared_library("tel_sms_mms") {
     "//base/telephony/sms_mms/interfaces/innerkits/",
     "//base/telephony/sms_mms/frameworks/native/sms/include",
     "//base/telephony/sms_mms/interfaces/innerkits/ims",
+    "//third_party/glib/glib",
+    "//third_party/glib",
   ]
 
   configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
