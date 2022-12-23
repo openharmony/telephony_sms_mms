@@ -14,9 +14,17 @@
  */
 #define private public
 #define protected public
+#include "cdma_sms_receive_handler.h"
+#include "cdma_sms_sender.h"
+#include "delivery_short_message_callback_stub.h"
 #include "gtest/gtest.h"
 #include "mms_header.h"
 #include "msg_text_convert.h"
+#include "radio_event.h"
+#include "send_short_message_callback_stub.h"
+#include "sms_cb_message.h"
+#include "sms_common_utils.h"
+#include "sms_receive_handler.h"
 #include "sms_wap_push_buffer.h"
 #include "telephony_errors.h"
 #include "telephony_hisysevent.h"
@@ -28,13 +36,21 @@ using namespace testing::ext;
 
 namespace {
 const std::string TEXT_SMS_CONTENT = "hello world";
+const int8_t TEXT_PORT_NUM = -1;
 const uint32_t TRANSACTION_ID_LENGTH = 3;
+const int16_t WAP_PUSH_PORT = 2948;
 const uint8_t MIN_TOKEN = 30;
 const uint8_t MAX_TOKEN = 127;
 const int BUF_SIZE = 2401;
 const int TEXT_LENGTH = 2;
+const int FILL_BITS = 2;
+const int DIGIT_LEN = 3;
+const int START_BIT = 4;
 const unsigned char SRC_TEXT = 2;
 const uint8_t FIELD_ID = 2;
+const int32_t INVALID_SLOTID = 2;
+const uint16_t PWS_FIRST_ID = 0x1100;
+// const uint32_t TOTOl_LENGTH = 2;
 } // namespace
 
 class BranchTest : public testing::Test {
@@ -452,6 +468,382 @@ HWTEST_F(BranchTest, SmsWapPushBuffer_0001, Function | MediumTest | Level1)
     EXPECT_FALSE(smsWapPushBuffer->WriteDataBuffer(nullptr, 1));
     smsWapPushBuffer->GetCurPosition();
     smsWapPushBuffer->GetSize();
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveHandler_0001
+ * @tc.name     Test CdmaSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsReceiveHandler_0001, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_GSM_SMS, 1);
+    std::shared_ptr<SmsReceiveHandler> smsReceiveHandler =
+        std::make_shared<CdmaSmsReceiveHandler>(runner, INVALID_SLOTID);
+    smsReceiveHandler->ProcessEvent(event);
+    event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_CDMA_SMS, 1);
+    smsReceiveHandler->ProcessEvent(event);
+    event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_CONNECTED, 1);
+    smsReceiveHandler->ProcessEvent(event);
+    event = nullptr;
+    smsReceiveHandler->ProcessEvent(event);
+    std::shared_ptr<SmsReceiveIndexer> indexer = nullptr;
+    std::shared_ptr<SmsBaseMessage> smsBaseMessage = nullptr;
+    std::shared_ptr<vector<string>> pdus;
+    smsReceiveHandler->DeleteMessageFormDb(indexer);
+    smsReceiveHandler->CombineMessagePart(indexer);
+    smsReceiveHandler->CheckBlockPhone(indexer);
+    smsReceiveHandler->SendBroadcast(indexer, pdus);
+    smsReceiveHandler->HandleReceivedSms(smsBaseMessage);
+    EXPECT_FALSE(smsReceiveHandler->AddMsgToDB(indexer));
+    indexer = std::make_shared<SmsReceiveIndexer>();
+    smsReceiveHandler->CombineMessagePart(indexer);
+    indexer->msgCount_ = 1;
+    indexer->destPort_ = WAP_PUSH_PORT;
+    smsReceiveHandler->CombineMessagePart(indexer);
+    smsReceiveHandler->SendBroadcast(indexer, pdus);
+    pdus = std::make_shared<vector<string>>();
+    string pud = "qwe";
+    pdus->push_back(pud);
+    smsReceiveHandler->SendBroadcast(indexer, pdus);
+    indexer->destPort_ = TEXT_PORT_NUM;
+    smsReceiveHandler->SendBroadcast(indexer, pdus);
+    EXPECT_FALSE(smsReceiveHandler->IsRepeatedMessagePart(indexer));
+    EXPECT_FALSE(smsReceiveHandler->AddMsgToDB(indexer));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCommonUtils_0001
+ * @tc.name     Test CdmaSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsCommonUtils_0001, Function | MediumTest | Level1)
+{
+    auto smsCommonUtils = std::make_shared<SmsCommonUtils>();
+    const unsigned char *userData = (const unsigned char *)TEXT_SMS_CONTENT.c_str();
+    const std::string str = "*#PPQQ";
+    const char *digit = (const char *)str.c_str();
+    char *bcd = (char *)str.c_str();
+    unsigned char *packData = (unsigned char *)TEXT_SMS_CONTENT.c_str();
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(nullptr, 0, 0, nullptr), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(nullptr, 1, 1, nullptr, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(userData, 1, 0, packData), 1);
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(userData, 1, 1, packData), 1);
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(userData, 1, FILL_BITS, packData), FILL_BITS);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(userData, 1, 0, packData, 1), 1);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(userData, 1, FILL_BITS, packData, 1), 1);
+    EXPECT_EQ(smsCommonUtils->DigitToBcd(digit, 1, nullptr), 0);
+    EXPECT_EQ(smsCommonUtils->DigitToBcd(nullptr, 1, packData), 0);
+    EXPECT_EQ(smsCommonUtils->DigitToBcd(digit, DIGIT_LEN, packData), FILL_BITS);
+    EXPECT_EQ(smsCommonUtils->BcdToDigit(userData, 1, nullptr), 0);
+    EXPECT_EQ(smsCommonUtils->BcdToDigit(nullptr, 1, bcd), 0);
+    EXPECT_EQ(smsCommonUtils->BcdToDigitCdma(userData, 1, bcd), FILL_BITS);
+    EXPECT_EQ(smsCommonUtils->BcdToDigitCdma(nullptr, 1, bcd), 0);
+    EXPECT_EQ(smsCommonUtils->ConvertDigitToDTMF(nullptr, 1, 1, packData), 0);
+    EXPECT_EQ(smsCommonUtils->ConvertDigitToDTMF(digit, 1, 1, packData), 0);
+    EXPECT_EQ(smsCommonUtils->ConvertDigitToDTMF(digit, 1, START_BIT, packData), 0);
+    EXPECT_EQ(smsCommonUtils->ConvertDigitToDTMF(digit, FILL_BITS, 0, packData), 1);
+    EXPECT_EQ(smsCommonUtils->ConvertDigitToDTMF(digit, FILL_BITS, 0, packData), 1);
+    EXPECT_EQ(smsCommonUtils->ConvertDigitToDTMF(digit, FILL_BITS, FILL_BITS, packData), 1);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CdmaSmsSender_0001
+ * @tc.name     Test CdmaSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
+    auto cdmaSmsSender = std::make_shared<CdmaSmsSender>(runner, INVALID_SLOTID, fun);
+    cdmaSmsSender->isImsCdmaHandlerRegistered = true;
+    cdmaSmsSender->RegisterImsHandler();
+    const sptr<ISendShortMessageCallback> sendCallback =
+        iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
+    if (sendCallback == nullptr) {
+        return;
+    }
+    const sptr<IDeliveryShortMessageCallback> deliveryCallback =
+        iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+    if (deliveryCallback == nullptr) {
+        return;
+    }
+    const std::string desAddr = "qwe";
+    const std::string scAddr = "123";
+    const std::string text = "123";
+    std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
+    cdmaSmsSender->SendSmsToRil(smsIndexer);
+    cdmaSmsSender->ResendTextDelivery(smsIndexer);
+    cdmaSmsSender->ResendDataDelivery(smsIndexer);
+    smsIndexer = std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    cdmaSmsSender->SendSmsToRil(smsIndexer);
+    cdmaSmsSender->ResendTextDelivery(smsIndexer);
+    cdmaSmsSender->ResendDataDelivery(smsIndexer);
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(0, 1);
+    cdmaSmsSender->StatusReportGetImsSms(event);
+    cdmaSmsSender->StatusReportAnalysis(event);
+    event = nullptr;
+    cdmaSmsSender->StatusReportSetImsSms(event);
+    cdmaSmsSender->StatusReportGetImsSms(event);
+    cdmaSmsSender->StatusReportAnalysis(event);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCbMessage_0001
+ * @tc.name     Test CdmaSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsCbMessage_0001, Function | MediumTest | Level1)
+{
+    auto smsCbMessage = std::make_shared<SmsCbMessage>();
+    int8_t format = 1;
+    std::string pdu = "123";
+    std::string raw = "qwe";
+    std::string message = "asd";
+    uint8_t gs = 1;
+    uint16_t serial = 1;
+    bool isUserAlert = false;
+    long recvTime = 1;
+    std::vector<unsigned char> pdus;
+    EXPECT_FALSE(smsCbMessage->GetFormat(format));
+    EXPECT_FALSE(smsCbMessage->GetPriority(format));
+    EXPECT_NE(smsCbMessage->SmsCbMessage::ToString(), "");
+    EXPECT_FALSE(smsCbMessage->GetGeoScope(gs));
+    EXPECT_FALSE(smsCbMessage->GetSerialNum(serial));
+    EXPECT_FALSE(smsCbMessage->IsEtwsEmergencyUserAlert(isUserAlert));
+    EXPECT_FALSE(smsCbMessage->IsEtwsPopupAlert(isUserAlert));
+    EXPECT_FALSE(smsCbMessage->GetServiceCategory(serial));
+    EXPECT_FALSE(smsCbMessage->GetCmasResponseType(format));
+    EXPECT_FALSE(smsCbMessage->GetCmasMessageClass(format));
+    EXPECT_FALSE(smsCbMessage->GetWarningType(serial));
+    EXPECT_FALSE(smsCbMessage->GetMsgType(gs));
+    EXPECT_FALSE(smsCbMessage->GetLangType(gs));
+    EXPECT_FALSE(smsCbMessage->GetDcs(gs));
+    EXPECT_FALSE(smsCbMessage->GetReceiveTime(recvTime));
+    EXPECT_FALSE(smsCbMessage->PduAnalysis(pdus));
+    smsCbMessage->GetCmasCategory(format);
+    smsCbMessage->ConvertToUTF8(raw, message);
+    smsCbMessage->cbHeader_ = std::make_shared<SmsCbMessage::SmsCbMessageHeader>();
+    smsCbMessage->cbHeader_->dcs.codingScheme = SMS_CODING_7BIT;
+    smsCbMessage->ConvertToUTF8(raw, message);
+    smsCbMessage->cbHeader_->dcs.codingScheme = SMS_CODING_UCS2;
+    smsCbMessage->ConvertToUTF8(raw, message);
+    smsCbMessage->cbHeader_->dcs.codingScheme = SMS_CODING_AUTO;
+    smsCbMessage->ConvertToUTF8(raw, message);
+    smsCbMessage->cbHeader_->bEtwsMessage = true;
+    smsCbMessage->cbHeader_->cbEtwsType = SmsCbMessage::SMS_NETTEXT_ETWS_PRIMARY;
+    smsCbMessage->ConvertToUTF8(raw, message);
+    smsCbMessage->GetCbMessageRaw();
+    EXPECT_TRUE(smsCbMessage->GetPriority(format));
+    smsCbMessage->cbHeader_->msgId = PWS_FIRST_ID;
+    EXPECT_TRUE(smsCbMessage->GetPriority(format));
+    EXPECT_FALSE(smsCbMessage->IsSinglePageMsg());
+    EXPECT_TRUE(smsCbMessage->CreateCbMessage(pdu) == nullptr);
+    EXPECT_FALSE(smsCbMessage->CreateCbMessage(pdus));
+    EXPECT_TRUE(smsCbMessage->GetCbHeader() != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCbMessage_0002
+ * @tc.name     Test CdmaSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsCbMessage_0002, Function | MediumTest | Level1)
+{
+    auto smsCbMessage = std::make_shared<SmsCbMessage>();
+    int8_t severity = 1;
+    smsCbMessage->cbHeader_ = std::make_shared<SmsCbMessage::SmsCbMessageHeader>();
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_EXTREME_OBSERVED_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_EXTREME_OBSERVED_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_EXTREME_LIKELY_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_EXTREME_LIKELY_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_EXTREME_OBSERVED_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_EXTREME_OBSERVED_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCbMessage_0003
+ * @tc.name     Test CdmaSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsCbMessage_0003, Function | MediumTest | Level1)
+{
+    auto smsCbMessage = std::make_shared<SmsCbMessage>();
+    int8_t severity = 1;
+    smsCbMessage->cbHeader_ = std::make_shared<SmsCbMessage::SmsCbMessageHeader>();
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_OPERATOR_ALERT_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasSeverity(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasUrgency(severity));
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_EXTREME_OBSERVED_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_EXTREME_OBSERVED_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_EXTERME_OBSERVED_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_EXTREME_OBSERVED_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_EXTREME_LIKELY_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_EXTREME_LIKELY_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_SPANISH;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+    smsCbMessage->cbHeader_->msgId = SmsCbMessage::SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_DEFUALT;
+    EXPECT_TRUE(smsCbMessage->GetCmasCertainty(severity));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCbMessage_0004
+ * @tc.name     Test CdmaSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsCbMessage_0004, Function | MediumTest | Level1)
+{
+    auto smsCbMessage = std::make_shared<SmsCbMessage>();
+    std::vector<unsigned char> pdu;
+    smsCbMessage->Decode2gCbMsg(pdu);
+    smsCbMessage->Decode3gCbMsg(pdu);
+    smsCbMessage->cbHeader_ = std::make_shared<SmsCbMessage::SmsCbMessageHeader>();
+    // smsCbMessage->cbHeader_->dcs.iso639Lang[0] = 1;
+    smsCbMessage->cbHeader_->dcs.codingScheme = SmsCodingScheme::SMS_CODING_7BIT;
+    smsCbMessage->Decode2gCbMsg(pdu);
+    smsCbMessage->Decode3gCbMsg(pdu);
+    smsCbMessage->cbHeader_->dcs.codingScheme = SmsCodingScheme::SMS_CODING_8BIT;
+    smsCbMessage->Decode2gCbMsg(pdu);
+    smsCbMessage->Decode3gCbMsg(pdu);
+    smsCbMessage->cbHeader_->dcs.codingScheme = SmsCodingScheme::SMS_CODING_UCS2;
+    smsCbMessage->Decode2gCbMsg(pdu);
+    smsCbMessage->Decode3gCbMsg(pdu);
+    smsCbMessage->cbHeader_->dcs.codingScheme = SmsCodingScheme::SMS_CODING_ASCII7BIT;
+    smsCbMessage->Decode2gCbMsg(pdu);
+    smsCbMessage->Decode3gCbMsg(pdu);
+    unsigned char data = 1;
+    pdu.push_back(data);
+    smsCbMessage->cbHeader_->totalPages = 1;
+    smsCbMessage->Decode3g7Bit(pdu);
+    smsCbMessage->Decode3gUCS2(pdu);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_PRESIDENTIAL_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_PRESIDENTIAL);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_PRESIDENTIAL_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_PRESIDENTIAL);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_EXTREME_OBSERVED_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_EXTREME);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_EXTREME_OBSERVED_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_EXTREME);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_EXTREME_LIKELY_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_EXTREME);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_EXTREME_LIKELY_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_EXTREME);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_EXTERME_OBSERVED_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_EXTREME_OBSERVED_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_EXTERME_LIKELY_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_EXTERME_LIKELY_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_SERVER_OBSERVED_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_SERVER_OBSERVED_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCbMessage_0005
+ * @tc.name     Test CdmaSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsCbMessage_0005, Function | MediumTest | Level1)
+{
+    auto smsCbMessage = std::make_shared<SmsCbMessage>();
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_SERVER_LIKELY_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_SERVER_LIKELY_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_SERVER_EXPECTED_LIKELY_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_SERVER_SERVER_EXPECTED_LIKELY_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_SEVERE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_AMBER_ALERT_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_AMBER);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_AMBER_ALERT_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_AMBER);
+    EXPECT_EQ(
+        smsCbMessage->CMASClass(SmsCbMessage::CMAS_RMT_ALERT_DEFUALT), SmsCbMessage::SmsMessageSubType::MSG_CMAS_TEST);
+    EXPECT_EQ(
+        smsCbMessage->CMASClass(SmsCbMessage::CMAS_RMT_ALERT_SPANISH), SmsCbMessage::SmsMessageSubType::MSG_CMAS_TEST);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_EXERCISE_ALERT_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_EXERCISE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_EXERCISE_ALERT_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_EXERCISE);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_OPERATOR_ALERT_DEFUALT),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_OPERATOR_DEFINED);
+    EXPECT_EQ(smsCbMessage->CMASClass(SmsCbMessage::CMAS_OPERATOR_ALERT_SPANISH),
+        SmsCbMessage::SmsMessageSubType::MSG_CMAS_OPERATOR_DEFINED);
 }
 } // namespace Telephony
 } // namespace OHOS
