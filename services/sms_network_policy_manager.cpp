@@ -131,7 +131,9 @@ bool SmsNetworkPolicyManager::IsCtSimCard()
             break;
     }
     if (isCTCardType) {
-        std::string iccid = Str16ToStr8(CoreManagerInner::GetInstance().GetSimIccId(slotId_));
+        std::u16string tempIccId;
+        CoreManagerInner::GetInstance().GetSimIccId(slotId_, tempIccId);
+        std::string iccid = Str16ToStr8(tempIccId);
         if (!iccid.empty() && iccid.length() >= ICCID_LEN_MINIMUM) {
             std::string subIccId = iccid.substr(0, ICCID_LEN_MINIMUM);
             if (!subIccId.empty() && (subIccId.compare(0, PREFIX_LOCAL_ICCID_LEN, PREFIX_LOCAL_ICCID) == 0) &&
