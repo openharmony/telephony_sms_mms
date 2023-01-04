@@ -155,7 +155,8 @@ std::shared_ptr<unsigned char> StringUtils::StringToBytes(const std::string &s)
         TELEPHONY_LOGE("StringToBytes length is invalid");
         return nullptr;
     }
-    std::shared_ptr<unsigned char> bytes { new unsigned char[s.length()], [](unsigned char *byte) { delete[] byte; } };
+    auto bytes =
+        std::shared_ptr<unsigned char>(new unsigned char[s.length()], [](unsigned char *byte) { delete[] byte; });
     for (size_t i = 0; i < s.length(); i++) {
         bytes.get()[i] = static_cast<unsigned char>(s[i]);
     }
