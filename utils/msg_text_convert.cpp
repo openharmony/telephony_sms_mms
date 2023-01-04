@@ -1160,15 +1160,15 @@ void MsgTextConvert::Base64Encode(const std::string src, std::string &dest)
 void MsgTextConvert::Base64Decode(const std::string src, std::string &dest)
 {
     gsize out_len = 0;
-    char *decode_data = (char *)g_base64_decode(src.data(), &out_len);
-    if (decode_data == nullptr) {
+    char *decodeData = (char *)g_base64_decode(src.data(), &out_len);
+    if (decodeData == nullptr) {
         return;
     }
-    std::string temp(decode_data, out_len);
+    std::string temp(decodeData, out_len);
     dest = temp;
 
-    if (decode_data != nullptr) {
-        g_free(decode_data);
+    if (decodeData != nullptr) {
+        g_free(decodeData);
     }
 }
 
