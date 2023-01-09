@@ -28,7 +28,7 @@ template<typename T>
 inline void UniquePtrDeleterOneDimension(T **(&ptr))
 {
     if (ptr && *ptr) {
-        delete[] * ptr;
+        delete[] *ptr;
         *ptr = nullptr;
     }
 }
