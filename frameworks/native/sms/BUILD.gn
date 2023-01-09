@@ -19,7 +19,6 @@ config("sms_native_config") {
   include_dirs = [
     "include",
     "$SUBSYSTEM_DIR/sms_mms/utils",
-    "$SUBSYSTEM_DIR/sms_mms/common/include",
     "$SUBSYSTEM_DIR/sms_mms/interfaces/innerkits",
     "$SUBSYSTEM_DIR/sms_mms:tel_sms_mms_config",
     "$SUBSYSTEM_DIR/sms_mms/interfaces/innerkits/ims",
@@ -28,14 +27,6 @@ config("sms_native_config") {
 
 ohos_source_set("sms_native_source") {
   sources = [
-    "$SUBSYSTEM_DIR/sms_mms/common/src/cdma_sms_message.cpp",
-    "$SUBSYSTEM_DIR/sms_mms/common/src/cdma_sms_pdu_codec.cpp",
-    "$SUBSYSTEM_DIR/sms_mms/common/src/gsm_sms_message.cpp",
-    "$SUBSYSTEM_DIR/sms_mms/common/src/gsm_sms_param_codec.cpp",
-    "$SUBSYSTEM_DIR/sms_mms/common/src/gsm_sms_tpdu_codec.cpp",
-    "$SUBSYSTEM_DIR/sms_mms/common/src/gsm_sms_udata_codec.cpp",
-    "$SUBSYSTEM_DIR/sms_mms/common/src/sms_base_message.cpp",
-    "$SUBSYSTEM_DIR/sms_mms/utils/sms_common_utils.cpp",
     "$SUBSYSTEM_DIR/sms_mms/utils/string_utils.cpp",
     "//base/telephony/sms_mms/services/ims_service_interaction/src/ims_sms_callback_proxy.cpp",
     "src/delivery_short_message_callback_stub.cpp",
