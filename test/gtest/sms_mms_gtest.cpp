@@ -184,10 +184,12 @@ public:
     static sptr<ISmsServiceInterface> GetProxy();
     static bool HasSimCard(int32_t slotId)
     {
+        bool hasSimCard = false;
         if (CoreServiceClient::GetInstance().GetProxy() == nullptr) {
-            return false;
+            return hasSimCard;
         }
-        return CoreServiceClient::GetInstance().HasSimCard(slotId);
+        CoreServiceClient::GetInstance().HasSimCard(slotId, hasSimCard);
+        return hasSimCard;
     }
 };
 

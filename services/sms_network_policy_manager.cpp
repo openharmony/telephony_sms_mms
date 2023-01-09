@@ -116,11 +116,12 @@ NetWorkType SmsNetworkPolicyManager::GetNetWorkType()
 
 bool SmsNetworkPolicyManager::IsCtSimCard()
 {
-    int32_t cardType = CoreManagerInner::GetInstance().GetCardType(slotId_);
+    CardType cardType = CardType::UNKNOWN_CARD;
+    CoreManagerInner::GetInstance().GetCardType(slotId_, cardType);
     bool isCTCardType = false;
     bool result = false;
     TELEPHONY_LOGI("[slot%{public}d] cardType = %{public}d", slotId_, cardType);
-    switch (static_cast<CardType>(cardType)) {
+    switch (cardType) {
         case CardType::SINGLE_MODE_USIM_CARD:
         case CardType::CT_NATIONAL_ROAMING_CARD:
         case CardType::DUAL_MODE_TELECOM_LTE_CARD:
@@ -149,7 +150,9 @@ bool SmsNetworkPolicyManager::IsCtSimCard()
         result = isCTCardType;
     }
     if (!result) {
-        std::string cplmn = Str16ToStr8(CoreManagerInner::GetInstance().GetSimOperatorNumeric(slotId_));
+        std::u16string operatorNumeric;
+        CoreManagerInner::GetInstance().GetSimOperatorNumeric(slotId_, operatorNumeric);
+        std::string cplmn = Str16ToStr8(operatorNumeric);
         if (!cplmn.empty()) {
             auto cplmnRet = find(CT_CPLMNS.begin(), CT_CPLMNS.end(), cplmn);
             result = cplmnRet != CT_CPLMNS.end();
