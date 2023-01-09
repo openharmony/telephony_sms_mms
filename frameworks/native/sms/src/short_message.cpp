@@ -15,10 +15,8 @@
 
 #include "short_message.h"
 
-#include "cdma_sms_message.h"
-#include "gsm_sms_message.h"
+#include "sms_service_manager_client.h"
 #include "string_utils.h"
-#include "sms_base_message.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -193,30 +191,10 @@ ShortMessage *ShortMessage::CreateMessage(std::vector<unsigned char> &pdu, std::
         return nullptr;
     }
 
-    std::shared_ptr<SmsBaseMessage> baseMessage;
-    if (indicates == "3gpp") {
-        baseMessage = GsmSmsMessage::CreateMessage(StringUtils::StringToHex(pdu));
-    } else if (indicates == "3gpp2") {
-        baseMessage = CdmaSmsMessage::CreateMessage(StringUtils::StringToHex(pdu));
-    }
-
-    if (baseMessage == nullptr) {
-        delete message;
-        message = nullptr;
-        return message;
-    }
-
-    message->visibleMessageBody_ = StringUtils::ToUtf16(baseMessage->GetVisibleMessageBody());
-    message->visibleRawAddress_ = StringUtils::ToUtf16(baseMessage->GetVisibleOriginatingAddress());
-    message->messageClass_ = static_cast<ShortMessage::SmsMessageClass>(baseMessage->GetMessageClass());
-    message->scAddress_ = StringUtils::ToUtf16(baseMessage->GetSmscAddr());
-    message->scTimestamp_ = baseMessage->GetScTimestamp();
-    message->isReplaceMessage_ = baseMessage->IsReplaceMessage();
-    message->status_ = baseMessage->GetStatus();
-    message->isSmsStatusReportMessage_ = baseMessage->IsSmsStatusReportMessage();
-    message->hasReplyPath_ = baseMessage->HasReplyPath();
-    message->protocolId_ = baseMessage->GetProtocolId();
-    message->pdu_ = baseMessage->GetRawPdu();
+    ShortMessage messageObj;
+    auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    client->CreateMessage(StringUtils::StringToHex(pdu), indicates, messageObj);
+    *message = messageObj;
     return message;
 }
 
@@ -233,29 +211,11 @@ ShortMessage ShortMessage::CreateIccMessage(std::vector<unsigned char> &pdu, std
         simStatus == SMS_SIM_MESSAGE_STATUS_SENT || simStatus == SMS_SIM_MESSAGE_STATUS_UNSENT) {
         message.simMessageStatus_ = static_cast<SmsSimMessageStatus>(simStatus);
         std::vector<unsigned char> pduTemp(pdu.begin() + MIN_ICC_PDU_LEN, pdu.end());
-        std::shared_ptr<SmsBaseMessage> baseMessage;
-        if (specification == "3gpp") {
-            baseMessage = GsmSmsMessage::CreateMessage(StringUtils::StringToHex(pduTemp));
-        } else if (specification == "3gpp2") {
-            baseMessage = CdmaSmsMessage::CreateMessage(StringUtils::StringToHex(pduTemp));
-        }
 
-        if (baseMessage == nullptr) {
-            return message;
-        }
-        baseMessage->SetIndexOnSim(index);
-
-        message.visibleMessageBody_ = StringUtils::ToUtf16(baseMessage->GetVisibleMessageBody());
-        message.visibleRawAddress_ = StringUtils::ToUtf16(baseMessage->GetVisibleOriginatingAddress());
-        message.messageClass_ = static_cast<ShortMessage::SmsMessageClass>(baseMessage->GetMessageClass());
-        message.scAddress_ = StringUtils::ToUtf16(baseMessage->GetSmscAddr());
-        message.scTimestamp_ = baseMessage->GetScTimestamp();
-        message.isReplaceMessage_ = baseMessage->IsReplaceMessage();
-        message.status_ = baseMessage->GetStatus();
-        message.isSmsStatusReportMessage_ = baseMessage->IsSmsStatusReportMessage();
-        message.hasReplyPath_ = baseMessage->HasReplyPath();
-        message.protocolId_ = baseMessage->GetProtocolId();
-        message.pdu_ = baseMessage->GetRawPdu();
+        ShortMessage messageObj;
+        auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+        client->CreateMessage(StringUtils::StringToHex(pdu), specification, messageObj);
+        message = messageObj;
         message.indexOnSim_ = index;
     } else {
         message.simMessageStatus_ = SMS_SIM_MESSAGE_STATUS_FREE;

@@ -242,77 +242,7 @@ public:
      * @param pSrcText Indicates source string
      * @return Returns {@code true} if transfer success; returns {@code false} otherwise
      */
-    bool ConvertGSM7bitToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) override;
-
-    /**
-     * transfer a string from EUCKR to UTF8
-     * @param pDestText Indicates destination string,
-     * @param maxLength Indicates destination string max length
-     * @param pSrcText Indicates source string
-     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
-     */
-    bool ConvertEUCKRToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) override;
-
-    /**
-     * transfer a string from SHIFTJIS to UTF8
-     * @param pDestText Indicates destination string,
-     * @param maxLength Indicates destination string max length
-     * @param pSrcText Indicates source string
-     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
-     */
-    bool ConvertSHIFTJISToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) override;
-
-    /**
-     * transfer a string from UCS2 to UTF8
-     * @param pDestText Indicates destination string,
-     * @param maxLength Indicates destination string max length
-     * @param pSrcText Indicates source string
-     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
-     */
-    bool ConvertUCS2ToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) override;
-
-    /**
-     * transfer a string from UTF8 to UCS2
-     * @param pDestText Indicates destination string,
-     * @param maxLength Indicates destination string max length
-     * @param pSrcText Indicates source string
-     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
-     */
-    bool ConvertUTF8ToUCS2bit(std::string &pDestText, int32_t maxLength, std::string pSrcText) override;
-
-    /**
-     * transfer a string from CDMA UTF8 to AUTO
-     * @param pDestText Indicates destination string,
-     * @param maxLength Indicates destination string max length
-     * @param pSrcText Indicates source string
-     * @param getCodingType Indicates return code type
-     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
-     */
-    bool ConvertCdmaUTF8ToAutobit(
-        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType) override;
-
-    /**
-     * transfer a string from GSM UTF8 to AUTO
-     * @param pDestText Indicates destination string,
-     * @param maxLength Indicates destination string max length
-     * @param pSrcText Indicates source string
-     * @param getCodingType Indicates return code type
-     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
-     */
-    bool ConvertGsmUTF8ToAutobit(
-        std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType) override;
-
-    /**
-     * transfer a string from UTF8 to GSM
-     * @param pDestText Indicates destination string,
-     * @param maxLength Indicates destination string max length
-     * @param pSrcText Indicates source string
-     * @param langIdVal Indicates return language id
-     * @param abnormal Indicates return whether include abnormal character
-     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
-     */
-    bool ConvertUTF8ToGSM7bitfunc(std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &langIdVal,
-        int32_t &abnormal) override;
+    bool CreateMessage(std::string pdu, std::string specification, ShortMessage &message) override;
 
     /**
      * mms base64 encode

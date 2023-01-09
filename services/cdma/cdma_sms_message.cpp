@@ -15,9 +15,9 @@
 
 #include "cdma_sms_message.h"
 
+#include "msg_text_convert.h"
 #include "securec.h"
 #include "sms_common_utils.h"
-#include "sms_service_manager_client.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -46,7 +46,7 @@ std::unique_ptr<SmsTransMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::str
     transMsg->data.p2pMsg.address.numberPlan = SMS_NPI_UNKNOWN;
     transMsg->data.p2pMsg.address.addrLen = dest.length();
     if (strncpy_s(transMsg->data.p2pMsg.address.szData, sizeof(transMsg->data.p2pMsg.address.szData), dest.c_str(),
-        dest.length()) != EOK) {
+            dest.length()) != EOK) {
         transMsg->data.p2pMsg.address.addrLen = sizeof(transMsg->data.p2pMsg.address.szData) - 1;
         transMsg->data.p2pMsg.address.szData[transMsg->data.p2pMsg.address.addrLen] = '\0';
     }
@@ -84,7 +84,7 @@ std::unique_ptr<SmsTransMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::str
         return nullptr;
     }
     if (strncpy_s(transMsg->data.p2pMsg.address.szData, sizeof(transMsg->data.p2pMsg.address.szData), dest.c_str(),
-        dest.length()) != EOK) {
+            dest.length()) != EOK) {
         transMsg->data.p2pMsg.address.addrLen = sizeof(transMsg->data.p2pMsg.address.szData) - 1;
         transMsg->data.p2pMsg.address.szData[transMsg->data.p2pMsg.address.addrLen] = '\0';
     }
@@ -326,23 +326,25 @@ void CdmaSmsMessage::AnalsisSubmitMsg(const SmsTeleSvcSubmit &submit)
 void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
 {
     int dataSize = 0;
+    MsgLangInfo langinfo = {
+        0,
+    };
     AnalsisHeader(userData);
-    unsigned char buff[MAX_MSG_TEXT_LEN + 1] = {0};
-
-    auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-    std::string destData;
-    std::string srcData =
-        StringUtils::BytesConvertToString((unsigned char *)&userData.userData, 0, userData.userData.length);
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        return;
+    }
+    unsigned char buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
     switch (userData.encodeType) {
         case SMS_ENCODE_GSM7BIT: {
-            client->ConvertGSM7bitToUTF8bit(destData, MAX_MSG_TEXT_LEN, srcData);
-            dataSize = static_cast<int>(destData.size());
+            dataSize = textCvt->ConvertGSM7bitToUTF8(
+                buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData, userData.userData.length, &langinfo);
             break;
         }
         case SMS_ENCODE_KOREAN:
         case SMS_ENCODE_EUCKR: {
-            client->ConvertEUCKRToUTF8bit(destData, MAX_MSG_TEXT_LEN, srcData);
-            dataSize = static_cast<int>(destData.size());
+            dataSize = textCvt->ConvertEUCKRToUTF8(
+                buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData, userData.userData.length);
             break;
         }
         case SMS_ENCODE_IA5:
@@ -359,24 +361,18 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
             break;
         }
         case SMS_ENCODE_SHIFT_JIS: {
-            client->ConvertSHIFTJISToUTF8bit(destData, MAX_MSG_TEXT_LEN, srcData);
-            dataSize = static_cast<int>(destData.size());
+            dataSize = textCvt->ConvertSHIFTJISToUTF8(
+                buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData.data, userData.userData.length);
             break;
         }
         default: {
-            client->ConvertUCS2ToUTF8bit(destData, MAX_MSG_TEXT_LEN, srcData);
-            dataSize = static_cast<int>(destData.size());
+            dataSize = textCvt->ConvertUCS2ToUTF8(
+                buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData.data, userData.userData.length);
             break;
         }
     }
-    if (destData.empty()) {
-        visibleMessageBody_.insert(0, (char *)buff, dataSize);
-    }
-    {
-        visibleMessageBody_ = destData;
-    }
-
-    TELEPHONY_LOGD("AnalsisDeliverMsg userData == %{private}s", visibleMessageBody_.c_str());
+    visibleMessageBody_.insert(0, (char *)buff, dataSize);
+    TELEPHONY_LOGI("AnalsisDeliverMsg userData == %{private}s", visibleMessageBody_.c_str());
 }
 
 void CdmaSmsMessage::AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver)
@@ -399,7 +395,7 @@ void CdmaSmsMessage::AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver)
         return;
     }
     if (memcpy_s(userData.userData.data, sizeof(userData.userData.data), deliver.cmasData.alertText,
-        deliver.cmasData.dataLen) == EOK) {
+            deliver.cmasData.dataLen) == EOK) {
         AnalsisUserData(userData);
     }
 }
@@ -544,7 +540,7 @@ bool CdmaSmsMessage::IsBroadcastMsg() const
     return GetTransMsgType() == SMS_TRANS_BROADCAST_MSG;
 }
 
-int CdmaSmsMessage::DecodeMessage(std::string &decodeData, unsigned int len, SmsCodingScheme &codingType,
+int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, SmsCodingScheme &codingType,
     const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId)
 {
     int decodeLen = 0;
@@ -552,31 +548,32 @@ int CdmaSmsMessage::DecodeMessage(std::string &decodeData, unsigned int len, Sms
     const unsigned int maxDecodeLen = len;
     const unsigned char *pMsgText = (const unsigned char *)msgText.c_str();
 
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        TELEPHONY_LOGE("MsgTextConvert Instance is nullptr");
+        return decodeLen;
+    }
     if (msgText.empty()) {
         TELEPHONY_LOGE("MsgText is empty!");
         return decodeLen;
     }
 
-    auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-    std::string destData;
-    std::string srcData = StringUtils::BytesConvertToString(pMsgText, 0, dataLen);
     switch (codingType) {
         case SMS_CODING_7BIT: {
             if (static_cast<unsigned int>(dataLen) > maxDecodeLen) {
                 TELEPHONY_LOGE("DecodeMessage memcpy_s data length invalid.");
                 return decodeLen;
             }
-            if (memcpy_s(StringUtils::StringToBytes(decodeData).get(), maxDecodeLen, pMsgText, dataLen) != EOK) {
+            if (memcpy_s(decodeData, maxDecodeLen, pMsgText, dataLen) != EOK) {
                 TELEPHONY_LOGE("SplitMessage SMS_CHARSET_8BIT memcpy_s error!");
                 return decodeLen;
             }
-
             decodeLen = dataLen;
             codingType = SMS_CODING_ASCII7BIT;
             break;
         }
         case SMS_CODING_8BIT: {
-            if (memcpy_s(StringUtils::StringToBytes(decodeData).get(), maxDecodeLen, pMsgText, dataLen) != EOK) {
+            if (memcpy_s(decodeData, maxDecodeLen, pMsgText, dataLen) != EOK) {
                 TELEPHONY_LOGE("SplitMessage SMS_CHARSET_8BIT memcpy_s error!");
                 return decodeLen;
             }
@@ -584,18 +581,12 @@ int CdmaSmsMessage::DecodeMessage(std::string &decodeData, unsigned int len, Sms
             break;
         }
         case SMS_CODING_UCS2: {
-            client->ConvertUTF8ToUCS2bit(destData, maxDecodeLen, srcData);
-            decodeLen = static_cast<int>(destData.size());
-            decodeData = destData;
+            decodeLen = textCvt->ConvertUTF8ToUCS2(decodeData, maxDecodeLen, pMsgText, dataLen);
             break;
         }
         case SMS_CODING_AUTO:
         default: {
-            int32_t getCodingType = 0;
-            client->ConvertCdmaUTF8ToAutobit(destData, maxDecodeLen, srcData, getCodingType);
-            decodeLen = static_cast<int>(destData.size());
-            decodeData = destData;
-            codingType = static_cast<SmsCodingScheme>(getCodingType);
+            decodeLen = textCvt->ConvertCdmaUTF8ToAuto(decodeData, maxDecodeLen, pMsgText, dataLen, &codingType);
             break;
         }
     }
@@ -657,7 +648,7 @@ std::string CdmaSmsMessage::GetCbInfo() const
 {
     std::string info;
     info.append("isCmas:")
-        .append(isCmas_ ? "true":"false")
+        .append(isCmas_ ? "true" : "false")
         .append("\n")
         .append("format:")
         .append(std::to_string(GetFormat()))
