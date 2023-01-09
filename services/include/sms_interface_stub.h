@@ -61,14 +61,7 @@ private:
     void OnIsImsSmsSupported(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetImsShortMessageFormat(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnHasSmsCapability(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-    void OnConvertGSM7bitToUTF8bit(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-    void OnConvertEUCKRToUTF8bit(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-    void OnConvertSHIFTJISToUTF8bit(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-    void OnConvertUCS2ToUTF8bit(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-    void OnConvertUTF8ToUCS2bit(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-    void OnConvertCdmaUTF8ToAutobit(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-    void OnConvertGsmUTF8ToAutobit(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-    void OnConvertUTF8ToGSM7bitfunc(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnCreateMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetBase64Encode(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetBase64Decode(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetEncodeStringFunc(MessageParcel &data, MessageParcel &reply, MessageOption &option);
