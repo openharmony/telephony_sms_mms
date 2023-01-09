@@ -90,7 +90,7 @@ private:
     void CreateDefaultSubmit(bool bStatusReport, const SmsCodingScheme codingScheme);
     int SetSmsTpduDestAddress(std::shared_ptr<struct SmsTpdu> &tPdu, const std::string &desAddr);
     int CalcReplyEncodeAddress(const std::string &replyAddress);
-    virtual int DecodeMessage(std::string &decodeData, unsigned int length, SmsCodingScheme &codingType,
+    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
         const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
 };
 

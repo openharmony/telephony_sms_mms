@@ -176,10 +176,9 @@ public:
     ShortMessage() = default;
     virtual bool Marshalling(Parcel &parcel) const override;
     static ShortMessage UnMarshalling(Parcel &parcel);
-
-private:
     bool ReadFromParcel(Parcel &parcel);
 
+public:
     static constexpr int MIN_ICC_PDU_LEN = 1;
     std::u16string visibleMessageBody_;
     std::u16string visibleRawAddress_;
