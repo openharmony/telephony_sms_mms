@@ -77,7 +77,7 @@ private:
     void AnalsisUserData(const SmsTeleSvcUserData &userData);
     void AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver);
     void AnalsisHeader(const SmsTeleSvcUserData &userData);
-    virtual int DecodeMessage(std::string &decodeData, unsigned int length, SmsCodingScheme &codingType,
+    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
         const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
 
 private:
@@ -87,7 +87,7 @@ private:
     std::vector<struct SmsUDH> userHeaders_;
     int8_t category_ = SMS_CMAE_CTG_RESERVED;
     int8_t responseType_ = SMS_CMAE_RESP_TYPE_RESERVED;
-    int8_t severity_  = SMS_CMAE_SEVERITY_RESERVED;
+    int8_t severity_ = SMS_CMAE_SEVERITY_RESERVED;
     int8_t urgency_ = SMS_CMAE_URGENCY_RESERVED;
     int8_t certainty_ = SMS_CMAE_CERTAINTY_RESERVED;
     int8_t messageClass_ = SMS_CMAE_ALERT_RESERVED;
