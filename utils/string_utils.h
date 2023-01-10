@@ -32,8 +32,6 @@ public:
     static std::u16string ToUtf16(const std::string &str);
     static std::string StringToHex(const std::vector<uint8_t> &data);
     static std::vector<uint8_t> HexToByteVector(const std::string &str);
-    static std::string BytesConvertToString(const unsigned char *bytes, int32_t offset, int32_t len);
-    static std::shared_ptr<unsigned char> StringToBytes(const std::string &s);
 
 private:
     StringUtils();

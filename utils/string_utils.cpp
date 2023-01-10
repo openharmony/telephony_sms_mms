@@ -132,35 +132,5 @@ std::u16string StringUtils::ToUtf16(const std::string &str)
     }
     return Str8ToStr16(str);
 }
-
-std::string StringUtils::BytesConvertToString(const unsigned char *bytes, int32_t offset, int32_t len)
-{
-    if (offset < 0 || len <= 0) {
-        TELEPHONY_LOGE("parameter is invalid");
-        return "";
-    }
-    auto sByte = new char[len + 1];
-    sByte[len] = '\0';
-    for (int i = 0; i < len; i++) {
-        sByte[i] = static_cast<char>(bytes[offset + i]);
-    }
-    std::string str(sByte);
-    delete[] sByte;
-    return str;
-}
-
-std::shared_ptr<unsigned char> StringUtils::StringToBytes(const std::string &s)
-{
-    if (s.length() <= 0) {
-        TELEPHONY_LOGE("StringToBytes length is invalid");
-        return nullptr;
-    }
-    auto bytes =
-        std::shared_ptr<unsigned char>(new unsigned char[s.length()], [](unsigned char *byte) { delete[] byte; });
-    for (size_t i = 0; i < s.length(); i++) {
-        bytes.get()[i] = static_cast<unsigned char>(s[i]);
-    }
-    return bytes;
-}
 } // namespace Telephony
 } // namespace OHOS

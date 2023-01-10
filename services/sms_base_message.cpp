@@ -15,7 +15,7 @@
 
 #include "sms_base_message.h"
 
-#include "sms_service_manager_client.h"
+#include "msg_text_convert.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -282,8 +282,8 @@ int SmsBaseMessage::GetSegmentSize(
 
     if (codingScheme == SMS_CODING_7BIT || codingScheme == SMS_CODING_ASCII7BIT) {
         if ((dataLen + headerSize) > maxSize) {
-            segSize = ((GSM_BEAR_DATA_LEN * BYTE_BITS) - ((headerLen + concat + headerSize) * BYTE_BITS)) /
-                CHARSET_7BIT_BITS;
+            segSize =
+                ((GSM_BEAR_DATA_LEN * BYTE_BITS) - ((headerLen + concat + headerSize) * BYTE_BITS)) / CHARSET_7BIT_BITS;
         } else {
             segSize = dataLen;
         }
@@ -326,8 +326,8 @@ int SmsBaseMessage::GetMaxSegmentSize(
     }
     if (codingScheme == SMS_CODING_7BIT || codingScheme == SMS_CODING_ASCII7BIT) {
         if ((dataLen + headerSize) > maxSize) {
-            segSize = ((GSM_BEAR_DATA_LEN * BYTE_BITS) - ((headerLen + concat + headerSize) * BYTE_BITS)) /
-                CHARSET_7BIT_BITS;
+            segSize =
+                ((GSM_BEAR_DATA_LEN * BYTE_BITS) - ((headerLen + concat + headerSize) * BYTE_BITS)) / CHARSET_7BIT_BITS;
         } else {
             segSize = maxSize - headerSize;
         }
@@ -343,20 +343,28 @@ int SmsBaseMessage::GetMaxSegmentSize(
 
 void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType)
 {
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr || split.encodeData.size() <= 0) {
+        TELEPHONY_LOGE("MsgTextConvert Instance is nullptr");
+        return;
+    }
+
     int dataSize = 0;
-    unsigned char buff[MAX_MSG_TEXT_LEN + 1] = {0};
-    auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-    std::string destData;
-    std::string srcData = StringUtils::BytesConvertToString(split.encodeData.data(), 0, split.encodeData.size());
+    unsigned char buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
     switch (codingType) {
         case SMS_CODING_7BIT: {
-            client->ConvertGSM7bitToUTF8bit(destData, MAX_MSG_TEXT_LEN, srcData);
-            dataSize = static_cast<int>(destData.size());
+            MsgLangInfo langInfo = {
+                0,
+            };
+            langInfo.bSingleShift = false;
+            langInfo.bLockingShift = false;
+            dataSize = textCvt->ConvertGSM7bitToUTF8(
+                buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size(), &langInfo);
             break;
         }
         case SMS_CODING_UCS2: {
-            client->ConvertUCS2ToUTF8bit(destData, MAX_MSG_TEXT_LEN, srcData);
-            dataSize = static_cast<int>(destData.size());
+            dataSize =
+                textCvt->ConvertUCS2ToUTF8(buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size());
             break;
         }
         default: {
@@ -374,11 +382,7 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
         }
     }
 
-    if (destData.empty()) {
-        split.text.insert(0, (char *)buff, dataSize);
-    } else {
-        split.text = destData;
-    }
+    split.text.insert(0, (char *)buff, dataSize);
     TELEPHONY_LOGI("split text");
 }
 
@@ -396,14 +400,7 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
     bool bAbnormal = false;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
     codingType = force7BitCode ? SMS_CODING_7BIT : SMS_CODING_AUTO;
-    std::string decodeDataStr;
-    encodeLen = DecodeMessage(decodeDataStr, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
-    int32_t index_data = 0;
-    while (index_data < encodeLen) {
-        decodeData[index_data] = decodeDataStr[index_data];
-        index_data++;
-    }
-
+    encodeLen = DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
     if (encodeLen <= 0) {
         TELEPHONY_LOGE("encodeLen Less than or equal to 0");
         return;
@@ -451,14 +448,7 @@ bool SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool force7B
     bool bAbnormal = false;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
     SmsCodingScheme codingType = force7BitCode ? SMS_CODING_7BIT : SMS_CODING_AUTO;
-
-    std::string decodeDataStr;
-    encodeLen = DecodeMessage(decodeDataStr, sizeof(decodeData), codingType, message, bAbnormal, langId);
-    int32_t index_data = 0;
-    while (index_data < encodeLen) {
-        decodeData[index_data] = decodeDataStr[index_data];
-        index_data++;
-    }
+    encodeLen = DecodeMessage(decodeData, sizeof(decodeData), codingType, message, bAbnormal, langId);
     if (encodeLen <= 0) {
         TELEPHONY_LOGE("encodeLen Less than or equal to 0");
         return false;
@@ -481,8 +471,7 @@ bool SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool force7B
     }
     if (segSize != 0) {
         lenInfo.msgRemainCount = static_cast<uint8_t>(((segSize - (lenInfo.msgEncodeCount % segSize))) % segSize);
-        lenInfo.msgSegCount = ceil(static_cast<double>(lenInfo.msgEncodeCount) /
-            static_cast<double>(segSize));
+        lenInfo.msgSegCount = ceil(static_cast<double>(lenInfo.msgEncodeCount) / static_cast<double>(segSize));
     }
     return true;
 }
