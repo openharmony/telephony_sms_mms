@@ -22,10 +22,9 @@
 #include <memory>
 
 #include "gsm_sms_udata_codec.h"
+#include "msg_text_convert.h"
 #include "securec.h"
 #include "sms_common_utils.h"
-#include "sms_service_manager_client.h"
-#include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -251,7 +250,11 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
         TELEPHONY_LOGE("Address or SMSC is null!");
         return offset;
     }
-
+    MsgTextConvert *textCvt = MsgTextConvert::Instance();
+    if (textCvt == nullptr) {
+        TELEPHONY_LOGE("MsgTextConvert Instance is nullptr");
+        return offset;
+    }
     if (memset_s(pAddress->address, sizeof(pAddress->address), 0x00, sizeof(pAddress->address)) != EOK) {
         TELEPHONY_LOGE("pAddress memset_s error!");
         return offset;
@@ -277,17 +280,11 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
         int tmplength = 0;
         tmplength = SmsCommonUtils::Unpack7bitChar(
             &(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00, (unsigned char *)tmpAddress, MAX_ADDRESS_LEN);
-        int dataSize = 0;
-        std::string destData;
-        std::string srcData = StringUtils::BytesConvertToString((unsigned char *)tmpAddress, 0, dataSize);
-        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->ConvertGSM7bitToUTF8bit(
-            destData, MAX_ADDRESS_LEN, srcData);
-        dataSize = static_cast<int>(destData.size());
-        int addressIndex = 0;
-        while (addressIndex++ < dataSize) {
-            pAddress->address[addressIndex] = static_cast<char>(destData[addressIndex]);
-        }
-
+        MsgLangInfo langInfo = {0};
+        langInfo.bSingleShift = false;
+        langInfo.bLockingShift = false;
+        textCvt->ConvertGSM7bitToUTF8((unsigned char *)pAddress->address, MAX_ADDRESS_LEN,
+            (unsigned char *)tmpAddress, tmplength, &langInfo);
         if (tmpAddress) {
             delete[] tmpAddress;
         }
@@ -480,7 +477,7 @@ int GsmSmsParamCodec::DecodeSMSC(const unsigned char *pTpdu, int pduLen, struct 
     }
     addrLen = (int)pTpdu[offset++];
     if ((addrLen == 0) || (addrLen >= pduLen)) {
-        TELEPHONY_LOGE("AddrLen  is invilid.");
+        TELEPHONY_LOGE("AddrLen is invilid.");
         return offset;
     }
 
@@ -489,7 +486,7 @@ int GsmSmsParamCodec::DecodeSMSC(const unsigned char *pTpdu, int pduLen, struct 
 
     if (pAddress.ton == SMS_TON_INTERNATIONAL) {
         if (addrLen > (SMS_MAX_ADDRESS_LEN - 1)) {
-            TELEPHONY_LOGE("AddrLen  is invilid.");
+            TELEPHONY_LOGE("AddrLen is invilid.");
             return 0;
         }
         SmsCommonUtils::BcdToDigit(&(pTpdu[offset]), addrLen, &((pAddress.address)[1]));
@@ -498,7 +495,7 @@ int GsmSmsParamCodec::DecodeSMSC(const unsigned char *pTpdu, int pduLen, struct 
         }
     } else {
         if (addrLen > SMS_MAX_ADDRESS_LEN) {
-            TELEPHONY_LOGE("AddrLen  is invilid.");
+            TELEPHONY_LOGE("AddrLen is invilid.");
             return 0;
         }
         SmsCommonUtils::BcdToDigit(&(pTpdu[offset]), addrLen, &((pAddress.address)[0]));

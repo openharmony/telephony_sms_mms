@@ -17,6 +17,7 @@
 
 #include <regex>
 
+#include "cdma_sms_message.h"
 #include "core_manager_inner.h"
 #include "ims_sms_client.h"
 #include "msg_text_convert.h"
@@ -496,133 +497,31 @@ int64_t SmsService::GetSpendTime()
     return spendTime_;
 }
 
-bool SmsService::ConvertGSM7bitToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
+bool SmsService::CreateMessage(std::string pdu, std::string specification, ShortMessage &message)
 {
-    MsgLangInfo langInfo = { 0 };
-    langInfo.bSingleShift = false;
-    langInfo.bLockingShift = false;
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr || maxLength <= 0 || pSrcText.empty()) {
+    std::shared_ptr<SmsBaseMessage> baseMessage;
+    if (specification == "3gpp") {
+        baseMessage = GsmSmsMessage::CreateMessage(pdu);
+    } else if (specification == "3gpp2") {
+        baseMessage = CdmaSmsMessage::CreateMessage(pdu);
+    }
+
+    if (baseMessage == nullptr) {
         return false;
     }
-    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
-    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(pSrcText);
-
-    int32_t dataSize =
-        textCvt->ConvertGSM7bitToUTF8(destText.get(), maxLength, srcText.get(), pSrcText.size(), &langInfo);
-    pDestText = StringUtils::BytesConvertToString(destText.get(), 0, dataSize);
+    message.visibleMessageBody_ = StringUtils::ToUtf16(baseMessage->GetVisibleMessageBody());
+    message.visibleRawAddress_ = StringUtils::ToUtf16(baseMessage->GetVisibleOriginatingAddress());
+    message.messageClass_ = static_cast<ShortMessage::SmsMessageClass>(baseMessage->GetMessageClass());
+    message.scAddress_ = StringUtils::ToUtf16(baseMessage->GetSmscAddr());
+    message.scTimestamp_ = baseMessage->GetScTimestamp();
+    message.isReplaceMessage_ = baseMessage->IsReplaceMessage();
+    message.status_ = baseMessage->GetStatus();
+    message.isSmsStatusReportMessage_ = baseMessage->IsSmsStatusReportMessage();
+    message.hasReplyPath_ = baseMessage->HasReplyPath();
+    message.protocolId_ = baseMessage->GetProtocolId();
+    message.pdu_ = baseMessage->GetRawPdu();
     return true;
-};
-
-bool SmsService::ConvertEUCKRToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
-{
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr || maxLength <= 0 || pSrcText.empty()) {
-        return false;
-    }
-    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
-    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(pSrcText);
-    int32_t dataSize = textCvt->ConvertEUCKRToUTF8(destText.get(), maxLength, srcText.get(), pSrcText.size());
-    pDestText = StringUtils::BytesConvertToString(destText.get(), 0, dataSize);
-    return true;
-};
-
-bool SmsService::ConvertSHIFTJISToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
-{
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr || maxLength <= 0 || pSrcText.empty()) {
-        return false;
-    }
-    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
-    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(pSrcText);
-    int32_t dataSize = textCvt->ConvertSHIFTJISToUTF8(destText.get(), maxLength, srcText.get(), pSrcText.size());
-    pDestText = StringUtils::BytesConvertToString(destText.get(), 0, dataSize);
-    return true;
-};
-
-bool SmsService::ConvertUCS2ToUTF8bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
-{
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr || maxLength <= 0 || pSrcText.empty()) {
-        return false;
-    }
-    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
-    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(pSrcText);
-    int32_t dataSize = textCvt->ConvertUCS2ToUTF8(destText.get(), maxLength, srcText.get(), pSrcText.size());
-    pDestText = StringUtils::BytesConvertToString(destText.get(), 0, dataSize);
-    return true;
-};
-
-bool SmsService::ConvertUTF8ToUCS2bit(std::string &pDestText, int32_t maxLength, std::string pSrcText)
-{
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr || maxLength <= 0 || pSrcText.empty()) {
-        return false;
-    }
-    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
-    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(pSrcText);
-    int32_t dataSize = textCvt->ConvertUTF8ToUCS2(destText.get(), maxLength, srcText.get(), pSrcText.size());
-    pDestText = StringUtils::BytesConvertToString(destText.get(), 0, dataSize);
-    return true;
-};
-
-bool SmsService::ConvertCdmaUTF8ToAutobit(
-    std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType)
-{
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr || maxLength <= 0 || pSrcText.empty()) {
-        return false;
-    }
-    SmsCodingScheme pCharTypeValue = static_cast<SmsCodingScheme>(getCodingType);
-    SmsCodingScheme *pCharType = &pCharTypeValue;
-    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
-    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(pSrcText);
-    int32_t dataSize =
-        textCvt->ConvertCdmaUTF8ToAuto(destText.get(), maxLength, srcText.get(), pSrcText.size(), pCharType);
-    pDestText = StringUtils::BytesConvertToString(destText.get(), 0, dataSize);
-    getCodingType = static_cast<int32_t>(pCharTypeValue);
-    return true;
-};
-
-bool SmsService::ConvertGsmUTF8ToAutobit(
-    std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &getCodingType)
-{
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr || maxLength <= 0 || pSrcText.empty()) {
-        return false;
-    }
-    SmsCodingScheme pCharTypeValue = static_cast<SmsCodingScheme>(getCodingType);
-    SmsCodingScheme *pCharType = &pCharTypeValue;
-    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
-    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(pSrcText);
-    int32_t dataSize =
-        textCvt->ConvertGsmUTF8ToAuto(destText.get(), maxLength, srcText.get(), pSrcText.size(), pCharType);
-    pDestText = StringUtils::BytesConvertToString(destText.get(), 0, dataSize);
-    getCodingType = static_cast<int32_t>(pCharTypeValue);
-    return true;
-};
-
-bool SmsService::ConvertUTF8ToGSM7bitfunc(
-    std::string &pDestText, int32_t maxLength, std::string pSrcText, int32_t &langIdVal, int32_t &abnormal)
-{
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr || maxLength <= 0 || pSrcText.empty()) {
-        return false;
-    }
-    bool bAbnormal = false;
-    MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
-    MSG_LANGUAGE_ID_T *tLangId = &langId;
-    bool *pIncludeAbnormalChar = &bAbnormal;
-    std::shared_ptr<unsigned char> destText = std::make_shared<unsigned char>(maxLength);
-    std::shared_ptr<unsigned char> srcText = StringUtils::StringToBytes(pSrcText);
-    std::tuple<unsigned char *, int, unsigned char *, int, MSG_LANGUAGE_ID_T *, bool *> paras(destText.get(), maxLength,
-        const_cast<unsigned char *>(srcText.get()), pSrcText.size(), tLangId, pIncludeAbnormalChar);
-    int32_t decodeLen = textCvt->ConvertUTF8ToGSM7bit(paras);
-    langIdVal = static_cast<int32_t>(*tLangId);
-    abnormal = static_cast<int32_t>(bAbnormal);
-    pDestText = StringUtils::BytesConvertToString(destText.get(), 0, decodeLen);
-    return true;
-};
+}
 
 bool SmsService::GetBase64Encode(std::string src, std::string &dest)
 {
