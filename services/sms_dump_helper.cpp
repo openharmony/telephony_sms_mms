@@ -41,7 +41,9 @@ static std::string to_utf8(std::u16string str16)
 
 bool SmsDumpHelper::WhetherHasSimCard(const int32_t slotId) const
 {
-    return DelayedRefSingleton<CoreServiceClient>::GetInstance().HasSimCard(slotId);
+    bool hasSimCard = false;
+    DelayedRefSingleton<CoreServiceClient>::GetInstance().HasSimCard(slotId, hasSimCard);
+    return hasSimCard;
 }
 
 void SmsDumpHelper::ShowHelp(std::string &result) const
