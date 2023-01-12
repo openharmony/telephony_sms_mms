@@ -246,14 +246,13 @@ HWTEST_F(SmsMmsGtest, GetProxy_0001, Function | MediumTest | Level0)
 
 void OpenCellBroadcastTestFuc(SmsMmsTestHelper &helper)
 {
-    bool result = true;
     bool enable = true;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -283,14 +282,13 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0001, Function | MediumTest | Level3)
 
 void OpenCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
 {
-    bool result = true;
     bool enable = true;
     uint32_t fromMsgId = 20;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -320,14 +318,13 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0002, Function | MediumTest | Level3)
 
 void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
 {
-    bool result = true;
     bool enable = true;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 3;
-    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -361,9 +358,9 @@ void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -397,9 +394,9 @@ void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 1000;
     uint8_t netType = 1;
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -433,9 +430,9 @@ void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 0;
     uint8_t netType = 1;
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -608,14 +605,13 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0012, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
 {
-    bool result = true;
     bool enable = false;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -645,14 +641,13 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0001, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
 {
-    bool result = true;
     bool enable = false;
     uint32_t fromMsgId = 20;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -682,14 +677,13 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0002, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
 {
-    bool result = true;
     bool enable = false;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 3;
-    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -723,9 +717,9 @@ void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -759,9 +753,9 @@ void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 1000;
     uint8_t netType = 1;
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -795,9 +789,9 @@ void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 0;
     uint8_t netType = 1;
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -1243,9 +1237,9 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0003, Function | MediumTest | Level3)
 
 void GetAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
 {
-    std::vector<ShortMessage> result;
-    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetAllSimMessages(helper.slotId);
-    bool empty = result.empty();
+    std::vector<ShortMessage> message;
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetAllSimMessages(helper.slotId, message);
+    bool empty = message.empty();
     helper.SetBoolResult(empty);
     helper.NotifyAll();
 }
@@ -1479,8 +1473,9 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0003, Function | MediumTest | Level3)
 void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
 {
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetImsSmsConfig(helper.slotId, 1);
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId);
-    helper.SetBoolResult(result);
+    bool isSupported = false;
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId, isSupported);
+    helper.SetBoolResult(isSupported);
     helper.NotifyAll();
 }
 
@@ -1511,10 +1506,10 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level2)
 
 void SetImsSmsConfigTestFuc2(SmsMmsTestHelper &helper)
 {
-    bool result = true;
+    bool isSupported = false;
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetImsSmsConfig(helper.slotId, 0);
-    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId);
-    helper.SetBoolResult(result);
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId, isSupported);
+    helper.SetBoolResult(isSupported);
     helper.NotifyAll();
 }
 
@@ -1818,8 +1813,9 @@ void GetSmsSegmentsInfoTestFuc(SmsMmsTestHelper &helper)
     ISmsServiceInterface::SmsSegmentsInfo result;
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetSmsSegmentsInfo(
         helper.slotId, message, force7BitCode, result);
-    bool ret = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId);
-    helper.SetBoolResult(ret);
+    bool isSupported = false;
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId, isSupported);
+    helper.SetBoolResult(isSupported);
     helper.NotifyAll();
 }
 
@@ -1830,8 +1826,9 @@ void GetSmsSegmentsInfoTestFuc2(SmsMmsTestHelper &helper)
     ISmsServiceInterface::SmsSegmentsInfo result;
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetSmsSegmentsInfo(
         helper.slotId, message, force7BitCode, result);
-    bool ret = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId);
-    helper.SetBoolResult(ret);
+    bool isSupported = false;
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId, isSupported);
+    helper.SetBoolResult(isSupported);
     helper.NotifyAll();
 }
 
