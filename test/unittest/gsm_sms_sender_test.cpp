@@ -427,7 +427,6 @@ void GsmSmsSenderTest::TestGetAllSimMessages(const sptr<ISmsServiceInterface> &s
 void GsmSmsSenderTest::TestEnableCBRangeConfig(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;
-    bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -449,15 +448,13 @@ void GsmSmsSenderTest::TestEnableCBRangeConfig(const sptr<ISmsServiceInterface> 
     std::cout << "Please enter endMessageId" << std::endl;
     std::cin >> input;
     endMessageId = std::atoi(input.c_str());
-    result = smsService->SetCBConfig(slotId, enable, startMessageId, endMessageId, ranType);
-    std::string ret = result ? "true" : "false";
-    std::cout << "TestEnableCBRangeConfig:" << ret << std::endl;
+    int32_t result = smsService->SetCBConfig(slotId, enable, startMessageId, endMessageId, ranType);
+    std::cout << "TestEnableCBRangeConfig:" << result << std::endl;
 }
 
 void GsmSmsSenderTest::TestDisableCBRangeConfig(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;
-    bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -479,15 +476,13 @@ void GsmSmsSenderTest::TestDisableCBRangeConfig(const sptr<ISmsServiceInterface>
     std::cout << "Please enter endMessageId" << std::endl;
     std::cin >> input;
     endMessageId = std::atoi(input.c_str());
-    result = smsService->SetCBConfig(slotId, enable, startMessageId, endMessageId, ranType);
-    std::string ret = result ? "true" : "false";
-    std::cout << "TestDisableCBRangeConfig:" << ret << std::endl;
+    int32_t result = smsService->SetCBConfig(slotId, enable, startMessageId, endMessageId, ranType);
+    std::cout << "TestDisableCBRangeConfig:" << result << std::endl;
 }
 
 void GsmSmsSenderTest::TestEnableCBConfig(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;
-    bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -505,15 +500,13 @@ void GsmSmsSenderTest::TestEnableCBConfig(const sptr<ISmsServiceInterface> &smsS
     std::cout << "Please enter identifier" << std::endl;
     std::cin >> input;
     identifier = std::atoi(input.c_str());
-    result = smsService->SetCBConfig(slotId, enable, identifier, identifier, ranType);
-    std::string ret = result ? "true" : "false";
-    std::cout << "TestEnableCBConfig:" << ret << std::endl;
+    int32_t result = smsService->SetCBConfig(slotId, enable, identifier, identifier, ranType);
+    std::cout << "TestEnableCBConfig:" << result << std::endl;
 }
 
 void GsmSmsSenderTest::TestDisableCBConfig(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;
-    bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -531,15 +524,13 @@ void GsmSmsSenderTest::TestDisableCBConfig(const sptr<ISmsServiceInterface> &sms
     std::cout << "Please enter identifier" << std::endl;
     std::cin >> input;
     identifier = std::atoi(input.c_str());
-    result = smsService->SetCBConfig(slotId, enable, identifier, identifier, ranType);
-    std::string ret = result ? "true" : "false";
-    std::cout << "TestDisableCBConfig:" << ret << std::endl;
+    int32_t result = smsService->SetCBConfig(slotId, enable, identifier, identifier, ranType);
+    std::cout << "TestDisableCBConfig:" << result << std::endl;
 }
 
 void GsmSmsSenderTest::TestSetDefaultSmsSlotId(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;
-    bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -549,9 +540,8 @@ void GsmSmsSenderTest::TestSetDefaultSmsSlotId(const sptr<ISmsServiceInterface> 
     std::cout << "Please enter Slot Id" << std::endl;
     std::cin >> input;
     slotId = std::atoi(input.c_str());
-    result = smsService->SetDefaultSmsSlotId(slotId);
-    std::string ret = result ? "true" : "false";
-    std::cout << "TestSetDefaultSmsSlotId:" << ret << std::endl;
+    int32_t result = smsService->SetDefaultSmsSlotId(slotId);
+    std::cout << "TestSetDefaultSmsSlotId:" << result << std::endl;
 }
 
 void GsmSmsSenderTest::TestGetDefaultSmsSlotId(const sptr<ISmsServiceInterface> &smsService) const
@@ -598,7 +588,7 @@ void GsmSmsSenderTest::TestGetSmsSegmentsInfo(const sptr<ISmsServiceInterface> &
     std::cout << "Please enter message" << std::endl;
     std::getline(std::cin, input);
     ISmsServiceInterface::SmsSegmentsInfo result;
-    if (!smsService->GetSmsSegmentsInfo(slotId, StringUtils::ToUtf16(input), false, result)) {
+    if (smsService->GetSmsSegmentsInfo(slotId, StringUtils::ToUtf16(input), false, result) != TELEPHONY_ERR_SUCCESS) {
         std::cout << "Get Sms SegmentsInfo Fail." << std::endl;
         return;
     }

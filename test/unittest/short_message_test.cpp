@@ -75,8 +75,9 @@ void ShortMessageTest::TestShowShortMessage() const
         std::cout << "please create a short message!" << std::endl;
         return;
     }
-
-    std::cout << "GetSmscAddr = " << StringUtils::ToUtf8(shortMessage_->GetScAddress()) << std::endl;
+    std::u16string smscAddress;
+    shortMessage_->GetScAddress(smscAddress);
+    std::cout << "GetSmscAddr = " << StringUtils::ToUtf8(smscAddress) << std::endl;
     std::cout << "GetVisibleMessageBody = " << StringUtils::ToUtf8(shortMessage_->GetVisibleMessageBody())
               << std::endl;
     std::cout << "GetVisibleRawAddress = " << StringUtils::ToUtf8(shortMessage_->GetVisibleRawAddress())

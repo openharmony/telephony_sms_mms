@@ -143,83 +143,94 @@ void SmsInterfaceStub::OnSendSmsDataRequest(MessageParcel &data, MessageParcel &
 
 void SmsInterfaceStub::OnSetSmscAddr(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    bool result = false;
     int32_t slotId = data.ReadInt32();
     std::u16string scAddr = data.ReadString16();
-    result = SetSmscAddr(slotId, scAddr);
+    int32_t result = SetSmscAddr(slotId, scAddr);
     TELEPHONY_LOGI("SetSmscAddr result %{public}d", result);
-    reply.WriteBool(result);
+    reply.WriteInt32(result);
 }
 
 void SmsInterfaceStub::OnGetSmscAddr(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    std::u16string result;
+    std::u16string smscAddress;
     int32_t slotId = data.ReadInt32();
-    result = GetSmscAddr(slotId);
-    TELEPHONY_LOGI("GetSmscAddr result size %{public}zu", result.size());
-    reply.WriteString16(result);
+    int32_t result = GetSmscAddr(slotId, smscAddress);
+    TELEPHONY_LOGI("GetSmscAddr result size %{public}d", result);
+    if (!reply.WriteInt32(result)) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnGetSmscAddr write reply failed.");
+        return;
+    }
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnGetSmscAddr result is not TELEPHONY_ERR_SUCCESS.");
+        return;
+    }
+
+    if (!reply.WriteString16(smscAddress)) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnGetSmscAddr write reply failed.");
+        return;
+    }
 }
 
 void SmsInterfaceStub::OnAddSimMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    bool result = false;
     int32_t slotId = data.ReadInt32();
     std::u16string smsc = data.ReadString16();
     std::u16string pdu = data.ReadString16();
     uint32_t status = data.ReadUint32();
-    result = AddSimMessage(slotId, smsc, pdu, static_cast<SimMessageStatus>(status));
+    int32_t result = AddSimMessage(slotId, smsc, pdu, static_cast<SimMessageStatus>(status));
     TELEPHONY_LOGI("AddSimMessage result %{public}d", result);
-    reply.WriteBool(result);
+    reply.WriteInt32(result);
 }
 
 void SmsInterfaceStub::OnDelSimMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    bool result = false;
     int32_t slotId = data.ReadInt32();
     uint32_t msgIndex = data.ReadUint32();
-    result = DelSimMessage(slotId, msgIndex);
+    int32_t result = DelSimMessage(slotId, msgIndex);
     TELEPHONY_LOGI("DelSimMessage result %{public}d", result);
-    reply.WriteBool(result);
+    reply.WriteInt32(result);
 }
 
 void SmsInterfaceStub::OnUpdateSimMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    bool result = false;
     int32_t slotId = data.ReadInt32();
     uint32_t msgIndex = data.ReadUint32();
     uint32_t newStatus = data.ReadUint32();
     std::u16string pdu = data.ReadString16();
     std::u16string smsc = data.ReadString16();
-    result = UpdateSimMessage(slotId, msgIndex, static_cast<SimMessageStatus>(newStatus), pdu, smsc);
+    int32_t result = UpdateSimMessage(slotId, msgIndex, static_cast<SimMessageStatus>(newStatus), pdu, smsc);
     TELEPHONY_LOGI("UpdateSimMessage result %{public}d", result);
-    reply.WriteBool(result);
+    reply.WriteInt32(result);
 }
 
 void SmsInterfaceStub::OnGetAllSimMessages(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    std::vector<ShortMessage> result;
+    std::vector<ShortMessage> message;
     int32_t slotId = data.ReadInt32();
-    result = GetAllSimMessages(slotId);
-    TELEPHONY_LOGI("GetAllSimMessages size %{public}zu", result.size());
-
-    int32_t resultLen = static_cast<int32_t>(result.size());
+    int32_t result = GetAllSimMessages(slotId, message);
+    TELEPHONY_LOGI("GetAllSimMessages result %{public}d size %{public}zu", result, message.size());
+    reply.WriteInt32(result);
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnGetSmscAddr result is not TELEPHONY_ERR_SUCCESS.");
+        return;
+    }
+    int32_t resultLen = static_cast<int32_t>(message.size());
     reply.WriteInt32(resultLen);
-    for (const auto &v : result) {
+    for (const auto &v : message) {
         v.Marshalling(reply);
     }
 }
 
 void SmsInterfaceStub::OnSetCBConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    bool result = false;
     int32_t slotId = data.ReadInt32();
     bool enable = data.ReadBool();
     uint32_t fromMsgId = data.ReadUint32();
     uint32_t toMsgId = data.ReadUint32();
     uint8_t ranType = data.ReadUint8();
-    result = SetCBConfig(slotId, enable, fromMsgId, toMsgId, ranType);
+    int32_t result = SetCBConfig(slotId, enable, fromMsgId, toMsgId, ranType);
     TELEPHONY_LOGI("OnSetCBConfig result %{public}d", result);
-    reply.WriteBool(result);
+    reply.WriteInt32(result);
 }
 
 void SmsInterfaceStub::OnSetImsSmsConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -234,11 +245,10 @@ void SmsInterfaceStub::OnSetImsSmsConfig(MessageParcel &data, MessageParcel &rep
 
 void SmsInterfaceStub::OnSetDefaultSmsSlotId(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    bool result = false;
     int32_t slotId = data.ReadInt32();
-    result = SetDefaultSmsSlotId(slotId);
+    int32_t result = SetDefaultSmsSlotId(slotId);
     TELEPHONY_LOGI("SetDefaultSmsSlotId result %{public}d", result);
-    reply.WriteBool(result);
+    reply.WriteInt32(result);
 }
 
 void SmsInterfaceStub::OnGetDefaultSmsSlotId(MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -251,13 +261,18 @@ void SmsInterfaceStub::OnGetDefaultSmsSlotId(MessageParcel &data, MessageParcel 
 
 void SmsInterfaceStub::OnSplitMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    std::vector<std::u16string> result;
+    std::vector<std::u16string> splitMessage;
     std::u16string message = data.ReadString16();
-    result = SplitMessage(message);
-    int32_t resultLen = static_cast<int32_t>(result.size());
+    int32_t result = SplitMessage(message, splitMessage);
+    reply.WriteInt32(result);
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnSplitMessage result is not TELEPHONY_ERR_SUCCESS.");
+        return;
+    }
+    int32_t resultLen = static_cast<int32_t>(splitMessage.size());
     TELEPHONY_LOGI("SplitMessage size %{public}d", resultLen);
     reply.WriteInt32(resultLen);
-    for (const auto &item : result) {
+    for (const auto &item : splitMessage) {
         reply.WriteString16(item);
     }
 }
@@ -269,10 +284,10 @@ void SmsInterfaceStub::OnGetSmsSegmentsInfo(MessageParcel &data, MessageParcel &
     bool force7BitCode = data.ReadBool();
 
     SmsSegmentsInfo segInfo;
-    bool result = GetSmsSegmentsInfo(slotId, message, force7BitCode, segInfo);
-    reply.WriteBool(result);
+    int32_t result = GetSmsSegmentsInfo(slotId, message, force7BitCode, segInfo);
+    reply.WriteInt32(result);
 
-    if (result) {
+    if (result == TELEPHONY_ERR_SUCCESS) {
         reply.WriteInt32(segInfo.msgSegCount);
         reply.WriteInt32(segInfo.msgEncodingCount);
         reply.WriteInt32(segInfo.msgRemainCount);
@@ -283,12 +298,31 @@ void SmsInterfaceStub::OnGetSmsSegmentsInfo(MessageParcel &data, MessageParcel &
 void SmsInterfaceStub::OnIsImsSmsSupported(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     int32_t slotId = data.ReadInt32();
-    reply.WriteBool(IsImsSmsSupported(slotId));
+    bool isSupported = false;
+    int32_t result = IsImsSmsSupported(slotId, isSupported);
+    if (!reply.WriteInt32(result)) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnIsImsSmsSupported write reply failed.");
+        return;
+    }
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnIsImsSmsSupported result is not TELEPHONY_ERR_SUCCESS.");
+        return;
+    }
+    if (!reply.WriteBool(isSupported)) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnIsImsSmsSupported write reply failed.");
+        return;
+    }
 }
 
 void SmsInterfaceStub::OnGetImsShortMessageFormat(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    std::u16string format = GetImsShortMessageFormat();
+    std::u16string format;
+    int32_t result = GetImsShortMessageFormat(format);
+    reply.WriteInt32(result);
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnGetImsShortMessageFormat result is not TELEPHONY_ERR_SUCCESS.");
+        return;
+    }
     reply.WriteString16(format);
 }
 

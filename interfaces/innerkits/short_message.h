@@ -81,9 +81,10 @@ public:
     /**
      * @brief GetScAddress
      * Obtains the short message service center (SMSC) address
-     * @return std::u16string
+     * @param smscAddress SMS center address
+     * @return Interface execution results
      */
-    std::u16string GetScAddress() const;
+    int32_t GetScAddress(std::u16string &smscAddress) const;
 
     /**
      * @brief GetScTimestamp

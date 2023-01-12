@@ -63,18 +63,18 @@ public:
      * Sets the address for the Short Message Service Center (SMSC) based on a specified slot ID.
      * @param slotId [in]
      * @param scAddr [in]
-     * @return true
-     * @return false
+     * @return int32_t
      */
-    bool SetSmscAddr(int32_t slotId, const std::u16string &scAddr) override;
+    int32_t SetSmscAddr(int32_t slotId, const std::u16string &scAddr) override;
 
     /**
      * @brief GetSmscAddr
      * Obtains the SMSC address based on a specified slot ID.
      * @param slotId [in]
-     * @return std::u16string
+     * @param smscAddress [out]
+     * @return Interface execution results.
      */
-    std::u16string GetSmscAddr(int32_t slotId) override;
+    int32_t GetSmscAddr(int32_t slotId, std::u16string &smscAddress) override;
 
     /**
      * @brief AddSimMessage
@@ -83,10 +83,9 @@ public:
      * @param smsc [in]
      * @param pdu [in]
      * @param status [in]
-     * @return true
-     * @return false
+     * @return int32_t
      */
-    bool AddSimMessage(
+    int32_t AddSimMessage(
         int32_t slotId, const std::u16string &smsc, const std::u16string &pdu, SimMessageStatus status) override;
 
     /**
@@ -94,10 +93,9 @@ public:
      * Delete a sms in the sim card.
      * @param slotId [in]
      * @param msgIndex [in]
-     * @return true
-     * @return false
+     * @return int32_t
      */
-    bool DelSimMessage(int32_t slotId, uint32_t msgIndex) override;
+    int32_t DelSimMessage(int32_t slotId, uint32_t msgIndex) override;
 
     /**
      * @brief UpdateSimMessage
@@ -107,19 +105,18 @@ public:
      * @param newStatus [in]
      * @param pdu [in]
      * @param smsc [in]
-     * @return true
-     * @return false
+     * @return int32_t
      */
-    bool UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessageStatus newStatus, const std::u16string &pdu,
+    int32_t UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessageStatus newStatus, const std::u16string &pdu,
         const std::u16string &smsc) override;
 
     /**
      * @brief GetAllSimMessages
      * Get sim card all the sms.
      * @param slotId [in]
-     * @return std::vector<ShortMessage>
+     * @return int32_t
      */
-    std::vector<ShortMessage> GetAllSimMessages(int32_t slotId) override;
+    int32_t GetAllSimMessages(int32_t slotId, std::vector<ShortMessage> &message) override;
 
     /**
      * @brief SetCBConfig
@@ -132,7 +129,7 @@ public:
      * @return true
      * @return false
      */
-    bool SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) override;
+    int32_t SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) override;
 
     /**
      * @brief SetImsSmsConfig enable or disable IMS SMS.
@@ -148,10 +145,9 @@ public:
      * @brief SetDefaultSmsSlotId
      * Set the Default Sms Slot Id To SmsService
      * @param slotId [in]
-     * @return true
-     * @return false
+     * @return int32_t
      */
-    bool SetDefaultSmsSlotId(int32_t slotId) override;
+    int32_t SetDefaultSmsSlotId(int32_t slotId) override;
 
     /**
      * @brief GetDefaultSmsSlotId
@@ -164,9 +160,9 @@ public:
      * @brief SplitMessage
      * calculate Sms Message Split Segment count
      * @param message [in]
-     * @return std::vector<std::u16string>
+     * @return int32_t
      */
-    std::vector<std::u16string> SplitMessage(const std::u16string &message) override;
+    int32_t SplitMessage(const std::u16string &message, std::vector<std::u16string> &splitMessage) override;
 
     /**
      * @brief GetSmsSegmentsInfo
@@ -175,10 +171,9 @@ public:
      * @param message [in]
      * @param force7BitCode [in]
      * @param info [out]
-     * @return true
-     * @return false
+     * @return Returns {@code 0} if get sms segments info
      */
-    bool GetSmsSegmentsInfo(int32_t slotId, const std::u16string &message, bool force7BitCode,
+    int32_t GetSmsSegmentsInfo(int32_t slotId, const std::u16string &message, bool force7BitCode,
         ISmsServiceInterface::SmsSegmentsInfo &segInfo) override;
 
     /**
@@ -186,17 +181,18 @@ public:
      * Hide this for inner system use
      * @param slotId Indicates the card slot index number, ranging from {@code 0} to the maximum card slot index number
      * supported by the device.
-     * @return If support Ims Sms return true, otherwise return false
+     * @param isSupported Whether ims SMS is supported.
+     * @return Interface execution results.
      */
-    bool IsImsSmsSupported(int32_t slotId) override;
+    int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported) override;
 
     /**
      * @brief GetImsShortMessageFormat
      * Get the Ims Short Message Format 3gpp/3gpp2
      * Hide this for inner system use
-     * @return std::u16string
+     * @return int32_t
      */
-    std::u16string GetImsShortMessageFormat() override;
+    int32_t GetImsShortMessageFormat(std::u16string &format) override;
 
     /**
      * @brief HasSmsCapability

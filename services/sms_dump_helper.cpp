@@ -85,10 +85,14 @@ void SmsDumpHelper::ShowSmsInfo(std::string &result) const
             result.append(std::to_string(i));
             result.append("\n");
             result.append("IsImsSmsSupported = ");
-            result.append(std::to_string(DelayedSingleton<SmsService>::GetInstance()->IsImsSmsSupported(i)));
+            bool isSupported = false;
+            DelayedSingleton<SmsService>::GetInstance()->IsImsSmsSupported(i, isSupported);
+            result.append(std::to_string(isSupported));
             result.append("\n");
             result.append("ImsShortMessageFormat = ");
-            result.append(to_utf8(DelayedSingleton<SmsService>::GetInstance()->GetImsShortMessageFormat()));
+            std::u16string format;
+            DelayedSingleton<SmsService>::GetInstance()->GetImsShortMessageFormat(format);
+            result.append(to_utf8(format));
             result.append("\n");
         }
     }
