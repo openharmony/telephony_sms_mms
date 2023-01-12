@@ -55,7 +55,7 @@ public:
     virtual void Init() = 0;
     virtual void ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) = 0;
     virtual void ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer) = 0;
-    virtual bool IsImsSmsSupported(int32_t slotId) = 0;
+    virtual int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported) = 0;
     virtual void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) = 0;
     virtual void StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event) = 0;
     virtual void RegisterImsHandler() = 0;

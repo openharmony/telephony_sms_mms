@@ -374,12 +374,12 @@ void GsmSmsSender::SendImsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, GsmS
     TELEPHONY_LOGI("SendImsSms reply = %{public}d", reply);
 }
 
-bool GsmSmsSender::IsImsSmsSupported(int32_t slotId)
+int32_t GsmSmsSender::IsImsSmsSupported(int32_t slotId, bool &isSupported)
 {
     auto smsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
     if (smsClient == nullptr) {
         TELEPHONY_LOGE("GetImsSmsConfig return, ImsSmsClient is nullptr.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     std::unique_lock<std::mutex> lck(ctx_);
     resIsSmsReady_ = false;
@@ -392,7 +392,8 @@ bool GsmSmsSender::IsImsSmsSupported(int32_t slotId)
         }
     }
     TELEPHONY_LOGI("GsmSmsSender::IsImsSmsSupported() imsSmsCfg_:%{public}d", imsSmsCfg_);
-    return (imsSmsCfg_ == IMS_SMS_ENABLE);
+    isSupported = (imsSmsCfg_ == IMS_SMS_ENABLE);
+    return TELEPHONY_ERR_SUCCESS;
 }
 
 void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event)

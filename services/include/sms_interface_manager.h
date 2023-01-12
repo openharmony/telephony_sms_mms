@@ -40,22 +40,22 @@ public:
     void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const uint16_t port,
         const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
-    bool AddSimMessage(
+    int32_t AddSimMessage(
         const std::string &smsc, const std::string &pdu, ISmsServiceInterface::SimMessageStatus status);
-    bool DelSimMessage(uint32_t msgIndex);
-    bool UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
+    int32_t DelSimMessage(uint32_t msgIndex);
+    int32_t UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
         const std::string &pdu, const std::string &smsc);
-    std::vector<ShortMessage> GetAllSimMessages();
-    bool SetSmscAddr(const std::string &scAddr);
-    std::string GetSmscAddr();
-    bool SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType);
+    int32_t GetAllSimMessages(std::vector<ShortMessage> &message);
+    int32_t SetSmscAddr(const std::string &scAddr);
+    int32_t GetSmscAddr(std::u16string &smscAddress);
+    int32_t SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType);
     bool SetImsSmsConfig(int32_t slotId, int32_t enable);
-    bool SetDefaultSmsSlotId(int32_t slotId);
+    int32_t SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
-    std::vector<std::string> SplitMessage(const std::string &message);
-    bool GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &outInfo);
-    bool IsImsSmsSupported(int32_t slotId);
-    std::string GetImsShortMessageFormat();
+    int32_t SplitMessage(const std::string &message, std::vector<std::u16string> &splitMessage);
+    int32_t GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &outInfo);
+    int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported);
+    int32_t GetImsShortMessageFormat(std::u16string &format);
     bool HasSmsCapability();
 
 private:
