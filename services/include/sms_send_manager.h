@@ -41,11 +41,11 @@ public:
     void Init();
     void InitNetworkHandle();
     std::shared_ptr<SmsSender> GetCdmaSmsSender() const;
-    std::vector<std::string> SplitMessage(const std::string &message);
-    bool GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
-    bool IsImsSmsSupported(int32_t slotId);
+    int32_t SplitMessage(const std::string &message, std::vector<std::u16string> &splitMessage);
+    int32_t GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
+    int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported);
     bool SetImsSmsConfig(int32_t slotId, int32_t enable);
-    std::string GetImsShortMessageFormat();
+    int32_t GetImsShortMessageFormat(std::u16string &format);
 
 private:
     SmsSendManager &operator=(const SmsSendManager &) = delete;

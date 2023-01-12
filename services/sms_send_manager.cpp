@@ -24,10 +24,15 @@
 #include "i_sms_service_interface.h"
 #include "sms_hisysevent.h"
 #include "sms_receive_manager.h"
+#include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
+static constexpr const char *NET_TYPE_GSM_STRING = "3gpp";
+static constexpr const char *NET_TYPE_CDMA_STRING = "3gpp2";
+static constexpr const char *NET_TYPE_UNKNOWN_STRING = "unknown";
+
 using namespace std;
 SmsSendManager::SmsSendManager(int32_t slotId) : slotId_(slotId) {}
 
@@ -232,12 +237,11 @@ void SmsSendManager::RetriedSmsDelivery(const shared_ptr<SmsSendIndexer> smsInde
     }
 }
 
-std::vector<std::string> SmsSendManager::SplitMessage(const std::string &message)
+int32_t SmsSendManager::SplitMessage(const std::string &message, std::vector<std::u16string> &splitMessage)
 {
-    std::vector<std::string> result;
     if (networkManager_ == nullptr) {
         TELEPHONY_LOGE("SmsSendManager::SplitMessage networkManager nullptr Error.");
-        return result;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
 
     SmsCodingScheme codingType;
@@ -260,16 +264,16 @@ std::vector<std::string> SmsSendManager::SplitMessage(const std::string &message
     }
 
     for (auto &item : cellsInfos) {
-        result.emplace_back(item.text);
+        splitMessage.emplace_back(StringUtils::ToUtf16(item.text));
     }
-    return result;
+    return TELEPHONY_ERR_SUCCESS;
 }
 
-bool SmsSendManager::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo)
+int32_t SmsSendManager::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo)
 {
     if (networkManager_ == nullptr) {
         TELEPHONY_LOGE("GetSmsSegmentsInfo networkManager_ Nullptr Error.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     NetWorkType netWorkType = networkManager_->GetNetWorkType();
     switch (netWorkType) {
@@ -285,7 +289,7 @@ bool SmsSendManager::GetSmsSegmentsInfo(const std::string &message, bool force7B
             TELEPHONY_LOGE("netWorkType is NET_TYPE_UNKNOWN");
             break;
     }
-    return false;
+    return TELEPHONY_ERR_UNKNOWN_NETWORK_TYPE;
 }
 
 std::shared_ptr<SmsSender> SmsSendManager::GetCdmaSmsSender() const
@@ -293,32 +297,28 @@ std::shared_ptr<SmsSender> SmsSendManager::GetCdmaSmsSender() const
     return cdmaSmsSender_;
 }
 
-bool SmsSendManager::IsImsSmsSupported(int32_t slotId)
+int32_t SmsSendManager::IsImsSmsSupported(int32_t slotId, bool &isSupported)
 {
-    bool result = false;
     if (networkManager_ == nullptr) {
         TELEPHONY_LOGE("networkManager is nullptr error.");
-        return result;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
 
     if (gsmSmsSender_ == nullptr || cdmaSmsSender_ == nullptr || networkManager_ == nullptr) {
         TELEPHONY_LOGE("Sender or network nullptr error.");
-        return result;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
 
     NetWorkType newNetWorkType = networkManager_->GetNetWorkType();
     switch (newNetWorkType) {
         case NetWorkType::NET_TYPE_GSM:
-            result = gsmSmsSender_->IsImsSmsSupported(slotId);
-            break;
+            return gsmSmsSender_->IsImsSmsSupported(slotId, isSupported);
         case NetWorkType::NET_TYPE_CDMA:
-            result = cdmaSmsSender_->IsImsSmsSupported(slotId);
-            break;
+            return cdmaSmsSender_->IsImsSmsSupported(slotId, isSupported);
         default:
             TELEPHONY_LOGE("network unknown send error.");
-            break;
+            return TELEPHONY_ERR_UNKNOWN_NETWORK_TYPE;
     }
-    return result;
 }
 
 bool SmsSendManager::SetImsSmsConfig(int32_t slotId, int32_t enable)
@@ -344,20 +344,24 @@ bool SmsSendManager::SetImsSmsConfig(int32_t slotId, int32_t enable)
     return result;
 }
 
-std::string SmsSendManager::GetImsShortMessageFormat()
+int32_t SmsSendManager::GetImsShortMessageFormat(std::u16string &format)
 {
+    format = StringUtils::ToUtf16(NET_TYPE_UNKNOWN_STRING);
     if (networkManager_ == nullptr) {
         TELEPHONY_LOGE("networkManager is nullptr error.");
-        return "unknown";
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     switch (networkManager_->GetNetWorkType()) {
         case NetWorkType::NET_TYPE_GSM:
-            return "3gpp";
+            format = StringUtils::ToUtf16(NET_TYPE_GSM_STRING);
+            break;
         case NetWorkType::NET_TYPE_CDMA:
-            return "3gpp2";
+            format = StringUtils::ToUtf16(NET_TYPE_CDMA_STRING);
+            break;
         default:
-            return "unknown";
+            break;
     }
+    return TELEPHONY_ERR_SUCCESS;
 }
 } // namespace Telephony
 } // namespace OHOS

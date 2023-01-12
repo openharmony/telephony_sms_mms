@@ -16,6 +16,9 @@
 #include "sms_base_message.h"
 
 #include "msg_text_convert.h"
+#include "sms_mms_errors.h"
+#include "sms_service_manager_client.h"
+#include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -433,12 +436,12 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
     }
 }
 
-bool SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo)
+int32_t SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo)
 {
     unsigned char decodeData[(MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1];
     if (memset_s(decodeData, sizeof(decodeData), 0x00, sizeof(decodeData)) != EOK) {
         TELEPHONY_LOGE("SplitMessage memset_s error!");
-        return false;
+        return TELEPHONY_ERR_MEMSET_FAIL;
     }
     const uint8_t smsEncodingUnkown = 0;
     const uint8_t smsEncoding7Bit = 1;
@@ -451,7 +454,7 @@ bool SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool force7B
     encodeLen = DecodeMessage(decodeData, sizeof(decodeData), codingType, message, bAbnormal, langId);
     if (encodeLen <= 0) {
         TELEPHONY_LOGE("encodeLen Less than or equal to 0");
-        return false;
+        return SMS_MMS_DECODE_DATA_EMPTY;
     }
     int segSize = GetMaxSegmentSize(codingType, encodeLen, false, langId, MAX_ADD_PARAM_LEN);
     TELEPHONY_LOGI("segSize = %{public}d", segSize);
@@ -473,7 +476,7 @@ bool SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool force7B
         lenInfo.msgRemainCount = static_cast<uint8_t>(((segSize - (lenInfo.msgEncodeCount % segSize))) % segSize);
         lenInfo.msgSegCount = ceil(static_cast<double>(lenInfo.msgEncodeCount) / static_cast<double>(segSize));
     }
-    return true;
+    return TELEPHONY_ERR_SUCCESS;
 }
 
 int32_t SmsBaseMessage::GetIndexOnSim() const

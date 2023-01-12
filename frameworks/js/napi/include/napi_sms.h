@@ -15,23 +15,24 @@
 
 #ifndef NAPI_SMS_H
 #define NAPI_SMS_H
+
 #include <codecvt>
 #include <cstring>
-#include <memory>
 #include <locale>
+#include <memory>
 #include <string>
 #include <vector>
 
+#include "base_context.h"
+#include "i_sms_service_interface.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "i_sms_service_interface.h"
-#include "base_context.h"
-#include "short_message.h"
+#include "napi_util.h"
 #include "refbase.h"
+#include "short_message.h"
+#include "sms_service_manager_client.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_types.h"
-#include "napi_util.h"
-#include "sms_service_manager_client.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -44,6 +45,7 @@ constexpr int32_t MAX_TEXT_SHORT_MESSAGE_LENGTH = 4096;
 constexpr size_t BUFF_LENGTH = 31;
 constexpr int32_t PROPERTY_NAME_SIZE = 32;
 constexpr int32_t NORMAL_STRING_SIZE = 64;
+constexpr int32_t NONE_PARAMETER = 0;
 constexpr int32_t ONE_PARAMETER = 1;
 constexpr int32_t TWO_PARAMETERS = 2;
 constexpr int32_t THREE_PARAMETERS = 3;

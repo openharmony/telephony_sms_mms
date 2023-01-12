@@ -17,6 +17,7 @@
 
 #include "sms_service_manager_client.h"
 #include "string_utils.h"
+#include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -138,9 +139,10 @@ ShortMessage::SmsMessageClass ShortMessage::GetMessageClass() const
     return messageClass_;
 }
 
-std::u16string ShortMessage::GetScAddress() const
+int32_t ShortMessage::GetScAddress(std::u16string &smscAddress) const
 {
-    return scAddress_;
+    smscAddress = scAddress_;
+    return TELEPHONY_ERR_SUCCESS;
 }
 
 int64_t ShortMessage::GetScTimestamp() const
