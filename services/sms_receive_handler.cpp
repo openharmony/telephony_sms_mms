@@ -58,7 +58,7 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
             std::shared_ptr<SmsBaseMessage> message = nullptr;
             message = TransformMessageInfo(event->GetSharedObject<SmsMessageInfo>());
             if (message != nullptr) {
-                TELEPHONY_LOGD("[raw pdu] =%{private}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
+                TELEPHONY_LOGI("[raw pdu] =%{private}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
             }
             HandleReceivedSms(message);
             break;
