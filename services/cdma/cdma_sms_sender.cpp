@@ -449,7 +449,7 @@ void CdmaSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &
     if (deliveryCallback != nullptr) {
         std::string ackpdu = StringUtils::StringToHex(message->GetRawPdu());
         deliveryCallback->OnSmsDeliveryResult(StringUtils::ToUtf16(ackpdu));
-        TELEPHONY_LOGD("gsm_sms_sender: StatusReportAnalysis %{private}s", pdu.c_str());
+        TELEPHONY_LOGI("gsm_sms_sender: StatusReportAnalysis %{private}s", pdu.c_str());
     }
 }
 
@@ -489,7 +489,7 @@ void CdmaSmsSender::SendCsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, int6
     lastSmsDomain_ = CS_DOMAIN;
     CoreManagerInner::GetInstance().SendCdmaSms(
         slotId_, RadioEvent::RADIO_SEND_CDMA_SMS, pdu, refId, shared_from_this());
-    TELEPHONY_LOGD("SendCsSms pdu = %{private}s", pdu.c_str());
+    TELEPHONY_LOGI("SendCsSms pdu = %{private}s", pdu.c_str());
 }
 
 void CdmaSmsSender::SendImsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu)
