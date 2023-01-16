@@ -17,6 +17,7 @@
 
 #include "sms_service_manager_client.h"
 #include "string_utils.h"
+#include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
