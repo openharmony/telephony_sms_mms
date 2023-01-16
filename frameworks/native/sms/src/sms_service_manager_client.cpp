@@ -90,9 +90,7 @@ int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16strin
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (InitSmsServiceProxy()) {
-        smsServiceInterface_->SendMessage(slotId, desAddr, scAddr, text, callback, deliveryCallback);
-        TELEPHONY_LOGI("execute SendMessage\n");
-        return ERROR_NONE;
+        return smsServiceInterface_->SendMessage(slotId, desAddr, scAddr, text, callback, deliveryCallback);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
@@ -102,8 +100,8 @@ int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16strin
     const sptr<ISendShortMessageCallback> &callback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (InitSmsServiceProxy()) {
-        smsServiceInterface_->SendMessage(slotId, desAddr, scAddr, port, data, dataLen, callback, deliveryCallback);
-        return ERROR_NONE;
+        return smsServiceInterface_->SendMessage(
+            slotId, desAddr, scAddr, port, data, dataLen, callback, deliveryCallback);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
@@ -216,13 +214,12 @@ bool SmsServiceManagerClient::HasSmsCapability()
     return false;
 }
 
-bool SmsServiceManagerClient::CreateMessage(std::string pdu, std::string specification, ShortMessage &message)
+int32_t SmsServiceManagerClient::CreateMessage(std::string pdu, std::string specification, ShortMessage &message)
 {
     if (InitSmsServiceProxy()) {
-        bool ret = smsServiceInterface_->CreateMessage(pdu, specification, message);
-        return ret;
+        return smsServiceInterface_->CreateMessage(pdu, specification, message);
     }
-    return false;
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 
 bool SmsServiceManagerClient::GetBase64Encode(std::string src, std::string &dest)

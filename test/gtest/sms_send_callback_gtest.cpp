@@ -32,6 +32,11 @@ SmsSendCallbackGTest::SmsSendCallbackGTest(SmsMmsTestHelper &helper)
 
 SmsSendCallbackGTest::~SmsSendCallbackGTest() {}
 
+void SmsSendCallbackGTest::HasDeliveryCallBack(bool hasCallback)
+{
+    hasDeliveryCallback_ = hasCallback;
+}
+
 void SmsSendCallbackGTest::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResult result)
 {
     TELEPHONY_LOGI("SmsSendCallbackGTest OnSmsSendResult = %{public}d", result);
@@ -39,10 +44,10 @@ void SmsSendCallbackGTest::OnSmsSendResult(const ISendShortMessageCallback::SmsS
         TELEPHONY_LOGE("SmsSendCallbackGTest callbackHelper_ is nullptr");
         return;
     }
-    if (result == ISendShortMessageCallback::SmsSendResult::SEND_SMS_SUCCESS) {
-        callbackHelper_->SetSendSmsBoolResult(true);
-    } else {
-        callbackHelper_->SetSendSmsBoolResult(false);
+
+    callbackHelper_->SetSendSmsIntResult(result);
+    if (!hasDeliveryCallback_) {
+        callbackHelper_->NotifyAll();
     }
     callbackHelper_ = nullptr;
 }

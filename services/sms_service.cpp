@@ -132,13 +132,13 @@ std::string SmsService::GetBindTime()
     return std::to_string(bindTime_);
 }
 
-void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr, const u16string text,
+int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr, const u16string text,
     const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (NoPermissionOrParametersCheckFail(slotId, desAddr, sendCallback)) {
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_PERMISSION_ERROR, Permission::SEND_MESSAGES);
-        return;
+        return TELEPHONY_ERR_PERMISSION_ERR;
     }
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
@@ -146,25 +146,25 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "text sms interfaceManager is nullptr");
         TELEPHONY_LOGE("SmsService::SendMessage interfaceManager nullptr error.");
-        return;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     if (!ValidDestinationAddress(StringUtils::ToUtf8(desAddr))) {
-        TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        return;
+        TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
+    return interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
         StringUtils::ToUtf8(text), sendCallback, deliveryCallback);
 }
 
-void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr, uint16_t port,
+int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr, uint16_t port,
     const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (NoPermissionOrParametersCheckFail(slotId, desAddr, sendCallback)) {
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_PERMISSION_ERROR, Permission::SEND_MESSAGES);
-        return;
+        return TELEPHONY_ERR_PERMISSION_ERR;
     }
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
@@ -172,14 +172,14 @@ void SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16s
         TELEPHONY_LOGE("SmsService::SendMessage interfaceManager nullptr error.");
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "data sms interfaceManager is nullptr");
-        return;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     if (!ValidDestinationAddress(StringUtils::ToUtf8(desAddr))) {
-        TELEPHONY_LOGE("SmsService::SendMessage desAddr does not match the regular specification");
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        return;
+        TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    interfaceManager->DataBasedSmsDelivery(
+    return interfaceManager->DataBasedSmsDelivery(
         StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr), port, data, dataLen, sendCallback, deliveryCallback);
 }
 
@@ -489,7 +489,7 @@ int64_t SmsService::GetSpendTime()
     return spendTime_;
 }
 
-bool SmsService::CreateMessage(std::string pdu, std::string specification, ShortMessage &message)
+int32_t SmsService::CreateMessage(std::string pdu, std::string specification, ShortMessage &message)
 {
     std::shared_ptr<SmsBaseMessage> baseMessage;
     if (specification == "3gpp") {
@@ -499,7 +499,7 @@ bool SmsService::CreateMessage(std::string pdu, std::string specification, Short
     }
 
     if (baseMessage == nullptr) {
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     message.visibleMessageBody_ = StringUtils::ToUtf16(baseMessage->GetVisibleMessageBody());
     message.visibleRawAddress_ = StringUtils::ToUtf16(baseMessage->GetVisibleOriginatingAddress());
@@ -512,7 +512,7 @@ bool SmsService::CreateMessage(std::string pdu, std::string specification, Short
     message.hasReplyPath_ = baseMessage->HasReplyPath();
     message.protocolId_ = baseMessage->GetProtocolId();
     message.pdu_ = baseMessage->GetRawPdu();
-    return true;
+    return TELEPHONY_ERR_SUCCESS;
 }
 
 bool SmsService::GetBase64Encode(std::string src, std::string &dest)
