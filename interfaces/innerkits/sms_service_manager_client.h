@@ -56,7 +56,7 @@ public:
     int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported);
     int32_t GetImsShortMessageFormat(std::u16string &format);
     bool HasSmsCapability();
-    bool CreateMessage(std::string pdu, std::string specification, ShortMessage &message);
+    int32_t CreateMessage(std::string pdu, std::string specification, ShortMessage &message);
     bool GetBase64Encode(std::string src, std::string &dest);
     bool GetBase64Decode(std::string src, std::string &dest);
     bool GetEncodeStringFunc(

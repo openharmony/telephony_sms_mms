@@ -54,32 +54,47 @@ void SmsInterfaceManager::InitInterfaceManager()
     TELEPHONY_LOGI("SmsInterfaceManager::InitInterfaceManager success, %{public}d", slotId_);
 }
 
-void SmsInterfaceManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
-    const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+int32_t SmsInterfaceManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
+    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (desAddr.empty() || text.empty() || (smsSendManager_ == nullptr)) {
+    if (desAddr.empty() || text.empty()) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
-            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "text sms arges is empty is nullptr");
+            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "text sms arges is empty");
         TELEPHONY_LOGE("TextBasedSmsDelivery failed to send.");
-        return;
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    if (smsSendManager_ == nullptr) {
+        TELEPHONY_LOGE("TextBasedSmsDelivery failed to send.");
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "text sms smsSendManager_ is nullptr");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     smsSendManager_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    return TELEPHONY_ERR_SUCCESS;
 }
 
-void SmsInterfaceManager::DataBasedSmsDelivery(const string &desAddr, const string &scAddr, const uint16_t port,
+int32_t SmsInterfaceManager::DataBasedSmsDelivery(const string &desAddr, const string &scAddr, const uint16_t port,
     const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (desAddr.empty() || (smsSendManager_ == nullptr) || (data == nullptr)) {
+    if (desAddr.empty() || (data == nullptr)) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
-            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "data sms arges is empty is nullptr");
+            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "data sms arges is empty");
         TELEPHONY_LOGE("DataBasedSmsDelivery failed to send.");
-        return;
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    if (smsSendManager_ == nullptr) {
+        TELEPHONY_LOGE("TextBasedSmsDelivery failed to send.");
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "text sms smsSendManager_ is nullptr");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     smsSendManager_->DataBasedSmsDelivery(desAddr, scAddr, port, data, dataLen, sendCallback, deliveryCallback);
+    return TELEPHONY_ERR_SUCCESS;
 }
 
 int32_t SmsInterfaceManager::AddSimMessage(

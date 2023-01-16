@@ -26,6 +26,7 @@
 #include "sms_delivery_callback_test.h"
 #include "sms_send_callback_test.h"
 #include "string_utils.h"
+#include "telephony_errors.h"
 #include "token_setproc.h"
 #include "values_bucket.h"
 
@@ -288,7 +289,7 @@ void GsmSmsSenderTest::TestSetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
 void GsmSmsSenderTest::TestGetSmscAddr(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;
-    std::string result;
+    std::u16string result;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -299,8 +300,8 @@ void GsmSmsSenderTest::TestGetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
     std::cin >> dest;
     slotId = atoi(dest.c_str());
     dest.clear();
-    result = StringUtils::ToUtf8(smsService->GetSmscAddr(slotId));
-    std::cout << "TestGetSmscAddr:" << result << std::endl;
+    smsService->GetSmscAddr(slotId, result);
+    std::cout << "TestGetSmscAddr:" << StringUtils::ToUtf8(result) << std::endl;
 }
 
 void GsmSmsSenderTest::TestAddSimMessage(const sptr<ISmsServiceInterface> &smsService) const
@@ -414,7 +415,7 @@ void GsmSmsSenderTest::TestGetAllSimMessages(const sptr<ISmsServiceInterface> &s
     std::cin >> dest;
     slotId = atoi(dest.c_str());
     dest.clear();
-    result = smsService->GetAllSimMessages(slotId);
+    smsService->GetAllSimMessages(slotId, result);
     std::cout << "TestGetAllSimMessages Begin:" << std::endl;
     for (auto &item : result) {
         std::cout << "[" << item.GetIndexOnSim() << "] " << StringUtils::StringToHex(item.GetPdu()) << std::endl;
@@ -566,7 +567,7 @@ void GsmSmsSenderTest::TestSplitMessage(const sptr<ISmsServiceInterface> &smsSer
     std::string input;
     std::cout << "Please enter message" << std::endl;
     std::getline(std::cin, input);
-    result = smsService->SplitMessage(StringUtils::ToUtf16(input));
+    smsService->SplitMessage(StringUtils::ToUtf16(input), result);
     std::cout << "TestSplitMessage size:" << result.size() << std::endl;
     for (auto &item : result) {
         std::cout << StringUtils::ToUtf8(item) << std::endl;
@@ -609,7 +610,9 @@ void GsmSmsSenderTest::TestIsImsSmsSupported(const sptr<ISmsServiceInterface> &s
     std::cout << "TestIsImsSmsSupported Please enter Slot Id" << std::endl;
     std::getline(std::cin, input);
     slotId = std::atoi(input.c_str());
-    std::string res = smsService->IsImsSmsSupported(slotId) ? "true" : "false";
+    bool result = false;
+    smsService->IsImsSmsSupported(slotId, result);
+    std::string res = result ? "true" : "false";
     std::cout << "IsImsSmsSupported:" << res << std::endl;
 }
 
@@ -639,8 +642,9 @@ void GsmSmsSenderTest::TestGetImsShortMessageFormat(const sptr<ISmsServiceInterf
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    std::cout << "GetImsShortMessageFormat:" << StringUtils::ToUtf8(smsService->GetImsShortMessageFormat())
-              << std::endl;
+    std::u16string format;
+    smsService->GetImsShortMessageFormat(format);
+    std::cout << "GetImsShortMessageFormat:" << StringUtils::ToUtf8(format) << std::endl;
 }
 
 void GsmSmsSenderTest::TestAddBlockPhone() const
