@@ -102,7 +102,7 @@ int GsmSmsTpduCodec::EncodeSubmit(const struct SmsSubmit *pSubmit, char *pTpdu)
     if (pSubmit == nullptr || pTpdu == nullptr) {
         return offset;
     }
-    offset += EncodeSubmitTpduType(*pSubmit, (unsigned char *)pTpdu);
+    offset += EncodeSubmitTpduType(*pSubmit, reinterpret_cast<unsigned char *>(pTpdu));
     /* TP-MR */
     pTpdu[offset++] = pSubmit->msgRef;
     /* TP-DA */
@@ -512,7 +512,6 @@ int GsmSmsTpduCodec::DecodeDeliver(const unsigned char *pTpdu, int TpduLen, stru
 
 int GsmSmsTpduCodec::DecodeStatusReport(const unsigned char *pTpdu, int TpduLen, struct SmsStatusReport *pStatusRep)
 {
-    int ret = 0;
     int offset = 0;
     int udLen = 0;
     char *address = nullptr;
@@ -557,7 +556,7 @@ int GsmSmsTpduCodec::DecodeStatusReport(const unsigned char *pTpdu, int TpduLen,
         pStatusRep->dcs.indType = SMS_OTHER_INDICATOR;
         pStatusRep->userData.headerCnt = 0;
         pStatusRep->userData.length = 0;
-        ret = memset_s(pStatusRep->userData.data, sizeof(pStatusRep->userData.data), 0x00, MAX_USER_DATA_LEN + 1);
+        int ret = memset_s(pStatusRep->userData.data, sizeof(pStatusRep->userData.data), 0x00, MAX_USER_DATA_LEN + 1);
         if (ret != EOK) {
             return offset;
         }
