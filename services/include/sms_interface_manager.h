@@ -34,10 +34,10 @@ public:
     explicit SmsInterfaceManager(int32_t slotId);
     virtual ~SmsInterfaceManager();
     void InitInterfaceManager();
-    void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
+    int32_t TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
         const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
-    void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const uint16_t port,
+    int32_t DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const uint16_t port,
         const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
     int32_t AddSimMessage(

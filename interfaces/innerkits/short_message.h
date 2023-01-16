@@ -151,9 +151,10 @@ public:
      * protocol data unit (PDU) and the specified SMS protocol
      * @param pdu
      * @param specification
-     * @return ShortMessage*
+     * @return Returns {@code 0} if CreateMessage success
      */
-    static ShortMessage *CreateMessage(std::vector<unsigned char> &pdu, std::u16string specification);
+    static int32_t CreateMessage(
+        std::vector<unsigned char> &pdu, std::u16string specification, ShortMessage &messageObj);
 
     /**
      * @brief Create a Icc Message object

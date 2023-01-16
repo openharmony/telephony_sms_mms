@@ -98,7 +98,6 @@ std::shared_ptr<SmsInterfaceManager> SmsInterfaceStub::GetSmsInterfaceManager()
 
 void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    int32_t result = 0;
     sptr<ISendShortMessageCallback> sendCallback = nullptr;
     sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
     int32_t slotId = data.ReadInt32();
@@ -114,13 +113,12 @@ void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &
         deliveryCallback = iface_cast<IDeliveryShortMessageCallback>(remoteDeliveryCallback);
     }
     TELEPHONY_LOGI("MessageID::TEXT_BASED_SMS_DELIVERY %{public}d", slotId);
-    SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback);
+    int32_t result = SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback);
     reply.WriteInt32(result);
 }
 
 void SmsInterfaceStub::OnSendSmsDataRequest(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    int32_t result = 0;
     sptr<ISendShortMessageCallback> sendCallback = nullptr;
     sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
     int32_t slotId = data.ReadInt32();
@@ -137,7 +135,7 @@ void SmsInterfaceStub::OnSendSmsDataRequest(MessageParcel &data, MessageParcel &
     }
     int16_t dataLen = data.ReadInt16();
     const uint8_t *buffer = reinterpret_cast<const uint8_t *>(data.ReadRawData(dataLen));
-    SendMessage(slotId, desAddr, scAddr, port, buffer, dataLen, sendCallback, deliveryCallback);
+    int32_t result = SendMessage(slotId, desAddr, scAddr, port, buffer, dataLen, sendCallback, deliveryCallback);
     reply.WriteInt32(result);
 }
 
@@ -333,14 +331,13 @@ void SmsInterfaceStub::OnHasSmsCapability(MessageParcel &data, MessageParcel &re
 
 void SmsInterfaceStub::OnCreateMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    bool result = false;
     std::string pdu = data.ReadString();
     std::string specification = data.ReadString();
     ShortMessage message;
-    result = CreateMessage(pdu, specification, message);
+    int32_t result = CreateMessage(pdu, specification, message);
 
-    reply.WriteBool(result);
-    if (!result) {
+    reply.WriteInt32(result);
+    if (result != TELEPHONY_ERR_SUCCESS) {
         return;
     }
     if (!message.Marshalling(reply)) {

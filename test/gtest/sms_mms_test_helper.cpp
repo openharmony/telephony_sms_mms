@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace Telephony {
-constexpr static const int32_t WAIT_TIME_SECOND = 5;
+constexpr static const int32_t WAIT_TIME_SECOND = 10;
 
 bool SmsMmsTestHelper::Run(void (*func)(SmsMmsTestHelper &), SmsMmsTestHelper &helper)
 {
@@ -54,13 +54,13 @@ void SmsMmsTestHelper::SetBoolResult(bool result)
     TELEPHONY_LOGI("Set boolResult_ : %{public}d ", boolResult_);
 }
 
-void SmsMmsTestHelper::SetSendSmsBoolResult(bool result)
+void SmsMmsTestHelper::SetSendSmsIntResult(int32_t result)
 {
     sendSmsResult_ = result;
     TELEPHONY_LOGI("Set sendSmsResult_ : %{public}d ", sendSmsResult_);
 }
 
-void SmsMmsTestHelper::SetDeliverySmsBoolResult(bool result)
+void SmsMmsTestHelper::SetDeliverySmsIntResult(int32_t result)
 {
     deliverySmsResult_ = result;
     TELEPHONY_LOGI("Set deliverySmsResult_ : %{public}d ", deliverySmsResult_);
@@ -82,13 +82,13 @@ bool SmsMmsTestHelper::GetBoolResult()
     return boolResult_;
 }
 
-bool SmsMmsTestHelper::GetSendSmsBoolResult()
+int32_t SmsMmsTestHelper::GetSendSmsIntResult()
 {
     TELEPHONY_LOGI("Get sendSmsResult_ : %{public}d ", sendSmsResult_);
     return sendSmsResult_;
 }
 
-bool SmsMmsTestHelper::GetDeliverySmsBoolResult()
+int32_t SmsMmsTestHelper::GetDeliverySmsIntResult()
 {
     TELEPHONY_LOGI("Get deliverySmsResult_ : %{public}d ", deliverySmsResult_);
     return deliverySmsResult_;

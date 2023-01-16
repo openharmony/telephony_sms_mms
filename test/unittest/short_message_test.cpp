@@ -29,7 +29,8 @@ void ShortMessageTest::TestCreateMessage() const
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector(
         "0891683108200075F4240D91688129562983F6000012408"
         "00102142302C130");
-    ShortMessage *message = ShortMessage::CreateMessage(pdu, u"3gpp");
+    ShortMessage *message = new ShortMessage();
+    ShortMessage::CreateMessage(pdu, u"3gpp", *message);
     if (message == nullptr) {
         std::cout << "message is nullptr!" << std::endl;
         return;
@@ -46,7 +47,8 @@ void ShortMessageTest::Test3Gpp2CreateMessage() const
 {
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector(
         "0000021002020702c6049064c4d40601fc081b00031000200106102e8cbb366f03061409011126310a01400d0101");
-    ShortMessage *message = ShortMessage::CreateMessage(pdu, u"3gpp2");
+    ShortMessage *message = new ShortMessage();
+    ShortMessage::CreateMessage(pdu, u"3gpp2", *message);
     if (message == nullptr) {
         std::cout << "message is nullptr!" << std::endl;
         return;

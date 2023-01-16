@@ -37,32 +37,36 @@ public:
     std::string GetBindTime();
 
     /**
-     * @brief SendMessage
      * Sends a text Type SMS message.
-     * @param slotId [in]
-     * @param desAddr [in]
-     * @param scAddr [in]
-     * @param text [in]
-     * @param sendCallback [in]
-     * @param deliverCallback [in]
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param desAddr Indicates the destination address
+     * @param scAddr Indicates the sms center address
+     * @param text Indicates sms content
+     * @param sendCallback Indicates callback for send out
+     * @param deliverCallback Indicates callback for delivery to destination user
+     * @return Returns {@code 0} if send message success.
      */
-    void SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+    int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
         const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
 
     /**
-     * @brief SendMessage
      * Sends a data Type SMS message.
-     * @param slotId [in]
-     * @param desAddr [in]
-     * @param scAddr [in]
-     * @param port [in]
-     * @param data [in]
-     * @param dataLen [in]
-     * @param sendCallback [in]
-     * @param deliverCallback [in]
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param desAddr Indicates the destination address
+     * @param scAddr Indicates the sms center address
+     * @param port Indicates the port of data sms
+     * @param data Indicates the array of data sms
+     * @param dataLen Indicates the array length of data sms
+     * @param sendCallback Indicates callback for send out
+     * @param deliverCallback Indicates callback for delivery to destination user
+     * @return Returns {@code 0} if send message success.
      */
-    void SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr, uint16_t port,
+    int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr, uint16_t port,
         const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
 
@@ -248,13 +252,13 @@ public:
     int64_t GetEndTime();
 
     /**
-     * transfer a string from GSM to UTF8
-     * @param pDestText Indicates destination string,
-     * @param maxLength Indicates destination string max length
-     * @param pSrcText Indicates source string
-     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     * create a short message
+     * @param pdu Indicates pdu code,
+     * @param specification Indicates 3gpp or 3gpp2
+     * @param ShortMessage Indicates a short message object
+     * @return Returns {@code 0} if CreateMessage success
      */
-    bool CreateMessage(std::string pdu, std::string specification, ShortMessage &message) override;
+    int32_t CreateMessage(std::string pdu, std::string specification, ShortMessage &message) override;
 
     /**
      * mms base64 encode

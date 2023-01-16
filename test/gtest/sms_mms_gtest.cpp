@@ -277,7 +277,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void OpenCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
@@ -313,7 +313,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
@@ -349,7 +349,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
@@ -385,7 +385,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
@@ -421,7 +421,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
@@ -457,7 +457,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -481,7 +481,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0007, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -505,7 +505,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0008 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -529,7 +529,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -553,7 +553,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -577,7 +577,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0011, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -600,7 +600,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0012, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0012 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
@@ -636,7 +636,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
@@ -672,7 +672,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void CloseCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
@@ -708,7 +708,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003-->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
@@ -744,7 +744,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
@@ -780,7 +780,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
@@ -816,7 +816,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -840,7 +840,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0007, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -864,7 +864,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0008-->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -888,7 +888,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -912,7 +912,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -936,7 +936,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -959,13 +959,13 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0012, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0012 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void SetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
 {
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetDefaultSmsSlotId(helper.slotId);
-    helper.SetBoolResult(result);
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetDefaultSmsSlotId(helper.slotId);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -990,7 +990,7 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0001 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -1014,7 +1014,7 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0002 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -1037,7 +1037,7 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0003, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0003 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void GetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
@@ -1061,23 +1061,21 @@ HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
         return;
     }
     SmsMmsTestHelper helper;
-    const int32_t error = DEFAULT_SIM_SLOT_ID_REMOVE;
     if (!helper.Run(GetDefaultSmsSlotIdTestFuc, std::ref(helper))) {
         TELEPHONY_LOGI("GetDefaultSmsSlotIdTestFuc out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::GetDefaultSmsSlotId_0001 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() != error);
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 void SetSmscAddrTestFuc(SmsMmsTestHelper &helper)
 {
-    bool result = true;
     // invalid slotID scenario, a invalid smsc addr is OKAY
     std::string scAddr("1234");
-    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetScAddress(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetScAddress(
         helper.slotId, StringUtils::ToUtf16(scAddr));
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -1103,7 +1101,7 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0001 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -1115,7 +1113,7 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level2)
 HWTEST_F(SmsMmsGtest, SetSmscAddr_0002, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0002 -->");
-    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
         ASSERT_TRUE(true);
         return;
@@ -1127,7 +1125,7 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0002, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0002 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void AddSimMessageTestFuc(SmsMmsTestHelper &helper)
@@ -1135,17 +1133,17 @@ void AddSimMessageTestFuc(SmsMmsTestHelper &helper)
     std::u16string smscData(u"");
     std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
     uint32_t status = 3;
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->AddSimMessage(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->AddSimMessage(
         helper.slotId, smscData, pduData, static_cast<ISmsServiceInterface::SimMessageStatus>(status));
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
 void DelSimMessageTestFuc(SmsMmsTestHelper &helper)
 {
     uint32_t msgIndex = 0;
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DelSimMessage(helper.slotId, msgIndex);
-    helper.SetBoolResult(result);
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DelSimMessage(helper.slotId, msgIndex);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -1175,7 +1173,7 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0001 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -1204,7 +1202,7 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0002 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -1232,7 +1230,7 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0003, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0003 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void GetAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
@@ -1336,7 +1334,7 @@ HWTEST_F(SmsMmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0001 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -1360,7 +1358,7 @@ HWTEST_F(SmsMmsGtest, DelSimMessage_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0002 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -1383,7 +1381,7 @@ HWTEST_F(SmsMmsGtest, DelSimMessage_0003, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0003 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
@@ -1392,9 +1390,9 @@ void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
     std::u16string smscData(u"");
     std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
     uint32_t status = 3;
-    bool result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->UpdateSimMessage(
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->UpdateSimMessage(
         helper.slotId, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
-    helper.SetBoolResult(result);
+    helper.SetIntResult(result);
     helper.NotifyAll();
 }
 
@@ -1419,7 +1417,7 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -1444,7 +1442,7 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
+    ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
 /**
@@ -1467,7 +1465,7 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0003, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0003 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetIntResult() == 0);
 }
 
 void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
@@ -1611,7 +1609,7 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0005, Function | MediumTest | Level2)
     EXPECT_FALSE(helper.GetBoolResult());
 }
 
-void SetDataMessageTestFuc(SmsMmsTestHelper &helper)
+void SendDataMessageTestFuc(SmsMmsTestHelper &helper)
 {
     std::string dest = DES_ADDR;
     std::string sca("");
@@ -1620,15 +1618,36 @@ void SetDataMessageTestFuc(SmsMmsTestHelper &helper)
     uint16_t port = SMS_PORT;
     if (sendCallBackPtr == nullptr) {
         TELEPHONY_LOGI("sendCallBackPtr is nullptr");
-        helper.SetBoolResult(false);
         helper.NotifyAll();
     }
 
     if (deliveryCallBackPtr == nullptr) {
         TELEPHONY_LOGI("deliveryCallBackPtr is nullptr");
-        helper.SetBoolResult(false);
         helper.NotifyAll();
     }
+    sendCallBackPtr->HasDeliveryCallBack(true);
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
+        StringUtils::ToUtf16(sca), port, DATA_SMS, (sizeof(DATA_SMS) / sizeof(DATA_SMS[0]) - 1), sendCallBackPtr,
+        deliveryCallBackPtr);
+}
+
+void SendDataMessageTestFuc2(SmsMmsTestHelper &helper)
+{
+    std::string dest = DES_ADDR;
+    std::string sca("");
+    OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
+    OHOS::sptr<SmsDeliveryCallbackGTest> deliveryCallBackPtr(new SmsDeliveryCallbackGTest(helper));
+    uint16_t port = SMS_PORT;
+    if (sendCallBackPtr == nullptr) {
+        TELEPHONY_LOGI("sendCallBackPtr is nullptr");
+        helper.NotifyAll();
+    }
+
+    if (deliveryCallBackPtr == nullptr) {
+        TELEPHONY_LOGI("deliveryCallBackPtr is nullptr");
+        helper.NotifyAll();
+    }
+    sendCallBackPtr->HasDeliveryCallBack(false);
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
         StringUtils::ToUtf16(sca), port, DATA_SMS, (sizeof(DATA_SMS) / sizeof(DATA_SMS[0]) - 1), sendCallBackPtr,
         deliveryCallBackPtr);
@@ -1651,12 +1670,12 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0001, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetDataMessageTestFuc, helper)) {
-        TELEPHONY_LOGI("SetDataMessageTestFuc out of time");
+    if (!helper.Run(SendDataMessageTestFuc, helper)) {
+        TELEPHONY_LOGI("SendDataMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0001 -->finished");
-    ASSERT_TRUE(helper.GetSendSmsBoolResult() && helper.GetDeliverySmsBoolResult());
+    ASSERT_TRUE(helper.GetSendSmsIntResult() == 0 && helper.GetDeliverySmsIntResult() == 0);
 }
 
 /**
@@ -1676,12 +1695,12 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0002, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetDataMessageTestFuc, helper)) {
-        TELEPHONY_LOGI("SetDataMessageTestFuc out of time");
+    if (!helper.Run(SendDataMessageTestFuc, helper)) {
+        TELEPHONY_LOGI("SendDataMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0002 -->finished");
-    ASSERT_TRUE(helper.GetSendSmsBoolResult() && helper.GetDeliverySmsBoolResult());
+    ASSERT_TRUE(helper.GetSendSmsIntResult() == 0 && helper.GetDeliverySmsIntResult() == 0);
 }
 
 /**
@@ -1691,7 +1710,6 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0002, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsMmsGtest, SendDataMessage_0003, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0003 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(SmsMmsGtest::HasSimCard(slotId))) {
@@ -1701,15 +1719,15 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0003, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetDataMessageTestFuc, helper)) {
-        TELEPHONY_LOGI("SetDataMessageTestFuc out of time");
+    if (!helper.Run(SendDataMessageTestFuc2, helper)) {
+        TELEPHONY_LOGI("SendDataMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0003 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetSendSmsIntResult() == 0);
 }
 
-void SetTextMessageTestFuc(SmsMmsTestHelper &helper)
+void SendTextMessageTestFuc(SmsMmsTestHelper &helper)
 {
     std::string dest = DES_ADDR;
     std::string sca("");
@@ -1718,15 +1736,35 @@ void SetTextMessageTestFuc(SmsMmsTestHelper &helper)
     std::string text = TEXT_SMS_CONTENT;
     if (sendCallBackPtr == nullptr) {
         TELEPHONY_LOGI("sendCallBackPtr is nullptr");
-        helper.SetBoolResult(false);
         helper.NotifyAll();
     }
 
     if (deliveryCallBackPtr == nullptr) {
         TELEPHONY_LOGI("deliveryCallBackPtr is nullptr");
-        helper.SetBoolResult(false);
         helper.NotifyAll();
     }
+    sendCallBackPtr->HasDeliveryCallBack(true);
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
+        StringUtils::ToUtf16(sca), StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
+}
+
+void SendTextMessageTestFuc2(SmsMmsTestHelper &helper)
+{
+    std::string dest = DES_ADDR;
+    std::string sca("");
+    OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
+    OHOS::sptr<SmsDeliveryCallbackGTest> deliveryCallBackPtr(new SmsDeliveryCallbackGTest(helper));
+    std::string text = TEXT_SMS_CONTENT;
+    if (sendCallBackPtr == nullptr) {
+        TELEPHONY_LOGI("sendCallBackPtr is nullptr");
+        helper.NotifyAll();
+    }
+
+    if (deliveryCallBackPtr == nullptr) {
+        TELEPHONY_LOGI("deliveryCallBackPtr is nullptr");
+        helper.NotifyAll();
+    }
+    sendCallBackPtr->HasDeliveryCallBack(false);
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
         StringUtils::ToUtf16(sca), StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
 }
@@ -1748,12 +1786,12 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0001, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetTextMessageTestFuc, helper)) {
-        TELEPHONY_LOGI("SetTextMessageTestFuc out of time");
+    if (!helper.Run(SendTextMessageTestFuc, helper)) {
+        TELEPHONY_LOGI("SendTextMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0001 -->finished");
-    ASSERT_TRUE(helper.GetSendSmsBoolResult() && helper.GetDeliverySmsBoolResult());
+    ASSERT_TRUE(helper.GetSendSmsIntResult() == 0 && helper.GetDeliverySmsIntResult() == 0);
 }
 
 /**
@@ -1773,12 +1811,12 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0002, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetTextMessageTestFuc, helper)) {
-        TELEPHONY_LOGI("SetTextMessageTestFuc out of time");
+    if (!helper.Run(SendTextMessageTestFuc, helper)) {
+        TELEPHONY_LOGI("SendTextMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0001 -->finished");
-    ASSERT_TRUE(helper.GetSendSmsBoolResult() && helper.GetDeliverySmsBoolResult());
+    ASSERT_TRUE(helper.GetSendSmsIntResult() == 0 && helper.GetDeliverySmsIntResult() == 0);
 }
 
 /**
@@ -1788,7 +1826,6 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0002, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsMmsGtest, SendTextMessage_0003, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0003 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(SmsMmsGtest::HasSimCard(slotId))) {
@@ -1798,12 +1835,12 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0003, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
-    if (!helper.Run(SetTextMessageTestFuc, helper)) {
-        TELEPHONY_LOGI("SetTextMessageTestFuc out of time");
+    if (!helper.Run(SendTextMessageTestFuc2, helper)) {
+        TELEPHONY_LOGI("SendTextMessageTestFuc out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0003 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_FALSE(helper.GetSendSmsIntResult() == 0);
 }
 
 void GetSmsSegmentsInfoTestFuc(SmsMmsTestHelper &helper)

@@ -328,6 +328,7 @@ void NativeDecodeMms(napi_env env, void *data)
         GetMmsReadRecInd(mmsMsg, context->readRecInd);
     }
     getAttachmentByDecodeMms(mmsMsg, *context);
+    context->errorCode = TELEPHONY_ERR_SUCCESS;
     context->resolved = true;
     TELEPHONY_LOGI("napi_mms NativeDecodeMms end");
 }
@@ -587,7 +588,8 @@ void DecodeMmsCallback(napi_env env, napi_status status, void *data)
         if (decodeMmsContext->resolved) {
             callbackValue = CreateDecodeMmsValue(env, *decodeMmsContext);
         } else {
-            callbackValue = NapiUtil::CreateErrorMessage(env, "decode mms error");
+            JsError error = NapiUtil::ConverErrorMessageForJs(decodeMmsContext->errorCode);
+            callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
         }
     } else {
         callbackValue =
@@ -1289,7 +1291,8 @@ void NativeEncodeMms(napi_env env, void *data)
 {
     TELEPHONY_LOGI("napi_mms NativeEncodeMms start");
     if (data == nullptr) {
-        TELEPHONY_LOGE("napi_mms data nullptr");
+        TELEPHONY_LOGE("NativeEncodeMms data is nullptr");
+        NapiUtil::ThrowParameterError(env);
         return;
     }
     EncodeMmsContext *context = static_cast<EncodeMmsContext *>(data);
@@ -1328,6 +1331,7 @@ void NativeEncodeMms(napi_env env, void *data)
             break;
     }
     context->outBuffer = mmsMsg.EncodeMsg(context->bufferLen);
+    context->errorCode = TELEPHONY_ERR_SUCCESS;
     context->resolved = true;
     TELEPHONY_LOGI("napi_mms  NativeEncodeMms end");
 }
@@ -1375,7 +1379,8 @@ napi_value NapiMms::EncodeMms(napi_env env, napi_callback_info info)
     if (!ParseEncodeMmsParam(env, parameters[0], *context)) {
         free(context);
         context = nullptr;
-        NAPI_ASSERT(env, false, "missing required arguments");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
     }
     if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);

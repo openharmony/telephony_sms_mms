@@ -97,8 +97,9 @@ public:
      * @param text [in]
      * @param sendCallback [in]
      * @param deliverCallback [in]
+     * @return int32_t
      */
-    virtual void SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+    virtual int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
         const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliverCallback) = 0;
 
@@ -113,8 +114,9 @@ public:
      * @param dataLen [in]
      * @param sendCallback [in]
      * @param deliverCallback [in]
+     * @return int32_t
      */
-    virtual void SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+    virtual int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
         uint16_t port, const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliverCallback) = 0;
 
@@ -132,7 +134,7 @@ public:
      * Obtains the SMSC address based on a specified slot ID.
      * @param slotId [in]
      * @param smscAddress [out]
-     * @return Interface execution results.
+     * @return int32_t.
      */
     virtual int32_t GetSmscAddr(int32_t slotId, std::u16string &smscAddress) = 0;
 
@@ -266,13 +268,13 @@ public:
     virtual bool HasSmsCapability() = 0;
 
     /**
-     * transfer a string from GSM to UTF8
-     * @param pDestText Indicates destination string,
-     * @param maxLength Indicates destination string max length
-     * @param pSrcText Indicates source string
-     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     * create a short message
+     * @param pdu Indicates pdu code,
+     * @param specification Indicates 3gpp or 3gpp2
+     * @param ShortMessage Indicates a short message object
+     * @return Returns {@code 0} if CreateMessage success
      */
-    virtual bool CreateMessage(std::string pdu, std::string specification, ShortMessage &message) = 0;
+    virtual int32_t CreateMessage(std::string pdu, std::string specification, ShortMessage &message) = 0;
 
     /**
      * mms base64 encode
