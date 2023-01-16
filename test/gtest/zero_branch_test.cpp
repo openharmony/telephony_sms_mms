@@ -929,7 +929,8 @@ HWTEST_F(BranchTest, ShortMessage_0001, Function | MediumTest | Level1)
     std::u16string specification = u"3gpp";
     std::string str = "3gpp";
     Parcel parcel;
-    EXPECT_TRUE(shortMessage->CreateMessage(pdu, specification) == nullptr);
+    ShortMessage ShortMessageObj;
+    EXPECT_TRUE(shortMessage->CreateMessage(pdu, specification, ShortMessageObj) != TELEPHONY_ERR_SUCCESS);
     pdu.push_back(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_READ);
     pdu.push_back(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_FREE);
     EXPECT_EQ(shortMessage->CreateIccMessage(pdu, str, 1).indexOnSim_, 0);

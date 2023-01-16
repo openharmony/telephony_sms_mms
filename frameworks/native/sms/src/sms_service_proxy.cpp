@@ -26,7 +26,7 @@ namespace Telephony {
 const int32_t MAX_LEN = 10000;
 SmsServiceProxy::SmsServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<ISmsServiceInterface>(impl) {}
 
-void SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
     const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliverCallback)
 {
@@ -36,29 +36,34 @@ void SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, 
     MessageOption option(MessageOption::TF_ASYNC);
     if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
         TELEPHONY_LOGE("SendMessage with text WriteInterfaceToken is false");
-        return;
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     dataParcel.WriteInt32(slotId);
     dataParcel.WriteString16(desAddr);
     dataParcel.WriteString16(scAddr);
     dataParcel.WriteString16(text);
-    if (sendCallback != nullptr) {
-        dataParcel.WriteRemoteObject(sendCallback->AsObject().GetRefPtr());
+    if (sendCallback == nullptr) {
+        TELEPHONY_LOGE("SendMessage with text sendCallback is nullptr");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    if (deliverCallback != nullptr) {
-        dataParcel.WriteRemoteObject(deliverCallback->AsObject().GetRefPtr());
+    dataParcel.WriteRemoteObject(sendCallback->AsObject().GetRefPtr());
+    if (deliverCallback == nullptr) {
+        TELEPHONY_LOGE("SendMessage with text deliverCallback is nullptr");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
+    dataParcel.WriteRemoteObject(deliverCallback->AsObject().GetRefPtr());
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TELEPHONY_LOGE("SendMessage with text Remote is null");
-        return;
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
     remote->SendRequest(TEXT_BASED_SMS_DELIVERY, dataParcel, replyParcel, option);
+    return replyParcel.ReadInt32();
 };
 
-void SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
     uint16_t port, const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliverCallback)
 {
@@ -68,28 +73,33 @@ void SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, 
     MessageOption option(MessageOption::TF_ASYNC);
     if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
         TELEPHONY_LOGE("SendMessage with data WriteInterfaceToken is false");
-        return;
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     dataParcel.WriteInt32(slotId);
     dataParcel.WriteString16(desAddr);
     dataParcel.WriteString16(scAddr);
     dataParcel.WriteInt16(port);
-    if (sendCallback != nullptr) {
-        dataParcel.WriteRemoteObject(sendCallback->AsObject().GetRefPtr());
+    if (sendCallback == nullptr) {
+        TELEPHONY_LOGE("SendMessage with data sendCallback is nullptr");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    if (deliverCallback != nullptr) {
-        dataParcel.WriteRemoteObject(deliverCallback->AsObject().GetRefPtr());
+    dataParcel.WriteRemoteObject(sendCallback->AsObject().GetRefPtr());
+    if (deliverCallback == nullptr) {
+        TELEPHONY_LOGE("SendMessage with data deliverCallback is nullptr");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
+    dataParcel.WriteRemoteObject(deliverCallback->AsObject().GetRefPtr());
     dataParcel.WriteInt16(dataLen);
     dataParcel.WriteRawData(data, dataLen);
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TELEPHONY_LOGE("SendMessage with data Remote is null");
-        return;
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
     remote->SendRequest(DATA_BASED_SMS_DELIVERY, dataParcel, replyParcel, option);
+    return replyParcel.ReadInt32();
 };
 
 int32_t SmsServiceProxy::SetSmscAddr(int32_t slotId, const std::u16string &scAddr)
@@ -464,11 +474,10 @@ bool SmsServiceProxy::HasSmsCapability()
     return replyParcel.ReadBool();
 }
 
-bool SmsServiceProxy::CreateMessage(std::string pdu, std::string specification, ShortMessage &message)
+int32_t SmsServiceProxy::CreateMessage(std::string pdu, std::string specification, ShortMessage &message)
 {
-    bool result = false;
     if (pdu.empty() || specification.empty()) {
-        return result;
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
 
     MessageParcel dataParcel;
@@ -476,7 +485,7 @@ bool SmsServiceProxy::CreateMessage(std::string pdu, std::string specification, 
     MessageOption option(MessageOption::TF_SYNC);
     if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
         TELEPHONY_LOGE("CreateMessage WriteInterfaceToken is false");
-        return result;
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     dataParcel.WriteString(pdu);
@@ -484,18 +493,20 @@ bool SmsServiceProxy::CreateMessage(std::string pdu, std::string specification, 
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        return result;
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
     remote->SendRequest(CREATE_MESSAGE, dataParcel, replyParcel, option);
 
-    result = replyParcel.ReadBool();
+    int32_t result = replyParcel.ReadInt32();
     TELEPHONY_LOGI("SmsServiceProxy::CreateMessage result:%{public}d", result);
-    if (!result) {
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("CreateMessage result fail");
         return result;
     }
 
     if (!message.ReadFromParcel(replyParcel)) {
         TELEPHONY_LOGE("SmsServiceProxy::CreateMessage fail");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     return result;
 }
