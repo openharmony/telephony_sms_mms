@@ -48,9 +48,10 @@ public:
     int ConvertSHIFTJISToUTF8(
         OUT unsigned char *pDestText, IN int maxLength, IN const unsigned char *pSrcText, IN int srcTextLen) const;
 
-    void Base64Encode(const std::string src, std::string &dest);
-    void Base64Decode(const std::string src, std::string &dest);
-    bool GetEncodeString(std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString);
+    void Base64Encode(const std::string &src, std::string &dest);
+    void Base64Decode(const std::string &src, std::string &dest);
+    bool GetEncodeString(
+        std::string &encodeString, uint32_t charset, uint32_t valLength, const std::string &strEncodeString);
 
 private:
     MsgTextConvert();

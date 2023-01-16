@@ -46,7 +46,6 @@ static constexpr uint8_t MAX_TPDU_DATA_LEN = 255;
 
 void CdmaSmsPduCodec::ShiftNBit(unsigned char *src, unsigned int nBytes, unsigned int nShiftBit)
 {
-    unsigned char temp;
     if (src == nullptr) {
         TELEPHONY_LOGE("Source is null!");
         return;
@@ -57,7 +56,7 @@ void CdmaSmsPduCodec::ShiftNBit(unsigned char *src, unsigned int nBytes, unsigne
             TELEPHONY_LOGE("ShiftNBit BYTE_BITS less than nShiftBit");
             return;
         }
-        temp = src[index] >> (BYTE_BITS - nShiftBit);
+        unsigned char temp = src[index] >> (BYTE_BITS - nShiftBit);
         src[index - 1] |= temp;
         src[index] = (unsigned int)src[index] << nShiftBit;
     }
@@ -65,14 +64,13 @@ void CdmaSmsPduCodec::ShiftNBit(unsigned char *src, unsigned int nBytes, unsigne
 
 void CdmaSmsPduCodec::ShiftRNBit(unsigned char *src, unsigned int nBytes, unsigned int nShiftBit)
 {
-    unsigned char temp;
     unsigned char bit = 0x00;
     if (src == nullptr) {
         TELEPHONY_LOGE("Source is null!");
         return;
     }
     for (unsigned int index = 0; index <= nBytes; index++) {
-        temp = src[index] >> (nShiftBit);
+        unsigned char temp = src[index] >> (nShiftBit);
         temp |= bit;
         if (BYTE_BITS < nShiftBit) {
             TELEPHONY_LOGE("ShiftRNBit BYTE_BITS less than nShiftBit");
@@ -403,13 +401,13 @@ int CdmaSmsPduCodec::EncodeTelesvcSubmitMsg(const struct SmsTeleSvcSubmit &sbMsg
 
 int CdmaSmsPduCodec::EncodeCbNumber(const SmsTeleSvcAddr &cbNumber, std::vector<unsigned char> &pdustr)
 {
-    unsigned char cbData[SMS_TRANS_ADDRESS_MAX_LEN] = {0};
     unsigned char temp = cbNumber.digitMode ? 0x80 : 0x00;
     if (cbNumber.digitMode == false) {
         temp |= (cbNumber.addrLen & 0xfe) >> SHIFT_1BITS;
         pdustr.push_back(temp);
 
         int offset = 0;
+        unsigned char cbData[SMS_TRANS_ADDRESS_MAX_LEN] = { 0 };
         cbData[offset] |= (cbNumber.addrLen & 0x01) << SHIFT_7BITS;
         int addrLen =
             SmsCommonUtils::ConvertDigitToDTMF(cbNumber.szData, cbNumber.addrLen, SHIFT_1BITS, cbData + offset);
@@ -930,7 +928,7 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
 
         int bcdLen = enhancedVmn.anNumField / HEX_BYTE_STEP;
         bcdLen = (enhancedVmn.anNumField % HEX_BYTE_STEP == 0) ? bcdLen : bcdLen + 1;
-        SmsCommonUtils::BcdToDigitCdma(&(tempStr[tempOff]), bcdLen, (char *)enhancedVmn.anChar);
+        SmsCommonUtils::BcdToDigitCdma(&(tempStr[tempOff]), bcdLen, reinterpret_cast<char *>(enhancedVmn.anChar));
         enhancedVmn.anChar[enhancedVmn.anNumField] = '\0';
     } else {
         ShiftNBitForDecode(tempStr, tempLen, SHIFT_4BITS);
@@ -961,7 +959,7 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
         int bcdLen = tempStr[tempOff++] / HEX_BYTE_STEP;
         bcdLen = (enhancedVmn.cliNumField % HEX_BYTE_STEP == 0) ? bcdLen : bcdLen + 1;
         enhancedVmn.cliNumField =
-            SmsCommonUtils::BcdToDigitCdma(&(tempStr[tempOff]), bcdLen, (char *)enhancedVmn.anChar);
+            SmsCommonUtils::BcdToDigitCdma(&(tempStr[tempOff]), bcdLen, reinterpret_cast<char *>(enhancedVmn.anChar));
         enhancedVmn.anChar[enhancedVmn.cliNumField] = '\0';
     } else {
         ShiftNBitForDecode(tempStr, tempLen, SHIFT_4BITS);
@@ -1668,13 +1666,12 @@ int CdmaSmsPduCodec::DecodeAbsTime(const unsigned char *pduStr, struct SmsTimeAb
 int CdmaSmsPduCodec::Encode7BitASCIIData(const struct SmsUserData &userData, unsigned char *dest, int &remainBits)
 {
     int shift = 0;
-    int headerLen = 0;
     int offset = 0;
     int fillBits = 0;
     unsigned char udhl = 0x00;
     offset = (userData.headerCnt > 0) ? HEX_BYTE_STEP : 1;
     for (int i = 0; i < userData.headerCnt; i++) {
-        headerLen = GsmSmsUDataCodec::EncodeHeader(userData.header[i], (char *)(&(dest[offset])));
+        int headerLen = GsmSmsUDataCodec::EncodeHeader(userData.header[i], (char *)(&(dest[offset])));
         TELEPHONY_LOGI("headerLen [%{public}d]", headerLen);
         udhl += headerLen;
         offset += headerLen;
@@ -1690,7 +1687,7 @@ int CdmaSmsPduCodec::Encode7BitASCIIData(const struct SmsUserData &userData, uns
     /* Set UDL, UDHL */
     dest[0] = (udhl > 0) ? (udhl + 1 + userData.length) : userData.length;
 
-    unsigned char *temp = (unsigned char *)calloc(BYTE_STEP, userData.length + 0x01);
+    unsigned char *temp = static_cast<unsigned char *>(calloc(BYTE_STEP, userData.length + 0x01));
     if (temp == nullptr) {
         TELEPHONY_LOGE("SmsUserData is null!");
         return shift;
@@ -1722,10 +1719,8 @@ int CdmaSmsPduCodec::Encode7BitASCIIData(const struct SmsUserData &userData, uns
 
 int CdmaSmsPduCodec::Encode7BitGSMData(const struct SmsUserData &userData, unsigned char *dest, int &remainBits)
 {
-    int headerLen = 0;
     int offset = 0;
     int fillBits = 0;
-    int offsetIndex = 0;
     int packSize = 0;
     int encodeLen = 0;
 
@@ -1733,7 +1728,7 @@ int CdmaSmsPduCodec::Encode7BitGSMData(const struct SmsUserData &userData, unsig
     offset = (userData.headerCnt > 0) ? HEX_BYTE_STEP : 1;
 
     for (int i = 0; i < userData.headerCnt; i++) {
-        headerLen = GsmSmsUDataCodec::EncodeHeader(userData.header[i], (char *)&(dest[offset]));
+        int headerLen = GsmSmsUDataCodec::EncodeHeader(userData.header[i], (char *)&(dest[offset]));
         TELEPHONY_LOGI("headerLen [%{public}d]", headerLen);
         udhl += headerLen;
         offset += headerLen;
@@ -1755,11 +1750,12 @@ int CdmaSmsPduCodec::Encode7BitGSMData(const struct SmsUserData &userData, unsig
         dest[0] = userData.length;
     }
 
-    packSize =
-        SmsCommonUtils::Pack7bitChar((unsigned char *)userData.data, userData.length, fillBits, &dest[offset]);
+    packSize = SmsCommonUtils::Pack7bitChar(
+        reinterpret_cast<const unsigned char *>(userData.data), userData.length, fillBits, &dest[offset]);
     encodeLen = offset + packSize;
     TELEPHONY_LOGI("packSize [%{public}d] encodeLen [%{public}d]", packSize, encodeLen);
     if (fillBits > 0) {
+        int offsetIndex = 0;
         ShiftRNBit(&dest[offsetIndex], packSize, fillBits);
         ++encodeLen;
     }
@@ -1768,7 +1764,6 @@ int CdmaSmsPduCodec::Encode7BitGSMData(const struct SmsUserData &userData, unsig
 
 int CdmaSmsPduCodec::EncodeUCS2Data(const struct SmsUserData &userData, unsigned char *dest, int &remainBits)
 {
-    int headerLen = 0;
     int offset = 0;
     int encodeLen = 0;
 
@@ -1776,7 +1771,7 @@ int CdmaSmsPduCodec::EncodeUCS2Data(const struct SmsUserData &userData, unsigned
     offset = (userData.headerCnt > 0) ? HEX_BYTE_STEP : 1;
 
     for (int i = 0; i < userData.headerCnt; i++) {
-        headerLen = GsmSmsUDataCodec::EncodeHeader(userData.header[i], (char *)&(dest[offset]));
+        int headerLen = GsmSmsUDataCodec::EncodeHeader(userData.header[i], (char *)&(dest[offset]));
         TELEPHONY_LOGI("headerLen [%{public}d]", headerLen);
         udhl += headerLen;
     }
@@ -1809,7 +1804,6 @@ int CdmaSmsPduCodec::EncodeUCS2Data(const struct SmsUserData &userData, unsigned
 void CdmaSmsPduCodec::DecodeCMASData(unsigned char *pduStr, int pduLen, struct SmsTeleSvcCmasData &cmasData)
 {
     int offset = 0;
-    int tempLen = 0;
     if (memset_s(&cmasData, sizeof(SmsTeleSvcCmasData), 0x00, sizeof(SmsTeleSvcCmasData)) != EOK) {
         TELEPHONY_LOGE("DecodeCMASData memset_s fail.");
         return;
@@ -1831,8 +1825,7 @@ void CdmaSmsPduCodec::DecodeCMASData(unsigned char *pduStr, int pduLen, struct S
             offset += DecodeCMASType0Data(&pduStr[offset], pduLen - offset, cmasData);
         } else if (pduStr[offset] == 0x01) {
             offset += HEX_BYTE_STEP;
-            tempLen = pduStr[offset - 1];
-            TELEPHONY_LOGI("Type 1 length = [%{public}d]", tempLen);
+            TELEPHONY_LOGI("Type 1 length = [%{public}d]", pduStr[offset - 1]);
             cmasData.category = static_cast<enum SmsCmaeCategory>(pduStr[offset++]);
             cmasData.responseType = static_cast<enum SmsCmaeResponseType>(pduStr[offset++]);
             cmasData.severity = static_cast<enum SmsCmaeSeverity>(pduStr[offset] >> SHIFT_4BITS);
@@ -1840,8 +1833,7 @@ void CdmaSmsPduCodec::DecodeCMASData(unsigned char *pduStr, int pduLen, struct S
             cmasData.certainty = static_cast<enum SmsCmaeCertainty>(pduStr[offset++] >> SHIFT_4BITS);
         } else if (pduStr[offset] == 0x02) {
             offset += HEX_BYTE_STEP;
-            tempLen = pduStr[offset - 1];
-            TELEPHONY_LOGI("Type 2 length = [%{public}d]", tempLen);
+            TELEPHONY_LOGI("Type 2 length = [%{public}d]", pduStr[offset - 1]);
             cmasData.id = pduStr[offset++];
             cmasData.id = (cmasData.id << SHIFT_8BITS) + pduStr[offset++];
             cmasData.alertHandle = static_cast<enum SmsCmaeAlertHandle>(pduStr[offset++]);
@@ -1958,7 +1950,7 @@ void CdmaSmsPduCodec::DecodeUserData(
 
             userData.userData.length = headerInd ? (numFields - udhlBytes - 1) : numFields;
             SmsCommonUtils::Unpack7bitChar(&(pduStr[offset]), userData.userData.length, 0x00,
-                (unsigned char *)(userData.userData.data), MAX_USER_DATA_LEN + 1);
+                reinterpret_cast<unsigned char *>(userData.userData.data), MAX_USER_DATA_LEN + 1);
             break;
         case SMS_ENCODE_EPM:
         case SMS_ENCODE_GSMDCS:
@@ -2003,12 +1995,11 @@ void CdmaSmsPduCodec::DecodeUserData(
 void CdmaSmsPduCodec::Decode7BitHeader(
     const unsigned char *pduStr, unsigned char udhlBytes, struct SmsUserData &userData)
 {
-    int offset = 0;
     if (udhlBytes > 0) {
+        int offset = 0;
         userData.headerCnt = 0;
-        int headerLen = 0;
         for (int i = 0; offset < udhlBytes; i++) {
-            headerLen = GsmSmsUDataCodec::DecodeHeader(&(pduStr[offset]), &(userData.header[i]));
+            int headerLen = GsmSmsUDataCodec::DecodeHeader(&(pduStr[offset]), &(userData.header[i]));
             if (headerLen <= 0) {
                 TELEPHONY_LOGI("Error to Header. headerLen [%{public}d]", headerLen);
                 GsmSmsUDataCodec::ResetUserData(userData);
