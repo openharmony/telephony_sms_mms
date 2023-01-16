@@ -371,7 +371,7 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
             break;
         }
     }
-    visibleMessageBody_.insert(0, (char *)buff, dataSize);
+    visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
     TELEPHONY_LOGI("AnalsisDeliverMsg userData == %{private}s", visibleMessageBody_.c_str());
 }
 
@@ -546,7 +546,7 @@ int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, S
     int decodeLen = 0;
     int dataLen = static_cast<int>(msgText.length());
     const unsigned int maxDecodeLen = len;
-    const unsigned char *pMsgText = (const unsigned char *)msgText.c_str();
+    const unsigned char *pMsgText = reinterpret_cast<const unsigned char *>(msgText.c_str());
 
     MsgTextConvert *textCvt = MsgTextConvert::Instance();
     if (textCvt == nullptr) {
