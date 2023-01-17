@@ -1141,7 +1141,7 @@ void MsgTextConvert::ConvertDumpTextToHex(const unsigned char *pText, int length
     TELEPHONY_LOGI("=======================================");
 }
 
-void MsgTextConvert::Base64Encode(const std::string src, std::string &dest)
+void MsgTextConvert::Base64Encode(const std::string &src, std::string &dest)
 {
     gchar *encode_data = g_base64_encode((guchar *)src.data(), src.length());
     if (encode_data == nullptr) {
@@ -1149,7 +1149,7 @@ void MsgTextConvert::Base64Encode(const std::string src, std::string &dest)
     }
     gsize out_len = 0;
     out_len = strlen(encode_data);
-    std::string temp((char *)encode_data, out_len);
+    std::string temp(static_cast<char *>(encode_data), out_len);
     dest = temp;
 
     if (encode_data != nullptr) {
@@ -1157,10 +1157,10 @@ void MsgTextConvert::Base64Encode(const std::string src, std::string &dest)
     }
 }
 
-void MsgTextConvert::Base64Decode(const std::string src, std::string &dest)
+void MsgTextConvert::Base64Decode(const std::string &src, std::string &dest)
 {
     gsize out_len = 0;
-    char *decodeData = (char *)g_base64_decode(src.data(), &out_len);
+    char *decodeData = reinterpret_cast<char *>(g_base64_decode(src.data(), &out_len));
     if (decodeData == nullptr) {
         return;
     }
@@ -1173,7 +1173,7 @@ void MsgTextConvert::Base64Decode(const std::string src, std::string &dest)
 }
 
 bool MsgTextConvert::GetEncodeString(
-    std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString)
+    std::string &encodeString, uint32_t charset, uint32_t valLength, const std::string &strEncodeString)
 {
     bool ret = false;
     char *pDest = nullptr;

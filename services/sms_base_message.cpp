@@ -382,7 +382,7 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
         }
     }
 
-    split.text.insert(0, (char *)buff, dataSize);
+    split.text.insert(0, reinterpret_cast<char *>(buff), dataSize);
     TELEPHONY_LOGI("split text");
 }
 

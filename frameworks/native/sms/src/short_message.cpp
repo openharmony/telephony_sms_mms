@@ -17,6 +17,7 @@
 
 #include "sms_service_manager_client.h"
 #include "string_utils.h"
+#include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -214,8 +215,11 @@ ShortMessage ShortMessage::CreateIccMessage(std::vector<unsigned char> &pdu, std
 
         ShortMessage messageObj;
         auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-        client->CreateMessage(StringUtils::StringToHex(pdu), specification, messageObj);
-        message = messageObj;
+        int32_t errorCode = client->CreateMessage(StringUtils::StringToHex(pduTemp), specification, message);
+        if (errorCode != TELEPHONY_ERR_SUCCESS) {
+            TELEPHONY_LOGE("CreateMessage fail errorCode:%{public}d", errorCode);
+            return message;
+        }
         message.indexOnSim_ = index;
     } else {
         message.simMessageStatus_ = SMS_SIM_MESSAGE_STATUS_FREE;
