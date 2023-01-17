@@ -141,7 +141,6 @@ int GsmSmsParamCodec::EncodeSMSC(const struct SmsAddress *pAddress, unsigned cha
 
 int GsmSmsParamCodec::EncodeTime(const struct SmsTimeStamp *pTimeStamp, char **ppParam)
 {
-    int ret = 0;
     int offset = 0;
     if (pTimeStamp == nullptr) {
         TELEPHONY_LOGE("TimeStamp is null.");
@@ -180,8 +179,8 @@ int GsmSmsParamCodec::EncodeTime(const struct SmsTimeStamp *pTimeStamp, char **p
             TELEPHONY_LOGE("ppParam is null.");
             return offset;
         }
-        ret = memcpy_s(
-            *ppParam, MAX_REL_TIME_PARAM_LEN + 1, &(pTimeStamp->time.relative.time), MAX_REL_TIME_PARAM_LEN);
+        int ret =
+            memcpy_s(*ppParam, MAX_REL_TIME_PARAM_LEN + 1, &(pTimeStamp->time.relative.time), MAX_REL_TIME_PARAM_LEN);
         if (ret != EOK) {
             TELEPHONY_LOGE("EncodeTime memcpy_s error!");
         }
@@ -278,13 +277,13 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
             return offset;
         }
         int tmplength = 0;
-        tmplength = SmsCommonUtils::Unpack7bitChar(
-            &(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00, (unsigned char *)tmpAddress, MAX_ADDRESS_LEN);
-        MsgLangInfo langInfo = {0};
+        tmplength = SmsCommonUtils::Unpack7bitChar(&(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00,
+            reinterpret_cast<unsigned char *>(tmpAddress), MAX_ADDRESS_LEN);
+        MsgLangInfo langInfo = { 0 };
         langInfo.bSingleShift = false;
         langInfo.bLockingShift = false;
-        textCvt->ConvertGSM7bitToUTF8((unsigned char *)pAddress->address, MAX_ADDRESS_LEN,
-            (unsigned char *)tmpAddress, tmplength, &langInfo);
+        textCvt->ConvertGSM7bitToUTF8(reinterpret_cast<unsigned char *>(pAddress->address), MAX_ADDRESS_LEN,
+            reinterpret_cast<unsigned char *>(tmpAddress), tmplength, &langInfo);
         if (tmpAddress) {
             delete[] tmpAddress;
         }

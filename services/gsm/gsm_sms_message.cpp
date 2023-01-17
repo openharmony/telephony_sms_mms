@@ -35,7 +35,6 @@ inline void UniquePtrDeleterOneDimension(T **(&ptr))
 
 int GsmSmsMessage::CalcReplyEncodeAddress(const std::string &replyAddress)
 {
-    int ret = 0;
     int addrLen = 0;
     char *encodedAddr = nullptr;
     unique_ptr<char *, void (*)(char **(&))> addressBuf(&encodedAddr, UniquePtrDeleterOneDimension);
@@ -43,7 +42,7 @@ int GsmSmsMessage::CalcReplyEncodeAddress(const std::string &replyAddress)
         struct SmsAddress replyAddr = {};
         replyAddr.ton = SMS_TON_NATIONAL;
         replyAddr.npi = SMS_NPI_ISDN;
-        ret = memset_s(replyAddr.address, sizeof(replyAddr.address), 0x00, MAX_ADDRESS_LEN + 1);
+        int ret = memset_s(replyAddr.address, sizeof(replyAddr.address), 0x00, MAX_ADDRESS_LEN + 1);
         if (ret != EOK) {
             TELEPHONY_LOGE("CalcReplyEncodeAddress memset_s error!");
             return addrLen;
@@ -147,7 +146,7 @@ int GsmSmsMessage::SetHeaderReply(int index)
 {
     int ret = 0;
     std::string reply = GetReplyAddress();
-    if (smsTpdu_ == nullptr && reply.length() <= 0) {
+    if (smsTpdu_ == nullptr && reply.length() == 0) {
         TELEPHONY_LOGE("TPdu or address is null.");
         return ret;
     }
@@ -238,7 +237,7 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
         TELEPHONY_LOGE("failed to initialize!");
         return nullptr;
     }
-    const unsigned char *pMsgText = (const unsigned char *)data;
+    const unsigned char *pMsgText = static_cast<const unsigned char *>(data);
     unsigned char *pDestText = encodeData;
     MSG_LANGUAGE_ID_T *pLangId = &langId;
     bool *pIncludeAbnormalChar = &bAbnormal;
@@ -275,7 +274,6 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
 
 std::shared_ptr<struct EncodeInfo> GsmSmsMessage::GetSubmitEncodeInfo(const std::string &sc, bool bMore)
 {
-    int ret = 0;
     int encodeSmscLen = 0;
     char tpduBuf[MAX_TPDU_DATA_LEN];
     unsigned char encodeSmscAddr[MAX_SMSC_LEN];
@@ -283,14 +281,14 @@ std::shared_ptr<struct EncodeInfo> GsmSmsMessage::GetSubmitEncodeInfo(const std:
     (void)memset_s(tpduBuf, sizeof(tpduBuf), 0x00, sizeof(tpduBuf));
     if ((!sc.empty()) && (sc.length() < MAX_SMSC_LEN)) {
         struct SmsAddress pAddress;
-        if ((ret = memset_s(&pAddress.address, sizeof(pAddress.address), 0x00, sizeof(pAddress.address))) != EOK) {
+        if (memset_s(&pAddress.address, sizeof(pAddress.address), 0x00, sizeof(pAddress.address)) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo memset_s error!");
             return nullptr;
         }
         if (sc.length() > sizeof(pAddress.address)) {
             return nullptr;
         }
-        if ((ret = memcpy_s(&pAddress.address, sizeof(pAddress.address), sc.data(), sc.length())) != EOK) {
+        if (memcpy_s(&pAddress.address, sizeof(pAddress.address), sc.data(), sc.length()) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo memcpy_s error!");
             return nullptr;
         }
@@ -310,11 +308,11 @@ std::shared_ptr<struct EncodeInfo> GsmSmsMessage::GetSubmitEncodeInfo(const std:
             TELEPHONY_LOGE("GetSubmitEncodeInfo data length invalid.");
             return nullptr;
         }
-        if ((ret = memcpy_s(info->smcaData_, sizeof(info->smcaData_), encodeSmscAddr, encodeSmscLen)) != EOK) {
+        if (memcpy_s(info->smcaData_, sizeof(info->smcaData_), encodeSmscAddr, encodeSmscLen) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo encodeSmscAddr memcpy_s error!");
             return nullptr;
         }
-        if ((ret = memcpy_s(info->tpduData_, sizeof(info->tpduData_), tpduBuf, bufLen)) != EOK) {
+        if (memcpy_s(info->tpduData_, sizeof(info->tpduData_), tpduBuf, bufLen) != EOK) {
             TELEPHONY_LOGE("GetSubmitEncodeInfo memcpy_s error!");
             return nullptr;
         }
@@ -394,7 +392,8 @@ bool GsmSmsMessage::PduAnalysis(const string &pdu)
         TELEPHONY_LOGE("PduAnalysis memset_s error!");
         return false;
     }
-    int smscLen = GsmSmsParamCodec::DecodeSMSC((const unsigned char *)pdu.c_str(), pdu.length(), smsc);
+    int smscLen =
+        GsmSmsParamCodec::DecodeSMSC(reinterpret_cast<const unsigned char *>(pdu.c_str()), pdu.length(), smsc);
     if (smscLen > 0) {
         scAddress_ = smsc.address;
     }
@@ -516,7 +515,6 @@ void GsmSmsMessage::ConvertMessageDcs()
 void GsmSmsMessage::ConvertUserData()
 {
     int ret = 0;
-    int dataSize = 0;
     if (smsTpdu_ == nullptr ||
         (memset_s(&smsUserData_, sizeof(struct SmsUserData), 0x00, sizeof(struct SmsUserData)) != EOK)) {
         return;
@@ -543,6 +541,7 @@ void GsmSmsMessage::ConvertUserData()
         return;
     }
     if (smsUserData_.length > 0) {
+        int dataSize = 0;
         MsgTextConvert *textCvt = MsgTextConvert::Instance();
         if (textCvt == nullptr) {
             return;
@@ -554,14 +553,14 @@ void GsmSmsMessage::ConvertUserData()
             };
             langInfo.bSingleShift = false;
             langInfo.bLockingShift = false;
-            dataSize = textCvt->ConvertGSM7bitToUTF8(
-                buff, MAX_MSG_TEXT_LEN, (unsigned char *)smsUserData_.data, smsUserData_.length, &langInfo);
+            dataSize = textCvt->ConvertGSM7bitToUTF8(buff, MAX_MSG_TEXT_LEN,
+                reinterpret_cast<unsigned char *>(smsUserData_.data), smsUserData_.length, &langInfo);
         } else if (codingScheme_ == SMS_CODING_UCS2) {
             dataSize = textCvt->ConvertUCS2ToUTF8(
-                buff, MAX_MSG_TEXT_LEN, (unsigned char *)smsUserData_.data, smsUserData_.length);
+                buff, MAX_MSG_TEXT_LEN, reinterpret_cast<unsigned char *>(smsUserData_.data), smsUserData_.length);
         }
-        visibleMessageBody_.insert(0, (char *)buff, dataSize);
-        rawUserData_.insert(0, (char *)smsUserData_.data, smsUserData_.length);
+        visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
+        rawUserData_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
     }
 }
 
@@ -662,7 +661,7 @@ int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, Sm
     int decodeLen = 0;
     int dataLen = static_cast<int>(msgText.length());
     const unsigned int maxDecodeLen = len;
-    const unsigned char *pMsgText = (const unsigned char *)msgText.c_str();
+    const unsigned char *pMsgText = reinterpret_cast<const unsigned char *>(msgText.c_str());
 
     MsgTextConvert *textCvt = MsgTextConvert::Instance();
     if (textCvt == nullptr) {
