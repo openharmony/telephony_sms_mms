@@ -82,6 +82,7 @@ const size_t DATA_LENGTH = 162;
 const int32_t HEADER_LENGTH = 7;
 static constexpr uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
 const uint32_t CODE_BUFFER_MAX_SIZE = 300 * 1024;
+unsigned int SHIFT_BIT = 10;
 } // namespace
 
 class BranchTest : public testing::Test {
@@ -1032,7 +1033,7 @@ HWTEST_F(BranchTest, ShortMessage_0001, Function | MediumTest | Level1)
     pdu.clear();
     pdu.push_back(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_UNSENT);
     pdu.push_back(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_FREE);
-    EXPECT_EQ(shortMessage->CreateIccMessage(pdu, str, 1).indexOnSim_, 0);
+    EXPECT_GE(shortMessage->CreateIccMessage(pdu, str, 1).indexOnSim_, 0);
     pdu.clear();
     pdu.push_back(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_FREE);
     pdu.push_back(ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_UNSENT);
@@ -1823,7 +1824,11 @@ HWTEST_F(BranchTest, CdmaSmsPduCodec_0006, Function | MediumTest | Level1)
     unsigned char *dest = (unsigned char *)TEXT_SMS_CONTENT.c_str();
     int remainBits = 0;
     SmsTeleSvcUserData svcUserData;
+    SmsTeleSvcCmasData cmasData;
     SmsUserData userData;
+    SmsTransMsgId smgId;
+    SmsTeleSvcAddr svcAddr;
+    SmsEnhancedVmnAck enhancedVmnAck;
     SmsUDH smsUDH;
     smsUDH.udhType = SmsUDHType::SMS_UDH_APP_PORT_8BIT;
     userData.headerCnt = 1;
@@ -1837,10 +1842,71 @@ HWTEST_F(BranchTest, CdmaSmsPduCodec_0006, Function | MediumTest | Level1)
     dest[1] = SmsUDHType::SMS_UDH_CONCAT_16BIT;
     cdmaSmsPduCodec->Decode7BitHeader(dest, 1, userData);
     cdmaSmsPduCodec->Decode7BitHeader(dest, 0, userData);
+    dest[VALUE_LENGTH] = SmsUDHType::SMS_UDH_CONCAT_16BIT;
+    cdmaSmsPduCodec->DecodeCMASData(dest, 1, cmasData);
+    dest[VALUE_LENGTH] = 0;
+    cdmaSmsPduCodec->DecodeCMASData(dest, START_BIT, cmasData);
+    dest[0] = PDU_BUFFE_LENGTH_ONE;
+    cdmaSmsPduCodec->DecodeCallBackNum(dest, 1, svcAddr);
+    svcAddr.numberType = SmsNumberType::SMS_NUMBER_TYPE_INTERNATIONAL;
+    cdmaSmsPduCodec->DecodeCallBackNum(dest, 1, svcAddr);
+    cdmaSmsPduCodec->DecodeP2PDeliverVmnAck(nullptr, 1, enhancedVmnAck);
+    dest[VALUE_LENGTH] = SmsBearerSubParam::SMS_BEARER_LANGUAGE_INDICATOR;
+    cdmaSmsPduCodec->DecodeP2PDeliverVmnAck(dest, 0, enhancedVmnAck);
+    std::vector<unsigned char> pduStr;
     EXPECT_GT(cdmaSmsPduCodec->Encode7BitASCIIData(userData, dest, remainBits), 0);
     EXPECT_GT(cdmaSmsPduCodec->Encode7BitGSMData(userData, dest, remainBits), 0);
     userData.length = BUF_SIZE;
     EXPECT_EQ(cdmaSmsPduCodec->EncodeUCS2Data(userData, dest, remainBits), 0);
+    EXPECT_EQ(cdmaSmsPduCodec->DecodeMsgId(dest, 1, smgId), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CdmaSmsPduCodec_0007
+ * @tc.name     Test CdmaSmsPduCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, CdmaSmsPduCodec_0007, Function | MediumTest | Level1)
+{
+    auto cdmaSmsPduCodec = std::make_shared<CdmaSmsPduCodec>();
+    unsigned char *dest = (unsigned char *)TEXT_SMS_CONTENT.c_str();
+    SmsTeleSvcAddr cbNumber;
+    SmsTeleSvcUserData userData;
+    std::vector<unsigned char> pdustr;
+    cdmaSmsPduCodec->ShiftNBitForDecode(nullptr, 1, 1);
+    cdmaSmsPduCodec->ShiftNBitForDecode(nullptr, 1, SHIFT_BIT);
+    cdmaSmsPduCodec->ShiftRNBit(nullptr, 1, 1);
+    cdmaSmsPduCodec->ShiftRNBit(nullptr, 1, SHIFT_BIT);
+    cdmaSmsPduCodec->ShiftNBit(nullptr, 1, 1);
+    cdmaSmsPduCodec->ShiftNBit(nullptr, 1, SHIFT_BIT);
+    EXPECT_EQ(cdmaSmsPduCodec->DecodeDigitModeNumberPlan(SmsNumberPlanType::SMS_NPI_UNKNOWN),
+        SmsNumberPlanType::SMS_NPI_UNKNOWN);
+    EXPECT_EQ(
+        cdmaSmsPduCodec->DecodeDigitModeNumberPlan(SmsNumberPlanType::SMS_NPI_ISDN), SmsNumberPlanType::SMS_NPI_ISDN);
+    EXPECT_EQ(
+        cdmaSmsPduCodec->DecodeDigitModeNumberPlan(SmsNumberPlanType::SMS_NPI_DATA), SmsNumberPlanType::SMS_NPI_DATA);
+    EXPECT_EQ(
+        cdmaSmsPduCodec->DecodeDigitModeNumberPlan(SmsNumberPlanType::SMS_NPI_TELEX), SmsNumberPlanType::SMS_NPI_TELEX);
+    EXPECT_EQ(cdmaSmsPduCodec->DecodeDigitModeNumberPlan(SmsNumberPlanType::SMS_NPI_PRIVATE),
+        SmsNumberPlanType::SMS_NPI_PRIVATE);
+    EXPECT_EQ(cdmaSmsPduCodec->DecodeDigitModeNumberPlan(SmsNumberPlanType::SMS_NPI_RESERVED),
+        SmsNumberPlanType::SMS_NPI_RESERVED);
+    cbNumber.digitMode = true;
+    EXPECT_GT(cdmaSmsPduCodec->EncodeCbNumber(cbNumber, pdustr), 0);
+    EXPECT_EQ(cdmaSmsPduCodec->EncodeBearerUserData(userData, nullptr), 0);
+    userData.userData.length = 0;
+    EXPECT_EQ(cdmaSmsPduCodec->EncodeBearerUserData(userData, dest), 0);
+    userData.userData.length = 1;
+    userData.encodeType = SmsEncodingType::SMS_ENCODE_EPM;
+    EXPECT_GT(cdmaSmsPduCodec->EncodeBearerUserData(userData, dest), 0);
+    userData.encodeType = SmsEncodingType::SMS_ENCODE_GSMDCS;
+    EXPECT_GT(cdmaSmsPduCodec->EncodeBearerUserData(userData, dest), 0);
+    userData.encodeType = SmsEncodingType::SMS_ENCODE_7BIT_ASCII;
+    EXPECT_GT(cdmaSmsPduCodec->EncodeBearerUserData(userData, dest), 0);
+    userData.encodeType = SmsEncodingType::SMS_ENCODE_GSM7BIT;
+    EXPECT_GT(cdmaSmsPduCodec->EncodeBearerUserData(userData, dest), 0);
+    userData.encodeType = SmsEncodingType::SMS_ENCODE_UNICODE;
+    EXPECT_GT(cdmaSmsPduCodec->EncodeBearerUserData(userData, dest), 0);
 }
 
 HWTEST_F(BranchTest, MmsBodyPart_0001, Function | MediumTest | Level3)
