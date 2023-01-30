@@ -146,8 +146,12 @@ int GsmSmsMessage::SetHeaderReply(int index)
 {
     int ret = 0;
     std::string reply = GetReplyAddress();
-    if (smsTpdu_ == nullptr && reply.length() == 0) {
-        TELEPHONY_LOGE("TPdu or address is null.");
+    if (reply.length() == 0) {
+        TELEPHONY_LOGE("address is null.");
+        return ret;
+    }
+    if (smsTpdu_ == nullptr) {
+        TELEPHONY_LOGE("smsTpdu_ is null.");
         return ret;
     }
     switch (smsTpdu_->tpduType) {
@@ -165,10 +169,6 @@ int GsmSmsMessage::SetHeaderReply(int index)
             }
             if (sizeof(smsTpdu_->data.submit.userData.header[index].udh.alternateAddress.address) < reply.length()) {
                 TELEPHONY_LOGE("reply length exceed maxinum");
-                return ret;
-            }
-            if (reply.length() > sizeof(smsTpdu_->data.submit.userData.header[index].udh.alternateAddress.address)) {
-                TELEPHONY_LOGE("SetHeaderReply data length invalid.");
                 return ret;
             }
             ret = memcpy_s(smsTpdu_->data.submit.userData.header[index].udh.alternateAddress.address,
@@ -404,7 +404,7 @@ bool GsmSmsMessage::PduAnalysis(const string &pdu)
     }
 
     unsigned char tempPdu[TAPI_TEXT_SIZE_MAX + 1] = { 0 };
-    if (sizeof(tempPdu) < (static_cast<int>(pdu.length()) - smscLen)) {
+    if (static_cast<int>(sizeof(tempPdu)) < (static_cast<int>(pdu.length()) - smscLen)) {
         TELEPHONY_LOGE("pdu length exceed maxinum");
         return false;
     }
