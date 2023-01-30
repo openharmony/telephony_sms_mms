@@ -43,16 +43,13 @@ int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAdd
     dataParcel.WriteString16(desAddr);
     dataParcel.WriteString16(scAddr);
     dataParcel.WriteString16(text);
-    if (sendCallback == nullptr) {
-        TELEPHONY_LOGE("SendMessage with text sendCallback is nullptr");
-        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    if (sendCallback != nullptr) {
+        dataParcel.WriteRemoteObject(sendCallback->AsObject().GetRefPtr());
     }
-    dataParcel.WriteRemoteObject(sendCallback->AsObject().GetRefPtr());
-    if (deliverCallback == nullptr) {
-        TELEPHONY_LOGE("SendMessage with text deliverCallback is nullptr");
-        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+
+    if (deliverCallback != nullptr) {
+        dataParcel.WriteRemoteObject(deliverCallback->AsObject().GetRefPtr());
     }
-    dataParcel.WriteRemoteObject(deliverCallback->AsObject().GetRefPtr());
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
