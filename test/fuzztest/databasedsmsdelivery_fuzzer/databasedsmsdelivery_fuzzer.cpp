@@ -25,12 +25,18 @@
 using namespace OHOS::Telephony;
 namespace OHOS {
 constexpr int32_t SLOT_NUM = 2;
+bool g_flag = false;
 
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size == 0) {
         return;
     }
+
+    if (g_flag) {
+        return;
+    }
+    g_flag = true;
 
     int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
     auto smsInterfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
