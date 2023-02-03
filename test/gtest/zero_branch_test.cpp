@@ -32,6 +32,7 @@
 #include "short_message.h"
 #include "sms_cb_message.h"
 #include "sms_common_utils.h"
+#include "sms_misc_manager.h"
 #include "sms_receive_handler.h"
 #include "sms_send_manager.h"
 #include "sms_sender.h"
@@ -72,6 +73,7 @@ const int TEXT_LENGTH = 2;
 const int FILL_BITS = 2;
 const int DIGIT_LEN = 3;
 const int START_BIT = 4;
+const int PID_LENGTH = 32;
 const unsigned char SRC_TEXT = 2;
 const unsigned char TP_FAIL_CAUSE = 128;
 const uint8_t FIELD_ID = 2;
@@ -856,7 +858,6 @@ HWTEST_F(BranchTest, SmsCbMessage_0004, Function | MediumTest | Level1)
     smsCbMessage->Decode2gCbMsg(pdu);
     smsCbMessage->Decode3gCbMsg(pdu);
     smsCbMessage->cbHeader_ = std::make_shared<SmsCbMessage::SmsCbMessageHeader>();
-    // smsCbMessage->cbHeader_->dcs.iso639Lang[0] = 1;
     smsCbMessage->cbHeader_->dcs.codingScheme = SmsCodingScheme::SMS_CODING_7BIT;
     smsCbMessage->Decode2gCbMsg(pdu);
     smsCbMessage->Decode3gCbMsg(pdu);
@@ -1909,6 +1910,11 @@ HWTEST_F(BranchTest, CdmaSmsPduCodec_0007, Function | MediumTest | Level1)
     EXPECT_GT(cdmaSmsPduCodec->EncodeBearerUserData(userData, dest), 0);
 }
 
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsBodyPart_0001
+ * @tc.name     Test MmsBodyPart
+ * @tc.desc     Function test
+ */
 HWTEST_F(BranchTest, MmsBodyPart_0001, Function | MediumTest | Level3)
 {
     MmsBodyPart mmsBodyPart;
@@ -1960,8 +1966,8 @@ HWTEST_F(BranchTest, MmsBodyPart_0001, Function | MediumTest | Level3)
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_MmsBodyPart_0001
- * @tc.name     Test SmsBaseMessage
+ * @tc.number   Telephony_SmsMmsGtest_MmsBodyPart_0002
+ * @tc.name     Test MmsBodyPart
  * @tc.desc     Function test
  */
 HWTEST_F(BranchTest, MmsBodyPart_0002, Function | MediumTest | Level3)
@@ -1992,7 +1998,7 @@ HWTEST_F(BranchTest, MmsBodyPart_0002, Function | MediumTest | Level3)
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_MmsContentType_0001
- * @tc.name     Test SmsBaseMessage
+ * @tc.name     Test MmsContentType
  * @tc.desc     Function test
  */
 HWTEST_F(BranchTest, MmsContentType_0001, Function | MediumTest | Level3)
@@ -2029,7 +2035,7 @@ HWTEST_F(BranchTest, MmsContentType_0001, Function | MediumTest | Level3)
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_MmsContentType_0002
- * @tc.name     Test SmsBaseMessage
+ * @tc.name     Test MmsContentType
  * @tc.desc     Function test
  */
 HWTEST_F(BranchTest, MmsContentType_0002, Function | MediumTest | Level3)
@@ -2078,7 +2084,7 @@ HWTEST_F(BranchTest, MmsContentType_0002, Function | MediumTest | Level3)
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_MmsContentType_0003
- * @tc.name     Test SmsBaseMessage
+ * @tc.name     Test MmsContentType
  * @tc.desc     Function test
  */
 HWTEST_F(BranchTest, MmsContentType_0003, Function | MediumTest | Level3)
@@ -2104,10 +2110,10 @@ HWTEST_F(BranchTest, MmsContentType_0003, Function | MediumTest | Level3)
     mmsContentType.EncodeTextField(mmsEncodeBuffer);
     mmsContentType.msgContentParm_.textMap_[152] = "";
     mmsEncodeBuffer.curPosition_ = 0;
-    mmsContentType.EncodeTextField(mmsEncodeBuffer);
-    mmsContentType.EncodeCharsetField(mmsEncodeBuffer);
+    ASSERT_TRUE(mmsContentType.EncodeTextField(mmsEncodeBuffer));
+    ASSERT_TRUE(mmsContentType.EncodeCharsetField(mmsEncodeBuffer));
     mmsContentType.msgContentParm_.charset_ = offset;
-    mmsContentType.EncodeCharsetField(mmsEncodeBuffer);
+    ASSERT_TRUE(mmsContentType.EncodeCharsetField(mmsEncodeBuffer));
     mmsContentType.msgContentParm_.charset_ = offset;
     mmsEncodeBuffer.curPosition_ = CODE_BUFFER_MAX_SIZE + offset;
     mmsContentType.EncodeCharsetField(mmsEncodeBuffer);
@@ -2116,14 +2122,12 @@ HWTEST_F(BranchTest, MmsContentType_0003, Function | MediumTest | Level3)
     mmsContentType.EncodeCharsetField(mmsEncodeBuffer);
     mmsContentType.msgContentParm_.charset_ = offset;
     mmsEncodeBuffer.curPosition_ = 0;
-    mmsContentType.EncodeCharsetField(mmsEncodeBuffer);
-    MmsEncodeBuffer mmsEncodeBuffer1;
-    ASSERT_TRUE(mmsContentType.EncodeTextField(mmsEncodeBuffer1));
+    ASSERT_TRUE(mmsContentType.EncodeCharsetField(mmsEncodeBuffer));
 }
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_MmsContentType_0004
- * @tc.name     Test SmsBaseMessage
+ * @tc.name     Test MmsContentType
  * @tc.desc     Function test
  */
 HWTEST_F(BranchTest, MmsContentType_0004, Function | MediumTest | Level3)
@@ -2157,6 +2161,515 @@ HWTEST_F(BranchTest, MmsContentType_0004, Function | MediumTest | Level3)
     ASSERT_FALSE(mmsContentType.EncodeMmsBodyPartContentType(mmsEncodeBuffer));
     mmsEncodeBuffer.curPosition_ = CODE_BUFFER_MAX_SIZE + offset;
     ASSERT_FALSE(mmsContentType.EncodeMmsBodyPartContentType(mmsEncodeBuffer));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0001
+ * @tc.name     Test GsmSmsParamCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, GsmSmsParamCodec_0001, Function | MediumTest | Level1)
+{
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    char **ppParam = nullptr;
+    ppParam = (char **)malloc(sizeof(char *) * (1024));
+    SmsAddress *pAddress = new SmsAddress();
+    SmsTimeStamp *pTimeStamp = new SmsTimeStamp();
+    pTimeStamp->format = SmsTimeFormat::SMS_TIME_ABSOLUTE;
+    pTimeStamp->time.absolute.timeZone = -1;
+    EXPECT_GT(gsmSmsParamCodec->EncodeAddress(pAddress, ppParam), 0);
+    pAddress->address[0] = '+';
+    EXPECT_GT(gsmSmsParamCodec->EncodeAddress(pAddress, ppParam), 0);
+    EXPECT_EQ(gsmSmsParamCodec->EncodeAddress(nullptr, ppParam), 0);
+    EXPECT_EQ(gsmSmsParamCodec->EncodeTime(nullptr, ppParam), 0);
+    EXPECT_GT(gsmSmsParamCodec->EncodeTime(pTimeStamp, ppParam), 0);
+    pTimeStamp->format = SmsTimeFormat::SMS_TIME_RELATIVE;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeTime(pTimeStamp, ppParam), 1);
+    SmsDcs *pDCS = new SmsDcs();
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(nullptr, ppParam), 0);
+    pDCS->codingGroup = SmsCodingGroup::SMS_DELETION_GROUP;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(pDCS, ppParam), 1);
+    pDCS->codingGroup = SmsCodingGroup::SMS_DISCARD_GROUP;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(pDCS, ppParam), 1);
+    pDCS->codingGroup = SmsCodingGroup::SMS_STORE_GROUP;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(pDCS, ppParam), 1);
+    pDCS->codingGroup = SmsCodingGroup::SMS_GENERAL_GROUP;
+    pDCS->msgClass = SmsMessageClass::SMS_FORWARD_MESSAGE;
+    pDCS->bCompressed = true;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(pDCS, ppParam), 1);
+    pDCS->codingGroup = SmsCodingGroup::SMS_CODING_CLASS_GROUP;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(pDCS, ppParam), 1);
+    pDCS->codingScheme = SmsCodingScheme::SMS_CODING_7BIT;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(pDCS, ppParam), 1);
+    pDCS->codingScheme = SmsCodingScheme::SMS_CODING_UCS2;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(pDCS, ppParam), 1);
+    pDCS->codingScheme = SmsCodingScheme::SMS_CODING_8BIT;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(pDCS, ppParam), 1);
+    pDCS->codingScheme = SmsCodingScheme::SMS_CODING_EUCKR;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(pDCS, ppParam), 0);
+    pDCS->codingGroup = SmsCodingGroup::SMS_UNKNOWN_GROUP;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeDCS(pDCS, ppParam), 0);
+    unsigned char encodeData[BUF_SIZE];
+    char addressData[BUF_SIZE];
+    char *address = addressData;
+    unsigned char *pEncodeAddr = encodeData;
+    EXPECT_EQ(gsmSmsParamCodec->EncodeSMSC(nullptr, nullptr), 0);
+    EXPECT_EQ(gsmSmsParamCodec->EncodeSMSC(address, nullptr), 0);
+    EXPECT_EQ(gsmSmsParamCodec->EncodeSMSC(address, pEncodeAddr), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0002
+ * @tc.name     Test GsmSmsParamCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, GsmSmsParamCodec_0002, Function | MediumTest | Level1)
+{
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    SmsAddress *pAddress = new SmsAddress();
+    SmsTimeStamp *pTimeStamp = new SmsTimeStamp();
+    SmsDcs *pDCS = new SmsDcs();
+    unsigned char encodeData[BUF_SIZE];
+    unsigned char *pSMSC = encodeData;
+    char addressData[BUF_SIZE];
+    char *pDecodeAddr = addressData;
+    gsmSmsParamCodec->DecodeSMSC(pSMSC, 0, SmsTon::SMS_TON_UNKNOWN, pDecodeAddr);
+    gsmSmsParamCodec->DecodeSMSC(nullptr, 1, SmsTon::SMS_TON_UNKNOWN, pDecodeAddr);
+    gsmSmsParamCodec->DecodeSMSC(pSMSC, 1, SmsTon::SMS_TON_UNKNOWN, nullptr);
+    gsmSmsParamCodec->DecodeSMSC(pSMSC, 1, SmsTon::SMS_TON_UNKNOWN, pDecodeAddr);
+    gsmSmsParamCodec->DecodeSMSC(pSMSC, 1, SmsTon::SMS_TON_INTERNATIONAL, pDecodeAddr);
+    EXPECT_EQ(gsmSmsParamCodec->EncodeSMSC(nullptr, pSMSC, 0), 0);
+    EXPECT_EQ(gsmSmsParamCodec->EncodeSMSC(pAddress, nullptr, 0), 0);
+    EXPECT_EQ(gsmSmsParamCodec->EncodeSMSC(pAddress, pSMSC, 0), 0);
+    EXPECT_EQ(gsmSmsParamCodec->DecodeAddress(nullptr, pAddress), 0);
+    EXPECT_EQ(gsmSmsParamCodec->DecodeAddress(pSMSC, nullptr), 0);
+    EXPECT_GT(gsmSmsParamCodec->DecodeAddress(pSMSC, pAddress), 0);
+    EXPECT_EQ(gsmSmsParamCodec->DecodeTime(nullptr, pTimeStamp), 0);
+    EXPECT_EQ(gsmSmsParamCodec->DecodeTime(pSMSC, nullptr), 0);
+    EXPECT_EQ(gsmSmsParamCodec->DecodeDCS(nullptr, pDCS), 0);
+    EXPECT_EQ(gsmSmsParamCodec->DecodeDCS(pSMSC, nullptr), 0);
+    EXPECT_EQ(gsmSmsParamCodec->DecodeDCS(pSMSC, pDCS), 1);
+    SmsAddress smsAddress;
+    EXPECT_EQ(gsmSmsParamCodec->DecodeSMSC(nullptr, 1, smsAddress), 0);
+    EXPECT_GT(gsmSmsParamCodec->DecodeSMSC(pSMSC, 1, smsAddress), 0);
+    EXPECT_EQ(gsmSmsParamCodec->CheckCphsVmiMsg(nullptr, nullptr, nullptr), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsUDataCodec_0001
+ * @tc.name     Test GsmSmsUDataCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, GsmSmsUDataCodec_0001, Function | MediumTest | Level1)
+{
+    auto gsmSmsUDataCodec = std::make_shared<GsmSmsUDataCodec>();
+    SmsUserData smsUserData;
+    SmsTpud *pTPUD = new SmsTpud();
+    const struct SmsUserData *pUserData = &(smsUserData);
+    char encodeData[BUF_SIZE];
+    unsigned char addressData[BUF_SIZE];
+    char *pSMSC = encodeData;
+    unsigned char *pTpdu = addressData;
+    char *pEncodeData = &(pSMSC[0]);
+    EXPECT_GT(gsmSmsUDataCodec->EncodeUserData(pUserData, SmsCodingScheme::SMS_CODING_7BIT, pEncodeData), 0);
+    EXPECT_GT(gsmSmsUDataCodec->EncodeUserData(pUserData, SmsCodingScheme::SMS_CODING_8BIT, pEncodeData), 0);
+    EXPECT_GT(gsmSmsUDataCodec->EncodeUserData(pUserData, SmsCodingScheme::SMS_CODING_UCS2, pEncodeData), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->EncodeUserData(pUserData, SmsCodingScheme::SMS_CODING_ASCII7BIT, pEncodeData), 0);
+    SmsUserData *userData = new SmsUserData();
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeUserData(nullptr, 1, true, SmsCodingScheme::SMS_CODING_7BIT, userData, pTPUD), 0);
+    EXPECT_GE(gsmSmsUDataCodec->DecodeUserData(pTpdu, 1, true, SmsCodingScheme::SMS_CODING_7BIT, userData, pTPUD), 0);
+    EXPECT_GE(gsmSmsUDataCodec->DecodeUserData(pTpdu, 1, true, SmsCodingScheme::SMS_CODING_8BIT, userData, pTPUD), 0);
+    EXPECT_GE(gsmSmsUDataCodec->DecodeUserData(pTpdu, 1, true, SmsCodingScheme::SMS_CODING_UCS2, userData, pTPUD), 0);
+    EXPECT_EQ(
+        gsmSmsUDataCodec->DecodeUserData(pTpdu, 1, true, SmsCodingScheme::SMS_CODING_ASCII7BIT, userData, pTPUD), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeUserData(nullptr, 1, true, SmsCodingScheme::SMS_CODING_7BIT, userData), 0);
+    EXPECT_GE(gsmSmsUDataCodec->DecodeUserData(pTpdu, 1, true, SmsCodingScheme::SMS_CODING_7BIT, userData), 0);
+    EXPECT_GE(gsmSmsUDataCodec->DecodeUserData(pTpdu, 1, true, SmsCodingScheme::SMS_CODING_8BIT, userData), 0);
+    EXPECT_GE(gsmSmsUDataCodec->DecodeUserData(pTpdu, 1, true, SmsCodingScheme::SMS_CODING_UCS2, userData), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeUserData(pTpdu, 1, true, SmsCodingScheme::SMS_CODING_ASCII7BIT, userData), 0);
+    EXPECT_GT(gsmSmsUDataCodec->Encode8bitData(userData, pSMSC), 0);
+    EXPECT_GT(gsmSmsUDataCodec->EncodeUCS2Data(userData, pSMSC), 0);
+    userData->headerCnt = 1;
+    userData->length = BUF_SIZE;
+    EXPECT_EQ(gsmSmsUDataCodec->Encode8bitData(userData, pSMSC), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->EncodeUCS2Data(userData, pSMSC), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeGSMData(pTpdu, -1, true, userData, pTPUD), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeGSMData(pTpdu, -1, true, userData, pTPUD), 0);
+    pTpdu[1] = DATA_LENGTH;
+    EXPECT_EQ(gsmSmsUDataCodec->Decode8bitData(pTpdu, true, userData, pTPUD), 0);
+    pTpdu[1] = SHIFT_BIT;
+    EXPECT_EQ(gsmSmsUDataCodec->Decode8bitData(pTpdu, true, userData, pTPUD), 0);
+    pTpdu[1] = 1;
+    EXPECT_EQ(gsmSmsUDataCodec->Decode8bitData(pTpdu, true, userData, pTPUD), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeUCS2Data(pTpdu, -1, true, userData, pTPUD), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeUCS2Data(pTpdu, 1, true, userData, pTPUD), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsUDataCodec_0002
+ * @tc.name     Test GsmSmsUDataCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, GsmSmsUDataCodec_0002, Function | MediumTest | Level1)
+{
+    auto gsmSmsUDataCodec = std::make_shared<GsmSmsUDataCodec>();
+    char encodeData[BUF_SIZE];
+    char *pSMSC = encodeData;
+    unsigned char addressData[BUF_SIZE];
+    unsigned char *pTpdu = addressData;
+    SmsUDH header;
+    header.udhType = SMS_UDH_CONCAT_8BIT;
+    EXPECT_GT(gsmSmsUDataCodec->EncodeHeaderConcat(header, pSMSC), 0);
+    EXPECT_GT(gsmSmsUDataCodec->EncodeHeader(header, pSMSC), 0);
+    header.udhType = SMS_UDH_CONCAT_16BIT;
+    EXPECT_GT(gsmSmsUDataCodec->EncodeHeaderConcat(header, pSMSC), 0);
+    EXPECT_GT(gsmSmsUDataCodec->EncodeHeader(header, pSMSC), 0);
+    header.udhType = SMS_UDH_APP_PORT_8BIT;
+    EXPECT_GT(gsmSmsUDataCodec->EncodeHeader(header, pSMSC), 0);
+    header.udhType = SMS_UDH_APP_PORT_16BIT;
+    EXPECT_GT(gsmSmsUDataCodec->EncodeHeader(header, pSMSC), 0);
+    header.udhType = SMS_UDH_ALTERNATE_REPLY_ADDRESS;
+    EXPECT_GT(gsmSmsUDataCodec->EncodeHeader(header, pSMSC), 0);
+    header.udhType = SMS_UDH_SINGLE_SHIFT;
+    EXPECT_GT(gsmSmsUDataCodec->EncodeHeader(header, pSMSC), 0);
+    header.udhType = SMS_UDH_LOCKING_SHIFT;
+    EXPECT_GT(gsmSmsUDataCodec->EncodeHeader(header, pSMSC), 0);
+    header.udhType = SMS_UDH_NONE;
+    EXPECT_EQ(gsmSmsUDataCodec->EncodeHeaderConcat(header, pSMSC), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->EncodeHeader(header, pSMSC), 0);
+    header.udhType = SMS_UDH_EMS_LAST;
+    EXPECT_EQ(gsmSmsUDataCodec->EncodeHeaderConcat(header, pSMSC), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->EncodeHeader(header, pSMSC), 0);
+    SmsUDH *pHeader = new SmsUDH();
+    pHeader->udhType = SmsUDHType::SMS_UDH_CONCAT_8BIT;
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    pHeader->udhType = SmsUDHType::SMS_UDH_CONCAT_16BIT;
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    pHeader->udhType = SmsUDHType::SMS_UDH_APP_PORT_8BIT;
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    pHeader->udhType = SmsUDHType::SMS_UDH_APP_PORT_16BIT;
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    pHeader->udhType = SmsUDHType::SMS_UDH_SPECIAL_SMS;
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    pHeader->udhType = SmsUDHType::SMS_UDH_ALTERNATE_REPLY_ADDRESS;
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    pHeader->udhType = SmsUDHType::SMS_UDH_SINGLE_SHIFT;
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    pHeader->udhType = SmsUDHType::SMS_UDH_LOCKING_SHIFT;
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    pHeader->udhType = SmsUDHType::SMS_UDH_NONE;
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsUDataCodec_0003
+ * @tc.name     Test GsmSmsUDataCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, GsmSmsUDataCodec_0003, Function | MediumTest | Level1)
+{
+    auto gsmSmsUDataCodec = std::make_shared<GsmSmsUDataCodec>();
+    SmsUDH *pHeader = new SmsUDH();
+    gsmSmsUDataCodec->DebugDecodeHeader(nullptr);
+    pHeader->udhType = SMS_UDH_CONCAT_8BIT;
+    gsmSmsUDataCodec->DebugDecodeHeader(pHeader);
+    pHeader->udhType = SMS_UDH_CONCAT_16BIT;
+    gsmSmsUDataCodec->DebugDecodeHeader(pHeader);
+    pHeader->udhType = SMS_UDH_APP_PORT_8BIT;
+    gsmSmsUDataCodec->DebugDecodeHeader(pHeader);
+    pHeader->udhType = SMS_UDH_APP_PORT_16BIT;
+    gsmSmsUDataCodec->DebugDecodeHeader(pHeader);
+    pHeader->udhType = SMS_UDH_SPECIAL_SMS;
+    gsmSmsUDataCodec->DebugDecodeHeader(pHeader);
+    pHeader->udhType = SMS_UDH_ALTERNATE_REPLY_ADDRESS;
+    gsmSmsUDataCodec->DebugDecodeHeader(pHeader);
+    pHeader->udhType = SMS_UDH_SINGLE_SHIFT;
+    gsmSmsUDataCodec->DebugDecodeHeader(pHeader);
+    pHeader->udhType = SMS_UDH_LOCKING_SHIFT;
+    gsmSmsUDataCodec->DebugDecodeHeader(pHeader);
+    pHeader->udhType = SMS_UDH_NONE;
+    gsmSmsUDataCodec->DebugDecodeHeader(pHeader);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0001
+ * @tc.name     Test GsmSmsTpduCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, GsmSmsTpduCodec_0001, Function | MediumTest | Level1)
+{
+    auto gsmSmsTpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    unsigned char encodeData[BUF_SIZE];
+    unsigned char *pSMSC = encodeData;
+    char addressData[BUF_SIZE];
+    char *pDecodeAddr = addressData;
+    SmsTpdu *pSmsTpdu = new SmsTpdu();
+    pSmsTpdu->tpduType = SmsTpduType::SMS_TPDU_SUBMIT;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeTpdu(pSmsTpdu, pDecodeAddr, 1), 0);
+    pSmsTpdu->tpduType = SmsTpduType::SMS_TPDU_DELIVER;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeTpdu(pSmsTpdu, pDecodeAddr, 1), 0);
+    pSmsTpdu->tpduType = SmsTpduType::SMS_TPDU_DELIVER_REP;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeTpdu(pSmsTpdu, pDecodeAddr, 1), 0);
+    pSmsTpdu->tpduType = SmsTpduType::SMS_TPDU_STATUS_REP;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeTpdu(pSmsTpdu, pDecodeAddr, 1), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->DecodeTpdu(nullptr, 1, pSmsTpdu), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->DecodeTpdu(pSMSC, 1, nullptr), 0);
+    EXPECT_GT(gsmSmsTpduCodec->DecodeTpdu(pSMSC, 1, pSmsTpdu), 0);
+    pSMSC[0] = 1;
+    EXPECT_GT(gsmSmsTpduCodec->DecodeTpdu(pSMSC, 1, pSmsTpdu), 0);
+    pSMSC[0] = VALUE_LENGTH;
+    EXPECT_GT(gsmSmsTpduCodec->DecodeTpdu(pSMSC, 1, pSmsTpdu), 0);
+    pSMSC[0] = HEADER_LENGTH;
+    EXPECT_EQ(gsmSmsTpduCodec->DecodeTpdu(pSMSC, 1, pSmsTpdu), 0);
+    SmsSubmit *pSubmit = new SmsSubmit();
+    SmsDeliver *pDeliver = new SmsDeliver();
+    SmsDeliverReport *pDeliverRep = new SmsDeliverReport();
+    EXPECT_EQ(gsmSmsTpduCodec->EncodeSubmit(nullptr, pDecodeAddr), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->EncodeSubmit(pSubmit, nullptr), 0);
+    EXPECT_GT(gsmSmsTpduCodec->EncodeSubmit(pSubmit, pDecodeAddr), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->EncodeDeliver(nullptr, pDecodeAddr), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->EncodeDeliver(pDeliver, nullptr), 0);
+    pDeliver->bMoreMsg = false;
+    pDeliver->bStatusReport = true;
+    pDeliver->bHeaderInd = true;
+    pDeliver->bReplyPath = true;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeDeliver(pDeliver, pDecodeAddr), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->EncodeDeliverReport(nullptr, pDecodeAddr), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->EncodeDeliverReport(pDeliverRep, nullptr), 0);
+    pDeliverRep->bHeaderInd = true;
+    pDeliverRep->reportType = _SMS_REPORT_TYPE_E::SMS_REPORT_NEGATIVE;
+    pDeliverRep->paramInd = 1;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeDeliverReport(pDeliverRep, pDecodeAddr), 0);
+    pDeliverRep->paramInd = VALUE_LENGTH;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeDeliverReport(pDeliverRep, pDecodeAddr), 0);
+    pDeliverRep->paramInd = START_BIT;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeDeliverReport(pDeliverRep, pDecodeAddr), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0002
+ * @tc.name     Test GsmSmsTpduCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, GsmSmsTpduCodec_0002, Function | MediumTest | Level1)
+{
+    auto gsmSmsTpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    unsigned char encodeData[BUF_SIZE];
+    unsigned char *pTpdu = encodeData;
+    char addressData[BUF_SIZE];
+    char *pDecodeAddr = addressData;
+    SmsStatusReport *pStatusRep = new SmsStatusReport();
+    SmsSubmit *pSmsSub = new SmsSubmit();
+    EXPECT_EQ(gsmSmsTpduCodec->EncodeStatusReport(nullptr, pDecodeAddr), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->EncodeStatusReport(pStatusRep, nullptr), 0);
+    pStatusRep->bMoreMsg = true;
+    pStatusRep->bStatusReport = true;
+    pStatusRep->bHeaderInd = true;
+    pStatusRep->paramInd = 1;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeStatusReport(pStatusRep, pDecodeAddr), 0);
+    pStatusRep->paramInd = VALUE_LENGTH;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeStatusReport(pStatusRep, pDecodeAddr), 0);
+    pStatusRep->paramInd = START_BIT;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeStatusReport(pStatusRep, pDecodeAddr), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->DecodeSubmit(nullptr, 1, pSmsSub), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->DecodeSubmit(pTpdu, 1, nullptr), 0);
+    EXPECT_GT(gsmSmsTpduCodec->DecodeSubmit(pTpdu, 1, pSmsSub), 0);
+    pTpdu[0] = START_BIT;
+    EXPECT_GT(gsmSmsTpduCodec->DecodeSubmit(pTpdu, 1, pSmsSub), 0);
+    pTpdu[0] = PDU_BUFFE_LENGTH_ONE;
+    EXPECT_GT(gsmSmsTpduCodec->DecodeSubmit(pTpdu, 1, pSmsSub), 0);
+    pTpdu[0] = PID_LENGTH;
+    EXPECT_GT(gsmSmsTpduCodec->DecodeSubmit(pTpdu, 1, pSmsSub), 0);
+    SmsDeliver *pDeliver = new SmsDeliver();
+    EXPECT_EQ(gsmSmsTpduCodec->DecodeDeliver(nullptr, 1, pDeliver), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->DecodeDeliver(pTpdu, 1, nullptr), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->DecodeStatusReport(nullptr, 1, pStatusRep), 0);
+    EXPECT_EQ(gsmSmsTpduCodec->DecodeStatusReport(pTpdu, 1, nullptr), 0);
+    EXPECT_GT(gsmSmsTpduCodec->DecodeStatusReport(pTpdu, 1, pStatusRep), 0);
+    pTpdu[1] = 1;
+    EXPECT_GT(gsmSmsTpduCodec->DecodeStatusReport(pTpdu, 1, pStatusRep), 0);
+    pTpdu[1] = VALUE_LENGTH;
+    EXPECT_GT(gsmSmsTpduCodec->DecodeStatusReport(pTpdu, 1, pStatusRep), 0);
+    pTpdu[1] = START_BIT;
+    EXPECT_GT(gsmSmsTpduCodec->DecodeStatusReport(pTpdu, 1, pStatusRep), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0003
+ * @tc.name     Test GsmSmsTpduCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, GsmSmsTpduCodec_0003, Function | MediumTest | Level1)
+{
+    auto gsmSmsTpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    unsigned char encodeData[BUF_SIZE];
+    unsigned char *pTpdu = encodeData;
+    SmsSubmit pSubmit;
+    pSubmit.bRejectDup = true;
+    pSubmit.bStatusReport = true;
+    pSubmit.bHeaderInd = true;
+    pSubmit.bReplyPath = true;
+    gsmSmsTpduCodec->DebugTpdu(pTpdu, 1, DecodeType::DECODE_SUBMIT_TYPE);
+    EXPECT_GT(gsmSmsTpduCodec->EncodeSubmitTpduType(pSubmit, pTpdu), 0);
+    pSubmit.vpf = SmsVpf::SMS_VPF_NOT_PRESENT;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeSubmitTpduType(pSubmit, pTpdu), 0);
+    pSubmit.vpf = SmsVpf::SMS_VPF_ENHANCED;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeSubmitTpduType(pSubmit, pTpdu), 0);
+    pSubmit.vpf = SmsVpf::SMS_VPF_RELATIVE;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeSubmitTpduType(pSubmit, pTpdu), 0);
+    pSubmit.vpf = SmsVpf::SMS_VPF_ABSOLUTE;
+    EXPECT_GT(gsmSmsTpduCodec->EncodeSubmitTpduType(pSubmit, pTpdu), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsBaseMessage_0001
+ * @tc.name     Test SmsBaseMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsBaseMessage_0001, Function | MediumTest | Level1)
+{
+    auto smsBaseMessage = std::make_shared<GsmSmsMessage>();
+    smsBaseMessage->ConvertMessageClass(SmsMessageClass::SMS_SIM_MESSAGE);
+    smsBaseMessage->ConvertMessageClass(SmsMessageClass::SMS_INSTANT_MESSAGE);
+    smsBaseMessage->ConvertMessageClass(SmsMessageClass::SMS_OPTIONAL_MESSAGE);
+    smsBaseMessage->ConvertMessageClass(SmsMessageClass::SMS_FORWARD_MESSAGE);
+    smsBaseMessage->ConvertMessageClass(SmsMessageClass::SMS_CLASS_UNKNOWN);
+    SplitInfo split;
+    SmsCodingScheme codingType = SmsCodingScheme::SMS_CODING_7BIT;
+    smsBaseMessage->ConvertSpiltToUtf8(split, codingType);
+    split.encodeData.push_back(1);
+    codingType = SmsCodingScheme::SMS_CODING_UCS2;
+    smsBaseMessage->ConvertSpiltToUtf8(split, codingType);
+    codingType = SmsCodingScheme::SMS_CODING_AUTO;
+    smsBaseMessage->ConvertSpiltToUtf8(split, codingType);
+    smsBaseMessage->smsUserData_.headerCnt = 1;
+    smsBaseMessage->smsUserData_.header[0].udhType = SmsUDHType::SMS_UDH_CONCAT_8BIT;
+    EXPECT_FALSE(smsBaseMessage->GetConcatMsg() == nullptr);
+    smsBaseMessage->smsUserData_.header[0].udhType = SmsUDHType::SMS_UDH_CONCAT_16BIT;
+    EXPECT_FALSE(smsBaseMessage->GetConcatMsg() == nullptr);
+    smsBaseMessage->smsUserData_.header[0].udhType = SmsUDHType::SMS_UDH_APP_PORT_8BIT;
+    EXPECT_FALSE(smsBaseMessage->GetPortAddress() == nullptr);
+    smsBaseMessage->smsUserData_.header[0].udhType = SmsUDHType::SMS_UDH_APP_PORT_16BIT;
+    EXPECT_FALSE(smsBaseMessage->GetPortAddress() == nullptr);
+    smsBaseMessage->smsUserData_.header[0].udhType = SmsUDHType::SMS_UDH_SPECIAL_SMS;
+    EXPECT_FALSE(smsBaseMessage->GetSpecialSmsInd() == nullptr);
+    smsBaseMessage->smsUserData_.header[0].udhType = SmsUDHType::SMS_UDH_APP_PORT_8BIT;
+    EXPECT_FALSE(smsBaseMessage->IsWapPushMsg());
+    MSG_LANGUAGE_ID_T langId = 1;
+    codingType = SmsCodingScheme::SMS_CODING_7BIT;
+    EXPECT_GT(smsBaseMessage->GetMaxSegmentSize(codingType, 1, true, langId, 1), 0);
+    EXPECT_GT(smsBaseMessage->GetSegmentSize(codingType, 1, true, langId, 1), 0);
+    codingType = SmsCodingScheme::SMS_CODING_ASCII7BIT;
+    EXPECT_GT(smsBaseMessage->GetMaxSegmentSize(codingType, 1, true, langId, 1), 0);
+    EXPECT_GT(smsBaseMessage->GetSegmentSize(codingType, 1, true, langId, 1), 0);
+    codingType = SmsCodingScheme::SMS_CODING_8BIT;
+    EXPECT_GT(smsBaseMessage->GetMaxSegmentSize(codingType, 1, true, langId, 1), 0);
+    EXPECT_GT(smsBaseMessage->GetSegmentSize(codingType, 1, true, langId, 1), 0);
+    codingType = SmsCodingScheme::SMS_CODING_UCS2;
+    EXPECT_GT(smsBaseMessage->GetMaxSegmentSize(codingType, 1, true, langId, 1), 0);
+    EXPECT_GT(smsBaseMessage->GetSegmentSize(codingType, 1, true, langId, 1), 0);
+    std::string message = "";
+    LengthInfo lenInfo;
+    EXPECT_GE(smsBaseMessage->GetSmsSegmentsInfo(message, true, lenInfo), 0);
+    message = "123";
+    EXPECT_EQ(smsBaseMessage->GetSmsSegmentsInfo(message, true, lenInfo), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsBaseMessage->GetSmsSegmentsInfo(message, false, lenInfo), TELEPHONY_ERR_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsSender_0001
+ * @tc.name     Test GsmSmsSender
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, GsmSmsSender_0001, Function | MediumTest | Level1)
+{
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun = nullptr;
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    auto gsmSmsSender = std::make_shared<GsmSmsSender>(runner, INVALID_SLOTID, sendRetryFun);
+    uint8_t *data = (uint8_t *)malloc(VALUE_LENGTH * sizeof(uint8_t));
+    std::string dataStr = "123";
+    gsmSmsSender->CharArrayToString(data, 1, dataStr);
+    std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
+    const sptr<ISendShortMessageCallback> sendCallback =
+        iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
+    const sptr<IDeliveryShortMessageCallback> deliveryCallback =
+        iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+    const std::string desAddr = "qwe";
+    const std::string scAddr = "123";
+    const std::string text = "123";
+    std::shared_ptr<struct EncodeInfo> encodeInfo = nullptr;
+    gsmSmsSender->SendSmsToRil(smsIndexer);
+    gsmSmsSender->ResendTextDelivery(smsIndexer);
+    gsmSmsSender->ResendDataDelivery(smsIndexer);
+    gsmSmsSender->SetSendIndexerInfo(smsIndexer, encodeInfo, 1);
+    smsIndexer = std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    gsmSmsSender->ResendTextDelivery(smsIndexer);
+    gsmSmsSender->voiceServiceState_ = static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE);
+    gsmSmsSender->imsSmsCfg_ = 0;
+    gsmSmsSender->SendSmsToRil(smsIndexer);
+    smsIndexer->psResendCount_ = DIGIT_LEN;
+    gsmSmsSender->SendSmsToRil(smsIndexer);
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(0, 1);
+    gsmSmsSender->StatusReportAnalysis(event);
+    gsmSmsSender->StatusReportGetImsSms(event);
+    event = nullptr;
+    gsmSmsSender->StatusReportSetImsSms(event);
+    gsmSmsSender->StatusReportAnalysis(event);
+    gsmSmsSender->StatusReportGetImsSms(event);
+    gsmSmsSender->isImsGsmHandlerRegistered = true;
+    gsmSmsSender->RegisterImsHandler();
+    gsmSmsSender->SetSendIndexerInfo(smsIndexer, encodeInfo, 1);
+    GsmSimMessageParam smsData;
+    smsIndexer->hasMore_ = true;
+    gsmSmsSender->SendCsSms(smsIndexer, smsData);
+    smsIndexer->csResendCount_ = 1;
+    gsmSmsSender->SendCsSms(smsIndexer, smsData);
+    GsmSmsMessage gsmSmsMessage;
+    bool isMore = true;
+    smsIndexer->isConcat_ = true;
+    EXPECT_FALSE(gsmSmsSender->SetPduInfo(nullptr, gsmSmsMessage, isMore));
+    EXPECT_TRUE(gsmSmsSender->SetPduInfo(smsIndexer, gsmSmsMessage, isMore));
+    smsIndexer->smsConcat_.totalSeg = VALUE_LENGTH;
+    EXPECT_TRUE(gsmSmsSender->SetPduInfo(smsIndexer, gsmSmsMessage, isMore));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsMiscManager_0001
+ * @tc.name     Test SmsMiscManager
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsMiscManager_0001, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    auto smsMiscManager = std::make_shared<SmsMiscManager>(runner, INVALID_SLOTID);
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(SmsMiscManager::SET_CB_CONFIG_FINISH, 1);
+    smsMiscManager->ProcessEvent(event);
+    event = AppExecFwk::InnerEvent::Get(SmsMiscManager::SET_SMSC_ADDR_FINISH, 1);
+    smsMiscManager->ProcessEvent(event);
+    event = AppExecFwk::InnerEvent::Get(TELEPHONY_ERR_STRCPY_FAIL, 1);
+    smsMiscManager->ProcessEvent(event);
+    event = nullptr;
+    smsMiscManager->ProcessEvent(event);
+    EXPECT_EQ(smsMiscManager->SetCBConfig(true, CODE_BUFFER_MAX_SIZE, 1, 1), TELEPHONY_ERR_ARGUMENT_INVALID);
+    EXPECT_EQ(smsMiscManager->SetCBConfig(true, 1, 0, 1), TELEPHONY_ERR_ARGUMENT_INVALID);
+    EXPECT_EQ(smsMiscManager->SetCBConfig(true, 1, 1, 0), TELEPHONY_ERR_ARGUMENT_INVALID);
+    EXPECT_EQ(smsMiscManager->SetCBConfig(false, 1, 1, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GE(smsMiscManager->SetCBConfig(true, 1, 1, 1), TELEPHONY_ERR_SUCCESS);
+    smsMiscManager->rangeList_.emplace_back(VALUE_LENGTH, 1);
+    EXPECT_EQ(smsMiscManager->SetCBConfig(true, 1, 1, 1), TELEPHONY_ERR_RIL_CMD_FAIL);
+    auto oldIter = smsMiscManager->rangeList_.begin();
+    SmsMiscManager::infoData data(1, 1);
+    EXPECT_TRUE(smsMiscManager->ExpandMsgId(1, 1, oldIter, data));
+    EXPECT_TRUE(smsMiscManager->ExpandMsgId(1, 0, oldIter, data));
+    std::string smsc = "";
+    std::string pdu = "";
+    std::vector<ShortMessage> message;
+    EXPECT_GE(
+        smsMiscManager->AddSimMessage(smsc, pdu, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD), 0);
+    EXPECT_GE(smsMiscManager->UpdateSimMessage(
+                  1, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD, pdu, smsc),
+        0);
+    EXPECT_EQ(smsMiscManager->GetAllSimMessages(message), TELEPHONY_ERR_UNKNOWN_NETWORK_TYPE);
 }
 } // namespace Telephony
 } // namespace OHOS
