@@ -40,7 +40,9 @@
 #include "mms_header.h"
 #include "mms_msg.h"
 #include "mms_quoted_printable.h"
+#include "radio_event.h"
 #include "send_short_message_callback_stub.h"
+#include "sms_broadcast_subscriber_gtest.h"
 #include "sms_delivery_callback_gtest.h"
 #include "sms_mms_test_helper.h"
 #include "sms_send_callback_gtest.h"
@@ -204,6 +206,10 @@ const std::string DES_ADDR = "10086";
 const std::string TEXT_SMS_CONTENT = "hello world";
 const uint8_t DATA_SMS[] = "hello world";
 const uint16_t SMS_PORT = 100;
+const uint16_t MESSAGE_TYPE = 4;
+const uint16_t CB_PDU_LEN = 100;
+const uint16_t SMS_PDU_LEN = 36;
+const uint16_t WAPPUSH_PDU_LEN = 164;
 
 void SmsMmsGtest::SetUpTestCase()
 {
@@ -1612,6 +1618,12 @@ HWTEST_F(SmsMmsGtest, SetImsSmsConfig_0005, Function | MediumTest | Level2)
 void SendDataMessageTestFuc(SmsMmsTestHelper &helper)
 {
     std::string dest = DES_ADDR;
+    std::u16string simcardNumber;
+    if (!CoreServiceClient::GetInstance().GetSimTelephoneNumber(helper.slotId, simcardNumber) &&
+        !simcardNumber.empty()) {
+        dest = StringUtils::ToUtf8(simcardNumber);
+    }
+
     std::string sca("");
     OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
     OHOS::sptr<SmsDeliveryCallbackGTest> deliveryCallBackPtr(new SmsDeliveryCallbackGTest(helper));
@@ -1634,6 +1646,12 @@ void SendDataMessageTestFuc(SmsMmsTestHelper &helper)
 void SendDataMessageTestFuc2(SmsMmsTestHelper &helper)
 {
     std::string dest = DES_ADDR;
+    std::u16string simcardNumber;
+    if (!CoreServiceClient::GetInstance().GetSimTelephoneNumber(helper.slotId, simcardNumber) &&
+        !simcardNumber.empty()) {
+        dest = StringUtils::ToUtf8(simcardNumber);
+    }
+
     std::string sca("");
     OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
     OHOS::sptr<SmsDeliveryCallbackGTest> deliveryCallBackPtr(new SmsDeliveryCallbackGTest(helper));
@@ -1673,6 +1691,7 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0001, Function | MediumTest | Level2)
     if (!helper.Run(SendDataMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SendDataMessageTestFuc out of time");
         ASSERT_TRUE(false);
+        return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0001 -->finished");
     ASSERT_TRUE(helper.GetSendSmsIntResult() == 0 && helper.GetDeliverySmsIntResult() == 0);
@@ -1698,6 +1717,7 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0002, Function | MediumTest | Level2)
     if (!helper.Run(SendDataMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SendDataMessageTestFuc out of time");
         ASSERT_TRUE(false);
+        return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0002 -->finished");
     ASSERT_TRUE(helper.GetSendSmsIntResult() == 0 && helper.GetDeliverySmsIntResult() == 0);
@@ -1722,6 +1742,7 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0003, Function | MediumTest | Level2)
     if (!helper.Run(SendDataMessageTestFuc2, helper)) {
         TELEPHONY_LOGI("SendDataMessageTestFuc out of time");
         ASSERT_TRUE(false);
+        return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0003 -->finished");
     EXPECT_FALSE(helper.GetSendSmsIntResult() == 0);
@@ -1730,6 +1751,12 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0003, Function | MediumTest | Level2)
 void SendTextMessageTestFuc(SmsMmsTestHelper &helper)
 {
     std::string dest = DES_ADDR;
+    std::u16string simcardNumber;
+    if (!CoreServiceClient::GetInstance().GetSimTelephoneNumber(helper.slotId, simcardNumber) &&
+        !simcardNumber.empty()) {
+        dest = StringUtils::ToUtf8(simcardNumber);
+    }
+
     std::string sca("");
     OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
     OHOS::sptr<SmsDeliveryCallbackGTest> deliveryCallBackPtr(new SmsDeliveryCallbackGTest(helper));
@@ -1737,11 +1764,13 @@ void SendTextMessageTestFuc(SmsMmsTestHelper &helper)
     if (sendCallBackPtr == nullptr) {
         TELEPHONY_LOGI("sendCallBackPtr is nullptr");
         helper.NotifyAll();
+        return;
     }
 
     if (deliveryCallBackPtr == nullptr) {
         TELEPHONY_LOGI("deliveryCallBackPtr is nullptr");
         helper.NotifyAll();
+        return;
     }
     sendCallBackPtr->HasDeliveryCallBack(true);
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
@@ -1751,6 +1780,12 @@ void SendTextMessageTestFuc(SmsMmsTestHelper &helper)
 void SendTextMessageTestFuc2(SmsMmsTestHelper &helper)
 {
     std::string dest = DES_ADDR;
+    std::u16string simcardNumber;
+    if (!CoreServiceClient::GetInstance().GetSimTelephoneNumber(helper.slotId, simcardNumber) &&
+        !simcardNumber.empty()) {
+        dest = StringUtils::ToUtf8(simcardNumber);
+    }
+
     std::string sca("");
     OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
     OHOS::sptr<SmsDeliveryCallbackGTest> deliveryCallBackPtr(new SmsDeliveryCallbackGTest(helper));
@@ -1758,11 +1793,13 @@ void SendTextMessageTestFuc2(SmsMmsTestHelper &helper)
     if (sendCallBackPtr == nullptr) {
         TELEPHONY_LOGI("sendCallBackPtr is nullptr");
         helper.NotifyAll();
+        return;
     }
 
     if (deliveryCallBackPtr == nullptr) {
         TELEPHONY_LOGI("deliveryCallBackPtr is nullptr");
         helper.NotifyAll();
+        return;
     }
     sendCallBackPtr->HasDeliveryCallBack(false);
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
@@ -1838,9 +1875,396 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0003, Function | MediumTest | Level2)
     if (!helper.Run(SendTextMessageTestFuc2, helper)) {
         TELEPHONY_LOGI("SendTextMessageTestFuc out of time");
         ASSERT_TRUE(false);
+        return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0003 -->finished");
     EXPECT_FALSE(helper.GetSendSmsIntResult() == 0);
+}
+
+void ReceiveCellBroadCastTestFunc(SmsMmsTestHelper &helper)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(runner, helper.slotId);
+    auto message = std::make_shared<CBConfigReportInfo>();
+    message->indicationType = MESSAGE_TYPE;
+    message->sn = 0;
+    message->mid = 0;
+    message->page = 0;
+    message->pages = 0;
+    message->dcs = "";
+    message->data = "";
+    message->length = CB_PDU_LEN;
+    message->pdu = "01a41f51101102ea3030a830ea30a230e130fc30eb914d4fe130c630b930c8000d000a3053308c306f8a669a137528306e3"
+                   "0e130c330bb30fc30b8306730593002000d000aff080032003000310033002f00310031002f003252ea3000370020003100"
+                   "35003a00340034ff09000d000aff0830a830ea30a25e02ff090000000000000000000000000000000000000000000000000"
+                   "0000000000000000000000000000000000000000000000022";
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_CELL_BROADCAST, message);
+    gsmSmsCbHandler->ProcessEvent(event);
+}
+
+void ReceiveCellBroadCastTestFunc2(SmsMmsTestHelper &helper)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(runner, helper.slotId);
+    auto message = std::make_shared<CBConfigReportInfo>();
+    message->indicationType = MESSAGE_TYPE;
+    message->sn = 0;
+    message->mid = 0;
+    message->page = 0;
+    message->pages = 0;
+    message->dcs = "";
+    message->data = "";
+    message->length = CB_PDU_LEN;
+    message->pdu = "C0000032401174747A0E4ACF41E8B0BCFD76E741EF39685C66B34162F93B4C1E87E77410BD3CA7836EC2341D440ED3C321";
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_CELL_BROADCAST, message);
+    gsmSmsCbHandler->ProcessEvent(event);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_Receive_Cell_BroadCast_0001
+ * @tc.name     Receive a 3g Cell Broadcast
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, Receive_Cell_BroadCast_0001, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0001 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
+    EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
+        std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
+    if (subscriberTest == nullptr) {
+        ASSERT_TRUE(false);
+        return;
+    }
+    bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
+    TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
+
+    if (!helper.Run(ReceiveCellBroadCastTestFunc, helper)) {
+        TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc out of time");
+        ASSERT_TRUE(false);
+        return;
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0001 -->finished");
+    EXPECT_TRUE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_Receive_Cell_BroadCast_0002
+ * @tc.name     Receive a 2g Cell Broadcast
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, Receive_Cell_BroadCast_0002, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0002 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
+    EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
+        std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
+    if (subscriberTest == nullptr) {
+        ASSERT_TRUE(false);
+        return;
+    }
+    bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
+    TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
+
+    if (!helper.Run(ReceiveCellBroadCastTestFunc2, helper)) {
+        TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc2 out of time");
+        ASSERT_TRUE(false);
+        return;
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0002 -->finished");
+    EXPECT_TRUE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_Receive_Cell_BroadCast_0003
+ * @tc.name     Receive a 3g Cell Broadcast
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, Receive_Cell_BroadCast_0003, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0003 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
+    EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
+        std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
+    if (subscriberTest == nullptr) {
+        ASSERT_TRUE(false);
+        return;
+    }
+    bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
+    TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
+
+    if (!helper.Run(ReceiveCellBroadCastTestFunc, helper)) {
+        TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc out of time");
+        ASSERT_TRUE(false);
+        return;
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0003 -->finished");
+    EXPECT_TRUE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_Receive_Cell_BroadCast_0004
+ * @tc.name     Receive a 2g Cell Broadcast
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, Receive_Cell_BroadCast_0004, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0004 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
+    EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
+        std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
+    if (subscriberTest == nullptr) {
+        ASSERT_TRUE(false);
+        return;
+    }
+    bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
+    TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
+
+    if (!helper.Run(ReceiveCellBroadCastTestFunc2, helper)) {
+        TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc2 out of time");
+        ASSERT_TRUE(false);
+        return;
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0004 -->finished");
+    EXPECT_TRUE(helper.GetBoolResult());
+}
+
+void ReceiveSmsTestFunc(SmsMmsTestHelper &helper)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    auto smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(runner, helper.slotId);
+    auto message = std::make_shared<SmsMessageInfo>();
+    message->indicationType = MESSAGE_TYPE;
+    message->size = SMS_PDU_LEN;
+    message->pdu =
+        StringUtils::HexToByteVector("0891683110808805F0040D91686106571209F800003210921134922307D3F69C5A9ED301");
+
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_GSM_SMS, message);
+    smsReceiveHandler->ProcessEvent(event);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_Receive_SMS_0001
+ * @tc.name     Receive a normal Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, Receive_SMS_0001, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_SMS_0001 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
+        std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
+    if (subscriberTest == nullptr) {
+        ASSERT_TRUE(false);
+        return;
+    }
+    bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
+    TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
+
+    if (!helper.Run(ReceiveSmsTestFunc, helper)) {
+        TELEPHONY_LOGI("ReceiveSmsTestFunc out of time");
+        ASSERT_TRUE(true);
+        return;
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_SMS_0001 -->finished");
+    EXPECT_TRUE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_Receive_SMS_0002
+ * @tc.name     Receive a normal Sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, Receive_SMS_0002, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_SMS_0002 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
+        std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
+    if (subscriberTest == nullptr) {
+        ASSERT_TRUE(false);
+        return;
+    }
+    bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
+    TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
+
+    if (!helper.Run(ReceiveSmsTestFunc, helper)) {
+        TELEPHONY_LOGI("ReceiveSmsTestFunc out of time");
+        ASSERT_TRUE(true);
+        return;
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_SMS_0002 -->finished");
+    EXPECT_TRUE(helper.GetBoolResult());
+}
+
+void ReceiveWapPushTestFunc(SmsMmsTestHelper &helper)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    auto smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(runner, helper.slotId);
+    auto message = std::make_shared<SmsMessageInfo>();
+    message->indicationType = MESSAGE_TYPE;
+    message->size = WAPPUSH_PDU_LEN;
+    message->pdu = StringUtils::HexToByteVector(
+        "0891683110205005F0640BA10156455102F1000432109261715023880605040B8423F04C06246170706C69636174696F6E2F766E642E77"
+        "61702E6D6D732D6D65737361676500B487AF848C829850765030303031365A645430008D9089178031363630373532313930382F545950"
+        "453D504C4D4E008A808E040001298D"
+        "8805810303F47B83687474703A2F2F31302E3132332E31382E38303A3138302F76564F455F3000");
+
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_GSM_SMS, message);
+    smsReceiveHandler->ProcessEvent(event);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_Receive_Wap_Push_0001
+ * @tc.name     Receive a Wap Push
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, Receive_Wap_Push_0001, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0001 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
+    EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
+        std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
+    if (subscriberTest == nullptr) {
+        ASSERT_TRUE(false);
+        return;
+    }
+    bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
+    TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
+
+    if (!helper.Run(ReceiveWapPushTestFunc, helper)) {
+        TELEPHONY_LOGI("ReceiveWapPushTestFunc out of time");
+        ASSERT_TRUE(true);
+        return;
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0001 -->finished");
+    EXPECT_TRUE(helper.GetBoolResult());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_Receive_Wap_Push_0002
+ * @tc.name     Receive a Wap Push
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, Receive_Wap_Push_0002, Function | MediumTest | Level2)
+{
+    AccessMmsToken token;
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0002 -->");
+    int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!(SmsMmsGtest::HasSimCard(slotId))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = slotId;
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
+    EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
+        std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
+    if (subscriberTest == nullptr) {
+        ASSERT_TRUE(false);
+        return;
+    }
+    bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
+    TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
+
+    if (!helper.Run(ReceiveWapPushTestFunc, helper)) {
+        TELEPHONY_LOGI("ReceiveWapPushTestFunc out of time");
+        ASSERT_TRUE(true);
+        return;
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0002 -->finished");
+    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 void GetSmsSegmentsInfoTestFuc(SmsMmsTestHelper &helper)

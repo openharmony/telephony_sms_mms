@@ -21,6 +21,7 @@ ohos_unittest("tel_sms_mms_gtest") {
 
   sources = [
     "//base/telephony/sms_mms/frameworks/native/sms/src/sms_service_proxy.cpp",
+    "sms_broadcast_subscriber_gtest.cpp",
     "sms_delivery_callback_gtest.cpp",
     "sms_mms_gtest.cpp",
     "sms_mms_test_helper.cpp",
@@ -51,6 +52,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
