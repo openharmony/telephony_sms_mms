@@ -26,10 +26,8 @@
 
 using namespace OHOS::Telephony;
 namespace OHOS {
-const std::int32_t MAX_EVENT = 1024;
-const std::int32_t MIDDLE_EVENT = 50;
-const std::int32_t EVERY_STEP = 100;
 constexpr int32_t SLOT_NUM = 2;
+bool g_flag = false;
 
 void DoRecvItemsTest(const uint8_t *data, size_t size, std::shared_ptr<SmsReceiveManager> smsReceiveManager)
 {
@@ -59,6 +57,11 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
         return;
     }
 
+    if (g_flag) {
+        return;
+    }
+    g_flag = true;
+
     int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
     auto smsInterfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
     if (smsInterfaceManager == nullptr) {
@@ -80,22 +83,11 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     std::int32_t eventId = static_cast<int32_t>(size);
     std::int64_t refId = static_cast<int64_t>(size);
 
-    while (eventId < MIDDLE_EVENT) {
-        AppExecFwk::InnerEvent::Pointer response = AppExecFwk::InnerEvent::Get(eventId, refId);
-        smsReceiveManager->gsmSmsReceiveHandler_->ProcessEvent(response);
-        smsReceiveManager->cdmaSmsReceiveHandler_->ProcessEvent(response);
-        eventId++;
-    }
-
-    while (eventId < MAX_EVENT) {
-        AppExecFwk::InnerEvent::Pointer response = AppExecFwk::InnerEvent::Get(eventId, refId);
-        smsReceiveManager->gsmSmsReceiveHandler_->ProcessEvent(response);
-        smsReceiveManager->cdmaSmsReceiveHandler_->ProcessEvent(response);
-        eventId += EVERY_STEP;
-    }
+    AppExecFwk::InnerEvent::Pointer response = AppExecFwk::InnerEvent::Get(eventId, refId);
+    smsReceiveManager->gsmSmsReceiveHandler_->ProcessEvent(response);
+    smsReceiveManager->cdmaSmsReceiveHandler_->ProcessEvent(response);
 
     DoRecvItemsTest(data, size, smsReceiveManager);
-    return;
 }
 } // namespace OHOS
 
