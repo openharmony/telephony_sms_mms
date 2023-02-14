@@ -21,7 +21,6 @@ namespace Telephony {
 class SmsMmsData {
 public:
     static constexpr const char *ID = "id";
-    static constexpr const char *SLOT_ID = "slot_id";
     static constexpr const char *SMS_SUBSECTION_ID = "sms_subsection_id";
     static constexpr const char *RECEIVER_NUMBER = "receiver_number";
     static constexpr const char *SENDER_NUMBER = "sender_number";
