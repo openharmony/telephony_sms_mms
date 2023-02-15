@@ -232,6 +232,7 @@ bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &ind
     const uint8_t gsm = 1;
     const uint8_t cdma = 2;
     NativeRdb::ValuesBucket bucket;
+    bucket.PutString(SmsMmsData::SLOT_ID, std::to_string(slotId_));
     bucket.PutString(SmsMmsData::RECEIVER_NUMBER, indexer->GetOriginatingAddress());
     bucket.PutString(SmsMmsData::SENDER_NUMBER, indexer->GetOriginatingAddress());
     bucket.PutString(SmsMmsData::START_TIME, std::to_string(indexer->GetTimestamp()));
