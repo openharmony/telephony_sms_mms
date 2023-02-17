@@ -100,13 +100,14 @@ void IsImsSmsSupported(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
-    interfaceManager->IsImsSmsSupported(slotId);
+    bool isSupported = false;
+    interfaceManager->IsImsSmsSupported(slotId, isSupported);
     auto smsSendManager = std::make_unique<SmsSendManager>(slotId);
     if (smsSendManager == nullptr) {
         TELEPHONY_LOGE("failed to create SmsSendManager");
         return;
     }
-    smsSendManager->IsImsSmsSupported(slotId);
+    smsSendManager->IsImsSmsSupported(slotId, isSupported);
 }
 
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)

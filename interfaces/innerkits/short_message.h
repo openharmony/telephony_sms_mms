@@ -81,9 +81,10 @@ public:
     /**
      * @brief GetScAddress
      * Obtains the short message service center (SMSC) address
-     * @return std::u16string
+     * @param smscAddress SMS center address
+     * @return Interface execution results
      */
-    std::u16string GetScAddress() const;
+    int32_t GetScAddress(std::u16string &smscAddress) const;
 
     /**
      * @brief GetScTimestamp
@@ -150,9 +151,10 @@ public:
      * protocol data unit (PDU) and the specified SMS protocol
      * @param pdu
      * @param specification
-     * @return ShortMessage*
+     * @return Returns {@code 0} if CreateMessage success
      */
-    static ShortMessage *CreateMessage(std::vector<unsigned char> &pdu, std::u16string specification);
+    static int32_t CreateMessage(
+        std::vector<unsigned char> &pdu, std::u16string specification, ShortMessage &messageObj);
 
     /**
      * @brief Create a Icc Message object

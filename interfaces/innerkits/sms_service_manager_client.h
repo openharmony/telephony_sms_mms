@@ -26,13 +26,13 @@
 
 namespace OHOS {
 namespace Telephony {
-class SmsServiceManagerClient : public std::enable_shared_from_this<SmsServiceManagerClient>  {
+class SmsServiceManagerClient : public std::enable_shared_from_this<SmsServiceManagerClient> {
     DECLARE_DELAYED_SINGLETON(SmsServiceManagerClient)
 public:
     bool InitSmsServiceProxy();
     void ResetSmsServiceProxy();
 
-    bool SetDefaultSmsSlotId(int32_t slotId);
+    int32_t SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
     int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
         const std::u16string text, const sptr<ISendShortMessageCallback> &callback,
@@ -40,24 +40,23 @@ public:
     int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
         uint16_t port, const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &callback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
-    bool SetScAddress(int32_t slotId, const std::u16string &scAddr);
-    std::u16string GetScAddress(int32_t slotId);
-    bool AddSimMessage(int32_t slotId, const std::u16string &smsc, const std::u16string &pdu,
+    int32_t SetScAddress(int32_t slotId, const std::u16string &scAddr);
+    int32_t GetScAddress(int32_t slotId, std::u16string &smscAddress);
+    int32_t AddSimMessage(int32_t slotId, const std::u16string &smsc, const std::u16string &pdu,
         ISmsServiceInterface::SimMessageStatus status);
-    bool DelSimMessage(int32_t slotId, uint32_t msgIndex);
-    bool UpdateSimMessage(int32_t slotId, uint32_t msgIndex,
-        ISmsServiceInterface::SimMessageStatus newStatus, const std::u16string &pdu, const std::u16string &smsc);
-    std::vector<ShortMessage> GetAllSimMessages(int32_t slotId);
-    bool SetCBConfig(
-        int32_t slotId, bool enable, uint32_t startMessageId, uint32_t endMessageId, uint8_t ranType);
+    int32_t DelSimMessage(int32_t slotId, uint32_t msgIndex);
+    int32_t UpdateSimMessage(int32_t slotId, uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
+        const std::u16string &pdu, const std::u16string &smsc);
+    int32_t GetAllSimMessages(int32_t slotId, std::vector<ShortMessage> &message);
+    int32_t SetCBConfig(int32_t slotId, bool enable, uint32_t startMessageId, uint32_t endMessageId, uint8_t ranType);
     bool SetImsSmsConfig(int32_t slotId, int32_t enable);
-    std::vector<std::u16string> SplitMessage(const std::u16string &message);
-    bool GetSmsSegmentsInfo(int32_t slotId, const std::u16string &message, bool force7BitCode,
+    int32_t SplitMessage(const std::u16string &message, std::vector<std::u16string> &splitMessage);
+    int32_t GetSmsSegmentsInfo(int32_t slotId, const std::u16string &message, bool force7BitCode,
         ISmsServiceInterface::SmsSegmentsInfo &segInfo);
-    bool IsImsSmsSupported(int32_t slotId);
-    std::u16string GetImsShortMessageFormat();
+    int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported);
+    int32_t GetImsShortMessageFormat(std::u16string &format);
     bool HasSmsCapability();
-    bool CreateMessage(std::string pdu, std::string specification, ShortMessage &message);
+    int32_t CreateMessage(std::string pdu, std::string specification, ShortMessage &message);
     bool GetBase64Encode(std::string src, std::string &dest);
     bool GetBase64Decode(std::string src, std::string &dest);
     bool GetEncodeStringFunc(

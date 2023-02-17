@@ -99,9 +99,9 @@ public:
         SmsCodingScheme &codingType, bool bPortNum);
     virtual int32_t GetIndexOnSim() const;
     virtual void SetIndexOnSim(int32_t index);
-    virtual bool GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
-    virtual int GetMaxSegmentSize(SmsCodingScheme &codingScheme, int dataLen, bool bPortNum,
-        MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
+    virtual int32_t GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
+    virtual int GetMaxSegmentSize(
+        SmsCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
 
 protected:
     constexpr static int16_t MAX_MSG_TEXT_LEN = 1530;
