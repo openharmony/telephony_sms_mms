@@ -51,18 +51,18 @@ public:
     };
     SmsMiscManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
     virtual ~SmsMiscManager() {};
-    bool SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType);
+    int32_t SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType);
     std::list<gsmCBRangeInfo> GetRangeInfo() const;
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
-    bool AddSimMessage(
+    int32_t AddSimMessage(
         const std::string &smsc, const std::string &pdu, ISmsServiceInterface::SimMessageStatus status);
-    bool DelSimMessage(uint32_t msgIndex);
-    bool UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
+    int32_t DelSimMessage(uint32_t msgIndex);
+    int32_t UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
         const std::string &pdu, const std::string &smsc);
-    std::vector<ShortMessage> GetAllSimMessages();
-    bool SetSmscAddr(const std::string &scAddr);
-    std::string GetSmscAddr();
-    bool SetDefaultSmsSlotId(int32_t slotId);
+    int32_t GetAllSimMessages(std::vector<ShortMessage> &message);
+    int32_t SetSmscAddr(const std::string &scAddr);
+    int32_t GetSmscAddr(std::u16string &smscAddress);
+    int32_t SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
 
 protected:

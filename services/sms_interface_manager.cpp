@@ -54,96 +54,110 @@ void SmsInterfaceManager::InitInterfaceManager()
     TELEPHONY_LOGI("SmsInterfaceManager::InitInterfaceManager success, %{public}d", slotId_);
 }
 
-void SmsInterfaceManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
-    const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+int32_t SmsInterfaceManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
+    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (desAddr.empty() || text.empty() || (smsSendManager_ == nullptr)) {
+    if (desAddr.empty() || text.empty()) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
-            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "text sms arges is empty is nullptr");
+            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "text sms arges is empty");
         TELEPHONY_LOGE("TextBasedSmsDelivery failed to send.");
-        return;
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    if (smsSendManager_ == nullptr) {
+        TELEPHONY_LOGE("TextBasedSmsDelivery failed to send.");
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "text sms smsSendManager_ is nullptr");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     smsSendManager_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    return TELEPHONY_ERR_SUCCESS;
 }
 
-void SmsInterfaceManager::DataBasedSmsDelivery(const string &desAddr, const string &scAddr, const uint16_t port,
+int32_t SmsInterfaceManager::DataBasedSmsDelivery(const string &desAddr, const string &scAddr, const uint16_t port,
     const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    if (desAddr.empty() || (smsSendManager_ == nullptr) || (data == nullptr)) {
+    if (desAddr.empty() || (data == nullptr)) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
-            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "data sms arges is empty is nullptr");
+            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "data sms arges is empty");
         TELEPHONY_LOGE("DataBasedSmsDelivery failed to send.");
-        return;
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    if (smsSendManager_ == nullptr) {
+        TELEPHONY_LOGE("TextBasedSmsDelivery failed to send.");
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "text sms smsSendManager_ is nullptr");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     smsSendManager_->DataBasedSmsDelivery(desAddr, scAddr, port, data, dataLen, sendCallback, deliveryCallback);
+    return TELEPHONY_ERR_SUCCESS;
 }
 
-bool SmsInterfaceManager::AddSimMessage(
+int32_t SmsInterfaceManager::AddSimMessage(
     const std::string &smsc, const std::string &pdu, ISmsServiceInterface::SimMessageStatus status)
 {
     if (smsMiscManager_ == nullptr) {
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     return smsMiscManager_->AddSimMessage(smsc, pdu, status);
 }
 
-bool SmsInterfaceManager::DelSimMessage(uint32_t msgIndex)
+int32_t SmsInterfaceManager::DelSimMessage(uint32_t msgIndex)
 {
     if (smsMiscManager_ == nullptr) {
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     return smsMiscManager_->DelSimMessage(msgIndex);
 }
 
-bool SmsInterfaceManager::UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
+int32_t SmsInterfaceManager::UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
     const std::string &pdu, const std::string &smsc)
 {
     if (smsMiscManager_ == nullptr) {
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     return smsMiscManager_->UpdateSimMessage(msgIndex, newStatus, pdu, smsc);
 }
 
-vector<ShortMessage> SmsInterfaceManager::GetAllSimMessages()
+int32_t SmsInterfaceManager::GetAllSimMessages(std::vector<ShortMessage> &message)
 {
     if (smsMiscManager_ == nullptr) {
-        std::vector<ShortMessage> ret;
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
-        return ret;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    return smsMiscManager_->GetAllSimMessages();
+    return smsMiscManager_->GetAllSimMessages(message);
 }
 
-bool SmsInterfaceManager::SetSmscAddr(const std::string &scAddr)
+int32_t SmsInterfaceManager::SetSmscAddr(const std::string &scAddr)
 {
     if (smsMiscManager_ == nullptr) {
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     return smsMiscManager_->SetSmscAddr(scAddr);
 }
 
-std::string SmsInterfaceManager::GetSmscAddr()
+int32_t SmsInterfaceManager::GetSmscAddr(std::u16string &smscAddress)
 {
     if (smsMiscManager_ == nullptr) {
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
-        return "";
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    return smsMiscManager_->GetSmscAddr();
+    return smsMiscManager_->GetSmscAddr(smscAddress);
 }
 
-bool SmsInterfaceManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
+int32_t SmsInterfaceManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
 {
     if (smsMiscManager_ == nullptr) {
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     return smsMiscManager_->SetCBConfig(enable, fromMsgId, toMsgId, netType);
 }
@@ -157,11 +171,11 @@ bool SmsInterfaceManager::SetImsSmsConfig(int32_t slotId, int32_t enable)
     return smsSendManager_->SetImsSmsConfig(slotId, enable);
 }
 
-bool SmsInterfaceManager::SetDefaultSmsSlotId(int32_t slotId)
+int32_t SmsInterfaceManager::SetDefaultSmsSlotId(int32_t slotId)
 {
     if (smsMiscManager_ == nullptr) {
         TELEPHONY_LOGE("smsMiscManager nullptr error.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     return smsMiscManager_->SetDefaultSmsSlotId(slotId);
 }
@@ -175,42 +189,40 @@ int32_t SmsInterfaceManager::GetDefaultSmsSlotId()
     return smsMiscManager_->GetDefaultSmsSlotId();
 }
 
-std::vector<std::string> SmsInterfaceManager::SplitMessage(const std::string &message)
+int32_t SmsInterfaceManager::SplitMessage(const std::string &message, std::vector<std::u16string> &splitMessage)
 {
-    std::vector<std::string> result;
     if (smsSendManager_ == nullptr) {
         TELEPHONY_LOGE("smsSendManager nullptr error.");
-        return result;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    return smsSendManager_->SplitMessage(message);
+    return smsSendManager_->SplitMessage(message, splitMessage);
 }
 
-bool SmsInterfaceManager::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &outInfo)
+int32_t SmsInterfaceManager::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &outInfo)
 {
     if (smsSendManager_ == nullptr) {
         TELEPHONY_LOGE("smsSendManager nullptr error.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     return smsSendManager_->GetSmsSegmentsInfo(message, force7BitCode, outInfo);
 }
 
-bool SmsInterfaceManager::IsImsSmsSupported(int32_t slotId)
+int32_t SmsInterfaceManager::IsImsSmsSupported(int32_t slotId, bool &isSupported)
 {
     if (smsSendManager_ == nullptr) {
         TELEPHONY_LOGE("smsSendManager is nullptr error.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    return smsSendManager_->IsImsSmsSupported(slotId);
+    return smsSendManager_->IsImsSmsSupported(slotId, isSupported);
 }
 
-std::string SmsInterfaceManager::GetImsShortMessageFormat()
+int32_t SmsInterfaceManager::GetImsShortMessageFormat(std::u16string &format)
 {
-    std::string result;
     if (smsSendManager_ == nullptr) {
         TELEPHONY_LOGE("smsSendManager is nullptr error.");
-        return result;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    return smsSendManager_->GetImsShortMessageFormat();
+    return smsSendManager_->GetImsShortMessageFormat(format);
 }
 
 bool SmsInterfaceManager::HasSmsCapability()

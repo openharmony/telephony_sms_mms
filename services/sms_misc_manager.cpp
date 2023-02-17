@@ -18,6 +18,7 @@
 #include "core_manager_inner.h"
 #include "hril_sms_parcel.h"
 #include "short_message.h"
+#include "sms_mms_errors.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -32,11 +33,11 @@ SmsMiscManager::SmsMiscManager(const std::shared_ptr<AppExecFwk::EventRunner> &r
     : AppExecFwk::EventHandler(runner), slotId_(slotId)
 {}
 
-bool SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
+int32_t SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
 {
     bool ret = false;
     if ((toMsgId > RANG_MAX) || (fromMsgId > toMsgId) || (netType != GSM_TYPE)) {
-        return ret;
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
     oldRangeList_ = rangeList_;
     if (enable) {
@@ -45,20 +46,18 @@ bool SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsg
         ret = CloseCBRange(fromMsgId, toMsgId);
     }
     if (ret) {
-        ret = SendDataToRil(false, oldRangeList_);
-        if (!ret) {
+        if (!SendDataToRil(false, oldRangeList_)) {
             rangeList_ = oldRangeList_;
-            return ret;
+            return TELEPHONY_ERR_RIL_CMD_FAIL;
         } else {
             oldRangeList_.clear();
         }
-        ret = SendDataToRil(true, rangeList_);
-        if (!ret) {
+        if (!SendDataToRil(true, rangeList_)) {
             rangeList_ = oldRangeList_;
-            return ret;
+            return TELEPHONY_ERR_RIL_CMD_FAIL;
         }
     }
-    return true;
+    return TELEPHONY_ERR_SUCCESS;
 }
 
 std::list<SmsMiscManager::gsmCBRangeInfo> SmsMiscManager::GetRangeInfo() const
@@ -315,7 +314,7 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list)
     }
 }
 
-bool SmsMiscManager::AddSimMessage(
+int32_t SmsMiscManager::AddSimMessage(
     const std::string &smsc, const std::string &pdu, ISmsServiceInterface::SimMessageStatus status)
 {
     TELEPHONY_LOGI(
@@ -331,13 +330,13 @@ bool SmsMiscManager::AddSimMessage(
         slotId_, static_cast<int>(status), const_cast<std::string &>(pdu), smscAddr);
 }
 
-bool SmsMiscManager::DelSimMessage(uint32_t msgIndex)
+int32_t SmsMiscManager::DelSimMessage(uint32_t msgIndex)
 {
     TELEPHONY_LOGI("messageIndex = %{public}d", msgIndex);
     return CoreManagerInner::GetInstance().DelSmsIcc(slotId_, msgIndex);
 }
 
-bool SmsMiscManager::UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
+int32_t SmsMiscManager::UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::SimMessageStatus newStatus,
     const std::string &pdu, const std::string &smsc)
 {
     std::string smscAddr(smsc);
@@ -349,9 +348,8 @@ bool SmsMiscManager::UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface::S
         slotId_, msgIndex, static_cast<int>(newStatus), const_cast<std::string &>(pdu), smscAddr);
 }
 
-std::vector<ShortMessage> SmsMiscManager::GetAllSimMessages()
+int32_t SmsMiscManager::GetAllSimMessages(std::vector<ShortMessage> &message)
 {
-    std::vector<ShortMessage> ret;
     TELEPHONY_LOGI("GetAllSimMessages");
     std::vector<std::string> pdus = CoreManagerInner::GetInstance().ObtainAllSmsOfIcc(slotId_);
     int index = 0;
@@ -362,20 +360,20 @@ std::vector<ShortMessage> SmsMiscManager::GetAllSimMessages()
     } else if (PhoneType::PHONE_TYPE_IS_CDMA == type) {
         specification = "3gpp2";
     } else {
-        return ret;
+        return TELEPHONY_ERR_UNKNOWN_NETWORK_TYPE;
     }
     for (auto &v : pdus) {
         std::vector<unsigned char> pdu = StringUtils::HexToByteVector(v);
         ShortMessage item = ShortMessage::CreateIccMessage(pdu, specification, index);
         if (item.GetIccMessageStatus() != ShortMessage::SMS_SIM_MESSAGE_STATUS_FREE) {
-            ret.emplace_back(item);
+            message.emplace_back(item);
         }
         index++;
     }
-    return ret;
+    return TELEPHONY_ERR_SUCCESS;
 }
 
-bool SmsMiscManager::SetSmscAddr(const std::string &scAddr)
+int32_t SmsMiscManager::SetSmscAddr(const std::string &scAddr)
 {
     TELEPHONY_LOGI("SmsMiscManager::SetSmscAddr [%{private}s]", scAddr.c_str());
     std::unique_lock<std::mutex> lock(mutex_);
@@ -385,10 +383,13 @@ bool SmsMiscManager::SetSmscAddr(const std::string &scAddr)
     CoreManagerInner::GetInstance().SetSmscAddr(
         slotId_, SmsMiscManager::SET_SMSC_ADDR_FINISH, 0, scAddr, shared_from_this());
     condVar_.wait(lock, [&]() { return fairVar_ == condition; });
-    return isSuccess_;
+    if (isSuccess_ == false) {
+        return TELEPHONY_ERR_RIL_CMD_FAIL;
+    }
+    return TELEPHONY_ERR_SUCCESS;
 }
 
-std::string SmsMiscManager::GetSmscAddr()
+int32_t SmsMiscManager::GetSmscAddr(std::u16string &smscAddress)
 {
     TELEPHONY_LOGI("SmsMiscManager::GetSmscAddr");
     std::unique_lock<std::mutex> lock(mutex_);
@@ -398,10 +399,11 @@ std::string SmsMiscManager::GetSmscAddr()
     fairList_.push_back(condition);
     CoreManagerInner::GetInstance().GetSmscAddr(slotId_, SmsMiscManager::GET_SMSC_ADDR_FINISH, shared_from_this());
     condVar_.wait(lock, [&]() { return fairVar_ == condition; });
-    return smscAddr_;
+    smscAddress = StringUtils::ToUtf16(smscAddr_);
+    return TELEPHONY_ERR_SUCCESS;
 }
 
-bool SmsMiscManager::SetDefaultSmsSlotId(int32_t slotId)
+int32_t SmsMiscManager::SetDefaultSmsSlotId(int32_t slotId)
 {
     TELEPHONY_LOGI("SetDefaultSmsSlotId slotId = %{public}d", slotId);
     return CoreManagerInner::GetInstance().SetDefaultSmsSlotId(slotId);

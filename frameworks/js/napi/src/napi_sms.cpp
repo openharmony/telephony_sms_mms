@@ -17,6 +17,7 @@
 #include "napi_mms.h"
 #include "delivery_callback.h"
 #include "send_callback.h"
+#include "sms_mms_errors.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -29,6 +30,7 @@ const std::string g_destinationPortStr = "destinationPort";
 const std::string g_sendCallbackStr = "sendCallback";
 const std::string g_deliveryCallbackStr = "deliveryCallback";
 static const int32_t DEFAULT_REF_COUNT = 1;
+constexpr const char *NET_TYPE_UNKNOWN_STRING = "unknown";
 
 static bool g_validPort = false;
 } // namespace
@@ -71,7 +73,6 @@ static int32_t GetDefaultSmsSlotId()
 {
     return DEFAULT_SIM_SLOT_ID;
 }
-
 
 static inline bool IsValidSlotId(int32_t slotId)
 {
@@ -131,88 +132,73 @@ static bool InValidSlotIdOrInValidPort(int32_t slotId, uint16_t port)
     return false;
 }
 
-static bool ActuallySendTextMessage(SendMessageContext &parameter, std::unique_ptr<SendCallback> sendCallback,
+static int32_t ActuallySendTextMessage(SendMessageContext &parameter, std::unique_ptr<SendCallback> sendCallback,
     std::unique_ptr<DeliveryCallback> deliveryCallback)
 {
     if (!IsValidSlotId(parameter.slotId)) {
         auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
         sendCallback.release()->OnSmsSendResult(result);
-        return false;
+        deliveryCallback.release()->OnSmsDeliveryResult(u"");
+        return TELEPHONY_ERR_SLOTID_INVALID;
     }
-    int32_t sendResult = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(parameter.slotId,
+    return DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(parameter.slotId,
         parameter.destinationHost, parameter.serviceCenter, parameter.textContent, sendCallback.release(),
         deliveryCallback.release());
-
-    TELEPHONY_LOGI("ActuallySendTextMessage SendTextMessage execResult = %{public}d", sendResult);
-    if (sendResult == ERROR_NONE) {
-        return true;
-    } else {
-        return false;
-    }
-    return false;
 }
 
-static bool ActuallySendDataMessage(SendMessageContext &parameter, std::unique_ptr<SendCallback> sendCallback,
+static int32_t ActuallySendDataMessage(SendMessageContext &parameter, std::unique_ptr<SendCallback> sendCallback,
     std::unique_ptr<DeliveryCallback> deliveryCallback)
 {
     if (InValidSlotIdOrInValidPort(parameter.slotId, parameter.destinationPort)) {
         auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
         sendCallback.release()->OnSmsSendResult(result);
         deliveryCallback.release()->OnSmsDeliveryResult(u"");
-        return false;
+        return TELEPHONY_ERR_SLOTID_INVALID;
     }
     if (parameter.rawDataContent.size() > 0) {
         uint16_t arrayLength = static_cast<uint16_t>(parameter.rawDataContent.size());
-        int32_t sendResult = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(parameter.slotId,
+        return DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(parameter.slotId,
             parameter.destinationHost, parameter.serviceCenter, parameter.destinationPort, &parameter.rawDataContent[0],
             arrayLength, sendCallback.release(), deliveryCallback.release());
-        TELEPHONY_LOGI("ActuallySendDataMessage SendRawDataMessage execResult = %{public}d", sendResult);
-        if (sendResult == ERROR_NONE) {
-            return true;
-        } else {
-            return false;
-        }
     }
-    return false;
+    return TELEPHONY_ERR_ARGUMENT_INVALID;
 }
 
-static bool ActuallySendMessage(napi_env env, SendMessageContext &parameter)
+static int32_t ActuallySendMessage(napi_env env, SendMessageContext &parameter)
 {
     bool hasSendCallback = parameter.sendCallbackRef != nullptr;
     std::unique_ptr<SendCallback> sendCallback =
         std::make_unique<SendCallback>(hasSendCallback, env, parameter.thisVarRef, parameter.sendCallbackRef);
     if (sendCallback == nullptr) {
         TELEPHONY_LOGE("ActuallySendMessage sendCallback == nullptr");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     bool hasDeliveryCallback = parameter.deliveryCallbackRef != nullptr;
     std::unique_ptr<DeliveryCallback> deliveryCallback = std::make_unique<DeliveryCallback>(
         hasDeliveryCallback, env, parameter.thisVarRef, parameter.deliveryCallbackRef);
     if (deliveryCallback == nullptr) {
         TELEPHONY_LOGE("ActuallySendMessage deliveryCallback == nullptr");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     if (parameter.messageType == TEXT_MESSAGE_PARAMETER_MATCH) {
-        if (ActuallySendTextMessage(parameter, std::move(sendCallback), std::move(deliveryCallback))) {
-            return true;
-        } else {
-            return false;
-        }
+        return ActuallySendTextMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
     } else if (parameter.messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
-        if (ActuallySendDataMessage(parameter, std::move(sendCallback), std::move(deliveryCallback))) {
-            return true;
-        } else {
-            return false;
-        }
+        return ActuallySendDataMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
     }
-    return false;
+    return TELEPHONY_ERR_ARGUMENT_INVALID;
 }
 
 static void NativeSendMessage(napi_env env, void *data)
 {
     auto asyncContext = static_cast<SendMessageContext *>(data);
-    if (asyncContext != nullptr) {
-        asyncContext->resolved = ActuallySendMessage(env, *asyncContext);
+    if (asyncContext == nullptr) {
+        TELEPHONY_LOGE("NativeSendMessage SendMessageContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
+        return;
+    }
+    int32_t errorCode = ActuallySendMessage(env, *asyncContext);
+    if (errorCode == TELEPHONY_SUCCESS) {
+        asyncContext->resolved = true;
     }
 }
 
@@ -319,12 +305,15 @@ static napi_value SendMessage(napi_env env, napi_callback_info info)
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     int32_t messageMatchResult = MatchSendMessageParameters(env, parameters, parameterCount);
-    NAPI_ASSERT(env, messageMatchResult != MESSAGE_PARAMETER_NOT_MATCH, "type mismatch");
+    if (messageMatchResult == MESSAGE_PARAMETER_NOT_MATCH) {
+        TELEPHONY_LOGE("SendMessage parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto asyncContext = std::make_unique<SendMessageContext>().release();
     if (asyncContext == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at SendMessageContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("SendMessage SendMessageContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     ParseMessageParameter(messageMatchResult, env, parameters[0], *asyncContext);
@@ -340,19 +329,19 @@ static napi_value SendMessage(napi_env env, napi_callback_info info)
 static void NativeCreateMessage(napi_env env, void *data)
 {
     auto asyncContext = static_cast<CreateMessageContext *>(data);
-    if (!asyncContext->specification.empty() && !asyncContext->pdu.empty()) {
-        TELEPHONY_LOGI("NativeCreateMessage before CreateMessage");
-        std::u16string specification16 = NapiUtil::ToUtf16(asyncContext->specification);
-        asyncContext->shortMessage = ShortMessage::CreateMessage(asyncContext->pdu, specification16);
-        if (asyncContext->shortMessage != nullptr) {
-            TELEPHONY_LOGI("NativeCreateMessage CreateMessage success");
-            asyncContext->resolved = true;
-        } else {
-            TELEPHONY_LOGI("NativeCreateMessage CreateMessage faied");
-            asyncContext->resolved = false;
-        }
+    if (asyncContext->specification.empty() || asyncContext->pdu.empty()) {
+        asyncContext->errorCode = TELEPHONY_ERR_ARGUMENT_INVALID;
+        return;
+    }
+    TELEPHONY_LOGI("NativeCreateMessage before CreateMessage");
+    std::u16string specification16 = NapiUtil::ToUtf16(asyncContext->specification);
+    auto shortMessageObj = new ShortMessage();
+    asyncContext->errorCode = ShortMessage::CreateMessage(asyncContext->pdu, specification16, *shortMessageObj);
+    if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
+        asyncContext->resolved = true;
+        asyncContext->shortMessage = shortMessageObj;
     } else {
-        asyncContext->resolved = false;
+        TELEPHONY_LOGI("NativeCreateMessage CreateMessage faied");
     }
     TELEPHONY_LOGI("NativeCreateMessage end");
 }
@@ -367,7 +356,9 @@ static napi_value CreateShortMessageValue(napi_env env, const ShortMessage &shor
         env, object, "visibleRawAddress", NapiUtil::ToUtf8(shortMessage.GetVisibleRawAddress()));
     NapiUtil::SetPropertyInt32(env, object, "messageClass", shortMessage.GetMessageClass());
     NapiUtil::SetPropertyInt32(env, object, "protocolId", shortMessage.GetProtocolId());
-    NapiUtil::SetPropertyStringUtf8(env, object, "scAddress", NapiUtil::ToUtf8(shortMessage.GetScAddress()));
+    std::u16string smscAddress;
+    shortMessage.GetScAddress(smscAddress);
+    NapiUtil::SetPropertyStringUtf8(env, object, "scAddress", NapiUtil::ToUtf8(smscAddress));
     NapiUtil::SetPropertyInt32(env, object, "scTimestamp", shortMessage.GetScTimestamp());
     NapiUtil::SetPropertyBoolean(env, object, "isReplaceMessage", shortMessage.IsReplaceMessage());
     NapiUtil::SetPropertyBoolean(env, object, "hasReplyPath", shortMessage.HasReplyPath());
@@ -384,8 +375,13 @@ static void CreateMessageCallback(napi_env env, napi_status status, void *data)
     if (status == napi_ok) {
         if (asyncContext->resolved) {
             callbackValue = CreateShortMessageValue(env, *(asyncContext->shortMessage));
+            if (asyncContext->shortMessage != nullptr) {
+                delete asyncContext->shortMessage;
+                asyncContext->shortMessage = nullptr;
+            }
         } else {
-            callbackValue = NapiUtil::CreateErrorMessage(env, "create message error");
+            JsError error = NapiUtil::ConverErrorMessageForJs(asyncContext->errorCode);
+            callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
         }
     } else {
         callbackValue = NapiUtil::CreateErrorMessage(
@@ -398,11 +394,11 @@ static bool MatchCreateMessageParameter(napi_env env, const napi_value parameter
 {
     bool typeMatch = false;
     switch (parameterCount) {
-        case 2: {
+        case TWO_PARAMETERS: {
             typeMatch = NapiUtil::MatchParameters(env, parameters, {napi_object, napi_string});
             break;
         }
-        case 3:
+        case THREE_PARAMETERS:
             typeMatch = NapiUtil::MatchParameters(env, parameters, {napi_object, napi_string, napi_function});
             break;
         default: {
@@ -419,18 +415,21 @@ static bool MatchCreateMessageParameter(napi_env env, const napi_value parameter
 
 static napi_value CreateMessage(napi_env env, napi_callback_info info)
 {
-    size_t parameterCount = 3;
-    napi_value parameters[3] = {0};
+    size_t parameterCount = THREE_PARAMETERS;
+    napi_value parameters[THREE_PARAMETERS] = {0};
     napi_value thisVar = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchCreateMessageParameter(env, parameters, parameterCount), "type mismatch");
+    if (!MatchCreateMessageParameter(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("CreateMessage parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto asyncContext = std::make_unique<CreateMessageContext>().release();
     if (asyncContext == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at CreateMessageContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("CreateMessage CreateMessageContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     asyncContext->specification = Get64StringFromValue(env, parameters[1]);
@@ -445,7 +444,7 @@ static napi_value CreateMessage(napi_env env, napi_callback_info info)
         asyncContext->pdu.push_back((unsigned char)element);
     }
     TELEPHONY_LOGI("CreateMessage pdu size = %{private}zu", asyncContext->pdu.size());
-    if (parameterCount == 3) {
+    if (parameterCount == THREE_PARAMETERS) {
         napi_create_reference(env, parameters[2], DEFAULT_REF_COUNT, &(asyncContext->callbackRef));
     }
     return NapiUtil ::HandleAsyncWork(
@@ -455,10 +454,10 @@ static napi_value CreateMessage(napi_env env, napi_callback_info info)
 static bool MatchSetDefaultSmsSlotIdParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
     switch (parameterCount) {
-        case 1: {
+        case ONE_PARAMETER: {
             return NapiUtil::MatchParameters(env, parameters, {napi_number});
         }
-        case 2:
+        case TWO_PARAMETERS:
             return NapiUtil::MatchParameters(env, parameters, {napi_number, napi_function});
         default: {
             return false;
@@ -474,7 +473,10 @@ static void NativeSetDefaultSmsSlotId(napi_env env, void *data)
         context->errorCode = ERROR_SLOT_ID_INVALID;
         return;
     }
-    context->resolved = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetDefaultSmsSlotId(context->slotId);
+    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetDefaultSmsSlotId(context->slotId);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->resolved = true;
+    }
     TELEPHONY_LOGI("NativeSetDefaultSmsSlotId end resolved = %{public}d", context->resolved);
 }
 
@@ -483,41 +485,37 @@ static void SetDefaultSmsSlotIdCallback(napi_env env, napi_status status, void *
     auto context = static_cast<SetDefaultSmsSlotIdContext *>(data);
     TELEPHONY_LOGI("SetDefaultSmsSlotIdCallback status = %{public}d", status);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_get_undefined(env, &callbackValue);
-        } else {
-            if (context->errorCode == ERROR_SLOT_ID_INVALID) {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "slotId is invalid", ERROR_SLOT_ID_INVALID);
-            } else {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "set default sms slot id error");
-            }
-        }
+    if (context->resolved) {
+        napi_get_undefined(env, &callbackValue);
     } else {
-        callbackValue = NapiUtil::CreateErrorMessage(
-            env, "set default sms slot id error cause napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "setDefaultSmsSlotId", "ohos.permission.SET_TELEPHONY_STATE");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
 
 static napi_value SetDefaultSmsSlotId(napi_env env, napi_callback_info info)
 {
-    size_t parameterCount = 2;
-    napi_value parameters[2] = {0};
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = {0};
     napi_value thisVar = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchSetDefaultSmsSlotIdParameters(env, parameters, parameterCount), "type mismatch");
+    if (!MatchSetDefaultSmsSlotIdParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("SetDefaultSmsSlotId parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<SetDefaultSmsSlotIdContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at SetDefaultSmsSlotIdContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("SetDefaultSmsSlotId SetDefaultSmsSlotIdContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     napi_get_value_int32(env, parameters[0], &context->slotId);
-    if (parameterCount == 2) {
+    if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     napi_value result = nullptr;
@@ -537,10 +535,10 @@ static napi_value SetDefaultSmsSlotId(napi_env env, napi_callback_info info)
 static bool MatchGetDefaultSmsSlotIdParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
     switch (parameterCount) {
-        case 0: {
+        case NONE_PARAMETER: {
             return true;
         }
-        case 1: {
+        case ONE_PARAMETER: {
             return NapiUtil::MatchParameters(env, parameters, {napi_function});
         }
         default: {
@@ -626,54 +624,53 @@ static void NativeSetSmscAddr(napi_env env, void *data)
         context->errorCode = ERROR_SLOT_ID_INVALID;
         return;
     }
-    context->resolved = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetScAddress(context->slotId,
+    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetScAddress(context->slotId,
         NapiUtil::ToUtf16(context->smscAddr));
-    TELEPHONY_LOGI("NativeSetSmscAddr resolved = %{private}d", context->resolved);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->resolved = true;
+    }
+    TELEPHONY_LOGI("NativeSetSmscAddr resolved = %{public}d", context->resolved);
 }
 
 static void SetSmscAddrCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<SetSmscAddrContext *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_get_undefined(env, &callbackValue);
-        } else {
-            if (context->errorCode == ERROR_SLOT_ID_INVALID) {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "slotId is invalid", ERROR_SLOT_ID_INVALID);
-            } else {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "set smsc addr error by ipc");
-            }
-        }
+    if (context->resolved) {
+        napi_get_undefined(env, &callbackValue);
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "set smsc addr error napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "setSmscAddr", "ohos.permission.SET_TELEPHONY_STATE");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
 
 static napi_value SetSmscAddr(napi_env env, napi_callback_info info)
 {
-    size_t parameterCount = 3;
-    napi_value parameters[3] = {0};
+    size_t parameterCount = THREE_PARAMETERS;
+    napi_value parameters[THREE_PARAMETERS] = {0};
     napi_value thisVar = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchSetSmscAddrParameters(env, parameters, parameterCount), "type mismatch");
+    if (!MatchSetSmscAddrParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("SetSmscAddr parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     TELEPHONY_LOGI("SetSmscAddr start after MatchSetSmscAddrParameters");
     auto context = std::make_unique<SetSmscAddrContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at SetSmscAddrContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("SetSmscAddr SetSmscAddrContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     TELEPHONY_LOGI("SetSmscAddr start after SetSmscAddrContext contruct");
     napi_get_value_int32(env, parameters[0], &context->slotId);
     context->smscAddr = Get64StringFromValue(env, parameters[1]);
     TELEPHONY_LOGI("SetSmscAddr smscAddr = %{private}s", context->smscAddr.data());
-    if (parameterCount == 3) {
+    if (parameterCount == THREE_PARAMETERS) {
         napi_create_reference(env, parameters[2], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     TELEPHONY_LOGI("SetSmscAddr before end");
@@ -683,10 +680,10 @@ static napi_value SetSmscAddr(napi_env env, napi_callback_info info)
 static bool MatchGetSmscAddrParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
     switch (parameterCount) {
-        case 1: {
+        case ONE_PARAMETER: {
             return NapiUtil::MatchParameters(env, parameters, {napi_number});
         }
-        case 2: {
+        case TWO_PARAMETERS: {
             return NapiUtil::MatchParameters(env, parameters, {napi_number, napi_function});
         }
         default: {
@@ -703,52 +700,52 @@ static void NativeGetSmscAddr(napi_env env, void *data)
         context->errorCode = ERROR_SLOT_ID_INVALID;
         return;
     }
-    std::u16string smscAddress = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->
-        GetScAddress(context->slotId);
-    context->smscAddr = NapiUtil::ToUtf8(smscAddress);
-    context->resolved = true;
-    TELEPHONY_LOGI("NativeGetSmscAddr smscAddr = %{private}s", context->smscAddr.data());
+    std::u16string smscAddress;
+    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->
+        GetScAddress(context->slotId, smscAddress);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->smscAddr = NapiUtil::ToUtf8(smscAddress);
+        context->resolved = true;
+        TELEPHONY_LOGI("NativeGetSmscAddr smscAddr = %{private}s", context->smscAddr.data());
+    }
+    TELEPHONY_LOGI("NativeGetSmscAddr resolved = %{public}d", context->resolved);
 }
 
 static void GetSmscAddrCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<GetSmscAddrContext *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_create_string_utf8(env, context->smscAddr.data(), context->smscAddr.length(), &callbackValue);
-        } else {
-            if (context->errorCode == ERROR_SLOT_ID_INVALID) {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "slotId is invalid", ERROR_SLOT_ID_INVALID);
-            } else {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "get smsc addr error by ipc");
-            }
-        }
+    if (context->resolved) {
+        napi_create_string_utf8(env, context->smscAddr.data(), context->smscAddr.length(), &callbackValue);
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "get smsc addr error,napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "getSmscAddr", "ohos.permission.GET_TELEPHONY_STATE");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
 
 static napi_value GetSmscAddr(napi_env env, napi_callback_info info)
 {
-    size_t parameterCount = 2;
-    napi_value parameters[2] = {0};
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = {0};
     napi_value thisVar = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchGetSmscAddrParameters(env, parameters, parameterCount), "type mismatch");
+    if (!MatchGetSmscAddrParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("GetSmscAddr parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<GetSmscAddrContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at GetSmscAddrContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("GetSmscAddr GetSmscAddrContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     napi_get_value_int32(env, parameters[0], &context->slotId);
-    if (parameterCount == 2) {
+    if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     return NapiUtil::HandleAsyncWork(env, context, "GetSmscAddr", NativeGetSmscAddr, GetSmscAddrCallback);
@@ -758,11 +755,11 @@ static bool MatchAddSimMessageParameters(napi_env env, const napi_value paramete
 {
     bool typeMatch = false;
     switch (parameterCount) {
-        case 1: {
+        case ONE_PARAMETER: {
             typeMatch = NapiUtil::MatchParameters(env, parameters, {napi_object});
             break;
         }
-        case 2: {
+        case TWO_PARAMETERS: {
             typeMatch = NapiUtil::MatchParameters(env, parameters, {napi_object, napi_function});
             break;
         }
@@ -790,11 +787,14 @@ static void NativeAddSimMessage(napi_env env, void *data)
     if (wrapStatus != MESSAGE_UNKNOWN_STATUS) {
         ISmsServiceInterface::SimMessageStatus status =
             static_cast<ISmsServiceInterface::SimMessageStatus>(wrapStatus);
-        context->resolved = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->AddSimMessage(
+        context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->AddSimMessage(
             context->slotId, NapiUtil::ToUtf16(context->smsc), NapiUtil::ToUtf16(context->pdu), status);
-        TELEPHONY_LOGI("NativeAddSimMessage context->resolved = %{private}d", context->resolved);
+        if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+            context->resolved = true;
+        }
+        TELEPHONY_LOGI("NativeAddSimMessage context->resolved = %{public}d", context->resolved);
     } else {
-        context->resolved = false;
+        context->errorCode = SMS_MMS_UNKNOWN_SIM_MESSAGE_STATUS;
     }
 }
 
@@ -802,33 +802,33 @@ static void AddSimMessageCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<AddSimMessageContext *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_get_undefined(env, &callbackValue);
-        } else {
-            callbackValue = NapiUtil::CreateErrorMessage(env, "add sim message error by ipc");
-        }
+    if (context->resolved) {
+        napi_get_undefined(env, &callbackValue);
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "add sim message error,napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "addSimMessage", "ohos.permission.SEND_MESSAGES");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
 
 static napi_value AddSimMessage(napi_env env, napi_callback_info info)
 {
-    size_t parameterCount = 2;
-    napi_value parameters[2] = {0};
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = {0};
     napi_value thisVar = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchAddSimMessageParameters(env, parameters, parameterCount), "type mismatch");
+    if (!MatchAddSimMessageParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("AddSimMessage parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<AddSimMessageContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at AddSimMessageContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("AddSimMessage AddSimMessageContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     napi_value slotIdValue = NapiUtil::GetNamedProperty(env, parameters[0], "slotId");
@@ -849,7 +849,7 @@ static napi_value AddSimMessage(napi_env env, napi_callback_info info)
         napi_get_value_int32(env, statusValue, &messageStatus);
         context->status = WrapSimMessageStatus(messageStatus);
     }
-    if (parameterCount == 2) {
+    if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     return NapiUtil::HandleAsyncWork(env, context, "AddSimMessage", NativeAddSimMessage, AddSimMessageCallback);
@@ -877,26 +877,24 @@ static void NativeDelSimMessage(napi_env env, void *data)
         context->errorCode = ERROR_SLOT_ID_INVALID;
         return;
     }
-    context->resolved = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DelSimMessage(context->slotId,
+    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DelSimMessage(context->slotId,
         context->msgIndex);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->resolved = true;
+    }
+    TELEPHONY_LOGI("NativeDelSimMessage resolved = %{public}d", context->resolved);
 }
+
 static void DelSimMessageCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<DelSimMessageContext *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_get_undefined(env, &callbackValue);
-        } else {
-            if (context->errorCode == ERROR_SLOT_ID_INVALID) {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "slotId is invalid", ERROR_SLOT_ID_INVALID);
-            } else {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "delete sim message error by ipc");
-            }
-        }
+    if (context->resolved) {
+        napi_get_undefined(env, &callbackValue);
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "delete sim message error,napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "delSimMessage", "ohos.permission.SEND_MESSAGES");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
@@ -909,12 +907,15 @@ static napi_value DelSimMessage(napi_env env, napi_callback_info info)
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchDelSimMessageParameters(env, parameters, parameterCount), "type mismatch");
+    if (!MatchDelSimMessageParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("DelSimMessage parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<DelSimMessageContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at DelSimMessageContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("DelSimMessage DelSimMessageContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     napi_get_value_int32(env, parameters[0], &context->slotId);
@@ -929,11 +930,11 @@ static bool MatchUpdateSimMessageParameters(napi_env env, const napi_value param
 {
     bool typeMatch = false;
     switch (parameterCount) {
-        case 1: {
+        case ONE_PARAMETER: {
             typeMatch = NapiUtil::MatchParameters(env, parameters, {napi_object});
             break;
         }
-        case 2: {
+        case TWO_PARAMETERS: {
             typeMatch = NapiUtil::MatchParameters(env, parameters, {napi_object, napi_function});
             break;
         }
@@ -966,12 +967,15 @@ static void NativeUpdateSimMessage(napi_env env, void *data)
     if (!context->pdu.empty() && (newStatus > -1)) {
         std::string msgPud(context->pdu.begin(), context->pdu.end());
         TELEPHONY_LOGD("NativeUpdateSimMessage msgPud = %{private}s", msgPud.c_str());
-        context->resolved = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->UpdateSimMessage(context->slotId,
+        context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->UpdateSimMessage(context->slotId,
             context->msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(context->newStatus),
             NapiUtil::ToUtf16(context->pdu), NapiUtil::ToUtf16(context->smsc));
+        if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+            context->resolved = true;
+        }
     } else {
         TELEPHONY_LOGI("NativeUpdateSimMessage resolved false cause parameter invalided");
-        context->resolved = false;
+        context->errorCode = SMS_MMS_UNKNOWN_SIM_MESSAGE_STATUS;
     }
 }
 
@@ -979,34 +983,34 @@ static void UpdateSimMessageCallback(napi_env env, napi_status status, void *dat
 {
     auto context = static_cast<UpdateSimMessageContext *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_get_undefined(env, &callbackValue);
-        } else {
-            callbackValue = NapiUtil::CreateErrorMessage(env, "update sim message failed");
-        }
+    if (context->resolved) {
+        napi_get_undefined(env, &callbackValue);
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "update sim message error,napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "updateSimMessage", "ohos.permission.SEND_MESSAGES");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
 
 static napi_value UpdateSimMessage(napi_env env, napi_callback_info info)
 {
-    size_t parameterCount = 2;
-    napi_value parameters[2] = {0};
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = {0};
     napi_value thisVar = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchUpdateSimMessageParameters(env, parameters, parameterCount), "type mismatch");
+    if (!MatchUpdateSimMessageParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("UpdateSimMessage parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     TELEPHONY_LOGI("UpdateSimMessage start parameter match passed");
     auto context = std::make_unique<UpdateSimMessageContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at UpdateSimMessageContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("UpdateSimMessage UpdateSimMessageContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     napi_value slotIdValue = NapiUtil::GetNamedProperty(env, parameters[0], "slotId");
@@ -1032,7 +1036,7 @@ static napi_value UpdateSimMessage(napi_env env, napi_callback_info info)
     if (smscValue != nullptr) {
         context->smsc = Get64StringFromValue(env, smscValue);
     }
-    if (parameterCount == 2) {
+    if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     TELEPHONY_LOGI("UpdateSimMessage start before HandleAsyncWork");
@@ -1043,10 +1047,10 @@ static napi_value UpdateSimMessage(napi_env env, napi_callback_info info)
 static bool MatchGetAllSimMessagesParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
     switch (parameterCount) {
-        case 1: {
+        case ONE_PARAMETER: {
             return NapiUtil::MatchParameters(env, parameters, {napi_number});
         }
-        case 2: {
+        case TWO_PARAMETERS: {
             return NapiUtil::MatchParameters(env, parameters, {napi_number, napi_function});
         }
         default: {
@@ -1063,9 +1067,13 @@ static void NativeGetAllSimMessages(napi_env env, void *data)
         context->errorCode = ERROR_SLOT_ID_INVALID;
         return;
     }
-    context->messageArray = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->
-        GetAllSimMessages(context->slotId);
-    context->resolved = true;
+    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->
+        GetAllSimMessages(context->slotId, context->messageArray);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->resolved = true;
+    } else {
+        TELEPHONY_LOGE("NativeGetAllSimMessages context->resolved == false");
+    }
 }
 
 static napi_value CreateSimShortMessageValue(napi_env env, const ShortMessage &shortMessage)
@@ -1084,47 +1092,43 @@ static void GetAllSimMessagesCallback(napi_env env, napi_status status, void *da
 {
     auto context = static_cast<GetAllSimMessagesContext *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_create_array(env, &callbackValue);
-            int32_t arraySize = static_cast<int32_t>(context->messageArray.size());
-            for (int32_t i = 0; i < arraySize; i++) {
-                ShortMessage message = context->messageArray[i];
-                napi_value itemValue = CreateSimShortMessageValue(env, message);
-                napi_set_element(env, callbackValue, i, itemValue);
-            }
-        } else {
-            if (context->errorCode == ERROR_SLOT_ID_INVALID) {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "slotId is invalid", ERROR_SLOT_ID_INVALID);
-            } else {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "get all sim message error by ipc");
-            }
+    if (context->resolved) {
+        napi_create_array(env, &callbackValue);
+        int32_t arraySize = static_cast<int32_t>(context->messageArray.size());
+        for (int32_t i = 0; i < arraySize; i++) {
+            ShortMessage message = context->messageArray[i];
+            napi_value itemValue = CreateSimShortMessageValue(env, message);
+            napi_set_element(env, callbackValue, i, itemValue);
         }
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "get all sim message error,napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "getAllSimMessages", "ohos.permission.RECEIVE_SMS");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
 
 static napi_value GetAllSimMessages(napi_env env, napi_callback_info info)
 {
-    size_t parameterCount = 2;
-    napi_value parameters[2] = {0};
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = {0};
     napi_value thisVar = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchGetAllSimMessagesParameters(env, parameters, parameterCount), "type mismatch");
+    if (!MatchGetAllSimMessagesParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("GetAllSimMessages parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<GetAllSimMessagesContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at GetAllSimMessagesContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("GetAllSimMessages GetAllSimMessagesContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     napi_get_value_int32(env, parameters[0], &context->slotId);
-    if (parameterCount == 2) {
+    if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     napi_value result = NapiUtil::HandleAsyncWork(
@@ -1136,11 +1140,11 @@ static bool MatchSetCBConfigParameters(napi_env env, const napi_value parameters
 {
     bool typeMatch = false;
     switch (parameterCount) {
-        case 1: {
+        case ONE_PARAMETER: {
             typeMatch = NapiUtil::MatchParameters(env, parameters, {napi_object});
             break;
         }
-        case 2: {
+        case TWO_PARAMETERS: {
             typeMatch = NapiUtil::MatchParameters(env, parameters, {napi_object, napi_function});
             break;
         }
@@ -1164,8 +1168,11 @@ static bool MatchSetCBConfigParameters(napi_env env, const napi_value parameters
 static void NativeSetCBConfig(napi_env env, void *data)
 {
     auto context = static_cast<CBConfigContext *>(data);
-    context->resolved = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
         context->slotId, context->enable, context->startMessageId, context->endMessageId, context->ranType);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->resolved = true;
+    }
     TELEPHONY_LOGI("NativeSetCBConfig end resolved = %{public}d", context->resolved);
 }
 
@@ -1173,33 +1180,33 @@ static void SetCBConfigCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<CBConfigContext *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_get_undefined(env, &callbackValue);
-        } else {
-            callbackValue = NapiUtil::CreateErrorMessage(env, "set cb range config error by ipc");
-        }
+    if (context->resolved) {
+        napi_get_undefined(env, &callbackValue);
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "set cb range config  error,napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "setCBConfig", "ohos.permission.RECEIVE_SMS");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
 
 static napi_value SetCBConfig(napi_env env, napi_callback_info info)
 {
-    size_t parameterCount = 2;
-    napi_value parameters[2] = {0};
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = {0};
     napi_value thisVar = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchSetCBConfigParameters(env, parameters, parameterCount), "type mismatch");
+    if (!MatchSetCBConfigParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("SetCBConfig parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<CBConfigContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at CBConfigContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("SetCBConfig CBConfigContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     napi_value slotIdValue = NapiUtil::GetNamedProperty(env, parameters[0], "slotId");
@@ -1222,7 +1229,7 @@ static napi_value SetCBConfig(napi_env env, napi_callback_info info)
     if (ranTypeValue != nullptr) {
         napi_get_value_int32(env, ranTypeValue, &context->ranType);
     }
-    if (parameterCount == 2) {
+    if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     napi_value result =
@@ -1233,9 +1240,9 @@ static napi_value SetCBConfig(napi_env env, napi_callback_info info)
 static bool MatchSplitMessageParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
     switch (parameterCount) {
-        case 1:
+        case ONE_PARAMETER:
             return NapiUtil::MatchParameters(env, parameters, {napi_string});
-        case 2:
+        case TWO_PARAMETERS:
             return NapiUtil::MatchParameters(env, parameters, {napi_string, napi_function});
         default:
             return false;
@@ -1246,54 +1253,57 @@ static void NativeSplitMessage(napi_env env, void *data)
 {
     auto context = static_cast<SplitMessageContext *>(data);
     std::u16string content = NapiUtil::ToUtf16(context->content);
-    context->messageArray = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SplitMessage(content);
-    context->resolved = true;
+    context->errorCode =
+        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SplitMessage(content, context->messageArray);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->resolved = true;
+    }
 }
 
 static void SplitMessageCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<SplitMessageContext *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_create_array(env, &callbackValue);
-            int32_t arraySize = static_cast<int32_t>(context->messageArray.size());
-            TELEPHONY_LOGI("napi_sms messageArray.size =  %{public}d", arraySize);
-            for (int32_t i = 0; i < arraySize; i++) {
-                napi_value itemValue = nullptr;
-                std::string message = NapiUtil::ToUtf8(context->messageArray[i]);
-                napi_create_string_utf8(env, message.data(), message.size(), &itemValue);
-                napi_set_element(env, callbackValue, i, itemValue);
-            }
-        } else {
-            callbackValue = NapiUtil::CreateErrorMessage(env, "split Message error by ipc");
+    if (context->resolved) {
+        napi_create_array(env, &callbackValue);
+        int32_t arraySize = static_cast<int32_t>(context->messageArray.size());
+        TELEPHONY_LOGI("napi_sms messageArray.size =  %{public}d", arraySize);
+        for (int32_t i = 0; i < arraySize; i++) {
+            napi_value itemValue = nullptr;
+            std::string message = NapiUtil::ToUtf8(context->messageArray[i]);
+            napi_create_string_utf8(env, message.data(), message.size(), &itemValue);
+            napi_set_element(env, callbackValue, i, itemValue);
         }
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "split Message error,napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "splitMessage", "ohos.permission.SEND_MESSAGES");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
 
 static napi_value SplitMessage(napi_env env, napi_callback_info info)
 {
-    size_t parameterCount = 2;
-    napi_value parameters[2] = {0};
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = {0};
     napi_value thisVar = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchSplitMessageParameters(env, parameters, parameterCount), "type mismatch");
+    if (!MatchSplitMessageParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("SplitMessage parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<SplitMessageContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at SplitMessageContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("SplitMessage SplitMessageContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     context->content = Get64StringFromValue(env, parameters[0]);
     TELEPHONY_LOGD("napi_sms splitMessage context->content = %{private}s", context->content.c_str());
-    if (parameterCount == 2) {
+    if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], MAX_TEXT_SHORT_MESSAGE_LENGTH, &context->callbackRef);
     }
     napi_value result =
@@ -1331,15 +1341,16 @@ static void NativeGetSmsSegmentsInfo(napi_env env, void *data)
     }
     std::u16string content = NapiUtil::ToUtf16(context->content);
     ISmsServiceInterface::SmsSegmentsInfo info;
-    context->resolved = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetSmsSegmentsInfo(context->slotId,
+    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetSmsSegmentsInfo(context->slotId,
         content, context->force7BitCode, info);
-    if (context->resolved) {
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->resolved = true;
         context->splitCount = info.msgSegCount;
         context->encodeCount = info.msgEncodingCount;
         context->encodeCountRemaining = info.msgRemainCount;
         context->scheme = info.msgCodeScheme;
     } else {
-        TELEPHONY_LOGE("context->resolved == false");
+        TELEPHONY_LOGE("NativeGetSmsSegmentsInfo context->resolved == false");
     }
 }
 
@@ -1347,47 +1358,42 @@ static void GetSmsSegmentsInfoCallback(napi_env env, napi_status status, void *d
 {
     auto context = static_cast<GetSmsSegmentsInfoContext *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_create_object(env, &callbackValue);
-            NapiUtil::SetPropertyInt32(env, callbackValue, "splitCount", context->splitCount);
-            NapiUtil::SetPropertyInt32(env, callbackValue, "encodeCount", context->encodeCount);
-            NapiUtil::SetPropertyInt32(env, callbackValue, "encodeCountRemaining", context->encodeCountRemaining);
-            NapiUtil::SetPropertyInt32(env, callbackValue, "scheme", static_cast<int32_t>(context->scheme));
-        } else {
-            if (context->errorCode == ERROR_SLOT_ID_INVALID) {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "slotId is invalid", ERROR_SLOT_ID_INVALID);
-            } else {
-                callbackValue = NapiUtil::CreateErrorMessage(env, "calculate length error by ipc");
-            }
-        }
+    if (context->resolved) {
+        napi_create_object(env, &callbackValue);
+        NapiUtil::SetPropertyInt32(env, callbackValue, "splitCount", context->splitCount);
+        NapiUtil::SetPropertyInt32(env, callbackValue, "encodeCount", context->encodeCount);
+        NapiUtil::SetPropertyInt32(env, callbackValue, "encodeCountRemaining", context->encodeCountRemaining);
+        NapiUtil::SetPropertyInt32(env, callbackValue, "scheme", static_cast<int32_t>(context->scheme));
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "calculate length error,napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageForJs(context->errorCode);
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
 
 static napi_value GetSmsSegmentsInfo(napi_env env, napi_callback_info info)
 {
-    size_t parameterCount = 4;
-    napi_value parameters[4] = {0};
+    size_t parameterCount = FOUR_PARAMETERS;
+    napi_value parameters[FOUR_PARAMETERS] = { 0 };
     napi_value thisVar = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchGetSmsSegmentsInfoParameters(env, parameters, parameterCount), "type mismatch");
+    if (!MatchGetSmsSegmentsInfoParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("GetSmsSegmentsInfo parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<GetSmsSegmentsInfoContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at GetSmsSegmentsInfoContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("GetSmsSegmentsInfo context is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     napi_get_value_int32(env, parameters[0], &context->slotId);
     context->content = NapiUtil::GetStringFromValue(env, parameters[1]);
     napi_get_value_bool(env, parameters[2], &context->force7BitCode);
-    if (parameterCount == 4) {
+    if (parameterCount == FOUR_PARAMETERS) {
         napi_create_reference(env, parameters[3], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     napi_value result = NapiUtil::HandleAsyncWork(
@@ -1413,41 +1419,45 @@ static bool MatchIsImsSmsSupportedParameters(napi_env env, const napi_value para
 static void NativeIsImsSmsSupported(napi_env env, void *data)
 {
     auto context = static_cast<IsImsSmsSupportedContext *>(data);
-    context->setResult = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(context->slotId);
-    context->resolved = true;
+    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(
+        context->slotId, context->setResult);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->resolved = true;
+    } else {
+        TELEPHONY_LOGE("NativeIsImsSmsSupported context->resolved == false");
+    }
 }
 
 static void IsImsSmsSupportedCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<IsImsSmsSupportedContext *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_get_boolean(env, context->setResult, &callbackValue);
-        } else {
-            callbackValue = NapiUtil::CreateErrorMessage(env, "IsImsSmsSupported error by ipc");
-        }
+    if (context->resolved) {
+        napi_get_boolean(env, context->setResult, &callbackValue);
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "IsImsSmsSupported error,napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageForJs(context->errorCode);
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
 
 static napi_value IsImsSmsSupported(napi_env env, napi_callback_info info)
 {
-    size_t paramsCount = 2;
-    napi_value params[2] = { 0 };
+    size_t paramsCount = TWO_PARAMETERS;
+    napi_value params[TWO_PARAMETERS] = { 0 };
     napi_value arg = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &paramsCount, params, &arg, &data);
-    NAPI_ASSERT(env, MatchIsImsSmsSupportedParameters(env, params, paramsCount), "IsImsSmsSupported type mismatch");
+    if (!MatchIsImsSmsSupportedParameters(env, params, paramsCount)) {
+        TELEPHONY_LOGE("IsImsSmsSupported parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<IsImsSmsSupportedContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at IsImsSmsSupportedContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("IsImsSmsSupported IsImsSmsSupportedContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     napi_get_value_int32(env, params[0], &context->slotId);
@@ -1462,7 +1472,11 @@ static napi_value IsImsSmsSupported(napi_env env, napi_callback_info info)
 static void NativeGetImsShortMessageFormat(napi_env env, void *data)
 {
     auto context = static_cast<SingleValueContext<std::u16string> *>(data);
-    context->value = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetImsShortMessageFormat();
+    context->errorCode =
+        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetImsShortMessageFormat(context->value);
+    if (context->errorCode != TELEPHONY_ERR_SUCCESS) {
+        context->value = NapiUtil::ToUtf16(NET_TYPE_UNKNOWN_STRING);
+    }
     context->resolved = true;
 }
 
@@ -1475,38 +1489,36 @@ static void GetImsShortMessageFormatCallback(napi_env env, napi_status status, v
 {
     auto context = static_cast<SingleValueContext<std::u16string> *>(data);
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            std::string toUtf8Value = to_utf8(context->value);
-            napi_create_string_utf8(env, toUtf8Value.c_str(), toUtf8Value.size(), &callbackValue);
-        } else {
-            callbackValue = NapiUtil::CreateErrorMessage(env, "GetImsShortMessageFormat error by ipc");
-        }
+    if (context->resolved) {
+        std::string toUtf8Value = to_utf8(context->value);
+        napi_create_string_utf8(env, toUtf8Value.c_str(), toUtf8Value.size(), &callbackValue);
     } else {
-        callbackValue =
-            NapiUtil::CreateErrorMessage(env, "GetImsShortMessageFormat error,napi_status = " + std::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageForJs(context->errorCode);
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
 
 static napi_value GetImsShortMessageFormat(napi_env env, napi_callback_info info)
 {
-    size_t paramsCount = 1;
-    napi_value params[1] = {0};
+    size_t paramsCount = ONE_PARAMETER;
+    napi_value params[ONE_PARAMETER] = { 0 };
     napi_value arg = nullptr;
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &paramsCount, params, &arg, &data);
-    NAPI_ASSERT(
-        env, MatchIsImsSmsSupportedParameters(env, params, paramsCount), "GetImsShortMessageFormat type mismatch");
-    auto context = std::make_unique<SingleValueContext<std::u16string>>().release();
-    if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at SingleValueContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+    if (!MatchIsImsSmsSupportedParameters(env, params, paramsCount)) {
+        TELEPHONY_LOGE("GetImsShortMessageFormat parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
-    if (paramsCount == 1) {
+    auto context = std::make_unique<SingleValueContext<std::u16string>>().release();
+    if (context == nullptr) {
+        TELEPHONY_LOGE("GetImsShortMessageFormat SingleValueContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    if (paramsCount == ONE_PARAMETER) {
         napi_create_reference(env, params[0], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     napi_value result = NapiUtil::HandleAsyncWork(env, context, "GetImsShortMessageFormat",

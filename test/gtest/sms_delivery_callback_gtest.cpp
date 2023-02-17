@@ -40,14 +40,14 @@ void SmsDeliveryCallbackGTest::OnSmsDeliveryResult(const std::u16string &pdu)
     TELEPHONY_LOGI("SmsDeliveryCallbackGTest OnSmsDeliveryResult pduLen =  %{public}d", deliveryPduLen);
 
     if (callbackHelper_ == nullptr) {
-        TELEPHONY_LOGE("SmsSendCallbackGTest callbackHelper_ is nullptr");
+        TELEPHONY_LOGE("SmsDeliveryCallbackGTest callbackHelper_ is nullptr");
         return;
     }
     if (deliveryPduLen > 0) {
-        callbackHelper_->SetDeliverySmsBoolResult(true);
+        callbackHelper_->SetDeliverySmsIntResult(SMS_DEFAULT_RESULT);
         callbackHelper_->NotifyAll();
     } else {
-        callbackHelper_->SetDeliverySmsBoolResult(false);
+        callbackHelper_->SetDeliverySmsIntResult(SMS_DEFAULT_ERROR);
         callbackHelper_->NotifyAll();
     }
     callbackHelper_ = nullptr;

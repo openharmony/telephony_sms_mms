@@ -87,7 +87,8 @@ void GetSmscFuzz(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
-    interfaceManager->GetSmscAddr();
+    std::u16string smscAddress;
+    interfaceManager->GetSmscAddr(smscAddress);
 }
 
 void DoSetGetSmscMyAPI(const uint8_t *data, size_t size)

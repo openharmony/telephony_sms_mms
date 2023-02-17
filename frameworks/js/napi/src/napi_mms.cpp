@@ -328,6 +328,7 @@ void NativeDecodeMms(napi_env env, void *data)
         GetMmsReadRecInd(mmsMsg, context->readRecInd);
     }
     getAttachmentByDecodeMms(mmsMsg, *context);
+    context->errorCode = TELEPHONY_ERR_SUCCESS;
     context->resolved = true;
     TELEPHONY_LOGI("napi_mms NativeDecodeMms end");
 }
@@ -587,7 +588,8 @@ void DecodeMmsCallback(napi_env env, napi_status status, void *data)
         if (decodeMmsContext->resolved) {
             callbackValue = CreateDecodeMmsValue(env, *decodeMmsContext);
         } else {
-            callbackValue = NapiUtil::CreateErrorMessage(env, "decode mms error");
+            JsError error = NapiUtil::ConverErrorMessageForJs(decodeMmsContext->errorCode);
+            callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
         }
     } else {
         callbackValue =
@@ -650,23 +652,26 @@ napi_value NapiMms::DecodeMms(napi_env env, napi_callback_info info)
 {
     TELEPHONY_LOGI("napi_mms DecodeMms start");
     napi_value result = nullptr;
-    size_t parameterCount = 2;
-    napi_value parameters[2] = {0};
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = { 0 };
     napi_value thisVar = nullptr;
     void *data = nullptr;
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     int32_t messageMatchResult = GetMatchDecodeMmsResult(env, parameters, parameterCount);
-    NAPI_ASSERT(env, messageMatchResult != MESSAGE_PARAMETER_NOT_MATCH, "type mismatch");
+    if (messageMatchResult == MESSAGE_PARAMETER_NOT_MATCH) {
+        TELEPHONY_LOGE("DecodeMms parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<DecodeMmsContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at DecodeMmsContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("DecodeMms DecodeMmsContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     context->messageMatchResult = messageMatchResult;
     ParseDecodeMmsParam(env, parameters[0], *context);
-    if (parameterCount == 2) {
+    if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     result = NapiUtil::HandleAsyncWork(env, context, "DecodeMms", NativeDecodeMms, DecodeMmsCallback);
@@ -1286,7 +1291,8 @@ void NativeEncodeMms(napi_env env, void *data)
 {
     TELEPHONY_LOGI("napi_mms NativeEncodeMms start");
     if (data == nullptr) {
-        TELEPHONY_LOGE("napi_mms data nullptr");
+        TELEPHONY_LOGE("NativeEncodeMms data is nullptr");
+        NapiUtil::ThrowParameterError(env);
         return;
     }
     EncodeMmsContext *context = static_cast<EncodeMmsContext *>(data);
@@ -1325,6 +1331,7 @@ void NativeEncodeMms(napi_env env, void *data)
             break;
     }
     context->outBuffer = mmsMsg.EncodeMsg(context->bufferLen);
+    context->errorCode = TELEPHONY_ERR_SUCCESS;
     context->resolved = true;
     TELEPHONY_LOGI("napi_mms  NativeEncodeMms end");
 }
@@ -1334,20 +1341,17 @@ void EncodeMmsCallback(napi_env env, napi_status status, void *data)
     auto context = static_cast<EncodeMmsContext *>(data);
 
     napi_value callbackValue = nullptr;
-    if (status == napi_ok) {
-        if (context->resolved) {
-            napi_create_array(env, &callbackValue);
-            for (uint32_t i = 0; i < context->bufferLen; i++) {
-                napi_value itemValue = nullptr;
-                int32_t element = context->outBuffer[i];
-                napi_create_int32(env, element, &itemValue);
-                napi_set_element(env, callbackValue, i, itemValue);
-            }
-        } else {
-            callbackValue = NapiUtil::CreateErrorMessage(env, "EncodeMms error by ipc");
+    if (context->resolved) {
+        napi_create_array(env, &callbackValue);
+        for (uint32_t i = 0; i < context->bufferLen; i++) {
+            napi_value itemValue = nullptr;
+            int32_t element = context->outBuffer[i];
+            napi_create_int32(env, element, &itemValue);
+            napi_set_element(env, callbackValue, i, itemValue);
         }
     } else {
-        callbackValue = NapiUtil::CreateErrorMessage(env, "EncodeMms  error,napi_status = " + std ::to_string(status));
+        JsError error = NapiUtil::ConverErrorMessageForJs(context->errorCode);
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
@@ -1356,25 +1360,29 @@ napi_value NapiMms::EncodeMms(napi_env env, napi_callback_info info)
 {
     TELEPHONY_LOGI("napi_mms EncodeMms start");
     napi_value result = nullptr;
-    size_t parameterCount = 2;
-    napi_value parameters[2] = {0};
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = { 0 };
     napi_value thisVar = nullptr;
     void *data = nullptr;
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
-    NAPI_ASSERT(env, MatchEncodeMms(env, parameters, parameterCount), "type mismatch");
+    if (!MatchEncodeMms(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("EncodeMms parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
     auto context = std::make_unique<EncodeMmsContext>().release();
     if (context == nullptr) {
-        std::string errorCode = std::to_string(napi_generic_failure);
-        std::string errorMessage = "error at EncodeMmsContext is nullptr";
-        NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        TELEPHONY_LOGE("EncodeMms EncodeMmsContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
     if (!ParseEncodeMmsParam(env, parameters[0], *context)) {
         free(context);
         context = nullptr;
-        NAPI_ASSERT(env, false, "missing required arguments");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
     }
-    if (parameterCount == 2) {
+    if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     result = NapiUtil::HandleAsyncWork(env, context, "EncodeMms", NativeEncodeMms, EncodeMmsCallback);

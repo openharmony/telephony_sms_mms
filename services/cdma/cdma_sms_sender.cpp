@@ -510,12 +510,12 @@ void CdmaSmsSender::SendImsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, int
     TELEPHONY_LOGI("SendImsSms reply = %{public}d", reply);
 }
 
-bool CdmaSmsSender::IsImsSmsSupported(int32_t slotId)
+int32_t CdmaSmsSender::IsImsSmsSupported(int32_t slotId, bool &isSupported)
 {
     auto smsClient = DelayedSingleton<ImsSmsClient>::GetInstance();
     if (smsClient == nullptr) {
         TELEPHONY_LOGE("IsImsSmsSupported return, ImsSmsClient is nullptr.");
-        return false;
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     std::unique_lock<std::mutex> lck(ctx_);
     resIsSmsReady_ = false;
@@ -528,7 +528,8 @@ bool CdmaSmsSender::IsImsSmsSupported(int32_t slotId)
         }
     }
     TELEPHONY_LOGI("CdmaSmsSender::IsImsSmsSupported(), imsSmsCfg_:%{public}d", imsSmsCfg_);
-    return (imsSmsCfg_ == IMS_SMS_ENABLE);
+    isSupported = (imsSmsCfg_ == IMS_SMS_ENABLE);
+    return TELEPHONY_ERR_SUCCESS;
 }
 
 void CdmaSmsSender::StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event)
