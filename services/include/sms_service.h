@@ -19,9 +19,9 @@
 #include <memory>
 
 #include "sms_interface_stub.h"
+#include "sms_state_handler.h"
 #include "system_ability.h"
 #include "system_ability_definition.h"
-#include "sms_state_handler.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -37,52 +37,60 @@ public:
     std::string GetBindTime();
 
     /**
-     * @brief SendMessage
      * Sends a text Type SMS message.
-     * @param slotId [in]
-     * @param desAddr [in]
-     * @param scAddr [in]
-     * @param text [in]
-     * @param sendCallback [in]
-     * @param deliverCallback [in]
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param desAddr Indicates the destination address
+     * @param scAddr Indicates the sms center address
+     * @param text Indicates sms content
+     * @param sendCallback Indicates callback for send out
+     * @param deliverCallback Indicates callback for delivery to destination user
+     * @return Returns {@code 0} if send message success.
      */
-    void SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+    int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
         const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
 
     /**
-     * @brief SendMessage
      * Sends a data Type SMS message.
-     * @param slotId [in]
-     * @param desAddr [in]
-     * @param scAddr [in]
-     * @param port [in]
-     * @param data [in]
-     * @param dataLen [in]
-     * @param sendCallback [in]
-     * @param deliverCallback [in]
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param desAddr Indicates the destination address
+     * @param scAddr Indicates the sms center address
+     * @param port Indicates the port of data sms
+     * @param data Indicates the array of data sms
+     * @param dataLen Indicates the array length of data sms
+     * @param sendCallback Indicates callback for send out
+     * @param deliverCallback Indicates callback for delivery to destination user
+     * @return Returns {@code 0} if send message success.
      */
-    void SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr, uint16_t port,
+    int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr, uint16_t port,
         const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
 
     /**
-     * @brief SetSmscAddr
-     * Sets the address for the Short Message Service Center (SMSC) based on a specified slot ID.
-     * @param slotId [in]
-     * @param scAddr [in]
-     * @return true
-     * @return false
+     * Sets the address for the Short Message Service Center (SMSC) based on a
+     * specified slot ID
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param scAddr Indicates the sms center address
+     * @return Returns {@code 0} if set smsc success
      */
-    bool SetSmscAddr(int32_t slotId, const std::u16string &scAddr) override;
+    int32_t SetSmscAddr(int32_t slotId, const std::u16string &scAddr) override;
 
     /**
      * @brief GetSmscAddr
      * Obtains the SMSC address based on a specified slot ID.
-     * @param slotId [in]
-     * @return std::u16string
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param smscAddress [out]
+     * @return Returns {@code 0} if get smsc success.
      */
-    std::u16string GetSmscAddr(int32_t slotId) override;
+    int32_t GetSmscAddr(int32_t slotId, std::u16string &smscAddress) override;
 
     /**
      * @brief AddSimMessage
@@ -91,10 +99,10 @@ public:
      * @param smsc [in]
      * @param pdu [in]
      * @param status [in]
-     * @return true
-     * @return false
+     * @return Returns {@code true} if add sim success; returns {@code false}
+
      */
-    bool AddSimMessage(
+    int32_t AddSimMessage(
         int32_t slotId, const std::u16string &smsc, const std::u16string &pdu, SimMessageStatus status) override;
 
     /**
@@ -102,32 +110,35 @@ public:
      * Delete a sms in the sim card.
      * @param slotId [in]
      * @param msgIndex [in]
-     * @return true
-     * @return false
+     * @return Returns {@code true} if delete sim success; returns {@code false}
      */
-    bool DelSimMessage(int32_t slotId, uint32_t msgIndex) override;
+    int32_t DelSimMessage(int32_t slotId, uint32_t msgIndex) override;
 
     /**
      * @brief UpdateSimMessage
      * Update a sms in the sim card.
-     * @param slotId [in]
-     * @param msgIndex [in]
-     * @param newStatus [in]
-     * @param pdu [in]
-     * @param smsc [in]
-     * @return true
-     * @return false
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param msgIndex Indicates the sim sms index in sim card
+     * @param newStatusIndicates the sms status, read or not
+     * @param pdu Indicates the sms pdu data
+     * @param smsc Indicates the sms center address
+     * @return Returns {@code 0} if update sim success
      */
-    bool UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessageStatus newStatus, const std::u16string &pdu,
+    int32_t UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessageStatus newStatus, const std::u16string &pdu,
         const std::u16string &smsc) override;
 
     /**
      * @brief GetAllSimMessages
      * Get sim card all the sms.
-     * @param slotId [in]
-     * @return std::vector<ShortMessage>
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param message Indicates all SMS messages of sim card
+     * @return Returns {@code 0} if get all sim messages success
      */
-    std::vector<ShortMessage> GetAllSimMessages(int32_t slotId) override;
+    int32_t GetAllSimMessages(int32_t slotId, std::vector<ShortMessage> &message) override;
 
     /**
      * @brief SetCBConfig
@@ -137,10 +148,9 @@ public:
      * @param fromMsgId [in]
      * @param toMsgId [in]
      * @param netType [in]
-     * @return true
-     * @return false
+     * @return Returns {@code 0} if set CB config success
      */
-    bool SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) override;
+    int32_t SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) override;
 
     /**
      * @brief SetImsSmsConfig enable or disable IMS SMS.
@@ -155,11 +165,12 @@ public:
     /**
      * @brief SetDefaultSmsSlotId
      * Set the Default Sms Slot Id To SmsService
-     * @param slotId [in]
-     * @return true
-     * @return false
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @return Returns {@code 0} if set default sms slot id success
      */
-    bool SetDefaultSmsSlotId(int32_t slotId) override;
+    int32_t SetDefaultSmsSlotId(int32_t slotId) override;
 
     /**
      * @brief GetDefaultSmsSlotId
@@ -171,40 +182,45 @@ public:
     /**
      * @brief SplitMessage
      * calculate Sms Message Split Segment count
-     * @param message [in]
-     * @return std::vector<std::u16string>
+     * @param Indicates input message
+     * @param splitMessage Indicates the split information
+     * @return Returns {@code 0} if split message success
      */
-    std::vector<std::u16string> SplitMessage(const std::u16string &message) override;
+    int32_t SplitMessage(const std::u16string &message, std::vector<std::u16string> &splitMessage) override;
 
     /**
      * @brief GetSmsSegmentsInfo
      * calculate the Sms Message Segments Info
-     * @param slotId [in]
-     * @param message [in]
-     * @param force7BitCode [in]
-     * @param info [out]
-     * @return true
-     * @return false
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param message Indicates input message
+     * @param force7BitCode Indicates sms encode type, 7bit or not
+     * @param info Indicates output sms segment
+     * @return Returns {@code 0} if get sms segments info
      */
-    bool GetSmsSegmentsInfo(int32_t slotId, const std::u16string &message, bool force7BitCode,
+    int32_t GetSmsSegmentsInfo(int32_t slotId, const std::u16string &message, bool force7BitCode,
         ISmsServiceInterface::SmsSegmentsInfo &info) override;
 
     /**
      * @brief IsImsSmsSupported
      * Check Sms Is supported Ims newtwork
      * Hide this for inner system use
-     * @return true
-     * @return false
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param isSupported Whether ims SMS is supported
+     * @return Returns {@code 0} if successful
      */
-    bool IsImsSmsSupported(int32_t slotId) override;
+    int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported) override;
 
     /**
      * @brief GetImsShortMessageFormat
      * Get the Ims Short Message Format 3gpp/3gpp2
      * Hide this for inner system use
-     * @return std::u16string
+     * @return int32_t
      */
-    std::u16string GetImsShortMessageFormat() override;
+    int32_t GetImsShortMessageFormat(std::u16string &format) override;
 
     /**
      * @brief HasSmsCapability
@@ -236,13 +252,13 @@ public:
     int64_t GetEndTime();
 
     /**
-     * transfer a string from GSM to UTF8
-     * @param pDestText Indicates destination string,
-     * @param maxLength Indicates destination string max length
-     * @param pSrcText Indicates source string
-     * @return Returns {@code true} if transfer success; returns {@code false} otherwise
+     * create a short message
+     * @param pdu Indicates pdu code,
+     * @param specification Indicates 3gpp or 3gpp2
+     * @param ShortMessage Indicates a short message object
+     * @return Returns {@code 0} if CreateMessage success
      */
-    bool CreateMessage(std::string pdu, std::string specification, ShortMessage &message) override;
+    int32_t CreateMessage(std::string pdu, std::string specification, ShortMessage &message) override;
 
     /**
      * mms base64 encode

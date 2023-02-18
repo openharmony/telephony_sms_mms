@@ -30,9 +30,11 @@ public:
     ~SmsSendCallbackGTest();
     void OnSmsSendResult(const ISendShortMessageCallback::SmsSendResult result) override;
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) final;
+    void HasDeliveryCallBack(bool hasCallback);
 
 private:
     SmsMmsTestHelper *callbackHelper_;
+    bool hasDeliveryCallback_ = false;
 };
 } // namespace Telephony
 } // namespace OHOS
