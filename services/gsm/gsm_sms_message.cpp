@@ -467,6 +467,7 @@ void GsmSmsMessage::AnalysisMsgStatusReport(const SmsStatusReport &statusRep)
 void GsmSmsMessage::AnalysisMsgSubmit(const SmsSubmit &submit)
 {
     protocolId_ = static_cast<int>(submit.pid);
+    hasReplyPath_ = submit.bReplyPath;
     msgRef_ = submit.msgRef;
     bStatusReportMessage_ = submit.bStatusReport;
     bHeaderInd_ = submit.bHeaderInd;
@@ -555,11 +556,15 @@ void GsmSmsMessage::ConvertUserData()
             langInfo.bLockingShift = false;
             dataSize = textCvt->ConvertGSM7bitToUTF8(buff, MAX_MSG_TEXT_LEN,
                 reinterpret_cast<unsigned char *>(smsUserData_.data), smsUserData_.length, &langInfo);
+            visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
         } else if (codingScheme_ == SMS_CODING_UCS2) {
             dataSize = textCvt->ConvertUCS2ToUTF8(
                 buff, MAX_MSG_TEXT_LEN, reinterpret_cast<unsigned char *>(smsUserData_.data), smsUserData_.length);
+            visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
+        } else if (codingScheme_ == SMS_CODING_8BIT) {
+            visibleMessageBody_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
         }
-        visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
+
         rawUserData_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
     }
 }

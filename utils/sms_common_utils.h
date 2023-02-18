@@ -32,7 +32,7 @@ public:
     static int BcdToDigit(const unsigned char *bcd, int bcdLen, char *digit);
     static int BcdToDigitCdma(const unsigned char *bcd, int bcdLen, char *digit);
     static int ConvertDigitToDTMF(const char *digit, int digitLen, int startBit, unsigned char *dtmf);
-    static long ConvertTime(const struct SmsTimeAbs &timeAbs);
+    static int64_t ConvertTime(const struct SmsTimeAbs &timeAbs);
 
 private:
     static char BcdToChar(const unsigned char c);

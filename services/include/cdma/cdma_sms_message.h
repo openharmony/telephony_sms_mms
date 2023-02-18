@@ -53,7 +53,7 @@ public:
     virtual bool IsEmergencyMsg() const;
     virtual uint16_t GetServiceCategoty() const;
     virtual uint8_t GetGeoScope() const;
-    long GetReceTime() const;
+    int64_t GetReceTime() const;
 
     virtual std::shared_ptr<SpecialSmsIndication> GetSpecialSmsInd();
     static std::shared_ptr<CdmaSmsMessage> CreateMessage(const std::string &pdu);

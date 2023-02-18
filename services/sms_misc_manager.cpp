@@ -317,9 +317,19 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list)
 int32_t SmsMiscManager::AddSimMessage(
     const std::string &smsc, const std::string &pdu, ISmsServiceInterface::SimMessageStatus status)
 {
-    TELEPHONY_LOGI(
-        "smscLen = %{public}zu pudLen = %{public}zu status = %{public}d", smsc.size(), pdu.size(), status);
+    std::vector<ShortMessage> message;
+    int32_t result = GetAllSimMessages(message);
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("SmsMiscManager::AddSimMessage get result fail");
+        return result;
+    }
+    int32_t smsCountCurrent = static_cast<int32_t>(message.size());
+    if (smsCountCurrent >= smsCapacityOfSim_) {
+        TELEPHONY_LOGE("AddSimMessage sim card is full");
+        return false;
+    }
 
+    TELEPHONY_LOGI("smscLen = %{public}zu pudLen = %{public}zu status = %{public}d", smsc.size(), pdu.size(), status);
     std::string smscAddr(smsc);
     if (smsc.length() <= MIN_SMSC_LEN) {
         smscAddr.clear();
@@ -352,6 +362,7 @@ int32_t SmsMiscManager::GetAllSimMessages(std::vector<ShortMessage> &message)
 {
     TELEPHONY_LOGI("GetAllSimMessages");
     std::vector<std::string> pdus = CoreManagerInner::GetInstance().ObtainAllSmsOfIcc(slotId_);
+    smsCapacityOfSim_ = static_cast<int32_t>(pdus.size());
     int index = 0;
     PhoneType type = CoreManagerInner::GetInstance().GetPhoneType(slotId_);
     std::string specification;

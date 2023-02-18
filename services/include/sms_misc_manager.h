@@ -102,6 +102,7 @@ private:
     std::string smscAddr_;
     std::string codeScheme_ {"0-255"};
     std::list<gsmCBRangeInfo> oldRangeList_;
+    int32_t smsCapacityOfSim_ = 0;
 };
 } // namespace Telephony
 } // namespace OHOS

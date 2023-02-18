@@ -72,8 +72,8 @@ public:
     void SetIsFailure(bool isFailure);
     bool GetHasMore() const;
     void SetHasMore(bool hasMore);
-    long GetTimeStamp() const;
-    void SetTimeStamp(long timeStamp);
+    int64_t GetTimeStamp() const;
+    void SetTimeStamp(int64_t timeStamp);
     void SetNetWorkType(NetWorkType netWorkType);
     NetWorkType GetNetWorkType() const;
     void SetEncodeSmca(const std::vector<uint8_t> &smca);

@@ -709,7 +709,7 @@ uint8_t CdmaSmsMessage::GetGeoScope() const
     return scopePlmnWide;
 }
 
-long CdmaSmsMessage::GetReceTime() const
+int64_t CdmaSmsMessage::GetReceTime() const
 {
     return scTimestamp_;
 }

@@ -299,6 +299,10 @@ int32_t SmsService::AddSimMessage(
     }
     std::string smscData = StringUtils::ToUtf8(smsc);
     std::string pduData = StringUtils::ToUtf8(pdu);
+    if (pdu.empty() || pduData.empty()) {
+        TELEPHONY_LOGE("SmsService::AddSimMessage pdu empty error");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
     return interfaceManager->AddSimMessage(smscData, pduData, status);
 }
 
@@ -318,6 +322,11 @@ int32_t SmsService::DelSimMessage(int32_t slotId, uint32_t msgIndex)
         TELEPHONY_LOGE("SmsService::DelSimMessage interfaceManager nullptr error.");
         return TELEPHONY_ERR_SLOTID_INVALID;
     }
+    if (!CheckSimMessageIndexValid(slotId, msgIndex)) {
+        TELEPHONY_LOGE("SmsService::DelSimMessage msgIndex inValid");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+
     return interfaceManager->DelSimMessage(msgIndex);
 }
 
@@ -340,6 +349,14 @@ int32_t SmsService::UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessa
     }
     std::string pduData = StringUtils::ToUtf8(pdu);
     std::string smscData = StringUtils::ToUtf8(smsc);
+    if (!CheckSimMessageIndexValid(slotId, msgIndex)) {
+        TELEPHONY_LOGE("SmsService::UpdateSimMessage msgIndex inValid");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    if (pdu.empty() || pduData.empty()) {
+        TELEPHONY_LOGE("SmsService::UpdateSimMessage pdu empty error");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
     return interfaceManager->UpdateSimMessage(msgIndex, newStatus, pduData, smscData);
 }
 
@@ -356,6 +373,28 @@ int32_t SmsService::GetAllSimMessages(int32_t slotId, std::vector<ShortMessage> 
         return TELEPHONY_ERR_SLOTID_INVALID;
     }
     return interfaceManager->GetAllSimMessages(message);
+}
+
+bool SmsService::CheckSimMessageIndexValid(int32_t slotId, uint32_t msgIndex)
+{
+    std::vector<ShortMessage> totalMessages;
+    int32_t result = GetAllSimMessages(slotId, totalMessages);
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("SmsService::CheckSimMessageIndexValid get result fail");
+        return false;
+    }
+
+    if (msgIndex < 0 || totalMessages.size() <= 0) {
+        TELEPHONY_LOGE("SmsService::CheckSimMessageIndexValid msgIndex error");
+        return false;
+    }
+    for (auto message : totalMessages) {
+        if (message.GetIndexOnSim() == static_cast<int32_t>(msgIndex)) {
+            return true;
+        }
+    }
+    TELEPHONY_LOGI("SmsService::CheckSimMessageIndexValid msgIndex not founded");
+    return false;
 }
 
 int32_t SmsService::SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
