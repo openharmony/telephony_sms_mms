@@ -59,13 +59,14 @@ void SplitMessage(const uint8_t *data, size_t size)
     }
 
     std::string messageData(reinterpret_cast<const char *>(data), size);
-    interfaceManager->SplitMessage(messageData);
+    std::vector<std::u16string> splitMessage;
+    interfaceManager->SplitMessage(messageData, splitMessage);
     auto smsSendManager = std::make_unique<SmsSendManager>(slotId);
     if (smsSendManager == nullptr) {
         TELEPHONY_LOGE("failed to create SmsSendManager");
         return;
     }
-    smsSendManager->SplitMessage(messageData);
+    smsSendManager->SplitMessage(messageData, splitMessage);
 
     SmsCodingScheme codingType;
     std::vector<struct SplitInfo> cellsInfos;
@@ -91,14 +92,15 @@ void GetImsShortMessageFormat(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
-    interfaceManager->GetImsShortMessageFormat();
+    std::u16string format;
+    interfaceManager->GetImsShortMessageFormat(format);
 
     auto smsSendManager = std::make_unique<SmsSendManager>(slotId);
     if (smsSendManager == nullptr) {
         TELEPHONY_LOGE("failed to create SmsSendManager");
         return;
     }
-    smsSendManager->GetImsShortMessageFormat();
+    smsSendManager->GetImsShortMessageFormat(format);
 }
 
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)

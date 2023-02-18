@@ -331,6 +331,7 @@ public:
     std::unique_ptr<char[]> EncodeMsg(uint32_t &outLen);
 
     MmsHeader &GetHeader();
+
 private:
     MmsHeader mmsHeader_;
     MmsBody mmsBody_;

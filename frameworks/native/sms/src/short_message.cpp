@@ -139,9 +139,10 @@ ShortMessage::SmsMessageClass ShortMessage::GetMessageClass() const
     return messageClass_;
 }
 
-std::u16string ShortMessage::GetScAddress() const
+int32_t ShortMessage::GetScAddress(std::u16string &smscAddress) const
 {
-    return scAddress_;
+    smscAddress = scAddress_;
+    return TELEPHONY_ERR_SUCCESS;
 }
 
 int64_t ShortMessage::GetScTimestamp() const
@@ -184,19 +185,21 @@ std::vector<unsigned char> ShortMessage::GetPdu() const
     return pdu_;
 }
 
-ShortMessage *ShortMessage::CreateMessage(std::vector<unsigned char> &pdu, std::u16string specification)
+int32_t ShortMessage::CreateMessage(
+    std::vector<unsigned char> &pdu, std::u16string specification, ShortMessage &messageObj)
 {
-    std::string indicates = StringUtils::ToUtf8(specification);
-    ShortMessage *message = new (std::nothrow) ShortMessage();
-    if (message == nullptr) {
-        return nullptr;
+    if (pdu.size() <= 0) {
+        TELEPHONY_LOGE("CreateMessage fail pdu invalid");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-
-    ShortMessage messageObj;
+    std::string indicates = StringUtils::ToUtf8(specification);
     auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-    client->CreateMessage(StringUtils::StringToHex(pdu), indicates, messageObj);
-    *message = messageObj;
-    return message;
+    int32_t errorCode = client->CreateMessage(StringUtils::StringToHex(pdu), indicates, messageObj);
+    if (errorCode != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("CreateMessage fail errorCode:%{public}d", errorCode);
+        return errorCode;
+    }
+    return errorCode;
 }
 
 ShortMessage ShortMessage::CreateIccMessage(std::vector<unsigned char> &pdu, std::string specification, int32_t index)
@@ -213,7 +216,6 @@ ShortMessage ShortMessage::CreateIccMessage(std::vector<unsigned char> &pdu, std
         message.simMessageStatus_ = static_cast<SmsSimMessageStatus>(simStatus);
         std::vector<unsigned char> pduTemp(pdu.begin() + MIN_ICC_PDU_LEN, pdu.end());
 
-        ShortMessage messageObj;
         auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
         int32_t errorCode = client->CreateMessage(StringUtils::StringToHex(pduTemp), specification, message);
         if (errorCode != TELEPHONY_ERR_SUCCESS) {
