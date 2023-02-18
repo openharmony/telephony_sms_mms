@@ -480,20 +480,6 @@ int64_t SmsService::GetEndTime()
 
 bool SmsService::ValidDestinationAddress(std::string desAddr)
 {
-    // Remove spaces in desAddr
-    std::string resultAddr = desAddr;
-    int32_t count = static_cast<int32_t>(desAddr.size());
-    int32_t indexDes = 0;
-    int32_t indexResult = 0;
-    while (indexDes < count) {
-        if (desAddr[indexDes] != ' ') {
-            resultAddr[indexResult] = desAddr[indexDes];
-            indexResult++;
-        }
-        indexDes++;
-    }
-    desAddr = resultAddr.substr(0, indexResult);
-
     // Allow address start with '+' and number, Address length range 3 to 20
     std::regex regexMode("^([0-9_+]{1})([0-9]{2,19})$");
     return std::regex_match(desAddr, regexMode);
