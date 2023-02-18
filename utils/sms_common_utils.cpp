@@ -249,7 +249,7 @@ unsigned char SmsCommonUtils::DigitToDtmfChar(const unsigned char c)
     }
 }
 
-long SmsCommonUtils::ConvertTime(const struct SmsTimeAbs &timeAbs)
+int64_t SmsCommonUtils::ConvertTime(const struct SmsTimeAbs &timeAbs)
 {
     time_t rawtime;
     struct tm tmInfo;

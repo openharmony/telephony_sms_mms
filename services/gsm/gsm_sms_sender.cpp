@@ -291,7 +291,7 @@ void GsmSmsSender::DataBasedSmsDeliverySendSplitPage(std::shared_ptr<struct Enco
     }
 
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
-    long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
+    int64_t timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
     indexer->SetUnSentCellCount(unSentCellCount);
     indexer->SetHasCellFailed(hasCellFailed);
     indexer->SetEncodeSmca(std::move(smca));
@@ -472,7 +472,7 @@ void GsmSmsSender::SetSendIndexerInfo(const std::shared_ptr<SmsSendIndexer> &ind
     std::vector<uint8_t> smca(encodeInfo->smcaData_, encodeInfo->smcaData_ + encodeInfo->smcaLen);
     std::vector<uint8_t> pdu(encodeInfo->tpduData_, encodeInfo->tpduData_ + encodeInfo->tpduLen);
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
-    long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
+    int64_t timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
     indexer->SetTimeStamp(timeStamp);
     indexer->SetEncodeSmca(std::move(smca));
     indexer->SetEncodePdu(std::move(pdu));
@@ -569,7 +569,7 @@ void GsmSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sms
         return;
     }
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
-    long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
+    int64_t timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
 
     smsIndexer->SetUnSentCellCount(unSentCellCount);
     smsIndexer->SetHasCellFailed(hasCellFailed);

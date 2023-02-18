@@ -190,7 +190,7 @@ void SmsSender::SendCacheMapTimeoutCheck()
     std::lock_guard<std::mutex> guard(sendCacheMapMutex_);
     system_clock::duration timePoint = system_clock::now().time_since_epoch();
     seconds sec = duration_cast<seconds>(timePoint);
-    long timeStamp = sec.count();
+    int64_t timeStamp = sec.count();
     auto item = sendCacheMap_.begin();
     while (item != sendCacheMap_.end()) {
         auto iter = item++;

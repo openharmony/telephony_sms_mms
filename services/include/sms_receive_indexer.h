@@ -25,16 +25,16 @@ class SmsReceiveIndexer {
 public:
     SmsReceiveIndexer();
     virtual ~SmsReceiveIndexer() = default;
-    SmsReceiveIndexer(const std::vector<uint8_t> &pdu, long timestamp, int16_t destPort, bool isCdma,
+    SmsReceiveIndexer(const std::vector<uint8_t> &pdu, int64_t timestamp, int16_t destPort, bool isCdma,
         const std::string &address, const std::string &displayAddress, int16_t msgRefId, uint16_t msgSeqId,
         uint16_t msgCount, bool isCdmaWapPdu, const std::string &messageBody);
-    SmsReceiveIndexer(const std::vector<uint8_t> &pdu, long timestamp, int16_t destPort, bool isCdma,
+    SmsReceiveIndexer(const std::vector<uint8_t> &pdu, int64_t timestamp, int16_t destPort, bool isCdma,
         bool isCdmaWapPdu, const std::string &address, const std::string &displayAddress,
         const std::string &messageBody);
     const std::vector<uint8_t>& GetPdu() const;
     void SetPdu(const std::vector<uint8_t> &pdu);
-    long GetTimestamp() const;
-    void SetTimestamp(long timestamp);
+    int64_t GetTimestamp() const;
+    void SetTimestamp(int64_t timestamp);
     int16_t GetDestPort() const;
     void SetDestPort(int16_t destPort);
     bool GetIsCdma() const;
@@ -66,7 +66,7 @@ private:
     static constexpr int8_t TEXT_PORT_NUM = -1;
     static constexpr int16_t WAP_PUSH_PORT = 2948;
     std::vector<uint8_t> pdu_;
-    long timestamp_;
+    int64_t timestamp_;
     int16_t destPort_;
     bool isCdma_ = false;
     bool isCdmaWapPdu_ = false;
