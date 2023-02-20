@@ -65,6 +65,7 @@ private:
     void OnGetBase64Encode(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetBase64Decode(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetEncodeStringFunc(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void RemoveSpacesInDesAddr(std::u16string &desAddr);
 
     std::map<uint32_t, std::shared_ptr<SmsInterfaceManager>> slotSmsInterfaceManagerMap_;
     using SmsServiceFunc = void (SmsInterfaceStub::*)(MessageParcel &data, MessageParcel &reply, MessageOption &option);
