@@ -113,6 +113,7 @@ void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &
         deliveryCallback = iface_cast<IDeliveryShortMessageCallback>(remoteDeliveryCallback);
     }
     TELEPHONY_LOGI("MessageID::TEXT_BASED_SMS_DELIVERY %{public}d", slotId);
+    RemoveSpacesInDesAddr(desAddr);
     int32_t result = SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback);
     reply.WriteInt32(result);
 }
@@ -135,8 +136,28 @@ void SmsInterfaceStub::OnSendSmsDataRequest(MessageParcel &data, MessageParcel &
     }
     int16_t dataLen = data.ReadInt16();
     const uint8_t *buffer = reinterpret_cast<const uint8_t *>(data.ReadRawData(dataLen));
+    RemoveSpacesInDesAddr(desAddr);
     int32_t result = SendMessage(slotId, desAddr, scAddr, port, buffer, dataLen, sendCallback, deliveryCallback);
     reply.WriteInt32(result);
+}
+
+void SmsInterfaceStub::RemoveSpacesInDesAddr(std::u16string &desAddr)
+{
+    // Remove spaces in desAddr
+    std::string sourceAddr = StringUtils::ToUtf8(desAddr);
+    std::string resultAddr = sourceAddr;
+    int32_t count = static_cast<int32_t>(sourceAddr.size());
+    int32_t indexDes = 0;
+    int32_t indexResult = 0;
+    while (indexDes < count) {
+        if (desAddr[indexDes] != ' ') {
+            resultAddr[indexResult] = desAddr[indexDes];
+            indexResult++;
+        }
+        indexDes++;
+    }
+    sourceAddr = resultAddr.substr(0, indexResult);
+    desAddr = StringUtils::ToUtf16(sourceAddr);
 }
 
 void SmsInterfaceStub::OnSetSmscAddr(MessageParcel &data, MessageParcel &reply, MessageOption &option)
