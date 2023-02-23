@@ -21,11 +21,14 @@
 #include "delivery_short_message_callback_stub.h"
 #include "gsm_sms_cb_handler.h"
 #include "gsm_sms_message.h"
+#include "gsm_sms_receive_handler.h"
 #include "gtest/gtest.h"
+#include "mms_body.h"
 #include "mms_body_part.h"
 #include "mms_content_type.h"
 #include "mms_encode_buffer.h"
 #include "mms_header.h"
+#include "mms_msg.h"
 #include "msg_text_convert.h"
 #include "radio_event.h"
 #include "send_short_message_callback_stub.h"
@@ -36,6 +39,7 @@
 #include "sms_receive_handler.h"
 #include "sms_send_manager.h"
 #include "sms_sender.h"
+#include "sms_service.h"
 #include "sms_wap_push_buffer.h"
 #include "sms_wap_push_content_type.h"
 #include "telephony_errors.h"
@@ -667,6 +671,9 @@ HWTEST_F(BranchTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
     const std::string desAddr = "qwe";
     const std::string scAddr = "123";
     const std::string text = "123";
+    cdmaSmsSender->isImsNetDomain_ = true;
+    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    cdmaSmsSender->TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback);
     std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
     cdmaSmsSender->SendSmsToRil(smsIndexer);
     cdmaSmsSender->ResendTextDelivery(smsIndexer);
@@ -2577,6 +2584,72 @@ HWTEST_F(BranchTest, SmsBaseMessage_0001, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsReceiveHandler_0001
+ * @tc.name     Test GsmSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, GsmSmsReceiveHandler_0001, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    auto gsmSmsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(runner, 1);
+    gsmSmsReceiveHandler->UnRegisterHandler();
+    EXPECT_NE(gsmSmsReceiveHandler->HandleSmsByType(nullptr), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(gsmSmsReceiveHandler->TransformMessageInfo(nullptr), nullptr);
+}
+
+/**
+
+ * @tc.number   Telephony_SmsMmsGtest_MmsBody_0001
+ * @tc.name     Test MmsBody
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsMmsGtest_MmsBody_0001, Function | MediumTest | Level1)
+{
+    MmsBody mmsBody;
+    MmsDecodeBuffer mmsDecodeBuffer;
+    MmsHeader mmsHeader;
+    MmsEncodeBuffer mmsEncodeBuffer;
+    MmsBodyPart mmsBodyPart;
+    mmsDecodeBuffer.curPosition_ = 1;
+    mmsDecodeBuffer.totolLength_ = 0;
+    EXPECT_FALSE(mmsBody.DecodeMultipart(mmsDecodeBuffer));
+    EXPECT_FALSE(mmsBody.DecodeMmsBody(mmsDecodeBuffer, mmsHeader));
+    EXPECT_TRUE(mmsBody.EncodeMmsBody(mmsEncodeBuffer));
+    EXPECT_FALSE(mmsBody.EncodeMmsHeaderContentType(mmsHeader, mmsEncodeBuffer));
+    EXPECT_FALSE(mmsBody.IsContentLocationPartExist(""));
+    EXPECT_FALSE(mmsBody.IsContentIdPartExist(""));
+    EXPECT_FALSE(mmsBody.IsBodyPartExist(mmsBodyPart));
+    EXPECT_TRUE(mmsBody.AddMmsBodyPart(mmsBodyPart));
+    mmsBodyPart.isSmilFile_ = true;
+    EXPECT_TRUE(mmsBody.AddMmsBodyPart(mmsBodyPart));
+    mmsBody.bHaveSmilPart_ = true;
+    EXPECT_FALSE(mmsBody.AddMmsBodyPart(mmsBodyPart));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsMsg_0001
+ * @tc.name     Test MmsMsg
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsMmsGtest_MmsMsg_0001, Function | MediumTest | Level1)
+{
+    MmsMsg mmsMsg;
+    uint32_t outLen;
+    std::vector<MmsAddress> toAddrs = {};
+    MmsAttachment mmsAttachment;
+    std::vector<MmsAttachment> attachments = {};
+    EXPECT_FALSE(mmsMsg.DecodeMsg(""));
+    EXPECT_FALSE(mmsMsg.DecodeMsg(nullptr, 0));
+    mmsMsg.EncodeMsg(outLen);
+    mmsMsg.GetMmsFrom();
+    EXPECT_FALSE(mmsMsg.SetMmsTo(toAddrs));
+    mmsMsg.GetHeaderStringValue(0);
+    mmsMsg.GetHeaderContentTypeStart();
+    EXPECT_FALSE(mmsMsg.AddAttachment(mmsAttachment));
+    EXPECT_FALSE(mmsMsg.GetAllAttachment(attachments));
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_GsmSmsSender_0001
  * @tc.name     Test GsmSmsSender
  * @tc.desc     Function test
@@ -2650,11 +2723,16 @@ HWTEST_F(BranchTest, SmsMiscManager_0001, Function | MediumTest | Level1)
     smsMiscManager->ProcessEvent(event);
     event = nullptr;
     smsMiscManager->ProcessEvent(event);
+    smsMiscManager->NotifyHasResponse();
+    smsMiscManager->fairList_.push_back(1);
+    smsMiscManager->NotifyHasResponse();
     EXPECT_EQ(smsMiscManager->SetCBConfig(true, CODE_BUFFER_MAX_SIZE, 1, 1), TELEPHONY_ERR_ARGUMENT_INVALID);
     EXPECT_EQ(smsMiscManager->SetCBConfig(true, 1, 0, 1), TELEPHONY_ERR_ARGUMENT_INVALID);
     EXPECT_EQ(smsMiscManager->SetCBConfig(true, 1, 1, 0), TELEPHONY_ERR_ARGUMENT_INVALID);
     EXPECT_EQ(smsMiscManager->SetCBConfig(false, 1, 1, 1), TELEPHONY_ERR_SUCCESS);
     EXPECT_GE(smsMiscManager->SetCBConfig(true, 1, 1, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_TRUE(smsMiscManager->OpenCBRange(1, 1));
+    smsMiscManager->rangeList_.clear();
     smsMiscManager->rangeList_.emplace_back(VALUE_LENGTH, 1);
     EXPECT_EQ(smsMiscManager->SetCBConfig(true, 1, 1, 1), TELEPHONY_ERR_RIL_CMD_FAIL);
     auto oldIter = smsMiscManager->rangeList_.begin();
@@ -2670,6 +2748,107 @@ HWTEST_F(BranchTest, SmsMiscManager_0001, Function | MediumTest | Level1)
                   1, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD, pdu, smsc),
         0);
     EXPECT_EQ(smsMiscManager->GetAllSimMessages(message), TELEPHONY_ERR_UNKNOWN_NETWORK_TYPE);
+    std::list<SmsMiscManager::gsmCBRangeInfo> rangeList;
+    EXPECT_TRUE(smsMiscManager->SendDataToRil(true, rangeList));
+    SmsMiscManager::gsmCBRangeInfo rangeInfo(1, 1);
+    SmsMiscManager::gsmCBRangeInfo rangeInfoTwo(1, 0);
+    rangeList.push_back(rangeInfo);
+    rangeList.push_back(rangeInfoTwo);
+    EXPECT_NE(smsMiscManager->RangeListToString(rangeList), "");
+    EXPECT_FALSE(smsMiscManager->SendDataToRil(true, rangeList));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsService_0001
+ * @tc.name     Test SmsMiscManager
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsService_0001, Function | MediumTest | Level1)
+{
+    auto smsService = DelayedSingleton<SmsService>::GetInstance();
+    smsService->state_ = ServiceRunningState::STATE_RUNNING;
+    smsService->OnStart();
+    std::u16string desAddr = u"";
+    uint8_t *data = nullptr;
+    sptr<ISendShortMessageCallback> sendCallback = nullptr;
+    sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
+    EXPECT_GT(
+        smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback, deliveryCallback), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SendMessage(0, desAddr, desAddr, 1, data, 1, sendCallback, deliveryCallback),
+        TELEPHONY_ERR_SUCCESS);
+    bool isSupported = true;
+    std::string sca = "";
+    smsService->TrimSmscAddr(sca);
+    sca = " 123";
+    smsService->TrimSmscAddr(sca);
+    EXPECT_GT(smsService->IsImsSmsSupported(INVALID_SLOTID, isSupported), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->GetImsShortMessageFormat(desAddr), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SetSmscAddr(INVALID_SLOTID, desAddr), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->GetSmscAddr(INVALID_SLOTID, desAddr), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->AddSimMessage(
+                  INVALID_SLOTID, desAddr, desAddr, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD),
+        TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->DelSimMessage(INVALID_SLOTID, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->UpdateSimMessage(INVALID_SLOTID, 1,
+                  ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD, desAddr, desAddr),
+        TELEPHONY_ERR_SUCCESS);
+    std::vector<ShortMessage> message;
+    EXPECT_GT(smsService->SetCBConfig(INVALID_SLOTID, true, 1, 1, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GE(smsService->SetImsSmsConfig(INVALID_SLOTID, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SetDefaultSmsSlotId(INVALID_SLOTID), TELEPHONY_ERR_SUCCESS);
+    std::vector<std::u16string> splitMessage;
+    EXPECT_GT(smsService->SplitMessage(desAddr, splitMessage), TELEPHONY_ERR_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsService_0002
+ * @tc.name     Test SmsMiscManager
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, SmsService_0002, Function | MediumTest | Level1)
+{
+    auto smsService = DelayedSingleton<SmsService>::GetInstance();
+    std::u16string message = u"";
+    ISmsServiceInterface::SmsSegmentsInfo info;
+    EXPECT_GT(smsService->GetSmsSegmentsInfo(INVALID_SLOTID, message, true, info), TELEPHONY_ERR_SUCCESS);
+    message = u"123";
+    EXPECT_GT(smsService->GetSmsSegmentsInfo(INVALID_SLOTID, message, true, info), TELEPHONY_ERR_SUCCESS);
+    std::string scAddr = "";
+    std::string specification = "";
+    ShortMessage messages;
+    EXPECT_GT(smsService->CreateMessage(scAddr, specification, messages), TELEPHONY_ERR_SUCCESS);
+    specification = "3gpp";
+    EXPECT_GE(smsService->CreateMessage(scAddr, specification, messages), TELEPHONY_ERR_SUCCESS);
+    specification = "3gpp2";
+    EXPECT_GE(smsService->CreateMessage(scAddr, specification, messages), TELEPHONY_ERR_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsBodyPartHeader_0001
+ * @tc.name     Test SmsMiscManager
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchTest, MmsBodyPartHeader_0001, Function | MediumTest | Level1)
+{
+    auto mmsBodyPartHeader = std::make_shared<MmsBodyPartHeader>();
+    MmsDecodeBuffer decodeBuffer;
+    uint32_t len = 1;
+    decodeBuffer.curPosition_ = 0;
+    decodeBuffer.totolLength_ = 0;
+    EXPECT_FALSE(mmsBodyPartHeader->DecodeContentDisposition(decodeBuffer, len));
+    MmsEncodeBuffer encodeBuffer;
+    mmsBodyPartHeader->strContentTransferEncoding_ = "";
+    EXPECT_TRUE(mmsBodyPartHeader->EncodeContentTransferEncoding(encodeBuffer));
+    EXPECT_TRUE(mmsBodyPartHeader->EncodeContentLocation(encodeBuffer));
+    EXPECT_TRUE(mmsBodyPartHeader->EncodeContentId(encodeBuffer));
+    encodeBuffer.curPosition_ = CODE_BUFFER_MAX_SIZE;
+    mmsBodyPartHeader->strContentLocation_ = "123";
+    EXPECT_FALSE(mmsBodyPartHeader->EncodeMmsBodyPartHeader(encodeBuffer));
+    mmsBodyPartHeader->strContentID_ = "123";
+    encodeBuffer.curPosition_ = CODE_BUFFER_MAX_SIZE;
+    EXPECT_FALSE(mmsBodyPartHeader->EncodeContentLocation(encodeBuffer));
+    EXPECT_FALSE(mmsBodyPartHeader->EncodeContentId(encodeBuffer));
+    EXPECT_FALSE(mmsBodyPartHeader->EncodeMmsBodyPartHeader(encodeBuffer));
 }
 } // namespace Telephony
 } // namespace OHOS
