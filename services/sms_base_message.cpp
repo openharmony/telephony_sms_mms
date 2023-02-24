@@ -76,7 +76,7 @@ std::string SmsBaseMessage::GetRawUserData() const
     return rawUserData_;
 }
 
-long SmsBaseMessage::GetScTimestamp() const
+int64_t SmsBaseMessage::GetScTimestamp() const
 {
     return scTimestamp_;
 }

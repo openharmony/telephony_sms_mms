@@ -706,7 +706,7 @@ HWTEST_F(BranchTest, SmsCbMessage_0001, Function | MediumTest | Level1)
     uint8_t gs = 1;
     uint16_t serial = 1;
     bool isUserAlert = false;
-    long recvTime = 1;
+    int64_t recvTime = 1;
     std::vector<unsigned char> pdus;
     EXPECT_FALSE(smsCbMessage->GetFormat(format));
     EXPECT_FALSE(smsCbMessage->GetPriority(format));
