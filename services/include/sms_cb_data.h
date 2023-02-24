@@ -29,7 +29,7 @@ public:
         int32_t slotId = -1;
         std::string msgBody;
         uint16_t serial = 0;
-        long recvTime = 0;
+        int64_t recvTime = 0;
         uint16_t msgId = 0;
         int8_t format = 0;
         uint16_t category = SMS_CMAE_CTG_RESERVED;

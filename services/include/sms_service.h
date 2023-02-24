@@ -294,6 +294,7 @@ private:
         int32_t slotId, const std::u16string desAddr, const sptr<ISendShortMessageCallback> &sendCallback);
     bool ValidDestinationAddress(std::string desAddr);
     void TrimSmscAddr(std::string &sca);
+    bool CheckSimMessageIndexValid(int32_t slotId, uint32_t msgIndex);
 
 private:
     int64_t bindTime_ = 0;

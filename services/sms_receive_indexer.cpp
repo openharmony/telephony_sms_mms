@@ -34,17 +34,16 @@ SmsReceiveIndexer::SmsReceiveIndexer()
     isCdmaWapPdu_ = false;
 }
 
-SmsReceiveIndexer::SmsReceiveIndexer(const std::vector<uint8_t> &pdu, long timestamp, int16_t destPort,
-    bool isCdma, const std::string &address, const std::string &visibleAddress, int16_t msgRefId,
-    uint16_t msgSeqId, uint16_t msgCount, bool isCdmaWapPdu, const std::string &messageBody)
+SmsReceiveIndexer::SmsReceiveIndexer(const std::vector<uint8_t> &pdu, int64_t timestamp, int16_t destPort, bool isCdma,
+    const std::string &address, const std::string &visibleAddress, int16_t msgRefId, uint16_t msgSeqId,
+    uint16_t msgCount, bool isCdmaWapPdu, const std::string &messageBody)
     : pdu_(pdu), timestamp_(timestamp), destPort_(destPort), isCdma_(isCdma), isCdmaWapPdu_(isCdmaWapPdu),
       visibleMessageBody_(messageBody), originatingAddress_(address), msgRefId_(msgRefId), msgSeqId_(msgSeqId),
       msgCount_(msgCount), visibleAddress_(visibleAddress)
 {}
 
-SmsReceiveIndexer::SmsReceiveIndexer(const std::vector<uint8_t> &pdu, long timestamp, int16_t destPort,
-    bool isCdma, bool isCdmaWapPdu, const std::string &address, const std::string &visibleAddress,
-    const std::string &messageBody)
+SmsReceiveIndexer::SmsReceiveIndexer(const std::vector<uint8_t> &pdu, int64_t timestamp, int16_t destPort, bool isCdma,
+    bool isCdmaWapPdu, const std::string &address, const std::string &visibleAddress, const std::string &messageBody)
     : pdu_(pdu), timestamp_(timestamp), destPort_(destPort), isCdma_(isCdma), isCdmaWapPdu_(isCdmaWapPdu),
       visibleMessageBody_(messageBody), originatingAddress_(address), visibleAddress_(visibleAddress)
 {
@@ -157,12 +156,12 @@ void SmsReceiveIndexer::SetDestPort(int16_t destPort)
     destPort_ = destPort;
 }
 
-long SmsReceiveIndexer::GetTimestamp() const
+int64_t SmsReceiveIndexer::GetTimestamp() const
 {
     return timestamp_;
 }
 
-void SmsReceiveIndexer::SetTimestamp(long timestamp)
+void SmsReceiveIndexer::SetTimestamp(int64_t timestamp)
 {
     timestamp_ = timestamp;
 }

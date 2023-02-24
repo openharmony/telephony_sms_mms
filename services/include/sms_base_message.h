@@ -76,7 +76,7 @@ public:
     virtual enum SmsMessageClass GetMessageClass() const;
     std::vector<uint8_t> GetRawPdu() const;
     std::string GetRawUserData() const;
-    virtual long GetScTimestamp() const;
+    virtual int64_t GetScTimestamp() const;
     virtual int GetStatus() const;
     virtual int GetProtocolId() const;
     virtual bool IsReplaceMessage();
@@ -110,7 +110,7 @@ protected:
     std::string originatingAddress_;
     std::string visibleMessageBody_;
     enum SmsMessageClass msgClass_ = SMS_CLASS_UNKNOWN;
-    long scTimestamp_;
+    int64_t scTimestamp_;
     int status_;
     int protocolId_;
     bool bReplaceMessage_;

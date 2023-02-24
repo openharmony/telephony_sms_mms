@@ -94,12 +94,12 @@ void SmsSendIndexer::SetHasMore(bool hasMore)
     hasMore_ = hasMore;
 }
 
-long SmsSendIndexer::GetTimeStamp() const
+int64_t SmsSendIndexer::GetTimeStamp() const
 {
     return timeStamp_;
 }
 
-void SmsSendIndexer::SetTimeStamp(long timeStamp)
+void SmsSendIndexer::SetTimeStamp(int64_t timeStamp)
 {
     timeStamp_ = timeStamp;
 }

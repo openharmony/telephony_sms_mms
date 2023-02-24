@@ -359,7 +359,7 @@ static napi_value CreateShortMessageValue(napi_env env, const ShortMessage &shor
     std::u16string smscAddress;
     shortMessage.GetScAddress(smscAddress);
     NapiUtil::SetPropertyStringUtf8(env, object, "scAddress", NapiUtil::ToUtf8(smscAddress));
-    NapiUtil::SetPropertyInt32(env, object, "scTimestamp", shortMessage.GetScTimestamp());
+    NapiUtil::SetPropertyInt64(env, object, "scTimestamp", shortMessage.GetScTimestamp());
     NapiUtil::SetPropertyBoolean(env, object, "isReplaceMessage", shortMessage.IsReplaceMessage());
     NapiUtil::SetPropertyBoolean(env, object, "hasReplyPath", shortMessage.HasReplyPath());
     SetPropertyArray(env, object, "pdu", shortMessage.GetPdu());

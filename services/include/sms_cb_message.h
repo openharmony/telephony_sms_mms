@@ -266,7 +266,7 @@ public:
     bool GetMsgType(uint8_t &msgType) const;
     bool GetLangType(uint8_t &lan) const;
     bool GetDcs(uint8_t &dcs) const;
-    bool GetReceiveTime(long &recvTime) const;
+    bool GetReceiveTime(int64_t &recvTime) const;
 
 private:
     static constexpr uint8_t HEX_BYTE_STEP = 2;
@@ -293,7 +293,7 @@ private:
     void DecodeCbMsgDCS(const unsigned char dcsData, const unsigned short iosData, SmsCbMessageDcs &pDcs) const;
     void DecodeIos639Dcs(const unsigned char dcsData, const unsigned short iosData, SmsCbMessageDcs &pDcs) const;
     void DecodeGeneralDcs(const unsigned char dcsData, SmsCbMessageDcs &pDcs) const;
-    unsigned long GetRecvTime() const;
+    int64_t GetRecvTime() const;
     int CMASClass(const unsigned short messageId) const;
     void Decode3g7Bit(const std::vector<unsigned char> &pdu);
     void Decode3gUCS2(const std::vector<unsigned char> &pdu);

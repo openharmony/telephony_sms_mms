@@ -589,10 +589,10 @@ void SmsCbMessage::DecodeCbMsgDCS(
     }
 }
 
-unsigned long SmsCbMessage::GetRecvTime() const
+int64_t SmsCbMessage::GetRecvTime() const
 {
     time_t recvTime = time(NULL);
-    return (unsigned long)recvTime;
+    return static_cast<int64_t>(recvTime);
 }
 
 std::string SmsCbMessage::ToString() const
@@ -931,7 +931,7 @@ bool SmsCbMessage::GetDcs(uint8_t &dcs) const
     return true;
 }
 
-bool SmsCbMessage::GetReceiveTime(long &recvTime) const
+bool SmsCbMessage::GetReceiveTime(int64_t &recvTime) const
 {
     if (cbHeader_ == nullptr) {
         TELEPHONY_LOGE("cbHeader_ is nullptr");
