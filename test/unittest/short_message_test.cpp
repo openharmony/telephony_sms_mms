@@ -30,11 +30,11 @@ void ShortMessageTest::TestCreateMessage() const
         "0891683108200075F4240D91688129562983F6000012408"
         "00102142302C130");
     ShortMessage *message = new ShortMessage();
-    ShortMessage::CreateMessage(pdu, u"3gpp", *message);
     if (message == nullptr) {
         std::cout << "message is nullptr!" << std::endl;
         return;
     }
+    ShortMessage::CreateMessage(pdu, u"3gpp", *message);
     shortMessage_ = std::unique_ptr<ShortMessage>(message);
     if (shortMessage_ == nullptr) {
         std::cout << "TestCreateMessage fail!!!" << std::endl;
@@ -48,11 +48,11 @@ void ShortMessageTest::Test3Gpp2CreateMessage() const
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector(
         "0000021002020702c6049064c4d40601fc081b00031000200106102e8cbb366f03061409011126310a01400d0101");
     ShortMessage *message = new ShortMessage();
-    ShortMessage::CreateMessage(pdu, u"3gpp2", *message);
     if (message == nullptr) {
         std::cout << "message is nullptr!" << std::endl;
         return;
     }
+    ShortMessage::CreateMessage(pdu, u"3gpp2", *message);
     shortMessage_ = std::unique_ptr<ShortMessage>(message);
     if (shortMessage_ == nullptr) {
         std::cout << "TestCreateMessage Cdma fail!!!" << std::endl;
