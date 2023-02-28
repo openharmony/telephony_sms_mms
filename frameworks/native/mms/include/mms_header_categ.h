@@ -19,7 +19,7 @@
 #include <map>
 #include <stdint.h>
 
-#include "__functional_base"
+#include <functional>
 #include "mms_codec_type.h"
 
 namespace OHOS {
