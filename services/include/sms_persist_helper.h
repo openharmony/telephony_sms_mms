@@ -41,11 +41,11 @@ public:
     inline static const std::string SMS_ENCODING_PARAM_KEY = "persist.sys.sms.config.7bitforce";
 
 private:
-    const std::string SMS_URI = "dataability:///com.ohos.smsmmsability";
-    const std::string SMS_SUBSECTION = "dataability:///com.ohos.smsmmsability/sms_mms/sms_subsection";
-    const std::string CONTACT_URI = "dataability:///com.ohos.contactsdataability";
+    const std::string SMS_URI = "datashare:///com.ohos.smsmmsability";
+    const std::string SMS_SUBSECTION = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
+    const std::string CONTACT_URI = "datashare:///com.ohos.contactsdataability";
     const std::string CONTACT_BLOCK =
-        "dataability:///com.ohos.contactsdataability/contacts/contact_blocklist";
+        "datashare:///com.ohos.contactsdataability/contacts/contact_blocklist";
 
     std::shared_ptr<AppExecFwk::DataAbilityHelper> CreateDataAHelper();
     void ResultSetConvertToIndexer(
