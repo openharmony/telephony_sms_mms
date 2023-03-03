@@ -53,7 +53,7 @@ std::shared_ptr<DataShare::DataShareHelper> SmsPersistHelper::CreateDataAHelper(
 
 bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values)
 {
-    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
     if (helper == nullptr) {
         TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
         return false;
@@ -66,7 +66,7 @@ bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values)
 
 bool SmsPersistHelper::Query(DataShare::DataSharePredicates &predicates, std::vector<SmsReceiveIndexer> &indexers)
 {
-    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
     if (helper == nullptr) {
         TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
         return false;
@@ -93,7 +93,7 @@ bool SmsPersistHelper::Query(DataShare::DataSharePredicates &predicates, std::ve
 
 bool SmsPersistHelper::Delete(DataShare::DataSharePredicates &predicates)
 {
-    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
     if (helper == nullptr) {
         TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
         return false;
@@ -112,7 +112,7 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
     if (phoneNum.empty()) {
         return result;
     }
-    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(CONTACT_URI);
     if (helper == nullptr) {
         TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
         return false;
