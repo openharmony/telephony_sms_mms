@@ -28,9 +28,6 @@
 
 namespace OHOS {
 namespace Telephony {
-using namespace OHOS::AppExecFwk;
-using namespace OHOS::AAFwk;
-using namespace NativeRdb;
 class AbsSharedResultSet;
 SmsPersistHelper::SmsPersistHelper() {}
 
