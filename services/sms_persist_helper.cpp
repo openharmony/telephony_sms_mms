@@ -36,7 +36,7 @@ SmsPersistHelper::SmsPersistHelper() {}
 
 SmsPersistHelper::~SmsPersistHelper() {}
 
-std::shared_ptr<AppExecFwk::DataAbilityHelper> SmsPersistHelper::CreateDataAHelper()
+std::shared_ptr<DataShare::DataShareHelper> SmsPersistHelper::CreateDataAHelper(std::string uri)
 {
     auto saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
@@ -48,12 +48,12 @@ std::shared_ptr<AppExecFwk::DataAbilityHelper> SmsPersistHelper::CreateDataAHelp
         TELEPHONY_LOGE("GetSystemAbility Service Failed.");
         return nullptr;
     }
-    return DataAbilityHelper::Creator(remoteObj);
+    return DataShare::DataShareHelper::Creator(remoteObj, uri);
 }
 
-bool SmsPersistHelper::Insert(NativeRdb::ValuesBucket &values)
+bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values)
 {
-    std::shared_ptr<DataAbilityHelper> helper = CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataAHelper();
     if (helper == nullptr) {
         TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
         return false;
@@ -64,16 +64,16 @@ bool SmsPersistHelper::Insert(NativeRdb::ValuesBucket &values)
     return ret >= 0 ? true : false;
 }
 
-bool SmsPersistHelper::Query(NativeRdb::DataAbilityPredicates &predicates, std::vector<SmsReceiveIndexer> &indexers)
+bool SmsPersistHelper::Query(DataShare::DataSharePredicates &predicates, std::vector<SmsReceiveIndexer> &indexers)
 {
-    std::shared_ptr<DataAbilityHelper> helper = CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataAHelper();
     if (helper == nullptr) {
         TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
         return false;
     }
     Uri uri(SMS_SUBSECTION);
     std::vector<std::string> columns;
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = helper->Query(uri, columns, predicates);
+    auto resultSet = helper->Query(uri, predicates, columns);
     helper->Release();
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
@@ -91,9 +91,9 @@ bool SmsPersistHelper::Query(NativeRdb::DataAbilityPredicates &predicates, std::
     return true;
 }
 
-bool SmsPersistHelper::Delete(NativeRdb::DataAbilityPredicates &predicates)
+bool SmsPersistHelper::Delete(DataShare::DataSharePredicates &predicates)
 {
-    std::shared_ptr<DataAbilityHelper> helper = CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataAHelper();
     if (helper == nullptr) {
         TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
         return false;
@@ -108,20 +108,20 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
 {
     bool result = false;
     int count = 0;
-    const string phoneNumber = "phone_number";
+    const std::string phoneNumber = "phone_number";
     if (phoneNum.empty()) {
         return result;
     }
-    std::shared_ptr<DataAbilityHelper> helper = CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataAHelper();
     if (helper == nullptr) {
         TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
         return false;
     }
     Uri uri(CONTACT_BLOCK);
     std::vector<std::string> columns;
-    NativeRdb::DataAbilityPredicates predicates;
+    DataShare::DataSharePredicates predicates;
     predicates.EqualTo(phoneNumber, phoneNum);
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = helper->Query(uri, columns, predicates);
+    auto resultSet = helper->Query(uri, predicates, columns);
     helper->Release();
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
@@ -160,7 +160,7 @@ bool SmsPersistHelper::QueryParamBoolean(const std::string key, bool defValue)
 }
 
 void SmsPersistHelper::ConvertIntToIndexer(
-    SmsReceiveIndexer &info, const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
+    SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet)
 {
     int32_t columnInt;
     int columnIndex;
@@ -191,7 +191,7 @@ void SmsPersistHelper::ConvertIntToIndexer(
 }
 
 void SmsPersistHelper::ConvertStringToIndexer(
-    SmsReceiveIndexer &info, const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
+    SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet)
 {
     int columnIndex;
     std::string columnValue;
@@ -220,7 +220,7 @@ void SmsPersistHelper::ConvertStringToIndexer(
 }
 
 void SmsPersistHelper::ResultSetConvertToIndexer(
-    SmsReceiveIndexer &info, const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
+    SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet)
 {
     ConvertIntToIndexer(info, resultSet);
     ConvertStringToIndexer(info, resultSet);
