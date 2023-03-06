@@ -33,7 +33,7 @@ SmsPersistHelper::SmsPersistHelper() {}
 
 SmsPersistHelper::~SmsPersistHelper() {}
 
-std::shared_ptr<DataShare::DataShareHelper> SmsPersistHelper::CreateDataAHelper(std::string uri)
+std::shared_ptr<DataShare::DataShareHelper> SmsPersistHelper::CreateDataShareHelper(std::string uri)
 {
     auto saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
