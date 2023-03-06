@@ -231,7 +231,7 @@ bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &ind
     }
     const uint8_t gsm = 1;
     const uint8_t cdma = 2;
-    DataShare::DataShareBucket bucket;
+    DataShare::DataShareValuesBucket bucket;
     bucket.Put(SmsMmsData::SLOT_ID, std::to_string(slotId_));
     bucket.Put(SmsMmsData::RECEIVER_NUMBER, indexer->GetOriginatingAddress());
     bucket.Put(SmsMmsData::SENDER_NUMBER, indexer->GetOriginatingAddress());
