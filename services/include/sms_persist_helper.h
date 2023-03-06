@@ -47,7 +47,7 @@ private:
     const std::string CONTACT_BLOCK =
         "datashare:///com.ohos.contactsdataability/contacts/contact_blocklist";
 
-    std::shared_ptr<AppExecFwk::DataAbilityHelper> CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> CreateDataAHelper(std::string uri);
     void ResultSetConvertToIndexer(
         SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
     void ConvertIntToIndexer(
