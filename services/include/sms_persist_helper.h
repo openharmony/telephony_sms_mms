@@ -18,10 +18,8 @@
 
 #include "singleton.h"
 
-#include "data_ability_helper.h"
-#include "data_ability_predicates.h"
-#include "values_bucket.h"
-#include "abs_shared_result_set.h"
+#include "datashare_helper.h"
+#include "datashare_predicates.h"
 
 #include "sms_receive_indexer.h"
 #include "sms_mms_data.h"
@@ -31,9 +29,9 @@ namespace Telephony {
 class SmsPersistHelper {
     DECLARE_DELAYED_SINGLETON(SmsPersistHelper)
 public:
-    bool Insert(NativeRdb::ValuesBucket &values);
-    bool Query(NativeRdb::DataAbilityPredicates &predicates, std::vector<SmsReceiveIndexer> &indexers);
-    bool Delete(NativeRdb::DataAbilityPredicates &predicates);
+    bool Insert(DataShare::DataShareValuesBucket &values);
+    bool Query(DataShare::DataSharePredicates &predicates, std::vector<SmsReceiveIndexer> &indexers);
+    bool Delete(DataShare::DataSharePredicates &predicates);
     bool QueryBlockPhoneNumber(const std::string &phoneNum);
     bool QueryParamBoolean(const std::string key, bool defValue);
 
@@ -43,17 +41,19 @@ public:
     inline static const std::string SMS_ENCODING_PARAM_KEY = "persist.sys.sms.config.7bitforce";
 
 private:
-    const std::string SMS_SUBSECTION = "dataability:///com.ohos.smsmmsability/sms_mms/sms_subsection";
+    const std::string SMS_URI = "datashare:///com.ohos.smsmmsability";
+    const std::string SMS_SUBSECTION = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
+    const std::string CONTACT_URI = "datashare:///com.ohos.contactsdataability";
     const std::string CONTACT_BLOCK =
-        "dataability:///com.ohos.contactsdataability/contacts/contact_blocklist";
+        "datashare:///com.ohos.contactsdataability/contacts/contact_blocklist";
 
-    std::shared_ptr<AppExecFwk::DataAbilityHelper> CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper(std::string uri);
     void ResultSetConvertToIndexer(
-        SmsReceiveIndexer &info, const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet);
+        SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
     void ConvertIntToIndexer(
-        SmsReceiveIndexer &info, const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet);
+        SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
     void ConvertStringToIndexer(
-        SmsReceiveIndexer &info, const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet);
+        SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
 };
 } // namespace Telephony
 } // namespace OHOS
