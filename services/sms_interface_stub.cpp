@@ -403,7 +403,7 @@ void SmsInterfaceStub::OnGetEncodeStringFunc(MessageParcel &data, MessageParcel 
     std::string encodeString;
 
     if (valLength != str.length()) {
-        TELEPHONY_LOGE("invalid valLength[%{public}u], str.length[%{public}u]!", valLength, str.length());
+        TELEPHONY_LOGE("invalid valLength!");
         return;
     }
     result = GetEncodeStringFunc(encodeString, charset, valLength, str);
