@@ -18,16 +18,11 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "telephony_errors.h"
-#include "telephony_permission.h"
 
 namespace OHOS {
 namespace Telephony {
 int32_t ImsSmsProxy::ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo)
 {
-    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
-        TELEPHONY_LOGE("[slot%{public}d]Permission denied!", slotId);
-        return TELEPHONY_ERR_PERMISSION_ERR;
-    }
     MessageParcel in;
     int32_t ret = WriteCommonInfo(__FUNCTION__, in, slotId);
     if (ret != TELEPHONY_SUCCESS) {
@@ -42,10 +37,6 @@ int32_t ImsSmsProxy::ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMes
 
 int32_t ImsSmsProxy::ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig)
 {
-    if (!TelephonyPermission::CheckPermission(Permission::SET_TELEPHONY_STATE)) {
-        TELEPHONY_LOGE("[slot%{public}d]Permission denied!", slotId);
-        return TELEPHONY_ERR_PERMISSION_ERR;
-    }
     MessageParcel in;
     int32_t ret = WriteCommonInfo(__FUNCTION__, in, slotId);
     if (ret != TELEPHONY_SUCCESS) {
@@ -70,10 +61,6 @@ int32_t ImsSmsProxy::ImsGetSmsConfig(int32_t slotId)
 
 int32_t ImsSmsProxy::RegisterImsSmsCallback(const sptr<ImsSmsCallbackInterface> &callback)
 {
-    if (!TelephonyPermission::CheckPermission(Permission::SET_TELEPHONY_STATE)) {
-        TELEPHONY_LOGE("Permission denied!");
-        return TELEPHONY_ERR_PERMISSION_ERR;
-    }
     if (callback == nullptr) {
         TELEPHONY_LOGE("callback is nullptr!");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
