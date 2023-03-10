@@ -2113,7 +2113,7 @@ HWTEST_F(SmsMmsGtest, Receive_SMS_0001, Function | MediumTest | Level2)
     helper.slotId = slotId;
 
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVED_COMPLETED);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
         std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
@@ -2152,7 +2152,7 @@ HWTEST_F(SmsMmsGtest, Receive_SMS_0002, Function | MediumTest | Level2)
     helper.slotId = slotId;
 
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVED_COMPLETED);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
         std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
