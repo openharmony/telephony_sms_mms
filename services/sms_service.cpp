@@ -384,7 +384,7 @@ bool SmsService::CheckSimMessageIndexValid(int32_t slotId, uint32_t msgIndex)
         return false;
     }
 
-    if (msgIndex < 0 || totalMessages.size() <= 0) {
+    if (msgIndex < 0 || totalMessages.size() == 0) {
         TELEPHONY_LOGE("SmsService::CheckSimMessageIndexValid msgIndex error");
         return false;
     }

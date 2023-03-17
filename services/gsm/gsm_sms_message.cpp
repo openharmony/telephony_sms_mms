@@ -542,7 +542,6 @@ void GsmSmsMessage::ConvertUserData()
         return;
     }
     if (smsUserData_.length > 0) {
-        int dataSize = 0;
         MsgTextConvert *textCvt = MsgTextConvert::Instance();
         if (textCvt == nullptr) {
             return;
@@ -554,11 +553,11 @@ void GsmSmsMessage::ConvertUserData()
             };
             langInfo.bSingleShift = false;
             langInfo.bLockingShift = false;
-            dataSize = textCvt->ConvertGSM7bitToUTF8(buff, MAX_MSG_TEXT_LEN,
+            int dataSize = textCvt->ConvertGSM7bitToUTF8(buff, MAX_MSG_TEXT_LEN,
                 reinterpret_cast<unsigned char *>(smsUserData_.data), smsUserData_.length, &langInfo);
             visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
         } else if (codingScheme_ == SMS_CODING_UCS2) {
-            dataSize = textCvt->ConvertUCS2ToUTF8(
+            int dataSize = textCvt->ConvertUCS2ToUTF8(
                 buff, MAX_MSG_TEXT_LEN, reinterpret_cast<unsigned char *>(smsUserData_.data), smsUserData_.length);
             visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
         } else if (codingScheme_ == SMS_CODING_8BIT) {

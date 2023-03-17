@@ -34,8 +34,6 @@ void SmsBroadcastSubscriberGtest::OnReceiveEvent(const OHOS::EventFwk::CommonEve
         action == CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED) {
         TELEPHONY_LOGI("receive a Cell Broadcast");
         if (helper_ == nullptr) {
-            helper_->SetBoolResult(false);
-            helper_->NotifyAll();
             return;
         }
         helper_->SetBoolResult(true);
@@ -44,8 +42,6 @@ void SmsBroadcastSubscriberGtest::OnReceiveEvent(const OHOS::EventFwk::CommonEve
     } else if (action == CommonEventSupport::COMMON_EVENT_SMS_RECEIVED_COMPLETED) {
         TELEPHONY_LOGI("receive a Normal Sms");
         if (helper_ == nullptr) {
-            helper_->SetBoolResult(false);
-            helper_->NotifyAll();
             return;
         }
         helper_->SetBoolResult(true);
@@ -54,8 +50,6 @@ void SmsBroadcastSubscriberGtest::OnReceiveEvent(const OHOS::EventFwk::CommonEve
     } else if (action == CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED) {
         TELEPHONY_LOGI("receive a Wap Push");
         if (helper_ == nullptr) {
-            helper_->SetBoolResult(false);
-            helper_->NotifyAll();
             return;
         }
         helper_->SetBoolResult(true);
