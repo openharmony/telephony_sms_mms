@@ -41,7 +41,7 @@ void SmsBroadcastSubscriberGtest::OnReceiveEvent(const OHOS::EventFwk::CommonEve
         helper_->SetBoolResult(true);
         helper_->NotifyAll();
         helper_ = nullptr;
-    } else if (action == CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED) {
+    } else if (action == CommonEventSupport::COMMON_EVENT_SMS_RECEIVED_COMPLETED) {
         TELEPHONY_LOGI("receive a Normal Sms");
         if (helper_ == nullptr) {
             helper_->SetBoolResult(false);
