@@ -35,7 +35,7 @@ void SmsStateObserver::StartEventSubscriber()
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVED_COMPLETED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     smsSubscriber_ = std::make_shared<SmsStateEventSubscriber>(subscriberInfo);
@@ -78,7 +78,7 @@ void SmsStateEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventDa
                 slotId, SmsMmsMessageType::CELL_BROAD_CAST);
             SmsHiSysEvent::WriteSmsReceiveBehaviorEvent(slotId, SmsMmsMessageType::CELL_BROAD_CAST);
             break;
-        case COMMON_EVENT_SMS_RECEIVE_COMPLETED:
+        case COMMON_EVENT_SMS_RECEIVED_COMPLETED:
             DelayedSingleton<SmsHiSysEvent>::GetInstance()->JudgingSmsBroadcastTimeOut(
                 slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE);
             SmsHiSysEvent::WriteSmsReceiveBehaviorEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE);
@@ -108,7 +108,7 @@ void SmsStateEventSubscriber::InitEventMap()
         { CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED,
             COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED },
         { CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED, COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED },
-        { CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED, COMMON_EVENT_SMS_RECEIVE_COMPLETED },
+        { CommonEventSupport::COMMON_EVENT_SMS_RECEIVED_COMPLETED, COMMON_EVENT_SMS_RECEIVED_COMPLETED },
         { CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED, COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED },
     };
 }

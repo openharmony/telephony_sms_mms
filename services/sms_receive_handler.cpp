@@ -195,7 +195,7 @@ void SmsReceiveHandler::SendBroadcast(
         }
     }
     Want want;
-    want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVED_COMPLETED);
     want.SetParam("slotId", static_cast<int>(slotId_));
     want.SetParam("pdus", newPdus);
     want.SetParam("isCdma", indexer->GetIsCdma());
