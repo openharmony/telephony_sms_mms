@@ -562,9 +562,8 @@ HWTEST_F(BranchTest, SmsWapPushBuffer_0002, Function | MediumTest | Level1)
     smsWapPushBuffer->pduBuffer_[0] = PDU_BUFFE_LENGTH_ONE;
     EXPECT_TRUE(smsWapPushBuffer->DecodeInteger(iInteger));
     smsWapPushBuffer->curPosition_ = 0;
-    smsWapPushBuffer->pduBuffer_[0] = PDU_BUFFE_LENGTH_ONE;
-    smsWapPushBuffer->pduBuffer_[1] = PDU_BUFFE_LENGTH_ONE;
-    EXPECT_TRUE(smsWapPushBuffer->DecodeInteger(iInteger));
+    smsWapPushBuffer->pduBuffer_[0] = PDU_BUFFE_LENGTH_TWO;
+    EXPECT_FALSE(smsWapPushBuffer->DecodeInteger(iInteger));
 }
 
 /**
