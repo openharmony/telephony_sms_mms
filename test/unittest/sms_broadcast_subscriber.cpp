@@ -32,7 +32,7 @@ void SmsBroadcastSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventDat
     std::cout << "CommonEventPublishOrderedEventTest::Subscriber OnReceiveEvent" << std::endl;
     OHOS::EventFwk::Want want = data.GetWant();
     std::string action = data.GetWant().GetAction();
-    if (action == CommonEventSupport::COMMON_EVENT_SMS_RECEIVED_COMPLETED) {
+    if (action == CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED) {
         int msgcode = GetCode();
         std::string msgdata = GetData();
         bool isCdma = want.GetBoolParam("isCdma", false);
