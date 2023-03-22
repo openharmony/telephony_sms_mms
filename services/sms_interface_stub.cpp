@@ -144,6 +144,10 @@ void SmsInterfaceStub::OnSendSmsDataRequest(MessageParcel &data, MessageParcel &
 void SmsInterfaceStub::RemoveSpacesInDesAddr(std::u16string &desAddr)
 {
     // Remove spaces in desAddr
+    if (desAddr.empty() || desAddr.size() >= MAX_ADDRESS_LEN) {
+        TELEPHONY_LOGE("RemoveSpacesInDesAddr desAddr is invalid");
+        return;
+    }
     std::string sourceAddr = StringUtils::ToUtf8(desAddr);
     std::string resultAddr = sourceAddr;
     int32_t count = static_cast<int32_t>(sourceAddr.size());
