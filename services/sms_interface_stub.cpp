@@ -402,6 +402,11 @@ void SmsInterfaceStub::OnGetEncodeStringFunc(MessageParcel &data, MessageParcel 
     std::string str = StringUtils::ToUtf8(strEncodeString);
     std::string encodeString;
 
+    if (valLength != str.length()) {
+        TELEPHONY_LOGE("invalid valLength!");
+        return;
+    }
+
     result = GetEncodeStringFunc(encodeString, charset, valLength, str);
     reply.WriteBool(result);
     if (!result) {
