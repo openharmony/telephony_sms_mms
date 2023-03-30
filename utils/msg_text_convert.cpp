@@ -984,6 +984,9 @@ int MsgTextConvert::EscapeGSM7BitToUCS2(
     }
     if (GSM7_BIT_TO_UC_S2[pSrcText[index]] == 0x001B) {
         index++;
+        if (index == srcLen) {
+            return index;
+        }
         result = EscapeToUCS2(pSrcText[index], pLangInfo);
     } else {
         result = GSM7_BIT_TO_UC_S2[pSrcText[index]];
