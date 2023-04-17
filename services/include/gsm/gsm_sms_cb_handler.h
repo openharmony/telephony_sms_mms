@@ -39,9 +39,9 @@ using SmsCbInfo = struct CbInfo {
         : header(headPtr), cbMsgs(cbPtr)
     {}
     CbInfo() {}
-    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> header;
-    std::map<unsigned char, std::shared_ptr<SmsCbMessage>> cbMsgs;
-    std::u16string plmn_;
+    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> header = nullptr;
+    std::map<unsigned char, std::shared_ptr<SmsCbMessage>> cbMsgs {};
+    std::u16string plmn_ = u"";
     int32_t lac_ = -1;
     int32_t cid_ = -1;
 

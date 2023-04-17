@@ -41,38 +41,38 @@ static constexpr char SMS_PUSH_XML_INVAL_SVC[] = "invalidate-service";
 static constexpr char SMS_PUSH_XML_CO_URI[] = "uri";
 
 struct SmsWapContentType {
-    char *contentsTypeName;
-    unsigned char contentsTypeCode;
+    char *contentsTypeName = nullptr;
+    unsigned char contentsTypeCode = 0;
 };
 
 struct SmsWapCharset {
-    char *charsetName;
-    unsigned short charsetCode;
+    char *charsetName = nullptr;
+    unsigned short charsetCode = 0;
 };
 
 struct SmsWapUnregisterContentsType {
-    char *contentsTypeName;
-    unsigned short contentsTypeCode;
+    char *contentsTypeName = nullptr;
+    unsigned short contentsTypeCode = 0;
 };
 
 struct SmsWspLanguage {
-    char *languageName;
-    unsigned char languageCode;
+    char *languageName = nullptr;
+    unsigned char languageCode = 0;
 };
 
 struct SmsWspHeaderParameter {
-    char *parameterToken;
-    unsigned int parameterCode;
+    char *parameterToken = nullptr;
+    unsigned int parameterCode = 0;
 };
 
 struct SmsWspMethodType {
-    char *methodName;
-    unsigned char methodCode;
+    char *methodName = nullptr;
+    unsigned char methodCode = 0;
 };
 
 struct SmsWspSecurityType {
-    char *securityTypeName;
-    unsigned char securityTypeCode;
+    char *securityTypeName = nullptr;
+    unsigned char securityTypeCode = 0;
 };
 
 enum SmsNetworkStatus {
@@ -439,19 +439,19 @@ struct SmsEncodingSpecific {
 };
 
 struct SmsCtgSpecific {
-    unsigned char operationCode;
-    unsigned short category;
-    SmsLanguageType language;
-    unsigned char maxMsg;
-    SmsAlertOption alertOption;
-    unsigned int dataLen;
-    char userData[SMS_MAX_USER_DATA_LEN + 1];
+    unsigned char operationCode = 0;
+    unsigned short category = 0;
+    SmsLanguageType language = SmsLanguageType::SMS_LAN_UNKNOWN;
+    unsigned char maxMsg = 0;
+    SmsAlertOption alertOption = SmsAlertOption::SMS_ALERT_NO_ALERT;
+    unsigned int dataLen = 0;
+    char userData[SMS_MAX_USER_DATA_LEN + 1] = { 0 };
 };
 
 struct SmsSvcCtgProgramData {
-    enum SmsEncodingType encodeType;
-    unsigned int numData;
-    SmsCtgSpecific *specificData;
+    enum SmsEncodingType encodeType = SmsEncodingType::SMS_ENCODE_OCTET;
+    unsigned int numData = 0;
+    SmsCtgSpecific *specificData = nullptr;
 };
 
 struct SmsTeleSvcUserData {

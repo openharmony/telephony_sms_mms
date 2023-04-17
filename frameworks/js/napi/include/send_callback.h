@@ -23,10 +23,10 @@
 namespace OHOS {
 namespace Telephony {
 struct SendCallbackContext {
-    napi_env env;
-    napi_ref thisVarRef;
-    napi_ref callbackRef;
-    SendSmsResult result;
+    napi_env env = nullptr;
+    napi_ref thisVarRef = nullptr;
+    napi_ref callbackRef = nullptr;
+    SendSmsResult result = SendSmsResult::SEND_SMS_FAILURE_UNKNOWN;
 };
 class SendCallback : public SendShortMessageCallbackStub {
 public:

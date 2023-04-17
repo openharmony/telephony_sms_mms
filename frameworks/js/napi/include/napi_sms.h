@@ -111,7 +111,7 @@ struct SendMessageContext {
 };
 
 struct CreateMessageContext : BaseContext {
-    std::vector<unsigned char> pdu;
+    std::vector<unsigned char> pdu {};
     std::string specification = "";
     ShortMessage *shortMessage = nullptr;
 };
@@ -188,9 +188,9 @@ struct GetSmsSegmentsInfoContext : BaseContext {
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::string content = "";
     bool force7BitCode = false;
-    int32_t splitCount;
-    int32_t encodeCount;
-    int32_t encodeCountRemaining;
+    int32_t splitCount = 0;
+    int32_t encodeCount = 0;
+    int32_t encodeCountRemaining = 0;
     ISmsServiceInterface::SmsSegmentsInfo::SmsSegmentCodeScheme scheme;
 };
 

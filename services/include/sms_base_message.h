@@ -51,10 +51,10 @@ typedef struct {
 } SpecialSmsIndication;
 
 struct SplitInfo {
-    std::string text;
-    std::vector<uint8_t> encodeData;
-    SmsCodingScheme encodeType;
-    MSG_LANGUAGE_ID_T langId;
+    std::string text = "";
+    std::vector<uint8_t> encodeData {};
+    SmsCodingScheme encodeType = SmsCodingScheme::SMS_CODING_7BIT;
+    MSG_LANGUAGE_ID_T langId = 0;
 };
 
 struct LengthInfo {

@@ -398,19 +398,19 @@ enum class MmsEncodeErrcode {
 };
 
 struct MmsHeaderCategDes {
-    unsigned char fieldId;
-    MmsFieldOptType fieldOpt;
-    MmsFieldValueType valueType;
+    unsigned char fieldId = 0;
+    MmsFieldOptType fieldOpt = MmsFieldOptType::MMS_UNSUPPORTED_TYPE;
+    MmsFieldValueType valueType = MmsFieldValueType::MMS_FIELD_UNKOWN_TYPE;
 };
 
 struct KeyString {
-    unsigned char key;
-    const char *value;
+    unsigned char key = 0;
+    const char *value = nullptr;
 };
 
 struct MmsFieldDes {
-    unsigned char fieldId;
-    MmsFieldValueType type;
+    unsigned char fieldId = 0;
+    MmsFieldValueType type = MmsFieldValueType::MMS_FIELD_UNKOWN_TYPE;
 };
 
 /**
