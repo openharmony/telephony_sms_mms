@@ -111,8 +111,8 @@ enum class ContentTypes {
 };
 
 struct KeyValue {
-    ContentTypes key;
-    const char *value;
+    ContentTypes key = ContentTypes::X_X;
+    const char *value = nullptr;
 };
 
 static const KeyValue mmsContentNames[] = {

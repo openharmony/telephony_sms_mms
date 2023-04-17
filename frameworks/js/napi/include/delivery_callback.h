@@ -22,10 +22,10 @@
 namespace OHOS {
 namespace Telephony {
 struct DeliveryCallbackContext {
-    napi_env env;
-    napi_ref thisVarRef;
-    napi_ref callbackRef;
-    std::string pduStr;
+    napi_env env = nullptr;
+    napi_ref thisVarRef = nullptr;
+    napi_ref callbackRef = nullptr;
+    std::string pduStr = "";
 };
 class DeliveryCallback : public DeliveryShortMessageCallbackStub {
 public:

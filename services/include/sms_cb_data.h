@@ -27,7 +27,7 @@ class SmsCbData {
 public:
     struct CbData {
         int32_t slotId = -1;
-        std::string msgBody;
+        std::string msgBody = "";
         uint16_t serial = 0;
         int64_t recvTime = 0;
         uint16_t msgId = 0;

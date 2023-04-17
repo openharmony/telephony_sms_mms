@@ -188,9 +188,9 @@ public:
      * Serial Number
      */
     struct SmsCBMessageSerialNum {
-        unsigned char geoScope;
-        unsigned char updateNum;
-        unsigned short msgCode;
+        unsigned char geoScope = 0;
+        unsigned char updateNum = 0;
+        unsigned short msgCode = 0;
     };
 
     /**
@@ -199,14 +199,14 @@ public:
      * CBS Data Coding Scheme
      */
     struct SmsCbMessageDcs {
-        unsigned char codingGroup; /**  Coding group, GSM 03.38 */
-        unsigned char classType; /** The message class */
-        bool bCompressed; /** if text is compressed this is TRUE */
-        unsigned char codingScheme; /** How to encode a message. */
-        unsigned char langType;
-        unsigned char iso639Lang[SmsCbMessage::SMS_CB_IOS639LANG_SIZE]; /* 2 GSM chars and a CR char */
-        bool bUDH;
-        unsigned char rawData;
+        unsigned char codingGroup = 0; /**  Coding group, GSM 03.38 */
+        unsigned char classType = 0; /** The message class */
+        bool bCompressed = false; /** if text is compressed this is TRUE */
+        unsigned char codingScheme = 0; /** How to encode a message. */
+        unsigned char langType = 0;
+        unsigned char iso639Lang[SmsCbMessage::SMS_CB_IOS639LANG_SIZE] = { 0 }; /* 2 GSM chars and a CR char */
+        bool bUDH = false;
+        unsigned char rawData = 0;
     };
 
     /**

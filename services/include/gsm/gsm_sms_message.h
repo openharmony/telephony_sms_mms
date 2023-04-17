@@ -95,11 +95,11 @@ private:
 };
 
 struct EncodeInfo {
-    char tpduData_[GsmSmsMessage::TAPI_NETTEXT_SMDATA_SIZE_MAX + 1];
-    char smcaData_[GsmSmsMessage::TAPI_SIM_SMSP_ADDRESS_LEN + 1];
-    int tpduLen;
-    int smcaLen;
-    bool isMore_;
+    char tpduData_[GsmSmsMessage::TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = { 0 };
+    char smcaData_[GsmSmsMessage::TAPI_SIM_SMSP_ADDRESS_LEN + 1] = { 0 };
+    int tpduLen = 0;
+    int smcaLen = 0;
+    bool isMore_ = false;
 };
 } // namespace Telephony
 } // namespace OHOS

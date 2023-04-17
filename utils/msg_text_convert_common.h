@@ -43,10 +43,10 @@ enum MsgLanguageId {
 };
 
 struct MsgLangInfo {
-    bool bSingleShift;
-    bool bLockingShift;
-    MSG_LANGUAGE_ID_T singleLang;
-    MSG_LANGUAGE_ID_T lockingLang;
+    bool bSingleShift = false;
+    bool bLockingShift = false;
+    MSG_LANGUAGE_ID_T singleLang = 0;
+    MSG_LANGUAGE_ID_T lockingLang = 0;
 };
 } // namespace Telephony
 } // namespace OHOS

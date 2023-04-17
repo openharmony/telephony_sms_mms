@@ -58,127 +58,127 @@ enum DispositionValue {
 };
 
 struct MmsAddressContext {
-    std::string address;
+    std::string address = "";
     int32_t charset = DEFAULT_ERROR;
 };
 
 struct MmsAttachmentContext {
-    std::string path;
-    std::string fileName;
-    std::string contentId;
-    std::string contentLocation;
-    std::string contentDisposition;
-    std::string contentTransferEncoding;
-    std::string contentType;
+    std::string path = "";
+    std::string fileName = "";
+    std::string contentId = "";
+    std::string contentLocation = "";
+    std::string contentDisposition = "";
+    std::string contentTransferEncoding = "";
+    std::string contentType = "";
     bool isSmil = false;
-    uint32_t inBuffLen;
-    std::unique_ptr<char[]> inBuff;
+    uint32_t inBuffLen = 0;
+    std::unique_ptr<char[]> inBuff = nullptr;
     int32_t charset = DEFAULT_ERROR;
 };
 
 struct MmsSendConfContext {
-    uint8_t responseState;
-    std::string transactionId;
-    uint16_t version;
-    std::string messageId;
+    uint8_t responseState = 0;
+    std::string transactionId = "";
+    uint16_t version = 0;
+    std::string messageId = "";
 };
 
 struct MmsSendReqContext {
     MmsAddress from;
-    std::vector<MmsAddress> to;
-    std::string transactionId;
+    std::vector<MmsAddress> to {};
+    std::string transactionId = "";
     uint16_t version = DEFAULT_ERROR;
-    int64_t date;
-    std::vector<MmsAddress> cc;
-    std::vector<MmsAddress> bcc;
-    std::string subject;
-    uint8_t messageClass;
+    int64_t date = 0;
+    std::vector<MmsAddress> cc {};
+    std::vector<MmsAddress> bcc {};
+    std::string subject = "";
+    uint8_t messageClass = 0;
     int32_t expiry = DEFAULT_ERROR;
     uint8_t priority = DEFAULT_ERROR;
-    uint8_t senderVisibility;
-    uint8_t deliveryReport;
-    uint8_t readReport;
-    std::string contentType;
+    uint8_t senderVisibility = 0;
+    uint8_t deliveryReport = 0;
+    uint8_t readReport = 0;
+    std::string contentType = "";
 };
 
 struct MmsNotificationIndContext {
-    std::string transactionId;
-    uint8_t messageClass;
-    int64_t messageSize;
-    int32_t expiry;
-    uint16_t version;
+    std::string transactionId = "";
+    uint8_t messageClass = 0;
+    int64_t messageSize = 0;
+    int32_t expiry = DEFAULT_ERROR;
+    uint16_t version = DEFAULT_ERROR;
     MmsAddress from;
-    std::string subject;
-    uint8_t deliveryReport;
-    std::string contentLocation;
-    uint8_t contentClass;
-    uint32_t charset;
+    std::string subject = "";
+    uint8_t deliveryReport = 0;
+    std::string contentLocation = "";
+    uint8_t contentClass = 0;
+    uint32_t charset = DEFAULT_ERROR;
 };
 
 struct MmsRespIndContext {
-    std::string transactionId;
-    uint8_t status;
-    uint16_t version;
-    uint8_t reportAllowed;
+    std::string transactionId = 0;
+    uint8_t status = 0;
+    uint16_t version = DEFAULT_ERROR;
+    uint8_t reportAllowed = 0;
 };
 
 struct MmsRetrieveConfContext {
-    std::string transactionId;
-    std::string messageId;
-    int64_t date;
-    uint16_t version;
-    std::vector<MmsAddress> to;
+    std::string transactionId = "";
+    std::string messageId = "";
+    int64_t date = 0;
+    uint16_t version = DEFAULT_ERROR;
+    std::vector<MmsAddress> to {};
     MmsAddress from;
-    std::vector<MmsAddress> cc;
-    std::string subject;
-    uint8_t priority;
-    uint8_t deliveryReport;
-    uint8_t readReport;
-    uint8_t retrieveStatus;
-    std::string retrieveText;
-    std::string contentType;
-    int32_t message;
+    std::vector<MmsAddress> cc {};
+    std::string subject = "";
+    uint8_t priority = DEFAULT_ERROR;
+    uint8_t deliveryReport = 0;
+    uint8_t readReport = 0;
+    uint8_t retrieveStatus = 0;
+    std::string retrieveText = "";
+    std::string contentType = "";
+    int32_t message = 0;
 };
 
 struct MmsAcknowledgeIndContext {
-    std::string transactionId;
-    uint16_t version;
-    uint8_t reportAllowed;
+    std::string transactionId = "";
+    uint16_t version = DEFAULT_ERROR;
+    uint8_t reportAllowed = 0;
 };
 
 struct MmsDeliveryIndContext {
-    std::string messageId;
-    int64_t date;
-    std::vector<MmsAddress> to;
-    uint8_t status;
-    uint16_t version;
+    std::string messageId = "";
+    int64_t date = 0;
+    std::vector<MmsAddress> to {};
+    uint8_t status = 0;
+    uint16_t version = DEFAULT_ERROR;
 };
 
 struct MmsReadOrigIndContext {
-    uint16_t version;
-    std::string messageId;
-    std::vector<MmsAddress> to;
+    uint16_t version = DEFAULT_ERROR;
+    std::string messageId = "";
+    std::vector<MmsAddress> to {};
     MmsAddress from;
-    int64_t date;
-    uint8_t readStatus;
+    int64_t date = 0;
+    uint8_t readStatus = 0;
 };
 
 struct MmsReadRecIndContext {
-    uint16_t version;
-    std::string messageId;
-    std::vector<MmsAddress> to;
+    uint16_t version = DEFAULT_ERROR;
+    std::string messageId = "";
+    std::vector<MmsAddress> to {};
     MmsAddress from;
-    int64_t date;
-    uint8_t readStatus;
+    int64_t date = 0;
+    uint8_t readStatus = 0;
 };
 
 struct DecodeMmsContext : BaseContext {
     int32_t messageType = DEFAULT_ERROR;
-    int32_t messageMatchResult;
+    int32_t messageMatchResult = 0;
     std::string textFilePath = "";
     std::unique_ptr<char[]> inBuffer = nullptr;
     uint32_t inLen;
-    std::vector<MmsAttachmentContext> attachment;
+    std::vector<MmsAttachmentContext> attachment {};
     struct MmsSendConfContext sendConf;
     struct MmsSendReqContext sendReq;
     struct MmsNotificationIndContext notificationInd;
@@ -193,8 +193,8 @@ struct DecodeMmsContext : BaseContext {
 struct EncodeMmsContext : BaseContext {
     int32_t messageType = DEFAULT_ERROR;
     std::unique_ptr<char[]> outBuffer = nullptr;
-    uint32_t bufferLen;
-    std::vector<MmsAttachmentContext> attachment;
+    uint32_t bufferLen = 0;
+    std::vector<MmsAttachmentContext> attachment {};
     struct MmsSendConfContext sendConf;
     struct MmsSendReqContext sendReq;
     struct MmsNotificationIndContext notificationInd;
