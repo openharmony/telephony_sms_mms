@@ -86,8 +86,8 @@ private:
             endPos = toMsgId;
         }
         bool isMerge = false;
-        uint32_t startPos;
-        uint32_t endPos;
+        uint32_t startPos = 0;
+        uint32_t endPos = 0;
     };
 
     bool SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list);

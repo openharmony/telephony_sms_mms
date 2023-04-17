@@ -112,8 +112,8 @@ enum class WapPushContentTypes {
 };
 
 struct WapKeyValue {
-    WapPushContentTypes key;
-    const char *value;
+    WapPushContentTypes key = WapPushContentTypes::X_X;
+    const char *value = nullptr;
 };
 
 static const WapKeyValue wapContentNames[] = {

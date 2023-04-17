@@ -26,10 +26,10 @@ typedef enum {
     SMS_RADIO_TECH_3GPP2 = 2 /* 3GPP2 Technologies - CDMA */
 } SmsRadioTechnologyFamily;
 struct ImsMessageInfo {
-    int64_t refId;
-    std::string smscPdu;
-    std::string pdu;
-    SmsRadioTechnologyFamily tech;
+    int64_t refId = 0;
+    std::string smscPdu = "";
+    std::string pdu = "";
+    SmsRadioTechnologyFamily tech = SmsRadioTechnologyFamily::SMS_RADIO_TECH_3GPP;
 };
 } // namespace Telephony
 } // namespace OHOS
