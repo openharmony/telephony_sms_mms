@@ -160,7 +160,7 @@ bool CdmaSmsPduCodec::CheckInvalidPDU(const std::vector<unsigned char> &pduStr)
         return false;
     }
     offset++;
-    while (offset < pduStr.size()) {
+    while (offset + 1 < pduStr.size()) {
         if (pduStr[offset] >= 0 && pduStr[offset] <= 0x08) {
             offset += (pduStr[offset + 1] + HEX_BYTE_STEP);
         } else {

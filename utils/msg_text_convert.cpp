@@ -885,6 +885,7 @@ int MsgTextConvert::ConvertGSM7bitToUCS2(OUT unsigned char *pDestText, IN int ma
         pDestText[outTextLen++] = lowerByte;
         maxLength -= 0x02;
     }
+    pDestText[outTextLen] = '\0';
 
 #ifdef CONVERT_DUMP
     TELEPHONY_LOGI("\n########## Dump GSM7bit -> UCS2");
