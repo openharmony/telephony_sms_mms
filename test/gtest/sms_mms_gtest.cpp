@@ -210,6 +210,8 @@ const uint16_t MESSAGE_TYPE = 4;
 const uint16_t CB_PDU_LEN = 100;
 const uint16_t SMS_PDU_LEN = 36;
 const uint16_t WAPPUSH_PDU_LEN = 164;
+const int CDMA_PDU_BYTE_COUNT = 2;
+const int CDMA_PDU_SHITFT_BITS = 9;
 
 void SmsMmsGtest::SetUpTestCase()
 {
@@ -2785,8 +2787,8 @@ HWTEST_F(SmsMmsGtest, CdmaSmsPduCodec_0001, Function | MediumTest | Level1)
     unsigned char c = 'a';
     unsigned char *src1 = &c;
     unsigned char *src2 = nullptr;
-    unsigned int nBytes = 1;
-    unsigned int nShiftBit = 1;
+    unsigned int nBytes = CDMA_PDU_BYTE_COUNT;
+    unsigned int nShiftBit = CDMA_PDU_SHITFT_BITS;
     cdmaSmsPduCodec.ShiftNBit(src1, nBytes, nShiftBit);
     cdmaSmsPduCodec.ShiftNBit(src2, nBytes, nShiftBit);
     cdmaSmsPduCodec.ShiftRNBit(src1, nBytes, nShiftBit);
