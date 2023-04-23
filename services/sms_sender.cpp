@@ -347,7 +347,7 @@ void SmsSender::SetNetworkState(bool isImsNetDomain, int32_t voiceServiceState)
         SetImsSmsConfig(slotId_, IMS_SMS_ENABLE);
         enableImsSmsOnceWhenImsReg_ = false;
     }
-    TELEPHONY_LOGI("isImsNetDomain = %{public}s voiceServiceState = %{public}d",
+    TELEPHONY_LOGD("isImsNetDomain = %{public}s voiceServiceState = %{public}d",
         isImsNetDomain_ ? "true" : "false", voiceServiceState_);
 }
 

@@ -120,7 +120,7 @@ bool SmsNetworkPolicyManager::IsCtSimCard()
     CoreManagerInner::GetInstance().GetCardType(slotId_, cardType);
     bool isCTCardType = false;
     bool result = false;
-    TELEPHONY_LOGI("[slot%{public}d] cardType = %{public}d", slotId_, cardType);
+    TELEPHONY_LOGD("[slot%{public}d] cardType = %{public}d", slotId_, cardType);
     switch (cardType) {
         case CardType::SINGLE_MODE_USIM_CARD:
         case CardType::CT_NATIONAL_ROAMING_CARD:
@@ -158,7 +158,7 @@ bool SmsNetworkPolicyManager::IsCtSimCard()
             result = cplmnRet != CT_CPLMNS.end();
         }
     }
-    TELEPHONY_LOGI("[slot%{public}d] result = %{public}d", slotId_, result);
+    TELEPHONY_LOGD("[slot%{public}d] result = %{public}d", slotId_, result);
     return result;
 }
 
@@ -174,14 +174,14 @@ void SmsNetworkPolicyManager::GetRadioState()
     CoreManagerInner::GetInstance().GetImsRegStatus(slotId_, ImsServiceType::TYPE_SMS, info);
     isImsNetDomain_ = info.imsRegState == ImsRegState::IMS_REGISTERED;
     voiceServiceState_ = CoreManagerInner::GetInstance().GetCsRegState(slotId_);
-    TELEPHONY_LOGI("netWorkType_ = %{public}d isImsNetDomain_ = %{public}s GetCsRegStatus = %{public}d",
+    TELEPHONY_LOGD("netWorkType_ = %{public}d isImsNetDomain_ = %{public}s GetCsRegStatus = %{public}d",
         netWorkType_, isImsNetDomain_ ? "true" : "false", voiceServiceState_);
     for (const auto &item : callbackMap_) {
         if (item.second == nullptr) {
             TELEPHONY_LOGE("callbackList's item is nullptr");
             continue;
         }
-        TELEPHONY_LOGI("update network info.");
+        TELEPHONY_LOGD("update network info.");
         item.second(isImsNetDomain_, voiceServiceState_);
     }
 }
