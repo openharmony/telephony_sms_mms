@@ -21,6 +21,7 @@
 #include "core_manager_inner.h"
 #include "ims_sms_client.h"
 #include "msg_text_convert.h"
+#include "runner_pool.h"
 #include "sms_dump_helper.h"
 #include "sms_hisysevent.h"
 #include "string_utils.h"
@@ -50,6 +51,7 @@ void SmsService::OnStart()
         TELEPHONY_LOGE("msService has already started.");
         return;
     }
+    RunnerPool::GetInstance().Init();
     if (!Init()) {
         TELEPHONY_LOGE("failed to init SmsService");
         return;
