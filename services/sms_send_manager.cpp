@@ -22,6 +22,7 @@
 #include "gsm_sms_message.h"
 #include "gsm_sms_tpdu_codec.h"
 #include "i_sms_service_interface.h"
+#include "runner_pool.h"
 #include "sms_hisysevent.h"
 #include "sms_receive_manager.h"
 #include "telephony_errors.h"
@@ -55,7 +56,7 @@ SmsSendManager::~SmsSendManager()
 
 void SmsSendManager::Init()
 {
-    gsmSmsSendRunner_ = AppExecFwk::EventRunner::Create("gsmSmsSenderLoop" + to_string(slotId_));
+    gsmSmsSendRunner_ = RunnerPool::GetInstance().GetSmsSendReceiveRunnerBySlotId(slotId_);
     if (gsmSmsSendRunner_ == nullptr) {
         TELEPHONY_LOGE("failed to create GsmSenderEventRunner");
         return;
@@ -67,9 +68,8 @@ void SmsSendManager::Init()
         return;
     }
     gsmSmsSender_->Init();
-    gsmSmsSendRunner_->Run();
 
-    cdmaSmsSendRunner_ = AppExecFwk::EventRunner::Create("cdmaSmsSenderLoop" + to_string(slotId_));
+    cdmaSmsSendRunner_ = RunnerPool::GetInstance().GetSmsSendReceiveRunnerBySlotId(slotId_);
     if (cdmaSmsSendRunner_ == nullptr) {
         TELEPHONY_LOGE("failed to create CdmaSenderEventRunner");
         return;
@@ -81,13 +81,12 @@ void SmsSendManager::Init()
         return;
     }
     cdmaSmsSender_->Init();
-    cdmaSmsSendRunner_->Run();
     InitNetworkHandle();
 }
 
 void SmsSendManager::InitNetworkHandle()
 {
-    networkRunner_ = AppExecFwk::EventRunner::Create("networkLoop" + to_string(slotId_));
+    networkRunner_ = RunnerPool::GetInstance().GetSmsCommonRunner();
     if (networkRunner_ == nullptr) {
         TELEPHONY_LOGE("failed to create networkRunner");
         return;
@@ -98,7 +97,6 @@ void SmsSendManager::InitNetworkHandle()
         return;
     }
     networkManager_->Init();
-    networkRunner_->Run();
     TELEPHONY_LOGI("Init SmsSendManager successfully.");
     if (auto ret = networkManager_->NetworkRegister(
         std::bind(&SmsSender::SetNetworkState, gsmSmsSender_, std::placeholders::_1, std::placeholders::_2));

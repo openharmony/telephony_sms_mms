@@ -17,6 +17,7 @@
 
 #include "cdma_sms_receive_handler.h"
 #include "gsm_sms_receive_handler.h"
+#include "runner_pool.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -45,12 +46,12 @@ SmsReceiveManager::~SmsReceiveManager()
 
 void SmsReceiveManager::Init()
 {
-    gsmSmsReceiveRunner_ = AppExecFwk::EventRunner::Create("gsmSmsReceiveHandler" + to_string(slotId_));
+    gsmSmsReceiveRunner_ = RunnerPool::GetInstance().GetSmsSendReceiveRunnerBySlotId(slotId_);
     if (gsmSmsReceiveRunner_ == nullptr) {
         TELEPHONY_LOGE("failed to create GsmEventReceiverRunner");
         return;
     }
-    cdmaSmsReceiveRunner_ = AppExecFwk::EventRunner::Create("cdmaSmsReceiveHandler" + to_string(slotId_));
+    cdmaSmsReceiveRunner_ = RunnerPool::GetInstance().GetSmsSendReceiveRunnerBySlotId(slotId_);
     if (cdmaSmsReceiveRunner_ == nullptr) {
         TELEPHONY_LOGE("failed to create CdmaEventReceiverRunner");
         return;
@@ -69,8 +70,6 @@ void SmsReceiveManager::Init()
 
     gsmSmsReceiveHandler_->Init();
     cdmaSmsReceiveHandler_->Init();
-    cdmaSmsReceiveRunner_->Run();
-    gsmSmsReceiveRunner_->Run();
     TELEPHONY_LOGI("SmsReceiveManager init ok.");
 }
 

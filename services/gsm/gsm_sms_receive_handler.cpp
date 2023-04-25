@@ -18,6 +18,7 @@
 #include "core_manager_inner.h"
 #include "gsm_sms_message.h"
 #include "radio_event.h"
+#include "runner_pool.h"
 #include "sms_base_message.h"
 #include "sms_hisysevent.h"
 #include "sms_receive_indexer.h"
@@ -43,7 +44,7 @@ void GsmSmsReceiveHandler::Init()
     if (!RegisterHandler()) {
         TELEPHONY_LOGI("GsmSmsSender::Init Register RADIO_SMS_STATUS fail.");
     }
-    smsCbRunner_ = AppExecFwk::EventRunner::Create("GsmSmsCbHandler" + to_string(slotId_));
+    smsCbRunner_ = RunnerPool::GetInstance().GetSmsCommonRunner();
     if (smsCbRunner_ == nullptr) {
         TELEPHONY_LOGE("failed to create GsmSmsCbHandler");
         return;
@@ -54,7 +55,6 @@ void GsmSmsReceiveHandler::Init()
         return;
     }
     smsCbHandler_->Init();
-    smsCbRunner_->Run();
     TELEPHONY_LOGI("smsCbHandler_->Run().");
 }
 

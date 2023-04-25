@@ -15,6 +15,7 @@
 
 #include "sms_interface_manager.h"
 
+#include "runner_pool.h"
 #include "sms_hisysevent.h"
 #include "sms_misc_manager.h"
 #include "string_utils.h"
@@ -43,14 +44,13 @@ void SmsInterfaceManager::InitInterfaceManager()
         return;
     }
     smsReceiveManager_->Init();
-    auto smsMiscRunner = AppExecFwk::EventRunner::Create("SmsMiscRunner" + to_string(slotId_));
+    auto smsMiscRunner = RunnerPool::GetInstance().GetSmsCommonRunner();
     if (smsMiscRunner == nullptr) {
-        TELEPHONY_LOGE("failed to create SmsCbRunner");
+        TELEPHONY_LOGE("failed to create SmsMiscRunner");
         return;
     }
     smsReceiveManager_->SetCdmaSender(smsSendManager_->GetCdmaSmsSender());
     smsMiscManager_ = make_shared<SmsMiscManager>(smsMiscRunner, slotId_);
-    smsMiscRunner->Run();
     TELEPHONY_LOGI("SmsInterfaceManager::InitInterfaceManager success, %{public}d", slotId_);
 }
 
