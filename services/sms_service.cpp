@@ -558,35 +558,20 @@ int32_t SmsService::CreateMessage(std::string pdu, std::string specification, Sh
 
 bool SmsService::GetBase64Encode(std::string src, std::string &dest)
 {
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr) {
-        return false;
-    }
-
-    textCvt->Base64Encode(src, dest);
+    MsgTextConvert::Instance().Base64Encode(src, dest);
     return true;
 }
 
 bool SmsService::GetBase64Decode(std::string src, std::string &dest)
 {
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr) {
-        return false;
-    }
-
-    textCvt->Base64Decode(src, dest);
+    MsgTextConvert::Instance().Base64Decode(src, dest);
     return true;
 }
 
 bool SmsService::GetEncodeStringFunc(
     std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString)
 {
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr) {
-        return false;
-    }
-
-    textCvt->GetEncodeString(encodeString, charset, valLength, strEncodeString);
+    MsgTextConvert::Instance().GetEncodeString(encodeString, charset, valLength, strEncodeString);
     return true;
 }
 } // namespace Telephony
