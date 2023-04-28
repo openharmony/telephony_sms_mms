@@ -29,8 +29,9 @@ namespace OHOS {
 namespace Telephony {
 using msg_encode_type_t = unsigned char;
 using namespace std;
-std::shared_ptr<MsgTextConvert> MsgTextConvert::instance_ = nullptr;
+// std::shared_ptr<MsgTextConvert> MsgTextConvert::instance_ = nullptr;
 static constexpr uint8_t GSM7_DEFLIST_LEN = 128;
+static constexpr uint8_t PDU_MIN_LEN = 2;
 
 template<typename T>
 inline void UniquePtrDeleterOneDimension(T **(&ptr))
@@ -84,14 +85,10 @@ MsgTextConvert::~MsgTextConvert()
     replaceCharMap_.clear();
 }
 
-MsgTextConvert *MsgTextConvert::Instance()
+MsgTextConvert &MsgTextConvert::Instance()
 {
-    if (!instance_) {
-        TELEPHONY_LOGI("pInstance is nullptr. Now creating instance.\r\n");
-        struct make_shared_enabler : public MsgTextConvert {};
-        instance_ = std::make_shared<make_shared_enabler>();
-    }
-    return instance_.get();
+    static MsgTextConvert instance;
+    return instance;
 }
 
 void MsgTextConvert::InitExtCharMap()
@@ -414,16 +411,12 @@ int MsgTextConvert::ConvertUCS2ToUTF8(
     const unsigned char *pTempSrcText = pSrcText;
 #endif
     unsigned char *pTempDestText = pDestText;
-    if (srcTextLen == 0 || pSrcText == nullptr || pDestText == nullptr || maxLength == 0) {
+    if (srcTextLen <= 0 || pSrcText == nullptr || pDestText == nullptr || maxLength == 0) {
         TELEPHONY_LOGE("UCS2 to UTF8 Failed as text length is 0");
         return false;
     }
 
-    if (srcTextLen == -1) {
-        textLen = strlen(reinterpret_cast<char *>(const_cast<unsigned char *>(pSrcText)));
-    } else {
-        textLen = srcTextLen;
-    }
+    textLen = srcTextLen;
 
     GIConv cd;
     int err = 0;
@@ -857,7 +850,7 @@ int MsgTextConvert::ConvertGSM7bitToUCS2(OUT unsigned char *pDestText, IN int ma
         TELEPHONY_LOGE("UCS2 to GSM7bit Failed as text length is 0");
         return -1;
     }
-    for (int i = 0; i < srcTextLen && maxLength > 0; i++) {
+    for (int i = 0; i < srcTextLen && maxLength > PDU_MIN_LEN; i++) {
         if (pSrcText[i] >= 0x80) {
             TELEPHONY_LOGE("a_pTextString[i]=%{public}x, The alpha isn't the gsm 7bit code", pSrcText[i]);
             return -1;

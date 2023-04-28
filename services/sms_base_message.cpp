@@ -346,8 +346,7 @@ int SmsBaseMessage::GetMaxSegmentSize(
 
 void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType)
 {
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr || split.encodeData.size() <= 0) {
+    if (split.encodeData.size() <= 0) {
         TELEPHONY_LOGE("MsgTextConvert Instance is nullptr");
         return;
     }
@@ -361,13 +360,13 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
             };
             langInfo.bSingleShift = false;
             langInfo.bLockingShift = false;
-            dataSize = textCvt->ConvertGSM7bitToUTF8(
+            dataSize = MsgTextConvert::Instance().ConvertGSM7bitToUTF8(
                 buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size(), &langInfo);
             break;
         }
         case SMS_CODING_UCS2: {
-            dataSize =
-                textCvt->ConvertUCS2ToUTF8(buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size());
+            dataSize = MsgTextConvert::Instance().ConvertUCS2ToUTF8(
+                buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size());
             break;
         }
         default: {

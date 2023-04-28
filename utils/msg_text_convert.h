@@ -30,7 +30,7 @@ namespace Telephony {
 
 class MsgTextConvert {
 public:
-    static MsgTextConvert *Instance();
+    static MsgTextConvert &Instance();
     int ConvertUTF8ToGSM7bit(std::tuple<unsigned char *, int, unsigned char *, int,
         MSG_LANGUAGE_ID_T *, bool *> &parameters);
     int ConvertUTF8ToUCS2(
@@ -94,7 +94,7 @@ private:
     void InitUCS2ToReplaceCharMap();
 
 private:
-    static std::shared_ptr<MsgTextConvert> instance_;
+    // static std::shared_ptr<MsgTextConvert> instance_;
     std::map<unsigned short, unsigned char> extCharMap_;
     std::map<unsigned short, unsigned char> ucs2toGSM7DefMap_;
     std::map<unsigned short, unsigned char> ucs2toGSM7ExtMap_;
