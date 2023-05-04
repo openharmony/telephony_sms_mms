@@ -249,11 +249,6 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
         TELEPHONY_LOGE("Address or SMSC is null!");
         return offset;
     }
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr) {
-        TELEPHONY_LOGE("MsgTextConvert Instance is nullptr");
-        return offset;
-    }
     if (memset_s(pAddress->address, sizeof(pAddress->address), 0x00, sizeof(pAddress->address)) != EOK) {
         TELEPHONY_LOGE("pAddress memset_s error!");
         return offset;
@@ -282,8 +277,8 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
         MsgLangInfo langInfo = { 0 };
         langInfo.bSingleShift = false;
         langInfo.bLockingShift = false;
-        textCvt->ConvertGSM7bitToUTF8(reinterpret_cast<unsigned char *>(pAddress->address), MAX_ADDRESS_LEN,
-            reinterpret_cast<unsigned char *>(tmpAddress), tmplength, &langInfo);
+        MsgTextConvert::Instance().ConvertGSM7bitToUTF8(reinterpret_cast<unsigned char *>(pAddress->address),
+            MAX_ADDRESS_LEN, reinterpret_cast<unsigned char *>(tmpAddress), tmplength, &langInfo);
         if (tmpAddress) {
             delete[] tmpAddress;
         }
