@@ -382,22 +382,17 @@ void SmsCbMessage::ConvertToUTF8(const std::string &raw, std::string &message) c
     if (cbHeader_->bEtwsMessage && cbHeader_->cbEtwsType == SMS_NETTEXT_ETWS_PRIMARY) {
         message.assign(raw);
     } else {
-        MsgTextConvert *textCvt = MsgTextConvert::Instance();
-        if (textCvt == nullptr) {
-            TELEPHONY_LOGE("MsgTextConvert Instance nullptr");
-            return;
-        }
         int codeSize = 0;
         MsgLangInfo langInfo = {
             0,
         };
         unsigned char outBuf[MAX_CB_MSG_TEXT_LEN + 1] = {0};
         if (cbHeader_->dcs.codingScheme == SMS_CODING_7BIT) {
-            codeSize = textCvt->ConvertGSM7bitToUTF8(
+            codeSize = MsgTextConvert::Instance().ConvertGSM7bitToUTF8(
                 outBuf, sizeof(outBuf), (unsigned char *)raw.data(), raw.length(), &langInfo);
         } else if (cbHeader_->dcs.codingScheme == SMS_CODING_UCS2) {
-            codeSize =
-                textCvt->ConvertUCS2ToUTF8(outBuf, sizeof(outBuf), (unsigned char *)raw.data(), raw.length());
+            codeSize = MsgTextConvert::Instance().ConvertUCS2ToUTF8(
+                outBuf, sizeof(outBuf), (unsigned char *)raw.data(), raw.length());
         } else {
             message.assign(raw);
             return;

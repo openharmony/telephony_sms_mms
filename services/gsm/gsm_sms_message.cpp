@@ -232,8 +232,7 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
     const int bufSize = (MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1;
     unsigned char encodeData[bufSize];
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if ((textCvt == nullptr) || (memset_s(encodeData, sizeof(encodeData), 0x00, sizeof(encodeData)) != EOK)) {
+    if (memset_s(encodeData, sizeof(encodeData), 0x00, sizeof(encodeData)) != EOK) {
         TELEPHONY_LOGE("failed to initialize!");
         return nullptr;
     }
@@ -243,7 +242,7 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
     bool *pIncludeAbnormalChar = &bAbnormal;
     std::tuple<unsigned char *, int, unsigned char *, int, MSG_LANGUAGE_ID_T *, bool *> paras(
         pDestText, bufSize, const_cast<unsigned char *>(pMsgText), (int)dataLen, pLangId, pIncludeAbnormalChar);
-    endcodeLen = textCvt->ConvertUTF8ToGSM7bit(paras);
+    endcodeLen = MsgTextConvert::Instance().ConvertUTF8ToGSM7bit(paras);
     if (smsTpdu_ == nullptr) {
         TELEPHONY_LOGE("smsTpdu_ is nullptr!");
         return nullptr;
@@ -542,10 +541,6 @@ void GsmSmsMessage::ConvertUserData()
         return;
     }
     if (smsUserData_.length > 0) {
-        MsgTextConvert *textCvt = MsgTextConvert::Instance();
-        if (textCvt == nullptr) {
-            return;
-        }
         unsigned char buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
         if (codingScheme_ == SMS_CODING_7BIT) {
             MsgLangInfo langInfo = {
@@ -553,11 +548,11 @@ void GsmSmsMessage::ConvertUserData()
             };
             langInfo.bSingleShift = false;
             langInfo.bLockingShift = false;
-            int dataSize = textCvt->ConvertGSM7bitToUTF8(buff, MAX_MSG_TEXT_LEN,
+            int dataSize = MsgTextConvert::Instance().ConvertGSM7bitToUTF8(buff, MAX_MSG_TEXT_LEN,
                 reinterpret_cast<unsigned char *>(smsUserData_.data), smsUserData_.length, &langInfo);
             visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
         } else if (codingScheme_ == SMS_CODING_UCS2) {
-            int dataSize = textCvt->ConvertUCS2ToUTF8(
+            int dataSize = MsgTextConvert::Instance().ConvertUCS2ToUTF8(
                 buff, MAX_MSG_TEXT_LEN, reinterpret_cast<unsigned char *>(smsUserData_.data), smsUserData_.length);
             visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
         } else if (codingScheme_ == SMS_CODING_8BIT) {
@@ -667,11 +662,6 @@ int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, Sm
     const unsigned int maxDecodeLen = len;
     const unsigned char *pMsgText = reinterpret_cast<const unsigned char *>(msgText.c_str());
 
-    MsgTextConvert *textCvt = MsgTextConvert::Instance();
-    if (textCvt == nullptr) {
-        TELEPHONY_LOGE("MsgTextConvert Instance is nullptr");
-        return decodeLen;
-    }
     if (msgText.empty()) {
         return decodeLen;
     }
@@ -680,7 +670,7 @@ int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, Sm
         case SMS_CODING_7BIT: {
             std::tuple<unsigned char *, int, unsigned char *, int, MSG_LANGUAGE_ID_T *, bool *> paras(
                 decodeData, maxDecodeLen, const_cast<unsigned char *>(pMsgText), dataLen, &langId, &bAbnormal);
-            decodeLen = textCvt->ConvertUTF8ToGSM7bit(paras);
+            decodeLen = MsgTextConvert::Instance().ConvertUTF8ToGSM7bit(paras);
             break;
         }
         case SMS_CODING_8BIT: {
@@ -696,13 +686,14 @@ int GsmSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, Sm
             break;
         }
         case SMS_CODING_UCS2: {
-            decodeLen = textCvt->ConvertUTF8ToUCS2(decodeData, maxDecodeLen, pMsgText, dataLen);
+            decodeLen = MsgTextConvert::Instance().ConvertUTF8ToUCS2(decodeData, maxDecodeLen, pMsgText, dataLen);
             break;
         }
         case SMS_CODING_AUTO:
         default: {
             SmsCodingScheme encodeType = SMS_CODING_AUTO;
-            decodeLen = textCvt->ConvertGsmUTF8ToAuto(decodeData, maxDecodeLen, pMsgText, dataLen, &encodeType);
+            decodeLen = MsgTextConvert::Instance().ConvertGsmUTF8ToAuto(
+                decodeData, maxDecodeLen, pMsgText, dataLen, &encodeType);
             codingType = encodeType;
             break;
         }
