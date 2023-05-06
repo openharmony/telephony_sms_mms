@@ -71,7 +71,6 @@ bool SmsPersistHelper::Query(DataShare::DataSharePredicates &predicates, std::ve
     Uri uri(SMS_SUBSECTION);
     std::vector<std::string> columns;
     auto resultSet = helper->Query(uri, predicates, columns);
-    helper->Release();
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
         return false;
@@ -85,6 +84,8 @@ bool SmsPersistHelper::Query(DataShare::DataSharePredicates &predicates, std::ve
         resultSetNum = resultSet->GoToNextRow();
     }
     resultSet->Close();
+    helper->Release();
+    helper = nullptr;
     return true;
 }
 
@@ -119,7 +120,6 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(phoneNumber, phoneNum);
     auto resultSet = helper->Query(uri, predicates, columns);
-    helper->Release();
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
         return result;
@@ -128,6 +128,8 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
         result = true;
     }
     resultSet->Close();
+    helper->Release();
+    helper = nullptr;
     return result;
 }
 
