@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/telephony/core_service/telephony.gni")
 import("//build/test.gni")
+SMS_MMS_SOURCE_DIR = "../../"
 ohos_unittest("tel_sms_mms_gtest") {
   subsystem_name = "telephony"
   part_name = "sms_mms"
@@ -20,7 +20,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   module_out_path = part_name + "/" + test_module
 
   sources = [
-    "//base/telephony/sms_mms/frameworks/native/sms/src/sms_service_proxy.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/sms_service_proxy.cpp",
     "sms_broadcast_subscriber_gtest.cpp",
     "sms_delivery_callback_gtest.cpp",
     "sms_mms_gtest.cpp",
@@ -30,34 +30,30 @@ ohos_unittest("tel_sms_mms_gtest") {
   ]
 
   include_dirs = [
-    "//base/telephony/sms_mms/services/include",
-    "//base/telephony/sms_mms/interfaces/innerkits",
-    "//base/telephony/sms_mms/interfaces/kits/native",
-    "//base/telephony/call_manager/services/telephony_interaction/include",
-    "//base/telephony/sms_mms/frameworks/native/sms/include",
-    "//base/telephony/sms_mms/utils",
-    "//third_party/curl/include",
+    "$SMS_MMS_SOURCE_DIR/services/include",
+    "$SMS_MMS_SOURCE_DIR/interfaces/innerkits",
+    "$SMS_MMS_SOURCE_DIR/interfaces/kits/native",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/include",
+    "$SMS_MMS_SOURCE_DIR/utils",
   ]
 
-  configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
-
   deps = [
-    "//base/telephony/core_service/utils:libtel_common",
-    "//base/telephony/sms_mms:tel_sms_mms",
-    "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
-    "//foundation/ability/ability_runtime/frameworks/native/ability/native:data_ability_helper",
-    "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:ability_manager",
+    "$SMS_MMS_SOURCE_DIR:tel_sms_mms",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
     "//third_party/curl:curl",
     "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:ability_manager",
+    "ability_runtime:data_ability_helper",
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "core_service:libtel_common",
     "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
@@ -68,8 +64,9 @@ ohos_unittest("tel_sms_mms_gtest") {
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "telephony_data:tel_telephony_data",
   ]
-  defines += [
+  defines = [
     "TELEPHONY_LOG_TAG = \"SmsMmmsGtest\"",
     "LOG_DOMAIN = 0xD000F00",
   ]
