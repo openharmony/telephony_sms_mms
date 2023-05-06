@@ -15,8 +15,8 @@ import("//build/ohos.gni")
 
 ohos_shared_library("tel_sms_mms_api") {
   deps = [
-    "//base/telephony/sms_mms/frameworks/native/mms:mms_native_source",
-    "//base/telephony/sms_mms/frameworks/native/sms:sms_native_source",
+    "mms:mms_native_source",
+    "sms:sms_native_source",
   ]
 
   external_deps = [ "samgr:samgr_proxy" ]
@@ -27,8 +27,8 @@ ohos_shared_library("tel_sms_mms_api") {
   ]
 
   public_configs = [
-    "//base/telephony/sms_mms/frameworks/native/sms:sms_native_config",
-    "//base/telephony/sms_mms/frameworks/native/mms:mms_native_config",
+    "sms:sms_native_config",
+    "mms:mms_native_config",
   ]
 
   if (is_standard_system) {

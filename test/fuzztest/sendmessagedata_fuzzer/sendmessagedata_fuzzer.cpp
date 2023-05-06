@@ -18,7 +18,6 @@
 #define private public
 #include "addsmstoken_fuzzer.h"
 #include "delivery_send_call_back_stub.h"
-#include "napi_util.h"
 #include "send_call_back_stub.h"
 #include "sms_service.h"
 
