@@ -38,6 +38,7 @@ void SmsStateObserver::StartEventSubscriber()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    subscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     smsSubscriber_ = std::make_shared<SmsStateEventSubscriber>(subscriberInfo);
     smsSubscriber_->InitEventMap();
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
