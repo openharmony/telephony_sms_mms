@@ -21,7 +21,6 @@
 #include "system_ability_definition.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
-#include "telephony_napi_common_error.h"
 
 namespace OHOS {
 namespace Telephony {

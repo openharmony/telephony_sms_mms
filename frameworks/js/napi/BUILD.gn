@@ -11,41 +11,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/ohos.gni")
-SUBSYSTEM_DIR = "//base/telephony"
-import("//base/telephony/core_service/telephony.gni")
+SUBSYSTEM_DIR = "../../../../"
 ohos_shared_library("sms") {
   include_dirs = [
     "//third_party/node/src",
     "include",
     "$SUBSYSTEM_DIR/sms_mms/frameworks/js/napi/include",
-    "$SUBSYSTEM_DIR/core_service/frameworks/js/napi",
   ]
 
   sources = [
-    "$SUBSYSTEM_DIR/core_service/frameworks/js/napi/napi_util.cpp",
     "src/delivery_callback.cpp",
     "src/napi_mms.cpp",
     "src/napi_sms.cpp",
     "src/send_callback.cpp",
   ]
 
-  configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
-
-  deps = [
-    "$SUBSYSTEM_DIR/sms_mms/frameworks/native:tel_sms_mms_api",
-    "//foundation/arkui/napi:ace_napi",
-  ]
-
-  defines += [
+  defines = [
     "TELEPHONY_LOG_TAG = \"SmsMmsJsApi\"",
     "LOG_DOMAIN = 0xD001F06",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "core_service:tel_core_service_api",
+    "core_service:libtel_common",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "napi:ace_napi",
+    "sms_mms:tel_sms_mms_api",
   ]
 
   if (is_standard_system) {

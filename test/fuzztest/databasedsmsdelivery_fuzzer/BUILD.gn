@@ -12,52 +12,48 @@
 # limitations under the License.
 
 #####################hydra-fuzz###################
-import("//base/telephony/core_service/telephony.gni")
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
+SMS_MMS_SOURCE_DIR = "../../../"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("DataBasedSmsDeliveryFuzzTest") {
   module_output_path = "sms_mms/DataBasedSmsDeliveryFuzzTest"
   module_out_path = module_output_path
   fuzz_config_file =
-      "//base/telephony/sms_mms/test/fuzztest/databasedsmsdelivery_fuzzer"
+      "$SMS_MMS_SOURCE_DIR/test/fuzztest/databasedsmsdelivery_fuzzer"
 
   include_dirs = [
-    "//base/telephony/core_service/frameworks/js/napi",
-    "//base/telephony/core_service/interfaces/innerkits/include",
-    "//base/telephony/core_service/interfaces/innerkits/ims/include",
-    "//base/telephony/sms_mms/frameworks/js/napi/include",
-    "//base/telephony/sms_mms/services/include",
-    "//base/telephony/sms_mms/test/fuzztest/common_fuzzer",
-    "//base/telephony/sms_mms/interfaces/innerkits/",
-    "//base/telephony/sms_mms/interfaces/innerkits/ims",
-    "//third_party/curl/include",
-    "//foundation/communication/netmanager_base/services/netconnmanager/include",
+    "$SMS_MMS_SOURCE_DIR/frameworks/js/napi/include",
+    "$SMS_MMS_SOURCE_DIR/services/include",
+    "$SMS_MMS_SOURCE_DIR/test/fuzztest/common_fuzzer",
+    "$SMS_MMS_SOURCE_DIR/interfaces/innerkits/",
+    "$SMS_MMS_SOURCE_DIR/interfaces/innerkits/ims",
   ]
 
   deps = [
-    "//base/telephony/sms_mms:tel_sms_mms",
-    "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
-    "//foundation/ability/ability_runtime/frameworks/native/ability/native:data_ability_helper",
-    "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:ability_manager",
-    "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
+    "$SMS_MMS_SOURCE_DIR:tel_sms_mms",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
     "//third_party/curl:curl",
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
+    "ability_runtime:data_ability_helper",
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "ipc:ipc_core",
     "netmanager_base:net_conn_manager_if",
+    "telephony_data:tel_telephony_data",
   ]
-  defines += [
+  defines = [
     "TELEPHONY_LOG_TAG = \"SmsMmsFuzzTest\"",
     "LOG_DOMAIN = 0xD000F00",
   ]
@@ -75,7 +71,7 @@ ohos_fuzztest("DataBasedSmsDeliveryFuzzTest") {
   ]
 
   sources = [
-    "//base/telephony/sms_mms/test/fuzztest/common_fuzzer/addsmstoken_fuzzer.cpp",
+    "$SMS_MMS_SOURCE_DIR/test/fuzztest/common_fuzzer/addsmstoken_fuzzer.cpp",
     "databasedsmsdelivery_fuzzer.cpp",
   ]
 }
