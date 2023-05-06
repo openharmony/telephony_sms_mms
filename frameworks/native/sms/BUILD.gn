@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-SUBSYSTEM_DIR = "//base/telephony"
+SUBSYSTEM_DIR = "../../../../"
 
 config("sms_native_config") {
   visibility = [ "*:*" ]
@@ -27,8 +27,8 @@ config("sms_native_config") {
 
 ohos_source_set("sms_native_source") {
   sources = [
+    "$SUBSYSTEM_DIR/sms_mms/services/ims_service_interaction/src/ims_sms_callback_proxy.cpp",
     "$SUBSYSTEM_DIR/sms_mms/utils/string_utils.cpp",
-    "//base/telephony/sms_mms/services/ims_service_interaction/src/ims_sms_callback_proxy.cpp",
     "src/delivery_short_message_callback_stub.cpp",
     "src/send_short_message_callback_stub.cpp",
     "src/short_message.cpp",
@@ -37,16 +37,11 @@ ohos_source_set("sms_native_source") {
     "src/sms_service_proxy.cpp",
   ]
 
-  include_dirs = [
-    ":sms_native_config",
-    "$SUBSYSTEM_DIR/core_service/frameworks/js/napi",
-    "$SUBSYSTEM_DIR/core_service/interfaces/innerkits/common",
-  ]
-
-  configs = [ "//base/telephony/core_service/utils:telephony_log_config" ]
+  include_dirs = [ ":sms_native_config" ]
 
   external_deps = [
     "c_utils:utils",
+    "core_service:libtel_common",
     "core_service:tel_core_service_api",
     "drivers_interface_ril:hril_innerkits",
     "ipc:ipc_core",

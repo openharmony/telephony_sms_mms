@@ -18,7 +18,6 @@
 #define private public
 #include "addsmstoken_fuzzer.h"
 #include "i_sms_service_interface.h"
-#include "napi_util.h"
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;

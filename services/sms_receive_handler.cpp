@@ -100,11 +100,11 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
 
         std::vector<SmsReceiveIndexer> dbIndexers;
         DataShare::DataSharePredicates predicates;
-        predicates.EqualTo(SmsMmsData::SENDER_NUMBER, indexer->GetOriginatingAddress())
+        predicates.EqualTo(SmsSubsection::SENDER_NUMBER, indexer->GetOriginatingAddress())
             ->And()
-            ->EqualTo(SmsMmsData::SMS_SUBSECTION_ID, std::to_string(indexer->GetMsgRefId()))
+            ->EqualTo(SmsSubsection::SMS_SUBSECTION_ID, std::to_string(indexer->GetMsgRefId()))
             ->And()
-            ->EqualTo(SmsMmsData::SIZE, std::to_string(indexer->GetMsgCount()));
+            ->EqualTo(SmsSubsection::SIZE, std::to_string(indexer->GetMsgCount()));
         DelayedSingleton<SmsPersistHelper>::GetInstance()->Query(predicates, dbIndexers);
 
         for (const auto &v : dbIndexers) {
@@ -156,7 +156,7 @@ void SmsReceiveHandler::DeleteMessageFormDb(const std::shared_ptr<SmsReceiveInde
     }
 
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(SmsMmsData::SMS_SUBSECTION_ID, std::to_string(smsIndexer->GetMsgRefId()));
+    predicates.EqualTo(SmsSubsection::SMS_SUBSECTION_ID, std::to_string(smsIndexer->GetMsgRefId()));
     DelayedSingleton<SmsPersistHelper>::GetInstance()->Delete(predicates);
 }
 
@@ -165,11 +165,11 @@ bool SmsReceiveHandler::IsRepeatedMessagePart(const shared_ptr<SmsReceiveIndexer
     if (smsIndexer != nullptr) {
         std::vector<SmsReceiveIndexer> dbIndexers;
         DataShare::DataSharePredicates predicates;
-        predicates.EqualTo(SmsMmsData::SENDER_NUMBER, smsIndexer->GetOriginatingAddress())
+        predicates.EqualTo(SmsSubsection::SENDER_NUMBER, smsIndexer->GetOriginatingAddress())
             ->And()
-            ->EqualTo(SmsMmsData::SMS_SUBSECTION_ID, std::to_string(smsIndexer->GetMsgRefId()))
+            ->EqualTo(SmsSubsection::SMS_SUBSECTION_ID, std::to_string(smsIndexer->GetMsgRefId()))
             ->And()
-            ->EqualTo(SmsMmsData::SIZE, std::to_string(smsIndexer->GetMsgCount()));
+            ->EqualTo(SmsSubsection::SIZE, std::to_string(smsIndexer->GetMsgCount()));
         DelayedSingleton<SmsPersistHelper>::GetInstance()->Query(predicates, dbIndexers);
 
         for (const auto &it : dbIndexers) {
@@ -232,18 +232,18 @@ bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &ind
     const uint8_t gsm = 1;
     const uint8_t cdma = 2;
     DataShare::DataShareValuesBucket bucket;
-    bucket.Put(SmsMmsData::SLOT_ID, std::to_string(slotId_));
-    bucket.Put(SmsMmsData::RECEIVER_NUMBER, indexer->GetOriginatingAddress());
-    bucket.Put(SmsMmsData::SENDER_NUMBER, indexer->GetOriginatingAddress());
-    bucket.Put(SmsMmsData::START_TIME, std::to_string(indexer->GetTimestamp()));
-    bucket.Put(SmsMmsData::END_TIME, std::to_string(indexer->GetTimestamp()));
-    bucket.Put(SmsMmsData::RAW_PUD, StringUtils::StringToHex(indexer->GetPdu()));
+    bucket.Put(SmsSubsection::SLOT_ID, std::to_string(slotId_));
+    bucket.Put(SmsSubsection::RECEIVER_NUMBER, indexer->GetOriginatingAddress());
+    bucket.Put(SmsSubsection::SENDER_NUMBER, indexer->GetOriginatingAddress());
+    bucket.Put(SmsSubsection::START_TIME, std::to_string(indexer->GetTimestamp()));
+    bucket.Put(SmsSubsection::END_TIME, std::to_string(indexer->GetTimestamp()));
+    bucket.Put(SmsSubsection::REW_PUD, StringUtils::StringToHex(indexer->GetPdu()));
 
-    bucket.Put(SmsMmsData::FORMAT, indexer->GetIsCdma() ? cdma : gsm);
-    bucket.Put(SmsMmsData::DEST_PORT, indexer->GetDestPort());
-    bucket.Put(SmsMmsData::SMS_SUBSECTION_ID, indexer->GetMsgRefId());
-    bucket.Put(SmsMmsData::SIZE, indexer->GetMsgCount());
-    bucket.Put(SmsMmsData::SUBSECTION_INDEX, indexer->GetMsgSeqId());
+    bucket.Put(SmsSubsection::FORMAT, indexer->GetIsCdma() ? cdma : gsm);
+    bucket.Put(SmsSubsection::DEST_PORT, indexer->GetDestPort());
+    bucket.Put(SmsSubsection::SMS_SUBSECTION_ID, indexer->GetMsgRefId());
+    bucket.Put(SmsSubsection::SIZE, indexer->GetMsgCount());
+    bucket.Put(SmsSubsection::SUBSECTION_INDEX, indexer->GetMsgSeqId());
     bool ret = DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(bucket);
     if (!ret) {
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
