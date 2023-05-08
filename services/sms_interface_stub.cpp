@@ -24,6 +24,12 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
+
+static inline bool IsValidSlotId(int32_t slotId)
+{
+    return ((slotId >= DEFAULT_SIM_SLOT_ID) && (slotId < SIM_SLOT_COUNT));
+}
+
 SmsInterfaceStub::SmsInterfaceStub()
 {
     memberFuncMap_[TEXT_BASED_SMS_DELIVERY] = &SmsInterfaceStub::OnSendSmsTextRequest;
@@ -104,6 +110,11 @@ void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &
     u16string desAddr = data.ReadString16();
     u16string scAddr = data.ReadString16();
     u16string text = data.ReadString16();
+    if (!IsValidSlotId(slotId)) {
+        TELEPHONY_LOGE("invalid slotId：%{public}d", slotId);
+        return;
+    }
+
     sptr<IRemoteObject> remoteSendCallback = data.ReadRemoteObject();
     sptr<IRemoteObject> remoteDeliveryCallback = data.ReadRemoteObject();
     if (remoteSendCallback != nullptr) {
@@ -126,6 +137,11 @@ void SmsInterfaceStub::OnSendSmsDataRequest(MessageParcel &data, MessageParcel &
     u16string desAddr = data.ReadString16();
     u16string scAddr = data.ReadString16();
     int16_t port = data.ReadInt16();
+    if (!IsValidSlotId(slotId)) {
+        TELEPHONY_LOGE("invalid slotId：%{public}d", slotId);
+        return;
+    }
+
     sptr<IRemoteObject> remoteSendCallback = data.ReadRemoteObject();
     sptr<IRemoteObject> remoteDeliveryCallback = data.ReadRemoteObject();
     if (remoteSendCallback != nullptr) {
