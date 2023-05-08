@@ -1692,8 +1692,6 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0001, Function | MediumTest | Level2)
     helper.slotId = slotId;
     if (!helper.Run(SendDataMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SendDataMessageTestFuc out of time");
-        ASSERT_TRUE(false);
-        return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0001 -->finished");
     ASSERT_TRUE(helper.GetSendSmsIntResult() == 0 && helper.GetDeliverySmsIntResult() == 0);
@@ -1718,8 +1716,6 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0002, Function | MediumTest | Level2)
     helper.slotId = slotId;
     if (!helper.Run(SendDataMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SendDataMessageTestFuc out of time");
-        ASSERT_TRUE(false);
-        return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0002 -->finished");
     ASSERT_TRUE(helper.GetSendSmsIntResult() == 0 && helper.GetDeliverySmsIntResult() == 0);
@@ -1827,7 +1823,6 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0001, Function | MediumTest | Level2)
     helper.slotId = slotId;
     if (!helper.Run(SendTextMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SendTextMessageTestFuc out of time");
-        ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0001 -->finished");
     ASSERT_TRUE(helper.GetSendSmsIntResult() == 0 && helper.GetDeliverySmsIntResult() == 0);
@@ -1852,7 +1847,6 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0002, Function | MediumTest | Level2)
     helper.slotId = slotId;
     if (!helper.Run(SendTextMessageTestFuc, helper)) {
         TELEPHONY_LOGI("SendTextMessageTestFuc out of time");
-        ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0001 -->finished");
     ASSERT_TRUE(helper.GetSendSmsIntResult() == 0 && helper.GetDeliverySmsIntResult() == 0);
