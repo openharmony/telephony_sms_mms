@@ -20,12 +20,19 @@
 
 #include "addsmstoken_fuzzer.h"
 #include "cdma_sms_message.h"
+#include "common_event.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
 #include "delivery_short_message_callback_stub.h"
 #include "send_short_message_callback_stub.h"
+#include "sms_broadcast_subscriber_receiver.h"
 #include "sms_interface_manager.h"
+#include "sms_receive_reliability_handler.h"
+#include "string_utils.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
+using namespace EventFwk;
 constexpr int32_t SLOT_NUM = 2;
 bool g_flag = false;
 
@@ -45,10 +52,47 @@ void DoRecvItemsTest(const uint8_t *data, size_t size, std::shared_ptr<SmsReceiv
     const std::shared_ptr<SmsReceiveIndexer> smsReceiveIndexer = std::make_shared<SmsReceiveIndexer>();
     smsReceiveManager->gsmSmsReceiveHandler_->CombineMessagePart(smsReceiveIndexer);
     smsReceiveManager->cdmaSmsReceiveHandler_->CombineMessagePart(smsReceiveIndexer);
-    smsReceiveManager->gsmSmsReceiveHandler_->DeleteMessageFormDb(smsReceiveIndexer);
-    smsReceiveManager->cdmaSmsReceiveHandler_->DeleteMessageFormDb(smsReceiveIndexer);
+
     smsReceiveManager->gsmSmsReceiveHandler_->IsRepeatedMessagePart(smsReceiveIndexer);
     smsReceiveManager->cdmaSmsReceiveHandler_->IsRepeatedMessagePart(smsReceiveIndexer);
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(slotId);
+    if (reliabilityHandler == nullptr) {
+        return;
+    }
+    reliabilityHandler->DeleteMessageFormDb(smsReceiveIndexer->GetMsgRefId());
+
+    std::vector<SmsReceiveIndexer> dbIndexers;
+    std::string strData(reinterpret_cast<const char *>(data), size);
+    auto indexer = SmsReceiveIndexer(StringUtils::HexToByteVector(strData), size, size, size % SLOT_NUM, strData,
+        strData, size, size, size, size % SLOT_NUM, strData);
+
+    dbIndexers.push_back(indexer);
+    indexer = SmsReceiveIndexer(
+        StringUtils::HexToByteVector(strData), size, size, size % SLOT_NUM, size % SLOT_NUM, strData, strData, strData);
+    dbIndexers.push_back(indexer);
+    reliabilityHandler->CheckUnReceiveWapPush(dbIndexers);
+
+    std::shared_ptr<std::vector<std::string>> userDataRaws = std::make_shared<std::vector<std::string>>();
+    userDataRaws->push_back(strData);
+
+    int32_t pages = 0;
+    reliabilityHandler->GetWapPushUserDataSinglePage(indexer, userDataRaws);
+    reliabilityHandler->GetWapPushUserDataMultipage(pages, dbIndexers, size, userDataRaws);
+    reliabilityHandler->ReadyDecodeWapPushUserData(indexer, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(pages, dbIndexers, size, userDataRaws);
+    reliabilityHandler->ReadySendSmsBroadcast(indexer, userDataRaws);
+    reliabilityHandler->DeleteMessageFormDb(size, size);
+    reliabilityHandler->RemoveBlockedSms(dbIndexers);
+
+    std::shared_ptr<SmsReceiveIndexer> indexerPtr =
+        std::make_shared<SmsReceiveIndexer>(StringUtils::HexToByteVector(strData), size, size, size % SLOT_NUM, strData,
+            strData, size, size, size, size % SLOT_NUM, strData);
+    if (indexerPtr == nullptr) {
+        return;
+    }
+    reliabilityHandler->SendBroadcast(indexerPtr, userDataRaws);
 }
 
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
@@ -86,6 +130,14 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     AppExecFwk::InnerEvent::Pointer response = AppExecFwk::InnerEvent::Get(eventId, refId);
     smsReceiveManager->gsmSmsReceiveHandler_->ProcessEvent(response);
     smsReceiveManager->cdmaSmsReceiveHandler_->ProcessEvent(response);
+
+    MatchingSkills smsSkills;
+    std::string strData(reinterpret_cast<const char *>(data), size);
+    smsSkills.AddEvent(strData);
+    CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
+    auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo, nullptr, size, size);
+    CommonEventData comData;
+    smsReceiver->OnReceiveEvent(comData);
 
     DoRecvItemsTest(data, size, smsReceiveManager);
 }

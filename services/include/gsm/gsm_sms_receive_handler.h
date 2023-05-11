@@ -16,11 +16,7 @@
 #ifndef GSM_SMS_RECEIVE_HANDLER_H
 #define GSM_SMS_RECEIVE_HANDLER_H
 
-#include "event_handler.h"
-#include "event_runner.h"
-
 #include "gsm_sms_cb_handler.h"
-#include "sms_receive_indexer.h"
 #include "sms_receive_handler.h"
 
 namespace OHOS {
@@ -33,13 +29,16 @@ public:
     void UnRegisterHandler();
 
 protected:
-    virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage) override;
-    virtual void ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> &response) override;
-    std::shared_ptr<SmsBaseMessage> TransformMessageInfo(const std::shared_ptr<SmsMessageInfo> &info) override;
+    virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) override;
+    virtual void ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> response) override;
+    virtual std::shared_ptr<SmsBaseMessage> TransformMessageInfo(const std::shared_ptr<SmsMessageInfo> info) override;
 
 private:
     bool RegisterHandler();
+    int32_t CheckSmsSupport();
+    int32_t HandleNormalSmsByType(const std::shared_ptr<SmsBaseMessage> smsBaseMessage);
 
+private:
     std::shared_ptr<GsmSmsCbHandler> smsCbHandler_;
     std::shared_ptr<AppExecFwk::EventRunner> smsCbRunner_;
 };

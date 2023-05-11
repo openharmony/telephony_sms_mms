@@ -26,7 +26,7 @@ public:
     SmsReceiveIndexer();
     virtual ~SmsReceiveIndexer() = default;
     SmsReceiveIndexer(const std::vector<uint8_t> &pdu, int64_t timestamp, int16_t destPort, bool isCdma,
-        const std::string &address, const std::string &displayAddress, int16_t msgRefId, uint16_t msgSeqId,
+        const std::string &address, const std::string &displayAddress, uint16_t msgRefId, uint16_t msgSeqId,
         uint16_t msgCount, bool isCdmaWapPdu, const std::string &messageBody);
     SmsReceiveIndexer(const std::vector<uint8_t> &pdu, int64_t timestamp, int16_t destPort, bool isCdma,
         bool isCdmaWapPdu, const std::string &address, const std::string &displayAddress,
@@ -49,6 +49,8 @@ public:
     void SetMsgRefId(uint16_t msgRefId);
     uint16_t GetMsgSeqId() const;
     void SetMsgSeqId(uint16_t msgSeqId);
+    uint16_t GetDataBaseId() const;
+    void SetDataBaseId(uint16_t dataBaseId);
     uint16_t GetMsgCount() const;
     void SetMsgCount(uint16_t msgCount);
     std::string GetEraseRefId() const;
@@ -63,8 +65,6 @@ public:
     void SetRawUserData(const std::string &rawUserData);
 
 private:
-    static constexpr int8_t TEXT_PORT_NUM = -1;
-    static constexpr int16_t WAP_PUSH_PORT = 2948;
     std::vector<uint8_t> pdu_;
     int64_t timestamp_;
     int16_t destPort_;
@@ -72,9 +72,10 @@ private:
     bool isCdmaWapPdu_ = false;
     std::string visibleMessageBody_;
     std::string originatingAddress_;
-    int16_t msgRefId_;
-    uint16_t msgSeqId_;
-    uint16_t msgCount_;
+    uint16_t msgRefId_ = 0;
+    uint16_t msgSeqId_ = 0;
+    uint16_t dataBaseId_ = 0;
+    uint16_t msgCount_ = 0;
     std::string eraseRefId_;
     std::string visibleAddress_;
     std::string rawUserData_;

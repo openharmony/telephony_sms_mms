@@ -1398,7 +1398,16 @@ void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
     std::u16string smscData(u"");
     std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
     uint32_t status = 3;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->UpdateSimMessage(
+
+    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->AddSimMessage(
+        helper.slotId, smscData, pduData, static_cast<ISmsServiceInterface::SimMessageStatus>(status));
+    if (result != 0) {
+        helper.SetIntResult(result);
+        helper.NotifyAll();
+        return;
+    }
+
+    result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->UpdateSimMessage(
         helper.slotId, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
     helper.SetIntResult(result);
     helper.NotifyAll();

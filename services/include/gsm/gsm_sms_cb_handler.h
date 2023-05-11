@@ -17,17 +17,15 @@
 #define GSM_SMS_CB_HANDLER_H
 
 #include <map>
-#include <memory>
 
 #include "common_event.h"
 #include "common_event_manager.h"
-#include "want.h"
-
 #include "event_handler.h"
 #include "event_runner.h"
 #include "hril_sms_parcel.h"
 #include "sms_cb_data.h"
 #include "sms_cb_message.h"
+#include "want.h"
 
 enum SmsCbType { SMS_CB_TYPE = 0, SMS_ETWS_TYPE };
 

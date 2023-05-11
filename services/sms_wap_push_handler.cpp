@@ -22,6 +22,7 @@
 #include "common_event_support.h"
 #include "mms_msg.h"
 #include "securec.h"
+#include "sms_broadcast_subscriber_receiver.h"
 #include "sms_hisysevent.h"
 #include "sms_persist_helper.h"
 #include "string_utils.h"
@@ -32,6 +33,11 @@
 namespace OHOS {
 namespace Telephony {
 using namespace OHOS::EventFwk;
+static constexpr uint8_t PDU_TYPE_PUSH = 0x06;
+static constexpr uint8_t PDU_TYPE_CONFIRMED_PUSH = 0x07;
+static constexpr uint32_t PARAMETER_X_WAP_APPLICATION_ID = 0x2F;
+static constexpr const char *CONTENT_MIME_TYPE_B_PUSH_CO = "application/vnd.wap.coc";
+
 SmsWapPushHandler::SmsWapPushHandler(int32_t slotId) : slotId_(slotId) {}
 
 SmsWapPushHandler::~SmsWapPushHandler() {}
@@ -69,8 +75,13 @@ bool SmsWapPushHandler::DecodeWapPushPduData(SmsWapPushBuffer &decodeBuffer, uin
 /*
  * wap-230-wsp-20010705-a 8.2.4.1 Push and ConfirmedPush
  */
-bool SmsWapPushHandler::DecodeWapPushPdu(std::string &wapPdu)
+bool SmsWapPushHandler::DecodeWapPushPdu(std::shared_ptr<SmsReceiveIndexer> indexer, std::string &wapPdu)
 {
+    if (indexer == nullptr) {
+        TELEPHONY_LOGE("indexer is nullptr");
+        return false;
+    }
+
     SmsWapPushBuffer decodeBuffer;
     if (!decodeBuffer.WriteRawStringBuffer(wapPdu)) {
         TELEPHONY_LOGE("Wap push WriteRawStringBuffer fail.");
@@ -112,7 +123,7 @@ bool SmsWapPushHandler::DecodeWapPushPdu(std::string &wapPdu)
         TELEPHONY_LOGI("Wap Push Mms-message Is Blocked Dispatcher.");
         return true;
     }
-    SendWapPushMessageBroadcast();
+    SendWapPushMessageBroadcast(indexer);
     return true;
 }
 
@@ -304,8 +315,13 @@ bool SmsWapPushHandler::DecodeXWapAbandonHeaderValue(SmsWapPushBuffer &decodeBuf
     return true;
 }
 
-bool SmsWapPushHandler::SendWapPushMessageBroadcast()
+bool SmsWapPushHandler::SendWapPushMessageBroadcast(std::shared_ptr<SmsReceiveIndexer> indexer)
 {
+    if (indexer == nullptr) {
+        TELEPHONY_LOGE("indexer is nullptr");
+        return false;
+    }
+
     EventFwk::Want want;
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
 
@@ -326,14 +342,26 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast()
     std::vector<std::string> wappushPermissions;
     wappushPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
     publishInfo.SetSubscriberPermissions(wappushPermissions);
-    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
+
+    MatchingSkills smsSkills;
+    smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
+    CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
+    auto handler = std::make_shared<SmsReceiveReliabilityHandler>(slotId_);
+    auto wapPushReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(
+        smsSubscriberInfo, handler, indexer->GetMsgRefId(), indexer->GetDataBaseId());
+    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, wapPushReceiver);
+    HiSysEventWapPushResult(publishResult);
+    return true;
+}
+
+void SmsWapPushHandler::HiSysEventWapPushResult(bool publishResult)
+{
     if (!publishResult) {
         TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::WAP_PUSH,
             SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish wpa push broadcast event fail");
     }
     DelayedSingleton<SmsHiSysEvent>::GetInstance()->SetWapPushBroadcastStartTime();
-    return true;
 }
 } // namespace Telephony
 } // namespace OHOS

@@ -16,18 +16,11 @@
 #ifndef SMS_RECEIVE_HANDLER_H
 #define SMS_RECEIVE_HANDLER_H
 
-#include <memory>
-#include <unordered_map>
-#include <vector>
-
 #include "event_handler.h"
 #include "event_runner.h"
-
 #include "hril_sms_parcel.h"
 #include "sms_base_message.h"
-#include "sms_common.h"
 #include "sms_receive_indexer.h"
-#include "sms_persist_helper.h"
 #include "sms_wap_push_handler.h"
 
 namespace OHOS {
@@ -39,30 +32,24 @@ public:
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 
 protected:
-    virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage) = 0;
-    virtual void ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> &response) = 0;
-    virtual std::shared_ptr<SmsBaseMessage> TransformMessageInfo(const std::shared_ptr<SmsMessageInfo> &info) = 0;
+    virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) = 0;
+    virtual void ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> response) = 0;
+    virtual std::shared_ptr<SmsBaseMessage> TransformMessageInfo(const std::shared_ptr<SmsMessageInfo> info) = 0;
     void CombineMessagePart(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
-    void DeleteMessageFormDb(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
     bool IsRepeatedMessagePart(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
-    bool AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer);
-    bool CheckBlockPhone(const std::shared_ptr<SmsReceiveIndexer> &indexer);
-    bool CheckSmsCapable();
-    int32_t slotId_ = -1;
+    bool AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> indexer);
 
 private:
-    constexpr static uint16_t PDU_POS_OFFSET = 1;
-    constexpr static int32_t TEXT_MSG_RECEIVE_CODE = 0;
-    constexpr static int32_t DATA_MSG_RECEIVE_CODE = 1;
-
-    void SendBroadcast(
-        const std::shared_ptr<SmsReceiveIndexer> &indexer, const std::shared_ptr<std::vector<std::string>> &pdus);
-    void HandleReceivedSms(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage);
     SmsReceiveHandler(const SmsReceiveHandler &) = delete;
     SmsReceiveHandler(const SmsReceiveHandler &&) = delete;
     SmsReceiveHandler &operator=(const SmsReceiveHandler &) = delete;
     SmsReceiveHandler &operator=(const SmsReceiveHandler &&) = delete;
+    void HandleReceivedSms(const std::shared_ptr<SmsBaseMessage> smsBaseMessage);
 
+protected:
+    int32_t slotId_ = -1;
+
+private:
     std::unique_ptr<SmsWapPushHandler> smsWapPushHandler_;
 };
 } // namespace Telephony
