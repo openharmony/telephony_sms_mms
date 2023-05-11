@@ -29,7 +29,8 @@ void WapPushBuffer(const uint8_t *data, size_t size)
     int32_t slotId = static_cast<int32_t>(size % SIM_COUNT);
     std::string strValue(reinterpret_cast<const char *>(data), size);
     std::unique_ptr<SmsWapPushHandler> smsWapPushHandler = std::make_unique<SmsWapPushHandler>(slotId);
-    smsWapPushHandler->DecodeWapPushPdu(strValue);
+    auto indexer = std::make_shared<SmsReceiveIndexer>();
+    smsWapPushHandler->DecodeWapPushPdu(indexer, strValue);
 
     auto decodeBuffer = std::make_shared<SmsWapPushBuffer>();
     if (decodeBuffer == nullptr) {

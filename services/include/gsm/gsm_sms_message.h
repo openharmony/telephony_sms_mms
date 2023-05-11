@@ -16,11 +16,6 @@
 #ifndef GSM_SMS_MESSAGE_H
 #define GSM_SMS_MESSAGE_H
 
-#include <memory>
-#include <stdint.h>
-#include <string>
-#include <vector>
-
 #include "gsm_pdu_code_type.h"
 #include "sms_base_message.h"
 

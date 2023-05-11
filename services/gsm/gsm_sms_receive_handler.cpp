@@ -19,10 +19,9 @@
 #include "gsm_sms_message.h"
 #include "radio_event.h"
 #include "runner_pool.h"
-#include "sms_base_message.h"
+#include "sms_common.h"
 #include "sms_hisysevent.h"
-#include "sms_receive_indexer.h"
-#include "string_utils.h"
+#include "sms_receive_reliability_handler.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -76,9 +75,8 @@ void GsmSmsReceiveHandler::UnRegisterHandler()
     }
 }
 
-int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> &smsBaseMessage)
+int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> smsBaseMessage)
 {
-    TELEPHONY_LOGI("GsmSmsReceiveHandler:: HandleSmsByType");
     if (smsBaseMessage == nullptr) {
         TELEPHONY_LOGE("BaseMessage is null.");
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
@@ -88,12 +86,40 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> &
         TELEPHONY_LOGI("GsmSmsReceiveHandler:: IsSpecialMessage");
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
-    if (!CheckSmsCapable()) {
+    int ret = CheckSmsSupport();
+    if (ret != AckIncomeCause::SMS_ACK_RESULT_OK) {
+        return ret;
+    }
+    return HandleNormalSmsByType(smsBaseMessage);
+}
+
+int32_t GsmSmsReceiveHandler::CheckSmsSupport()
+{
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(slotId_);
+    if (reliabilityHandler == nullptr) {
+        TELEPHONY_LOGE("reliabilityHandler nullptr");
+        return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+    }
+    if (!(reliabilityHandler->CheckSmsCapable())) {
         TELEPHONY_LOGI("sms receive capable unSupport");
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "sms receive capable unsupported");
         return AckIncomeCause::SMS_ACK_PROCESSED;
     }
+    if (!reliabilityHandler->DeleteExpireSmsFromDB()) {
+        TELEPHONY_LOGE("DeleteExpireSmsFromDB fail");
+        return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+    }
+    return AckIncomeCause::SMS_ACK_RESULT_OK;
+}
+
+int32_t GsmSmsReceiveHandler::HandleNormalSmsByType(const shared_ptr<SmsBaseMessage> smsBaseMessage)
+{
+    if (smsBaseMessage == nullptr) {
+        TELEPHONY_LOGE("BaseMessage is null.");
+        return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+    }
+    GsmSmsMessage *message = (GsmSmsMessage *)smsBaseMessage.get();
 
     shared_ptr<SmsReceiveIndexer> indexer;
     if (!message->IsConcatMsg()) {
@@ -116,7 +142,10 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> &
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
     indexer->SetRawUserData(message->GetRawUserData());
-    if (indexer->GetIsText() && IsRepeatedMessagePart(indexer)) {
+
+    TELEPHONY_LOGI("received a gsm sms, this is %{public}d, a total of %{public}d", indexer->GetMsgSeqId(),
+        indexer->GetMsgCount());
+    if (indexer->GetIsText() && message->IsConcatMsg() && IsRepeatedMessagePart(indexer)) {
         TELEPHONY_LOGE("Ack repeated error.");
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_REPEATED_ERROR, "gsm message repeated error");
@@ -129,14 +158,14 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> &
     return AckIncomeCause::SMS_ACK_RESULT_OK;
 }
 
-void GsmSmsReceiveHandler::ReplySmsToSmsc(int result, const shared_ptr<SmsBaseMessage> &response)
+void GsmSmsReceiveHandler::ReplySmsToSmsc(int result, const shared_ptr<SmsBaseMessage> response)
 {
     TELEPHONY_LOGI("GsmSmsReceiveHandler::ReplySmsToSmsc ackResult %{public}d", result);
     CoreManagerInner::GetInstance().SendSmsAck(
         slotId_, SMS_EVENT_NEW_SMS_REPLY, result == AckIncomeCause::SMS_ACK_RESULT_OK, result, shared_from_this());
 }
 
-shared_ptr<SmsBaseMessage> GsmSmsReceiveHandler::TransformMessageInfo(const shared_ptr<SmsMessageInfo> &info)
+shared_ptr<SmsBaseMessage> GsmSmsReceiveHandler::TransformMessageInfo(const shared_ptr<SmsMessageInfo> info)
 {
     std::shared_ptr<SmsBaseMessage> baseMessage = nullptr;
     if (info == nullptr) {

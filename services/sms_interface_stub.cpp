@@ -16,6 +16,7 @@
 #include "sms_interface_stub.h"
 
 #include "sms_interface_manager.h"
+#include "sms_receive_reliability_handler.h"
 #include "string_utils.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
@@ -75,7 +76,24 @@ void SmsInterfaceStub::InitModule()
                 return;
             }
             slotSmsInterfaceManagerMap_[slotId]->InitInterfaceManager();
-            TELEPHONY_LOGI("SmsInterfaceStub InitModule slotId = %{public}d", slotId);
+
+            std::thread smsReceiveReliabilityTask([slotId]() {
+                auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(slotId);
+                if (reliabilityHandler == nullptr) {
+                    TELEPHONY_LOGE("reliabilityHandler nullptr");
+                    return;
+                }
+                if (!reliabilityHandler->DeleteExpireSmsFromDB()) {
+                    TELEPHONY_LOGE("DeleteExpireSmsFromDB fail");
+                    return;
+                }
+                if (!reliabilityHandler->CheckSmsCapable()) {
+                    TELEPHONY_LOGE("sms receive capable unSupport");
+                    return;
+                }
+                reliabilityHandler->SmsReceiveReliabilityProcessing();
+            });
+            smsReceiveReliabilityTask.detach();
         }
     }
 }

@@ -19,8 +19,6 @@
 
 #include "sms_pdu_code_type.h"
 
-#include <cstdint>
-
 namespace OHOS {
 namespace Telephony {
 static constexpr uint8_t MAX_ADDRESS_LEN = 21;
