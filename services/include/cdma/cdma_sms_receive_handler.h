@@ -16,13 +16,8 @@
 #ifndef CDMA_SMS_RECEIVE_HANDLER_H
 #define CDMA_SMS_RECEIVE_HANDLER_H
 
-#include "event_handler.h"
-#include "event_runner.h"
-
 #include "sms_cb_data.h"
-#include "sms_receive_indexer.h"
 #include "sms_receive_handler.h"
-#include "sms_send_indexer.h"
 #include "sms_sender.h"
 
 namespace OHOS {
@@ -36,19 +31,19 @@ public:
     void UnRegisterHandler();
 
 protected:
-    virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage) override;
-    virtual void ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> &response) override;
-    virtual std::shared_ptr<SmsBaseMessage> TransformMessageInfo(
-        const std::shared_ptr<SmsMessageInfo> &info) override;
+    virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) override;
+    virtual void ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> response) override;
+    virtual std::shared_ptr<SmsBaseMessage> TransformMessageInfo(const std::shared_ptr<SmsMessageInfo> info) override;
 
 private:
     bool RegisterHandler();
-    bool SendCBBroadcast(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage);
+    bool SendCBBroadcast(const std::shared_ptr<SmsBaseMessage> smsBaseMessage);
     bool SetCBBroadcastParam(AppExecFwk::Want &want, SmsCbData::CbData &sendData);
-    void GetCBData(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage, SmsCbData::CbData &sendData,
-        bool &isEmergency);
-    std::weak_ptr<SmsSender> cdmaSmsSender_;
+    void GetCBData(
+        const std::shared_ptr<SmsBaseMessage> smsBaseMessage, SmsCbData::CbData &sendData, bool &isEmergency);
 
+private:
+    std::weak_ptr<SmsSender> cdmaSmsSender_;
     std::u16string plmn_;
 };
 } // namespace Telephony

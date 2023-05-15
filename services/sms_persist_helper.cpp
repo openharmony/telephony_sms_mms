@@ -29,6 +29,8 @@
 namespace OHOS {
 namespace Telephony {
 class AbsSharedResultSet;
+constexpr static uint8_t SMS_TYPE_CDMA = 2;
+
 SmsPersistHelper::SmsPersistHelper() {}
 
 SmsPersistHelper::~SmsPersistHelper() {}
@@ -48,7 +50,7 @@ std::shared_ptr<DataShare::DataShareHelper> SmsPersistHelper::CreateDataShareHel
     return DataShare::DataShareHelper::Creator(remoteObj, uri);
 }
 
-bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values)
+bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
     if (helper == nullptr) {
@@ -58,6 +60,7 @@ bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values)
     Uri uri(SMS_SUBSECTION);
     int ret = helper->Insert(uri, values);
     helper->Release();
+    dataBaseId = ret;
     return ret >= 0 ? true : false;
 }
 
@@ -165,7 +168,7 @@ void SmsPersistHelper::ConvertIntToIndexer(
     int columnIndex;
     resultSet->GetColumnIndex(SmsSubsection::FORMAT, columnIndex);
     if (resultSet->GetInt(columnIndex, columnInt) == 0) {
-        info.SetIsCdma(columnInt != 0);
+        info.SetIsCdma(columnInt == SMS_TYPE_CDMA);
     }
 
     resultSet->GetColumnIndex(SmsSubsection::SMS_SUBSECTION_ID, columnIndex);
@@ -186,6 +189,11 @@ void SmsPersistHelper::ConvertIntToIndexer(
     resultSet->GetColumnIndex(SmsSubsection::DEST_PORT, columnIndex);
     if (resultSet->GetInt(columnIndex, columnInt) == 0) {
         info.SetDestPort(columnInt);
+    }
+
+    resultSet->GetColumnIndex(SmsSubsection::ID, columnIndex);
+    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
+        info.SetDataBaseId(columnInt);
     }
 }
 
