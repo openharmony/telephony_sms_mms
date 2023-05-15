@@ -15,10 +15,6 @@
 
 #ifndef CDMA_SMS_MESSAGE_H
 #define CDMA_SMS_MESSAGE_H
-#include <memory>
-#include <stdint.h>
-#include <string>
-#include <vector>
 
 #include "sms_base_message.h"
 

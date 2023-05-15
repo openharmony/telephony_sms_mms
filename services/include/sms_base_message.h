@@ -18,16 +18,12 @@
 
 #include <cmath>
 #include <memory>
-#include <string>
-#include <vector>
 
 #include "cdma_sms_pdu_codec.h"
 #include "gsm_sms_tpdu_codec.h"
 #include "msg_text_convert_common.h"
-#include "securec.h"
 #include "sms_common_utils.h"
 #include "string_utils.h"
-#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {

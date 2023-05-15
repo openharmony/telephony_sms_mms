@@ -29,7 +29,7 @@ namespace Telephony {
 class SmsPersistHelper {
     DECLARE_DELAYED_SINGLETON(SmsPersistHelper)
 public:
-    bool Insert(DataShare::DataShareValuesBucket &values);
+    bool Insert(DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId);
     bool Query(DataShare::DataSharePredicates &predicates, std::vector<SmsReceiveIndexer> &indexers);
     bool Delete(DataShare::DataSharePredicates &predicates);
     bool QueryBlockPhoneNumber(const std::string &phoneNum);

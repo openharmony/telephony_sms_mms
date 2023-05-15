@@ -15,22 +15,21 @@
 
 #include "sms_receive_handler.h"
 
-#include "common_event.h"
-#include "common_event_manager.h"
-#include "common_event_support.h"
 #include "gsm_sms_message.h"
 #include "radio_event.h"
-#include "singleton.h"
 #include "sms_hisysevent.h"
-#include "string_utils.h"
+#include "sms_persist_helper.h"
+#include "sms_receive_reliability_handler.h"
 #include "telephony_log_wrapper.h"
-#include "telephony_permission.h"
-#include "want.h"
 
 namespace OHOS {
 namespace Telephony {
 using namespace std;
 using namespace EventFwk;
+constexpr static uint16_t PDU_POS_OFFSET = 1;
+constexpr static uint8_t SMS_TYPE_GSM = 1;
+constexpr static uint8_t SMS_TYPE_CDMA = 2;
+
 SmsReceiveHandler::SmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
     : AppExecFwk::EventHandler(runner), slotId_(slotId)
 {
@@ -69,7 +68,7 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
     }
 }
 
-void SmsReceiveHandler::HandleReceivedSms(const std::shared_ptr<SmsBaseMessage> &smsBaseMessage)
+void SmsReceiveHandler::HandleReceivedSms(const std::shared_ptr<SmsBaseMessage> smsBaseMessage)
 {
     if (smsBaseMessage == nullptr) {
         TELEPHONY_LOGE("smsBaseMessage is nullptr");
@@ -83,6 +82,11 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
     std::shared_ptr<vector<string>> pdus = make_shared<vector<string>>();
     if ((indexer == nullptr) || (pdus == nullptr)) {
         TELEPHONY_LOGE("indexer or pdus is nullptr");
+        return;
+    }
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(slotId_);
+    if ((reliabilityHandler == nullptr)) {
+        TELEPHONY_LOGE("reliabilityHandler is nullptr");
         return;
     }
     std::string messagBody;
@@ -111,7 +115,7 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
             ++count;
             string pdu = StringUtils::StringToHex(v.GetPdu());
             if ((v.GetMsgSeqId() - PDU_POS_OFFSET >= MAX_SEGMENT_NUM) || (v.GetMsgSeqId() - PDU_POS_OFFSET < 0)) {
-                DeleteMessageFormDb(indexer);
+                reliabilityHandler->DeleteMessageFormDb(indexer->GetMsgRefId());
                 return;
             }
             pdus->at(v.GetMsgSeqId() - PDU_POS_OFFSET) = pdu;
@@ -131,33 +135,21 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
 
     indexer->SetVisibleMessageBody(messagBody);
     indexer->SetRawUserData(userDataRaw);
-    DeleteMessageFormDb(indexer);
-    if (CheckBlockPhone(indexer)) {
+
+    if (reliabilityHandler->CheckBlockedPhoneNumber(indexer->GetOriginatingAddress())) {
         TELEPHONY_LOGI("indexer display address is block");
         return;
     }
     if (indexer->GetIsWapPushMsg()) {
         if (smsWapPushHandler_ != nullptr) {
-            if (!smsWapPushHandler_->DecodeWapPushPdu(userDataRaw)) {
+            if (!smsWapPushHandler_->DecodeWapPushPdu(indexer, userDataRaw)) {
                 SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::WAP_PUSH,
                     SmsMmsErrorCode::SMS_ERROR_PDU_DECODE_FAIL, "Wap push decode wap push fail");
             }
         }
         return;
     }
-    SendBroadcast(indexer, pdus);
-}
-
-void SmsReceiveHandler::DeleteMessageFormDb(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer)
-{
-    if (smsIndexer == nullptr) {
-        TELEPHONY_LOGE("smsIndexer is nullptr");
-        return;
-    }
-
-    DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(SmsSubsection::SMS_SUBSECTION_ID, std::to_string(smsIndexer->GetMsgRefId()));
-    DelayedSingleton<SmsPersistHelper>::GetInstance()->Delete(predicates);
+    reliabilityHandler->SendBroadcast(indexer, pdus);
 }
 
 bool SmsReceiveHandler::IsRepeatedMessagePart(const shared_ptr<SmsReceiveIndexer> &smsIndexer)
@@ -181,56 +173,13 @@ bool SmsReceiveHandler::IsRepeatedMessagePart(const shared_ptr<SmsReceiveIndexer
     return false;
 }
 
-void SmsReceiveHandler::SendBroadcast(
-    const std::shared_ptr<SmsReceiveIndexer> &indexer, const shared_ptr<vector<string>> &pdus)
-{
-    if (pdus == nullptr || indexer == nullptr) {
-        TELEPHONY_LOGE("pdus is nullptr");
-        return;
-    }
-    std::vector<std::string> newPdus;
-    for (const auto &it : *pdus) {
-        if (!it.empty()) {
-            newPdus.emplace_back(it);
-        }
-    }
-    Want want;
-    want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
-    want.SetParam("slotId", static_cast<int>(slotId_));
-    want.SetParam("pdus", newPdus);
-    want.SetParam("isCdma", indexer->GetIsCdma());
-    CommonEventData data;
-    data.SetWant(want);
-    if (indexer->GetIsText()) {
-        data.SetData("TEXT_SMS_RECEIVE");
-        data.SetCode(TEXT_MSG_RECEIVE_CODE);
-    } else {
-        data.SetData("DATA_SMS_RECEIVE");
-        data.SetCode(DATA_MSG_RECEIVE_CODE);
-        want.SetParam("port", static_cast<short>(indexer->GetDestPort()));
-    }
-    CommonEventPublishInfo publishInfo;
-    publishInfo.SetOrdered(true);
-    std::vector<std::string> smsPermissions;
-    smsPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
-    publishInfo.SetSubscriberPermissions(smsPermissions);
-    bool publishResult = CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
-    if (!publishResult) {
-        TELEPHONY_LOGE("SendBroadcast PublishBroadcastEvent result fail");
-        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
-            SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish short message broadcast event fail");
-    }
-    DelayedSingleton<SmsHiSysEvent>::GetInstance()->SetSmsBroadcastStartTime();
-}
-
-bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &indexer)
+bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> indexer)
 {
     if (indexer == nullptr) {
         TELEPHONY_LOGE("indexer is nullptr.");
         return false;
     }
-    const uint8_t gsm = 1;
-    const uint8_t cdma = 2;
+
     DataShare::DataShareValuesBucket bucket;
     bucket.Put(SmsSubsection::SLOT_ID, std::to_string(slotId_));
     bucket.Put(SmsSubsection::RECEIVER_NUMBER, indexer->GetOriginatingAddress());
@@ -239,37 +188,19 @@ bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> &ind
     bucket.Put(SmsSubsection::END_TIME, std::to_string(indexer->GetTimestamp()));
     bucket.Put(SmsSubsection::REW_PUD, StringUtils::StringToHex(indexer->GetPdu()));
 
-    bucket.Put(SmsSubsection::FORMAT, indexer->GetIsCdma() ? cdma : gsm);
+    bucket.Put(SmsSubsection::FORMAT, indexer->GetIsCdma() ? SMS_TYPE_CDMA : SMS_TYPE_GSM);
     bucket.Put(SmsSubsection::DEST_PORT, indexer->GetDestPort());
     bucket.Put(SmsSubsection::SMS_SUBSECTION_ID, indexer->GetMsgRefId());
     bucket.Put(SmsSubsection::SIZE, indexer->GetMsgCount());
     bucket.Put(SmsSubsection::SUBSECTION_INDEX, indexer->GetMsgSeqId());
-    bool ret = DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(bucket);
+    uint16_t dataBaseId = 0;
+    bool ret = DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(bucket, dataBaseId);
+    indexer->SetDataBaseId(dataBaseId);
     if (!ret) {
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_ADD_TO_DATABASE_FAIL, "add msg to database error");
     }
     return ret;
-}
-
-bool SmsReceiveHandler::CheckBlockPhone(const std::shared_ptr<SmsReceiveIndexer> &indexer)
-{
-    if (indexer == nullptr) {
-        TELEPHONY_LOGE("CheckBlockPhone sms indexer nullptr error.");
-        return false;
-    }
-    TELEPHONY_LOGD("indexer originating =%{private}s", indexer->GetOriginatingAddress().c_str());
-    return DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryBlockPhoneNumber(
-        indexer->GetOriginatingAddress());
-}
-
-bool SmsReceiveHandler::CheckSmsCapable()
-{
-    auto helperPtr = DelayedSingleton<SmsPersistHelper>::GetInstance();
-    if (helperPtr == nullptr) {
-        return true;
-    }
-    return helperPtr->QueryParamBoolean(SmsPersistHelper::SMS_CAPABLE_PARAM_KEY, true);
 }
 } // namespace Telephony
 } // namespace OHOS

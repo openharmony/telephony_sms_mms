@@ -16,6 +16,7 @@
 #include "sms_base_message.h"
 
 #include "msg_text_convert.h"
+#include "securec.h"
 #include "sms_mms_errors.h"
 #include "sms_service_manager_client.h"
 #include "telephony_errors.h"

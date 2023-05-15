@@ -23,19 +23,22 @@
 
 namespace OHOS {
 namespace Telephony {
+static constexpr int8_t TEXT_PORT_NUM = -1;
+static constexpr int16_t WAP_PUSH_PORT = 2948;
+
 SmsReceiveIndexer::SmsReceiveIndexer()
 {
     timestamp_ = 0;
     destPort_ = 0;
     msgSeqId_ = 0;
-    msgRefId_ = -1;
+    msgRefId_ = 0;
     msgCount_ = 1;
     isCdma_ = false;
     isCdmaWapPdu_ = false;
 }
 
 SmsReceiveIndexer::SmsReceiveIndexer(const std::vector<uint8_t> &pdu, int64_t timestamp, int16_t destPort, bool isCdma,
-    const std::string &address, const std::string &visibleAddress, int16_t msgRefId, uint16_t msgSeqId,
+    const std::string &address, const std::string &visibleAddress, uint16_t msgRefId, uint16_t msgSeqId,
     uint16_t msgCount, bool isCdmaWapPdu, const std::string &messageBody)
     : pdu_(pdu), timestamp_(timestamp), destPort_(destPort), isCdma_(isCdma), isCdmaWapPdu_(isCdmaWapPdu),
       visibleMessageBody_(messageBody), originatingAddress_(address), msgRefId_(msgRefId), msgSeqId_(msgSeqId),
@@ -52,7 +55,7 @@ SmsReceiveIndexer::SmsReceiveIndexer(const std::vector<uint8_t> &pdu, int64_t ti
     } else {
         msgSeqId_ = 1;
     }
-    msgRefId_ = -1;
+    msgRefId_ = 0;
     msgCount_ = 1;
 }
 
@@ -103,7 +106,17 @@ uint16_t SmsReceiveIndexer::GetMsgRefId() const
 
 void SmsReceiveIndexer::SetMsgRefId(uint16_t msgRefId)
 {
-    msgRefId_ = static_cast<int16_t>(msgRefId);
+    msgRefId_ = msgRefId;
+}
+
+uint16_t SmsReceiveIndexer::GetDataBaseId() const
+{
+    return dataBaseId_;
+}
+
+void SmsReceiveIndexer::SetDataBaseId(uint16_t dataBaseId)
+{
+    dataBaseId_ = dataBaseId;
 }
 
 std::string SmsReceiveIndexer::GetOriginatingAddress() const
