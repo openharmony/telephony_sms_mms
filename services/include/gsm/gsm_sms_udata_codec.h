@@ -39,17 +39,18 @@ public:
     static int DecodeGSMData(const unsigned char *pTpdu, const int tpduLen, bool bHeaderInd,
         struct SmsUserData *pUserData, struct SmsTpud *pTPUD);
     static int Decode8bitData(
-        const unsigned char *pTpdu, bool bHeaderInd, struct SmsUserData *pUserData, struct SmsTpud *pTPUD);
+        const unsigned char *pTpdu, int tpduLen, bool bHeaderInd, struct SmsUserData *pUserData, struct SmsTpud *pTPUD);
     static int DecodeUCS2Data(const unsigned char *pTpdu, const int tpduLen, bool bHeaderInd,
         struct SmsUserData *pUserData, struct SmsTpud *pTPUD);
     static int EncodeHeader(const struct SmsUDH header, char *pEncodeHeader);
-    static int DecodeHeader(const unsigned char *pTpdu, struct SmsUDH *pHeader);
+    static int DecodeHeader(const unsigned char *pTpdu, int pduLen, struct SmsUDH *pHeader);
     static void ResetUserData(struct SmsUserData &userData);
 
 private:
     static int EncodeHeaderConcat(const struct SmsUDH header, char *pEncodeHeader);
     static void DebugDecodeHeader(const struct SmsUDH *pHeader);
-    static bool GetHeaderCnt(const unsigned char *pTpdu, struct SmsUserData *pUserData, int &offset, int &udhl, int i);
+    static bool GetHeaderCnt(
+        const unsigned char *pTpdu, int tpduLen, struct SmsUserData *pUserData, int &offset, int &udhl, int i);
 };
 } // namespace Telephony
 } // namespace OHOS
