@@ -3918,7 +3918,7 @@ void CdmaSmsPduCodec::DecodeUserData(
     unsigned char numFields = pduStr[offset++];
     unsigned char udhlBytes = headerInd ? pduStr[offset++] : 0;
     TELEPHONY_LOGI("numFields %{public}d  udhlBytes %{public}d", numFields, udhlBytes);
-    Decode7BitHeader(&pduStr[offset], udhlBytes, userData.userData);
+    Decode7BitHeader(&pduStr[offset], pduLen, udhlBytes, userData.userData);
     offset += udhlBytes;
     DecodeUserDataEncodeType(&pduStr[offset], pduLen, userData, headerInd, numFields, udhlBytes);
 }
@@ -4067,13 +4067,13 @@ void CdmaSmsPduCodec::DecodeUserDataEncodeDefaultType(
  * @param userData
  */
 void CdmaSmsPduCodec::Decode7BitHeader(
-    const unsigned char *pduStr, unsigned char udhlBytes, struct SmsUserData &userData)
+    const unsigned char *pduStr, int pduLen, unsigned char udhlBytes, struct SmsUserData &userData)
 {
     if (udhlBytes > 0) {
         int offset = 0;
         userData.headerCnt = 0;
         for (int i = 0; offset < udhlBytes; i++) {
-            int headerLen = GsmSmsUDataCodec::DecodeHeader(&(pduStr[offset]), &(userData.header[i]));
+            int headerLen = GsmSmsUDataCodec::DecodeHeader(&(pduStr[offset]), pduLen, &(userData.header[i]));
             if (headerLen <= 0) {
                 TELEPHONY_LOGI("Error to Header. headerLen [%{public}d]", headerLen);
                 GsmSmsUDataCodec::ResetUserData(userData);
