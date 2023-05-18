@@ -418,7 +418,7 @@ int GsmSmsTpduCodec::DecodeSubmit(const unsigned char *pSubpdu, int pduLen, stru
     // TP-MR
     pSmsSub->msgRef = pSubpdu[offset++];
     // TP-DA
-    offset += GsmSmsParamCodec::DecodeAddress(pSubpdu + offset, &(pSmsSub->destAddress));
+    offset += GsmSmsParamCodec::DecodeAddress(pSubpdu + offset, pduLen, &(pSmsSub->destAddress));
     // TP-PID
     pSmsSub->pid = ParsePid(pSubpdu[offset++]);
     // TP-DCS
@@ -474,7 +474,7 @@ int GsmSmsTpduCodec::DecodeDeliver(const unsigned char *pTpdu, int TpduLen, stru
     offset++;
     tmpOffset = offset;
     /* TP-OA */
-    offset += GsmSmsParamCodec::DecodeAddress(&pTpdu[offset], &(pDeliver->originAddress));
+    offset += GsmSmsParamCodec::DecodeAddress(&pTpdu[offset], TpduLen, &(pDeliver->originAddress));
     /* TP-PID */
     pDeliver->pid = ParsePid(pTpdu[offset++]);
     /* TP-DCS */
@@ -533,7 +533,7 @@ int GsmSmsTpduCodec::DecodeStatusReport(const unsigned char *pTpdu, int TpduLen,
     /* TP-MR */
     pStatusRep->msgRef = pTpdu[offset++];
     /* TP-RA */
-    offset += GsmSmsParamCodec::DecodeAddress(&pTpdu[offset], &(pStatusRep->recipAddress));
+    offset += GsmSmsParamCodec::DecodeAddress(&pTpdu[offset], TpduLen, &(pStatusRep->recipAddress));
     /* TP-SCTS */
     /* Decode timestamp */
     offset += GsmSmsParamCodec::DecodeTime(&pTpdu[offset], &(pStatusRep->timeStamp));

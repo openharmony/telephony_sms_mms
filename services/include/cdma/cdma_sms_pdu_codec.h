@@ -262,7 +262,7 @@ private:
     static void DecodeUserData(
         unsigned char *pduStr, int pduLen, struct SmsTeleSvcUserData &userData, bool headerInd);
     static void Decode7BitHeader(
-        const unsigned char *pduStr, unsigned char udhlBytes, struct SmsUserData &userData);
+        const unsigned char *pduStr, int pduLen, unsigned char udhlBytes, struct SmsUserData &userData);
     static void DecodeCMASData(unsigned char *pduStr, int pduLen, struct SmsTeleSvcCmasData &cmasData);
     static int DecodeCMASType0Data(unsigned char *pduStr, int pduLen, struct SmsTeleSvcCmasData &cmasData);
 

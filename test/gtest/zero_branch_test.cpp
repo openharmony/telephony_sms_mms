@@ -1852,11 +1852,11 @@ HWTEST_F(BranchTest, CdmaSmsPduCodec_0006, Function | MediumTest | Level1)
     cdmaSmsPduCodec->DecodeUserData(nullptr, 1, svcUserData, true);
     cdmaSmsPduCodec->DecodeUserData(dest, 1, svcUserData, true);
     dest[1] = SmsUDHType::SMS_UDH_CONCAT_8BIT;
-    cdmaSmsPduCodec->Decode7BitHeader(dest, 1, userData);
+    cdmaSmsPduCodec->Decode7BitHeader(dest, 1, 1, userData);
     dest[0] = SmsUDHType::SMS_UDH_CONCAT_16BIT;
     dest[1] = SmsUDHType::SMS_UDH_CONCAT_16BIT;
-    cdmaSmsPduCodec->Decode7BitHeader(dest, 1, userData);
-    cdmaSmsPduCodec->Decode7BitHeader(dest, 0, userData);
+    cdmaSmsPduCodec->Decode7BitHeader(dest, 1, 1, userData);
+    cdmaSmsPduCodec->Decode7BitHeader(dest, 1, 0, userData);
     dest[VALUE_LENGTH] = SmsUDHType::SMS_UDH_CONCAT_16BIT;
     cdmaSmsPduCodec->DecodeCMASData(dest, 1, cmasData);
     dest[VALUE_LENGTH] = 0;
@@ -2256,9 +2256,9 @@ HWTEST_F(BranchTest, GsmSmsParamCodec_0002, Function | MediumTest | Level1)
     EXPECT_EQ(gsmSmsParamCodec->EncodeSMSC(nullptr, pSMSC, 0), 0);
     EXPECT_EQ(gsmSmsParamCodec->EncodeSMSC(pAddress, nullptr, 0), 0);
     EXPECT_EQ(gsmSmsParamCodec->EncodeSMSC(pAddress, pSMSC, 0), 0);
-    EXPECT_EQ(gsmSmsParamCodec->DecodeAddress(nullptr, pAddress), 0);
-    EXPECT_EQ(gsmSmsParamCodec->DecodeAddress(pSMSC, nullptr), 0);
-    EXPECT_GT(gsmSmsParamCodec->DecodeAddress(pSMSC, pAddress), 0);
+    EXPECT_EQ(gsmSmsParamCodec->DecodeAddress(nullptr, 1, pAddress), 0);
+    EXPECT_EQ(gsmSmsParamCodec->DecodeAddress(pSMSC, 1, nullptr), 0);
+    EXPECT_GT(gsmSmsParamCodec->DecodeAddress(pSMSC, 1, pAddress), 0);
     EXPECT_EQ(gsmSmsParamCodec->DecodeTime(nullptr, pTimeStamp), 0);
     EXPECT_EQ(gsmSmsParamCodec->DecodeTime(pSMSC, nullptr), 0);
     EXPECT_EQ(gsmSmsParamCodec->DecodeDCS(nullptr, pDCS), 0);
@@ -2311,11 +2311,11 @@ HWTEST_F(BranchTest, GsmSmsUDataCodec_0001, Function | MediumTest | Level1)
     EXPECT_EQ(gsmSmsUDataCodec->DecodeGSMData(pTpdu, -1, true, userData, pTPUD), 0);
     EXPECT_EQ(gsmSmsUDataCodec->DecodeGSMData(pTpdu, -1, true, userData, pTPUD), 0);
     pTpdu[1] = DATA_LENGTH;
-    EXPECT_EQ(gsmSmsUDataCodec->Decode8bitData(pTpdu, true, userData, pTPUD), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->Decode8bitData(pTpdu, 1, true, userData, pTPUD), 0);
     pTpdu[1] = SHIFT_BIT;
-    EXPECT_EQ(gsmSmsUDataCodec->Decode8bitData(pTpdu, true, userData, pTPUD), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->Decode8bitData(pTpdu, 1, true, userData, pTPUD), 0);
     pTpdu[1] = 1;
-    EXPECT_EQ(gsmSmsUDataCodec->Decode8bitData(pTpdu, true, userData, pTPUD), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->Decode8bitData(pTpdu, 1, true, userData, pTPUD), 0);
     EXPECT_EQ(gsmSmsUDataCodec->DecodeUCS2Data(pTpdu, -1, true, userData, pTPUD), 0);
     EXPECT_EQ(gsmSmsUDataCodec->DecodeUCS2Data(pTpdu, 1, true, userData, pTPUD), 0);
 }
@@ -2357,19 +2357,19 @@ HWTEST_F(BranchTest, GsmSmsUDataCodec_0002, Function | MediumTest | Level1)
     EXPECT_EQ(gsmSmsUDataCodec->EncodeHeader(header, pSMSC), 0);
     SmsUDH *pHeader = new SmsUDH();
     pHeader->udhType = SmsUDHType::SMS_UDH_CONCAT_8BIT;
-    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, 1, pHeader), 0);
     pHeader->udhType = SmsUDHType::SMS_UDH_CONCAT_16BIT;
-    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, 1, pHeader), 0);
     pHeader->udhType = SmsUDHType::SMS_UDH_APP_PORT_8BIT;
-    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, 1, pHeader), 0);
     pHeader->udhType = SmsUDHType::SMS_UDH_APP_PORT_16BIT;
-    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, 1, pHeader), 0);
     pHeader->udhType = SmsUDHType::SMS_UDH_SPECIAL_SMS;
-    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, 1, pHeader), 0);
     pHeader->udhType = SmsUDHType::SMS_UDH_ALTERNATE_REPLY_ADDRESS;
-    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, 1, pHeader), 0);
     pHeader->udhType = SmsUDHType::SMS_UDH_SINGLE_SHIFT;
-    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, 1, pHeader), 0);
 }
 
 /**
@@ -2403,9 +2403,9 @@ HWTEST_F(BranchTest, GsmSmsUDataCodec_0003, Function | MediumTest | Level1)
     unsigned char addressData[BUF_SIZE];
     unsigned char *pTpdu = addressData;
     pHeader->udhType = SmsUDHType::SMS_UDH_LOCKING_SHIFT;
-    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, 1, pHeader), 0);
     pHeader->udhType = SmsUDHType::SMS_UDH_NONE;
-    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, pHeader), 0);
+    EXPECT_EQ(gsmSmsUDataCodec->DecodeHeader(pTpdu, 1, pHeader), 0);
 }
 
 /**
