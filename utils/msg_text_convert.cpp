@@ -395,6 +395,10 @@ int MsgTextConvert::ConvertGSM7bitToUTF8(OUT unsigned char *pDestText, IN int ma
     TELEPHONY_LOGI("max dest Length = %{public}d", maxLength);
     ucs2Length = ConvertGSM7bitToUCS2(reinterpret_cast<unsigned char *>(pUCS2Text), maxUCS2Length * sizeof(WCHAR),
         pSrcText, srcTextLen, pLangInfo);
+    if (ucs2Length > maxLength) {
+        TELEPHONY_LOGE("pSrcText over size");
+        return utf8Length;
+    }
     utf8Length = ConvertUCS2ToUTF8(pDestText, maxLength, reinterpret_cast<unsigned char *>(pUCS2Text), ucs2Length);
     return utf8Length;
 }

@@ -32,7 +32,7 @@ public:
     static int EncodeSMSC(const char *pAddress, unsigned char *pEncodeAddr);
     static int EncodeSMSC(const struct SmsAddress *pAddress, unsigned char *pSMSC, int smscLen);
 
-    static int DecodeAddress(const unsigned char *pTpdu, struct SmsAddress *pAddress);
+    static int DecodeAddress(const unsigned char *pTpdu, int pduLen, struct SmsAddress *pAddress);
     static int DecodeTime(const unsigned char *pTpdu, struct SmsTimeStamp *pTimeStamp);
     static int DecodeDCS(const unsigned char *pTpdu, struct SmsDcs *pDCS);
     static void DecodeSMSC(unsigned char *pAddress, int AddrLen, enum SmsTon ton, char *pDecodeAddr);

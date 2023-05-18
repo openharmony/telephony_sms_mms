@@ -240,7 +240,7 @@ int GsmSmsParamCodec::EncodeDCS(const struct SmsDcs *pDCS, char **ppParam)
     return MAX_DCS_PARAM_LEN;
 }
 
-int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddress *pAddress)
+int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, struct SmsAddress *pAddress)
 {
     int offset = 0;
     int addrLen = 0;
@@ -254,6 +254,10 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, struct SmsAddres
         return offset;
     }
     addrLen = (int)pTpdu[offset++];
+    if (offset + addrLen >= pduLen) {
+        TELEPHONY_LOGE("addrLen over size!");
+        return offset;
+    }
     if (addrLen % HEX_BYTE_STEP == 0) {
         bcdLen = addrLen / HEX_BYTE_STEP;
     } else {
@@ -479,7 +483,7 @@ int GsmSmsParamCodec::DecodeSMSC(const unsigned char *pTpdu, int pduLen, struct 
     pAddress.npi = pTpdu[offset++] & 0x0F;
 
     if (pAddress.ton == SMS_TON_INTERNATIONAL) {
-        if (addrLen > (SMS_MAX_ADDRESS_LEN - 1)) {
+        if (addrLen > (SMS_MAX_ADDRESS_LEN - 1) || offset + addrLen >= pduLen) {
             TELEPHONY_LOGE("AddrLen is invilid.");
             return 0;
         }
@@ -488,7 +492,7 @@ int GsmSmsParamCodec::DecodeSMSC(const unsigned char *pTpdu, int pduLen, struct 
             pAddress.address[0] = '+';
         }
     } else {
-        if (addrLen > SMS_MAX_ADDRESS_LEN) {
+        if (addrLen > SMS_MAX_ADDRESS_LEN || offset + addrLen >= pduLen) {
             TELEPHONY_LOGE("AddrLen is invilid.");
             return 0;
         }
