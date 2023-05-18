@@ -183,13 +183,13 @@ HWTEST_F(BranchTest, MsgTextConvert_0002, Function | MediumTest | Level1)
     MsgTextConvert::Instance().ConvertDumpTextToHex(pMsgText, 1);
     EXPECT_EQ(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, 0, pMsgText, 0, &pLangInfo), -1);
     pLangInfo.lockingLang = MSG_ID_TURKISH_LANG;
-    EXPECT_GT(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, 1, pMsgText, 1, &pLangInfo), 0);
+    EXPECT_GT(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, START_BIT, pMsgText, 1, &pLangInfo), 0);
     EXPECT_GT(MsgTextConvert::Instance().EscapeToUCS2(SRC_TEXT, pLangInfo), 0);
     pLangInfo.lockingLang = MSG_ID_PORTUGUESE_LANG;
-    EXPECT_GT(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, 1, pMsgText, 1, &pLangInfo), 0);
+    EXPECT_GT(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, START_BIT, pMsgText, 1, &pLangInfo), 0);
     EXPECT_GT(MsgTextConvert::Instance().EscapeToUCS2(SRC_TEXT, pLangInfo), 0);
     pLangInfo.bLockingShift = false;
-    EXPECT_GT(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, 1, pMsgText, 1, &pLangInfo), 0);
+    EXPECT_GT(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, START_BIT, pMsgText, 1, &pLangInfo), 0);
     EXPECT_EQ(MsgTextConvert::Instance().EscapeTurkishLockingToUCS2(pMsgText, 0, pLangInfo, result), 0);
     EXPECT_EQ(MsgTextConvert::Instance().EscapeTurkishLockingToUCS2(pMsgText, 1, pLangInfo, result), 0);
     EXPECT_EQ(MsgTextConvert::Instance().EscapePortuLockingToUCS2(pMsgText, 0, pLangInfo, result), 0);
