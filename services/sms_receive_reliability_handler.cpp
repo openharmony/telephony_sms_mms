@@ -68,7 +68,6 @@ SmsReceiveReliabilityHandler::~SmsReceiveReliabilityHandler() {}
 
 bool SmsReceiveReliabilityHandler::DeleteExpireSmsFromDB()
 {
-    std::vector<SmsReceiveIndexer> dbIndexers;
     DataShare::DataSharePredicates predicates;
     std::time_t timep;
     int64_t currentTime = time(&timep);
@@ -170,7 +169,7 @@ void SmsReceiveReliabilityHandler::GetWapPushUserDataMultipage(int32_t &smsPages
     }
     string pdu = StringUtils::StringToHex(dbIndexers[place].GetPdu());
     std::shared_ptr<SmsBaseMessage> baseMessage = GsmSmsMessage::CreateMessage(pdu);
-    if (baseMessage != nullptr) {
+    if (baseMessage == nullptr) {
         TELEPHONY_LOGE("baseMessage nullptr");
         return;
     }
@@ -188,8 +187,8 @@ void SmsReceiveReliabilityHandler::GetWapPushUserDataMultipage(int32_t &smsPages
         if (locate->GetPdu().size() > 0) {
             smsPagesCount++;
         }
-        string pdu = StringUtils::StringToHex(locate->GetPdu());
-        std::shared_ptr<SmsBaseMessage> baseMessage = GsmSmsMessage::CreateMessage(pdu);
+        pdu = StringUtils::StringToHex(locate->GetPdu());
+        baseMessage = GsmSmsMessage::CreateMessage(pdu);
         if (baseMessage == nullptr) {
             TELEPHONY_LOGE("baseMessage nullptr");
             locate = dbIndexers.erase(locate);
