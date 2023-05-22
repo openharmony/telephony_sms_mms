@@ -182,20 +182,19 @@ void SmsInterfaceStub::RemoveSpacesInDesAddr(std::u16string &desAddr)
         TELEPHONY_LOGE("RemoveSpacesInDesAddr desAddr is invalid");
         return;
     }
-    std::string sourceAddr = StringUtils::ToUtf8(desAddr);
-    std::string resultAddr = sourceAddr;
-    int32_t count = static_cast<int32_t>(sourceAddr.size());
+
+    std::u16string storeAddr = desAddr;
+    int32_t count = static_cast<int32_t>(desAddr.size());
     int32_t indexDes = 0;
     int32_t indexResult = 0;
     while (indexDes < count) {
         if (desAddr[indexDes] != ' ') {
-            resultAddr[indexResult] = desAddr[indexDes];
+            storeAddr[indexResult] = desAddr[indexDes];
             indexResult++;
         }
         indexDes++;
     }
-    sourceAddr = resultAddr.substr(0, indexResult);
-    desAddr = StringUtils::ToUtf16(sourceAddr);
+    desAddr = storeAddr.substr(0, indexResult);
 }
 
 void SmsInterfaceStub::OnSetSmscAddr(MessageParcel &data, MessageParcel &reply, MessageOption &option)
