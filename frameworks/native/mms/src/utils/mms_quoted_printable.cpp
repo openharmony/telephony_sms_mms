@@ -22,7 +22,6 @@
 #include "string"
 #include "string.h"
 
-
 namespace OHOS {
 namespace Telephony {
 std::string MmsQuotedPrintable::Encode(const std::string &input)
