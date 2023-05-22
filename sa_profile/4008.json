@@ -1,0 +1,16 @@
+{
+    "process": "telephony",
+    "systemability": [
+        {
+            "name": 4008,
+            "libpath": "libtel_sms_mms.z.so",
+            "run-on-create": true,
+            "depend": [
+                4010
+            ],
+            "depend_time_out": 60000,
+            "distributed": false,
+            "dump_level": 1
+        }
+    ]
+}
