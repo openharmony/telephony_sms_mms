@@ -155,24 +155,24 @@ int GsmSmsParamCodec::EncodeTime(const struct SmsTimeStamp *pTimeStamp, char **p
             TELEPHONY_LOGE("ppParam is null.");
             return offset;
         }
-        (*ppParam)[offset++] = ((pTimeStamp->time.absolute.year % NUMBER_TEN) << 0x04) +
-            (pTimeStamp->time.absolute.year / NUMBER_TEN);
-        (*ppParam)[offset++] = ((pTimeStamp->time.absolute.month % NUMBER_TEN) << 0x04) +
-            (pTimeStamp->time.absolute.month / NUMBER_TEN);
+        (*ppParam)[offset++] =
+            ((pTimeStamp->time.absolute.year % NUMBER_TEN) << 0x04) + (pTimeStamp->time.absolute.year / NUMBER_TEN);
+        (*ppParam)[offset++] =
+            ((pTimeStamp->time.absolute.month % NUMBER_TEN) << 0x04) + (pTimeStamp->time.absolute.month / NUMBER_TEN);
         (*ppParam)[offset++] =
             ((pTimeStamp->time.absolute.day % NUMBER_TEN) << 0x04) + (pTimeStamp->time.absolute.day / NUMBER_TEN);
-        (*ppParam)[offset++] = ((pTimeStamp->time.absolute.hour % NUMBER_TEN) << 0x04) +
-            (pTimeStamp->time.absolute.hour / NUMBER_TEN);
-        (*ppParam)[offset++] = ((pTimeStamp->time.absolute.minute % NUMBER_TEN) << 0x04) +
-            (pTimeStamp->time.absolute.minute / NUMBER_TEN);
-        (*ppParam)[offset++] = ((pTimeStamp->time.absolute.second % NUMBER_TEN) << 0x04) +
-            (pTimeStamp->time.absolute.second / NUMBER_TEN);
+        (*ppParam)[offset++] =
+            ((pTimeStamp->time.absolute.hour % NUMBER_TEN) << 0x04) + (pTimeStamp->time.absolute.hour / NUMBER_TEN);
+        (*ppParam)[offset++] =
+            ((pTimeStamp->time.absolute.minute % NUMBER_TEN) << 0x04) + (pTimeStamp->time.absolute.minute / NUMBER_TEN);
+        (*ppParam)[offset++] =
+            ((pTimeStamp->time.absolute.second % NUMBER_TEN) << 0x04) + (pTimeStamp->time.absolute.second / NUMBER_TEN);
 
         if (timeZone < 0) {
             (*ppParam)[offset] = 0x08;
         }
         (*ppParam)[offset++] += ((unsigned int)(pTimeStamp->time.absolute.timeZone % NUMBER_TEN) << 0x04) +
-            (pTimeStamp->time.absolute.timeZone / NUMBER_TEN);
+                                (pTimeStamp->time.absolute.timeZone / NUMBER_TEN);
 
         return offset;
     } else if (pTimeStamp->format == SMS_TIME_RELATIVE) {
@@ -245,7 +245,6 @@ int GsmSmsParamCodec::EncodeDCS(const struct SmsDcs *pDCS, char **ppParam)
 int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, struct SmsAddress *pAddress)
 {
     int offset = 0;
-    int addrLen = 0;
     int bcdLen = 0;
     if (pTpdu == nullptr || pAddress == nullptr) {
         TELEPHONY_LOGE("Address or SMSC is null!");
@@ -266,7 +265,6 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, stru
         bcdLen = addrLen / HEX_BYTE_STEP + 1;
     }
     pAddress->ton = (pTpdu[offset] & 0x70) >> 0x04;
-    pAddress->npi = pTpdu[offset++] & 0x0F;
     if (pAddress->ton == SMS_TON_ALPHA_NUMERIC) {
         char *tmpAddress = new (std::nothrow) char[MAX_ADDRESS_LEN];
         if (tmpAddress == nullptr) {
@@ -277,14 +275,19 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, stru
             delete[] tmpAddress;
             return offset;
         }
-        int tmplength = 0;
-        tmplength = SmsCommonUtils::Unpack7bitChar(&(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00,
+        int tmplength = SmsCommonUtils::Unpack7bitChar(&(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00,
             reinterpret_cast<unsigned char *>(tmpAddress), MAX_ADDRESS_LEN);
+<<<<<<< HEAD
         MsgLangInfo langInfo = { 0 };
         langInfo.bSingleShift = false;
         langInfo.bLockingShift = false;
         MsgTextConvert::Instance().ConvertGSM7bitToUTF8(reinterpret_cast<unsigned char *>(pAddress->address),
             MAX_ADDRESS_LEN, reinterpret_cast<unsigned char *>(tmpAddress), tmplength, &langInfo);
+=======
+        MsgLangInfo langInfo;
+        textCvt->ConvertGSM7bitToUTF8(reinterpret_cast<unsigned char *>(pAddress->address), MAX_ADDRESS_LEN,
+            reinterpret_cast<unsigned char *>(tmpAddress), tmplength, &langInfo);
+>>>>>>> 45a55ab... IssueNo:sms_mms codex修改
         if (tmpAddress) {
             delete[] tmpAddress;
         }
@@ -296,9 +299,7 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, stru
     } else {
         SmsCommonUtils::BcdToDigit(&(pTpdu[offset]), bcdLen, &((pAddress->address)[0]));
     }
-
-    offset += bcdLen;
-    return offset;
+    return offset += bcdLen;
 }
 
 int GsmSmsParamCodec::DecodeTime(const unsigned char *pTpdu, struct SmsTimeStamp *pTimeStamp)
