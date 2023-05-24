@@ -28,11 +28,23 @@ int32_t ImsSmsProxy::ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMes
     if (ret != TELEPHONY_SUCCESS) {
         return ret;
     }
-    if (!in.WriteRawData((const void *)&imsMessageInfo, sizeof(imsMessageInfo))) {
+    if (!in.WriteInt64(imsMessageInfo.refId)) {
         TELEPHONY_LOGE("[slot%{public}d]Write imsMessageInfo fail!", slotId);
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
-    return SendRequest(in, slotId, IMS_GET_SMS_CONFIG);
+    if (!in.WriteString(imsMessageInfo.smscPdu)) {
+        TELEPHONY_LOGE("[slot%{public}d]Write imsMessageInfo fail!", slotId);
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    if (!in.WriteString(imsMessageInfo.pdu)) {
+        TELEPHONY_LOGE("[slot%{public}d]Write imsMessageInfo fail!", slotId);
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    if (!in.WriteInt32(imsMessageInfo.tech)) {
+        TELEPHONY_LOGE("[slot%{public}d]Write imsMessageInfo fail!", slotId);
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    return SendRequest(in, slotId, IMS_SEND_MESSAGE);
 }
 
 int32_t ImsSmsProxy::ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig)
@@ -46,7 +58,7 @@ int32_t ImsSmsProxy::ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig)
         TELEPHONY_LOGE("[slot%{public}d]Write imsSmsConfig fail!", slotId);
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
-    return SendRequest(in, slotId, IMS_GET_SMS_CONFIG);
+    return SendRequest(in, slotId, IMS_SET_SMS_CONFIG);
 }
 
 int32_t ImsSmsProxy::ImsGetSmsConfig(int32_t slotId)
