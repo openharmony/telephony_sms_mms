@@ -44,6 +44,7 @@ static constexpr uint8_t ENCODE_BYTE_BIT = 7;
 static constexpr uint8_t BYTE_BIT = 8;
 static constexpr uint8_t MAX_TPDU_DATA_LEN = 255;
 static constexpr uint8_t MIN_PDU_ABS_TIME_LEN = 6;
+static constexpr uint8_t ONE_BCD_TO_DIGITALS = 2;
 
 void CdmaSmsPduCodec::ShiftNBit(unsigned char *src, unsigned int nBytes, unsigned int nShiftBit)
 {
@@ -3593,7 +3594,7 @@ void CdmaSmsPduCodec::DecodeCallBackNum(const unsigned char *pduStr, int pduLen,
             svcAddr.addrLen = tempStr[0];
             int bcdLen = svcAddr.addrLen / HEX_BYTE_STEP;
             bcdLen = (svcAddr.addrLen % HEX_BYTE_STEP == 0) ? bcdLen : bcdLen + 1;
-            if (bcdLen > SMS_TRANS_ADDRESS_MAX_LEN) {
+            if (bcdLen + offset >= pduLen || bcdLen * ONE_BCD_TO_DIGITALS > SMS_TRANS_ADDRESS_MAX_LEN) {
                 TELEPHONY_LOGE("DecodeCallBackNum data length invalid.");
                 return;
             }

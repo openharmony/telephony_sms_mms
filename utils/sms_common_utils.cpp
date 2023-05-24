@@ -138,7 +138,7 @@ int SmsCommonUtils::BcdToDigit(const unsigned char *bcd, int bcdLen, char *digit
     if (bcd == nullptr || digit == nullptr) {
         return offset;
     }
-    for (int i = 0; i < bcdLen; i++) {
+    for (int i = 0; i < bcdLen && offset + 1 <= SMS_MAX_ADDRESS_LEN; i++) {
         temp = bcd[i] & 0x0F;
         digit[offset++] = BcdToChar(temp);
         temp = (bcd[i] & 0xF0) >> 0x04;
