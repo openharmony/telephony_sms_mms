@@ -15,9 +15,12 @@
 
 #include "mms_quoted_printable.h"
 
+#include <stdint.h>
+
 #include "memory"
 #include "securec.h"
 #include "string"
+#include "string.h"
 
 namespace OHOS {
 namespace Telephony {
