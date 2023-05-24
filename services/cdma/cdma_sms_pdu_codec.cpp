@@ -222,7 +222,6 @@ int CdmaSmsPduCodec::EncodeP2PMsg(const struct SmsTransP2PMsg &p2pMsg, unsigned 
 
     /* 5. Bearer reply option (optional) */
     offset += EncodeP2PMsgReplyOption(p2pMsg, &pduStr[offset], pduStrLen);
-
     /* 6. Bearer data */
     if (static_cast<size_t>(offset) >= pduStrLen) {
         TELEPHONY_LOGE("offset over size");
@@ -356,7 +355,6 @@ int CdmaSmsPduCodec::EncodeCBMsg(const struct SmsTransBroadCastMsg &cbMsg, unsig
     }
     /* 1. Service Category(Mandatory) */
     offset += EncodeCBMsgServiceCategory(cbMsg, &pduStr[offset], pduStrLen);
-
     /* 2. Bearer Data(Optional) */
     if (static_cast<size_t>(offset) >= pduStrLen) {
         TELEPHONY_LOGE("offset over size");
@@ -592,7 +590,7 @@ int CdmaSmsPduCodec::EncodeTelesvcSubmitMsg(
 int CdmaSmsPduCodec::EncodeTelesvcSubmitMsgDeliveryTime(
     const struct SmsTeleSvcSubmit &sbMsg, unsigned char *pduStr, size_t pduStrLen)
 {
-    int offset = 0;
+    size_t offset = 0;
     if (pduStr == nullptr || pduStrLen == 0) {
         TELEPHONY_LOGE("PDU is null!");
         return offset;
@@ -601,13 +599,13 @@ int CdmaSmsPduCodec::EncodeTelesvcSubmitMsgDeliveryTime(
     if (sbMsg.deferValPeriod.format == SMS_TIME_RELATIVE) {
         pduStr[offset++] = SMS_BEARER_DEFERRED_DELIVERY_TIME_RELATIVE;
 
-        if (static_cast<size_t>(offset) >= pduStrLen) {
+        if (offset >= pduStrLen) {
             TELEPHONY_LOGE("offset over size");
             return offset;
         }
         pduStr[offset++] = 0x01;
 
-        if (static_cast<size_t>(offset) >= pduStrLen) {
+        if (offset >= pduStrLen) {
             TELEPHONY_LOGE("offset over size");
             return offset;
         }
@@ -615,13 +613,13 @@ int CdmaSmsPduCodec::EncodeTelesvcSubmitMsgDeliveryTime(
     } else if (sbMsg.deferValPeriod.format == SMS_TIME_ABSOLUTE) {
         std::vector<unsigned char> temp;
 
-        if (static_cast<size_t>(offset) >= pduStrLen) {
+        if (offset >= pduStrLen) {
             TELEPHONY_LOGE("offset over size");
             return offset;
         }
         pduStr[offset++] = SMS_BEARER_DEFERRED_DELIVERY_TIME_ABSOLUTE;
 
-        if (static_cast<size_t>(offset) >= pduStrLen) {
+        if (offset >= pduStrLen) {
             TELEPHONY_LOGE("offset over size");
             return offset;
         }
@@ -826,7 +824,7 @@ int CdmaSmsPduCodec::EncodeSubAddress(const struct SmsTransSubAddr &address, uns
 
 int CdmaSmsPduCodec::EncodeAddress(const SmsTransAddr &address, unsigned char *pduStr, size_t pduStrLen)
 {
-    unsigned int offset = 0;
+    int offset = 0;
     unsigned int lenIndex = 0;
     if (pduStr == nullptr || pduStrLen == 0) {
         TELEPHONY_LOGE("PDU is null!");
@@ -836,7 +834,7 @@ int CdmaSmsPduCodec::EncodeAddress(const SmsTransAddr &address, unsigned char *p
     offset += EncodeAddressTransParam(address, &pduStr[offset], pduStrLen, lenIndex);
     offset += EncodeAddressModeParam(address, &pduStr[offset], pduStrLen);
 
-    pduStr[lenIndex] = offset - lenIndex - 1;
+    pduStr[lenIndex] = static_cast<unsigned int>(offset) - lenIndex - 1;
     TELEPHONY_LOGI("Address subparam length field = [%{public}d]", pduStr[lenIndex]);
     return offset;
 }
@@ -879,7 +877,7 @@ int CdmaSmsPduCodec::EncodeAddressModeParam(const SmsTransAddr &address, unsigne
     }
 
     if (address.digitMode) {
-        offset += EncodeAddressDigitModeParam(address, &pduStr[offset], pduStrLen);
+        offset += static_cast<unsigned int>(EncodeAddressDigitModeParam(address, &pduStr[offset], pduStrLen));
     } else {
         unsigned int index = offset++;
 
@@ -893,7 +891,8 @@ int CdmaSmsPduCodec::EncodeAddressModeParam(const SmsTransAddr &address, unsigne
             TELEPHONY_LOGE("offset over size");
             return offset;
         }
-        int addrLen = SmsCommonUtils::ConvertDigitToDTMF(address.szData, address.addrLen, 0, pduStr + offset);
+        unsigned int addrLen = static_cast<unsigned int>(
+            SmsCommonUtils::ConvertDigitToDTMF(address.szData, address.addrLen, 0, pduStr + offset));
         offset += addrLen;
         ShiftNBit(&pduStr[index], offset - index + 1, SHIFT_6BITS);
     }
@@ -902,7 +901,7 @@ int CdmaSmsPduCodec::EncodeAddressModeParam(const SmsTransAddr &address, unsigne
 
 int CdmaSmsPduCodec::EncodeAddressDigitModeParam(const SmsTransAddr &address, unsigned char *pduStr, size_t pduStrLen)
 {
-    unsigned int offset = 0;
+    int offset = 0;
     if (pduStr == nullptr || pduStrLen == 0) {
         TELEPHONY_LOGE("PDU is null!");
         return offset;
@@ -1002,20 +1001,20 @@ int CdmaSmsPduCodec::EncodeBearerUserData(
     if (padding >= SHIFT_3BITS) {
         offset--;
     }
-    pduStr[lenIndex] = offset - lenIndex - 1;
+    pduStr[lenIndex] = static_cast<unsigned int>(offset) - lenIndex - 1;
     return offset;
 }
 
 int CdmaSmsPduCodec::EncodeBearerUserDataParam(
     const struct SmsTeleSvcUserData &userData, unsigned char *pduStr, size_t pduStrLen, size_t &lenIndex)
 {
-    int offset = 0;
+    size_t offset = 0;
     if (pduStr == nullptr || userData.userData.length == 0) {
         TELEPHONY_LOGE("PDU is null!");
         return offset;
     }
 
-    if (static_cast<size_t>(offset) >= pduStrLen) {
+    if (offset >= pduStrLen) {
         TELEPHONY_LOGE("offset over size");
         return offset;
     }
@@ -1023,14 +1022,14 @@ int CdmaSmsPduCodec::EncodeBearerUserDataParam(
     lenIndex = offset;
 
     ++offset;
-    if (static_cast<size_t>(offset) >= pduStrLen) {
+    if (offset >= pduStrLen) {
         TELEPHONY_LOGE("offset over size");
         return offset;
     }
 
     pduStr[offset++] = static_cast<unsigned char>(userData.encodeType) << SHIFT_3BITS;
 
-    if (static_cast<size_t>(offset) >= pduStrLen) {
+    if (offset >= pduStrLen) {
         TELEPHONY_LOGE("offset over size");
         return offset;
     }
@@ -3422,7 +3421,7 @@ void CdmaSmsPduCodec::DecodeAddressDigitMode(unsigned char *tempStr, int tempLen
         }
     } else {
         transAddr.addrLen = tempStr[0];
-        int bcdLen = (transAddr.addrLen % HEX_BYTE_STEP == 0) ? transAddr.addrLen : transAddr.addrLen + 1;
+        unsigned int bcdLen = (transAddr.addrLen % HEX_BYTE_STEP == 0) ? transAddr.addrLen : transAddr.addrLen + 1;
         if (bcdLen > SMS_TRANS_ADDRESS_MAX_LEN) {
             TELEPHONY_LOGE("DecodeAddress data length invalid.");
             return;
@@ -3795,7 +3794,6 @@ void CdmaSmsPduCodec::DecodeCMASData(unsigned char *pduStr, int pduLen, struct S
                 TELEPHONY_LOGE("offset over size");
                 return;
             }
-            TELEPHONY_LOGI("Type 1 length = [%{public}d]", pduStr[offset - 1]);
             cmasData.category = static_cast<enum SmsCmaeCategory>(pduStr[offset++]);
             cmasData.responseType = static_cast<enum SmsCmaeResponseType>(pduStr[offset++]);
             cmasData.severity = static_cast<enum SmsCmaeSeverity>(pduStr[offset] >> SHIFT_4BITS);
@@ -3807,7 +3805,6 @@ void CdmaSmsPduCodec::DecodeCMASData(unsigned char *pduStr, int pduLen, struct S
                 TELEPHONY_LOGE("offset over size");
                 return;
             }
-            TELEPHONY_LOGI("Type 2 length = [%{public}d]", pduStr[offset - 1]);
             cmasData.id = pduStr[offset++];
             cmasData.id = (cmasData.id << SHIFT_8BITS) + pduStr[offset++];
             cmasData.alertHandle = static_cast<enum SmsCmaeAlertHandle>(pduStr[offset++]);
@@ -3820,7 +3817,6 @@ void CdmaSmsPduCodec::DecodeCMASData(unsigned char *pduStr, int pduLen, struct S
         } else {
             offset++;
         }
-        TELEPHONY_LOGI("offset = [%{public}d], pduLen = [%{public}d]", offset, pduLen);
     }
 }
 
@@ -3869,7 +3865,7 @@ int CdmaSmsPduCodec::DecodeCMASType0TempData(unsigned char *tempStr, int tempLen
         case SMS_ENCODE_7BIT_ASCII:
         case SMS_ENCODE_IA5:
         case SMS_ENCODE_GSM7BIT:
-            cmasData.dataLen = (tempLen * BYTE_BITS - SHIFT_5BITS) / ENCODE_GSM_BIT;
+            cmasData.dataLen = (static_cast<unsigned int>(tempLen) * BYTE_BITS - SHIFT_5BITS) / ENCODE_GSM_BIT;
             for (unsigned int i = 0; i < cmasData.dataLen; i++) {
                 cmasData.alertText[i] = tempStr[0] >> SHIFT_1BITS;
                 ShiftNBitForDecode(tempStr, tempLen, SHIFT_7BITS);
@@ -3879,7 +3875,7 @@ int CdmaSmsPduCodec::DecodeCMASType0TempData(unsigned char *tempStr, int tempLen
         case SMS_ENCODE_GSMDCS:
             break;
         default:
-            cmasData.dataLen = (tempLen == 0) ? 0 : (tempLen - 1);
+            cmasData.dataLen = (tempLen == 0) ? 0 : static_cast<unsigned int>(tempLen - 1);
             if (static_cast<size_t>(tempLen - 1) > sizeof(cmasData.alertText) ||
                 static_cast<size_t>(offset) > static_cast<size_t>(tempLen)) {
                 TELEPHONY_LOGE("data length invalid.");
