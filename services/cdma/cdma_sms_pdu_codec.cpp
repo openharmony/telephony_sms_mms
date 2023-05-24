@@ -1745,7 +1745,6 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
 {
     int ret = 0;
     int offset = 1;
-    int tempOff = 0;
     if (++offset >= pduLen) {
         TELEPHONY_LOGE("offset over size");
         return;
@@ -1777,6 +1776,7 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmn(
 
     ShiftNBitForDecode(tempStr, tempLen, SHIFT_5BITS);
     if (enhancedVmn.setupReq || enhancedVmn.pwChangeReq) {
+        int tempOff = 0;
         enhancedVmn.minPwLen = tempStr[tempOff] >> SHIFT_4BITS;
         enhancedVmn.maxPwLen = tempStr[tempOff++] & 0x0f;
     }
@@ -1883,7 +1883,6 @@ void CdmaSmsPduCodec::DecodeP2PEnhancedVmnAnDigitMode(
             TELEPHONY_LOGE("enhancedVmn memcpy_s err.");
             return;
         }
-        tempOff += enhancedVmn.anNumField;
     }
 }
 
@@ -4016,17 +4015,16 @@ void CdmaSmsPduCodec::DecodeUserDataEncodeUnicodeType(unsigned char *pduStr, int
         TELEPHONY_LOGE("PDU is null!");
         return;
     }
-    unsigned char fillBits;
 
     if (headerInd) {
-        fillBits = ((udhlBytes + 1) % HEX_BYTE_STEP == 0) ? 0 : 0x08;
+        unsigned char fillBits = ((udhlBytes + 1) % HEX_BYTE_STEP == 0) ? 0 : 0x08;
         offset += (fillBits > 0) ? 1 : 0;
         userData.userData.length = numFields * HEX_BYTE_STEP - (udhlBytes + 1);
     } else {
         userData.userData.length = numFields * HEX_BYTE_STEP;
     }
     if (static_cast<unsigned long>(userData.userData.length) + static_cast<unsigned long>(offset) >
-            sizeof(userData.userData.data) |
+            sizeof(userData.userData.data) ||
         static_cast<unsigned long>(userData.userData.length) + static_cast<unsigned long>(offset) >
             static_cast<size_t>(pduLen)) {
         TELEPHONY_LOGE("data length error.");
@@ -4048,7 +4046,7 @@ void CdmaSmsPduCodec::DecodeUserDataEncodeDefaultType(
     }
 
     if (static_cast<unsigned long>(userData.userData.length) + static_cast<unsigned long>(offset) >
-            sizeof(userData.userData.data) |
+            sizeof(userData.userData.data) ||
         static_cast<unsigned long>(userData.userData.length) + static_cast<unsigned long>(offset) >
             static_cast<size_t>(pduLen)) {
         TELEPHONY_LOGE("data length error.");

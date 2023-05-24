@@ -15,6 +15,9 @@
 
 #include "mms_header_categ.h"
 
+#include "map"
+#include "utility"
+
 namespace OHOS {
 namespace Telephony {
 MmsHeaderCateg::MmsHeaderCateg()

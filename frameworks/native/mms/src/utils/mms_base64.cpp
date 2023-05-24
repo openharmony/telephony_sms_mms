@@ -17,6 +17,7 @@
 
 #include "sms_service_manager_client.h"
 #include "string"
+#include "string.h"
 
 namespace OHOS {
 namespace Telephony {
