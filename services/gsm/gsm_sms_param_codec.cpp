@@ -255,7 +255,7 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, stru
         return offset;
     }
     int addrLen = (int)pTpdu[offset++];
-    if (offset + addrLen >= pduLen || ONE_BCD_TO_DIGITALS * addrLen > SMS_MAX_ADDRESS_LEN) {
+    if (offset + addrLen >= pduLen || addrLen > SMS_MAX_ADDRESS_LEN) {
         TELEPHONY_LOGE("addrLen over size!");
         return offset;
     }
