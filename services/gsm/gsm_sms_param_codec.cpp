@@ -254,7 +254,7 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, stru
         TELEPHONY_LOGE("pAddress memset_s error!");
         return offset;
     }
-    addrLen = (int)pTpdu[offset++];
+    int addrLen = (int)pTpdu[offset++];
     if (offset + addrLen >= pduLen || ONE_BCD_TO_DIGITALS * addrLen > SMS_MAX_ADDRESS_LEN) {
         TELEPHONY_LOGE("addrLen over size!");
         return offset;
@@ -278,8 +278,8 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, stru
         int tmplength = SmsCommonUtils::Unpack7bitChar(&(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00,
             reinterpret_cast<unsigned char *>(tmpAddress), MAX_ADDRESS_LEN);
         MsgLangInfo langInfo;
-        textCvt->ConvertGSM7bitToUTF8(reinterpret_cast<unsigned char *>(pAddress->address), MAX_ADDRESS_LEN,
-            reinterpret_cast<unsigned char *>(tmpAddress), tmplength, &langInfo);
+        MsgTextConvert::Instance().ConvertGSM7bitToUTF8(reinterpret_cast<unsigned char *>(pAddress->address),
+            MAX_ADDRESS_LEN, reinterpret_cast<unsigned char *>(tmpAddress), tmplength, &langInfo);
         if (tmpAddress) {
             delete[] tmpAddress;
         }
