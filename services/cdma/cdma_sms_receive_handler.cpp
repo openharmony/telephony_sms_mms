@@ -69,6 +69,7 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
     } else {
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
+    // Encapsulate key information to Tracker
     std::shared_ptr<SmsReceiveIndexer> indexer;
     if (!message->IsConcatMsg()) {
         indexer = std::make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
@@ -83,10 +84,13 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
             message->GetDestPort(), true, message->GetOriginatingAddress(), message->GetVisibleOriginatingAddress(),
             smsConcat->msgRef, smsConcat->seqNum, smsConcat->totalSeg, false, message->GetVisibleMessageBody());
     }
+    // add messages to the database
     if (indexer == nullptr) {
         TELEPHONY_LOGE("indexer is nullptr.");
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
+    TELEPHONY_LOGI("receive a cdma sms, this is %{public}d, a total of %{public}d", indexer->GetMsgSeqId(),
+        indexer->GetMsgCount());
     if (indexer->GetIsText() && message->IsConcatMsg() && IsRepeatedMessagePart(indexer)) {
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_REPEATED_ERROR, "cdma message repeated error");
