@@ -90,8 +90,8 @@ const size_t DATA_LENGTH = 162;
 const int32_t HEADER_LENGTH = 7;
 static constexpr uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
 const uint32_t CODE_BUFFER_MAX_SIZE = 300 * 1024;
-unsigned int SHIFT_BIT = 10;
-unsigned int SMS_REF_ID = 10;
+const unsigned int SHIFT_BIT = 10;
+const unsigned int SMS_REF_ID = 10;
 } // namespace
 
 class BranchTest : public testing::Test {
