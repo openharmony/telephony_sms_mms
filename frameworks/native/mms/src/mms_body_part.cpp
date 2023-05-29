@@ -448,7 +448,7 @@ bool MmsBodyPart::WriteBodyFromFile(std::string path)
     }
 
     (void)fseek(pFile, 0, SEEK_SET);
-    bodyLen_ = fread(pbodyPartBuffer_.get(), 1, MAX_MMS_MSG_PART_LEN, pFile);
+    bodyLen_ = fread(pbodyPartBuffer_.get(), 1, fileLen, pFile);
     (void)fclose(pFile);
     return true;
 }
