@@ -121,7 +121,7 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         return false;
     }
     (void)fseek(pFile, 0, SEEK_SET);
-    totolLength_ = fread(pduBuffer_.get(), 1, CODE_BUFFER_MAX_SIZE, pFile);
+    totolLength_ = fread(pduBuffer_.get(), 1, fileLen, pFile);
     (void)fclose(pFile);
     return true;
 }
