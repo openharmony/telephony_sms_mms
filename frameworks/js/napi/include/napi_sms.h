@@ -95,7 +95,7 @@ enum RanType {
     TYPE_CDMA = 2,
 };
 
-struct SendMessageContext {
+struct SendMessageContext : BaseContext {
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::u16string destinationHost = u"";
     std::u16string serviceCenter = u"";

@@ -33,7 +33,7 @@ int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAdd
     TELEPHONY_LOGI("SmsServiceProxy::SendMessage with text slotId : %{public}d", slotId);
     MessageParcel dataParcel;
     MessageParcel replyParcel;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
         TELEPHONY_LOGE("SendMessage with text WriteInterfaceToken is false");
         return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
@@ -67,7 +67,7 @@ int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAdd
     TELEPHONY_LOGI("SmsServiceProxy::SendMessage with data slotId : %{public}d", slotId);
     MessageParcel dataParcel;
     MessageParcel replyParcel;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
         TELEPHONY_LOGE("SendMessage with data WriteInterfaceToken is false");
         return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
