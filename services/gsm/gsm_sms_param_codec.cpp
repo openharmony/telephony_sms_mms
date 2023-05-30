@@ -264,7 +264,7 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, stru
     } else {
         bcdLen = addrLen / HEX_BYTE_STEP + 1;
     }
-    pAddress->ton = (pTpdu[offset] & 0x70) >> 0x04;
+    pAddress->ton = (pTpdu[offset++] & 0x70) >> 0x04;
     if (pAddress->ton == SMS_TON_ALPHA_NUMERIC) {
         char *tmpAddress = new (std::nothrow) char[MAX_ADDRESS_LEN];
         if (tmpAddress == nullptr) {
@@ -291,7 +291,8 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, stru
     } else {
         SmsCommonUtils::BcdToDigit(&(pTpdu[offset]), bcdLen, &((pAddress->address)[0]));
     }
-    return offset += bcdLen;
+    offset += bcdLen;
+    return offset;
 }
 
 int GsmSmsParamCodec::DecodeTime(const unsigned char *pTpdu, struct SmsTimeStamp *pTimeStamp)
