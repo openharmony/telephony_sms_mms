@@ -196,8 +196,8 @@ static void NativeSendMessage(napi_env env, void *data)
         NapiUtil::ThrowParameterError(env);
         return;
     }
-    int32_t errorCode = ActuallySendMessage(env, *asyncContext);
-    if (errorCode == TELEPHONY_SUCCESS) {
+    asyncContext->errorCode = ActuallySendMessage(env, *asyncContext);
+    if (asyncContext->errorCode == TELEPHONY_SUCCESS) {
         asyncContext->resolved = true;
     }
 }
@@ -205,7 +205,16 @@ static void NativeSendMessage(napi_env env, void *data)
 static void SendMessageCallback(napi_env env, napi_status status, void *data)
 {
     auto asyncContext = static_cast<SendMessageContext *>(data);
-    napi_delete_async_work(env, asyncContext->work);
+    napi_value callbackValue = nullptr;
+    if (asyncContext->resolved) {
+        napi_get_undefined(env, &callbackValue);
+    } else {
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            asyncContext->errorCode, "sendMessage", "ohos.permission.SEND_MESSAGES");
+        TELEPHONY_LOGI("asyncContext->errorCode:%{public}d.", error.errorCode);
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    NapiUtil::Handle1ValueCallback(env, asyncContext, callbackValue);
 }
 
 static int32_t MatchSendMessageParameters(napi_env env, napi_value parameters[], size_t parameterCount)
