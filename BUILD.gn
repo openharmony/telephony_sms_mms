@@ -100,7 +100,7 @@ ohos_shared_library("tel_sms_mms") {
     "drivers_interface_ril:hril_innerkits",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "telephony_data:tel_telephony_data",

@@ -27,8 +27,9 @@ public:
 
     /**
      * @brief OnSmsDeliveryResult
-     * Status of the sent SMS on the recipient.
-     * @param pdu [in]
+     * Callback to indicate the status of the sent SMS on the recipient.
+     *
+     * @param pdu [in], pdu of message.
      */
     virtual void OnSmsDeliveryResult(const std::u16string &pdu) = 0;
 

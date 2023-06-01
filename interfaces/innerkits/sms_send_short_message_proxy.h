@@ -28,9 +28,9 @@ public:
     virtual ~SmsSendShortMessageProxy() = default;
 
     /**
-     * @brief OnSmsDeliveryResult
-     * Status of sending SMS messages to the SMS service center.
-     * @param result [in]
+     * @brief Status of sending SMS messages to the SMS service center.
+     *
+     * @param result [in], returns {@code 0} if success.
      */
     void OnSmsSendResult(const SmsSendResult result) override;
 

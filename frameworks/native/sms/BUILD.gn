@@ -44,7 +44,7 @@ ohos_source_set("sms_native_source") {
     "core_service:libtel_common",
     "core_service:tel_core_service_api",
     "drivers_interface_ril:hril_innerkits",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

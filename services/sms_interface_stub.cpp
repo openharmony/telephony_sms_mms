@@ -94,6 +94,7 @@ void SmsInterfaceStub::InitModule()
                 }
                 reliabilityHandler->SmsReceiveReliabilityProcessing();
             });
+            pthread_setname_np(smsReceiveReliabilityTask.native_handle(), "sms_receive_reliability");
             smsReceiveReliabilityTask.detach();
         }
     }
