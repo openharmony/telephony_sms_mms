@@ -35,7 +35,7 @@ ohos_shared_library("sms") {
     "c_utils:utils",
     "core_service:libtel_common",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "napi:ace_napi",
     "sms_mms:tel_sms_mms_api",
   ]

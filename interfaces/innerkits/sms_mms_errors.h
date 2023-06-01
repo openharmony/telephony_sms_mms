@@ -20,9 +20,21 @@
 
 namespace OHOS {
 namespace Telephony {
+/**
+ * @brief Enumerates the error code of SMS and MMS.
+ */
 enum SmsMmsErrorCode {
+    /**
+     * Indicates the error is empty decode data.
+     */
     SMS_MMS_DECODE_DATA_EMPTY = SMS_MMS_ERR_OFFSET,
+    /**
+     * Indicates the error is unknown sim message status.
+     */
     SMS_MMS_UNKNOWN_SIM_MESSAGE_STATUS,
+    /**
+     * Indicates the error is meesage length out of range.
+     */
     SMS_MMS_MESSAGE_LENGTH_OUT_OF_RANGE,
 };
 } // namespace Telephony

@@ -36,33 +36,36 @@ public:
     };
 
     /**
-     * IMS send message interface
+     * @brief IMS send message interface.
      *
-     * @param slotId
-     * @param imsMessageInfo
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param imsMessageInfo Indicates the information of IMS message.
      * @return Returns TELEPHONY_SUCCESS on success, others on failure.
      */
     virtual int32_t ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo) = 0;
 
     /**
-     * IMS set ims sms config interface
+     * @brief IMS set ims sms config interface.
      *
-     * @param slotId
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
      * @param imsSmsConfig 1:enable ims sms, 0:disable ims sms
      * @return Returns TELEPHONY_SUCCESS on success, others on failure.
      */
     virtual int32_t ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig) = 0;
 
     /**
-     * IMS get sms config interface
+     * @brief IMS get sms config interface.
      *
-     * @param slotId
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
      * @return Returns TELEPHONY_SUCCESS on success, others on failure.
      */
     virtual int32_t ImsGetSmsConfig(int32_t slotId) = 0;
 
     /**
-     * Register CallBack
+     * @brief Register CallBack to listen the response from ImsSms.
      *
      * @param sptr<ImsSmsCallbackInterface>
      * @return Returns TELEPHONY_SUCCESS on success, others on failure.

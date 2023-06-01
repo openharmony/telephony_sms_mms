@@ -48,7 +48,7 @@ ohos_fuzztest("WapPushBufferFuzzTest") {
     "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "napi:ace_napi",
     "netmanager_base:net_conn_manager_if",
     "telephony_data:tel_telephony_data",

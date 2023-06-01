@@ -29,10 +29,55 @@ public:
     virtual ~ImsSmsCallbackProxy() = default;
 
     /****************** sms basic ******************/
+    /**
+     * @brief ImsSendMessageResponse the result of send the sms by IMS.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param result Indicates the result of send action.
+     * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
+     */
     int32_t ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result) override;
+
+    /**
+     * @brief ImsSendMessageResponse the fail result of send the sms by IMS.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param info Indicates details of failure.
+     * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
+     */
     int32_t ImsSendMessageResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
+
+    /**
+     * @brief ImsSetSmsConfigResponse the result for enable or disable IMS SMS.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param info Indicates set action was success or failure.
+     * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
+     */
     int32_t ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
+
+    /**
+     * @brief ImsGetSmsConfigResponse the result for get IMS SMS config.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param imsSmsConfig Indicates Ims sms was enabled or disabled.
+     * ranging {@code 0} Ims sms was disabled {@code 1} Ims sms was enabled.
+     * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
+     */
     int32_t ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig) override;
+
+    /**
+     * @brief ImsGetSmsConfigResponse the fail result for get IMS SMS config.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param info Indicates details of failure.
+     * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
+     */
     int32_t ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
 
 private:
