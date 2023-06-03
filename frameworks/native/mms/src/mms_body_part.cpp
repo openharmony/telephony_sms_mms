@@ -24,6 +24,8 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
+static constexpr const char *APP_SAND_DIR = "/data/app";
+
 MmsBodyPart::MmsBodyPart() : headerLen_(0), bodyLen_(0) {}
 
 MmsBodyPart::MmsBodyPart(const MmsBodyPart &srcBodyPart) : headerLen_(0), bodyLen_(0)
@@ -423,6 +425,13 @@ bool MmsBodyPart::WriteBodyFromFile(std::string path)
     char realPath[PATH_MAX] = {0};
     if (path.empty() || realpath(path.c_str(), realPath) == NULL) {
         TELEPHONY_LOGE("path or realPath is NULL");
+        return false;
+    }
+
+    std::string filePath = realPath;
+    std::string appDir = APP_SAND_DIR;
+    if (appDir.compare(filePath.substr(0, appDir.size())) != 0) {
+        TELEPHONY_LOGE("filePath no app sand box.");
         return false;
     }
     pFile = fopen(realPath, "rb");
