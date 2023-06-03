@@ -19,6 +19,8 @@
 
 namespace OHOS {
 namespace Telephony {
+static constexpr const char *APP_SAND_DIR = "/data/app";
+
 MmsBuffer::MmsBuffer()
 {
     pduBuffer_ = std::make_unique<char[]>(CODE_BUFFER_MAX_SIZE);
@@ -98,6 +100,14 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         TELEPHONY_LOGE("path or realPath is NULL");
         return false;
     }
+
+    std::string filePath = realPath;
+    std::string appDir = APP_SAND_DIR;
+    if (appDir.compare(filePath.substr(0, appDir.size())) != 0) {
+        TELEPHONY_LOGE("filePath no app sand box.");
+        return false;
+    }
+
     pFile = fopen(realPath, "rb");
     if (pFile == nullptr) {
         TELEPHONY_LOGE("Open File Error :%{public}s", strPathName.c_str());
