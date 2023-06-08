@@ -675,20 +675,20 @@ declare namespace sms {
    */
   function getDefaultSmsSimId(callback: AsyncCallback<number>): void;
 
-   /**
-    * Obtains the default SIM ID for sending SMS messages.
-    *
-    * @returns { Promise<number> } Returns the SIM ID of the default sms sim and
-    * SIM ID will increase from 1.
-    * @throws { BusinessError } 401 - Parameter error.
-    * @throws { BusinessError } 8300001 - Invalid parameter value.
-    * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
-    * @throws { BusinessError } 8300003 - System internal error.
-    * @throws { BusinessError } 8300004 - Do not have sim card.
-    * @throws { BusinessError } 8300999 - Unknown error code.
-    * @throws { BusinessError } 8301001 - SIM card is not activated.
-    * @since 10
-    */
+  /**
+   * Obtains the default SIM ID for sending SMS messages.
+   *
+   * @returns { Promise<number> } Returns the SIM ID of the default sms sim and
+   * SIM ID will increase from 1.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300004 - Do not have sim card.
+   * @throws { BusinessError } 8300999 - Unknown error code.
+   * @throws { BusinessError } 8301001 - SIM card is not activated.
+   * @since 10
+   */
   function getDefaultSmsSimId(): Promise<number>;
 
   /**
