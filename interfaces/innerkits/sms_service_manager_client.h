@@ -26,7 +26,7 @@
 
 namespace OHOS {
 namespace Telephony {
-class SmsServiceManagerClient : public std::enable_shared_from_this<SmsServiceManagerClient>  {
+class SmsServiceManagerClient : public std::enable_shared_from_this<SmsServiceManagerClient> {
     DECLARE_DELAYED_SINGLETON(SmsServiceManagerClient)
 public:
     bool InitSmsServiceProxy();
@@ -34,6 +34,7 @@ public:
 
     int32_t SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
+    int32_t GetDefaultSmsSimId(int32_t &simId);
     int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
         const std::u16string text, const sptr<ISendShortMessageCallback> &callback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);

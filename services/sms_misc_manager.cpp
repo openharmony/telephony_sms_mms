@@ -425,5 +425,11 @@ int32_t SmsMiscManager::GetDefaultSmsSlotId()
     TELEPHONY_LOGI("GetDefaultSmsSlotId");
     return CoreManagerInner::GetInstance().GetDefaultSmsSlotId();
 }
+
+int32_t SmsMiscManager::GetDefaultSmsSimId(int32_t &simId)
+{
+    TELEPHONY_LOGI("GetDefaultSmsSimId");
+    return CoreManagerInner::GetInstance().GetDefaultSmsSimId(simId);
+}
 } // namespace Telephony
 } // namespace OHOS
