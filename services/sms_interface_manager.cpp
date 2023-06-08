@@ -189,6 +189,15 @@ int32_t SmsInterfaceManager::GetDefaultSmsSlotId()
     return smsMiscManager_->GetDefaultSmsSlotId();
 }
 
+int32_t SmsInterfaceManager::GetDefaultSmsSimId(int32_t &simId)
+{
+    if (smsMiscManager_ == nullptr) {
+        TELEPHONY_LOGE("smsMiscManager nullptr error.");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    return smsMiscManager_->GetDefaultSmsSimId(simId);
+}
+
 int32_t SmsInterfaceManager::SplitMessage(const std::string &message, std::vector<std::u16string> &splitMessage)
 {
     if (smsSendManager_ == nullptr) {

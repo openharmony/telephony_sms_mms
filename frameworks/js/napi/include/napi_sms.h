@@ -130,6 +130,10 @@ struct GetDefaultSmsSlotIdContext : BaseContext {
     int32_t defaultSmsSlotId = DEFAULT_SIM_SLOT_ID;
 };
 
+struct GetDefaultSmsSimIdContext : BaseContext {
+    int32_t defaultSmsSimId = DEFAULT_SIM_SLOT_ID;
+};
+
 struct SetSmscAddrContext : BaseContext {
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::string smscAddr = "";

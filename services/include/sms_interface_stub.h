@@ -56,6 +56,7 @@ private:
     void OnSetImsSmsConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSetDefaultSmsSlotId(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetDefaultSmsSlotId(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnGetDefaultSmsSimId(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSplitMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetSmsSegmentsInfo(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnIsImsSmsSupported(MessageParcel &data, MessageParcel &reply, MessageOption &option);

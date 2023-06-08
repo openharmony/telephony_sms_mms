@@ -76,6 +76,14 @@ int32_t SmsServiceManagerClient::SetDefaultSmsSlotId(int32_t slotId)
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 
+int32_t SmsServiceManagerClient::GetDefaultSmsSimId(int32_t &simId)
+{
+    if (InitSmsServiceProxy()) {
+        return smsServiceInterface_->GetDefaultSmsSimId(simId);
+    }
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+}
+
 int32_t SmsServiceManagerClient::GetDefaultSmsSlotId()
 {
     if (InitSmsServiceProxy()) {

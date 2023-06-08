@@ -52,6 +52,7 @@ public:
     bool SetImsSmsConfig(int32_t slotId, int32_t enable);
     int32_t SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
+    int32_t GetDefaultSmsSimId(int32_t &simId);
     int32_t SplitMessage(const std::string &message, std::vector<std::u16string> &splitMessage);
     int32_t GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &outInfo);
     int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported);
