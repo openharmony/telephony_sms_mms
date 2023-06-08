@@ -1268,7 +1268,7 @@ declare namespace sms {
     /**
      * Indicates the carbon copy address for the MMS message retrieval configuration.
      *
-     * @type { ?Array<MmsAddress }
+     * @type { ?Array<MmsAddress> }
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 8
@@ -1596,7 +1596,7 @@ declare namespace sms {
     contentId: string;
 
     /**
-     * Indicates the content location for the attachment.
+     * Indicates the content location.
      *
      * @type { string }
      * @syscap SystemCapability.Telephony.SmsMms
@@ -1771,7 +1771,7 @@ declare namespace sms {
     TYPE_MMS_RETRIEVE_CONF,
 
     /**
-     * Indicates an MMS message acknowledgement.
+     * Indicates the type of multimedia message confirmation index.
      *
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
@@ -2314,7 +2314,7 @@ declare namespace sms {
     /**
      * Indicates the new status for the updating SIM message options.
      *
-     * @type { number }
+     * @type { SimMessageStatus }
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
