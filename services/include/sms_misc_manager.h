@@ -64,6 +64,7 @@ public:
     int32_t GetSmscAddr(std::u16string &smscAddress);
     int32_t SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
+    int32_t GetDefaultSmsSimId(int32_t &simId);
 
 protected:
     bool OpenCBRange(uint32_t fromMsgId, uint32_t toMsgId);

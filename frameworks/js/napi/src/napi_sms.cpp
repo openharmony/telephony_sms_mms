@@ -610,6 +610,64 @@ static napi_value GetDefaultSmsSlotId(napi_env env, napi_callback_info info)
         env, context, "SetDefaultSmsSlotId", NativeGetDefaultSmsSlotId, GetDefaultSmsSlotIdCallback);
 }
 
+static void NativeGetDefaultSmsSimId(napi_env env, void *data)
+{
+    auto context = static_cast<GetDefaultSmsSimIdContext *>(data);
+    int32_t simId = 0;
+    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetDefaultSmsSimId(simId);
+    TELEPHONY_LOGI("result = %{public}d", context->errorCode);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->defaultSmsSimId = simId;
+        context->resolved = true;
+    } else {
+        context->resolved = false;
+    }
+}
+
+static void GetDefaultSmsSimIdCallback(napi_env env, napi_status status, void *data)
+{
+    auto context = static_cast<GetDefaultSmsSimIdContext *>(data);
+    napi_value callbackValue = nullptr;
+    if (status == napi_ok) {
+        if (context->resolved) {
+            napi_create_int32(env, context->defaultSmsSimId, &callbackValue);
+        } else {
+            JsError error = NapiUtil::ConverErrorMessageForJs(context->errorCode);
+            callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+        }
+    } else {
+        callbackValue = NapiUtil::CreateErrorMessage(
+            env, "get default sms sim id error cause napi_status = " + std::to_string(status));
+    }
+    NapiUtil::Handle2ValueCallback(env, context, callbackValue);
+}
+
+static napi_value GetDefaultSmsSimId(napi_env env, napi_callback_info info)
+{
+    size_t parameterCount = 1;
+    napi_value parameters[1] = { 0 };
+    napi_value thisVar = nullptr;
+    void *data = nullptr;
+
+    napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
+    if (!MatchGetDefaultSmsSlotIdParameters(env, parameters, parameterCount)) {
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    auto context = std::make_unique<GetDefaultSmsSimIdContext>().release();
+    if (context == nullptr) {
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    napi_status statusValue = napi_get_value_int32(env, parameters[0], &context->defaultSmsSimId);
+    TELEPHONY_LOGI("statusValue = %{private}d", statusValue);
+    if (parameterCount == 1) {
+        napi_create_reference(env, parameters[0], DEFAULT_REF_COUNT, &context->callbackRef);
+    }
+    return NapiUtil::HandleAsyncWork(
+        env, context, "GetDefaultSmsSimId", NativeGetDefaultSmsSimId, GetDefaultSmsSimIdCallback);
+}
+
 static bool MatchSetSmscAddrParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
     switch (parameterCount) {
@@ -1754,6 +1812,7 @@ napi_value InitNapiSmsRegistry(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("createMessage", CreateMessage),
         DECLARE_NAPI_FUNCTION("setDefaultSmsSlotId", SetDefaultSmsSlotId),
         DECLARE_NAPI_FUNCTION("getDefaultSmsSlotId", GetDefaultSmsSlotId),
+        DECLARE_NAPI_FUNCTION("getDefaultSmsSimId", GetDefaultSmsSimId),
         DECLARE_NAPI_FUNCTION("setSmscAddr", SetSmscAddr),
         DECLARE_NAPI_FUNCTION("getSmscAddr", GetSmscAddr),
         DECLARE_NAPI_FUNCTION("addSimMessage", AddSimMessage),

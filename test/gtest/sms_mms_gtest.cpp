@@ -1077,6 +1077,36 @@ HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
     ASSERT_TRUE(helper.GetIntResult() == 0);
 }
 
+void GetDefaultSmsSimIdTestFuc(SmsMmsTestHelper &helper)
+{
+    int32_t simId = DEFAULT_SIM_SLOT_ID_REMOVE;
+    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetDefaultSmsSimId(simId);
+    helper.SetIntResult(simId);
+    helper.NotifyAll();
+}
+
+/**
+ * @tc.number   GetDefaultSmsSimId_0001
+ * @tc.name     Get Default Sms SimId
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsMmsGtest, GetDefaultSmsSimId_0001, Function | MediumTest | Level2)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::GetDefaultSmsSimId_0001 -->");
+    if (!(SmsMmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        ASSERT_TRUE(true);
+        return;
+    }
+    SmsMmsTestHelper helper;
+    if (!helper.Run(GetDefaultSmsSimIdTestFuc, std::ref(helper))) {
+        TELEPHONY_LOGI("GetDefaultSmsSimIdTestFuc out of time");
+        ASSERT_TRUE(true);
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::GetDefaultSmsSimId_0001 -->finished");
+    ASSERT_GT(helper.GetIntResult(), 0);
+}
+
 void SetSmscAddrTestFuc(SmsMmsTestHelper &helper)
 {
     // invalid slotID scenario, a invalid smsc addr is OKAY

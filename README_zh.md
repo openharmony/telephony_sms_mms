@@ -69,6 +69,8 @@
 | function createMessage(pdu: Array\<number>, specification: string): Promise\<ShortMessage> | 根据协议数据单元（PDU）和指定的短信协议创建短信实例，使用Promise方式异步返回创建的短信实例。 | 无                                  |
 | function getDefaultSmsSlotId(callback: AsyncCallback\<number>): void | 获取发送短信的默认SIM卡槽，使用callback方式异步返回默认SIM卡槽。 | 无                                  |
 | function getDefaultSmsSlotId():Promise\<number>              | 获取发送短信的默认SIM卡，使用Promise方式异步返回默认SIM卡槽。 | 无                                  |
+| function getDefaultSmsSimId(callback: AsyncCallback\<number>): void | 获取发送短信的默认SIM卡ID，使用callback方式异步返回默认SIM卡槽。 | 无                                  |
+| function getDefaultSmsSimId():Promise\<number>              | 获取发送短信的默认SIM卡ID，使用Promise方式异步返回默认SIM卡槽。 | 无                                  |
 | function setSmscAddr(slotId: number, smscAddr: string, callback: AsyncCallback\<void>): void | 设置短信服务中心地址，使用callback方式异步返回undefined。    | ohos.permission.SET_TELEPHONY_STATE |
 | function setSmscAddr(slotId: number, smscAddr: string): Promise\<void> | 设置短信服务中心地址，使用Promise方式异步返回undefined。     | ohos.permission.SET_TELEPHONY_STATE |
 | function getSmscAddr(slotId: number, callback: AsyncCallback\<string>): void | 获取短信服务中心地址，使用callback方式异步返回短信服务中心地址。 | ohos.permission.GET_TELEPHONY_STATE |
@@ -157,6 +159,11 @@
 | visibleMessageBody       | string                                                       | 短信正文。                                                   |
 | visibleRawAddress        | string                                                       | 发送者地址。                                                 |
 
+**表 11**  getDefaultSmsSimId接口参数说明
+
+| 参数     | 类型                   | 描述                      |
+| -------- | ---------------------- | ------------------------- |
+| callback | AsyncCallback\<number> | 回调函数。 |
 
 完整的JS API说明以及实例代码请参考：[收发短信](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-sms.md)
 

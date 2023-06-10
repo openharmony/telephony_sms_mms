@@ -159,6 +159,11 @@ public:
     int32_t GetDefaultSmsSlotId() override;
 
     /**
+     * Get the Default Sms Sim Id From SmsService
+     */
+    int32_t GetDefaultSmsSimId(int32_t &simId) override;
+
+    /**
      * @brief SplitMessage
      * calculate Sms Message Split Segment count
      * @param message [in]
