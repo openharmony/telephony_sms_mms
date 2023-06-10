@@ -453,6 +453,16 @@ int32_t SmsService::GetDefaultSmsSlotId()
     return interfaceManager->GetDefaultSmsSlotId();
 }
 
+int32_t SmsService::GetDefaultSmsSimId(int32_t &simId)
+{
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager();
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr error.");
+        return TELEPHONY_ERROR;
+    }
+    return interfaceManager->GetDefaultSmsSimId(simId);
+}
+
 int32_t SmsService::SplitMessage(const std::u16string &message, std::vector<std::u16string> &splitMessage)
 {
     if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {

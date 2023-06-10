@@ -39,6 +39,7 @@ public:
         SET_IMS_SMS_CONFIG,
         SET_DEFAULT_SMS_SLOT_ID,
         GET_DEFAULT_SMS_SLOT_ID,
+        GET_DEFAULT_SMS_SIM_ID,
         SPLIT_MESSAGE,
         GET_SMS_SEGMENTS_INFO,
         GET_IMS_SHORT_MESSAGE_FORMAT,
@@ -191,8 +192,7 @@ public:
      * @param netType [in]
      * @return int32_t
      */
-    virtual int32_t SetCBConfig(
-        int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) = 0;
+    virtual int32_t SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) = 0;
 
     /**
      * @brief SetImsSmsConfig enable or disable IMS SMS.
@@ -218,6 +218,13 @@ public:
      * @return int32_t
      */
     virtual int32_t GetDefaultSmsSlotId() = 0;
+
+    /**
+     * @brief GetDefaultSmsSimId
+     * Get the Default Sms Sim Id From SmsService
+     * @return int32_t
+     */
+    virtual int32_t GetDefaultSmsSimId(int32_t &simId) = 0;
 
     /**
      * @brief SplitMessage

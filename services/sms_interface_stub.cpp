@@ -45,6 +45,7 @@ SmsInterfaceStub::SmsInterfaceStub()
     memberFuncMap_[SET_IMS_SMS_CONFIG] = &SmsInterfaceStub::OnSetImsSmsConfig;
     memberFuncMap_[SET_DEFAULT_SMS_SLOT_ID] = &SmsInterfaceStub::OnSetDefaultSmsSlotId;
     memberFuncMap_[GET_DEFAULT_SMS_SLOT_ID] = &SmsInterfaceStub::OnGetDefaultSmsSlotId;
+    memberFuncMap_[GET_DEFAULT_SMS_SIM_ID] = &SmsInterfaceStub::OnGetDefaultSmsSimId;
     memberFuncMap_[SPLIT_MESSAGE] = &SmsInterfaceStub::OnSplitMessage;
     memberFuncMap_[GET_SMS_SEGMENTS_INFO] = &SmsInterfaceStub::OnGetSmsSegmentsInfo;
     memberFuncMap_[GET_IMS_SHORT_MESSAGE_FORMAT] = &SmsInterfaceStub::OnGetImsShortMessageFormat;
@@ -313,6 +314,25 @@ void SmsInterfaceStub::OnGetDefaultSmsSlotId(MessageParcel &data, MessageParcel 
     result = GetDefaultSmsSlotId();
     TELEPHONY_LOGI("SetDefaultSmsSlotId result %{public}d", result);
     reply.WriteInt32(result);
+}
+
+void SmsInterfaceStub::OnGetDefaultSmsSimId(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    int32_t result = 0;
+    int32_t simId = 0;
+    result = GetDefaultSmsSimId(simId);
+    if (!reply.WriteInt32(result)) {
+        TELEPHONY_LOGE("write int32 reply failed.");
+        return;
+    }
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        return;
+    }
+    if (!reply.WriteInt32(simId)) {
+        TELEPHONY_LOGE("write int32 reply failed.");
+        return;
+    }
+    return;
 }
 
 void SmsInterfaceStub::OnSplitMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option)
