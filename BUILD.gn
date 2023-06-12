@@ -53,6 +53,7 @@ ohos_shared_library("tel_sms_mms") {
     "services/sms_interface_stub.cpp",
     "services/sms_misc_manager.cpp",
     "services/sms_network_policy_manager.cpp",
+    "services/sms_pdu_buffer.cpp",
     "services/sms_persist_helper.cpp",
     "services/sms_receive_handler.cpp",
     "services/sms_receive_indexer.cpp",
