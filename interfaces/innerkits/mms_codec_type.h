@@ -20,7 +20,7 @@ namespace OHOS {
 namespace Telephony {
 /**
  * @brief MmsFieldCode
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.4 Header Field Names and Assigned Numbers
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.4 Header Field Names and Assigned Numbers
  * Table 25: Field Name Assignments
  */
 enum MmsFieldCode {
@@ -91,7 +91,7 @@ enum MmsFieldCode {
 
 /**
  * @brief MmsMsgType
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.30 X-Mms-Message-Type Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.30 X-Mms-Message-Type Field
  */
 enum MmsMsgType {
     MMS_MSGTYPE_SEND_REQ            = 128,
@@ -120,16 +120,31 @@ enum MmsMsgType {
     MMS_MSGTYPE_CANCEL_CONF         = 151,
 };
 
+/**
+ * @brief Enumerates MMS versions.
+ */
 enum class MmsVersionType {
+    /**
+     * Indicates MMS version 1_0.
+     */
     MMS_VERSION_1_0 = 0x10,
+    /**
+     * Indicates MMS version 1_1.
+     */
     MMS_VERSION_1_1 = 0x11,
+    /**
+     * Indicates MMS version 1_2.
+     */
     MMS_VERSION_1_2 = 0x12,
+    /**
+     * Indicates MMS version 1_3.
+     */
     MMS_VERSION_1_3 = 0x13,
 };
 
 /**
  * @brief MmsBoolType
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.37 X-Mms-Read-Report Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.37 X-Mms-Read-Report Field
  */
 enum class MmsBoolType {
     MMS_YES                         = 128,
@@ -138,7 +153,7 @@ enum class MmsBoolType {
 
 /**
  * @brief MmsMessageClass
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.27 X-Mms-Message-Class Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.27 X-Mms-Message-Class Field
  */
 enum class MmsMessageClass {
     PERSONAL =	128,
@@ -149,7 +164,7 @@ enum class MmsMessageClass {
 
 /**
  * @brief MmsExpiry
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.20 X-Mms-Expiry Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.20 X-Mms-Expiry Field
  */
 enum class MmsExpiry {
     ABSOLUTE_TOKEN = 128,
@@ -158,7 +173,7 @@ enum class MmsExpiry {
 
 /**
  * @brief MmsPriority
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.35 X-Mms-Priority Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.35 X-Mms-Priority Field
  */
 enum class MmsPriority {
     MMS_LOW                         = 128,
@@ -168,7 +183,7 @@ enum class MmsPriority {
 
 /**
  * @brief MmsResponseStatus
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.48 X-Mms-Response-Status Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.48 X-Mms-Response-Status Field
  */
 enum class MmsResponseStatus {
     MMS_OK                                                  = 128,
@@ -201,7 +216,7 @@ enum class MmsResponseStatus {
 
 /**
  * @brief MmsSenderVisibility
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.52 X-Mms-Sender-Visibility Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.52 X-Mms-Sender-Visibility Field
  */
 enum class MmsSenderVisibility {
     MMS_HIDE                         = 128,
@@ -210,7 +225,7 @@ enum class MmsSenderVisibility {
 
 /**
  * @brief MmsStatus
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.54 X-Mms-Status Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.54 X-Mms-Status Field
  */
 enum class MmsStatus {
     MMS_EXPIRED                      = 128,
@@ -225,7 +240,7 @@ enum class MmsStatus {
 
 /**
  * @brief MmsRetrieveStatus
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.50 X-Mms-Retrieve-Status Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.50 X-Mms-Retrieve-Status Field
  */
 enum class MmsRetrieveStatus {
     MMS_RETRIEVE_STATUS_OK                                  = 128,
@@ -240,7 +255,7 @@ enum class MmsRetrieveStatus {
 
 /**
  * @brief MmsReadStatus
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.38 X-Mms-Read-Status Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.38 X-Mms-Read-Status Field
  */
 enum class MmsReadStatus {
     MMS_READ                            = 128,
@@ -249,7 +264,7 @@ enum class MmsReadStatus {
 
 /**
  * @brief MmsReplyCharging
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.43 X-Mms-Reply-Charging Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.43 X-Mms-Reply-Charging Field
  */
 enum class MmsReplyCharging {
     MMS_REQUESTED               = 128,
@@ -260,7 +275,7 @@ enum class MmsReplyCharging {
 
 /**
  * @brief MmsReplyChargingDeadline
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.44 X-Mms-Reply-Charging-Deadline Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.44 X-Mms-Reply-Charging-Deadline Field
  */
 enum class MmsReplyChargingDeadline {
     MMS_ABSOLUTE_TOKEN              = 128,
@@ -269,7 +284,7 @@ enum class MmsReplyChargingDeadline {
 
 /**
  * @brief MmsMmState
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.33 X-Mms-MM-State Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.33 X-Mms-MM-State Field
  */
 enum class MmsMmState {
     MMS_MM_STATE_DRAFT                        = 128,
@@ -281,7 +296,7 @@ enum class MmsMmState {
 
 /**
  * @brief MmsMmFlags
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.32 X-Mms-MM-Flags Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.32 X-Mms-MM-Flags Field
  */
 enum class MmsMmFlags {
     MMS_ADD_TOKEN                       = 128,
@@ -291,7 +306,7 @@ enum class MmsMmFlags {
 
 /**
  * @brief MmsStoreStatus
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.58 X-Mms-Store-Status Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.58 X-Mms-Store-Status Field
  */
 enum class MmsStoreStatus {
     MMS_STORE_STATUS_SUCCESS                                 = 128,
@@ -306,7 +321,7 @@ enum class MmsStoreStatus {
 
 /**
  * @brief MmsMboxTotals
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.26 X-Mms-Mbox-Totals Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.26 X-Mms-Mbox-Totals Field
  */
 enum class MmsMboxTotals {
     MMS_MESSAGE_TOTAL_TOKEN                     = 128,
@@ -315,7 +330,7 @@ enum class MmsMboxTotals {
 
 /**
  * @brief MmsMboxQuotas
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.25 X-Mms-Mbox-Quotas Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.25 X-Mms-Mbox-Quotas Field
  */
 enum class MmsMboxQuotas {
     MMS_MESSAGE_QUOTA_TOKEN                     = 128,
@@ -324,7 +339,7 @@ enum class MmsMboxQuotas {
 
 /**
  * @brief MmsRecommendedRetrievalMode
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.39 X-Mms-Recommended-Retrieval-Mode Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.39 X-Mms-Recommended-Retrieval-Mode Field
  */
 enum class MmsRecommendedRetrievalMode {
     MMS_MANUAL                                  = 128,
@@ -332,7 +347,7 @@ enum class MmsRecommendedRetrievalMode {
 
 /**
  * @brief MmsContentClass
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.9 X-Mms-Content-Class Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.9 X-Mms-Content-Class Field
  */
 enum class MmsContentClass {
     MMS_TEXT                                    = 128,
@@ -347,7 +362,7 @@ enum class MmsContentClass {
 
 /**
  * @brief MmsCancelStatus
- * OMA-TS-MMS_CONF-V1_3-20110913-A   section:7.3.7 X-Mms-Cancel-Status Field
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.3.7 X-Mms-Cancel-Status Field
  */
 enum class MmsCancelStatus {
     MMS_CANCEL_REQUEST_SUCCESSFULLY_RECEIVED    = 128,
@@ -375,12 +390,27 @@ enum class MmsCharSets {
     UTF_8 = 0X6A
 };
 
+/**
+ * @brief Enumerates the selectivity type of MMS field.
+ */
 enum class MmsFieldOptType {
+    /**
+     * Indicates this MMS field is mandatory.
+     */
     MMS_MANDATORY_TYPE,
+    /**
+     * Indicates this MMS field is optional.
+     */
     MMS_OPTIONAL_TYPE,
+    /**
+     * Indicates this MMS field is unsupported.
+     */
     MMS_UNSUPPORTED_TYPE
 };
 
+/**
+ * @brief Enumerates the EncodeString type of MMS field value.
+ */
 enum class MmsFieldValueType {
     MMS_FIELD_OCTET_TYPE = 0x01,
     MMS_FIELD_INTEGER_TYPE = 0x02,
@@ -391,34 +421,63 @@ enum class MmsFieldValueType {
     MMS_FIELD_UNKOWN_TYPE = 0x00
 };
 
+/**
+ * @brief Enumerates the error code of MMS encode.
+ */
 enum class MmsEncodeErrcode {
     MMS_OK,
     MMS_NOT_SET_ERR,
     MMS_BUFF_ERR
 };
 
+/**
+ * @brief Used to save information about MMS header.
+ */
 struct MmsHeaderCategDes {
+    /**
+     * Indicates the id of MMS field.
+     */
     unsigned char fieldId = 0;
+    /**
+     * Indicates the selectivity type of MMS field.
+     */
     MmsFieldOptType fieldOpt = MmsFieldOptType::MMS_UNSUPPORTED_TYPE;
+    /**
+     * Indicates the EncodeString type of MMS field value.
+     */
     MmsFieldValueType valueType = MmsFieldValueType::MMS_FIELD_UNKOWN_TYPE;
 };
 
+/**
+ * @brief Used to save information about MMS header name.
+ */
 struct KeyString {
     unsigned char key = 0;
     const char *value = nullptr;
 };
 
+/**
+ * @brief Used to save information about MMS field.
+ */
 struct MmsFieldDes {
+    /**
+     * Indicates the id of MMS field.
+     */
     unsigned char fieldId = 0;
+    /**
+     * Indicates the EncodeString type of MMS field value.
+     */
     MmsFieldValueType type = MmsFieldValueType::MMS_FIELD_UNKOWN_TYPE;
 };
 
 /**
-* OMA-TS-MMS_ENC-V1_3-20110913-A.pdf
-* 7.4 Header Field Names and Assigned Numbers
-*/
+ * @brief Header Field Names and Assigned Numbers
+ * OMA-TS-MMS_ENC-V1_3-20110913-A   section:7.4 Header Field Names and Assigned Numbers
+ */
 static const KeyString mmsHeaderNames[] = {
-    /* MMS 1.0 */
+    /**
+     * MMS 1.0
+     */
     { MMS_BCC,                           "Mms-Bcc" },
     { MMS_CC,                            "Mms-Cc" },
     { MMS_CONTENT_LOCATION,              "Mms-Content-Location" },
@@ -443,7 +502,9 @@ static const KeyString mmsHeaderNames[] = {
     { MMS_SUBJECT,                       "Mms-Subject" },
     { MMS_TO,                            "Mms-To" },
     { MMS_TRANSACTION_ID,                "Mms-X-Mms-Transaction-Id" },
-    /* MMS 1.1 */
+    /**
+     * MMS 1.1
+     */
     { MMS_RETRIEVE_STATUS,               "Mms-X-Mms-Retrieve-Status" },
     { MMS_RETRIEVE_TEXT,                 "Mms-X-Mms-Retrieve-Text" },
     { MMS_READ_STATUS,                   "Mms-X-Mms-Read-Status" },
@@ -453,7 +514,9 @@ static const KeyString mmsHeaderNames[] = {
     { MMS_REPLY_CHARGING_SIZE,           "Mms-X-Mms-Reply-Charging-Size" },
     { MMS_PREVIOUSLY_SENT_BY,            "Mms-X-Mms-Previously-Sent-By" },
     { MMS_PREVIOUSLY_SENT_DATE,          "Mms-X-Mms-Previously-Sent-Date" },
-    /* MMS 1.2 */
+    /**
+     * MMS 1.2
+     */
     { MMS_STORE,                         "Mms-X-Mms-Store" },
     { MMS_MM_STATE,                      "Mms-X-Mms-MM-State" },
     { MMS_MM_FLAGS,                      "Mms-X-Mms-MM-Flags" },

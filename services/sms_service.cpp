@@ -126,6 +126,7 @@ void SmsService::WaitCoreServiceToInit()
             std::this_thread::sleep_for(std::chrono::milliseconds(CONNECT_SERVICE_WAIT_TIME));
         }
     });
+    pthread_setname_np(connectTask.native_handle(), "sms_service");
     connectTask.detach();
 }
 

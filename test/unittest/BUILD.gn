@@ -47,7 +47,7 @@ ohos_executable("tel_sms_mms_test") {
     "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
