@@ -1,0 +1,298 @@
+/*
+ * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "text_coder.h"
+
+#include "glib.h"
+#include "mms_charset.h"
+#include "securec.h"
+#include "telephony_log_wrapper.h"
+
+namespace OHOS {
+namespace Telephony {
+using msg_encode_type_t = uint8_t;
+using namespace std;
+static constexpr uint8_t GSM7_DEFLIST_LEN = 128;
+static constexpr uint8_t UCS2_LEN_MIN = 2;
+static constexpr uint32_t UCS2_LEN_MAX = INT_MAX / sizeof(WCHAR);
+
+const WCHAR GSM7_BIT_TO_UC_S2[] = { 0x0040, 0x00A3, 0x0024, 0x00A5, 0x00E8, 0x00E9, 0x00F9, 0x00EC, 0x00F2, 0x00C7,
+    0x000A, 216, 0x00F8, 0x000D, 0x00C5, 0x00E5, 0x0394, 0x005F, 0x03A6, 0x0393, 0x039B, 0x03A9, 0x03A0, 0x03A8, 0x03A3,
+    0x0398, 0x039E, 0x001B, 0x00C6, 0x00E6, 0x00DF, 0x00C9, 0x0020, 0x0021, 0x0022, 0x0023, 0x00A4, 0x0025, 0x0026,
+    0x0027, 0x0028, 0x0029, 0x002A, 0x002B, 0x002C, 0x002D, 0x002E, 0x002F, 0x0030, 0x0031, 0x0032, 0x0033, 0x0034,
+    0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x003A, 0x003B, 0x003C, 0x003D, 0x003E, 0x003F, 0x00A1, 0x0041, 0x0042,
+    0x0043, 0x0044, 0x0045, 0x0046, 0x0047, 0x0048, 0x0049, 0x004A, 0x004B, 0x004C, 0x004D, 0x004E, 0x004F, 0x0050,
+    0x0051, 0x0052, 0x0053, 0x0054, 0x0055, 0x0056, 0x0057, 0x0058, 0x0059, 0x005A, 0x00C4, 0x00D6, 0x00D1, 0x00DC,
+    0x00A7, 0x00BF, 0x0061, 0x0062, 0x0063, 0x0064, 0x0065, 0x0066, 0x0067, 0x0068, 0x0069, 0x006A, 0x006B, 0x006C,
+    0x006D, 0x006E, 0x006F, 0x0070, 0x0071, 0x0072, 0x0073, 0x0074, 0x0075, 0x0076, 0x0077, 0x0078, 0x0079, 0x007A,
+    0x00E4, 0x00F6, 0x00F1, 0x00FC, 0x00E0 };
+
+TextCoder::TextCoder()
+{
+    InitExtCharMap();
+    InitGsm7bitDefMap();
+    InitGsm7bitExtMap();
+    InitTurkishMap();
+    InitSpanishMap();
+    InitPortuMap();
+    InitReplaceCharMap();
+}
+
+TextCoder::~TextCoder()
+{
+    extCharMap_.clear();
+    gsm7bitDefMap_.clear();
+    gsm7bitExtMap_.clear();
+    turkishMap_.clear();
+    spanishMap_.clear();
+    portuMap_.clear();
+    replaceCharMap_.clear();
+}
+
+TextCoder &TextCoder::Instance()
+{
+    static TextCoder instance;
+    return instance;
+}
+
+void TextCoder::InitExtCharMap()
+{
+    extCharMap_.clear();
+    extCharMap_ = { { 0x000C, MSG_GSM7EXT_CHAR }, { 0x005B, MSG_GSM7EXT_CHAR }, { 0x005C, MSG_GSM7EXT_CHAR },
+        { 0x005D, MSG_GSM7EXT_CHAR }, { 0x005E, MSG_GSM7EXT_CHAR }, { 0x007B, MSG_GSM7EXT_CHAR },
+        { 0x007C, MSG_GSM7EXT_CHAR }, { 0x007D, MSG_GSM7EXT_CHAR }, { 0x007E, MSG_GSM7EXT_CHAR },
+        { 0x20AC, MSG_GSM7EXT_CHAR }, { 0x00E7, MSG_TURKISH_CHAR }, { 0x011E, MSG_TURKISH_CHAR },
+        { 0x011F, MSG_TURKISH_CHAR }, { 0x01E6, MSG_TURKISH_CHAR }, { 0x01E7, MSG_TURKISH_CHAR },
+        { 0x0130, MSG_TURKISH_CHAR }, { 0x0131, MSG_TURKISH_CHAR }, { 0x015E, MSG_TURKISH_CHAR },
+        { 0x015F, MSG_TURKISH_CHAR }, { 0x00C1, MSG_SPANISH_CHAR }, { 0x00E1, MSG_SPANISH_CHAR },
+        { 0x00CD, MSG_SPANISH_CHAR }, { 0x00ED, MSG_SPANISH_CHAR }, { 0x00D3, MSG_SPANISH_CHAR },
+        { 0x00F3, MSG_SPANISH_CHAR }, { 0x00DA, MSG_SPANISH_CHAR }, { 0x00FA, MSG_SPANISH_CHAR },
+        { 0x00D4, MSG_PORTUGUESE_CHAR }, { 0x00F4, MSG_PORTUGUESE_CHAR }, { 0x00CA, MSG_PORTUGUESE_CHAR },
+        { 0x00EA, MSG_PORTUGUESE_CHAR }, { 0x00C0, MSG_PORTUGUESE_CHAR }, { 0x00E7, MSG_PORTUGUESE_CHAR },
+        { 0x00C3, MSG_PORTUGUESE_CHAR }, { 0x00E3, MSG_PORTUGUESE_CHAR }, { 0x00D5, MSG_PORTUGUESE_CHAR },
+        { 0x00F5, MSG_PORTUGUESE_CHAR }, { 0x00C2, MSG_PORTUGUESE_CHAR }, { 0x00E2, MSG_PORTUGUESE_CHAR } };
+}
+
+void TextCoder::InitGsm7bitDefMap()
+{
+    gsm7bitDefMap_.clear();
+    for (uint8_t i = 0; i < GSM7_DEFLIST_LEN; i++) {
+        gsm7bitDefMap_[GSM7_BIT_TO_UC_S2[i]] = i;
+    }
+}
+
+void TextCoder::InitGsm7bitExtMap()
+{
+    gsm7bitExtMap_.clear();
+    gsm7bitExtMap_ = { { 0x005B, 0x3C }, { 0x005D, 0x3E }, { 0x007B, 0x28 }, { 0x007D, 0x29 }, { 0x000C, 0x0A },
+        { 0x005C, 0x2F }, { 0x005E, 0x14 }, { 0x007C, 0x40 }, { 0x007E, 0x3D }, { 0x20AC, 0x65 } };
+}
+
+void TextCoder::InitTurkishMap()
+{
+    // Turkish
+    turkishMap_.clear();
+    turkishMap_ = { { 0x005B, 0x3C }, { 0x005D, 0x3E }, { 0x007B, 0x28 }, { 0x007D, 0x29 }, { 0x000C, 0x0A },
+        { 0x005C, 0x2F }, { 0x005E, 0x14 }, { 0x007C, 0x40 }, { 0x007E, 0x3D }, { 0x20AC, 0x65 }, { 0x00E7, 0x63 },
+        { 0x011E, 0x47 }, { 0x011F, 0x67 }, { 0x01E6, 0x47 }, { 0x01E7, 0x67 }, { 0x0130, 0x49 }, { 0x0131, 0x69 },
+        { 0x015E, 0x53 }, { 0x015F, 0x73 } };
+}
+
+void TextCoder::InitSpanishMap()
+{
+    // Spanish
+    spanishMap_.clear();
+    spanishMap_ = { { 0x005B, 0x3C }, { 0x005D, 0x3E }, { 0x007B, 0x28 }, { 0x007D, 0x29 }, { 0x000C, 0x0A },
+        { 0x005C, 0x2F }, { 0x005E, 0x14 }, { 0x007C, 0x40 }, { 0x007E, 0x3D }, { 0x20AC, 0x65 }, { 0x00C1, 0x41 },
+        { 0x00E1, 0x61 }, { 0x00CD, 0x49 }, { 0x00ED, 0x69 }, { 0x00D3, 0x4F }, { 0x00F3, 0x6F }, { 0x00DA, 0x55 },
+        { 0x00FA, 0x75 } };
+}
+
+void TextCoder::InitPortuMap()
+{
+    // Portuguese
+    portuMap_.clear();
+    portuMap_ = { { 0x005B, 0x3C }, { 0x005D, 0x3E }, { 0x007B, 0x28 }, { 0x007D, 0x29 }, { 0x000C, 0x0A },
+        { 0x005C, 0x2F }, { 0x005E, 0x14 }, { 0x007C, 0x40 }, { 0x007E, 0x3D }, { 0x20AC, 0x65 }, { 0x00D4, 0x0B },
+        { 0x00F4, 0x0C }, { 0x00C1, 0x0E }, { 0x00E1, 0x0F }, { 0x00CA, 0x1F }, { 0x00EA, 0x05 }, { 0x00C0, 0x41 },
+        { 0x00E7, 0x09 }, { 0x00CD, 0x49 }, { 0x00ED, 0x69 }, { 0x00D3, 0x4F }, { 0x00F3, 0x6F }, { 0x00DA, 0x55 },
+        { 0x00FA, 0x75 }, { 0x00C3, 0x61 }, { 0x00E3, 0x7B }, { 0x00D5, 0x5C }, { 0x00F5, 0x7C }, { 0x00C2, 0x61 },
+        { 0x00E2, 0x7F }, { 0x03A6, 0x12 }, { 0x0393, 0x13 }, { 0x03A9, 0x15 }, { 0x03A0, 0x16 }, { 0x03A8, 0x17 },
+        { 0x03A3, 0x18 }, { 0x0398, 0x19 } };
+}
+
+void TextCoder::InitReplaceCharMap()
+{
+    // character replacement table
+    replaceCharMap_.clear();
+    replaceCharMap_ = { { 0x00E0, 0x61 }, { 0x00E1, 0x61 }, { 0x00E2, 0x61 }, { 0x00E3, 0x61 }, { 0x00E4, 0x61 },
+        { 0x00E5, 0x61 }, { 0x00E6, 0x61 }, { 0x0101, 0x61 }, { 0x0103, 0x61 }, { 0x0105, 0x61 }, { 0x01CE, 0x61 },
+        { 0x00C0, 0x41 }, { 0x00C1, 0x41 }, { 0x00C2, 0x41 }, { 0x00C3, 0x41 }, { 0x00C4, 0x41 }, { 0x00C5, 0x41 },
+        { 0x00C6, 0x41 }, { 0x0100, 0x41 }, { 0x0102, 0x41 }, { 0x0104, 0x41 }, { 0x01CD, 0x41 }, { 0x00E7, 0x63 },
+        { 0x0107, 0x63 }, { 0x0109, 0x63 }, { 0x010B, 0x63 }, { 0x010D, 0x63 }, { 0x00C7, 0x43 }, { 0x0106, 0x43 },
+        { 0x0108, 0x43 }, { 0x010A, 0x43 }, { 0x010C, 0x43 }, { 0x010F, 0x64 }, { 0x0111, 0x64 }, { 0x010E, 0x44 },
+        { 0x0110, 0x44 }, { 0x00E8, 0x65 }, { 0x00E9, 0x65 }, { 0x00EA, 0x65 }, { 0x00EB, 0x65 }, { 0x0113, 0x65 },
+        { 0x0115, 0x65 }, { 0x0117, 0x65 }, { 0x0119, 0x65 }, { 0x011B, 0x65 }, { 0x0259, 0x65 }, { 0x00C8, 0x45 },
+        { 0x00C9, 0x45 }, { 0x00CA, 0x45 }, { 0x00CB, 0x45 }, { 0x0112, 0x45 }, { 0x0114, 0x45 }, { 0x0116, 0x45 },
+        { 0x0118, 0x45 }, { 0x011A, 0x45 }, { 0x018F, 0x45 }, { 0x011D, 0x67 }, { 0x011F, 0x67 }, { 0x0121, 0x67 },
+        { 0x0123, 0x67 }, { 0x01E7, 0x67 }, { 0x01F5, 0x67 }, { 0x1E21, 0x67 }, { 0x011C, 0x47 }, { 0x011E, 0x47 },
+        { 0x0120, 0x47 }, { 0x0122, 0x47 }, { 0x01E6, 0x47 }, { 0x01F4, 0x47 }, { 0x1E20, 0x47 }, { 0x00EC, 0x69 },
+        { 0x00ED, 0x69 }, { 0x00EE, 0x69 }, { 0x00EF, 0x69 }, { 0x0129, 0x69 }, { 0x012B, 0x69 }, { 0x012D, 0x69 },
+        { 0x012F, 0x69 }, { 0x01D0, 0x69 }, { 0x0131, 0x69 }, { 0x00CC, 0x49 }, { 0x00CD, 0x49 }, { 0x00CE, 0x49 },
+        { 0x00CF, 0x49 }, { 0x0128, 0x49 }, { 0x012A, 0x49 }, { 0x012C, 0x49 }, { 0x012E, 0x49 }, { 0x0130, 0x49 },
+        { 0x0137, 0x6B }, { 0x0136, 0x4B }, { 0x013A, 0x6C }, { 0x013C, 0x6C }, { 0x013E, 0x6C }, { 0x0140, 0x6C },
+        { 0x0142, 0x6C }, { 0x0139, 0x4C }, { 0x013B, 0x4C }, { 0x013D, 0x4C }, { 0x013F, 0x4C }, { 0x0141, 0x4C },
+        { 0x00F1, 0x6E }, { 0x0144, 0x6E }, { 0x0146, 0x6E }, { 0x0148, 0x6E }, { 0x00D1, 0x4E }, { 0x0143, 0x4E },
+        { 0x0145, 0x4E }, { 0x0147, 0x4E }, { 0x00F2, 0x6F }, { 0x00F3, 0x6F }, { 0x00F4, 0x6F }, { 0x00F5, 0x6F },
+        { 0x00F6, 0x6F }, { 0x00F8, 0x6F }, { 0x014D, 0x6F }, { 0x014F, 0x6F }, { 0x01D2, 0x6F }, { 0x01EB, 0x6F },
+        { 0x0151, 0x6F }, { 0x0153, 0x6F }, { 0x00D2, 0x4F }, { 0x00D3, 0x4F }, { 0x00D4, 0x4F }, { 0x00D5, 0x4F },
+        { 0x00D6, 0x4F }, { 216, 0x4F }, { 0x014C, 0x4F }, { 0x014E, 0x4F }, { 0x01D1, 0x4F }, { 0x01EA, 0x4F },
+        { 0x0150, 0x4F }, { 0x0152, 0x4F }, { 0x0155, 0x72 }, { 0x0157, 0x72 }, { 0x0159, 0x72 }, { 0x0154, 0x52 },
+        { 0x0156, 0x52 }, { 0x0158, 0x52 }, { 0x015B, 0x73 }, { 0x015D, 0x73 }, { 0x015F, 0x73 }, { 0x0161, 0x73 },
+        { 0x015A, 0x53 }, { 0x015C, 0x53 }, { 0x015E, 0x53 }, { 0x0160, 0x53 }, { 0x00FE, 0x74 }, { 0x0163, 0x74 },
+        { 0x0165, 0x74 }, { 0x0167, 0x74 }, { 0x021B, 0x74 }, { 0x00DE, 0x54 }, { 0x0162, 0x54 }, { 0x0164, 0x54 },
+        { 0x0166, 0x54 }, { 0x00F9, 0x75 }, { 0x00FA, 0x75 }, { 0x00FB, 0x75 }, { 0x00FC, 0x75 }, { 0x0169, 0x75 },
+        { 0x016B, 0x75 }, { 0x016D, 0x75 }, { 0x016F, 0x75 }, { 0x0171, 0x75 }, { 0x0173, 0x75 }, { 0x01D4, 0x75 },
+        { 0x00D9, 0x55 }, { 0x00DA, 0x55 }, { 0x00DB, 0x55 }, { 0x00DC, 0x55 }, { 0x0168, 0x55 }, { 0x016A, 0x55 },
+        { 0x016C, 0x55 }, { 0x016E, 0x55 }, { 0x0170, 0x55 }, { 0x0172, 0x55 }, { 0x01D3, 0x55 }, { 0x00FD, 0x79 },
+        { 0x00FF, 0x79 }, { 0x0177, 0x79 }, { 0x0233, 0x79 }, { 0x1EF3, 0x79 }, { 0x1EF9, 0x79 }, { 0x00DD, 0x59 },
+        { 0x0176, 0x59 }, { 0x0178, 0x59 }, { 0x0232, 0x59 }, { 0x1EF2, 0x59 }, { 0x1EF8, 0x59 }, { 0x017A, 0x7A },
+        { 0x017C, 0x7A }, { 0x017E, 0x7A }, { 0x0179, 0x5A }, { 0x017B, 0x5A }, { 0x017D, 0x5A } };
+}
+
+void TextCoder::Base64Encode(const std::string &src, std::string &dest)
+{
+    gchar *encode_data = g_base64_encode((guchar *)src.data(), src.length());
+    if (encode_data == nullptr) {
+        return;
+    }
+    gsize out_len = 0;
+    out_len = strlen(encode_data);
+    std::string temp(encode_data, out_len);
+    dest = temp;
+
+    if (encode_data != nullptr) {
+        g_free(encode_data);
+    }
+}
+
+void TextCoder::Base64Decode(const std::string &src, std::string &dest)
+{
+    gsize out_len = 0;
+    gchar *decodeData = reinterpret_cast<gchar *>(g_base64_decode(src.data(), &out_len));
+    if (decodeData == nullptr) {
+        return;
+    }
+    std::string temp(decodeData, out_len);
+    dest = temp;
+
+    if (decodeData != nullptr) {
+        g_free(decodeData);
+    }
+}
+
+bool TextCoder::GetEncodeString(
+    std::string &encodeString, uint32_t charset, uint32_t valLength, const std::string &strEncodeString)
+{
+    bool ret = false;
+    gchar *pDest = nullptr;
+    gsize bytes_read = 0;
+    gsize bytes_written = 0;
+    GError *error = nullptr;
+    std::string strToCodeset("UTF-8");
+    std::string strFromCodeset;
+    auto charSetInstance = DelayedSingleton<MmsCharSet>::GetInstance();
+    if (charSetInstance == nullptr || (!charSetInstance->GetCharSetStrFromInt(strFromCodeset, charset))) {
+        strFromCodeset = "UTF-8";
+    }
+    pDest = g_convert(strEncodeString.c_str(), valLength, strToCodeset.c_str(), strFromCodeset.c_str(), &bytes_read,
+        &bytes_written, &error);
+    if (!error) {
+        encodeString = std::string(pDest, bytes_written);
+        ret = true;
+    } else {
+        TELEPHONY_LOGE("EncodeString charset convert fail.");
+        ret = false;
+    }
+    if (pDest != nullptr) {
+        g_free(pDest);
+    }
+    return ret;
+}
+
+/**
+ * @brief Utf8ToGsm7bit
+ * max # of Ucs2 chars, NOT bytes. when all utf8 chars are only one byte,
+ * Ucs2Length is maxUcs2 Length. otherwise (ex: 2 bytes of UTF8 is one char)
+ * Ucs2Length must be  less than utf8Length
+ */
+int TextCoder::Utf8ToGsm7bit(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, MSG_LANGUAGE_ID_T &langId)
+{
+    if (srcLength == -1 && src) {
+        // null terminated string
+        srcLength = strlen(reinterpret_cast<const gchar *>(src));
+    }
+    if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("text is null");
+        return 0;
+    }
+
+    int maxUcs2Length = srcLength;
+    if (maxUcs2Length >= UCS2_LEN_MAX) {
+        TELEPHONY_LOGE("src over size");
+        return 0;
+    }
+    std::unique_ptr<WCHAR[]> ucs2Text = std::make_unique<WCHAR[]>(maxUcs2Length);
+    if (ucs2Text == nullptr) {
+        TELEPHONY_LOGE("make_unique error");
+        return 0;
+    }
+    WCHAR *pUcs2Text = ucs2Text.get();
+    if (memset_s(pUcs2Text, maxUcs2Length * sizeof(WCHAR), 0x00, maxUcs2Length * sizeof(WCHAR)) != EOK) {
+        TELEPHONY_LOGE("memset_s error");
+        return 0;
+    }
+
+    TELEPHONY_LOGI("srcLength = %{public}d", srcLength);
+    int ucs2Length = Utf8ToUcs2(reinterpret_cast<uint8_t *>(pUcs2Text), maxUcs2Length * sizeof(WCHAR), src, srcLength);
+    return Ucs2ToGsm7bit(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length, langId);
+}
+
+int TextCoder::Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength)
+{
+    if (srcLength == -1 && src) {
+        // null terminated string
+        srcLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(src)));
+    }
+    if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("text is null");
+        return 0;
+    }
+
+    gsize textLen = srcLength;
+    auto unicodeTemp = reinterpret_cast<uint8_t *>(dest);
+    gsize remainedLength = maxLength;
+    int err = 0;
+    GIConv cd = g_iconv_open("UTF16BE", "UTF8");
+    if (cd != nullptr) {
+        err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
+            reinterpret_cast<gchar **>(&unicodeTemp), reinterpret_cast<gsize *>(&remainedLength));
+    }
+    g_iconv_close(cd);
+    return (err < 0) ? -1 : (maxLength - remainedLength);
+}
+
+} // namespace Telephony
+} // namespace OHOS
