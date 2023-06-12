@@ -29,128 +29,154 @@ public:
     /**
      * @brief SmsMessageClass
      * Indicates the SMS type.
-     * from 3GPP TS 23.038 V4.3.0 5 CBS Data Coding Scheme
+     * from 3GPP TS 23.038 V4.3.0 5 CBS Data Coding Scheme.
      */
     using SmsMessageClass = enum {
-        /** class0 Indicates an instant message, which is displayed immediately after being received. */
+        /**
+         * class0 Indicates an instant message, which is displayed immediately after being received.
+         */
         SMS_INSTANT_MESSAGE = 0,
-        /** class1 Indicates an SMS message that can be stored on the device or SIM card based on the storage
-           status. */
+        /**
+         * class1 Indicates an SMS message that can be stored on the device
+         * or SIM card based on the storage status.
+         */
         SMS_OPTIONAL_MESSAGE,
-        /** class2 Indicates an SMS message containing SIM card information, which is to be stored in a SIM card. */
+        /**
+         * class2 Indicates an SMS message containing SIM card information,
+         * which is to be stored in a SIM card.
+         */
         SMS_SIM_MESSAGE,
-        /** class3 Indicates an SMS message to be forwarded to another device. */
+        /**
+         * class3 Indicates an SMS message to be forwarded to another device.
+         */
         SMS_FORWARD_MESSAGE,
-        /** Indicates an unknown type. */
+        /**
+         * Indicates an unknown type.
+         */
         SMS_CLASS_UNKNOWN,
     };
 
     /**
      * @brief SimMessageStatus
-     * from 3GPP TS 51.011 V4.0.0 (2001-03) section 10.5.3 Parameter Definitions
+     * from 3GPP TS 51.011 V4.0.0 (2001-03) section 10.5.3 Parameter Definitions.
      */
     using SmsSimMessageStatus = enum {
-        SMS_SIM_MESSAGE_STATUS_FREE = 0, /** status free space ON SIM */
-        SMS_SIM_MESSAGE_STATUS_READ = 1, /** REC READ received unread message */
-        SMS_SIM_MESSAGE_STATUS_UNREAD = 3, /** REC UNREAD received read message */
-        SMS_SIM_MESSAGE_STATUS_SENT = 5, /** "STO SENT" stored unsent message (only applicable to SMs) */
-        SMS_SIM_MESSAGE_STATUS_UNSENT = 7, /** "STO UNSENT" stored sent message (only applicable to SMs) */
+        /**
+         * status free space ON SIM.
+         */
+        SMS_SIM_MESSAGE_STATUS_FREE = 0,
+        /**
+         * REC READ received unread message.
+         */
+        SMS_SIM_MESSAGE_STATUS_READ = 1,
+        /**
+         * REC UNREAD received read message.
+         */
+        SMS_SIM_MESSAGE_STATUS_UNREAD = 3,
+        /**
+         * "STO SENT" stored unsent message (only applicable to SMs).
+         */
+        SMS_SIM_MESSAGE_STATUS_SENT = 5,
+        /**
+         * "STO UNSENT" stored sent message (only applicable to SMs).
+         */
+        SMS_SIM_MESSAGE_STATUS_UNSENT = 7,
     };
 
     /**
-     * @brief GetVisibleMessageBody
-     * Obtains the SMS message body
-     * @return std::u16string
+     * @brief Obtains the SMS message body.
+     *
+     * @return std::u16string returns the message body.
      */
     std::u16string GetVisibleMessageBody() const;
 
     /**
-     * @brief GetVisibleRawAddress
-     * Obtains the address of the sender, which is to be displayed on the UI
-     * @return std::u16string
+     * @brief Obtains the address of the sender, which is to be displayed on the UI.
+     *
+     * @return std::u16string returns the raw address.
      */
     std::u16string GetVisibleRawAddress() const;
 
     /**
-     * @brief GetMessageClass
-     * Obtains the SMS type
-     * @return SmsMessageClass
+     * @brief Obtains the SMS type.
+     *
+     * @return returns SMS type, {@link SmsMessageClass}.
      */
     SmsMessageClass GetMessageClass() const;
 
     /**
-     * @brief GetScAddress
-     * Obtains the short message service center (SMSC) address
+     * @brief Obtains the short message service center (SMSC) address.
+     *
      * @param smscAddress SMS center address
-     * @return Interface execution results
+     * @return Interface execution results.
      */
     int32_t GetScAddress(std::u16string &smscAddress) const;
 
     /**
-     * @brief GetScTimestamp
-     * Obtains the SMSC timestamp
-     * @return int64_t
+     * @brief Obtains the SMSC timestamp.
+     *
+     * @return int64_t returns the SMSC timestamp.
      */
     int64_t GetScTimestamp() const;
 
     /**
-     * @brief IsReplaceMessage
-     * Checks whether the received SMS is a "replace short message"
-     * @return true
-     * @return false
+     * @brief Checks whether the received SMS is a "replace short message".
+     *
+     * @return returns true if the received SMS is a "replace short message", false otherwise.
      */
     bool IsReplaceMessage() const;
 
     /**
-     * @brief GetStatus
+     * @brief Indicates the SMS message status from the SMS-STATUS-REPORT message sent by the
+     * Short Message Service Center (SMSC).
      *
-     * @return int32_t
+     * @return int32_t returns the SMS message status from the SMS-STATUS-REPORT message.
      */
     int32_t GetStatus() const;
 
     /**
-     * @brief IsSmsStatusReportMessage
+     * @brief Indicates whether the current message is SMS-STATUS-REPORT.
      *
-     * @return true
-     * @return false
+     * @return Returns true if the current message is SMS-STATUS-REPORT, false otherwise.
      */
     bool IsSmsStatusReportMessage() const;
 
     /**
-     * @brief HasReplyPath
-     * Checks whether the received SMS contains "TP-Reply-Path"
-     * @return true
-     * @return false
+     * @brief Checks whether the received SMS contains "TP-Reply-Path"
+     *
+     * @return returns true if the received SMS contains "TP-Reply-Path", false otherwise.
      */
     bool HasReplyPath() const;
 
     /**
-     * @brief Get the Icc Message Status object
+     * @brief Get the Icc Message Status object.
      *
-     * @return SmsSimMessageStatus
+     * @return returns from 3GPP TS 51.011 V4.0.0 (2001-03) section 10.5.3 Parameter Definitions.
+     * {@link SmsSimMessageStatus}
      */
     SmsSimMessageStatus GetIccMessageStatus() const;
 
     /**
-     * @brief GetProtocolId
+     * @brief Get the protocol id used for sending SMS messages.
      *
-     * @return int32_t
+     * @return int32_t returns protocol id used for sending SMS messages
      */
     int32_t GetProtocolId() const;
 
     /**
-     * @brief Get the Pdu
+     * @brief Get the protocol data unit.
      *
-     * @return std::vector<unsigned char>
+     * @return returns the pdu code
      */
     std::vector<unsigned char> GetPdu() const;
 
     /**
      * @brief Create a Message object
      * Creates an SMS message instance based on the
-     * protocol data unit (PDU) and the specified SMS protocol
-     * @param pdu
-     * @param specification
+     * protocol data unit (PDU) and the specified SMS protocol.
+     *
+     * @param pdu Indicates pdu code.
+     * @param specification Indicates 3gpp or 3gpp2.
      * @return Returns {@code 0} if CreateMessage success
      */
     static int32_t CreateMessage(
@@ -160,17 +186,18 @@ public:
      * @brief Create a Icc Message object
      * Creates an SMS message instance based on the
      * ICC protocol data unit (PDU) and the specified SMS protocol
-     * @param pdu
-     * @param specification
-     * @param index
-     * @return ShortMessage
+     *
+     * @param pdu Indicates pdu code.
+     * @param specification Indicates 3gpp or 3gpp2.
+     * @param index Indicates the message index.
+     * @return returns a ShortMessage object
      */
     static ShortMessage CreateIccMessage(std::vector<unsigned char> &pdu, std::string specification, int32_t index);
 
     /**
      * @brief GetIndexOnSim
      *
-     * @return int32_t
+     * @return int32_t returns the index
      */
     int32_t GetIndexOnSim() const;
 

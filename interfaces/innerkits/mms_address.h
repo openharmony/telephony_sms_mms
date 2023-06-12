@@ -26,61 +26,80 @@ namespace OHOS {
 namespace Telephony {
 class MmsAddress {
 public:
+    /**
+     * @brief Defines the type of mms address.
+     */
     using MmsAddressType = enum {
+        /**
+         * Indicates the type of mms address is unknown.
+         */
         ADDRESS_TYPE_UNKNOWN = 0,
+        /**
+         * Indicates the type of mms address is PLMN.
+         */
         ADDRESS_TYPE_PLMN = 1,
+        /**
+         * Indicates the type of mms address is IPV4.
+         */
         ADDRESS_TYPE_IPV4 = 2,
+        /**
+         * Indicates the type of mms address is IPV6.
+         */
         ADDRESS_TYPE_IPV6 = 3,
+        /**
+         * Indicates the type of mms address is EMAIL.
+         */
         ADDRESS_TYPE_EMAIL = 4,
     };
 
     /**
      * @brief Get the Address String
      * for example: +8610086/TYPE=PLMN
-     * @brief Get the Address String
-     * @return std::string
+     *
+     * @return returns the Mms Address String
      */
     std::string GetAddressString();
 
     /**
      * @brief Get the Address Charset
      * for example: MmsCharSets::UTF_8
-     * @return MmsCharSets
+     *
+     * @return returns the Address Character {@link MmsCharSets}.
      */
     MmsCharSets GetAddressCharset();
 
     /**
      * @brief Get the Address Type
      * for example: MmsAddressType::ADDRESS_TYPE_PLMN
-     * @return MmsAddressType
+     *
+     * @return returns the type of mms address {@link MmsAddressType}.
      */
     MmsAddressType GetAddressType();
 
     /**
      * @brief Set the Mms Address String
      * for example: +8610086/TYPE=PLMN
-     * @param addressString
-     * @param charset
+     *
+     * @param addressString the Mms Address String, for example: +8610086/TYPE=PLMN
+     * @param charset the Address Character {@link MmsCharSets}.
      */
     void SetMmsAddressString(const std::string addressString, MmsCharSets charset = MmsCharSets::UTF_8);
 
     /**
      * @brief Construct a new Mms Address
      *
-     * @param addressString for example: +8610086/TYPE=PLMN
-     * @param charset defualt UTF_8
+     * @param addressString the Mms Address String, for example: +8610086/TYPE=PLMN
+     * @param charset the Address Character {@link MmsCharSets}.
      */
     MmsAddress(const std::string addressString, MmsCharSets charset = MmsCharSets::UTF_8);
 
     /**
      * @brief Construct a new Mms Address
-     *
      */
     MmsAddress();
 
     /**
      * @brief Destroy the Mms Address
-     *
      */
     ~MmsAddress();
 private:

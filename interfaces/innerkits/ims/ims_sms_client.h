@@ -32,28 +32,69 @@ class ImsSmsClient {
 
 public:
     /**
-     * Get ImsSms Remote Object
+     * @brief Get ImsSms Remote Object.
      *
      * @return sptr<ImsSmsInterface>
      */
     sptr<ImsSmsInterface> GetImsSmsProxy();
 
+    /**
+     * @brief Init the ImsSmsClient.
+     */
     void Init();
-    void UnInit();
-    int32_t RegisterImsSmsCallbackHandler(int32_t slotId, const std::shared_ptr<AppExecFwk::EventHandler> &handler);
 
     /**
-     * Get Handler
+     * @brief UnInit the ImsSmsClient.
+     */
+    void UnInit();
+
+    /**
+     * @brief Register the Handler to process the callback events from ImsSms.
      *
      * @param slotId Indicates the card slot index number,
      * ranging from {@code 0} to the maximum card slot index number supported by the device.
-     * @return AppExecFwk::EventHandler
+     * @param handler Indicates the EventHandler to process the call back event.
+     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     */
+    int32_t RegisterImsSmsCallbackHandler(int32_t slotId, const std::shared_ptr<AppExecFwk::EventHandler> &handler);
+
+    /**
+     * @brief Get Handler which is used to process the callback events from ImsSms.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @return AppExecFwk::EventHandler The EventHandler to process the call back event.
      */
     std::shared_ptr<AppExecFwk::EventHandler> GetHandler(int32_t slotId);
 
     /****************** sms basic ******************/
+    /**
+     * @brief IMS send message interface.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param imsMessageInfo Indicates the information of IMS message.
+     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     */
     int32_t ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo);
+
+    /**
+     * @brief IMS set ims sms config interface.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param imsSmsConfig 1:enable ims sms, 0:disable ims sms
+     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     */
     int32_t ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig);
+
+    /**
+     * @brief IMS get sms config interface.
+     *
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     */
     int32_t ImsGetSmsConfig(int32_t slotId);
 
 private:
@@ -67,13 +108,30 @@ private:
     };
 
     /**
-     * Is Connect ImsSms Remote Object
+     * @brief Is Connect ImsSms Remote Object.
      *
      * @return bool
      */
     bool IsConnect() const;
+
+    /**
+     * @brief Register CallBack to listen the response from ImsSms.
+     *
+     * @param sptr<ImsSmsCallbackInterface>
+     * @return Returns TELEPHONY_SUCCESS on success, others on failure.
+     */
     int32_t RegisterImsSmsCallback();
+
+    /**
+     * @brief Reconnect the ImsSms Remote Object.
+     *
+     * @return int32_t Returns TELEPHONY_SUCCESS on success, others on failure.
+     */
     int32_t ReConnectService();
+
+    /**
+     * @brief Clean the ImsSms Remote Object.
+     */
     void Clean();
 
 private:

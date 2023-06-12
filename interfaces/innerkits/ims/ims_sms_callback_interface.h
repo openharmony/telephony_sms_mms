@@ -27,6 +27,9 @@ class ImsSmsCallbackInterface : public IRemoteBroker {
 public:
     virtual ~ImsSmsCallbackInterface() = default;
 
+    /**
+     * @brief Enumerates the request sent to IMS from SmsService.
+     */
     enum {
         /****************** sms basic ******************/
         IMS_SEND_MESSAGE = 0,

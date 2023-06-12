@@ -26,6 +26,7 @@ constexpr static const int32_t WAIT_TIME_SECOND = 10;
 bool SmsMmsTestHelper::Run(void (*func)(SmsMmsTestHelper &), SmsMmsTestHelper &helper)
 {
     std::thread t(func, std::ref(helper));
+    pthread_setname_np(t.native_handle(), "sms_mms_test_helper");
     t.detach();
     TELEPHONY_LOGI("Thread running");
     return WaitForResult(WAIT_TIME_SECOND);

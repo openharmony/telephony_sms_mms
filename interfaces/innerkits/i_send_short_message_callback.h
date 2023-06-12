@@ -23,9 +23,12 @@ namespace Telephony {
 class ISendShortMessageCallback : public IRemoteBroker {
 public:
     virtual ~ISendShortMessageCallback() = default;
+    /**
+     * @brief Indicates the result of sending SMS.
+     */
     enum SmsSendResult {
         /**
-         *  Indicates that the SMS message is successfully sent.
+         * Indicates that the SMS message is successfully sent.
          */
         SEND_SMS_SUCCESS = 0,
         /**
@@ -43,12 +46,16 @@ public:
         SEND_SMS_FAILURE_SERVICE_UNAVAILABLE = 3
     };
 
+    /**
+     * @brief Indicates the call back event of sending SMS.
+     */
     enum SendCallback { ON_SMS_SEND_RESULT };
 
     /**
-     * @brief OnSmsDeliveryResult
-     * Status of sending SMS messages to the SMS service center.
-     * @param result [in]
+     * @brief OnSmsSendResult
+     * Callback to indicate status of sending SMS messages to the SMS service center.
+     *
+     * @param result [in], result of sending sms.
      */
     virtual void OnSmsSendResult(const SmsSendResult result) = 0;
 

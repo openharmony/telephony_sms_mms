@@ -28,9 +28,9 @@ public:
     virtual ~SmsDeliveryShortMessageProxy() = default;
 
     /**
-     * @brief OnSmsDeliveryResult
-     * Status of the sent SMS on the recipient.
-     * @param pdu [in]
+     * @brief Status of the sent SMS on the recipient.
+     *
+     * @param pdu [in], indicates protocol data unit.
      */
     virtual void OnSmsDeliveryResult(const std::u16string &pdu) override;
 
