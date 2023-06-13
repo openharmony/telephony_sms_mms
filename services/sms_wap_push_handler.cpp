@@ -346,6 +346,7 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast(std::shared_ptr<SmsReceiveIn
     MatchingSkills smsSkills;
     smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
     CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
+    smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     auto handler = std::make_shared<SmsReceiveReliabilityHandler>(slotId_);
     auto wapPushReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(
         smsSubscriberInfo, handler, indexer->GetMsgRefId(), indexer->GetDataBaseId());
