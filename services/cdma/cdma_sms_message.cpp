@@ -174,17 +174,11 @@ bool CdmaSmsMessage::PduAnalysis(const std::string &pduHex)
         return false;
     }
 
-    rawPdu_ = StringUtils::HexToByteVector(pduHex);
-    if (!CdmaSmsPduCodec::CheckInvalidPDU(rawPdu_)) {
-        TELEPHONY_LOGE("PduAnalysis is unInvalid pdu data!");
-        return false;
-    }
-
-    int decodeLen = 0;
     std::string pdu = StringUtils::HexToString(pduHex);
-    decodeLen =
-        CdmaSmsPduCodec::DecodeMsg(reinterpret_cast<const unsigned char *>(pdu.c_str()), pdu.length(), *transMsg_);
-    if (decodeLen <= 0) {
+    SmsReadBuffer pduBuffer(pdu);
+    std::unique_ptr<CdmaSmsTransportMessage> transportMessage =
+        CdmaSmsTransportMessage::CreateTransportMessage(*transMsg_, pduBuffer);
+    if (transportMessage == nullptr || transportMessage->IsEmpty() || !transportMessage->Decode(pduBuffer)) {
         TELEPHONY_LOGE("Pdu DecodeMsg has failure.");
         return false;
     }

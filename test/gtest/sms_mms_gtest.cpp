@@ -19,7 +19,6 @@
 
 #include "accesstoken_kit.h"
 #include "cdma_sms_message.h"
-#include "cdma_sms_pdu_codec.h"
 #include "cdma_sms_receive_handler.h"
 #include "core_service_client.h"
 #include "delivery_short_message_callback_stub.h"
@@ -66,8 +65,8 @@ using namespace Security::AccessToken;
 using Security::AccessToken::AccessTokenID;
 
 HapInfoParams testMmsInfoParams = {
-    .bundleName = "tel_sms_mms_gtest",
     .userID = 1,
+    .bundleName = "tel_sms_mms_gtest",
     .instIndex = 0,
     .appIDDesc = "test",
 };
@@ -76,76 +75,76 @@ PermissionDef testPermReceiveSmsDef = {
     .permissionName = "ohos.permission.RECEIVE_SMS",
     .bundleName = "tel_sms_mms_gtest",
     .grantMode = 1, // SYSTEM_GRANT
+    .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
     .labelId = 1,
     .description = "Test sms manager",
     .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
 };
 
 PermissionStateFull testReceiveSmsState = {
-    .grantFlags = { 2 }, // PERMISSION_USER_SET
-    .grantStatus = { PermissionState::PERMISSION_GRANTED },
-    .isGeneral = true,
     .permissionName = "ohos.permission.RECEIVE_SMS",
+    .isGeneral = true,
     .resDeviceID = { "local" },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
 };
 
 PermissionDef testPermSendSmsDef = {
     .permissionName = "ohos.permission.SEND_MESSAGES",
     .bundleName = "tel_sms_mms_gtest",
     .grantMode = 1, // SYSTEM_GRANT
+    .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
     .labelId = 1,
     .description = "Test sms manager",
     .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
 };
 
 PermissionStateFull testSendSmsState = {
-    .grantFlags = { 2 }, // PERMISSION_USER_SET
-    .grantStatus = { PermissionState::PERMISSION_GRANTED },
-    .isGeneral = true,
     .permissionName = "ohos.permission.SEND_MESSAGES",
+    .isGeneral = true,
     .resDeviceID = { "local" },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
 };
 
 PermissionDef testPermSetTelephonyDef = {
     .permissionName = "ohos.permission.SET_TELEPHONY_STATE",
     .bundleName = "tel_sms_mms_gtest",
     .grantMode = 1, // SYSTEM_GRANT
+    .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
     .labelId = 1,
     .description = "Test sms manager",
     .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
 };
 
 PermissionStateFull testSetTelephonyState = {
-    .grantFlags = { 2 }, // PERMISSION_USER_SET
-    .grantStatus = { PermissionState::PERMISSION_GRANTED },
-    .isGeneral = true,
     .permissionName = "ohos.permission.SET_TELEPHONY_STATE",
+    .isGeneral = true,
     .resDeviceID = { "local" },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
 };
 
 PermissionDef testPermGetTelephonyDef = {
     .permissionName = "ohos.permission.GET_TELEPHONY_STATE",
     .bundleName = "tel_sms_mms_gtest",
     .grantMode = 1, // SYSTEM_GRANT
+    .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
     .labelId = 1,
     .description = "Test sms manager",
     .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
 };
 
 PermissionStateFull testGetTelephonyState = {
-    .grantFlags = { 2 }, // PERMISSION_USER_SET
-    .grantStatus = { PermissionState::PERMISSION_GRANTED },
-    .isGeneral = true,
     .permissionName = "ohos.permission.GET_TELEPHONY_STATE",
+    .isGeneral = true,
     .resDeviceID = { "local" },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .grantFlags = { 2 }, // PERMISSION_USER_SET
 };
 
 HapPolicyParams testMmsPolicyParams = {
@@ -210,8 +209,6 @@ const uint16_t MESSAGE_TYPE = 4;
 const uint16_t CB_PDU_LEN = 100;
 const uint16_t SMS_PDU_LEN = 36;
 const uint16_t WAPPUSH_PDU_LEN = 164;
-const int CDMA_PDU_BYTE_COUNT = 2;
-const int CDMA_PDU_SHITFT_BITS = 9;
 
 void SmsMmsGtest::SetUpTestCase()
 {
@@ -285,7 +282,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void OpenCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
@@ -321,7 +318,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
@@ -357,7 +354,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
@@ -393,7 +390,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
@@ -429,7 +426,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
@@ -465,7 +462,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -489,7 +486,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0007, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -513,7 +510,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0008 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -537,7 +534,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -561,7 +558,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -585,7 +582,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0011, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -608,7 +605,7 @@ HWTEST_F(SmsMmsGtest, OpenCellBroadcast_0012, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0012 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
@@ -644,7 +641,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
@@ -680,7 +677,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void CloseCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
@@ -716,7 +713,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003-->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
@@ -752,7 +749,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
@@ -788,7 +785,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
@@ -824,7 +821,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -848,7 +845,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0007, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -872,7 +869,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0008-->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -896,7 +893,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -920,7 +917,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -944,7 +941,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -967,7 +964,7 @@ HWTEST_F(SmsMmsGtest, CloseCellBroadcast_0012, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0012 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void SetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
@@ -998,7 +995,7 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0001 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -1022,7 +1019,7 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0002 -->finished");
-    EXPECT_TRUE(helper.GetIntResult() == 0);
+    EXPECT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -1045,7 +1042,7 @@ HWTEST_F(SmsMmsGtest, SetDefaultSmsSlotId_0003, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0003 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    ASSERT_NE(helper.GetIntResult(), 0);
 }
 
 void GetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
@@ -1074,7 +1071,7 @@ HWTEST_F(SmsMmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::GetDefaultSmsSlotId_0001 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    EXPECT_EQ(helper.GetIntResult(), 0);
 }
 
 void GetDefaultSmsSimIdTestFuc(SmsMmsTestHelper &helper)
@@ -1139,7 +1136,7 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0001, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0001 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -1163,7 +1160,7 @@ HWTEST_F(SmsMmsGtest, SetSmscAddr_0002, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0002 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void AddSimMessageTestFuc(SmsMmsTestHelper &helper)
@@ -1211,7 +1208,7 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0001 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -1240,7 +1237,7 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0002 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -1268,7 +1265,7 @@ HWTEST_F(SmsMmsGtest, AddSimMessage_0003, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0003 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void GetAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
@@ -1464,7 +1461,7 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -1489,7 +1486,7 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->finished");
-    ASSERT_TRUE(helper.GetIntResult() == 0);
+    ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
 /**
@@ -1512,7 +1509,7 @@ HWTEST_F(SmsMmsGtest, UpdateSimMessage_0003, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0003 -->finished");
-    EXPECT_FALSE(helper.GetIntResult() == 0);
+    EXPECT_NE(helper.GetIntResult(), 0);
 }
 
 void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
@@ -1782,7 +1779,7 @@ HWTEST_F(SmsMmsGtest, SendDataMessage_0003, Function | MediumTest | Level2)
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0003 -->finished");
-    EXPECT_FALSE(helper.GetSendSmsIntResult() == 0);
+    EXPECT_NE(helper.GetSendSmsIntResult(), 0);
 }
 
 void SendTextMessageTestFuc(SmsMmsTestHelper &helper)
@@ -1913,7 +1910,7 @@ HWTEST_F(SmsMmsGtest, SendTextMessage_0003, Function | MediumTest | Level2)
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0003 -->finished");
-    EXPECT_FALSE(helper.GetSendSmsIntResult() == 0);
+    EXPECT_NE(helper.GetSendSmsIntResult(), 0);
 }
 
 void ReceiveCellBroadCastTestFunc(SmsMmsTestHelper &helper)
@@ -2577,7 +2574,7 @@ HWTEST_F(SmsMmsGtest, MmsBuffer_0001, Function | MediumTest | Level1)
     mmsBuffer.WriteBufferFromFile(strPathName);
     mmsBuffer.GetCurPosition();
     uint32_t ret = mmsBuffer.GetSize();
-    EXPECT_GE(ret, 0);
+    EXPECT_GE(ret, static_cast<uint32_t>(0));
 }
 
 /**
@@ -2806,30 +2803,6 @@ HWTEST_F(SmsMmsGtest, CdmaSmsMessage_0001, Function | MediumTest | Level1)
     cdmaSmsMessage.AnalsisDeliverMwi(p2pMsg);
     bool ret = cdmaSmsMessage.PduAnalysis("");
     EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_CdmaSmsPduCodec_0001
- * @tc.name     Test CdmaSmsPduCodec
- * @tc.desc     Function test
- */
-HWTEST_F(SmsMmsGtest, CdmaSmsPduCodec_0001, Function | MediumTest | Level1)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::CdmaSmsPduCodec_0001 -->");
-    CdmaSmsPduCodec cdmaSmsPduCodec;
-    unsigned char c = 'a';
-    unsigned char *src1 = &c;
-    unsigned char *src2 = nullptr;
-    unsigned int nBytes = CDMA_PDU_BYTE_COUNT;
-    unsigned int nShiftBit = CDMA_PDU_SHITFT_BITS;
-    cdmaSmsPduCodec.ShiftNBit(src1, nBytes, nShiftBit);
-    cdmaSmsPduCodec.ShiftNBit(src2, nBytes, nShiftBit);
-    cdmaSmsPduCodec.ShiftRNBit(src1, nBytes, nShiftBit);
-    cdmaSmsPduCodec.ShiftRNBit(src2, nBytes, nShiftBit);
-    cdmaSmsPduCodec.ShiftNBitForDecode(src1, nBytes, nShiftBit);
-    cdmaSmsPduCodec.ShiftNBitForDecode(src2, nBytes, nShiftBit);
-    unsigned char ret = cdmaSmsPduCodec.DecodeDigitModeNumberPlan(SmsNumberPlanType::SMS_NPI_UNKNOWN);
-    EXPECT_EQ(SmsNumberPlanType::SMS_NPI_UNKNOWN, ret);
 }
 
 /**

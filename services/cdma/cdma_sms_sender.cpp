@@ -102,10 +102,12 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
         transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length =
             static_cast<int>(splits[i].encodeData.size());
         /* encode msg data */
-        uint8_t pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = { 0 };
-        int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr, TAPI_NETTEXT_SMDATA_SIZE_MAX + 1);
-        std::vector<uint8_t> pdu(pduStr, pduStr + len);
-        indexer->SetEncodePdu(std::move(pdu));
+        std::unique_ptr<std::vector<uint8_t>> pdu = EncodeMsg(*transMsg.get());
+        if (pdu == nullptr) {
+            SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+            return;
+        }
+        indexer->SetEncodePdu(*pdu);
         indexer->SetMsgRefId(msgRef8bit);
         indexer->SetNetWorkType(NET_TYPE_CDMA);
         indexer->SetUnSentCellCount(unSentCellCount);
@@ -340,13 +342,13 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
         return;
     }
     /* encode msg data */
-    uint8_t pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = { 0 };
-    int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr, TAPI_NETTEXT_SMDATA_SIZE_MAX + 1);
-    if (len <= 0) {
-        TELEPHONY_LOGE("EncodeMsg Error len = %{public}d", len);
+    std::unique_ptr<CdmaSmsTransportMessage> msg = CdmaSmsTransportMessage::CreateTransportMessage(*transMsg.get());
+    SmsWriteBuffer pduBuffer;
+    if (msg == nullptr || msg->IsEmpty() || !msg->Encode(pduBuffer)) {
+        TELEPHONY_LOGE("EncodeMsg Error");
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
-            SmsMmsErrorCode::SMS_ERROR_PDU_ENCODEING_FAIL, "cdma encode msg data len error");
+            SmsMmsErrorCode::SMS_ERROR_PDU_ENCODEING_FAIL, "cdma encode msg error");
         return;
     }
 
@@ -356,13 +358,13 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
     indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, port, splits[0].encodeData.data(),
         splits[0].encodeData.size(), sendCallback, deliveryCallback);
-    if (indexer == nullptr || unSentCellCount == nullptr || hasCellFailed == nullptr) {
+    std::unique_ptr<std::vector<uint8_t>> pdu = pduBuffer.GetPduBuffer();
+    if (indexer == nullptr || unSentCellCount == nullptr || hasCellFailed == nullptr || pdu == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("Init SmsSend Indexer Error.");
         return;
     }
-    std::vector<uint8_t> pdu(pduStr, pduStr + len);
-    indexer->SetEncodePdu(std::move(pdu));
+    indexer->SetEncodePdu(*pdu);
     indexer->SetMsgRefId(msgRef8bit);
     indexer->SetNetWorkType(NET_TYPE_CDMA);
     indexer->SetUnSentCellCount(unSentCellCount);
@@ -593,6 +595,17 @@ uint8_t CdmaSmsSender::GetSubmitMsgId()
     return msgSubmitId_;
 }
 
+std::unique_ptr<std::vector<uint8_t>> CdmaSmsSender::EncodeMsg(SmsTransMsg &transMsg)
+{
+    std::unique_ptr<CdmaSmsTransportMessage> msg = CdmaSmsTransportMessage::CreateTransportMessage(transMsg);
+    SmsWriteBuffer pduBuffer;
+    if (msg == nullptr || msg->IsEmpty() || !msg->Encode(pduBuffer)) {
+        TELEPHONY_LOGE("encode msg error");
+        return nullptr;
+    }
+    return pduBuffer.GetPduBuffer();
+}
+
 void CdmaSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
 {
     if (smsIndexer == nullptr) {
@@ -634,10 +647,12 @@ void CdmaSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &sm
     }
     SetConcact(smsIndexer, transMsg);
     /* encode msg data */
-    uint8_t pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = { 0 };
-    int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr, TAPI_NETTEXT_SMDATA_SIZE_MAX + 1);
-    std::vector<uint8_t> pdu(pduStr, pduStr + len);
-    smsIndexer->SetEncodePdu(std::move(pdu));
+    std::unique_ptr<std::vector<uint8_t>> pdu = EncodeMsg(*transMsg.get());
+    if (pdu == nullptr) {
+        SendResultCallBack(smsIndexer->GetSendCallback(), ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        return;
+    }
+    smsIndexer->SetEncodePdu(*pdu);
     smsIndexer->SetNetWorkType(NET_TYPE_CDMA);
     smsIndexer->SetTimeStamp(timeStamp);
     SendSmsToRil(smsIndexer);
@@ -685,10 +700,12 @@ void CdmaSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sm
     transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length =
         static_cast<int>(smsIndexer->GetData().size());
     /* encode msg data */
-    uint8_t pduStr[TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = { 0 };
-    int len = CdmaSmsPduCodec::EncodeMsg(*transMsg.get(), pduStr, TAPI_NETTEXT_SMDATA_SIZE_MAX + 1);
-    std::vector<uint8_t> pdu(pduStr, pduStr + len);
-    smsIndexer->SetEncodePdu(std::move(pdu));
+    std::unique_ptr<std::vector<uint8_t>> pdu = EncodeMsg(*transMsg.get());
+    if (pdu == nullptr) {
+        SendResultCallBack(smsIndexer->GetSendCallback(), ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        return;
+    }
+    smsIndexer->SetEncodePdu(*pdu);
     smsIndexer->SetNetWorkType(NET_TYPE_CDMA);
     smsIndexer->SetTimeStamp(timeStamp);
     SendSmsToRil(smsIndexer);

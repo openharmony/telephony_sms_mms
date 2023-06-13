@@ -19,7 +19,7 @@
 #include <cmath>
 #include <memory>
 
-#include "cdma_sms_pdu_codec.h"
+#include "cdma_sms_transport_message.h"
 #include "gsm_sms_tpdu_codec.h"
 #include "msg_text_convert_common.h"
 #include "sms_common_utils.h"
