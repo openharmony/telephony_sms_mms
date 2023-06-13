@@ -68,10 +68,10 @@ ohos_shared_library("tel_sms_mms") {
     "services/sms_wap_push_buffer.cpp",
     "services/sms_wap_push_content_type.cpp",
     "services/sms_wap_push_handler.cpp",
-    "utils/msg_text_convert.cpp",
     "utils/sms_common_utils.cpp",
     "utils/sms_hisysevent.cpp",
     "utils/string_utils.cpp",
+    "utils/text_coder.cpp",
   ]
 
   include_dirs = [

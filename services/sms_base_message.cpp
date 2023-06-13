@@ -15,12 +15,12 @@
 
 #include "sms_base_message.h"
 
-#include "msg_text_convert.h"
 #include "securec.h"
 #include "sms_mms_errors.h"
 #include "sms_service_manager_client.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
+#include "text_coder.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -348,7 +348,7 @@ int SmsBaseMessage::GetMaxSegmentSize(
 void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType)
 {
     if (split.encodeData.size() <= 0) {
-        TELEPHONY_LOGE("MsgTextConvert Instance is nullptr");
+        TELEPHONY_LOGE("data is null");
         return;
     }
 
@@ -361,12 +361,12 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
             };
             langInfo.bSingleShift = false;
             langInfo.bLockingShift = false;
-            dataSize = MsgTextConvert::Instance().ConvertGSM7bitToUTF8(
-                buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size(), &langInfo);
+            dataSize = TextCoder::Instance().Gsm7bitToUtf8(
+                buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size(), langInfo);
             break;
         }
         case SMS_CODING_UCS2: {
-            dataSize = MsgTextConvert::Instance().ConvertUCS2ToUTF8(
+            dataSize = TextCoder::Instance().Ucs2ToUtf8(
                 buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size());
             break;
         }

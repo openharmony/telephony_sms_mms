@@ -28,7 +28,6 @@
 #include "mms_encode_buffer.h"
 #include "mms_header.h"
 #include "mms_msg.h"
-#include "msg_text_convert.h"
 #include "radio_event.h"
 #include "send_short_message_callback_stub.h"
 #include "short_message.h"
@@ -45,6 +44,7 @@
 #include "telephony_errors.h"
 #include "telephony_hisysevent.h"
 #include "telephony_log_wrapper.h"
+#include "text_coder.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -108,98 +108,89 @@ void BranchTest::SetUp() {}
 void BranchTest::TearDown() {}
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_MsgTextConvert_0001
- * @tc.name     Test MsgTextConvert
+ * @tc.number   Telephony_SmsMmsGtest_TextCoder_0001
+ * @tc.name     Test TextCoder
  * @tc.desc     Function test
  */
-HWTEST_F(BranchTest, MsgTextConvert_0001, Function | MediumTest | Level1)
+HWTEST_F(BranchTest, TextCoder_0001, Function | MediumTest | Level1)
 {
     SmsCodingScheme smsCodingScheme;
     MsgLangInfo msgLangInfo;
     unsigned char encodeData[BUF_SIZE];
     MSG_LANGUAGE_ID_T langId = 0;
-    bool bAbnormal = false;
+    bool unknown = false;
     unsigned short inText = 1;
     const unsigned char *pMsgText = (const unsigned char *)TEXT_SMS_CONTENT.c_str();
     unsigned char *pDestText = encodeData;
-    MSG_LANGUAGE_ID_T *pLangId = &langId;
-    bool *pIncludeAbnormalChar = &bAbnormal;
-    std::tuple<unsigned char *, int, unsigned char *, int, MSG_LANGUAGE_ID_T *, bool *> paras(
-        pDestText, BUF_SIZE, const_cast<unsigned char *>(pMsgText), 0, pLangId, pIncludeAbnormalChar);
-    EXPECT_GE(MsgTextConvert::Instance().ConvertUTF8ToGSM7bit(paras), 0);
-    EXPECT_GE(MsgTextConvert::Instance().ConvertCdmaUTF8ToAuto(pDestText, 1, pMsgText, 1, &smsCodingScheme), -1);
-    EXPECT_GE(MsgTextConvert::Instance().ConvertGsmUTF8ToAuto(pDestText, 1, pMsgText, 1, &smsCodingScheme), -1);
-    EXPECT_EQ(MsgTextConvert::Instance().ConvertUTF8ToUCS2(pDestText, 1, pMsgText, -1), -1);
-    EXPECT_EQ(MsgTextConvert::Instance().ConvertUTF8ToUCS2(pDestText, 0, pMsgText, -1), -1);
-    EXPECT_EQ(MsgTextConvert::Instance().ConvertCdmaUTF8ToAuto(pDestText, 1, pMsgText, 0, &smsCodingScheme), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().ConvertGsmUTF8ToAuto(pDestText, 1, pMsgText, 0, &smsCodingScheme), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().ConvertGSM7bitToUTF8(pDestText, 0, pMsgText, 0, &msgLangInfo), 0);
-    EXPECT_GE(MsgTextConvert::Instance().ConvertSHIFTJISToUTF8(pDestText, 1, pMsgText, -1), 0);
-    EXPECT_GE(MsgTextConvert::Instance().ConvertUCS2ToUTF8(pDestText, 1, pMsgText, -1), 0);
-    EXPECT_GE(MsgTextConvert::Instance().ConvertEUCKRToUTF8(pDestText, 1, pMsgText, -1), 0);
-    EXPECT_FALSE(MsgTextConvert::Instance().ConvertUCS2ToUTF8(pDestText, 0, pMsgText, 0));
-    EXPECT_FALSE(MsgTextConvert::Instance().ConvertEUCKRToUTF8(pDestText, 0, pMsgText, 1));
-    EXPECT_FALSE(MsgTextConvert::Instance().ConvertSHIFTJISToUTF8(pDestText, 0, pMsgText, 1));
-    EXPECT_EQ(
-        MsgTextConvert::Instance().ConvertUCS2ToGSM7bit(pDestText, 0, pMsgText, 0, pLangId, pIncludeAbnormalChar), -1);
-    EXPECT_GT(MsgTextConvert::Instance().ConvertUCS2ToGSM7bit(
-                  pDestText, 1, pMsgText, TEXT_LENGTH, pLangId, pIncludeAbnormalChar),
-        0);
-    EXPECT_EQ(MsgTextConvert::Instance().ConvertUCS2ToGSM7bitAuto(pDestText, 0, pMsgText, 0, pIncludeAbnormalChar), -1);
-    EXPECT_GE(MsgTextConvert::Instance().ConvertUCS2ToGSM7bitAuto(pDestText, 1, pMsgText, 1, pIncludeAbnormalChar), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().ConvertUCS2ToASCII(pDestText, 0, pMsgText, 0, pIncludeAbnormalChar), -1);
-    EXPECT_GE(MsgTextConvert::Instance().ConvertUCS2ToASCII(pDestText, 1, pMsgText, 1, pIncludeAbnormalChar), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().GetLangType(pMsgText, 0), MSG_DEFAULT_CHAR);
-    EXPECT_GE(MsgTextConvert::Instance().GetLangType(pMsgText, 0), MSG_DEFAULT_CHAR);
-    EXPECT_EQ(MsgTextConvert::Instance().FindUCS2toGSM7Ext(pDestText, 0, inText, bAbnormal), 0);
-    EXPECT_GE(MsgTextConvert::Instance().FindUCS2toGSM7Ext(pDestText, 1, inText, bAbnormal), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().FindUCS2toTurkish(pDestText, 0, inText, bAbnormal), 0);
-    EXPECT_GE(MsgTextConvert::Instance().FindUCS2toTurkish(pDestText, 1, inText, bAbnormal), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().FindUCS2toSpanish(pDestText, 0, inText, bAbnormal), 0);
-    EXPECT_GE(MsgTextConvert::Instance().FindUCS2toSpanish(pDestText, 1, inText, bAbnormal), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().FindUCS2toPortu(pDestText, 0, inText, bAbnormal), 0);
-    EXPECT_GE(MsgTextConvert::Instance().FindUCS2toPortu(pDestText, 1, inText, bAbnormal), 0);
-    EXPECT_GE(MsgTextConvert::Instance().FindUCS2ReplaceChar(inText), MSG_DEFAULT_CHAR);
+    EXPECT_GE(
+        TextCoder::Instance().Utf8ToGsm7bit(pDestText, BUF_SIZE, const_cast<unsigned char *>(pMsgText), 0, langId), 0);
+    EXPECT_GE(TextCoder::Instance().CdmaUtf8ToAuto(pDestText, 1, pMsgText, 1, smsCodingScheme), -1);
+    EXPECT_GE(TextCoder::Instance().GsmUtf8ToAuto(pDestText, 1, pMsgText, 1, smsCodingScheme), -1);
+    EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(pDestText, 1, pMsgText, -1), -1);
+    EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(pDestText, 0, pMsgText, -1), 0);
+    EXPECT_EQ(TextCoder::Instance().CdmaUtf8ToAuto(pDestText, 1, pMsgText, 0, smsCodingScheme), 0);
+    EXPECT_EQ(TextCoder::Instance().GsmUtf8ToAuto(pDestText, 1, pMsgText, 0, smsCodingScheme), 0);
+    EXPECT_EQ(TextCoder::Instance().Gsm7bitToUtf8(pDestText, 0, pMsgText, 0, msgLangInfo), 0);
+    EXPECT_GE(TextCoder::Instance().ShiftjisToUtf8(pDestText, 1, pMsgText, -1), 0);
+    EXPECT_GE(TextCoder::Instance().Ucs2ToUtf8(pDestText, 1, pMsgText, -1), 0);
+    EXPECT_GE(TextCoder::Instance().EuckrToUtf8(pDestText, 1, pMsgText, -1), 0);
+    EXPECT_FALSE(TextCoder::Instance().Ucs2ToUtf8(pDestText, 0, pMsgText, 0));
+    EXPECT_FALSE(TextCoder::Instance().EuckrToUtf8(pDestText, 0, pMsgText, 1));
+    EXPECT_FALSE(TextCoder::Instance().ShiftjisToUtf8(pDestText, 0, pMsgText, 1));
+    EXPECT_EQ(TextCoder::Instance().Ucs2ToGsm7bit(pDestText, 0, pMsgText, 0, langId), -1);
+    EXPECT_GT(TextCoder::Instance().Ucs2ToGsm7bit(pDestText, 1, pMsgText, TEXT_LENGTH, langId), 0);
+    EXPECT_EQ(TextCoder::Instance().Ucs2ToGsm7bitAuto(pDestText, 0, pMsgText, 0, unknown), -1);
+    EXPECT_GE(TextCoder::Instance().Ucs2ToGsm7bitAuto(pDestText, 1, pMsgText, 1, unknown), 0);
+    EXPECT_EQ(TextCoder::Instance().Ucs2ToAscii(pDestText, 0, pMsgText, 0, unknown), -1);
+    EXPECT_GE(TextCoder::Instance().Ucs2ToAscii(pDestText, 1, pMsgText, 1, unknown), 0);
+    EXPECT_EQ(TextCoder::Instance().GetLangType(pMsgText, 0), MSG_DEFAULT_CHAR);
+    EXPECT_GE(TextCoder::Instance().GetLangType(pMsgText, 0), MSG_DEFAULT_CHAR);
+    EXPECT_EQ(TextCoder::Instance().FindGsm7bitExt(pDestText, 0, inText), 0);
+    EXPECT_GE(TextCoder::Instance().FindGsm7bitExt(pDestText, 1, inText), 0);
+    EXPECT_EQ(TextCoder::Instance().FindTurkish(pDestText, 0, inText), 0);
+    EXPECT_GE(TextCoder::Instance().FindTurkish(pDestText, 1, inText), 0);
+    EXPECT_EQ(TextCoder::Instance().FindSpanish(pDestText, 0, inText), 0);
+    EXPECT_GE(TextCoder::Instance().FindSpanish(pDestText, 1, inText), 0);
+    EXPECT_EQ(TextCoder::Instance().FindPortu(pDestText, 0, inText), 0);
+    EXPECT_GE(TextCoder::Instance().FindPortu(pDestText, 1, inText), 0);
+    EXPECT_GE(TextCoder::Instance().FindReplaceChar(inText), MSG_DEFAULT_CHAR);
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_MsgTextConvert_0002
- * @tc.name     Test MsgTextConvert
+ * @tc.number   Telephony_SmsMmsGtest_TextCoder_0002
+ * @tc.name     Test TextCoder
  * @tc.desc     Function test
  */
-HWTEST_F(BranchTest, MsgTextConvert_0002, Function | MediumTest | Level1)
+HWTEST_F(BranchTest, TextCoder_0002, Function | MediumTest | Level1)
 {
     MsgLangInfo pLangInfo;
     pLangInfo.bLockingShift = true;
     pLangInfo.bSingleShift = true;
     unsigned char encodeData[BUF_SIZE];
     unsigned short result = 1;
-    const unsigned char *pText = nullptr;
     const unsigned char *pMsgText = (const unsigned char *)TEXT_SMS_CONTENT.c_str();
     unsigned char *pDestText = encodeData;
-    MsgTextConvert::Instance().ConvertDumpTextToHex(pText, 1);
-    MsgTextConvert::Instance().ConvertDumpTextToHex(pMsgText, 1);
-    EXPECT_EQ(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, 0, pMsgText, 0, &pLangInfo), -1);
+    EXPECT_EQ(TextCoder::Instance().Gsm7bitToUcs2(pDestText, 0, pMsgText, 0, pLangInfo), -1);
     pLangInfo.lockingLang = MSG_ID_TURKISH_LANG;
-    EXPECT_GT(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, START_BIT, pMsgText, 1, &pLangInfo), 0);
-    EXPECT_GT(MsgTextConvert::Instance().EscapeToUCS2(SRC_TEXT, pLangInfo), 0);
+    EXPECT_GE(TextCoder::Instance().Gsm7bitToUcs2(pDestText, 1, pMsgText, 1, pLangInfo), 0);
+    EXPECT_GT(TextCoder::Instance().EscapeToUcs2(SRC_TEXT, pLangInfo), 0);
     pLangInfo.lockingLang = MSG_ID_PORTUGUESE_LANG;
-    EXPECT_GT(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, START_BIT, pMsgText, 1, &pLangInfo), 0);
-    EXPECT_GT(MsgTextConvert::Instance().EscapeToUCS2(SRC_TEXT, pLangInfo), 0);
+    EXPECT_GE(TextCoder::Instance().Gsm7bitToUcs2(pDestText, 1, pMsgText, 1, pLangInfo), 0);
+    EXPECT_GT(TextCoder::Instance().EscapeToUcs2(SRC_TEXT, pLangInfo), 0);
     pLangInfo.bLockingShift = false;
-    EXPECT_GT(MsgTextConvert::Instance().ConvertGSM7bitToUCS2(pDestText, START_BIT, pMsgText, 1, &pLangInfo), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().EscapeTurkishLockingToUCS2(pMsgText, 0, pLangInfo, result), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().EscapeTurkishLockingToUCS2(pMsgText, 1, pLangInfo, result), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().EscapePortuLockingToUCS2(pMsgText, 0, pLangInfo, result), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().EscapePortuLockingToUCS2(pMsgText, 1, pLangInfo, result), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().EscapeGSM7BitToUCS2(pMsgText, 0, pLangInfo, result), 0);
-    EXPECT_EQ(MsgTextConvert::Instance().EscapeGSM7BitToUCS2(pMsgText, 1, pLangInfo, result), 0);
+    EXPECT_GE(TextCoder::Instance().Gsm7bitToUcs2(pDestText, 1, pMsgText, 1, pLangInfo), 0);
+    EXPECT_EQ(TextCoder::Instance().EscapeTurkishLockingToUcs2(pMsgText, 0, pLangInfo, result), 0);
+    EXPECT_EQ(TextCoder::Instance().EscapeTurkishLockingToUcs2(pMsgText, 1, pLangInfo, result), 0);
+    EXPECT_EQ(TextCoder::Instance().EscapePortuLockingToUcs2(pMsgText, 0, pLangInfo, result), 0);
+    EXPECT_EQ(TextCoder::Instance().EscapePortuLockingToUcs2(pMsgText, 1, pLangInfo, result), 0);
+    EXPECT_EQ(TextCoder::Instance().EscapeGsm7bitToUcs2(pMsgText, 0, pLangInfo, result), 0);
+    EXPECT_EQ(TextCoder::Instance().EscapeGsm7bitToUcs2(pMsgText, 1, pLangInfo, result), 0);
     pLangInfo.singleLang = MSG_ID_SPANISH_LANG;
-    EXPECT_GT(MsgTextConvert::Instance().EscapeToUCS2(SRC_TEXT, pLangInfo), 0);
+    EXPECT_GT(TextCoder::Instance().EscapeToUcs2(SRC_TEXT, pLangInfo), 0);
     pLangInfo.singleLang = MSG_ID_RESERVED_LANG;
-    EXPECT_GT(MsgTextConvert::Instance().EscapeToUCS2(SRC_TEXT, pLangInfo), 0);
+    EXPECT_GT(TextCoder::Instance().EscapeToUcs2(SRC_TEXT, pLangInfo), 0);
     pLangInfo.bSingleShift = false;
-    EXPECT_GT(MsgTextConvert::Instance().EscapeToUCS2(SRC_TEXT, pLangInfo), 0);
+    EXPECT_GT(TextCoder::Instance().EscapeToUcs2(SRC_TEXT, pLangInfo), 0);
 }
 
 /**

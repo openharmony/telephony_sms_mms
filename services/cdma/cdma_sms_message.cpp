@@ -15,11 +15,11 @@
 
 #include "cdma_sms_message.h"
 
-#include "msg_text_convert.h"
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
+#include "text_coder.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -327,13 +327,13 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
     unsigned char buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
     switch (userData.encodeType) {
         case SMS_ENCODE_GSM7BIT: {
-            dataSize = MsgTextConvert::Instance().ConvertGSM7bitToUTF8(
-                buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData, userData.userData.length, &langinfo);
+            dataSize = TextCoder::Instance().Gsm7bitToUtf8(
+                buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData, userData.userData.length, langinfo);
             break;
         }
         case SMS_ENCODE_KOREAN:
         case SMS_ENCODE_EUCKR: {
-            dataSize = MsgTextConvert::Instance().ConvertEUCKRToUTF8(
+            dataSize = TextCoder::Instance().EuckrToUtf8(
                 buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData, userData.userData.length);
             break;
         }
@@ -351,12 +351,12 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
             break;
         }
         case SMS_ENCODE_SHIFT_JIS: {
-            dataSize = MsgTextConvert::Instance().ConvertSHIFTJISToUTF8(
+            dataSize = TextCoder::Instance().ShiftjisToUtf8(
                 buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData.data, userData.userData.length);
             break;
         }
         default: {
-            dataSize = MsgTextConvert::Instance().ConvertUCS2ToUTF8(
+            dataSize = TextCoder::Instance().Ucs2ToUtf8(
                 buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData.data, userData.userData.length);
             break;
         }
@@ -566,13 +566,12 @@ int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, S
             break;
         }
         case SMS_CODING_UCS2: {
-            decodeLen = MsgTextConvert::Instance().ConvertUTF8ToUCS2(decodeData, maxDecodeLen, pMsgText, dataLen);
+            decodeLen = TextCoder::Instance().Utf8ToUcs2(decodeData, maxDecodeLen, pMsgText, dataLen);
             break;
         }
         case SMS_CODING_AUTO:
         default: {
-            decodeLen = MsgTextConvert::Instance().ConvertCdmaUTF8ToAuto(
-                decodeData, maxDecodeLen, pMsgText, dataLen, &codingType);
+            decodeLen = TextCoder::Instance().CdmaUtf8ToAuto(decodeData, maxDecodeLen, pMsgText, dataLen, codingType);
             break;
         }
     }

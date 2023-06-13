@@ -19,11 +19,11 @@
 #include <string>
 
 #include "cdma_sms_types.h"
-#include "msg_text_convert.h"
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
+#include "text_coder.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -388,11 +388,11 @@ void SmsCbMessage::ConvertToUTF8(const std::string &raw, std::string &message) c
         };
         unsigned char outBuf[MAX_CB_MSG_TEXT_LEN + 1] = {0};
         if (cbHeader_->dcs.codingScheme == SMS_CODING_7BIT) {
-            codeSize = MsgTextConvert::Instance().ConvertGSM7bitToUTF8(
-                outBuf, sizeof(outBuf), (unsigned char *)raw.data(), raw.length(), &langInfo);
+            codeSize = TextCoder::Instance().Gsm7bitToUtf8(
+                outBuf, sizeof(outBuf), (unsigned char *)raw.data(), raw.length(), langInfo);
         } else if (cbHeader_->dcs.codingScheme == SMS_CODING_UCS2) {
-            codeSize = MsgTextConvert::Instance().ConvertUCS2ToUTF8(
-                outBuf, sizeof(outBuf), (unsigned char *)raw.data(), raw.length());
+            codeSize =
+                TextCoder::Instance().Ucs2ToUtf8(outBuf, sizeof(outBuf), (unsigned char *)raw.data(), raw.length());
         } else {
             message.assign(raw);
             return;
