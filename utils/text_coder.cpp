@@ -294,5 +294,415 @@ int TextCoder::Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int 
     return (err < 0) ? -1 : (maxLength - remainedLength);
 }
 
+int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, SmsCodingScheme &scheme)
+{
+    int maxUcs2Length = srcLength;
+    if (maxUcs2Length <= 0 || maxUcs2Length >= UCS2_LEN_MAX) {
+        TELEPHONY_LOGE("src over size");
+        return 0;
+    }
+    std::unique_ptr<WCHAR[]> ucs2Text = std::make_unique<WCHAR[]>(maxUcs2Length);
+    if (ucs2Text == nullptr) {
+        TELEPHONY_LOGE("make_unique error");
+        return 0;
+    }
+    WCHAR *pUcs2Text = ucs2Text.get();
+    if (memset_s(pUcs2Text, maxUcs2Length * sizeof(WCHAR), 0x00, maxUcs2Length * sizeof(WCHAR)) != EOK) {
+        TELEPHONY_LOGE("memset_s error");
+        return 0;
+    }
+    int ucs2Length = Utf8ToUcs2(reinterpret_cast<uint8_t *>(pUcs2Text), maxUcs2Length * sizeof(WCHAR), src, srcLength);
+    int tempTextLen = 0;
+    if (ucs2Length < 0) {
+        scheme = SMS_CODING_8BIT;
+        tempTextLen = (srcLength > maxLength) ? maxLength : srcLength;
+        if (memcpy_s(dest, tempTextLen, src, tempTextLen) != EOK) {
+            TELEPHONY_LOGE("memcpy_s error");
+        }
+        return tempTextLen;
+    }
+    bool unknown = false;
+    int gsm7bitLength = Ucs2ToGsm7bitAuto(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length, unknown);
+    if (unknown) {
+        scheme = SMS_CODING_UCS2;
+        if (ucs2Length <= 0) {
+            return gsm7bitLength;
+        }
+        tempTextLen = (ucs2Length > maxLength) ? maxLength : ucs2Length;
+        if (memcpy_s(dest, tempTextLen, pUcs2Text, tempTextLen) != EOK) {
+            TELEPHONY_LOGE("memcpy_s error");
+        }
+        return tempTextLen;
+    }
+    scheme = SMS_CODING_7BIT;
+    return gsm7bitLength;
+}
+
+int TextCoder::CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, SmsCodingScheme &scheme)
+{
+    int maxUcs2Length = srcLength;
+    if (maxUcs2Length <= 0 || maxUcs2Length >= UCS2_LEN_MAX) {
+        TELEPHONY_LOGE("src over size");
+        return 0;
+    }
+    std::unique_ptr<WCHAR[]> ucs2Text = std::make_unique<WCHAR[]>(maxUcs2Length);
+    if (ucs2Text == nullptr) {
+        TELEPHONY_LOGE("make_unique error");
+        return 0;
+    }
+    WCHAR *pUcs2Text = ucs2Text.get();
+    if (memset_s(pUcs2Text, maxUcs2Length * sizeof(WCHAR), 0x00, maxUcs2Length * sizeof(WCHAR)) != EOK) {
+        TELEPHONY_LOGE("memset_s error");
+        return 0;
+    }
+    int ucs2Length = Utf8ToUcs2(reinterpret_cast<uint8_t *>(pUcs2Text), maxUcs2Length * sizeof(WCHAR), src, srcLength);
+    int tempTextLen = 0;
+    if (ucs2Length < 0) {
+        scheme = SMS_CODING_8BIT;
+        tempTextLen = (srcLength > maxLength) ? maxLength : srcLength;
+        if (memcpy_s(dest, tempTextLen, src, tempTextLen) != EOK) {
+            TELEPHONY_LOGE("memcpy_s error");
+        }
+        return tempTextLen;
+    }
+    bool unknown = false;
+    int gsm7bitLength = Ucs2ToAscii(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length, unknown);
+    if (unknown) {
+        scheme = SMS_CODING_UCS2;
+        if (ucs2Length <= 0) {
+            return gsm7bitLength;
+        }
+        tempTextLen = (ucs2Length > maxLength) ? maxLength : ucs2Length;
+        if (memcpy_s(dest, tempTextLen, pUcs2Text, tempTextLen) != EOK) {
+            TELEPHONY_LOGE("memcpy_s error");
+        }
+        return tempTextLen;
+    }
+    scheme = SMS_CODING_ASCII7BIT;
+    return gsm7bitLength;
+}
+
+/**
+ * @brief Gsm7bitToUtf8
+ * max # of Ucs2 chars, NOT bytes. when all gsm7 chars are only one byte(-there is no extension)
+ * Ucs2Length is maxUcs2 Length. otherwise(ex: gsm7 char starts with 0x1b)
+ * Ucs2Length must be less than gsm7 length
+ */
+int TextCoder::Gsm7bitToUtf8(
+    uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, const MsgLangInfo &langInfo)
+{
+    int maxUcs2Length = srcLength;
+    if (maxUcs2Length <= 0 || maxUcs2Length >= UCS2_LEN_MAX) {
+        TELEPHONY_LOGE("src over size");
+        return 0;
+    }
+    std::unique_ptr<WCHAR[]> ucs2Text = std::make_unique<WCHAR[]>(maxUcs2Length);
+    if (ucs2Text == nullptr) {
+        TELEPHONY_LOGE("make_unique error");
+        return 0;
+    }
+    WCHAR *pUcs2Text = ucs2Text.get();
+    if (memset_s(pUcs2Text, maxUcs2Length * sizeof(WCHAR), 0x00, maxUcs2Length * sizeof(WCHAR)) != EOK) {
+        TELEPHONY_LOGE("memset_s error");
+        return 0;
+    }
+    TELEPHONY_LOGI("srcLength = %{public}d", srcLength);
+    TELEPHONY_LOGI("max dest Length = %{public}d", maxLength);
+    int ucs2Length =
+        Gsm7bitToUcs2(reinterpret_cast<uint8_t *>(pUcs2Text), maxUcs2Length * sizeof(WCHAR), src, srcLength, langInfo);
+    if (ucs2Length > maxLength) {
+        TELEPHONY_LOGE("src over size");
+        return 0;
+    }
+    return Ucs2ToUtf8(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length);
+}
+
+int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength)
+{
+    if (srcLength == -1 && src) {
+        // null terminated string
+        srcLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(src)));
+    }
+    if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("text is null");
+        return 0;
+    }
+
+    gsize textLen = srcLength;
+    int err = 0;
+    gsize remainedLength = maxLength;
+    GIConv cd = g_iconv_open("UTF8", "UTF16BE");
+    if (cd != nullptr) {
+        err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
+            reinterpret_cast<gchar **>(&dest), reinterpret_cast<gsize *>(&remainedLength));
+    }
+    g_iconv_close(cd);
+    if (err != 0) {
+        TELEPHONY_LOGE("g_iconv() return value = %{public}d", err);
+    }
+    int utf8Length = maxLength - remainedLength;
+    if (utf8Length < 0 || utf8Length >= maxLength) {
+        return 0;
+    }
+    dest[utf8Length] = 0x00;
+    return utf8Length;
+}
+
+int TextCoder::EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength)
+{
+    if (srcLength == -1 && src) {
+        // null terminated string
+        srcLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(src)));
+    }
+    if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("text is null");
+        return 0;
+    }
+
+    gsize textLen = srcLength;
+    gsize remainedLength = maxLength;
+    int err = 0;
+    GIConv cd = g_iconv_open("UTF8", "EUCKR");
+    if (cd != nullptr) {
+        err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
+            reinterpret_cast<gchar **>(&dest), reinterpret_cast<gsize *>(&remainedLength));
+    }
+    g_iconv_close(cd);
+    if (err != 0) {
+        TELEPHONY_LOGE("g_iconv() return value = %{public}d", err);
+    }
+    int utf8Length = maxLength - remainedLength;
+    if (utf8Length < 0 || utf8Length >= maxLength) {
+        return 0;
+    }
+    dest[utf8Length] = 0x00;
+    return utf8Length;
+}
+
+int TextCoder::ShiftjisToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength) const
+{
+    if (srcLength == -1 && src) {
+        // null terminated string
+        srcLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(src)));
+    }
+    if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("text is null");
+        return 0;
+    }
+
+    gsize textLen = srcLength;
+    gsize remainedLength = maxLength;
+    int err = 0;
+    GIConv cd = g_iconv_open("UTF8", "SHIFT-JIS");
+    if (cd != nullptr) {
+        err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
+            reinterpret_cast<gchar **>(&dest), reinterpret_cast<gsize *>(&remainedLength));
+    }
+    g_iconv_close(cd);
+    TELEPHONY_LOGI("g_iconv() return value = %{public}d", err);
+    int utf8Length = maxLength - remainedLength;
+    if (utf8Length < 0 || utf8Length >= maxLength) {
+        return 0;
+    }
+    dest[utf8Length] = 0x00;
+    return utf8Length;
+}
+
+int TextCoder::Ucs2ToGsm7bit(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, MSG_LANGUAGE_ID_T &langId)
+{
+    if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("text is null");
+        return -1;
+    }
+    int outTextLen = 0;
+    int remainLen = 0;
+    uint16_t inText = 0;
+    uint8_t currType = GetLangType(src, srcLength);
+    std::map<uint16_t, uint8_t>::iterator itChar;
+    for (int index = 0; index < (srcLength - 1); index += UCS2_LEN_MIN) {
+        inText = src[index];
+        inText = ((inText << 0x08) & 0xFF00) | src[index + 1];
+        itChar = gsm7bitDefMap_.find(inText); // check gsm7bit default char
+        if (itChar != gsm7bitDefMap_.end()) {
+            dest[outTextLen++] = static_cast<uint8_t>(itChar->second);
+        } else {
+            switch (currType) {
+                case MSG_GSM7EXT_CHAR:
+                    remainLen = maxLength - outTextLen;
+                    outTextLen += FindGsm7bitExt(&dest[outTextLen], remainLen, inText);
+                    break;
+                case MSG_TURKISH_CHAR:
+                    langId = MSG_ID_TURKISH_LANG;
+                    remainLen = maxLength - outTextLen;
+                    outTextLen += FindTurkish(&dest[outTextLen], remainLen, inText);
+                    break;
+                case MSG_SPANISH_CHAR:
+                    langId = MSG_ID_SPANISH_LANG;
+                    remainLen = maxLength - outTextLen;
+                    outTextLen += FindSpanish(&dest[outTextLen], remainLen, inText);
+                    break;
+                case MSG_PORTUGUESE_CHAR:
+                    langId = MSG_ID_PORTUGUESE_LANG;
+                    remainLen = maxLength - outTextLen;
+                    outTextLen += FindPortu(&dest[outTextLen], remainLen, inText);
+                    break;
+                default:
+                    dest[outTextLen] = FindReplaceChar(inText);
+                    break;
+            }
+            outTextLen++;
+        }
+        // prevent buffer overflow
+        if (maxLength <= outTextLen) {
+            TELEPHONY_LOGE("buffer overflow");
+            break;
+        }
+    }
+    return outTextLen;
+}
+
+int TextCoder::Ucs2ToGsm7bitAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, bool &unknown)
+{
+    if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("text is null");
+        return -1;
+    }
+
+    int outTextLen = 0;
+    std::map<uint16_t, uint8_t>::iterator itChar;
+    std::map<uint16_t, uint8_t>::iterator itExt;
+    uint16_t inText;
+    for (int index = 0; index < srcLength - 1; index += UCS2_LEN_MIN) {
+        inText = src[index];
+        inText = ((inText << 0x08) & 0xFF00) | src[index + 1];
+        itChar = gsm7bitDefMap_.find(inText); // check gsm7bit default char
+        if (itChar != gsm7bitDefMap_.end()) {
+            dest[outTextLen++] = static_cast<uint8_t>(itChar->second);
+        } else {
+            itExt = gsm7bitExtMap_.find(inText);
+            if (itExt == gsm7bitExtMap_.end()) {
+                TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
+                unknown = true;
+                return 0;
+            }
+            if (maxLength <= outTextLen + 1) {
+                TELEPHONY_LOGE("buffer overflow.");
+                break;
+            }
+            dest[outTextLen++] = 0x1B;
+            dest[outTextLen++] = static_cast<uint8_t>(itExt->second);
+        }
+        // prevent buffer overflow
+        if (maxLength <= outTextLen) {
+            TELEPHONY_LOGE("buffer overflow");
+            break;
+        }
+    }
+    return outTextLen;
+}
+
+int TextCoder::Ucs2ToAscii(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, bool &unknown)
+{
+    if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("text is null");
+        return -1;
+    }
+
+    int outTextLen = 0;
+    std::map<uint16_t, uint8_t>::iterator itChar;
+    std::map<uint16_t, uint8_t>::iterator itExt;
+    uint16_t inText;
+    for (int index = 0; index < srcLength - 1; index += UCS2_LEN_MIN) {
+        inText = src[index];
+        inText = ((inText << 0x08) & 0xFF00) | src[index + 1];
+        // check default char
+        if (inText > 0x007f) {
+            TELEPHONY_LOGI("abnormal character is included [%{public}04x]", inText);
+            unknown = true;
+            return 0;
+        }
+        dest[outTextLen++] = static_cast<uint8_t>(inText);
+        // prevent buffer overflow
+        if (maxLength <= outTextLen) {
+            TELEPHONY_LOGE("buffer overflow");
+            break;
+        }
+    }
+    return outTextLen;
+}
+
+uint8_t TextCoder::GetLangType(const uint8_t *src, int srcLength)
+{
+    if (srcLength <= 0 || src == nullptr) {
+        TELEPHONY_LOGE("text is null");
+        return MSG_DEFAULT_CHAR;
+    }
+
+    std::map<uint16_t, uint8_t>::iterator itExt;
+    uint8_t currType = MSG_DEFAULT_CHAR;
+    uint8_t newType = MSG_DEFAULT_CHAR;
+    uint16_t inText;
+    for (int index = 0; index < (srcLength - 1); index += UCS2_LEN_MIN) {
+        inText = src[index];
+        inText = ((inText << 0x08) & 0xFF00) | src[index + 1];
+        itExt = extCharMap_.find(inText);
+        if (itExt == extCharMap_.end()) {
+            continue;
+        }
+        newType = static_cast<uint8_t>(itExt->second);
+        if (newType >= currType) {
+            bool isTurkisk = (inText == 0x00e7 && currType <= MSG_TURKISH_CHAR);
+            currType = isTurkisk ? MSG_TURKISH_CHAR : newType;
+        }
+    }
+    TELEPHONY_LOGI("charType : [%{public}hhu]", currType);
+    return currType;
+}
+
+int TextCoder::FindGsm7bitExt(uint8_t *dest, int maxLength, const uint16_t inText)
+{
+    int outTextLen = 0;
+    if (dest == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("Invalid parameter.");
+        return outTextLen;
+    }
+
+    auto itExt = gsm7bitExtMap_.find(inText);
+    if (itExt == gsm7bitExtMap_.end()) {
+        dest[outTextLen++] = FindReplaceChar(inText);
+        return outTextLen;
+    }
+    // prevent buffer overflow
+    if (maxLength <= outTextLen + 1) {
+        TELEPHONY_LOGE("buffer overflow");
+        return outTextLen;
+    }
+    dest[outTextLen++] = 0x1B;
+    dest[outTextLen++] = static_cast<uint8_t>(itExt->second);
+    return outTextLen;
+}
+
+int TextCoder::FindTurkish(uint8_t *dest, int maxLength, const uint16_t inText)
+{
+    int outTextLen = 0;
+    if (dest == nullptr || maxLength <= 0) {
+        TELEPHONY_LOGE("Invalid parameter.");
+        return outTextLen;
+    }
+
+    auto itExt = turkishMap_.find(inText);
+    if (itExt == turkishMap_.end()) {
+        dest[outTextLen++] = FindReplaceChar(inText);
+        return outTextLen;
+    }
+    // prevent buffer overflow
+    if (maxLength <= outTextLen + 1) {
+        TELEPHONY_LOGE("buffer overflow");
+        return outTextLen;
+    }
+    dest[outTextLen++] = 0x1B;
+    dest[outTextLen++] = static_cast<uint8_t>(itExt->second);
+    return outTextLen;
+}
 } // namespace Telephony
 } // namespace OHOS
