@@ -69,6 +69,7 @@ HapInfoParams testMmsInfoParams = {
     .bundleName = "tel_sms_mms_gtest",
     .instIndex = 0,
     .appIDDesc = "test",
+    .isSystemApp = true,
 };
 
 PermissionDef testPermReceiveSmsDef = {
@@ -162,7 +163,7 @@ public:
         TELEPHONY_LOGI("AccessMmsToken currentID_%{public}d", currentID_);
         AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testMmsInfoParams, testMmsPolicyParams);
         accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(accessID_);
+        SetSelfTokenID(tokenIdEx.tokenIDEx);
     }
     ~AccessMmsToken()
     {

@@ -204,6 +204,10 @@ bool SmsService::NoPermissionOrParametersCheckFail(
 
 int32_t SmsService::IsImsSmsSupported(int32_t slotId, bool &isSupported)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
         TELEPHONY_LOGE("interfaceManager is nullptr.");
@@ -214,6 +218,10 @@ int32_t SmsService::IsImsSmsSupported(int32_t slotId, bool &isSupported)
 
 int32_t SmsService::GetImsShortMessageFormat(std::u16string &format)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     int32_t slotId = GetDefaultSmsSlotId();
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
@@ -236,6 +244,10 @@ bool SmsService::HasSmsCapability()
 
 int32_t SmsService::SetSmscAddr(int32_t slotId, const std::u16string &scAddr)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     if (!TelephonyPermission::CheckPermission(Permission::SET_TELEPHONY_STATE)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Set State Permisson.");
         return TELEPHONY_ERR_PERMISSION_ERR;
@@ -270,6 +282,10 @@ void SmsService::TrimSmscAddr(std::string &sca)
 
 int32_t SmsService::GetSmscAddr(int32_t slotId, std::u16string &smscAddress)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     if (!TelephonyPermission::CheckPermission(Permission::GET_TELEPHONY_STATE)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
         return TELEPHONY_ERR_PERMISSION_ERR;
@@ -286,6 +302,10 @@ int32_t SmsService::GetSmscAddr(int32_t slotId, std::u16string &smscAddress)
 int32_t SmsService::AddSimMessage(
     int32_t slotId, const std::u16string &smsc, const std::u16string &pdu, SimMessageStatus status)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
         return TELEPHONY_ERR_PERMISSION_ERR;
@@ -311,6 +331,10 @@ int32_t SmsService::AddSimMessage(
 
 int32_t SmsService::DelSimMessage(int32_t slotId, uint32_t msgIndex)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
         return TELEPHONY_ERR_PERMISSION_ERR;
@@ -336,6 +360,10 @@ int32_t SmsService::DelSimMessage(int32_t slotId, uint32_t msgIndex)
 int32_t SmsService::UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessageStatus newStatus,
     const std::u16string &pdu, const std::u16string &smsc)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
         return TELEPHONY_ERR_PERMISSION_ERR;
@@ -365,6 +393,10 @@ int32_t SmsService::UpdateSimMessage(int32_t slotId, uint32_t msgIndex, SimMessa
 
 int32_t SmsService::GetAllSimMessages(int32_t slotId, std::vector<ShortMessage> &message)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
         return TELEPHONY_ERR_PERMISSION_ERR;
@@ -402,6 +434,10 @@ bool SmsService::CheckSimMessageIndexValid(int32_t slotId, uint32_t msgIndex)
 
 int32_t SmsService::SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Receive Messages Permisson.");
         return TELEPHONY_ERR_PERMISSION_ERR;
@@ -431,6 +467,10 @@ bool SmsService::SetImsSmsConfig(int32_t slotId, int32_t enable)
 
 int32_t SmsService::SetDefaultSmsSlotId(int32_t slotId)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     if (!TelephonyPermission::CheckPermission(Permission::SET_TELEPHONY_STATE)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Set State Permisson.");
         return TELEPHONY_ERR_PERMISSION_ERR;
@@ -466,6 +506,10 @@ int32_t SmsService::GetDefaultSmsSimId(int32_t &simId)
 
 int32_t SmsService::SplitMessage(const std::u16string &message, std::vector<std::u16string> &splitMessage)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
         TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
         return TELEPHONY_ERR_PERMISSION_ERR;
@@ -487,6 +531,10 @@ int32_t SmsService::SplitMessage(const std::u16string &message, std::vector<std:
 int32_t SmsService::GetSmsSegmentsInfo(
     int32_t slotId, const std::u16string &message, bool force7BitCode, ISmsServiceInterface::SmsSegmentsInfo &info)
 {
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
     if (message.empty()) {
         return TELEPHONY_ERR_ARGUMENT_NULL;
     }
