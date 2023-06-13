@@ -16,7 +16,6 @@
 #include "gsm_sms_sender.h"
 
 #include "core_manager_inner.h"
-#include "msg_text_convert.h"
 #include "radio_event.h"
 #include "securec.h"
 #include "sms_hisysevent.h"
