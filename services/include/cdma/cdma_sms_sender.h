@@ -81,6 +81,8 @@ private:
     void SendCsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu);
     void SendImsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu);
 
+    std::unique_ptr<std::vector<uint8_t>> EncodeMsg(SmsTransMsg &msg);
+
 private:
     uint8_t msgSeqNum_ = 0;
     uint8_t msgSubmitId_ = 0;
