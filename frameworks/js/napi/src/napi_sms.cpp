@@ -1508,6 +1508,21 @@ static void GetImsShortMessageFormatCallback(napi_env env, napi_status status, v
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
 
+static bool MatchGetImsShortMessageFormatParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
+{
+    switch (parameterCount) {
+        case NONE_PARAMETER: {
+            return true;
+        }
+        case ONE_PARAMETER: {
+            return NapiUtil::MatchParameters(env, parameters, { napi_function });
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
 static napi_value GetImsShortMessageFormat(napi_env env, napi_callback_info info)
 {
     size_t paramsCount = ONE_PARAMETER;
@@ -1516,7 +1531,7 @@ static napi_value GetImsShortMessageFormat(napi_env env, napi_callback_info info
     void *data = nullptr;
 
     napi_get_cb_info(env, info, &paramsCount, params, &arg, &data);
-    if (!MatchIsImsSmsSupportedParameters(env, params, paramsCount)) {
+    if (!MatchGetImsShortMessageFormatParameters(env, params, paramsCount)) {
         TELEPHONY_LOGE("GetImsShortMessageFormat parameter matching failed.");
         NapiUtil::ThrowParameterError(env);
         return nullptr;
