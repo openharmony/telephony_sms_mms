@@ -40,6 +40,7 @@ HapInfoParams testMmsInfoParams = {
     .userID = 1,
     .instIndex = 0,
     .appIDDesc = "test",
+    .isSystemApp = true,
 };
 
 PermissionDef testPermReceiveSmsDef = {
@@ -133,7 +134,7 @@ public:
         std::cout << "AccessMmsToken currentID_" << currentID_ << std::endl;
         AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testMmsInfoParams, testMmsPolicyParams);
         accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(accessID_);
+        SetSelfTokenID(tokenIdEx.tokenIDEx);
     }
     ~AccessMmsToken()
     {

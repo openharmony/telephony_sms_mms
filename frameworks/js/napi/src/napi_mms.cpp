@@ -14,6 +14,8 @@
  */
 #include "napi_mms.h"
 
+#include "telephony_permission.h"
+
 namespace OHOS {
 namespace Telephony {
 namespace {
@@ -294,6 +296,10 @@ void NativeDecodeMms(napi_env env, void *data)
         return;
     }
     auto context = static_cast<DecodeMmsContext *>(data);
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        context->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+        return;
+    }
     MmsMsg mmsMsg;
     bool mmsResult = false;
     if (context->messageMatchResult == TEXT_MESSAGE_PARAMETER_MATCH) {
@@ -1289,13 +1295,16 @@ void setReadRecIndToCore(MmsMsg &mmsMsg, MmsReadRecIndContext &context)
 
 void NativeEncodeMms(napi_env env, void *data)
 {
-    TELEPHONY_LOGI("napi_mms NativeEncodeMms start");
     if (data == nullptr) {
         TELEPHONY_LOGE("NativeEncodeMms data is nullptr");
         NapiUtil::ThrowParameterError(env);
         return;
     }
     EncodeMmsContext *context = static_cast<EncodeMmsContext *>(data);
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        context->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+        return;
+    }
     MmsMsg mmsMsg;
     mmsMsg.SetMmsMessageType(static_cast<uint8_t>(WrapEncodeMmsStatus(context->messageType)));
     setAttachmentToCore(mmsMsg, context->attachment);
