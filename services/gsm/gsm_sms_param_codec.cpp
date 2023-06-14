@@ -22,10 +22,10 @@
 #include <memory>
 
 #include "gsm_sms_udata_codec.h"
-#include "msg_text_convert.h"
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "telephony_log_wrapper.h"
+#include "text_coder.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -278,8 +278,8 @@ int GsmSmsParamCodec::DecodeAddress(const unsigned char *pTpdu, int pduLen, stru
         int tmplength = SmsCommonUtils::Unpack7bitChar(&(pTpdu[offset]), (addrLen * 0x04) / 0x07, 0x00,
             reinterpret_cast<unsigned char *>(tmpAddress), MAX_ADDRESS_LEN);
         MsgLangInfo langInfo;
-        MsgTextConvert::Instance().ConvertGSM7bitToUTF8(reinterpret_cast<unsigned char *>(pAddress->address),
-            MAX_ADDRESS_LEN, reinterpret_cast<unsigned char *>(tmpAddress), tmplength, &langInfo);
+        TextCoder::Instance().Gsm7bitToUtf8(reinterpret_cast<unsigned char *>(pAddress->address), MAX_ADDRESS_LEN,
+            reinterpret_cast<unsigned char *>(tmpAddress), tmplength, langInfo);
         if (tmpAddress) {
             delete[] tmpAddress;
         }
