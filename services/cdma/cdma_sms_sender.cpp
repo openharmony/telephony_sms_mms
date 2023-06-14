@@ -26,6 +26,9 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
+static constexpr uint32_t CDMASMS_MESSAGE_ID_MAX = 65536;
+static constexpr uint8_t CDMASMS_SEQ_NUM_MAX = 64;
+
 CdmaSmsSender::CdmaSmsSender(const shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId,
     function<void(shared_ptr<SmsSendIndexer>)> sendRetryFun)
     : SmsSender(runner, slotId, sendRetryFun)
@@ -53,7 +56,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
         return;
     }
     bool bStatusReport = (deliveryCallback == nullptr) ? false : true;
-    std::unique_ptr<SmsTransMsg> transMsg =
+    std::unique_ptr<CdmaTransportMsg> transMsg =
         message.CreateSubmitTransMsg(desAddr, scAddr, text, bStatusReport, codingType);
     if (transMsg == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -62,10 +65,10 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
     }
     /* 1. Set Reply sequence number. */
     uint8_t msgRef8bit = GetSeqNum();
-    transMsg->data.p2pMsg.transReplySeq = msgRef8bit;
+    transMsg->data.p2p.replySeq = msgRef8bit;
     /* 2. Set msg ID. */
     uint16_t msgId = GetSubmitMsgId();
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.msgId.msgId = msgId;
+    transMsg->data.p2p.telesvcMsg.data.submit.msgId.msgId = msgId;
     shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(splits.size());
     shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
     if (unSentCellCount == nullptr || hasCellFailed == nullptr) {
@@ -76,16 +79,16 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
 
     for (std::size_t i = 0; i < splits.size(); i++) {
-        (void)memset_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
-            sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data), 0x00,
-            sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data));
-        if (splits[i].encodeData.size() > sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data)) {
+        (void)memset_s(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data,
+            sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data), 0x00,
+            sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data));
+        if (splits[i].encodeData.size() > sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data)) {
             TELEPHONY_LOGE("data length invalid");
             return;
         }
-        if (memcpy_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
-            sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data),
-            splits[i].encodeData.data(), splits[i].encodeData.size()) != EOK) {
+        if (memcpy_s(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data,
+            sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data), splits[i].encodeData.data(),
+            splits[i].encodeData.size()) != EOK) {
             SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
             return;
         }
@@ -99,7 +102,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
         }
         indexer->SetDcs(splits[i].encodeType);
         SetPduSeqInfo(indexer, splits.size(), transMsg, i, msgRef8bit);
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length =
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.length =
             static_cast<int>(splits[i].encodeData.size());
         /* encode msg data */
         std::unique_ptr<std::vector<uint8_t>> pdu = EncodeMsg(*transMsg.get());
@@ -271,19 +274,19 @@ void CdmaSmsSender::SetSendIndexerInfo(const std::shared_ptr<SmsSendIndexer> &in
 }
 
 void CdmaSmsSender::SetPduSeqInfo(const std::shared_ptr<SmsSendIndexer> &smsIndexer, const std::size_t size,
-    const std::unique_ptr<SmsTransMsg> &transMsg, const std::size_t index, const uint8_t msgRef8bit)
+    const std::unique_ptr<CdmaTransportMsg> &transMsg, const std::size_t index, const uint8_t msgRef8bit)
 {
     if (size > 1) {
         smsIndexer->SetIsConcat(true);
         SmsConcat smsConcat;
-        transMsg->data.p2pMsg.transTelesvcId = SMS_TRANS_TELESVC_WEMT;
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.msgId.headerInd = true;
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.headerCnt = 1;
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.header[0].udhType = SMS_UDH_CONCAT_8BIT;
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.msgRef = msgRef8bit;
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.totalSeg =
+        transMsg->data.p2p.teleserviceId = static_cast<uint16_t>(SmsTransTelsvcId::WEMT);
+        transMsg->data.p2p.telesvcMsg.data.submit.msgId.headerInd = true;
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.headerCnt = 1;
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = SMS_UDH_CONCAT_8BIT;
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.msgRef = msgRef8bit;
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.totalSeg =
             static_cast<uint8_t>(size);
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.seqNum = index + 1;
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.seqNum = index + 1;
         smsConcat.msgRef = msgRef8bit;
         smsConcat.seqNum = index + 1;
         smsConcat.totalSeg = static_cast<uint8_t>(size);
@@ -292,8 +295,8 @@ void CdmaSmsSender::SetPduSeqInfo(const std::shared_ptr<SmsSendIndexer> &smsInde
     }
 }
 
-void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &scAddr, int32_t port,
-    const uint8_t *data, uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
+void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &scAddr, int32_t port, const uint8_t *data,
+    uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (isImsNetDomain_ && imsSmsCfg_) {
@@ -309,7 +312,7 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
         TELEPHONY_LOGE("splits fail.");
         return;
     }
-    std::unique_ptr<SmsTransMsg> transMsg = nullptr;
+    std::unique_ptr<CdmaTransportMsg> transMsg = nullptr;
     bool bStatusReport = (deliveryCallback == nullptr) ? false : true;
     transMsg = message.CreateSubmitTransMsg(desAddr, scAddr, port, data, dataLen, bStatusReport);
     if (transMsg == nullptr) {
@@ -319,24 +322,23 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     }
     /* Set Reply sequence number. */
     uint8_t msgRef8bit = GetSeqNum();
-    transMsg->data.p2pMsg.transReplySeq = msgRef8bit;
+    transMsg->data.p2p.replySeq = msgRef8bit;
     /* Set msg ID. */
     uint16_t msgId = GetSubmitMsgId();
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.msgId.msgId = msgId;
+    transMsg->data.p2p.telesvcMsg.data.submit.msgId.msgId = msgId;
     /* while user data header isn't exist, headerInd must be set false. */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.msgId.headerInd = true;
+    transMsg->data.p2p.telesvcMsg.data.submit.msgId.headerInd = true;
 
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length =
-        static_cast<int>(splits[0].encodeData.size());
-    if (splits[0].encodeData.size() > sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data)) {
+    transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.length = static_cast<int>(splits[0].encodeData.size());
+    if (splits[0].encodeData.size() > sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data)) {
         TELEPHONY_LOGE("DataBasedSmsDelivery data length invalid.");
         return;
     }
-    if (memcpy_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
-        sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data),
-        splits[0].encodeData.data(), splits[0].encodeData.size()) != EOK) {
+    if (memcpy_s(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data,
+        sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data), splits[0].encodeData.data(),
+        splits[0].encodeData.size()) != EOK) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("memcpy_s return error.");
         return;
@@ -585,17 +587,17 @@ void CdmaSmsSender::RegisterImsHandler()
 
 uint8_t CdmaSmsSender::GetSeqNum()
 {
-    msgSeqNum_ = ((msgSeqNum_ + 1) % SMS_SEQ_NUM_MAX);
+    msgSeqNum_ = ((msgSeqNum_ + 1) % CDMASMS_SEQ_NUM_MAX);
     return msgSeqNum_;
 }
 
 uint8_t CdmaSmsSender::GetSubmitMsgId()
 {
-    msgSubmitId_ = ((msgSubmitId_ + 1) % SMS_MAX_MESSAGE_ID);
+    msgSubmitId_ = ((msgSubmitId_ + 1) % CDMASMS_MESSAGE_ID_MAX);
     return msgSubmitId_;
 }
 
-std::unique_ptr<std::vector<uint8_t>> CdmaSmsSender::EncodeMsg(SmsTransMsg &transMsg)
+std::unique_ptr<std::vector<uint8_t>> CdmaSmsSender::EncodeMsg(CdmaTransportMsg &transMsg)
 {
     std::unique_ptr<CdmaSmsTransportMessage> msg = CdmaSmsTransportMessage::CreateTransportMessage(transMsg);
     SmsWriteBuffer pduBuffer;
@@ -614,7 +616,7 @@ void CdmaSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &sm
     }
     CdmaSmsMessage message;
     SmsCodingScheme codingType = smsIndexer->GetDcs();
-    std::unique_ptr<SmsTransMsg> transMsg = nullptr;
+    std::unique_ptr<CdmaTransportMsg> transMsg = nullptr;
     bool bStatusReport = (smsIndexer->GetDeliveryCallback() == nullptr) ? false : true;
     transMsg = message.CreateSubmitTransMsg(
         smsIndexer->GetDestAddr(), smsIndexer->GetSmcaAddr(), smsIndexer->GetText(), bStatusReport, codingType);
@@ -625,23 +627,23 @@ void CdmaSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &sm
     }
     /* 1. Set Reply sequence number. */
     uint8_t msgRef8bit = smsIndexer->GetMsgRefId();
-    transMsg->data.p2pMsg.transReplySeq = msgRef8bit;
+    transMsg->data.p2p.replySeq = msgRef8bit;
     /* 2. Set msg ID. */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.msgId.msgId = smsIndexer->GetMsgId();
+    transMsg->data.p2p.telesvcMsg.data.submit.msgId.msgId = smsIndexer->GetMsgId();
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
     smsIndexer->SetTimeStamp(timeStamp);
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.encodeType = SMS_ENCODE_OCTET;
-    (void)memset_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
-        sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data), 0x00,
-        sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data));
-    if (smsIndexer->GetText().length() > sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data)) {
+    transMsg->data.p2p.telesvcMsg.data.submit.userData.encodeType = SmsEncodingType::OCTET;
+    (void)memset_s(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data,
+        sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data), 0x00,
+        sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data));
+    if (smsIndexer->GetText().length() > sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data)) {
         TELEPHONY_LOGE("ResendTextDelivery data length invalid.");
         return;
     }
-    if (memcpy_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
-        sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data),
-        smsIndexer->GetText().data(), smsIndexer->GetText().length()) != EOK) {
+    if (memcpy_s(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data,
+        sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data), smsIndexer->GetText().data(),
+        smsIndexer->GetText().length()) != EOK) {
         SendResultCallBack(smsIndexer->GetSendCallback(), ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         return;
     }
@@ -666,7 +668,7 @@ void CdmaSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sm
     }
 
     CdmaSmsMessage message;
-    std::unique_ptr<SmsTransMsg> transMsg = nullptr;
+    std::unique_ptr<CdmaTransportMsg> transMsg = nullptr;
     bool bStatusReport = (smsIndexer->GetDeliveryCallback() == nullptr) ? false : true;
     transMsg = message.CreateSubmitTransMsg(smsIndexer->GetDestAddr(), smsIndexer->GetSmcaAddr(),
         smsIndexer->GetDestPort(), smsIndexer->GetData().data(), smsIndexer->GetData().size(), bStatusReport);
@@ -677,28 +679,27 @@ void CdmaSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sm
     }
     /* Set Reply sequence number. */
     uint8_t msgRef8bit = smsIndexer->GetMsgRefId();
-    transMsg->data.p2pMsg.transReplySeq = msgRef8bit;
+    transMsg->data.p2p.replySeq = msgRef8bit;
     /* Set msg ID. */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.msgId.msgId = smsIndexer->GetMsgId();
+    transMsg->data.p2p.telesvcMsg.data.submit.msgId.msgId = smsIndexer->GetMsgId();
     /* while user data header isn't exist, headerInd must be set false. */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.msgId.headerInd = true;
+    transMsg->data.p2p.telesvcMsg.data.submit.msgId.headerInd = true;
 
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.encodeType = SMS_ENCODE_OCTET;
-    if (smsIndexer->GetData().size() > sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data)) {
+    transMsg->data.p2p.telesvcMsg.data.submit.userData.encodeType = SmsEncodingType::OCTET;
+    if (smsIndexer->GetData().size() > sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data)) {
         TELEPHONY_LOGE("ResendDataDelivery data length invalid.");
         return;
     }
-    if (memcpy_s(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data,
-        sizeof(transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.data),
-        smsIndexer->GetData().data(), smsIndexer->GetData().size()) != EOK) {
+    if (memcpy_s(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data,
+        sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data), smsIndexer->GetData().data(),
+        smsIndexer->GetData().size()) != EOK) {
         SendResultCallBack(smsIndexer->GetSendCallback(), ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         return;
     }
 
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.length =
-        static_cast<int>(smsIndexer->GetData().size());
+    transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.length = static_cast<int>(smsIndexer->GetData().size());
     /* encode msg data */
     std::unique_ptr<std::vector<uint8_t>> pdu = EncodeMsg(*transMsg.get());
     if (pdu == nullptr) {
@@ -712,24 +713,22 @@ void CdmaSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sm
 }
 
 void CdmaSmsSender::SetConcact(
-    const std::shared_ptr<SmsSendIndexer> &smsIndexer, const std::unique_ptr<SmsTransMsg> &transMsg)
+    const std::shared_ptr<SmsSendIndexer> &smsIndexer, const std::unique_ptr<CdmaTransportMsg> &transMsg)
 {
     if (smsIndexer->GetIsConcat()) {
         SmsConcat smsConcat = smsIndexer->GetSmsConcat();
-        transMsg->data.p2pMsg.transTelesvcId = SMS_TRANS_TELESVC_WEMT;
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.msgId.headerInd = true;
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.headerCnt = 1;
+        transMsg->data.p2p.teleserviceId = static_cast<uint16_t>(SmsTransTelsvcId::WEMT);
+        transMsg->data.p2p.telesvcMsg.data.submit.msgId.headerInd = true;
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.headerCnt = 1;
         if (smsConcat.is8Bits) {
-            transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.header[0].udhType = SMS_UDH_CONCAT_8BIT;
+            transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = SMS_UDH_CONCAT_8BIT;
         } else {
-            transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.header[0].udhType = SMS_UDH_CONCAT_16BIT;
+            transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = SMS_UDH_CONCAT_16BIT;
         }
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.msgRef =
-            smsConcat.msgRef;
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.totalSeg =
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.msgRef = smsConcat.msgRef;
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.totalSeg =
             smsConcat.totalSeg;
-        transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.seqNum =
-            smsConcat.seqNum;
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.seqNum = smsConcat.seqNum;
     }
 }
 } // namespace Telephony

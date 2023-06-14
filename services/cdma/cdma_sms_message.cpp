@@ -25,10 +25,10 @@ namespace OHOS {
 namespace Telephony {
 static constexpr uint16_t CDMA_MAX_UD_HEADER_NUM = 7;
 
-std::unique_ptr<SmsTransMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::string &dest, const std::string &sc,
+std::unique_ptr<CdmaTransportMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::string &dest, const std::string &sc,
     const std::string &text, bool bStatusReport, const SmsCodingScheme codingScheme)
 {
-    std::unique_ptr<SmsTransMsg> transMsg = GreateTransMsg();
+    std::unique_ptr<CdmaTransportMsg> transMsg = GreateTransMsg();
     if (transMsg == nullptr) {
         TELEPHONY_LOGE("CreateMessage message transMsg nullptr");
         return nullptr;
@@ -37,32 +37,32 @@ std::unique_ptr<SmsTransMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::str
     originatingAddress_ = dest;
     visibleMessageBody_ = text;
     bStatusReportMessage_ = bStatusReport;
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.userData.encodeType = CovertEncodingType(codingScheme);
+    transMsg->data.p2p.telesvcMsg.data.submit.userData.encodeType = CovertEncodingType(codingScheme);
     /* Set Reply option */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.replyOpt.deliverAckReq = bStatusReport;
+    transMsg->data.p2p.telesvcMsg.data.submit.replyOpt.dak = bStatusReport;
     /* Convert Address values */
-    transMsg->data.p2pMsg.address.digitMode = SMS_DIGIT_4BIT_DTMF;
-    transMsg->data.p2pMsg.address.numberMode = SMS_NUMBER_MODE_NONE_DATANETWORK;
-    transMsg->data.p2pMsg.address.numberPlan = SMS_NPI_UNKNOWN;
-    transMsg->data.p2pMsg.address.addrLen = dest.length();
-    if (strncpy_s(transMsg->data.p2pMsg.address.szData, sizeof(transMsg->data.p2pMsg.address.szData), dest.c_str(),
+    transMsg->data.p2p.address.digitMode = false;
+    transMsg->data.p2p.address.numberMode = false;
+    transMsg->data.p2p.address.numberPlan = SMS_NPI_UNKNOWN;
+    transMsg->data.p2p.address.addrLen = dest.length();
+    if (strncpy_s(transMsg->data.p2p.address.szData, sizeof(transMsg->data.p2p.address.szData), dest.c_str(),
             dest.length()) != EOK) {
-        transMsg->data.p2pMsg.address.addrLen = sizeof(transMsg->data.p2pMsg.address.szData) - 1;
-        transMsg->data.p2pMsg.address.szData[transMsg->data.p2pMsg.address.addrLen] = '\0';
+        transMsg->data.p2p.address.addrLen = sizeof(transMsg->data.p2p.address.szData) - 1;
+        transMsg->data.p2p.address.szData[transMsg->data.p2p.address.addrLen] = '\0';
     }
     if (dest.at(0) == '+') {
-        transMsg->data.p2pMsg.address.digitMode = SMS_DIGIT_8BIT;
-        transMsg->data.p2pMsg.address.numberType = SMS_NUMBER_TYPE_INTERNATIONAL;
+        transMsg->data.p2p.address.digitMode = true;
+        transMsg->data.p2p.address.numberType = static_cast<uint8_t>(SmsNumberType::INTERNATIONAL);
     } else {
-        transMsg->data.p2pMsg.address.numberType = SMS_NUMBER_TYPE_NATIONAL;
+        transMsg->data.p2p.address.numberType = static_cast<uint8_t>(SmsNumberType::NATIONAL);
     }
     return transMsg;
 }
 
-std::unique_ptr<SmsTransMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::string &dest, const std::string &sc,
+std::unique_ptr<CdmaTransportMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::string &dest, const std::string &sc,
     int32_t port, const uint8_t *data, uint32_t dataLen, bool bStatusReport)
 {
-    std::unique_ptr<SmsTransMsg> transMsg = GreateTransMsg();
+    std::unique_ptr<CdmaTransportMsg> transMsg = GreateTransMsg();
     if (transMsg == nullptr) {
         TELEPHONY_LOGE("CreateMessage message transMsg nullptr");
         return nullptr;
@@ -73,75 +73,75 @@ std::unique_ptr<SmsTransMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::str
     originatingAddress_ = dest;
     bStatusReportMessage_ = bStatusReport;
     /* Set Reply option */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.replyOpt.deliverAckReq = bStatusReport;
+    transMsg->data.p2p.telesvcMsg.data.submit.replyOpt.dak = bStatusReport;
     /* Convert Address values */
-    transMsg->data.p2pMsg.address.digitMode = SMS_DIGIT_4BIT_DTMF;
-    transMsg->data.p2pMsg.address.numberMode = SMS_NUMBER_MODE_NONE_DATANETWORK;
-    transMsg->data.p2pMsg.address.numberPlan = SMS_NPI_UNKNOWN;
-    transMsg->data.p2pMsg.address.addrLen = dest.length();
-    if (dest.length() > SMS_TRANS_ADDRESS_MAX_LEN + 1) {
+    transMsg->data.p2p.address.digitMode = false;
+    transMsg->data.p2p.address.numberMode = false;
+    transMsg->data.p2p.address.numberPlan = SMS_NPI_UNKNOWN;
+    transMsg->data.p2p.address.addrLen = dest.length();
+    if (dest.length() > CDMASMS_ADDRESS_LEN_MAX + 1) {
         TELEPHONY_LOGE("CreateSubmitTransMsg data length invalid.");
         return nullptr;
     }
-    if (strncpy_s(transMsg->data.p2pMsg.address.szData, sizeof(transMsg->data.p2pMsg.address.szData), dest.c_str(),
+    if (strncpy_s(transMsg->data.p2p.address.szData, sizeof(transMsg->data.p2p.address.szData), dest.c_str(),
             dest.length()) != EOK) {
-        transMsg->data.p2pMsg.address.addrLen = sizeof(transMsg->data.p2pMsg.address.szData) - 1;
-        transMsg->data.p2pMsg.address.szData[transMsg->data.p2pMsg.address.addrLen] = '\0';
+        transMsg->data.p2p.address.addrLen = sizeof(transMsg->data.p2p.address.szData) - 1;
+        transMsg->data.p2p.address.szData[transMsg->data.p2p.address.addrLen] = '\0';
     }
     if (dest.at(0) == '+') {
-        transMsg->data.p2pMsg.address.digitMode = SMS_DIGIT_8BIT;
-        transMsg->data.p2pMsg.address.numberType = SMS_NUMBER_TYPE_INTERNATIONAL;
+        transMsg->data.p2p.address.digitMode = true;
+        transMsg->data.p2p.address.numberType = static_cast<uint8_t>(SmsNumberType::INTERNATIONAL);
     } else {
-        transMsg->data.p2pMsg.address.numberType = SMS_NUMBER_TYPE_NATIONAL;
+        transMsg->data.p2p.address.numberType = static_cast<uint8_t>(SmsNumberType::NATIONAL);
     }
     return transMsg;
 }
 
-std::unique_ptr<struct SmsTransMsg> CdmaSmsMessage::GreateTransMsg()
+std::unique_ptr<struct CdmaTransportMsg> CdmaSmsMessage::GreateTransMsg()
 {
-    std::unique_ptr<SmsTransMsg> transMsg = std::make_unique<SmsTransMsg>();
+    std::unique_ptr<CdmaTransportMsg> transMsg = std::make_unique<CdmaTransportMsg>();
     if (transMsg == nullptr) {
         TELEPHONY_LOGE("CreateMessage message transMsg nullptr");
         return nullptr;
     }
-    (void)memset_s(transMsg.get(), sizeof(SmsTransMsg), 0x00, sizeof(SmsTransMsg));
-    transMsg->type = (SmsTransMsgType)SMS_TRANS_P2P_MSG;
-    transMsg->data.p2pMsg.telesvcMsg.type = (SmsMessageType)SMS_TYPE_SUBMIT;
+    (void)memset_s(transMsg.get(), sizeof(CdmaTransportMsg), 0x00, sizeof(CdmaTransportMsg));
+    transMsg->type = CdmaTransportMsgType::P2P;
+    transMsg->data.p2p.telesvcMsg.type = TeleserviceMsgType::SUBMIT;
     /* 1. Set Teleservice ID */
-    transMsg->data.p2pMsg.transTelesvcId = SMS_TRANS_TELESVC_CMT_95;
+    transMsg->data.p2p.teleserviceId = static_cast<uint16_t>(SmsTransTelsvcId::CMT_95);
     /* 2. Set Service category */
-    transMsg->data.p2pMsg.transSvcCtg = SMS_TRANS_SVC_CTG_UNDEFINED;
+    transMsg->data.p2p.serviceCtg = static_cast<uint16_t>(SmsServiceCtg::UNDEFINED);
 
     /* 3. Set Valid period */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.valPeriod.format = SMS_TIME_RELATIVE;
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.valPeriod.time.relTime.time = SMS_REL_TIME_INDEFINITE;
+    transMsg->data.p2p.telesvcMsg.data.submit.valPeriod.format = SMS_TIME_RELATIVE;
+    transMsg->data.p2p.telesvcMsg.data.submit.valPeriod.time.relTime.time = SMS_REL_TIME_INDEFINITE;
     /* 4. Set Priority */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.priority = SMS_PRIORITY_NORMAL;
+    transMsg->data.p2p.telesvcMsg.data.submit.priority = SmsPriorityIndicator::NORMAL;
     /* 5. Set Privacy */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.privacy = SMS_PRIVACY_NOT_RESTRICTED;
+    transMsg->data.p2p.telesvcMsg.data.submit.privacy = SmsPrivacyIndicator::NOT_RESTRICTED;
     /* 6. Set Alert priority */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.alertPriority = SMS_ALERT_MOBILE_DEFAULT;
+    transMsg->data.p2p.telesvcMsg.data.submit.alertPriority = SmsAlertPriority::DEFAULT;
     /* 7. Set Language */
-    transMsg->data.p2pMsg.telesvcMsg.data.submit.language = SMS_LAN_UNKNOWN;
+    transMsg->data.p2p.telesvcMsg.data.submit.language = SmsLanguageType::UNKNOWN;
     return transMsg;
 }
 
 SmsEncodingType CdmaSmsMessage::CovertEncodingType(const SmsCodingScheme &codingScheme)
 {
-    SmsEncodingType encodingType = SMS_ENCODE_7BIT_ASCII;
+    SmsEncodingType encodingType = SmsEncodingType::ASCII_7BIT;
     switch (codingScheme) {
         case SMS_CODING_7BIT:
-            encodingType = SMS_ENCODE_GSM7BIT;
+            encodingType = SmsEncodingType::GSM7BIT;
             break;
         case SMS_CODING_ASCII7BIT:
-            encodingType = SMS_ENCODE_7BIT_ASCII;
+            encodingType = SmsEncodingType::ASCII_7BIT;
             break;
         case SMS_CODING_8BIT:
-            encodingType = SMS_ENCODE_OCTET;
+            encodingType = SmsEncodingType::OCTET;
             break;
         case SMS_CODING_UCS2:
         default:
-            encodingType = SMS_ENCODE_UNICODE;
+            encodingType = SmsEncodingType::UNICODE;
             break;
     }
     return encodingType;
@@ -154,13 +154,13 @@ std::shared_ptr<CdmaSmsMessage> CdmaSmsMessage::CreateMessage(const std::string 
         TELEPHONY_LOGE("CreateMessage message nullptr");
         return nullptr;
     }
-    message->transMsg_ = std::make_unique<struct SmsTransMsg>();
+    message->transMsg_ = std::make_unique<struct CdmaTransportMsg>();
     if (message->transMsg_ == nullptr) {
         TELEPHONY_LOGE("CreateMessage message transMsg_ nullptr");
         return nullptr;
     }
 
-    (void)memset_s(message->transMsg_.get(), sizeof(struct SmsTransMsg), 0x00, sizeof(struct SmsTransMsg));
+    (void)memset_s(message->transMsg_.get(), sizeof(struct CdmaTransportMsg), 0x00, sizeof(struct CdmaTransportMsg));
     if (message->PduAnalysis(pdu)) {
         return message;
     }
@@ -182,26 +182,26 @@ bool CdmaSmsMessage::PduAnalysis(const std::string &pduHex)
         TELEPHONY_LOGE("Pdu DecodeMsg has failure.");
         return false;
     }
-    if (transMsg_->type == SMS_TRANS_BROADCAST_MSG) {
-        if (transMsg_->data.cbMsg.telesvcMsg.data.deliver.cmasData.isWrongRecodeType) {
+    if (transMsg_->type == CdmaTransportMsgType::BROADCAST) {
+        if (transMsg_->data.broadcast.telesvcMsg.data.deliver.cmasData.isWrongRecodeType) {
             TELEPHONY_LOGE("Invalid CMAS Record Type");
             return false;
         }
-        SmsEncodingType encodeType = transMsg_->data.cbMsg.telesvcMsg.data.deliver.cmasData.encodeType;
-        if ((encodeType == SMS_ENCODE_KOREAN) || (encodeType == SMS_ENCODE_GSMDCS)) {
-            TELEPHONY_LOGE("This encode type is not supported [%{public}d]", encodeType);
+        SmsEncodingType encodeType = transMsg_->data.broadcast.telesvcMsg.data.deliver.cmasData.encodeType;
+        if ((encodeType == SmsEncodingType::KOREAN) || (encodeType == SmsEncodingType::GSMDCS)) {
+            TELEPHONY_LOGE("This encode type is not supported [%{public}d]", static_cast<int>(encodeType));
             return false;
         }
     }
     switch (transMsg_->type) {
-        case SMS_TRANS_P2P_MSG:
-            AnalysisP2pMsg(transMsg_->data.p2pMsg);
+        case CdmaTransportMsgType::P2P:
+            AnalysisP2pMsg(transMsg_->data.p2p);
             break;
-        case SMS_TRANS_BROADCAST_MSG:
-            AnalysisCbMsg(transMsg_->data.cbMsg);
+        case CdmaTransportMsgType::BROADCAST:
+            AnalysisCbMsg(transMsg_->data.broadcast);
             break;
-        case SMS_TRANS_ACK_MSG:
-            AnalsisAckMsg(transMsg_->data.ackMsg);
+        case CdmaTransportMsgType::ACK:
+            AnalsisAckMsg(transMsg_->data.ack);
             break;
         default:
             return false;
@@ -209,52 +209,52 @@ bool CdmaSmsMessage::PduAnalysis(const std::string &pduHex)
     return true;
 }
 
-void CdmaSmsMessage::AnalysisP2pMsg(const SmsTransP2PMsg &p2pMsg)
+void CdmaSmsMessage::AnalysisP2pMsg(const CdmaP2PMsg &p2pMsg)
 {
-    if (p2pMsg.transTelesvcId == SMS_TRANS_TELESVC_RESERVED) {
+    if (p2pMsg.teleserviceId == static_cast<uint16_t>(SmsTransTelsvcId::RESERVED)) {
         TELEPHONY_LOGE("this Incoming Message has Unknown Teleservice ID");
         return;
     }
 
-    address_ = std::make_unique<struct SmsTransAddr>();
+    address_ = std::make_unique<struct TransportAddr>();
     if (address_ == nullptr) {
         TELEPHONY_LOGE("AnalysisP2pMsg make address == nullptr");
         return;
     }
 
-    if (memcpy_s(address_.get(), sizeof(SmsTransAddr), &p2pMsg.address, sizeof(SmsTransAddr)) != EOK) {
+    if (memcpy_s(address_.get(), sizeof(TransportAddr), &p2pMsg.address, sizeof(TransportAddr)) != EOK) {
         TELEPHONY_LOGE("AnalysisP2pMsg address memcpy_s error.");
         return;
     }
 
     originatingAddress_ = address_->szData;
     switch (p2pMsg.telesvcMsg.type) {
-        case SmsMessageType::SMS_TYPE_DELIVER:
+        case TeleserviceMsgType::DELIVER:
             AnalsisDeliverMwi(p2pMsg);
             AnalsisDeliverMsg(p2pMsg.telesvcMsg.data.deliver);
             break;
-        case SmsMessageType::SMS_TYPE_DELIVERY_ACK:
+        case TeleserviceMsgType::DELIVERY_ACK:
             AnalsisDeliverAck(p2pMsg.telesvcMsg.data.deliveryAck);
             break;
-        case SmsMessageType::SMS_TYPE_USER_ACK:
-        case SmsMessageType::SMS_TYPE_READ_ACK:
+        case TeleserviceMsgType::USER_ACK:
+        case TeleserviceMsgType::READ_ACK:
             break;
-        case SmsMessageType::SMS_TYPE_SUBMIT_REPORT:
+        case TeleserviceMsgType::SUBMIT_REPORT:
             AnalsisSubmitReport(p2pMsg.telesvcMsg.data.report);
             break;
-        case SmsMessageType::SMS_TYPE_SUBMIT:
+        case TeleserviceMsgType::SUBMIT:
             AnalsisSubmitMsg(p2pMsg.telesvcMsg.data.submit);
             break;
         default:
-            TELEPHONY_LOGI("AnalysisP2pMsg unkown type =%{public}d", p2pMsg.telesvcMsg.type);
+            TELEPHONY_LOGI("AnalysisP2pMsg unkown type =%{public}d", static_cast<int>(p2pMsg.telesvcMsg.type));
             break;
     }
 }
 
-void CdmaSmsMessage::AnalsisDeliverMwi(const SmsTransP2PMsg &p2pMsg)
+void CdmaSmsMessage::AnalsisDeliverMwi(const CdmaP2PMsg &p2pMsg)
 {
     specialSmsInd_ = nullptr;
-    if (p2pMsg.transTelesvcId == SMS_TRANS_TELESVC_VMN_95) {
+    if (p2pMsg.teleserviceId == static_cast<uint16_t>(SmsTransTelsvcId::VMN_95)) {
         specialSmsInd_ = std::make_shared<SpecialSmsIndication>();
         if (specialSmsInd_ == nullptr) {
             TELEPHONY_LOGE("SpecialSmsIndication is null!");
@@ -262,7 +262,7 @@ void CdmaSmsMessage::AnalsisDeliverMwi(const SmsTransP2PMsg &p2pMsg)
         }
 
         specialSmsInd_->msgInd = SMS_VOICE_INDICATOR;
-        if (p2pMsg.telesvcMsg.data.deliver.enhancedVmn.faxIncluded) {
+        if (p2pMsg.telesvcMsg.data.deliver.vmn.faxIncluded) {
             specialSmsInd_->msgInd = SMS_FAX_INDICATOR;
         }
 
@@ -283,11 +283,11 @@ void CdmaSmsMessage::AnalsisDeliverMwi(const SmsTransP2PMsg &p2pMsg)
     }
 }
 
-void CdmaSmsMessage::AnalsisDeliverMsg(const SmsTeleSvcDeliver &deliver)
+void CdmaSmsMessage::AnalsisDeliverMsg(const TeleserviceDeliver &deliver)
 {
     isCmas_ = false;
     msgClass_ = SMS_CLASS_UNKNOWN;
-    if (deliver.displayMode == SMS_DISPLAY_IMMEDIATE) {
+    if (deliver.displayMode == SmsDisplayMode::IMMEDIATE) {
         msgClass_ = SMS_INSTANT_MESSAGE;
     }
 
@@ -297,19 +297,19 @@ void CdmaSmsMessage::AnalsisDeliverMsg(const SmsTeleSvcDeliver &deliver)
     AnalsisUserData(deliver.userData);
 }
 
-void CdmaSmsMessage::AnalsisDeliverAck(const SmsTeleSvcDeliverAck &deliverAck)
+void CdmaSmsMessage::AnalsisDeliverAck(const TeleserviceDeliverAck &deliverAck)
 {
     bStatusReportMessage_ = true;
     scTimestamp_ = SmsCommonUtils::ConvertTime(deliverAck.timeStamp);
     AnalsisUserData(deliverAck.userData);
 }
 
-void CdmaSmsMessage::AnalsisSubmitReport(const SmsTeleSvcDeliverReport &report)
+void CdmaSmsMessage::AnalsisSubmitReport(const TeleserviceDeliverReport &report)
 {
     AnalsisUserData(report.userData);
 }
 
-void CdmaSmsMessage::AnalsisSubmitMsg(const SmsTeleSvcSubmit &submit)
+void CdmaSmsMessage::AnalsisSubmitMsg(const TeleserviceSubmit &submit)
 {
     msgRef_ = submit.msgId.msgId;
     bHeaderInd_ = submit.msgId.headerInd;
@@ -326,22 +326,22 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
     AnalsisHeader(userData);
     unsigned char buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
     switch (userData.encodeType) {
-        case SMS_ENCODE_GSM7BIT: {
+        case SmsEncodingType::GSM7BIT: {
             dataSize = TextCoder::Instance().Gsm7bitToUtf8(
                 buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData, userData.userData.length, langinfo);
             break;
         }
-        case SMS_ENCODE_KOREAN:
-        case SMS_ENCODE_EUCKR: {
+        case SmsEncodingType::KOREAN:
+        case SmsEncodingType::EUCKR: {
             dataSize = TextCoder::Instance().EuckrToUtf8(
                 buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData, userData.userData.length);
             break;
         }
-        case SMS_ENCODE_IA5:
-        case SMS_ENCODE_7BIT_ASCII:
-        case SMS_ENCODE_LATIN_HEBREW:
-        case SMS_ENCODE_LATIN:
-        case SMS_ENCODE_OCTET: {
+        case SmsEncodingType::IA5:
+        case SmsEncodingType::ASCII_7BIT:
+        case SmsEncodingType::LATIN_HEBREW:
+        case SmsEncodingType::LATIN:
+        case SmsEncodingType::OCTET: {
             if (memcpy_s(buff, sizeof(buff), userData.userData.data, userData.userData.length) != EOK) {
                 TELEPHONY_LOGE("AnalsisDeliverMsg memcpy_s fail.");
                 return;
@@ -350,7 +350,7 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
             buff[dataSize] = '\0';
             break;
         }
-        case SMS_ENCODE_SHIFT_JIS: {
+        case SmsEncodingType::SHIFT_JIS: {
             dataSize = TextCoder::Instance().ShiftjisToUtf8(
                 buff, MAX_MSG_TEXT_LEN, (unsigned char *)&userData.userData.data, userData.userData.length);
             break;
@@ -365,15 +365,15 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
     TELEPHONY_LOGI("AnalsisDeliverMsg userData == %{private}s", visibleMessageBody_.c_str());
 }
 
-void CdmaSmsMessage::AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver)
+void CdmaSmsMessage::AnalsisCMASMsg(const TeleserviceDeliver &deliver)
 {
     isCmas_ = true;
-    category_ = deliver.cmasData.category;
-    responseType_ = deliver.cmasData.responseType;
-    severity_ = deliver.cmasData.severity;
-    urgency_ = deliver.cmasData.urgency;
-    certainty_ = deliver.cmasData.certainty;
-    messageClass_ = deliver.cmasData.alertHandle;
+    category_ = static_cast<int8_t>(deliver.cmasData.category);
+    responseType_ = static_cast<int8_t>(deliver.cmasData.responseType);
+    severity_ = static_cast<int8_t>(deliver.cmasData.severity);
+    urgency_ = static_cast<int8_t>(deliver.cmasData.urgency);
+    certainty_ = static_cast<int8_t>(deliver.cmasData.certainty);
+    messageClass_ = static_cast<int8_t>(deliver.cmasData.alertHandle);
     msgClass_ = SMS_CLASS_UNKNOWN;
     scTimestamp_ = SmsCommonUtils::ConvertTime(deliver.timeStamp);
     SmsTeleSvcUserData userData;
@@ -390,26 +390,26 @@ void CdmaSmsMessage::AnalsisCMASMsg(const SmsTeleSvcDeliver &deliver)
     }
 }
 
-void CdmaSmsMessage::AnalysisCbMsg(const SmsTransBroadCastMsg &cbMsg)
+void CdmaSmsMessage::AnalysisCbMsg(const CdmaBroadCastMsg &cbMsg)
 {
-    serviceCategory_ = cbMsg.transSvcCtg;
-    if (cbMsg.telesvcMsg.type != SmsMessageType::SMS_TYPE_DELIVER) {
-        TELEPHONY_LOGE("No matching type = [%{public}d]", cbMsg.telesvcMsg.type);
+    serviceCategory_ = cbMsg.serviceCtg;
+    if (cbMsg.telesvcMsg.type != TeleserviceMsgType::DELIVER) {
+        TELEPHONY_LOGE("No matching type = [%{public}d]", static_cast<int>(cbMsg.telesvcMsg.type));
         return;
     }
     messageId_ = cbMsg.telesvcMsg.data.deliver.msgId.msgId;
-    priority_ = cbMsg.telesvcMsg.data.deliver.priority;
-    language_ = cbMsg.telesvcMsg.data.deliver.language;
-    TELEPHONY_LOGI("analysisCbMsg transSvcCtg %{public}hu", cbMsg.transSvcCtg);
-    if ((cbMsg.transSvcCtg >= SMS_TRANS_SVC_CTG_CMAS_PRESIDENTIAL) &&
-        (cbMsg.transSvcCtg <= SMS_TRANS_SVC_CTG_CMAS_TEST)) {
+    priority_ = static_cast<int8_t>(cbMsg.telesvcMsg.data.deliver.priority);
+    language_ = static_cast<uint8_t>(cbMsg.telesvcMsg.data.deliver.language);
+    TELEPHONY_LOGI("analysisCbMsg serviceCtg %{public}hu", cbMsg.serviceCtg);
+    if ((cbMsg.serviceCtg >= static_cast<uint16_t>(SmsServiceCtg::CMAS_PRESIDENTIAL)) &&
+        (cbMsg.serviceCtg <= static_cast<uint16_t>(SmsServiceCtg::CMAS_TEST))) {
         AnalsisCMASMsg(cbMsg.telesvcMsg.data.deliver);
     } else {
         AnalsisDeliverMsg(cbMsg.telesvcMsg.data.deliver);
     }
 }
 
-void CdmaSmsMessage::AnalsisAckMsg(const SmsTransAckMsg &ackMsg)
+void CdmaSmsMessage::AnalsisAckMsg(const CdmaAckMsg &ackMsg)
 {
     originatingAddress_ = ackMsg.address.szData;
 }
@@ -448,13 +448,13 @@ void CdmaSmsMessage::AnalsisHeader(const SmsTeleSvcUserData &userData)
  * 0x01 is broadcast message
  * 0x02 is ack message
  * 0x03 is unkown message
- * @return int
+ * @return CdmaTransportMsgType
  */
-int CdmaSmsMessage::GetTransMsgType() const
+CdmaTransportMsgType CdmaSmsMessage::GetTransMsgType() const
 {
     if (transMsg_ == nullptr) {
         TELEPHONY_LOGE("Trans message type unkown!");
-        return SMS_TRANS_TYPE_RESERVED;
+        return CdmaTransportMsgType::RESERVED;
     }
 
     return transMsg_->type;
@@ -475,12 +475,12 @@ int CdmaSmsMessage::GetTransMsgType() const
  */
 int CdmaSmsMessage::GetTransTeleService() const
 {
-    if ((transMsg_ == nullptr) || (transMsg_->type != SMS_TRANS_P2P_MSG)) {
+    if ((transMsg_ == nullptr) || (transMsg_->type != CdmaTransportMsgType::P2P)) {
         TELEPHONY_LOGE("Trans Tele Service is error");
-        return SMS_TRANS_TELESVC_RESERVED;
+        return static_cast<int>(SmsTransTelsvcId::RESERVED);
     }
 
-    return transMsg_->data.p2pMsg.transTelesvcId;
+    return transMsg_->data.p2p.teleserviceId;
 }
 
 int CdmaSmsMessage::GetProtocolId() const
@@ -504,8 +504,8 @@ bool CdmaSmsMessage::IsWapPushMsg()
         return false;
     }
 
-    if (transMsg_->type == SMS_TRANS_P2P_MSG) {
-        return (transMsg_->data.p2pMsg.transTelesvcId == SMS_TRANS_TELESVC_WAP);
+    if (transMsg_->type == CdmaTransportMsgType::P2P) {
+        return (transMsg_->data.p2p.teleserviceId == static_cast<uint16_t>(SmsTransTelsvcId::WAP));
     }
     return false;
 }
@@ -517,7 +517,7 @@ std::shared_ptr<SpecialSmsIndication> CdmaSmsMessage::GetSpecialSmsInd()
 
 bool CdmaSmsMessage::IsStatusReport() const
 {
-    return (transMsg_->data.p2pMsg.telesvcMsg.type == SMS_TYPE_DELIVERY_ACK);
+    return (transMsg_->data.p2p.telesvcMsg.type == TeleserviceMsgType::DELIVERY_ACK);
 }
 
 int16_t CdmaSmsMessage::GetDestPort() const
@@ -527,7 +527,7 @@ int16_t CdmaSmsMessage::GetDestPort() const
 
 bool CdmaSmsMessage::IsBroadcastMsg() const
 {
-    return GetTransMsgType() == SMS_TRANS_BROADCAST_MSG;
+    return GetTransMsgType() == CdmaTransportMsgType::BROADCAST;
 }
 
 int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, SmsCodingScheme &codingType,
@@ -680,7 +680,7 @@ int8_t CdmaSmsMessage::GetPriority() const
 
 bool CdmaSmsMessage::IsEmergencyMsg() const
 {
-    return priority_ == SMS_PRIORITY_EMERGENCY;
+    return priority_ == static_cast<int8_t>(SmsPriorityIndicator::EMERGENCY);
 }
 
 uint16_t CdmaSmsMessage::GetServiceCategoty() const

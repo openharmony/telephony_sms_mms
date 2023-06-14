@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "cdma_sms_types.h"
+#include "cdma_sms_common.h"
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "string_utils.h"
@@ -766,7 +766,7 @@ bool SmsCbMessage::GetCmasSeverity(int8_t &severity) const
         case SmsCmasMessageType::CMAS_SERVER_EXTREME_OBSERVED_SPANISH:
         case SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_DEFUALT:
         case SmsCmasMessageType::CMAS_SERVER_EXTERME_LIKELY_SPANISH:
-            severity = SMS_CMAE_SEVERITY_EXTREME;
+            severity = static_cast<int8_t>(SmsCmaeSeverity::EXTREME);
             break;
         case SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_DEFUALT:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_SPANISH:
@@ -776,10 +776,10 @@ bool SmsCbMessage::GetCmasSeverity(int8_t &severity) const
         case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_SPANISH:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_DEFUALT:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_SPANISH:
-            severity =  SMS_CMAE_SEVERITY_SEVERE;
+            severity = static_cast<int8_t>(SmsCmaeSeverity::SEVERE);
             break;
         default:
-            severity = SMS_CMAE_SEVERITY_RESERVED;
+            severity = static_cast<int8_t>(SmsCmaeSeverity::RESERVED);
             break;
     }
     return true;
@@ -801,7 +801,7 @@ bool SmsCbMessage::GetCmasUrgency(int8_t &urgency) const
         case SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_SPANISH:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_DEFUALT:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_SPANISH:
-            urgency = SMS_CMAE_URGENCY_IMMEDIATE;
+            urgency = static_cast<uint8_t>(SmsCmaeUrgency::IMMEDIATE);
             break;
         case SmsCmasMessageType::CMAS_SERVER_EXTERME_OBSERVED_DEFUALT:
         case SmsCmasMessageType::CMAS_SERVER_EXTREME_OBSERVED_SPANISH:
@@ -811,10 +811,10 @@ bool SmsCbMessage::GetCmasUrgency(int8_t &urgency) const
         case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_SPANISH:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_DEFUALT:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_SPANISH:
-            urgency = SMS_CMAE_URGENCY_EXPECTED;
+            urgency = static_cast<uint8_t>(SmsCmaeUrgency::EXPECTED);
             break;
         default:
-            urgency = SMS_CMAE_URGENCY_RESERVED;
+            urgency = static_cast<uint8_t>(SmsCmaeUrgency::RESERVED);
             break;
     }
     return true;
@@ -836,7 +836,7 @@ bool SmsCbMessage::GetCmasCertainty(int8_t &certainty) const
         case SmsCmasMessageType::CMAS_SERVER_SERVER_OBSERVED_SPANISH:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_DEFUALT:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_OBSERVED_SPANISH:
-            certainty = SMS_CMAE_CERTAINTY_OBSERVED;
+            certainty = static_cast<uint8_t>(SmsCmaeCertainty::OBSERVED);
             break;
         case SmsCmasMessageType::CMAS_EXTREME_LIKELY_DEFUALT:
         case SmsCmasMessageType::CMAS_EXTREME_LIKELY_SPANISH:
@@ -846,10 +846,10 @@ bool SmsCbMessage::GetCmasCertainty(int8_t &certainty) const
         case SmsCmasMessageType::CMAS_SERVER_SERVER_LIKELY_SPANISH:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_DEFUALT:
         case SmsCmasMessageType::CMAS_SERVER_SERVER_EXPECTED_LIKELY_SPANISH:
-            certainty = SMS_CMAE_CERTAINTY_LIKELY;
+            certainty = static_cast<uint8_t>(SmsCmaeCertainty::LIKELY);
             break;
         default:
-            certainty = SMS_CMAE_CERTAINTY_RESERVED;
+            certainty = static_cast<uint8_t>(SmsCmaeCertainty::RESERVED);
             break;
     }
     return true;
@@ -861,7 +861,7 @@ bool SmsCbMessage::GetCmasCategory(int8_t &cmasCategory) const
         TELEPHONY_LOGE("cbHeader_ is nullptr");
         return false;
     }
-    cmasCategory = SMS_CMAE_CTG_RESERVED;
+    cmasCategory = static_cast<int8_t>(SmsCmaeCategory::RESERVED);
     return true;
 }
 
@@ -871,7 +871,7 @@ bool SmsCbMessage::GetCmasResponseType(int8_t &cmasRes) const
         TELEPHONY_LOGE("cbHeader_ is nullptr");
         return false;
     }
-    cmasRes = SMS_CMAE_RESP_TYPE_RESERVED;
+    cmasRes = static_cast<int8_t>(SmsCmaeResponseType::RESERVED);
     return true;
 }
 

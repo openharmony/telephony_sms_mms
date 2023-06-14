@@ -15,9 +15,9 @@
 
 #include "cdma_sms_receive_handler.h"
 
+#include "cdma_sms_common.h"
 #include "cdma_sms_message.h"
 #include "cdma_sms_sender.h"
-#include "cdma_sms_types.h"
 #include "common_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -52,7 +52,7 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
     int service = message->GetTransTeleService();
-    if (SMS_TRANS_TELESVC_WEMT == service || SMS_TRANS_TELESVC_CMT_95 == service) {
+    if (static_cast<int>(SmsTransTelsvcId::WEMT) == service || static_cast<int>(SmsTransTelsvcId::CMT_95) == service) {
         if (message->IsStatusReport() && !cdmaSmsSender_.expired()) {
             std::shared_ptr<SmsSender> smsSender = cdmaSmsSender_.lock();
             CdmaSmsSender *cdmaSend = static_cast<CdmaSmsSender *>(smsSender.get());
