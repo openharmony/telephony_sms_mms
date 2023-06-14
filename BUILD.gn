@@ -28,6 +28,7 @@ ohos_shared_library("tel_sms_mms") {
   sources = [
     "frameworks/native/sms/src/short_message.cpp",
     "services/cdma/cdma_sms_message.cpp",
+    "services/cdma/cdma_sms_parameter_record.cpp",
     "services/cdma/cdma_sms_receive_handler.cpp",
     "services/cdma/cdma_sms_sender.cpp",
     "services/cdma/cdma_sms_transport_message.cpp",
