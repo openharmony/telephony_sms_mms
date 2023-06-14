@@ -16,7 +16,7 @@
 #ifndef CDMA_SMS_TRANSPORT_MESSAGE_H
 #define CDMA_SMS_TRANSPORT_MESSAGE_H
 
-#include "cdma_sms_types.h"
+#include "cdma_sms_common.h"
 #include "sms_pdu_buffer.h"
 
 namespace OHOS {
@@ -29,8 +29,8 @@ public:
     virtual bool Decode(SmsReadBuffer &pdu);
     virtual bool IsEmpty();
 
-    static std::unique_ptr<CdmaSmsTransportMessage> CreateTransportMessage(SmsTransMsg &msg);
-    static std::unique_ptr<CdmaSmsTransportMessage> CreateTransportMessage(SmsTransMsg &msg, SmsReadBuffer &pdu);
+    static std::unique_ptr<CdmaSmsTransportMessage> CreateTransportMessage(CdmaTransportMsg &msg);
+    static std::unique_ptr<CdmaSmsTransportMessage> CreateTransportMessage(CdmaTransportMsg &msg, SmsReadBuffer &pdu);
 };
 
 } // namespace Telephony

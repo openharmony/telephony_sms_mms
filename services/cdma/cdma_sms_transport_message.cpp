@@ -39,14 +39,14 @@ bool CdmaSmsTransportMessage::IsEmpty()
     return true;
 }
 
-std::unique_ptr<CdmaSmsTransportMessage> CdmaSmsTransportMessage::CreateTransportMessage(SmsTransMsg &msg)
+std::unique_ptr<CdmaSmsTransportMessage> CdmaSmsTransportMessage::CreateTransportMessage(CdmaTransportMsg &msg)
 {
     TELEPHONY_LOGW("create not support");
     return nullptr;
 }
 
 std::unique_ptr<CdmaSmsTransportMessage> CdmaSmsTransportMessage::CreateTransportMessage(
-    SmsTransMsg &msg, SmsReadBuffer &pdu)
+    CdmaTransportMsg &msg, SmsReadBuffer &pdu)
 {
     TELEPHONY_LOGW("create not support");
     return nullptr;
