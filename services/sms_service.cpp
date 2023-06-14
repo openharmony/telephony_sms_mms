@@ -20,13 +20,13 @@
 #include "cdma_sms_message.h"
 #include "core_manager_inner.h"
 #include "ims_sms_client.h"
-#include "msg_text_convert.h"
 #include "runner_pool.h"
 #include "sms_dump_helper.h"
 #include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
+#include "text_coder.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -617,20 +617,20 @@ int32_t SmsService::CreateMessage(std::string pdu, std::string specification, Sh
 
 bool SmsService::GetBase64Encode(std::string src, std::string &dest)
 {
-    MsgTextConvert::Instance().Base64Encode(src, dest);
+    TextCoder::Instance().Base64Encode(src, dest);
     return true;
 }
 
 bool SmsService::GetBase64Decode(std::string src, std::string &dest)
 {
-    MsgTextConvert::Instance().Base64Decode(src, dest);
+    TextCoder::Instance().Base64Decode(src, dest);
     return true;
 }
 
 bool SmsService::GetEncodeStringFunc(
     std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString)
 {
-    MsgTextConvert::Instance().GetEncodeString(encodeString, charset, valLength, strEncodeString);
+    TextCoder::Instance().GetEncodeString(encodeString, charset, valLength, strEncodeString);
     return true;
 }
 } // namespace Telephony
