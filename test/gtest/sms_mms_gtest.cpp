@@ -2799,7 +2799,7 @@ HWTEST_F(SmsMmsGtest, CdmaSmsMessage_0001, Function | MediumTest | Level1)
     cdmaSmsMessage.CovertEncodingType(codingScheme);
     cdmaSmsMessage.CreateMessage(pdu);
     cdmaSmsMessage.PduAnalysis(pdu);
-    SmsTransP2PMsg p2pMsg;
+    CdmaP2PMsg p2pMsg;
     cdmaSmsMessage.AnalysisP2pMsg(p2pMsg);
     cdmaSmsMessage.AnalsisDeliverMwi(p2pMsg);
     bool ret = cdmaSmsMessage.PduAnalysis("");

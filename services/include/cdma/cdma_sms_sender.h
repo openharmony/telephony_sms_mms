@@ -71,17 +71,17 @@ protected:
 private:
     static constexpr uint16_t TAPI_NETTEXT_SMDATA_SIZE_MAX = 255;
 
-    void SetConcact(const std::shared_ptr<SmsSendIndexer> &smsIndexer,
-        const std::unique_ptr<SmsTransMsg> &transMsg);
+    void SetConcact(
+        const std::shared_ptr<SmsSendIndexer> &smsIndexer, const std::unique_ptr<CdmaTransportMsg> &transMsg);
     uint8_t GetSeqNum();
     uint8_t GetSubmitMsgId();
     void SetPduSeqInfo(const std::shared_ptr<SmsSendIndexer> &smsIndexer, const std::size_t size,
-        const std::unique_ptr<SmsTransMsg> &transMsg, const std::size_t index, const uint8_t msgRef8bit);
+        const std::unique_ptr<CdmaTransportMsg> &transMsg, const std::size_t index, const uint8_t msgRef8bit);
 
     void SendCsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu);
     void SendImsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu);
 
-    std::unique_ptr<std::vector<uint8_t>> EncodeMsg(SmsTransMsg &msg);
+    std::unique_ptr<std::vector<uint8_t>> EncodeMsg(CdmaTransportMsg &msg);
 
 private:
     uint8_t msgSeqNum_ = 0;
