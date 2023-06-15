@@ -22,6 +22,9 @@
 
 namespace OHOS {
 namespace Telephony {
+
+static constexpr uint8_t MAX_ABSTIME_LEN = 32;
+
 int SmsCommonUtils::Pack7bitChar(const unsigned char *userData, int dataLen, int fillBits, unsigned char *packData)
 {
     int srcIdx = 0;
@@ -249,6 +252,20 @@ unsigned char SmsCommonUtils::DigitToDtmfChar(const unsigned char c)
     }
 }
 
+unsigned char SmsCommonUtils::DtmfCharToDigit(const unsigned char c)
+{
+    switch (c) {
+        case 0x0B:
+            return '*';
+        case 0x0C:
+            return '#';
+        case 0x0A:
+            return '0';
+        default:
+            return (c + '0');
+    }
+}
+
 int64_t SmsCommonUtils::ConvertTime(const struct SmsTimeAbs &timeAbs)
 {
     time_t rawtime;
@@ -280,8 +297,7 @@ int64_t SmsCommonUtils::ConvertTime(const struct SmsTimeAbs &timeAbs)
 void SmsCommonUtils::DisplayTime(const time_t &rawtime)
 {
     struct tm tmInfo;
-    const uint8_t maxAbsTimeLen = 32;
-    char displayTime[maxAbsTimeLen];
+    char displayTime[MAX_ABSTIME_LEN];
     if (memset_s(&tmInfo, sizeof(struct tm), 0x00, sizeof(tm)) != EOK) {
         TELEPHONY_LOGE("DisplayTime memset fail.");
         return;
@@ -293,7 +309,7 @@ void SmsCommonUtils::DisplayTime(const time_t &rawtime)
     }
 
     localtime_r(&rawtime, &tmInfo);
-    if (strftime(displayTime, maxAbsTimeLen, "%Y-%02m-%02d %T %z", &tmInfo) <= 0) {
+    if (strftime(displayTime, MAX_ABSTIME_LEN, "%Y-%02m-%02d %T %z", &tmInfo) <= 0) {
         TELEPHONY_LOGE("strftime error.");
         return;
     }
