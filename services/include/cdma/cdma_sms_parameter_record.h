@@ -32,6 +32,9 @@ protected:
     inline bool IsInvalidPdu(SmsReadBuffer &pdu);
 
 public:
+    uint8_t id_ { RESERVED };
+    uint8_t len_ { 0 };
+
     enum ParameterId : uint8_t {
         TELESERVICE_ID = 0x00,
         SERVICE_CATEGORY = 0x01,
@@ -51,6 +54,9 @@ public:
     explicit CdmaSmsTeleserviceId(uint16_t &id);
     bool Encode(SmsWriteBuffer &pdu) override;
     bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    uint16_t &teleserviceId_;
 };
 
 class CdmaSmsServiceCategory : public CdmaSmsParameterRecord {
@@ -58,6 +64,9 @@ public:
     explicit CdmaSmsServiceCategory(uint16_t &cat);
     bool Encode(SmsWriteBuffer &pdu) override;
     bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    uint16_t &serviceCat_;
 };
 
 class CdmaSmsBearerReply : public CdmaSmsParameterRecord {
@@ -65,6 +74,9 @@ public:
     explicit CdmaSmsBearerReply(uint8_t &replySeq);
     bool Encode(SmsWriteBuffer &pdu) override;
     bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    uint8_t &replySeq_;
 };
 
 class CdmaSmsCauseCodes : public CdmaSmsParameterRecord {
@@ -72,6 +84,10 @@ public:
     explicit CdmaSmsCauseCodes(TransportCauseCode &code);
     bool Encode(SmsWriteBuffer &pdu) override;
     bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    TransportCauseCode &code_;
+    enum ErrorClass : uint8_t { NONE = 0b00, TEMPORARY = 0b10, PERMANENT = 0b11 };
 };
 
 class CdmaSmsAddressParameter : public CdmaSmsParameterRecord {
