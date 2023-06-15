@@ -192,28 +192,229 @@ bool CdmaSmsCauseCodes::Decode(SmsReadBuffer &pdu)
     return true;
 }
 
-CdmaSmsAddressParameter::CdmaSmsAddressParameter(TransportAddr &address, uint8_t id) {}
+CdmaSmsAddressParameter::CdmaSmsAddressParameter(TransportAddr &address, uint8_t id) : address_(address)
+{
+    if (id == ORG_ADDRESS || id == DEST_ADDRESS) {
+        id_ = id;
+    } else {
+        isInvalid_ = true;
+        TELEPHONY_LOGE("invalid ID[%{public}d]", id);
+    }
+}
 
 bool CdmaSmsAddressParameter::Encode(SmsWriteBuffer &pdu)
 {
-    return false;
+    if (isInvalid_ || pdu.IsEmpty()) {
+        TELEPHONY_LOGE("invalid ID or pdu");
+        return false;
+    }
+    if (!pdu.WriteByte(id_)) {
+        TELEPHONY_LOGE("id write error");
+        return false;
+    }
+    uint16_t lenIndex = pdu.MoveForward();
+    if (!pdu.WriteBits(address_.digitMode ? 0b1 : 0b0) || !pdu.WriteBits(address_.numberMode ? 0b1 : 0b0)) {
+        TELEPHONY_LOGE("digit mode or number mode write error");
+        return false;
+    }
+    if (address_.digitMode) {
+        if (!pdu.WriteBits(address_.numberType, BIT3)) {
+            TELEPHONY_LOGE("number type write error");
+            return false;
+        }
+        if (!address_.numberMode && !pdu.WriteBits(address_.numberPlan, BIT4)) {
+            TELEPHONY_LOGE("number plan write error");
+            return false;
+        }
+    }
+    if (!EncodeAddress(pdu)) {
+        TELEPHONY_LOGE("encode address error");
+        return false;
+    }
+    len_ = pdu.SkipBits() - lenIndex - 1;
+    return pdu.InsertByte(len_, lenIndex);
 }
 
 bool CdmaSmsAddressParameter::Decode(SmsReadBuffer &pdu)
 {
-    return false;
+    if (isInvalid_ || IsInvalidPdu(pdu)) {
+        TELEPHONY_LOGE("invalid ID or pdu");
+        return false;
+    }
+    if (memset_s(&address_, sizeof(address_), 0x0, sizeof(address_)) != EOK) {
+        TELEPHONY_LOGE("memset_s error");
+        return false;
+    }
+
+    uint8_t v1 = 0;
+    uint8_t v2 = 0;
+    if (!pdu.ReadBits(v1) || !pdu.ReadBits(v2)) {
+        TELEPHONY_LOGE("digit mode or number mode read error");
+        return false;
+    }
+    address_.digitMode = (v1 == 0b1) ? true : false;
+    address_.numberMode = (v2 == 0b1) ? true : false;
+    if (address_.digitMode) {
+        if (!pdu.ReadBits(address_.numberType, BIT3)) {
+            TELEPHONY_LOGE("number type read error");
+            return false;
+        }
+        if (!address_.numberMode && !pdu.ReadBits(address_.numberPlan, BIT4)) {
+            TELEPHONY_LOGE("number plan read error");
+            return false;
+        }
+    }
+    if (!DecodeAddress(pdu)) {
+        TELEPHONY_LOGE("decode address error");
+        return false;
+    }
+    pdu.SkipBits();
+    return true;
 }
 
-CdmaSmsSubaddress::CdmaSmsSubaddress(TransportSubAddr &address, uint8_t id) {}
+bool CdmaSmsAddressParameter::EncodeAddress(SmsWriteBuffer &pdu)
+{
+    if (!pdu.WriteBits(address_.addrLen, BIT8)) {
+        TELEPHONY_LOGE("addlen write error");
+        return false;
+    }
+    if (static_cast<unsigned long>(address_.addrLen) > (sizeof(address_.szData) / sizeof(address_.szData[0]))) {
+        TELEPHONY_LOGE("address length error");
+        return false;
+    }
+    if (address_.digitMode) {
+        for (uint8_t i = 0; i < address_.addrLen; i++) {
+            if (!pdu.WriteBits(address_.szData[i], BIT8)) {
+                TELEPHONY_LOGE("address write error");
+                return false;
+            }
+        }
+    } else {
+        for (uint8_t i = 0; i < address_.addrLen; i++) {
+            if (!pdu.WriteBits(SmsCommonUtils::DigitToDtmfChar(address_.szData[i]), BIT4)) {
+                TELEPHONY_LOGE("address write error");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool CdmaSmsAddressParameter::DecodeAddress(SmsReadBuffer &pdu)
+{
+    uint8_t v1 = 0;
+    if (!pdu.ReadBits(v1, BIT8)) {
+        TELEPHONY_LOGE("addrlen read error");
+        return false;
+    }
+    address_.addrLen = v1;
+    if (static_cast<unsigned long>(address_.addrLen) > (sizeof(address_.szData) / sizeof(address_.szData[0]))) {
+        TELEPHONY_LOGE("address length error");
+        return false;
+    }
+    if (address_.digitMode) {
+        for (uint8_t i = 0; i < address_.addrLen; i++) {
+            if (!pdu.ReadBits(v1, BIT8)) {
+                TELEPHONY_LOGE("address read error");
+                return false;
+            }
+            address_.szData[i] = v1;
+        }
+    } else {
+        for (uint8_t i = 0; i < address_.addrLen; i++) {
+            if (!pdu.ReadBits(v1, BIT4)) {
+                TELEPHONY_LOGE("address read error");
+                return false;
+            }
+            address_.szData[i] = SmsCommonUtils::DtmfCharToDigit(v1);
+        }
+    }
+    return true;
+}
+
+CdmaSmsSubaddress::CdmaSmsSubaddress(TransportSubAddr &address, uint8_t id) : address_(address)
+{
+    if (id == ORG_SUB_ADDRESS || id == DEST_SUB_ADDRESS) {
+        id_ = id;
+    } else {
+        isInvalid_ = true;
+        TELEPHONY_LOGE("invalid ID[%{public}d]", id);
+    }
+}
 
 bool CdmaSmsSubaddress::Encode(SmsWriteBuffer &pdu)
 {
-    return false;
+    if (isInvalid_ || pdu.IsEmpty()) {
+        TELEPHONY_LOGE("invalid ID or pdu");
+        return false;
+    }
+
+    if (!pdu.WriteByte(id_)) {
+        TELEPHONY_LOGE("id write error");
+        return false;
+    }
+    uint16_t lenIndex = pdu.MoveForward();
+    if (!pdu.WriteBits(static_cast<uint8_t>(address_.type), BIT3) || !pdu.WriteBits(address_.odd ? 0b1 : 0b0) ||
+        !pdu.WriteBits(address_.addrLen, BIT8)) {
+        TELEPHONY_LOGE("type, odd or addrlen write error");
+        return false;
+    }
+
+    if (static_cast<unsigned long>(address_.addrLen) > (sizeof(address_.szData) / sizeof(address_.szData[0]))) {
+        TELEPHONY_LOGE("address length error");
+        return false;
+    }
+
+    for (uint8_t i = 0; i < address_.addrLen; i++) {
+        if (!pdu.WriteBits(address_.szData[i], BIT8)) {
+            TELEPHONY_LOGE("address write error");
+            return false;
+        }
+    }
+    len_ = pdu.SkipBits() - lenIndex - 1;
+    return pdu.InsertByte(len_, lenIndex);
 }
 
 bool CdmaSmsSubaddress::Decode(SmsReadBuffer &pdu)
 {
-    return false;
+    if (isInvalid_ || IsInvalidPdu(pdu)) {
+        TELEPHONY_LOGE("invalid ID or pdu");
+        return false;
+    }
+    if (memset_s(&address_, sizeof(address_), 0x0, sizeof(address_)) != EOK) {
+        TELEPHONY_LOGE("memset_s error");
+        return false;
+    }
+
+    uint8_t v1 = 0;
+    uint8_t v2 = 0;
+    uint8_t v3 = 0;
+    if (!pdu.ReadBits(v1, BIT3) || !pdu.ReadBits(v2) || !pdu.ReadBits(v3, BIT8)) {
+        TELEPHONY_LOGE("type, odd or addrlen read error");
+        return false;
+    }
+    if (v1 == NSAP) {
+        address_.type = TransportSubAddrType::NSAP;
+    } else if (v1 == USER) {
+        address_.type = TransportSubAddrType::USER;
+    } else {
+        address_.type = TransportSubAddrType::RESERVED;
+    }
+    address_.odd = (v2 == 0b1) ? true : false;
+    address_.addrLen = v3;
+    if (static_cast<unsigned long>(address_.addrLen) > (sizeof(address_.szData) / sizeof(address_.szData[0]))) {
+        TELEPHONY_LOGE("address length error");
+        return false;
+    }
+    for (uint8_t i = 0; i < address_.addrLen; i++) {
+        if (!pdu.ReadBits(v1, BIT8)) {
+            TELEPHONY_LOGE("address read error");
+            return false;
+        }
+        address_.szData[i] = v1;
+    }
+    pdu.SkipBits();
+    return true;
 }
 
 CdmaSmsBearerData::CdmaSmsBearerData(CdmaTeleserviceMsg &msg) {}
