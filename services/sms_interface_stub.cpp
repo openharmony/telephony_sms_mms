@@ -327,13 +327,13 @@ void SmsInterfaceStub::OnGetDefaultSmsSimId(MessageParcel &data, MessageParcel &
         return;
     }
     if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("result %{public}d", result);
         return;
     }
     if (!reply.WriteInt32(simId)) {
         TELEPHONY_LOGE("write int32 reply failed.");
         return;
     }
-    return;
 }
 
 void SmsInterfaceStub::OnSplitMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option)
