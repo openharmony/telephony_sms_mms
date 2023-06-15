@@ -638,6 +638,8 @@ HWTEST_F(BranchTest, SmsCommonUtils_0001, Function | MediumTest | Level1)
     EXPECT_EQ(smsCommonUtils->ConvertDigitToDTMF(digit, FILL_BITS, 0, packData), 1);
     EXPECT_EQ(smsCommonUtils->ConvertDigitToDTMF(digit, FILL_BITS, 0, packData), 1);
     EXPECT_EQ(smsCommonUtils->ConvertDigitToDTMF(digit, FILL_BITS, FILL_BITS, packData), 1);
+    EXPECT_EQ(smsCommonUtils->DigitToDtmfChar('*'), static_cast<char>(0x0B));
+    EXPECT_EQ(smsCommonUtils->DtmfCharToDigit(static_cast<char>(0x0B)), '*');
 }
 
 /**
