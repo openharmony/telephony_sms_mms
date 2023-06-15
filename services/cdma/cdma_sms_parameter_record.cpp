@@ -417,18 +417,84 @@ bool CdmaSmsSubaddress::Decode(SmsReadBuffer &pdu)
     return true;
 }
 
-CdmaSmsBearerData::CdmaSmsBearerData(CdmaTeleserviceMsg &msg) {}
+CdmaSmsBearerData::CdmaSmsBearerData(CdmaTeleserviceMsg &msg)
+{
+    id_ = BEARER_DATA;
+    if (msg.type == TeleserviceMsgType::SUBMIT) {
+        teleserviceMessage_ = std::make_unique<CdmaSmsSubmitMessage>(msg.data.submit);
+    } else if (msg.type == TeleserviceMsgType::CANCEL) {
+        teleserviceMessage_ = std::make_unique<CdmaSmsCancelMessage>(msg.data.cancel);
+    } else if (msg.type == TeleserviceMsgType::DELIVER_REPORT) {
+        teleserviceMessage_ = std::make_unique<CdmaSmsDeliverReport>(msg.data.report);
+    } else {
+        TELEPHONY_LOGE("no matching type[%{public}d]", static_cast<uint8_t>(msg.type));
+    }
+}
 
-CdmaSmsBearerData::CdmaSmsBearerData(CdmaTeleserviceMsg &msg, SmsReadBuffer &pdu, bool isCMAS) {}
+CdmaSmsBearerData::CdmaSmsBearerData(CdmaTeleserviceMsg &msg, SmsReadBuffer &pdu, bool isCMAS)
+{
+    id_ = BEARER_DATA;
+    // teleservice pdu, does not include id and length
+    uint8_t index = pdu.GetIndex();
+    uint8_t type = CdmaSmsTeleserviceMessage::GetMessageType(pdu);
+    pdu.SetIndex(index);
+    if (type == CdmaSmsTeleserviceMessage::DELIVER) {
+        msg.type = TeleserviceMsgType::DELIVER;
+        teleserviceMessage_ = std::make_unique<CdmaSmsDeliverMessage>(msg.data.deliver, pdu, isCMAS);
+    } else if (type == CdmaSmsTeleserviceMessage::SUBMIT) {
+        msg.type = TeleserviceMsgType::SUBMIT;
+        teleserviceMessage_ = std::make_unique<CdmaSmsSubmitMessage>(msg.data.submit, pdu);
+    } else if (type == CdmaSmsTeleserviceMessage::DELIVERY_ACK) {
+        msg.type = TeleserviceMsgType::DELIVERY_ACK;
+        teleserviceMessage_ = std::make_unique<CdmaSmsDeliveryAck>(msg.data.deliveryAck, pdu);
+    } else if (type == CdmaSmsTeleserviceMessage::USER_ACK) {
+        msg.type = TeleserviceMsgType::USER_ACK;
+        teleserviceMessage_ = std::make_unique<CdmaSmsUserAck>(msg.data.userAck, pdu);
+    } else if (type == CdmaSmsTeleserviceMessage::READ_ACK) {
+        msg.type = TeleserviceMsgType::READ_ACK;
+        teleserviceMessage_ = std::make_unique<CdmaSmsReadAck>(msg.data.readAck, pdu);
+    } else {
+        msg.type = TeleserviceMsgType::RESERVED;
+        TELEPHONY_LOGE("no matching type[%{public}d]", type);
+    }
+}
 
 bool CdmaSmsBearerData::Encode(SmsWriteBuffer &pdu)
 {
-    return false;
+    if (pdu.IsEmpty()) {
+        TELEPHONY_LOGE("pdu is empty");
+        return false;
+    }
+    if (teleserviceMessage_ == nullptr) {
+        TELEPHONY_LOGE("teleservice message is null");
+        return false;
+    }
+
+    if (!pdu.WriteByte(id_)) {
+        TELEPHONY_LOGE("id write error");
+        return false;
+    }
+    uint16_t lenIndex = pdu.MoveForward();
+    if (!teleserviceMessage_->Encode(pdu)) {
+        TELEPHONY_LOGE("teleservice message encode error");
+        return false;
+    }
+    len_ = pdu.GetIndex() - lenIndex - 1;
+    return pdu.InsertByte(len_, lenIndex);
 }
 
 bool CdmaSmsBearerData::Decode(SmsReadBuffer &pdu)
 {
-    return false;
+    if (teleserviceMessage_ == nullptr) {
+        TELEPHONY_LOGE("Teleservice message is null");
+        return false;
+    }
+    if (IsInvalidPdu(pdu)) {
+        TELEPHONY_LOGE("invalid pdu");
+        return false;
+    }
+
+    return teleserviceMessage_->Decode(pdu);
 }
 
 } // namespace Telephony
