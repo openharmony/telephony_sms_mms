@@ -95,6 +95,14 @@ public:
     CdmaSmsAddressParameter(TransportAddr &address, uint8_t id);
     bool Encode(SmsWriteBuffer &pdu) override;
     bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    bool EncodeAddress(SmsWriteBuffer &pdu);
+    bool DecodeAddress(SmsReadBuffer &pdu);
+
+private:
+    TransportAddr &address_;
+    bool isInvalid_ { false };
 };
 
 class CdmaSmsSubaddress : public CdmaSmsParameterRecord {
@@ -102,6 +110,11 @@ public:
     CdmaSmsSubaddress(TransportSubAddr &address, uint8_t id);
     bool Encode(SmsWriteBuffer &pdu) override;
     bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    TransportSubAddr &address_;
+    bool isInvalid_ { false };
+    enum SubaddressType : uint8_t { NSAP = 0b000, USER = 0b001, RESERVED };
 };
 
 class CdmaSmsBearerData : public CdmaSmsParameterRecord {
