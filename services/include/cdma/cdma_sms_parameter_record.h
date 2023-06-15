@@ -17,6 +17,7 @@
 #define CDMA_SMS_PARAMETER_RECORD_H
 
 #include "cdma_sms_common.h"
+#include "cdma_sms_teleservice_message.h"
 #include "sms_pdu_buffer.h"
 
 namespace OHOS {
@@ -123,6 +124,9 @@ public:
     CdmaSmsBearerData(CdmaTeleserviceMsg &msg, SmsReadBuffer &pdu, bool isCMAS = false);
     bool Encode(SmsWriteBuffer &pdu) override;
     bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    std::unique_ptr<CdmaSmsTeleserviceMessage> teleserviceMessage_ { nullptr };
 };
 
 } // namespace Telephony
