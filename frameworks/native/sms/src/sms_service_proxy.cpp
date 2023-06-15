@@ -337,10 +337,7 @@ int32_t SmsServiceProxy::GetDefaultSmsSlotId()
 
 int32_t SmsServiceProxy::GetDefaultSmsSimId(int32_t &simId)
 {
-    TELEPHONY_LOGI("start");
     MessageParcel dataParcel;
-    MessageParcel replyParcel;
-    MessageOption option(MessageOption::TF_SYNC);
     if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
         TELEPHONY_LOGE("WriteInterfaceToken is false");
         return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
@@ -350,6 +347,8 @@ int32_t SmsServiceProxy::GetDefaultSmsSimId(int32_t &simId)
         TELEPHONY_LOGE("Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
     remote->SendRequest(GET_DEFAULT_SMS_SIM_ID, dataParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
     TELEPHONY_LOGI("end: result=%{public}d", result);
