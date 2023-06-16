@@ -145,7 +145,41 @@ private:
 
 class CdmaSmsUserData : public CdmaSmsSubParameter {
 public:
-    CdmaSmsUserData(SmsTeleSvcUserData &data, bool &headerInd) {}
+    CdmaSmsUserData(SmsTeleSvcUserData &data, bool &headerInd);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+    static inline SmsEncodingType GetEncodingType(uint8_t v);
+
+private:
+    bool EncodeAscii7Bit(SmsWriteBuffer &pdu);
+    bool EncodeGsm7Bit(SmsWriteBuffer &pdu);
+    bool EncodeUnicode(SmsWriteBuffer &pdu);
+    bool Encode8BitData(SmsWriteBuffer &pdu);
+    bool EncodeHeader7Bit(SmsWriteBuffer &pdu);
+    bool EncodeHeaderUnicode(SmsWriteBuffer &pdu);
+    uint8_t DecodeHeader7Bit(SmsReadBuffer &pdu);
+    bool DecodeAscii7Bit(SmsReadBuffer &pdu, uint8_t numFields, uint8_t udhBytes);
+    bool DecodeGsm7Bit(SmsReadBuffer &pdu, uint8_t numFields, uint8_t udhBytes);
+    bool Decode8BitData(SmsReadBuffer &pdu);
+
+private:
+    SmsTeleSvcUserData &data_;
+    bool &headerInd_;
+
+    enum EncodingType : uint8_t {
+        OCTET = 0x0,
+        EPM = 0x1,
+        ASCII7BIT = 0x2,
+        IA5 = 0x3,
+        UNICODE = 0x4,
+        SHIFT_JIS = 0x5,
+        KOREAN = 0x6,
+        LATIN_HEBREW = 0x7,
+        LATIN = 0x8,
+        GSM7BIT = 0x9,
+        GSMDCS = 0xa,
+        EUCKR = 0x10
+    };
 };
 
 class CdmaSmsCmasData : public CdmaSmsSubParameter {
