@@ -1171,5 +1171,131 @@ bool CdmaSmsCallbackNumber::Decode(SmsReadBuffer &pdu)
     return true;
 }
 
+CdmaSmsDepositIndex::CdmaSmsDepositIndex(uint16_t &index) : index_(index)
+{
+    id_ = MESSAGE_DEPOSIT_INDEX;
+    len_ = sizeof(index_);
+}
+
+bool CdmaSmsDepositIndex::Encode(SmsWriteBuffer &pdu)
+{
+    if (pdu.IsEmpty()) {
+        TELEPHONY_LOGE("pdu is empty");
+        return false;
+    }
+
+    if (pdu.WriteByte(id_) && pdu.WriteByte(len_) && pdu.WriteWord(index_)) {
+        return true;
+    }
+
+    TELEPHONY_LOGE("encode error");
+    return false;
+}
+
+bool CdmaSmsDepositIndex::Decode(SmsReadBuffer &pdu)
+{
+    if (IsInvalidPdu(pdu)) {
+        TELEPHONY_LOGE("invalid pdu");
+        return false;
+    }
+
+    return pdu.ReadWord(index_);
+}
+
+CdmaSmsDisplayMode::CdmaSmsDisplayMode(SmsDisplayMode &mode) : mode_(mode)
+{
+    id_ = MESSAGE_DISPLAY_MODE;
+    len_ = sizeof(uint8_t);
+}
+
+bool CdmaSmsDisplayMode::Encode(SmsWriteBuffer &pdu)
+{
+    if (pdu.IsEmpty()) {
+        TELEPHONY_LOGE("pdu is empty");
+        return false;
+    }
+
+    if (pdu.WriteByte(id_) && pdu.WriteByte(len_)) {
+        if (pdu.WriteBits(static_cast<uint8_t>(mode_), BIT2)) {
+            pdu.SkipBits();
+            return true;
+        }
+    }
+
+    TELEPHONY_LOGE("encode error");
+    return false;
+}
+
+bool CdmaSmsDisplayMode::Decode(SmsReadBuffer &pdu)
+{
+    if (IsInvalidPdu(pdu)) {
+        TELEPHONY_LOGE("invalid pdu");
+        return false;
+    }
+
+    uint8_t v = 0;
+    if (!pdu.ReadBits(v, BIT2)) {
+        TELEPHONY_LOGE("data read error");
+        return false;
+    }
+    pdu.SkipBits();
+    mode_ = SmsDisplayMode(v);
+    return true;
+}
+
+CdmaSmsMessageStatus::CdmaSmsMessageStatus(SmsStatusCode &status) : status_(status)
+{
+    id_ = MESSAGE_STATUS;
+}
+
+bool CdmaSmsMessageStatus::Encode(SmsWriteBuffer &pdu)
+{
+    TELEPHONY_LOGE("encode not support");
+    return false;
+}
+
+bool CdmaSmsMessageStatus::Decode(SmsReadBuffer &pdu)
+{
+    if (IsInvalidPdu(pdu)) {
+        TELEPHONY_LOGE("invalid pdu");
+        return false;
+    }
+
+    uint8_t v = 0;
+    if (!pdu.ReadByte(v)) {
+        TELEPHONY_LOGE("data read error");
+        return false;
+    }
+    status_ = (SmsStatusCode)v;
+    return true;
+}
+
+CdmaSmsNumberMessages::CdmaSmsNumberMessages(uint32_t &num) : num_(num)
+{
+    id_ = NUMBER_OF_MESSAGES;
+}
+
+bool CdmaSmsNumberMessages::Encode(SmsWriteBuffer &pdu)
+{
+    TELEPHONY_LOGE("encode not support");
+    return false;
+}
+
+bool CdmaSmsNumberMessages::Decode(SmsReadBuffer &pdu)
+{
+    if (IsInvalidPdu(pdu)) {
+        TELEPHONY_LOGE("invalid pdu");
+        return false;
+    }
+
+    uint8_t v = 0;
+    if (!pdu.ReadByte(v)) {
+        TELEPHONY_LOGE("data read error");
+        return false;
+    }
+    num_ = (((v & 0xf0) >> BIT4) * DECIMAL_NUM) + (v & 0x0f);
+    return true;
+}
+
 } // namespace Telephony
 } // namespace OHOS
