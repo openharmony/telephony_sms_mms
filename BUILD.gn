@@ -31,6 +31,7 @@ ohos_shared_library("tel_sms_mms") {
     "services/cdma/cdma_sms_parameter_record.cpp",
     "services/cdma/cdma_sms_receive_handler.cpp",
     "services/cdma/cdma_sms_sender.cpp",
+    "services/cdma/cdma_sms_sub_parameter.cpp",
     "services/cdma/cdma_sms_teleservice_message.cpp",
     "services/cdma/cdma_sms_transport_message.cpp",
     "services/gsm/gsm_sms_cb_handler.cpp",
