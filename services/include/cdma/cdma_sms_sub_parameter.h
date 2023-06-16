@@ -232,12 +232,42 @@ private:
 
 class CdmaSmsDepositIndex : public CdmaSmsSubParameter {
 public:
-    explicit CdmaSmsDepositIndex(uint16_t &index) {}
+    explicit CdmaSmsDepositIndex(uint16_t &index);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    uint16_t &index_;
 };
 
 class CdmaSmsDisplayMode : public CdmaSmsSubParameter {
 public:
-    explicit CdmaSmsDisplayMode(SmsDisplayMode &mode) {}
+    explicit CdmaSmsDisplayMode(SmsDisplayMode &mode);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    SmsDisplayMode &mode_;
+};
+
+class CdmaSmsMessageStatus : public CdmaSmsSubParameter {
+public:
+    explicit CdmaSmsMessageStatus(SmsStatusCode &status);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    SmsStatusCode &status_;
+};
+
+class CdmaSmsNumberMessages : public CdmaSmsSubParameter {
+public:
+    explicit CdmaSmsNumberMessages(uint32_t &num);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    uint32_t &num_;
 };
 
 class CdmaSmsEnhancedVmn : public CdmaSmsSubParameter {
@@ -248,16 +278,6 @@ public:
 class CdmaSmsEnhancedVmnAck : public CdmaSmsSubParameter {
 public:
     explicit CdmaSmsEnhancedVmnAck(SmsEnhancedVmnAck &ack) {}
-};
-
-class CdmaSmsMessageStatus : public CdmaSmsSubParameter {
-public:
-    explicit CdmaSmsMessageStatus(SmsStatusCode &status) {}
-};
-
-class CdmaSmsNumberMessages : public CdmaSmsSubParameter {
-public:
-    explicit CdmaSmsNumberMessages(uint32_t &num) {}
 };
 
 } // namespace Telephony
