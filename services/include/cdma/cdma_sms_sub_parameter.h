@@ -25,14 +25,8 @@ namespace Telephony {
 class CdmaSmsSubParameter {
 public:
     virtual ~CdmaSmsSubParameter() = default;
-    virtual bool Encode(SmsWriteBuffer &pdu)
-    {
-        return false;
-    };
-    virtual bool Decode(SmsReadBuffer &pdu)
-    {
-        return false;
-    };
+    virtual bool Encode(SmsWriteBuffer &pdu) = 0;
+    virtual bool Decode(SmsReadBuffer &pdu) = 0;
 
 protected:
     inline bool IsInvalidPdu(SmsReadBuffer &pdu);
@@ -272,12 +266,28 @@ private:
 
 class CdmaSmsEnhancedVmn : public CdmaSmsSubParameter {
 public:
-    explicit CdmaSmsEnhancedVmn(SmsEnhancedVmn &vmn) {}
+    explicit CdmaSmsEnhancedVmn(SmsEnhancedVmn &vmn);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    bool DecodeHeader(SmsReadBuffer &pdu);
+    bool DecodeVoiceMail(SmsReadBuffer &pdu);
+    bool DecodeAccessNumber(SmsReadBuffer &pdu);
+    bool DecodeCallingPartyNumber(SmsReadBuffer &pdu);
+
+private:
+    SmsEnhancedVmn &vmn_;
 };
 
 class CdmaSmsEnhancedVmnAck : public CdmaSmsSubParameter {
 public:
-    explicit CdmaSmsEnhancedVmnAck(SmsEnhancedVmnAck &ack) {}
+    explicit CdmaSmsEnhancedVmnAck(SmsEnhancedVmnAck &ack);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    SmsEnhancedVmnAck &ack_;
 };
 
 } // namespace Telephony
