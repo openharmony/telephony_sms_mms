@@ -1,0 +1,88 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+SMS_MMS_SOURCE_DIR = "../../../"
+
+##############################fuzztest##########################################
+ohos_fuzztest("CdmaSmsDecodeFuzzTest") {
+  module_output_path = "sms_mms/CdmaSmsDecodeFuzzTest"
+  module_out_path = module_output_path
+  fuzz_config_file = "$SMS_MMS_SOURCE_DIR/test/fuzztest/cdmasmsdecode_fuzzer"
+
+  include_dirs = [
+    "$SMS_MMS_SOURCE_DIR/frameworks/js/napi/include",
+    "$SMS_MMS_SOURCE_DIR/services/include",
+    "$SMS_MMS_SOURCE_DIR/test/fuzztest/common_fuzzer",
+    "$SMS_MMS_SOURCE_DIR/interfaces/innerkits/",
+    "$SMS_MMS_SOURCE_DIR/interfaces/innerkits/ims",
+  ]
+
+  deps = [
+    "$SMS_MMS_SOURCE_DIR:tel_sms_mms",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
+    "//third_party/curl:curl",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "ability_runtime:data_ability_helper",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "core_service:tel_core_service_api",
+    "data_share:datashare_consumer",
+    "eventhandler:libeventhandler",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "netmanager_base:net_conn_manager_if",
+    "telephony_data:tel_telephony_data",
+  ]
+  defines = [
+    "TELEPHONY_LOG_TAG = \"SmsMmsFuzzTest\"",
+    "LOG_DOMAIN = 0xD000F00",
+  ]
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+
+  sources = [
+    "$SMS_MMS_SOURCE_DIR/test/fuzztest/common_fuzzer/addsmstoken_fuzzer.cpp",
+    "cdmasmsdecode_fuzzer.cpp",
+  ]
+}
+
+###############################################################################
+group("fuzztest") {
+  testonly = true
+  deps = []
+  deps += [
+    # deps file
+    ":CdmaSmsDecodeFuzzTest",
+  ]
+}
+###############################################################################
