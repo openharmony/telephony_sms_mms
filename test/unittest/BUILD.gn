@@ -16,6 +16,7 @@ import("//build/ohos.gni")
 SMS_MMS_SOURCE_DIR = "../../"
 ohos_executable("tel_sms_mms_test") {
   sources = [
+    "cdma_sms_test.cpp",
     "gsm_sms_sender_test.cpp",
     "mms_msg_test.cpp",
     "short_message_test.cpp",
