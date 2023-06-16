@@ -201,18 +201,33 @@ private:
 
 class CdmaSmsAlertPriority : public CdmaSmsSubParameter {
 public:
-    explicit CdmaSmsAlertPriority(SmsAlertPriority &alertPriority) {}
+    explicit CdmaSmsAlertPriority(SmsAlertPriority &alertPriority);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    SmsAlertPriority &alertPriority_;
 };
 
 class CdmaSmsLanguageInd : public CdmaSmsSubParameter {
 public:
-    explicit CdmaSmsLanguageInd(SmsLanguageType &language) {}
+    explicit CdmaSmsLanguageInd(SmsLanguageType &language);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    SmsLanguageType &language_;
 };
 
 class CdmaSmsCallbackNumber : public CdmaSmsSubParameter {
 public:
-    CdmaSmsCallbackNumber() {}
-    explicit CdmaSmsCallbackNumber(SmsTeleSvcAddr &address) {}
+    CdmaSmsCallbackNumber();
+    explicit CdmaSmsCallbackNumber(SmsTeleSvcAddr &address);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    SmsTeleSvcAddr &address_;
 };
 
 class CdmaSmsDepositIndex : public CdmaSmsSubParameter {
