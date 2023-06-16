@@ -184,7 +184,19 @@ private:
 
 class CdmaSmsCmasData : public CdmaSmsSubParameter {
 public:
-    explicit CdmaSmsCmasData(SmsTeleSvcCmasData &data) {}
+    explicit CdmaSmsCmasData(SmsTeleSvcCmasData &data);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    bool DecodeData(SmsReadBuffer &pdu);
+    bool DecodeType0Data(SmsReadBuffer &pdu);
+    bool DecodeType1Data(SmsReadBuffer &pdu);
+    bool DecodeType2Data(SmsReadBuffer &pdu);
+    bool DecodeAbsTime(SmsReadBuffer &pdu);
+
+private:
+    SmsTeleSvcCmasData &data_;
 };
 
 class CdmaSmsAlertPriority : public CdmaSmsSubParameter {
