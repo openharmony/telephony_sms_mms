@@ -770,5 +770,222 @@ SmsEncodingType CdmaSmsUserData::GetEncodingType(uint8_t v)
     }
 }
 
+CdmaSmsCmasData::CdmaSmsCmasData(SmsTeleSvcCmasData &data) : data_(data)
+{
+    id_ = USER_DATA;
+}
+
+bool CdmaSmsCmasData::Encode(SmsWriteBuffer &pdu)
+{
+    TELEPHONY_LOGE("encode not support");
+    return false;
+}
+
+bool CdmaSmsCmasData::Decode(SmsReadBuffer &pdu)
+{
+    if (IsInvalidPdu(pdu)) {
+        TELEPHONY_LOGE("invalid pdu");
+        return false;
+    }
+
+    if (memset_s(&data_, sizeof(SmsTeleSvcCmasData), 0x00, sizeof(SmsTeleSvcCmasData)) != EOK) {
+        TELEPHONY_LOGE("memset_s fail");
+        return false;
+    }
+    uint16_t index = pdu.GetIndex();
+    uint8_t v = 0;
+    if (!pdu.ReadBits(v, BIT5)) {
+        TELEPHONY_LOGE("encode type read error");
+        return false;
+    }
+    SmsEncodingType encodeType = CdmaSmsUserData::GetEncodingType(v);
+    if (encodeType != SmsEncodingType::OCTET) {
+        TELEPHONY_LOGE("wrong encode type [%{public}d], must be 0", v);
+        return false;
+    }
+    if (!pdu.ReadBits(v, BIT8) || !pdu.ReadBits(v, BIT8)) {
+        TELEPHONY_LOGE("protocol version read error");
+        return false;
+    }
+    if (v != 0x00) {
+        TELEPHONY_LOGE("wrong protocol version [%{public}d], must be 0", v);
+        data_.isWrongRecodeType = true;
+        return false;
+    }
+
+    while (pdu.GetIndex() < index + len_ - 1) {
+        if (!DecodeData(pdu)) {
+            TELEPHONY_LOGE("decode data error");
+            return false;
+        }
+    }
+    pdu.SkipBits();
+    return true;
+}
+
+bool CdmaSmsCmasData::DecodeData(SmsReadBuffer &pdu)
+{
+    uint8_t v = 0;
+    if (!pdu.ReadBits(v, BIT8)) {
+        TELEPHONY_LOGE("type read error");
+        return false;
+    }
+    if (v == 0x00) {
+        if (!DecodeType0Data(pdu)) {
+            TELEPHONY_LOGE("type 0 decode error");
+            return false;
+        }
+    } else if (v == 0x01) {
+        if (!DecodeType1Data(pdu)) {
+            TELEPHONY_LOGE("type 1 decode error");
+            return false;
+        }
+    } else if (v == 0x02) {
+        if (!DecodeType2Data(pdu)) {
+            TELEPHONY_LOGE("type 2 decode error");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool CdmaSmsCmasData::DecodeType0Data(SmsReadBuffer &pdu)
+{
+    uint8_t len = 0;
+    uint8_t v = 0;
+    if (!pdu.ReadBits(len, BIT8) || !pdu.ReadBits(v, BIT5)) {
+        TELEPHONY_LOGE("len read error");
+        return false;
+    }
+    SmsEncodingType encodeType = CdmaSmsUserData::GetEncodingType(v);
+    if (encodeType == SmsEncodingType::ASCII_7BIT || encodeType == SmsEncodingType::IA5 ||
+        encodeType == SmsEncodingType::GSM7BIT) {
+        data_.dataLen = (len * BIT8 - BIT5) / BIT7;
+        if (static_cast<unsigned long>(data_.dataLen) > (sizeof(data_.alertText) / sizeof(data_.alertText[0]))) {
+            TELEPHONY_LOGE("alert text length error");
+            return false;
+        }
+        for (uint16_t i = 0; i < data_.dataLen; i++) {
+            if (!pdu.ReadBits(data_.alertText[i], BIT7)) {
+                TELEPHONY_LOGE("alert text read error");
+                return false;
+            }
+        }
+        uint8_t ignoredBits = (len * BIT8 - BIT5) % BIT7;
+        if (ignoredBits == BIT0) {
+            return true;
+        }
+        return pdu.ReadBits(v, ignoredBits);
+    } else if (encodeType == SmsEncodingType::EPM || encodeType == SmsEncodingType::GSMDCS) {
+        TELEPHONY_LOGE("encode type not support");
+        return false;
+    } else {
+        data_.dataLen = (len == 0) ? 0 : (len - 1);
+        if (static_cast<unsigned long>(data_.dataLen) > (sizeof(data_.alertText) / sizeof(data_.alertText[0]))) {
+            TELEPHONY_LOGE("alert text length invalid.");
+            return false;
+        }
+        for (uint16_t i = 0; i < data_.dataLen; i++) {
+            if (!pdu.ReadBits(data_.alertText[i], BIT8)) {
+                TELEPHONY_LOGE("alert text read error");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool CdmaSmsCmasData::DecodeType1Data(SmsReadBuffer &pdu)
+{
+    uint8_t v1 = 0;
+    uint8_t v2 = 0;
+    uint8_t v3 = 0;
+    uint8_t v4 = 0;
+    uint8_t v5 = 0;
+    if (!pdu.ReadBits(v1, BIT8)) {
+        TELEPHONY_LOGE("read error");
+        return false;
+    }
+    if (!pdu.ReadBits(v1, BIT8) || !pdu.ReadBits(v2, BIT8) || !pdu.ReadBits(v3, BIT4) || !pdu.ReadBits(v4, BIT4) ||
+        !pdu.ReadBits(v5, BIT4)) {
+        TELEPHONY_LOGE("data read error");
+        return false;
+    }
+    data_.category = static_cast<enum SmsCmaeCategory>(v1);
+    data_.responseType = static_cast<enum SmsCmaeResponseType>(v2);
+    data_.severity = static_cast<enum SmsCmaeSeverity>(v3);
+    data_.urgency = static_cast<enum SmsCmaeUrgency>(v4);
+    data_.certainty = static_cast<enum SmsCmaeCertainty>(v5);
+    return pdu.ReadBits(v1, BIT4);
+}
+
+bool CdmaSmsCmasData::DecodeType2Data(SmsReadBuffer &pdu)
+{
+    uint8_t v1 = 0;
+    uint8_t v2 = 0;
+    if (!pdu.ReadBits(v1, BIT8)) {
+        TELEPHONY_LOGE("read error");
+        return false;
+    }
+    if (!pdu.ReadBits(v1, BIT8) || !pdu.ReadBits(v2, BIT8)) {
+        TELEPHONY_LOGE("id read error");
+        return false;
+    }
+    data_.id = v1;
+    data_.id = (data_.id << BIT8) + v2;
+    if (!pdu.ReadBits(v1, BIT8)) {
+        TELEPHONY_LOGE("alert handle read error");
+        return false;
+    }
+    data_.alertHandle = static_cast<enum SmsCmaeAlertHandle>(v1);
+    if (!DecodeAbsTime(pdu)) {
+        TELEPHONY_LOGE("abs time decode error");
+        return false;
+    }
+    if (!pdu.ReadBits(v1, BIT8)) {
+        TELEPHONY_LOGE("language read error");
+        return false;
+    }
+    data_.language = static_cast<enum SmsLanguageType>(v1);
+    return true;
+}
+
+bool CdmaSmsCmasData::DecodeAbsTime(SmsReadBuffer &pdu)
+{
+    uint8_t v1 = 0;
+    uint8_t v2 = 0;
+    if (!pdu.ReadBits(v1, BIT4) || !pdu.ReadBits(v2, BIT4)) {
+        TELEPHONY_LOGE("year read error");
+        return false;
+    }
+    data_.expires.year = (v1 * DECIMAL_NUM) + v2;
+    if (!pdu.ReadBits(v1, BIT4) || !pdu.ReadBits(v2, BIT4)) {
+        TELEPHONY_LOGE("month read error");
+        return false;
+    }
+    data_.expires.month = (v1 * DECIMAL_NUM) + v2;
+    if (!pdu.ReadBits(v1, BIT4) || !pdu.ReadBits(v2, BIT4)) {
+        TELEPHONY_LOGE("day read error");
+        return false;
+    }
+    data_.expires.day = (v1 * DECIMAL_NUM) + v2;
+    if (!pdu.ReadBits(v1, BIT4) || !pdu.ReadBits(v2, BIT4)) {
+        TELEPHONY_LOGE("hour read error");
+        return false;
+    }
+    data_.expires.hour = (v1 * DECIMAL_NUM) + v2;
+    if (!pdu.ReadBits(v1, BIT4) || !pdu.ReadBits(v2, BIT4)) {
+        TELEPHONY_LOGE("minute read error");
+        return false;
+    }
+    data_.expires.minute = (v1 * DECIMAL_NUM) + v2;
+    if (!pdu.ReadBits(v1, BIT4) || !pdu.ReadBits(v2, BIT4)) {
+        TELEPHONY_LOGE("second read error");
+        return false;
+    }
+    data_.expires.second = (v1 * DECIMAL_NUM) + v2;
+    return true;
+}
+
 } // namespace Telephony
 } // namespace OHOS
