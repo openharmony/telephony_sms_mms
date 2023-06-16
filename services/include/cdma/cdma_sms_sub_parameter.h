@@ -89,11 +89,58 @@ public:
 
 class CdmaSmsMessageId : public CdmaSmsSubParameter {
 public:
-    CdmaSmsMessageId(SmsTeleSvcMsgId &msgId, uint8_t type) {}
-    uint8_t GetMessageType()
-    {
-        return 0;
-    };
+    CdmaSmsMessageId(SmsTeleSvcMsgId &msgId, uint8_t type);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+    uint8_t GetMessageType();
+
+private:
+    SmsTeleSvcMsgId &msgId_;
+    uint8_t type_;
+};
+
+class CdmaSmsAbsoluteTime : public CdmaSmsSubParameter {
+public:
+    CdmaSmsAbsoluteTime(uint8_t id, SmsTimeAbs &time);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    inline uint8_t EncodeBCD(const uint8_t v);
+    inline uint8_t DecodeBCD(const uint8_t v);
+
+private:
+    SmsTimeAbs &time_;
+};
+
+class CdmaSmsPriorityInd : public CdmaSmsSubParameter {
+public:
+    explicit CdmaSmsPriorityInd(SmsPriorityIndicator &priority);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    SmsPriorityIndicator &priority_;
+};
+
+class CdmaSmsPrivacyInd : public CdmaSmsSubParameter {
+public:
+    explicit CdmaSmsPrivacyInd(SmsPrivacyIndicator &privacy);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    SmsPrivacyIndicator &privacy_;
+};
+
+class CdmaSmsReplyOption : public CdmaSmsSubParameter {
+public:
+    explicit CdmaSmsReplyOption(SmsReplyOption &replyOpt);
+    bool Encode(SmsWriteBuffer &pdu) override;
+    bool Decode(SmsReadBuffer &pdu) override;
+
+private:
+    SmsReplyOption &replyOpt_;
 };
 
 class CdmaSmsUserData : public CdmaSmsSubParameter {
@@ -104,26 +151,6 @@ public:
 class CdmaSmsCmasData : public CdmaSmsSubParameter {
 public:
     explicit CdmaSmsCmasData(SmsTeleSvcCmasData &data) {}
-};
-
-class CdmaSmsAbsoluteTime : public CdmaSmsSubParameter {
-public:
-    CdmaSmsAbsoluteTime(uint8_t id, SmsTimeAbs &time) {}
-};
-
-class CdmaSmsPriorityInd : public CdmaSmsSubParameter {
-public:
-    explicit CdmaSmsPriorityInd(SmsPriorityIndicator &priority) {}
-};
-
-class CdmaSmsPrivacyInd : public CdmaSmsSubParameter {
-public:
-    explicit CdmaSmsPrivacyInd(SmsPrivacyIndicator &privacy) {}
-};
-
-class CdmaSmsReplyOption : public CdmaSmsSubParameter {
-public:
-    explicit CdmaSmsReplyOption(SmsReplyOption &replyOpt) {}
 };
 
 class CdmaSmsAlertPriority : public CdmaSmsSubParameter {
