@@ -16,7 +16,10 @@
 #ifndef CDMA_SMS_TELESERVICE_MESSAGE_H
 #define CDMA_SMS_TELESERVICE_MESSAGE_H
 
+#include <vector>
+
 #include "cdma_sms_common.h"
+#include "cdma_sms_sub_parameter.h"
 #include "sms_pdu_buffer.h"
 
 namespace OHOS {
@@ -44,6 +47,7 @@ public:
 
 protected:
     uint8_t type_ { RESERVED };
+    std::vector<std::unique_ptr<CdmaSmsSubParameter>> parameter_;
 };
 
 class CdmaSmsSubmitMessage : public CdmaSmsTeleserviceMessage {
@@ -65,6 +69,8 @@ public:
 class CdmaSmsDeliverMessage : public CdmaSmsTeleserviceMessage {
 public:
     CdmaSmsDeliverMessage(TeleserviceDeliver &msg, SmsReadBuffer &pdu, bool isCMAS = false);
+private:
+    void PushParameter(uint8_t id, TeleserviceDeliver &msg);
 };
 
 class CdmaSmsDeliveryAck : public CdmaSmsTeleserviceMessage {
