@@ -1297,5 +1297,250 @@ bool CdmaSmsNumberMessages::Decode(SmsReadBuffer &pdu)
     return true;
 }
 
+CdmaSmsEnhancedVmn::CdmaSmsEnhancedVmn(SmsEnhancedVmn &vmn) : vmn_(vmn)
+{
+    id_ = ENHANCED_VMN;
+}
+
+bool CdmaSmsEnhancedVmn::Encode(SmsWriteBuffer &pdu)
+{
+    TELEPHONY_LOGE("encode not support");
+    return false;
+}
+
+bool CdmaSmsEnhancedVmn::Decode(SmsReadBuffer &pdu)
+{
+    if (IsInvalidPdu(pdu)) {
+        TELEPHONY_LOGE("invalid pdu");
+        return false;
+    }
+
+    if (memset_s(&vmn_, sizeof(SmsEnhancedVmn), 0x00, sizeof(SmsEnhancedVmn)) != EOK) {
+        TELEPHONY_LOGE("memset_s fail");
+        return false;
+    }
+    if (DecodeHeader(pdu) && DecodeVoiceMail(pdu) && DecodeAccessNumber(pdu) && DecodeCallingPartyNumber(pdu)) {
+        pdu.SkipBits();
+        return true;
+    }
+
+    TELEPHONY_LOGE("decode error");
+    return false;
+}
+
+bool CdmaSmsEnhancedVmn::DecodeHeader(SmsReadBuffer &pdu)
+{
+    uint8_t v1 = 0;
+    uint8_t v2 = 0;
+    uint8_t v3 = 0;
+    uint8_t v4 = 0;
+    if (!pdu.ReadBits(v1, BIT2) || !pdu.ReadBits(v2, BIT1) || !pdu.ReadBits(v3, BIT1) || !pdu.ReadBits(v4, BIT1)) {
+        TELEPHONY_LOGE("data read error");
+        return false;
+    }
+    vmn_.priority = SmsPriorityIndicator(v1);
+    vmn_.passwordReq = (v2 == 0b1) ? true : false;
+    vmn_.setupReq = (v3 == 0b1) ? true : false;
+    vmn_.pwChangeReq = (v4 == 0b1) ? true : false;
+    if (vmn_.setupReq || vmn_.pwChangeReq) {
+        if (!pdu.ReadBits(vmn_.minPwLen, BIT4) || !pdu.ReadBits(vmn_.maxPwLen, BIT4)) {
+            TELEPHONY_LOGE("min pwlen or max pwlen read error");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool CdmaSmsEnhancedVmn::DecodeVoiceMail(SmsReadBuffer &pdu)
+{
+    uint8_t v1 = 0;
+    uint8_t v2 = 0;
+    uint8_t v3 = 0;
+    uint8_t v4 = 0;
+    if (!pdu.ReadBits(vmn_.vmNumUnheardMsg, BIT8)) {
+        TELEPHONY_LOGE("num unheard msg read error");
+        return false;
+    }
+    if (!pdu.ReadBits(v1, BIT1) || !pdu.ReadBits(v2, BIT1) || !pdu.ReadBits(v3, BIT1) || !pdu.ReadBits(v4, BIT1)) {
+        TELEPHONY_LOGE("data read error");
+        return false;
+    }
+    vmn_.vmMailboxAlmFull = (v1 == 0b1) ? true : false;
+    vmn_.vmMailboxFull = (v2 == 0b1) ? true : false;
+    vmn_.replyAllowed = (v3 == 0b1) ? true : false;
+    vmn_.faxIncluded = (v4 == 0b1) ? true : false;
+
+    if (!pdu.ReadBits(v1, BIT7) || !pdu.ReadBits(v2, BIT5) || !pdu.ReadBits(vmn_.vmRetDay, BIT7)) {
+        TELEPHONY_LOGE("vmlen or vmretday read error");
+        return false;
+    }
+    vmn_.vmLen = v1;
+    vmn_.vmLen = (vmn_.vmLen << BIT5) | v2;
+
+    if (!pdu.ReadBits(v1, BIT8) || !pdu.ReadBits(v2, BIT8) || !pdu.ReadBits(v3, BIT8) || !pdu.ReadBits(v4, BIT8)) {
+        TELEPHONY_LOGE("msgid or mailboxid read error");
+        return false;
+    }
+    vmn_.vmMsgId = v1;
+    vmn_.vmMsgId = (vmn_.vmMsgId << BIT8) | v2;
+    vmn_.vmMailboxId = v3;
+    vmn_.vmMailboxId = (vmn_.vmMailboxId << BIT8) | v4;
+
+    return true;
+}
+
+bool CdmaSmsEnhancedVmn::DecodeAccessNumber(SmsReadBuffer &pdu)
+{
+    uint8_t v1 = 0;
+    uint8_t v2 = 0;
+    if (!pdu.ReadBits(v1, BIT1) || !pdu.ReadBits(v2, BIT3)) {
+        TELEPHONY_LOGE("digitmode or numbertype read error");
+        return false;
+    }
+    vmn_.anDigitMode = (v1 == 0b1) ? true : false;
+    vmn_.anNumberType = v2;
+    if (vmn_.anDigitMode) {
+        if (!pdu.ReadBits(vmn_.anNumberPlan, BIT4) || !pdu.ReadBits(vmn_.anNumField, BIT8)) {
+            TELEPHONY_LOGE("number plan or num field read error");
+            return false;
+        }
+        if (static_cast<unsigned long>(vmn_.anNumField) > (sizeof(vmn_.anChar) / sizeof(vmn_.anChar[0]))) {
+            TELEPHONY_LOGE("enhancedVmn data length invalid.");
+            return false;
+        }
+        for (uint8_t i = 0; i < vmn_.anNumField; i++) {
+            if (!pdu.ReadBits(v1, BIT4)) {
+                TELEPHONY_LOGE("char read error");
+                return false;
+            }
+            vmn_.anChar[i] = SmsCommonUtils::DtmfCharToDigit(v1);
+        }
+        vmn_.anChar[vmn_.anNumField] = '\0';
+    } else {
+        if (!pdu.ReadBits(vmn_.anNumField, BIT8)) {
+            TELEPHONY_LOGE("num field read error");
+            return false;
+        }
+        if (static_cast<unsigned long>(vmn_.anNumField) > (sizeof(vmn_.anChar) / sizeof(vmn_.anChar[0]))) {
+            TELEPHONY_LOGE("enhancedVmn data length invalid.");
+            return false;
+        }
+        for (uint8_t i = 0; i < vmn_.anNumField; i++) {
+            if (!pdu.ReadBits(vmn_.anChar[i], BIT8)) {
+                TELEPHONY_LOGE("char read error");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool CdmaSmsEnhancedVmn::DecodeCallingPartyNumber(SmsReadBuffer &pdu)
+{
+    uint8_t v = 0;
+    if (!pdu.ReadBits(v, BIT1) || !pdu.ReadBits(vmn_.cliNumberType, BIT3)) {
+        TELEPHONY_LOGE("digit mode or number type read error");
+        return false;
+    }
+    vmn_.cliDigitMode = (v == 0b1) ? true : false;
+    if (vmn_.cliDigitMode) {
+        if (!pdu.ReadBits(vmn_.cliNumberPlan, BIT4) || !pdu.ReadBits(vmn_.cliNumField, BIT8)) {
+            TELEPHONY_LOGE("number plan or num field read error");
+            return false;
+        }
+        if (static_cast<unsigned long>(vmn_.cliNumField) > (sizeof(vmn_.cliChar) / sizeof(vmn_.cliChar[0]))) {
+            TELEPHONY_LOGE("enhancedVmn data length invalid.");
+            return false;
+        }
+        for (uint8_t i = 0; i < vmn_.cliNumField; i++) {
+            if (!pdu.ReadBits(v, BIT4)) {
+                TELEPHONY_LOGE("char read error");
+                return false;
+            }
+            vmn_.cliChar[i] = SmsCommonUtils::DtmfCharToDigit(v);
+        }
+        vmn_.cliChar[vmn_.cliNumField] = '\0';
+    } else {
+        if (!pdu.ReadBits(vmn_.cliNumField, BIT8)) {
+            TELEPHONY_LOGE("num field read error");
+            return false;
+        }
+        if (static_cast<unsigned long>(vmn_.cliNumField) > (sizeof(vmn_.cliChar) / sizeof(vmn_.cliChar[0]))) {
+            TELEPHONY_LOGE("enhancedVmn data length invalid.");
+            return false;
+        }
+        for (uint8_t i = 0; i < vmn_.cliNumField; i++) {
+            if (!pdu.ReadBits(vmn_.cliChar[i], BIT8)) {
+                TELEPHONY_LOGE("char read error");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+CdmaSmsEnhancedVmnAck::CdmaSmsEnhancedVmnAck(SmsEnhancedVmnAck &ack) : ack_(ack)
+{
+    id_ = ENHANCED_VMN_ACK;
+}
+
+bool CdmaSmsEnhancedVmnAck::Encode(SmsWriteBuffer &pdu)
+{
+    TELEPHONY_LOGE("encode not support");
+    return false;
+}
+
+bool CdmaSmsEnhancedVmnAck::Decode(SmsReadBuffer &pdu)
+{
+    if (IsInvalidPdu(pdu)) {
+        TELEPHONY_LOGE("invalid pdu");
+        return false;
+    }
+
+    if (memset_s(&ack_, sizeof(SmsEnhancedVmnAck), 0x00, sizeof(SmsEnhancedVmnAck)) != EOK) {
+        TELEPHONY_LOGE("memset_s fail");
+        return false;
+    }
+    if (!pdu.ReadWord(ack_.vmMailboxId) || !pdu.ReadByte(ack_.vmNumUnheardMsg)) {
+        TELEPHONY_LOGE("mail boxid or num unheard msg read error");
+        return false;
+    }
+    uint8_t v1 = 0;
+    uint8_t v2 = 0;
+    if (!pdu.ReadBits(v1, BIT3) || !pdu.ReadBits(v2, BIT3)) {
+        TELEPHONY_LOGE("delete ack or play ack read error");
+        return false;
+    }
+    ack_.numDeleteAck = v1;
+    ack_.numPlayAck = v2;
+    if (static_cast<unsigned long>(ack_.numDeleteAck) > (sizeof(ack_.daVmMsgId) / sizeof(ack_.daVmMsgId[0]))) {
+        TELEPHONY_LOGE("delect ack length error");
+        return false;
+    }
+    for (uint8_t i = 0; i < ack_.numDeleteAck; i++) {
+        if (!pdu.ReadBits(v1, BIT8) || !pdu.ReadBits(v2, BIT8)) {
+            TELEPHONY_LOGE("msgid read error");
+            return false;
+        }
+        ack_.daVmMsgId[i] = v1;
+        ack_.daVmMsgId[i] = (ack_.daVmMsgId[i] << BIT8) | v2;
+    }
+    if (static_cast<unsigned long>(ack_.numPlayAck) > (sizeof(ack_.paVmMsgId) / sizeof(ack_.paVmMsgId[0]))) {
+        TELEPHONY_LOGE("play ack length error");
+        return false;
+    }
+    for (uint8_t i = 0; i < ack_.numPlayAck; i++) {
+        if (!pdu.ReadBits(v1, BIT8) || !pdu.ReadBits(v2, BIT8)) {
+            TELEPHONY_LOGE("msgid read error");
+            return false;
+        }
+        ack_.paVmMsgId[i] = v1;
+        ack_.paVmMsgId[i] = (ack_.paVmMsgId[i] << BIT8) | v2;
+    }
+    pdu.SkipBits();
+    return true;
+}
+
 } // namespace Telephony
 } // namespace OHOS
