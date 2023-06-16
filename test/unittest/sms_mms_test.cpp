@@ -16,6 +16,7 @@
 #include <memory>
 #include <vector>
 
+#include "cdma_sms_test.h"
 #include "common_event_support.h"
 #include "gsm_sms_sender_test.h"
 #include "if_system_ability_manager.h"
@@ -41,6 +42,7 @@ using TestParam = struct Param {
     ShortMessageTest shortMessageTest;
     SmsCbMessageTest smsCbMessageTest;
     MmsMsgTest mmsMsgTest;
+    CdmaSmsTest cdmaSmsTest;
 };
 
 namespace OHOS {
@@ -148,6 +150,12 @@ public:
         funArray->emplace_back("TestMmsMsgFunction", std::bind(&MmsMsgTest::ProcessTest, param.mmsMsgTest));
     }
 
+    void InitCdmaFun(const std::unique_ptr<std::vector<TestStruct>> &funArray, const TestParam &param,
+        const sptr<ISmsServiceInterface> &smsService)
+    {
+        funArray->emplace_back("TestCdmaSmsFunction", std::bind(&CdmaSmsTest::ProcessTest, param.cdmaSmsTest));
+    }
+
     void InitFunArray(const std::unique_ptr<std::vector<TestStruct>> &funArray, const TestParam &param,
         const sptr<ISmsServiceInterface> &smsService)
     {
@@ -155,6 +163,7 @@ public:
         InitSimMessageFun(funArray, param, smsService);
         InitShortMessageFun(funArray, param, smsService);
         InitMmsFun(funArray, param, smsService);
+        InitCdmaFun(funArray, param, smsService);
     }
 
     std::unique_ptr<std::vector<TestStruct>> GetFunArray(const sptr<ISmsServiceInterface> &smsService)
