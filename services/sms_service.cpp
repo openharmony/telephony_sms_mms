@@ -168,8 +168,8 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
 
 void SmsService::InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text)
 {
-    uint16_t sessionId;
-    uint16_t messageCount;
+    uint16_t sessionId = 0;
+    uint16_t messageCount = 0;
     bool ret = QuerySessionByTelephone(telephone, sessionId, messageCount);
     if (ret) {
         InsertSmsMmsInfo(slotId, sessionId, telephone, text);
