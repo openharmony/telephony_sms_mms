@@ -305,7 +305,7 @@ private:
     void InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text);
     void InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text);
     bool InsertSession(bool isNewSession, uint16_t messageCount, const std::string &number, const std::string &text);
-    bool QuerySessionByTelephone(const std::string &telephone, uint16_t sessionId, uint16_t &messageCount);
+    bool QuerySessionByTelephone(const std::string &telephone, uint16_t &sessionId, uint16_t &messageCount);
 
 private:
     int64_t bindTime_ = 0;
