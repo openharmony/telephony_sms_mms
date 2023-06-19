@@ -47,7 +47,7 @@ public:
 private:
     const std::string SMS_URI = "datashare:///com.ohos.smsmmsability";
     const std::string SMS_SUBSECTION = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
-    const std::string SESSION = "datashare:///com.ohos.smsmmsability/sms_mms/sms_mms_info";
+    const std::string SMS_MMS_INFO = "datashare:///com.ohos.smsmmsability/sms_mms/sms_mms_info";
     const std::string SESSION = "datashare:///com.ohos.smsmmsability/sms_mms/session";
     const std::string CONTACT_URI = "datashare:///com.ohos.contactsdataability";
     const std::string CONTACT_BLOCK =
