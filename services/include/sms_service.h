@@ -302,6 +302,10 @@ private:
     bool ValidDestinationAddress(std::string desAddr);
     void TrimSmscAddr(std::string &sca);
     bool CheckSimMessageIndexValid(int32_t slotId, uint32_t msgIndex);
+    void InsertSessionAndDetail(int32_t slotId, const std::string &Telephone, const std::string &text);
+    void InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text);
+    void InsertSession(bool isNewSession, uint16_t messageCount, const std::string &number, const std::string &text);
+    void QuerySessionByTelephone(const std::string &Telephone, uint16_t sessionId, uint16_t &messageCount);
 
 private:
     int64_t bindTime_ = 0;
@@ -310,6 +314,9 @@ private:
     bool registerToService_ = false;
     ServiceRunningState state_ = ServiceRunningState::STATE_NOT_START;
     std::shared_ptr<SmsStateHandler> smsStateHandler_;
+    const std::string SMS_MMS_INFO = "datashare://com.ohos.smsmmsability/sms_mms/sms_mms_info";
+    const std::string SESSION = "datashare://com.ohos.smsmmsability/sms_mms/session";
+    const std::string COM_OHOS_MMS = "com.ohos.mms";
 };
 } // namespace Telephony
 } // namespace OHOS
