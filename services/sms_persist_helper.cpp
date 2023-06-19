@@ -64,6 +64,64 @@ bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values, uint16_t
     return ret >= 0 ? true : false;
 }
 
+bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBucket &values)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    Uri uri(tableUri);
+    int ret = helper->Insert(uri, values);
+    helper->Release();
+    return ret >= 0 ? true : false;
+}
+
+bool SmsPersistHelper::QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId,
+    uint16_t &messageCount)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    Uri uri(SMS_SESSION);
+    std::vector<std::string> columns;
+    auto resultSet = helper->Query(uri, predicates, columns);
+    if (resultSet == nullptr) {
+        TELEPHONY_LOGE("Query Result Set nullptr Failed.");
+        return false;
+    }
+    resultSet->GoToFirstRow();
+    int32_t columnInt;
+    int columnIndex;
+    resultSet->GetColumnIndex("id", columnIndex);
+    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
+        sessionId = columnInt;
+    }
+    resultSet->GetColumnIndex("message_count", columnIndex);
+    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
+        messageCount = columnInt;
+        return true;
+    }
+    resultSet->Close();
+    helper->Release();
+    return false;
+}
+
+bool SmsPersistHelper::Update(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    Uri uri(SMS_SESSION);
+    int ret = helper->Update(uri, predicates, values);
+    helper->Release();
+    return ret >= 0 ? true : false;
+}
+
 bool SmsPersistHelper::Query(DataShare::DataSharePredicates &predicates, std::vector<SmsReceiveIndexer> &indexers)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
@@ -89,6 +147,33 @@ bool SmsPersistHelper::Query(DataShare::DataSharePredicates &predicates, std::ve
     resultSet->Close();
     helper->Release();
     helper = nullptr;
+    return true;
+}
+
+bool SmsPersistHelper::QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    Uri uri(SMS_MMS_INFO);
+    std::vector<std::string> columns;
+    auto resultSet = helper->Query(uri, predicates, columns);
+    if (resultSet == nullptr) {
+        TELEPHONY_LOGE("Query Result Set nullptr Failed.");
+        return false;
+    }
+
+    int32_t columnInt;
+    int columnIndex;
+    resultSet->GoToLastRow();
+    resultSet->GetColumnIndex(SmsMmsInfo::GROUP_ID, columnIndex);
+    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
+        maxGroupId = columnInt;
+    }
+    resultSet->Close();
+    helper->Release();
     return true;
 }
 
