@@ -30,17 +30,22 @@ class SmsPersistHelper {
     DECLARE_DELAYED_SINGLETON(SmsPersistHelper)
 public:
     bool Insert(DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId);
+    bool Insert(std::string tableUri, DataShare::DataShareValuesBucket &values);
     bool Query(DataShare::DataSharePredicates &predicates, std::vector<SmsReceiveIndexer> &indexers);
     bool Delete(DataShare::DataSharePredicates &predicates);
+    bool Update(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values);
     bool QueryBlockPhoneNumber(const std::string &phoneNum);
     bool QueryParamBoolean(const std::string key, bool defValue);
-
+    bool QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId);
+    bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sectionId, uint16_t &messageCount);
+    
     inline static const std::string SMS_CAPABLE_KEY = "sms_config_capable";
     inline static const std::string SMS_ENCODING_KEY = "sms_config_force_7bit_encoding";
     inline static const std::string SMS_CAPABLE_PARAM_KEY = "const.telephony.sms.capable";
     inline static const std::string SMS_ENCODING_PARAM_KEY = "persist.sys.sms.config.7bitforce";
 
 private:
+    const std::string SESSION = "datashare:///com.ohos.smsmmsability";
     const std::string SMS_URI = "datashare:///com.ohos.smsmmsability";
     const std::string SMS_SUBSECTION = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
     const std::string CONTACT_URI = "datashare:///com.ohos.contactsdataability";
