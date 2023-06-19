@@ -159,7 +159,8 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
     }
     int32_t ret = interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
         StringUtils::ToUtf8(text), sendCallback, deliveryCallback);
-    if (bundleName != COM_OHOS_MMS) {
+    std::string bundleName = GetBundleName();
+    if (bundleName != MMS_APP) {
         InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(text));
     }
     return ret;
@@ -167,27 +168,27 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
 
 void SmsService::InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text)
 {
-    uint16_t sectionId;
+    uint16_t sessionId;
     uint16_t messageCount;
-    bool ret = QuerySessionByTelephone(telephone, sectionId, messageCount);
+    bool ret = QuerySessionByTelephone(telephone, sessionId, messageCount);
     if (ret) {
-        InsertSmsMmsInfo(slotId, sectionId, telephone, text);
+        InsertSmsMmsInfo(slotId, sessionId, telephone, text);
         messageCount++;
         InsertSession(false, messageCount, telephone, text);
     } else {
         ret = InsertSession(true, 0, telephone, text);
         if (ret) {
-            QuerySessionByTelephone(telephone, sectionId, messageCount);
-            InsertSmsMmsInfo(slotId, sectionId, telephone, text);
+            QuerySessionByTelephone(telephone, sessionId, messageCount);
+            InsertSmsMmsInfo(slotId, sessionId, telephone, text);
         }
     }
 }
 
-bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t &sectionId, uint16_t &messageCount)
+bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t &sessionId, uint16_t &messageCount)
 {
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(Session::TELEPHONE, telephone);
-    return DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySession(predicates, sectionId, messageCount);
+    return DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySession(predicates, sessionId, messageCount);
 }
 
 void SmsService::InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text)
@@ -245,7 +246,7 @@ bool SmsService::InsertSession(bool isNewSession, uint16_t messageCount, const s
         return DelayedSingleton<SmsPersistHelper>::GetInstance()->Update(predicates, sessionBucket);
     }
     sessionBucket.Put(Session::MESSAGE_COUNT, "1");
-    return DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(SESSION, sessionBucket);
+    return DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(SMS_SESSION, sessionBucket);
 }
 
 int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr, uint16_t port,

@@ -60,6 +60,7 @@ bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values, uint16_t
     Uri uri(SMS_SUBSECTION);
     int ret = helper->Insert(uri, values);
     helper->Release();
+    dataBaseId = ret;
     return ret >= 0 ? true : false;
 }
 
@@ -76,7 +77,7 @@ bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBu
     return ret >= 0 ? true : false;
 }
 
-bool SmsPersistHelper::QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sectionId,
+bool SmsPersistHelper::QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId,
     uint16_t &messageCount)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
@@ -84,7 +85,7 @@ bool SmsPersistHelper::QuerySession(DataShare::DataSharePredicates &predicates, 
         TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
         return false;
     }
-    Uri uri(SESSION);
+    Uri uri(SMS_SESSION);
     std::vector<std::string> columns;
     auto resultSet = helper->Query(uri, predicates, columns);
     if (resultSet == nullptr) {
@@ -96,7 +97,7 @@ bool SmsPersistHelper::QuerySession(DataShare::DataSharePredicates &predicates, 
     int columnIndex;
     resultSet->GetColumnIndex("id", columnIndex);
     if (resultSet->GetInt(columnIndex, columnInt) == 0) {
-        sectionId = columnInt;
+        sessionId = columnInt;
     }
     resultSet->GetColumnIndex("message_count", columnIndex);
     if (resultSet->GetInt(columnIndex, columnInt) == 0) {
@@ -115,7 +116,7 @@ bool SmsPersistHelper::Update(DataShare::DataSharePredicates &predicates, DataSh
         TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
         return false;
     }
-    Uri uri(SESSION);
+    Uri uri(SMS_SESSION);
     int ret = helper->Update(uri, predicates, values);
     helper->Release();
     return ret >= 0 ? true : false;
