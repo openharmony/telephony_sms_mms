@@ -37,7 +37,7 @@ public:
     bool QueryBlockPhoneNumber(const std::string &phoneNum);
     bool QueryParamBoolean(const std::string key, bool defValue);
     bool QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId);
-    bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sectionId, uint16_t &messageCount);
+    bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount);
     
     inline static const std::string SMS_CAPABLE_KEY = "sms_config_capable";
     inline static const std::string SMS_ENCODING_KEY = "sms_config_force_7bit_encoding";
@@ -48,7 +48,7 @@ private:
     const std::string SMS_URI = "datashare:///com.ohos.smsmmsability";
     const std::string SMS_SUBSECTION = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
     const std::string SMS_MMS_INFO = "datashare:///com.ohos.smsmmsability/sms_mms/sms_mms_info";
-    const std::string SESSION = "datashare:///com.ohos.smsmmsability/sms_mms/session";
+    const std::string SMS_SESSION = "datashare:///com.ohos.smsmmsability/sms_mms/session";
     const std::string CONTACT_URI = "datashare:///com.ohos.contactsdataability";
     const std::string CONTACT_BLOCK =
         "datashare:///com.ohos.contactsdataability/contacts/contact_blocklist";
