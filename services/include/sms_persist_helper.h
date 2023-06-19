@@ -45,7 +45,6 @@ public:
     inline static const std::string SMS_ENCODING_PARAM_KEY = "persist.sys.sms.config.7bitforce";
 
 private:
-    
     const std::string SMS_URI = "datashare:///com.ohos.smsmmsability";
     const std::string SMS_SUBSECTION = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
     const std::string SESSION = "datashare:///com.ohos.smsmmsability/sms_mms/sms_mms_info";
