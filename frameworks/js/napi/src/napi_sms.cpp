@@ -30,8 +30,6 @@ const std::string g_destinationPortStr = "destinationPort";
 const std::string g_sendCallbackStr = "sendCallback";
 const std::string g_deliveryCallbackStr = "deliveryCallback";
 static const int32_t DEFAULT_REF_COUNT = 1;
-constexpr const char *NET_TYPE_UNKNOWN_STRING = "unknown";
-
 static bool g_validPort = false;
 } // namespace
 
@@ -1541,10 +1539,10 @@ static void NativeGetImsShortMessageFormat(napi_env env, void *data)
     auto context = static_cast<SingleValueContext<std::u16string> *>(data);
     context->errorCode =
         DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetImsShortMessageFormat(context->value);
-    if (context->errorCode != TELEPHONY_ERR_SUCCESS) {
-        context->value = NapiUtil::ToUtf16(NET_TYPE_UNKNOWN_STRING);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->resolved = true;
     }
-    context->resolved = true;
+    TELEPHONY_LOGE("errorCode:%{public}d", context->errorCode);
 }
 
 static std::string to_utf8(std::u16string str16)
