@@ -688,10 +688,6 @@ int64_t SmsService::GetSpendTime()
 
 int32_t SmsService::CreateMessage(std::string pdu, std::string specification, ShortMessage &message)
 {
-    if (!TelephonyPermission::CheckPermission(Permission::GET_TELEPHONY_STATE)) {
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
-        return TELEPHONY_ERR_PERMISSION_ERR;
-    }
     std::shared_ptr<SmsBaseMessage> baseMessage;
     if (specification == "3gpp") {
         baseMessage = GsmSmsMessage::CreateMessage(pdu);
