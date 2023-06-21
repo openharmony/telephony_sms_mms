@@ -65,8 +65,8 @@
 | 接口名称                                                     | 接口描述                                                     | 所需权限                            |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ----------------------------------- |
 | function sendMessage(options: SendMessageOptions): void;     | 发送短信，通过callback异步获取短信发送结果。                 | SystemPermission.SEND_MESSAGES      |
-| function createMessage(pdu: Array\<number>, specification: string, callback: AsyncCallback、\<ShortMessage>): void; | 根据协议数据单元（PDU）和指定的短信协议创建短信实例，使用callback方式异步返回创建的短信实例。 | ohos.permission.GET_TELEPHONY_STATE |
-| function createMessage(pdu: Array\<number>, specification: string): Promise\<ShortMessage> | 根据协议数据单元（PDU）和指定的短信协议创建短信实例，使用Promise方式异步返回创建的短信实例。 | ohos.permission.GET_TELEPHONY_STATE |
+| function createMessage(pdu: Array\<number>, specification: string, callback: AsyncCallback、\<ShortMessage>): void; | 根据协议数据单元（PDU）和指定的短信协议创建短信实例，使用callback方式异步返回创建的短信实例。 | 无                                  |
+| function createMessage(pdu: Array\<number>, specification: string): Promise\<ShortMessage> | 根据协议数据单元（PDU）和指定的短信协议创建短信实例，使用Promise方式异步返回创建的短信实例。 | 无                                  |
 | function getDefaultSmsSlotId(callback: AsyncCallback\<number>): void | 获取发送短信的默认SIM卡槽，使用callback方式异步返回默认SIM卡槽。 | 无                                  |
 | function getDefaultSmsSlotId():Promise\<number>              | 获取发送短信的默认SIM卡，使用Promise方式异步返回默认SIM卡槽。 | 无                                  |
 | function getDefaultSmsSimId(callback: AsyncCallback\<number>): void | 获取发送短信的默认SIM卡ID，使用callback方式异步返回默认SIM卡槽。 | 无                                  |
