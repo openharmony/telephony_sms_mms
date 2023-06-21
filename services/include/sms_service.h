@@ -314,8 +314,8 @@ private:
     bool registerToService_ = false;
     ServiceRunningState state_ = ServiceRunningState::STATE_NOT_START;
     std::shared_ptr<SmsStateHandler> smsStateHandler_;
-    const std::string SMS_MMS_INFO = "datashare://com.ohos.smsmmsability/sms_mms/sms_mms_info";
-    const std::string SMS_SESSION = "datashare://com.ohos.smsmmsability/sms_mms/session";
+    const std::string SMS_MMS_INFO = "datashare:///com.ohos.smsmmsability/sms_mms/sms_mms_info";
+    const std::string SMS_SESSION = "datashare:///com.ohos.smsmmsability/sms_mms/session";
     const std::string MMS_APP = "com.ohos.mms";
 };
 } // namespace Telephony

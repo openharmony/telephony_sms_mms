@@ -174,6 +174,7 @@ bool SmsPersistHelper::QueryMaxGroupId(DataShare::DataSharePredicates &predicate
     }
     resultSet->Close();
     helper->Release();
+    helper = nullptr;
     return true;
 }
 
