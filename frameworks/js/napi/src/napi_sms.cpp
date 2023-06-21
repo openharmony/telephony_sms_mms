@@ -395,6 +395,9 @@ static void CreateMessageCallback(napi_env env, napi_status status, void *data)
         callbackValue = NapiUtil::CreateErrorMessage(
             env, "create message error,cause napi_status = " + std::to_string(status));
     }
+    if (asyncContext->pdu.capacity() != 0) {
+        std::vector<unsigned char>().swap(asyncContext->pdu);
+    }
     NapiUtil::Handle2ValueCallback(env, asyncContext, callbackValue);
 }
 
