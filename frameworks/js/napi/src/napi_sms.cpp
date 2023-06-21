@@ -387,8 +387,7 @@ static void CreateMessageCallback(napi_env env, napi_status status, void *data)
                 asyncContext->shortMessage = nullptr;
             }
         } else {
-            JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
-                asyncContext->errorCode, "createMessage", "ohos.permission.GET_TELEPHONY_STATE");
+            JsError error = NapiUtil::ConverErrorMessageForJs(asyncContext->errorCode);
             callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
         }
     } else {
