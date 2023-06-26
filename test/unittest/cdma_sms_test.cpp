@@ -54,7 +54,7 @@ void CdmaSmsTest::SetPduSeqInfo(const std::size_t size, const std::unique_ptr<Cd
         transMsg->data.p2p.teleserviceId = static_cast<uint16_t>(SmsTransTelsvcId::WEMT);
         transMsg->data.p2p.telesvcMsg.data.submit.msgId.headerInd = true;
         transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.headerCnt = 1;
-        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = SMS_UDH_CONCAT_8BIT;
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = UDH_CONCAT_8BIT;
         transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.msgRef = msgRef8bit;
         transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.totalSeg =
             static_cast<uint8_t>(size);
@@ -136,44 +136,44 @@ void CdmaSmsTest::PrintSmsTeleSvcAddr(SmsTeleSvcAddr &addr, string s) const
 void CdmaSmsTest::PrintHeader(const SmsUDH &header, string s) const
 {
     switch (header.udhType) {
-        case SMS_UDH_CONCAT_8BIT: {
-            cout << s << "udhType : SMS_UDH_CONCAT_8BIT - " << static_cast<int>(header.udhType) << endl;
+        case UDH_CONCAT_8BIT: {
+            cout << s << "udhType : UDH_CONCAT_8BIT - " << static_cast<int>(header.udhType) << endl;
             cout << s << "concat8bit: msgRef[" << static_cast<int>(header.udh.concat8bit.msgRef) << "] totalSeg["
                  << static_cast<int>(header.udh.concat8bit.totalSeg) << "] seqNum["
                  << static_cast<int>(header.udh.concat8bit.seqNum) << "]" << endl;
             break;
         }
-        case SMS_UDH_CONCAT_16BIT: {
-            cout << s << "udhType : SMS_UDH_CONCAT_16BIT - " << static_cast<int>(header.udhType) << endl;
+        case UDH_CONCAT_16BIT: {
+            cout << s << "udhType : UDH_CONCAT_16BIT - " << static_cast<int>(header.udhType) << endl;
             cout << s << "concat16bit.seqNum [" << static_cast<int>(header.udh.concat16bit.seqNum) << "]" << endl;
             break;
         }
-        case SMS_UDH_APP_PORT_8BIT: {
-            cout << s << "udhType : SMS_UDH_APP_PORT_8BIT - " << static_cast<int>(header.udhType) << endl;
+        case UDH_APP_PORT_8BIT: {
+            cout << s << "udhType : UDH_APP_PORT_8BIT - " << static_cast<int>(header.udhType) << endl;
             cout << s << "appPort8bit.destPort [" << static_cast<int>(header.udh.appPort8bit.destPort) << "]" << endl;
             cout << s << "appPort8bit.originPort [" << static_cast<int>(header.udh.appPort8bit.originPort) << "]"
                  << endl;
             break;
         }
-        case SMS_UDH_APP_PORT_16BIT: {
-            cout << s << "udhType : SMS_UDH_APP_PORT_16BIT - " << static_cast<int>(header.udhType) << endl;
+        case UDH_APP_PORT_16BIT: {
+            cout << s << "udhType : UDH_APP_PORT_16BIT - " << static_cast<int>(header.udhType) << endl;
             cout << s << "appPort16bit.destPort [" << static_cast<int>(header.udh.appPort16bit.destPort) << "]" << endl;
             cout << s << "appPort16bit.originPort [" << static_cast<int>(header.udh.appPort16bit.originPort) << "]"
                  << endl;
             break;
         }
-        case SMS_UDH_SPECIAL_SMS: {
-            cout << s << "udhType : SMS_UDH_SPECIAL_SMS - " << static_cast<int>(header.udhType) << endl;
+        case UDH_SPECIAL_SMS: {
+            cout << s << "udhType : UDH_SPECIAL_SMS - " << static_cast<int>(header.udhType) << endl;
             cout << s << "Decoding special sms udh." << endl;
             break;
         }
-        case SMS_UDH_SINGLE_SHIFT: {
-            cout << s << "udhType : SMS_UDH_SINGLE_SHIFT - " << static_cast<int>(header.udhType) << endl;
+        case UDH_SINGLE_SHIFT: {
+            cout << s << "udhType : UDH_SINGLE_SHIFT - " << static_cast<int>(header.udhType) << endl;
             cout << s << "singleShift.langId [" << static_cast<int>(header.udh.singleShift.langId) << "]" << endl;
             break;
         }
-        case SMS_UDH_LOCKING_SHIFT: {
-            cout << s << "udhType : SMS_UDH_LOCKING_SHIFT - " << static_cast<int>(header.udhType) << endl;
+        case UDH_LOCKING_SHIFT: {
+            cout << s << "udhType : UDH_LOCKING_SHIFT - " << static_cast<int>(header.udhType) << endl;
             cout << s << "lockingShift.langId [" << static_cast<int>(header.udh.lockingShift.langId) << "]" << endl;
             break;
         }
@@ -529,7 +529,7 @@ void CdmaSmsTest::EncodeSubmitMsg(
     std::string desAddr, std::string scAddr, std::string text, bool force7Bit, bool statusReport) const
 {
     CdmaSmsMessage message;
-    SmsCodingScheme codingType;
+    DataCodingScheme codingType;
     std::vector<struct SplitInfo> splits;
     message.SplitMessage(splits, text, force7Bit, codingType, false);
     std::cout << "codingType : " << codingType << std::endl;
