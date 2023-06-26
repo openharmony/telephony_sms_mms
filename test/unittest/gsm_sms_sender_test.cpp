@@ -19,7 +19,7 @@
 
 #include "ability_context.h"
 #include "ability_info.h"
-#include "accesstoken_kit.h"
+#include "access_mms_token.h"
 #include "context_deal.h"
 #include "data_ability_predicates.h"
 #include "iservice_registry.h"
@@ -27,127 +27,10 @@
 #include "sms_send_callback_test.h"
 #include "string_utils.h"
 #include "telephony_errors.h"
-#include "token_setproc.h"
 #include "values_bucket.h"
 
 namespace OHOS {
 namespace Telephony {
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
-
-HapInfoParams testMmsInfoParams = {
-    .bundleName = "tel_sms_mms_test",
-    .userID = 1,
-    .instIndex = 0,
-    .appIDDesc = "test",
-    .isSystemApp = true,
-};
-
-PermissionDef testPermReceiveSmsDef = {
-    .permissionName = "ohos.permission.RECEIVE_SMS",
-    .bundleName = "tel_sms_mms_test",
-    .grantMode = 1, // SYSTEM_GRANT
-    .label = "label",
-    .labelId = 1,
-    .description = "Test sms manager",
-    .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-};
-
-PermissionStateFull testReceiveSmsState = {
-    .grantFlags = { 2 }, // PERMISSION_USER_SET
-    .grantStatus = { PermissionState::PERMISSION_GRANTED },
-    .isGeneral = true,
-    .permissionName = "ohos.permission.RECEIVE_SMS",
-    .resDeviceID = { "local" },
-};
-
-PermissionDef testPermSendSmsDef = {
-    .permissionName = "ohos.permission.SEND_MESSAGES",
-    .bundleName = "tel_sms_mms_test",
-    .grantMode = 1, // SYSTEM_GRANT
-    .label = "label",
-    .labelId = 1,
-    .description = "Test sms manager",
-    .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-};
-
-PermissionStateFull testSendSmsState = {
-    .grantFlags = { 2 }, // PERMISSION_USER_SET
-    .grantStatus = { PermissionState::PERMISSION_GRANTED },
-    .isGeneral = true,
-    .permissionName = "ohos.permission.SEND_MESSAGES",
-    .resDeviceID = { "local" },
-};
-
-PermissionDef testPermSetTelephonyDef = {
-    .permissionName = "ohos.permission.SET_TELEPHONY_STATE",
-    .bundleName = "tel_sms_mms_test",
-    .grantMode = 1, // SYSTEM_GRANT
-    .label = "label",
-    .labelId = 1,
-    .description = "Test sms manager",
-    .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-};
-
-PermissionStateFull testSetTelephonyState = {
-    .grantFlags = { 2 }, // PERMISSION_USER_SET
-    .grantStatus = { PermissionState::PERMISSION_GRANTED },
-    .isGeneral = true,
-    .permissionName = "ohos.permission.SET_TELEPHONY_STATE",
-    .resDeviceID = { "local" },
-};
-
-PermissionDef testPermGetTelephonyDef = {
-    .permissionName = "ohos.permission.GET_TELEPHONY_STATE",
-    .bundleName = "tel_sms_mms_test",
-    .grantMode = 1, // SYSTEM_GRANT
-    .label = "label",
-    .labelId = 1,
-    .description = "Test sms manager",
-    .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-};
-
-PermissionStateFull testGetTelephonyState = {
-    .grantFlags = { 2 }, // PERMISSION_USER_SET
-    .grantStatus = { PermissionState::PERMISSION_GRANTED },
-    .isGeneral = true,
-    .permissionName = "ohos.permission.GET_TELEPHONY_STATE",
-    .resDeviceID = { "local" },
-};
-
-HapPolicyParams testMmsPolicyParams = {
-    .apl = APL_SYSTEM_BASIC,
-    .domain = "test.domain",
-    .permList = { testPermReceiveSmsDef, testPermSendSmsDef, testPermSetTelephonyDef, testPermGetTelephonyDef },
-    .permStateList = { testReceiveSmsState, testSendSmsState, testSetTelephonyState, testGetTelephonyState },
-};
-
-class AccessMmsToken {
-public:
-    AccessMmsToken()
-    {
-        currentID_ = GetSelfTokenID();
-        std::cout << "AccessMmsToken currentID_" << currentID_ << std::endl;
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testMmsInfoParams, testMmsPolicyParams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(tokenIdEx.tokenIDEx);
-    }
-    ~AccessMmsToken()
-    {
-        std::cout << "AccessMmsToken  ~AccessMmsToken" << std::endl;
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_ = 0;
-    AccessTokenID accessID_ = 0;
-};
-
 void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;

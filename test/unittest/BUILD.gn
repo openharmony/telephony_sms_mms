@@ -23,6 +23,7 @@ ohos_executable("tel_sms_mms_test") {
     "sms_broadcast_subscriber.cpp",
     "sms_cb_message_test.cpp",
     "sms_delivery_callback_test.cpp",
+    "sms_gsm_message_test.cpp",
     "sms_mms_test.cpp",
     "sms_send_callback_test.cpp",
   ]
