@@ -20,7 +20,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   module_out_path = part_name + "/" + test_module
 
   sources = [
-    "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/sms_service_proxy.cpp",
+    "mms_gtest.cpp",
     "sms_broadcast_subscriber_gtest.cpp",
     "sms_delivery_callback_gtest.cpp",
     "sms_mms_test_helper.cpp",
