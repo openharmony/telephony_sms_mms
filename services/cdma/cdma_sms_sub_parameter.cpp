@@ -15,7 +15,7 @@
 
 #include "cdma_sms_sub_parameter.h"
 
-#include "gsm_sms_udata_codec.h"
+#include "gsm_user_data_pdu.h"
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "telephony_log_wrapper.h"
@@ -389,21 +389,23 @@ bool CdmaSmsUserData::Encode(SmsWriteBuffer &pdu)
 
 bool CdmaSmsUserData::EncodeHeader7Bit(SmsWriteBuffer &pdu)
 {
-    std::unique_ptr<char[]> destPtr = std::make_unique<char[]>(MAX_USER_DATA_LEN + 1);
-    if ((static_cast<unsigned long>(data_.userData.headerCnt) >
-        (sizeof(data_.userData.header) / sizeof(data_.userData.header[0]))) ||
-        destPtr == nullptr) {
-        TELEPHONY_LOGE("user data header length error or make unique error");
+    uint8_t udhBytes = 0;
+    pdu.MoveForward(HEX_STEP);
+    uint8_t current = pdu.GetIndex();
+    if (static_cast<unsigned long>(data_.userData.headerCnt) >
+        (sizeof(data_.userData.header) / sizeof(data_.userData.header[0]))) {
+        TELEPHONY_LOGE("user data header length error");
         return false;
     }
-    uint8_t udhBytes = 0;
+    GsmUserDataPdu gsmUdPdu;
     for (uint8_t i = 0; i < data_.userData.headerCnt; i++) {
-        if (udhBytes > MAX_USER_DATA_LEN + 1) {
+        if (pdu.GetIndex() >= MAX_USER_DATA_LEN + current) {
             TELEPHONY_LOGE("user data header length error");
             return false;
         }
-        udhBytes += GsmSmsUDataCodec::EncodeHeader(data_.userData.header[i], &(destPtr.get()[udhBytes]));
+        gsmUdPdu.EncodeHeader(pdu, data_.userData.header[i]);
     }
+    udhBytes += (pdu.GetIndex() - current);
     if (udhBytes > 0) {
         uint8_t udhLen = (udhBytes + 1) * BIT8 / BIT7;
         // The header data is encoded in 7bit, the remaining bits need to be ignored.
@@ -424,17 +426,12 @@ bool CdmaSmsUserData::EncodeHeader7Bit(SmsWriteBuffer &pdu)
             TELEPHONY_LOGE("user data header length error");
             return false;
         }
-        for (uint8_t i = 0; i < udhBytes; i++) {
-            if (!pdu.WriteBits(destPtr.get()[i], BIT8)) {
-                TELEPHONY_LOGE("data write error");
-                return false;
-            }
-        }
-        if (ignoredBits != BIT7 && !pdu.WriteBits(0b0, ignoredBits)) {
+        if (ignoredBits < BIT7 && !pdu.WriteBits(0b0, ignoredBits)) {
             TELEPHONY_LOGE("write error");
             return false;
         }
     } else {
+        pdu.MoveBack(HEX_STEP);
         return pdu.WriteBits(data_.userData.length, BIT8);
     }
     return true;
@@ -471,8 +468,8 @@ bool CdmaSmsUserData::EncodeGsm7Bit(SmsWriteBuffer &pdu)
         TELEPHONY_LOGE("make_unique error");
         return false;
     }
-    uint8_t size = SmsCommonUtils::Pack7bitChar(
-        reinterpret_cast<const uint8_t *>(data_.userData.data), data_.userData.length, 0, destPtr.get());
+    uint8_t size = SmsCommonUtils::Pack7bitChar(reinterpret_cast<const uint8_t *>(data_.userData.data),
+        data_.userData.length, 0, destPtr.get(), MAX_USER_DATA_LEN + 1);
     if (size > MAX_USER_DATA_LEN + 1) {
         TELEPHONY_LOGE("user data length error");
         return false;
@@ -488,24 +485,24 @@ bool CdmaSmsUserData::EncodeGsm7Bit(SmsWriteBuffer &pdu)
 
 bool CdmaSmsUserData::EncodeHeaderUnicode(SmsWriteBuffer &pdu)
 {
-    std::unique_ptr<char[]> destPtr = std::make_unique<char[]>(MAX_USER_DATA_LEN + 1);
-    if (destPtr == nullptr) {
-        TELEPHONY_LOGE("make_unique error");
-        return false;
-    }
     if (static_cast<unsigned long>(data_.userData.headerCnt) >
         (sizeof(data_.userData.header) / sizeof(data_.userData.header[0]))) {
         TELEPHONY_LOGE("user data header length error");
         return false;
     }
+
     uint8_t size = 0;
+    pdu.MoveForward(HEX_STEP);
+    uint8_t current = pdu.GetIndex();
+    GsmUserDataPdu gsmUdPdu;
     for (uint8_t i = 0; i < data_.userData.headerCnt; i++) {
-        if (size > MAX_USER_DATA_LEN + 1) {
+        if (pdu.GetIndex() - current > MAX_USER_DATA_LEN + 1) {
             TELEPHONY_LOGE("user data header length error");
             return false;
         }
-        size += GsmSmsUDataCodec::EncodeHeader(data_.userData.header[i], &(destPtr.get()[size]));
+        gsmUdPdu.EncodeHeader(pdu, data_.userData.header[i]);
     }
+    size = pdu.GetIndex() - current;
     uint8_t numFields = 0;
     if (size > 0) {
         uint8_t udhBytes = size + 1;
@@ -518,13 +515,8 @@ bool CdmaSmsUserData::EncodeHeaderUnicode(SmsWriteBuffer &pdu)
             TELEPHONY_LOGE("user data header length error");
             return false;
         }
-        for (uint8_t i = 0; i < size; i++) {
-            if (!pdu.WriteBits(destPtr.get()[i], BIT8)) {
-                TELEPHONY_LOGE("header write error");
-                return false;
-            }
-        }
     } else {
+        pdu.MoveBack(HEX_STEP);
         numFields = data_.userData.length / HEX_STEP;
         if (!pdu.WriteBits(numFields, BIT8)) {
             TELEPHONY_LOGE("num fields write error");
@@ -645,21 +637,26 @@ uint8_t CdmaSmsUserData::DecodeHeader7Bit(SmsReadBuffer &pdu)
             }
         }
         uint8_t index = 0;
+        GsmUserDataPdu gsmUdPdu;
         for (uint8_t i = 0; index < udhBytes; i++) {
             if (static_cast<unsigned long>(i) > (sizeof(data_.userData.header) / sizeof(data_.userData.header[0]))) {
                 TELEPHONY_LOGE("user data header length error");
                 return 0;
             }
-            uint8_t len = GsmSmsUDataCodec::DecodeHeader(&(data[index]), udhBytes - index, &(data_.userData.header[i]));
-            if (len <= 0) {
-                TELEPHONY_LOGW("Decode header error, header len [%{public}d]", len);
-                GsmSmsUDataCodec::ResetUserData(data_.userData);
+            uint16_t length = 0;
+            if (!gsmUdPdu.DecodeHeader(pdu, data_.userData.header[i], length)) {
+                TELEPHONY_LOGE("decode header error");
                 return 0;
             }
-            index += len;
+            if (length == 0) {
+                TELEPHONY_LOGW("Decode header error, header len [%{public}d]", length);
+                gsmUdPdu.ResetUserData(data_.userData);
+                return 0;
+            }
+            index += length;
             if (index > udhBytes + HEX_STEP) {
                 TELEPHONY_LOGW("Decode header error, over data [%{public}d > %{public}d + 2]", index, udhBytes);
-                GsmSmsUDataCodec::ResetUserData(data_.userData);
+                gsmUdPdu.ResetUserData(data_.userData);
                 return 0;
             } else {
                 data_.userData.headerCnt++;

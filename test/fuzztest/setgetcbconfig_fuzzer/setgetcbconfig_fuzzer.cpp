@@ -18,6 +18,8 @@
 #define private public
 
 #include "addsmstoken_fuzzer.h"
+#include "gsm_cb_gsm_codec.h"
+#include "gsm_cb_umts_codec.h"
 #include "sms_service.h"
 #include "string_utils.h"
 
@@ -124,12 +126,12 @@ void SetImsSmsConfigFuzz(const uint8_t *data, size_t size)
 void UpdataCBMessage(const uint8_t *data, size_t size)
 {
     std::string pdu(reinterpret_cast<const char *>(data), size);
-    auto cbMessage = SmsCbMessage::CreateCbMessage(pdu);
+    auto cbMessage = GsmCbCodec::CreateCbMessage(pdu);
     if (cbMessage == nullptr) {
         return;
     }
     cbMessage->GetCbHeader();
-    auto cbMessageByVectorInit = SmsCbMessage::CreateCbMessage(StringUtils::HexToByteVector(pdu));
+    auto cbMessageByVectorInit = GsmCbCodec::CreateCbMessage(StringUtils::HexToByteVector(pdu));
     if (cbMessageByVectorInit == nullptr) {
         return;
     }
@@ -137,14 +139,20 @@ void UpdataCBMessage(const uint8_t *data, size_t size)
     cbMessageByVectorInit->IsSinglePageMsg();
 
     cbMessage->PduAnalysis(StringUtils::HexToByteVector(pdu));
-    cbMessage->Decode2gHeader(StringUtils::HexToByteVector(pdu));
-    cbMessage->Decode3gHeader(StringUtils::HexToByteVector(pdu));
 
-    cbMessage->Decode2gCbMsg(StringUtils::HexToByteVector(pdu));
-    cbMessage->Decode3gCbMsg(StringUtils::HexToByteVector(pdu));
-    cbMessage->Decode3g7Bit(StringUtils::HexToByteVector(pdu));
-    cbMessage->Decode3gUCS2(StringUtils::HexToByteVector(pdu));
-    cbMessage->DecodeEtwsMsg(StringUtils::HexToByteVector(pdu));
+    auto gsmCodec = std::make_shared<GsmCbGsmCodec>(cbMessage->cbHeader_, cbMessage->cbPduBuffer_, cbMessage);
+    auto umtsCodec = std::make_shared<GsmCbUmtsCodec>(cbMessage->cbHeader_, cbMessage->cbPduBuffer_, cbMessage);
+    if (gsmCodec == nullptr || umtsCodec == nullptr) {
+        return;
+    }
+    gsmCodec->Decode2gHeader();
+    umtsCodec->Decode3gHeader();
+
+    gsmCodec->Decode2gCbMsg();
+    umtsCodec->Decode3gCbMsg();
+    umtsCodec->Decode3g7Bit();
+    umtsCodec->Decode3gUCS2();
+    gsmCodec->DecodeEtwsMsg();
 
     std::string raw(reinterpret_cast<const char *>(data), size);
     std::string message(reinterpret_cast<const char *>(data), size);

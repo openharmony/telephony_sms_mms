@@ -28,13 +28,17 @@ public:
     virtual ~SmsPduBuffer();
     virtual bool IsEmpty();
     uint16_t GetIndex();
+    uint16_t GetSize();
     bool SetIndex(uint16_t index);
     uint16_t MoveForward(uint16_t len = 1);
     uint16_t MoveBack(uint16_t len = 1);
     uint16_t SkipBits();
+    std::unique_ptr<std::vector<uint8_t>> GetPduBuffer();
+
+public:
+    std::unique_ptr<uint8_t[]> data_ { nullptr };
 
 protected:
-    std::unique_ptr<uint8_t[]> data_ { nullptr };
     uint16_t index_ { 0 };
     uint16_t length_ { 0 };
     uint8_t bitIndex_ { 0 };
@@ -44,6 +48,8 @@ class SmsReadBuffer : public SmsPduBuffer {
 public:
     explicit SmsReadBuffer(const std::string &pdu);
     bool ReadByte(uint8_t &v);
+    bool PickOneByte(uint8_t &v);
+    bool PickOneByteFromIndex(uint16_t index, uint8_t &v);
     bool ReadWord(uint16_t &v);
     bool ReadBits(uint8_t &v, uint8_t l = BIT1);
 };
@@ -52,10 +58,11 @@ class SmsWriteBuffer : public SmsPduBuffer {
 public:
     SmsWriteBuffer();
     bool WriteByte(uint8_t v);
+    bool GetTopValue(uint8_t &oneByte);
+    bool GetValueFromIndex(uint16_t index, uint8_t &v);
     bool WriteWord(uint16_t v);
     bool WriteBits(uint8_t v, uint8_t l = BIT1);
     bool InsertByte(uint8_t v, uint16_t index);
-    std::unique_ptr<std::vector<uint8_t>> GetPduBuffer();
 };
 
 } // namespace Telephony

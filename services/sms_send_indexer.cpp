@@ -290,12 +290,12 @@ void SmsSendIndexer::UpdatePduForResend()
     }
 }
 
-void SmsSendIndexer::SetDcs(enum SmsCodingScheme dcs)
+void SmsSendIndexer::SetDcs(enum DataCodingScheme dcs)
 {
     dcs_ = dcs;
 }
 
-enum SmsCodingScheme SmsSendIndexer::GetDcs() const
+enum DataCodingScheme SmsSendIndexer::GetDcs() const
 {
     return dcs_;
 }

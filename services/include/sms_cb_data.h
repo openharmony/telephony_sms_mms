@@ -19,7 +19,7 @@
 #include <string>
 
 #include "cdma_sms_common.h"
-#include "sms_cb_message.h"
+#include "gsm_cb_codec.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -35,18 +35,18 @@ public:
         uint16_t category = static_cast<uint16_t>(SmsCmaeCategory::RESERVED);
         bool isEtws = false;
         bool isCmas = false;
-        int8_t cmasClass = static_cast<int8_t>(SmsCmaeAlertHandle::RESERVED);
-        int8_t cmasCate = static_cast<int8_t>(SmsCmaeCategory::RESERVED);
-        int8_t severity = static_cast<int8_t>(SmsCmaeSeverity::RESERVED);
-        int8_t urgency = static_cast<int8_t>(SmsCmaeUrgency::IMMEDIATE);
-        int8_t certainty = static_cast<int8_t>(SmsCmaeCertainty::RESERVED);
+        uint8_t cmasClass = static_cast<uint8_t>(SmsCmaeAlertHandle::RESERVED);
+        uint8_t cmasCate = static_cast<uint8_t>(SmsCmaeCategory::RESERVED);
+        uint8_t severity = static_cast<uint8_t>(SmsCmaeSeverity::RESERVED);
+        uint8_t urgency = static_cast<uint8_t>(SmsCmaeUrgency::IMMEDIATE);
+        uint8_t certainty = static_cast<uint8_t>(SmsCmaeCertainty::RESERVED);
         uint16_t warnType = 0;
-        uint8_t msgType = SmsCbMessage::SMS_CBMSG_TYPE_UNKNOWN;
-        uint8_t langType = SmsCbMessage::SMS_CBMSG_LANG_DUMMY;
+        uint8_t msgType = GsmCbCodec::GSM_UNKNOWN;
+        uint8_t langType = GsmCbCodec::CB_LANG_DUMMY;
         uint8_t dcs = 0;
         int8_t priority = static_cast<int8_t>(SmsPriorityIndicator::NORMAL);
         bool isPrimary = false;
-        int8_t cmasRes = static_cast<int8_t>(SmsCmaeResponseType::RESERVED);
+        uint8_t cmasRes = static_cast<uint8_t>(SmsCmaeResponseType::RESERVED);
         uint8_t geoScope = 0;
     };
     inline static const std::string SLOT_ID = "slotId";

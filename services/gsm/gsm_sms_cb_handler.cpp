@@ -47,7 +47,7 @@ void GsmSmsCbHandler::UnRegisterHandler()
     CoreManagerInner::GetInstance().UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_CELL_BROADCAST);
 }
 
-bool GsmSmsCbHandler::CheckCbActive(const std::shared_ptr<SmsCbMessage> &cbMessage)
+bool GsmSmsCbHandler::CheckCbActive(const std::shared_ptr<GsmCbCodec> &cbMessage)
 {
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("CbMessage is null!");
@@ -56,16 +56,16 @@ bool GsmSmsCbHandler::CheckCbActive(const std::shared_ptr<SmsCbMessage> &cbMessa
     return true;
 }
 
-unsigned char GsmSmsCbHandler::CheckCbMessage(const std::shared_ptr<SmsCbMessage> &cbMessage)
+uint8_t GsmSmsCbHandler::CheckCbMessage(const std::shared_ptr<GsmCbCodec> &cbMessage)
 {
-    unsigned char currPageCnt = 0;
+    uint8_t currPageCnt = 0;
     bool bFind = false;
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("CheckCbMessage cbMessage nullptr err.");
         return currPageCnt;
     }
 
-    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
+    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
     if (cbHeader == nullptr || cbHeader->totalPages == 0) {
         TELEPHONY_LOGE("CheckCbMessage GetCbHeader err.");
         return currPageCnt;
@@ -98,7 +98,7 @@ unsigned char GsmSmsCbHandler::CheckCbMessage(const std::shared_ptr<SmsCbMessage
     return currPageCnt;
 }
 
-std::unique_ptr<SmsCbInfo> GsmSmsCbHandler::FindCbMessage(const std::shared_ptr<SmsCbMessage> &cbMessage)
+std::unique_ptr<SmsCbInfo> GsmSmsCbHandler::FindCbMessage(const std::shared_ptr<GsmCbCodec> &cbMessage)
 {
     std::unique_ptr<SmsCbInfo> cbInfo = nullptr;
     if (cbMessage == nullptr) {
@@ -106,7 +106,7 @@ std::unique_ptr<SmsCbInfo> GsmSmsCbHandler::FindCbMessage(const std::shared_ptr<
         return cbInfo;
     }
 
-    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
+    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
     if (cbHeader == nullptr) {
         TELEPHONY_LOGE("FindCbMessage header err.");
         return cbInfo;
@@ -125,13 +125,13 @@ std::unique_ptr<SmsCbInfo> GsmSmsCbHandler::FindCbMessage(const std::shared_ptr<
     return cbInfo;
 }
 
-bool GsmSmsCbHandler::AddCbMessageToList(const std::shared_ptr<SmsCbMessage> &cbMessage)
+bool GsmSmsCbHandler::AddCbMessageToList(const std::shared_ptr<GsmCbCodec> &cbMessage)
 {
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("AddCbMessageToList cbMessage nullptr err.");
         return false;
     }
-    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
+    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
     if (cbHeader == nullptr) {
         TELEPHONY_LOGE("AddCbMessageToList header err.");
         return false;
@@ -189,7 +189,7 @@ bool GsmSmsCbHandler::InitLocation(SmsCbInfo &info)
     return true;
 }
 
-bool GsmSmsCbHandler::RemoveCbMessageFromList(const std::shared_ptr<SmsCbMessage> &cbMessage)
+bool GsmSmsCbHandler::RemoveCbMessageFromList(const std::shared_ptr<GsmCbCodec> &cbMessage)
 {
     bool result = false;
     if (cbMessage == nullptr) {
@@ -197,7 +197,7 @@ bool GsmSmsCbHandler::RemoveCbMessageFromList(const std::shared_ptr<SmsCbMessage
         return false;
     }
 
-    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> header = cbMessage->GetCbHeader();
+    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> header = cbMessage->GetCbHeader();
     if (header == nullptr) {
         TELEPHONY_LOGE("RemoveCbMessageFromList header err.");
         return false;
@@ -223,14 +223,14 @@ void GsmSmsCbHandler::HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &messa
     }
 
     std::string pdu(message->pdu);
-    std::shared_ptr<SmsCbMessage> cbMessage = SmsCbMessage::CreateCbMessage(pdu);
+    std::shared_ptr<GsmCbCodec> cbMessage = GsmCbCodec::CreateCbMessage(pdu);
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("create Sms CbMessage fail, pdu %{private}s", pdu.c_str());
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::CELL_BROAD_CAST,
             SmsMmsErrorCode::SMS_ERROR_CELL_BROADCAST_PUD_ANALYSIS_FAIL, "publish cell broadcast event fail");
         return;
     }
-    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> header = cbMessage->GetCbHeader();
+    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> header = cbMessage->GetCbHeader();
     if (header == nullptr) {
         TELEPHONY_LOGE("HandleCbMessage header is null.");
         return;
@@ -241,14 +241,14 @@ void GsmSmsCbHandler::HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &messa
         return;
     }
 
-    unsigned char pageCnt = CheckCbMessage(cbMessage);
+    uint8_t pageCnt = CheckCbMessage(cbMessage);
     if (header->totalPages == pageCnt) {
         SendCbMessageBroadcast(cbMessage);
         RemoveCbMessageFromList(cbMessage);
     }
 }
 
-bool GsmSmsCbHandler::SendCbMessageBroadcast(const std::shared_ptr<SmsCbMessage> &cbMessage)
+bool GsmSmsCbHandler::SendCbMessageBroadcast(const std::shared_ptr<GsmCbCodec> &cbMessage)
 {
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("SendCbMessageBroadcast cbMessage nullptr err.");
@@ -300,7 +300,7 @@ void GsmSmsCbHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     }
 }
 
-bool GsmSmsCbHandler::SetWantData(EventFwk::Want &want, const std::shared_ptr<SmsCbMessage> &cbMessage)
+bool GsmSmsCbHandler::SetWantData(EventFwk::Want &want, const std::shared_ptr<GsmCbCodec> &cbMessage)
 {
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("cbMessage is nullptr.");
@@ -352,7 +352,7 @@ bool GsmSmsCbHandler::SetWantData(EventFwk::Want &want, const std::shared_ptr<Sm
     return true;
 }
 
-void GsmSmsCbHandler::GetCbData(const std::shared_ptr<SmsCbMessage> &cbMessage, SmsCbData::CbData &sendData)
+void GsmSmsCbHandler::GetCbData(const std::shared_ptr<GsmCbCodec> &cbMessage, SmsCbData::CbData &sendData)
 {
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("Get Cb Data error.");

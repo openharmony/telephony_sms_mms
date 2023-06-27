@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
- * Copyright (C) 2014 Samsung Electronics Co., Ltd. All rights reserved
+ * Copyright (C) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,19 +23,19 @@ namespace Telephony {
 static constexpr uint8_t MAX_ADDRESS_LEN = 21;
 static constexpr uint8_t MAX_SEGMENT_NUM = 15;
 
-using SMS_TON_T = unsigned char;
-using SMS_NPI_T = unsigned char;
+using SMS_TON_T = uint8_t;
+using SMS_NPI_T = uint8_t;
 
 // from 3GPP TS 23.040 V5.1.0 9.1.2.5 Address fields
-enum SmsTon {
-    SMS_TON_UNKNOWN = 0, /* unknown */
-    SMS_TON_INTERNATIONAL = 1, /* international number */
-    SMS_TON_NATIONAL = 2, /* national number */
-    SMS_TON_NETWORK_SPECIFIC = 3, /* network specific number */
-    SMS_TON_DEDICATED_ACCESS = 4, /* subscriber number */
-    SMS_TON_ALPHA_NUMERIC = 5, /* alphanumeric, GSM 7-bit default */
-    SMS_TON_ABBREVIATED_NUMBER = 6, /* abbreviated number */
-    SMS_TON_RESERVED_FOR_EXT = 7 /* reserved for extension */
+enum TypeOfNum {
+    TYPE_UNKNOWN = 0, /* unknown */
+    TYPE_INTERNATIONAL = 1, /* international number */
+    TYPE_NATIONAL = 2, /* national number */
+    TYPE_NETWORK_SPECIFIC = 3, /* network specific number */
+    TYPE_DEDICATED_ACCESS = 4, /* subscriber number */
+    TYPE_ALPHA_NUMERIC = 5, /* alphanumeric, GSM 7-bit default */
+    TYPE_ABBREVIATED_NUMBER = 6, /* abbreviated number */
+    TYPE_RESERVED_FOR_EXT = 7 /* reserved for extension */
 };
 
 // from 3GPP TS 23.038 V4.3.0 5 CBS Data Coding Scheme
@@ -54,13 +53,13 @@ enum SmsMessageClass {
 };
 
 // from 3GPP TS 23.038 V4.3.0 4 SMS Data Coding Scheme
-enum SmsCodingGroup {
-    SMS_GENERAL_GROUP = 0, // General Data Coding indication
-    SMS_CODING_CLASS_GROUP, // Data coding/message class
-    SMS_DELETION_GROUP, // Message Marked for Automatic Deletion Group
-    SMS_DISCARD_GROUP, // Message Waiting Indication Group: Discard Message
-    SMS_STORE_GROUP, // Message Waiting Indication Group: Store Message
-    SMS_UNKNOWN_GROUP, // Reserved coding groups
+enum PduSchemeGroup {
+    CODING_GENERAL_GROUP = 0, // General Data Coding indication
+    SMS_CLASS_GROUP, // Data coding/message class
+    CODING_DELETION_GROUP, // Message Marked for Automatic Deletion Group
+    CODING_DISCARD_GROUP, // Message Waiting Indication Group: Discard Message
+    CODING_STORE_GROUP, // Message Waiting Indication Group: Store Message
+    CODING_UNKNOWN_GROUP, // Reserved coding groups
 };
 
 // from 3GPP TS 23.040 V5.1.0 3.2.3 Protocol Identifier
@@ -97,16 +96,15 @@ enum SmsPid {
 };
 
 /**
- * @brief SmsCodingScheme
  * from 3GPP TS 23.040 V5.1.0 9.2.3.10 TP Data Coding Scheme (TP DCS)
  */
-enum SmsCodingScheme {
-    SMS_CODING_7BIT = 0, // GSM 7 bit default alphabet
-    SMS_CODING_8BIT, // 8 bit data
-    SMS_CODING_UCS2, // UCS2 (16bit) [10]
-    SMS_CODING_AUTO,
-    SMS_CODING_EUCKR,
-    SMS_CODING_ASCII7BIT, // cdma 7 bit defualt alphabet
+enum DataCodingScheme {
+    DATA_CODING_7BIT = 0, // GSM 7 bit default alphabet
+    DATA_CODING_8BIT, // 8 bit data
+    DATA_CODING_UCS2, // UCS2 (16bit) [10]
+    DATA_CODING_AUTO,
+    DATA_CODING_EUCKR,
+    DATA_CODING_ASCII7BIT, // cdma 7 bit defualt alphabet
 };
 
 struct SmsTimeStamp {
@@ -118,7 +116,6 @@ struct SmsTimeStamp {
 };
 
 /**
- * @brief SmsDcs
  * form 3GPP TS 23.038 V4.3.0 4	SMS Data Coding Scheme
  */
 typedef struct SmsDcs {
@@ -128,13 +125,12 @@ typedef struct SmsDcs {
     bool bMWI;
     bool bIndActive;
     enum SmsMessageClass msgClass;
-    enum SmsCodingScheme codingScheme;
-    enum SmsCodingGroup codingGroup;
+    enum DataCodingScheme codingScheme;
+    enum PduSchemeGroup codingGroup;
     enum SmsIndicatorType indType;
 } SmsDcs_;
 
 /**
- * @brief SmsVpf
  * from 3GPP TS 23.040 V5.1.0 9.2.3.3 TP Validity Period Format (TP VPF)
  */
 enum SmsVpf {
@@ -147,7 +143,6 @@ enum SmsVpf {
 enum _SMS_REPORT_TYPE_E { SMS_REPORT_POSITIVE = 0, SMS_REPORT_NEGATIVE };
 
 /**
- * @brief SmsSubmit
  * from 3GPP TS 23.040 V5.1.0 9.2.2.2 SMS SUBMIT type
  */
 typedef struct SmsSubmit {
@@ -155,22 +150,21 @@ typedef struct SmsSubmit {
     bool bStatusReport; // TP Status report capabilities
     bool bHeaderInd; // TP User Data Header Indicator (TP UDHI)
     bool bReplyPath; // TP Reply Path
-    unsigned char msgRef; // TP Concatenated Short Messages
+    uint8_t msgRef; // TP Concatenated Short Messages
     enum SmsVpf vpf; // TP Validity Period Format (TP VPF)
-    struct SmsAddress destAddress; // TP Destination Address (TP DA)
+    struct AddressNumber destAddress; // TP Destination Address (TP DA)
     enum SmsPid pid; // TP Protocol Identifier (TP PID)
     struct SmsDcs dcs; // TP Data Coding Scheme (TP DCS)
     struct SmsTimeStamp validityPeriod; // TP Validity Period Format
-    struct SmsUserData userData; // TP User Data (TP UD)
+    struct SmsUDPackage userData; // TP User Data (TP UD)
 } SmsSubmit_;
 
 typedef struct SmsTpud {
-    int udl;
+    uint8_t udl;
     char ud[MAX_USER_DATA_LEN + 1];
 } SmsTpud_;
 
 /**
- * @brief SmsDeliver
  * from 3GPP TS 23.040 V5.1.0 9.2.2.1 SMS DELIVER type
  */
 typedef struct SmsDeliver {
@@ -178,50 +172,48 @@ typedef struct SmsDeliver {
     bool bStatusReport; // TP Status report capabilities
     bool bHeaderInd; // TP User Data Header Indicator (TP UDHI)
     bool bReplyPath; // TP Reply Path
-    struct SmsAddress originAddress; // TP Originating Address (TP OA)
+    struct AddressNumber originAddress; // TP Originating Address (TP OA)
     enum SmsPid pid; // TP Protocol Identifier (TP PID)
     struct SmsDcs dcs; // TP Data Coding Scheme (TP DCS)
     struct SmsTimeStamp timeStamp; // TP Service Centre Time Stamp
-    struct SmsUserData userData; // TP User Data (TP UD)
+    struct SmsUDPackage userData; // TP User Data (TP UD)
     struct SmsTpud udData; // TP User Data (TP UD)
 } SmsDeliver_;
 
-using SMS_REPORT_TYPE_T = unsigned char;
-using SMS_FAIL_CAUSE_T = unsigned char;
+using SMS_REPORT_TYPE_T = uint8_t;
+using SMS_FAIL_CAUSE_T = uint8_t;
 
 /**
- * @brief SmsDeliverReport
  * from 3GPP TS 23.040 V5.1.0 9.2.2.1a SMS DELIVER REPORT type
  */
 typedef struct SmsDeliverReport {
     SMS_REPORT_TYPE_T reportType; // TP Message Type Indicator
     bool bHeaderInd; // TP User Data Header Indicator (TP UDHI)
     SMS_FAIL_CAUSE_T failCause; // TP Failure Cause
-    unsigned char paramInd; // TP Parameter Indicator
+    uint8_t paramInd; // TP Parameter Indicator
     enum SmsPid pid; // TP Protocol Identifier (TP PID)
     struct SmsDcs dcs; // TP Data Coding Scheme (TP DCS)
-    struct SmsUserData userData; // TP User Data (TP UD)
+    struct SmsUDPackage userData; // TP User Data (TP UD)
 } SmsDeliverReport_;
 
-using SMS_STATUS_T = unsigned char;
+using SMS_STATUS_T = uint8_t;
 
 /**
- * @brief SmsStatusReport
  * from 3GPP TS 23.040 V5.1.0 9.2.2.3 SMS STATUS REPORT type
  */
 typedef struct SmsStatusReport {
     bool bMoreMsg; // More Messages to Send
     bool bStatusReport; // TP Status Report Qualifier
     bool bHeaderInd; // TP-User-Data-Header-Indication
-    unsigned char msgRef; // TP Message Reference
-    struct SmsAddress recipAddress; // TP Recipient Address
+    uint8_t msgRef; // TP Message Reference
+    struct AddressNumber recipAddress; // TP Recipient Address
     struct SmsTimeStamp timeStamp; // TP Service Centre Time Stamp
     struct SmsTimeStamp dischargeTime; // TP Discharge Time
     SMS_STATUS_T status; // TP Status
-    unsigned char paramInd; // TP-Parameter-Indicator
+    uint8_t paramInd; // TP-Parameter-Indicator
     enum SmsPid pid; // TP-Protocol-Identifier
     struct SmsDcs dcs; // TP-Data-Coding-Scheme
-    struct SmsUserData userData; // TP-User-Data
+    struct SmsUDPackage userData; // TP-User-Data
 } SmsStatusReport_;
 
 // from 3GPP TS 23.040 V5.1.0 9.2.3.23 TP User Data Header Indicator (TP UDHI)
@@ -243,22 +235,22 @@ typedef struct SmsTpdu {
 } SmsTpdu_S;
 
 // from 3GPP TS 23.040 V5.1.0 9.2.3.24.6 UDH Source Indicator
-enum SmsUDHType {
-    SMS_UDH_CONCAT_8BIT = 0x00,
-    SMS_UDH_SPECIAL_SMS = 0x01,
+enum UserDataHeadType {
+    UDH_CONCAT_8BIT = 0x00,
+    UDH_SPECIAL_SMS = 0x01,
     /* 0x02, 0x03 - Reserved */
-    SMS_UDH_APP_PORT_8BIT = 0x04,
-    SMS_UDH_APP_PORT_16BIT = 0x05,
-    SMS_UDH_SC_CONTROL = 0x06,
-    SMS_UDH_SRC_IND = 0x07,
-    SMS_UDH_CONCAT_16BIT = 0x08,
-    SMS_UDH_WCMP = 0x09,
-    SMS_UDH_EMS_FIRST = 0x0a,
-    SMS_UDH_EMS_LAST = 0x1f,
-    SMS_UDH_ALTERNATE_REPLY_ADDRESS = 0x22,
-    SMS_UDH_SINGLE_SHIFT = 0x24,
-    SMS_UDH_LOCKING_SHIFT = 0x25,
-    SMS_UDH_NONE = 0xFF,
+    UDH_APP_PORT_8BIT = 0x04,
+    UDH_APP_PORT_16BIT = 0x05,
+    UDH_SC_CONTROL = 0x06,
+    UDH_SRC_IND = 0x07,
+    UDH_CONCAT_16BIT = 0x08,
+    UDH_WCMP = 0x09,
+    UDH_EMS_FIRST = 0x0a,
+    UDH_EMS_LAST = 0x1f,
+    UDH_ALTERNATE_REPLY_ADDRESS = 0x22,
+    UDH_SINGLE_SHIFT = 0x24,
+    UDH_LOCKING_SHIFT = 0x25,
+    UDH_NONE = 0xFF,
 };
 } // namespace Telephony
 } // namespace OHOS

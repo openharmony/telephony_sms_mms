@@ -22,23 +22,26 @@
 #include "common_event_manager.h"
 #include "event_handler.h"
 #include "event_runner.h"
+#include "gsm_cb_codec.h"
 #include "hril_sms_parcel.h"
 #include "sms_cb_data.h"
-#include "sms_cb_message.h"
 #include "want.h"
 
-enum SmsCbType { SMS_CB_TYPE = 0, SMS_ETWS_TYPE };
+enum SmsCbType {
+    SMS_CB_TYPE = 0,
+    SMS_ETWS_TYPE,
+};
 
 namespace OHOS {
 namespace Telephony {
 using SmsCbInfo = struct CbInfo {
-    CbInfo(const std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> &headPtr,
-        const std::map<unsigned char, std::shared_ptr<SmsCbMessage>> &cbPtr)
+    CbInfo(const std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> &headPtr,
+        const std::map<uint8_t, std::shared_ptr<GsmCbCodec>> &cbPtr)
         : header(headPtr), cbMsgs(cbPtr)
     {}
     CbInfo() {}
-    std::shared_ptr<SmsCbMessage::SmsCbMessageHeader> header = nullptr;
-    std::map<unsigned char, std::shared_ptr<SmsCbMessage>> cbMsgs {};
+    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> header = nullptr;
+    std::map<uint8_t, std::shared_ptr<GsmCbCodec>> cbMsgs {};
     std::u16string plmn_ = u"";
     int32_t lac_ = -1;
     int32_t cid_ = -1;
@@ -67,22 +70,21 @@ public:
     void UnRegisterHandler();
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 
-    static constexpr uint16_t MAX_CB_MSG_TEXT_LEN = 4200;
+    static constexpr uint16_t MAX_CB_MSG_LEN = 4200;
     static constexpr uint8_t MAX_CB_MSG_LANGUAGE_TYPE_LEN = 3;
     static constexpr uint8_t MAX_ETWS_WARNING_DATA_INFO_LEN = 50;
 
 private:
-    bool CheckCbActive(const std::shared_ptr<SmsCbMessage> &cbMessage);
-    unsigned char CheckCbMessage(const std::shared_ptr<SmsCbMessage> &cbMessage);
-    std::unique_ptr<SmsCbInfo> FindCbMessage(const std::shared_ptr<SmsCbMessage> &cbMessage);
-    bool AddCbMessageToList(const std::shared_ptr<SmsCbMessage> &cbMessage);
-    bool RemoveCbMessageFromList(const std::shared_ptr<SmsCbMessage> &cbMessage);
-    bool SendCbMessageBroadcast(const std::shared_ptr<SmsCbMessage> &cbMessage);
+    bool CheckCbActive(const std::shared_ptr<GsmCbCodec> &cbMessage);
+    uint8_t CheckCbMessage(const std::shared_ptr<GsmCbCodec> &cbMessage);
+    std::unique_ptr<SmsCbInfo> FindCbMessage(const std::shared_ptr<GsmCbCodec> &cbMessage);
+    bool AddCbMessageToList(const std::shared_ptr<GsmCbCodec> &cbMessage);
+    bool RemoveCbMessageFromList(const std::shared_ptr<GsmCbCodec> &cbMessage);
+    bool SendCbMessageBroadcast(const std::shared_ptr<GsmCbCodec> &cbMessage);
     void HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &message);
-    bool SetWantData(EventFwk::Want &want, const std::shared_ptr<SmsCbMessage> &cbMessage);
+    bool SetWantData(EventFwk::Want &want, const std::shared_ptr<GsmCbCodec> &cbMessage);
     bool InitLocation(SmsCbInfo &info);
-    void GetCbData(const std::shared_ptr<SmsCbMessage> &cbMessage,
-        SmsCbData::CbData &SendData);
+    void GetCbData(const std::shared_ptr<GsmCbCodec> &cbMessage, SmsCbData::CbData &SendData);
 
     int32_t slotId_;
     std::vector<SmsCbInfo> cbMsgList_;
