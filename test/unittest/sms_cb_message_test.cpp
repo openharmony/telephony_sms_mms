@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "cdma_sms_message.h"
-#include "sms_cb_message.h"
+#include "gsm_cb_codec.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -111,7 +111,7 @@ void SmsCbMessageTest::TestMessageBody7Bit() const
         "C0000032401174747A0E4ACF41E8B0BCFD76E741EF39685C66B34162F93B4C1"
         "E87E77410BD3CA7836EC2341D440ED3C321");
 
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {
@@ -126,7 +126,7 @@ void SmsCbMessageTest::TestMessageBody7BitUmts() const
         "C0ECFE9207A794E07DD84693AA8EC1EBFC96550B54D9F83C8617A9845479741"
         "37719A0EAAB7E973D038EC060DC372791ED47ECBCB2072981E0652");
 
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {
@@ -140,7 +140,7 @@ void SmsCbMessageTest::TestMessageBody8Bit() const
         "C0000032441174686973206973206861726D6F6E79206F732063656C6C20627"
         "26F6164636173742074657374203842697420656E636F64652064617461");
 
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {
@@ -154,7 +154,7 @@ void SmsCbMessageTest::TestMessageBodyUcs2() const
         "C00000324811006800610072006D006F006E00790020006F00730020005500"
         "630073003200200065006E0063006F0064006500200064006100740061");
 
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {
@@ -172,7 +172,7 @@ void SmsCbMessageTest::TestMessageBodyUcs2Umts() const
         "00000000000000000000000000000000000000000000000000000000000000000"
         "000000000000000000022");
 
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {
@@ -186,7 +186,7 @@ void SmsCbMessageTest::TestEtwsWarningType0() const
       "0000110011010D0A004800610072006D006F006E00790020004F007300200045007400"
       "770073005700610072006E0069006E00670020004D0065007300730061006700650055"
       "00630073003200200045006D00740073");
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {
@@ -201,7 +201,7 @@ void SmsCbMessageTest::TestEtwsWarningType1() const
       "770073005700610072006E0069006E00670020004D0065007300730061006700650055"
       "00630073003200200045006D00740073");
 
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {
@@ -216,7 +216,7 @@ void SmsCbMessageTest::TestEtwsWarningType2() const
       "770073005700610072006E0069006E00670020004D0065007300730061006700650055"
       "00630073003200200045006D00740073");
 
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {
@@ -230,7 +230,7 @@ void SmsCbMessageTest::TestEtwsWarningType3() const
         "0000110311010D0A5BAE57CE770C531790E85C716CBF3044573065B93067573097"
         "07300263FA308C306B5099304830664E0B30553044FF086C178C615E81FF090000"
         "0000000000000000000000000000000000000000");
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {
@@ -245,7 +245,7 @@ void SmsCbMessageTest::TestEtwsWarningType4() const
       "770073005700610072006E0069006E00670020004D0065007300730061006700650055"
       "00630073003200200045006D00740073");
 
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {
@@ -259,7 +259,7 @@ void SmsCbMessageTest::TestMessageBody7BitGs2() const
         "80000032401174747A0E4ACF41E8B0BCFD76E741EF39685C66B34162F93B4C1"
         "E87E77410BD3CA7836EC2341D440ED3C321");
 
-    std::shared_ptr<SmsCbMessage> msg = SmsCbMessage::CreateCbMessage(data);
+    std::shared_ptr<GsmCbCodec> msg = GsmCbCodec::CreateCbMessage(data);
     if (msg == nullptr) {
         std::cout << "CreateCbMessage fail." << std::endl;
     } else {

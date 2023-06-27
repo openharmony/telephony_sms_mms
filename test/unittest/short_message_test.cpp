@@ -26,9 +26,9 @@ std::unique_ptr<ShortMessage> ShortMessageTest::shortMessage_ = nullptr;
 
 void ShortMessageTest::TestCreateMessage() const
 {
-    std::vector<unsigned char> pdu = StringUtils::HexToByteVector(
-        "0891683108200075F4240D91688129562983F6000012408"
-        "00102142302C130");
+    std::vector<unsigned char> pdu =
+        StringUtils::HexToByteVector("0891683108200075F4240D91688129562983F600001240800102142302C130");
+
     ShortMessage *message = new ShortMessage();
     if (message == nullptr) {
         std::cout << "message is nullptr!" << std::endl;
