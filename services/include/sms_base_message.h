@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ typedef struct {
 struct SplitInfo {
     std::string text = "";
     std::vector<uint8_t> encodeData {};
-    SmsCodingScheme encodeType = SmsCodingScheme::SMS_CODING_7BIT;
+    DataCodingScheme encodeType = DataCodingScheme::DATA_CODING_7BIT;
     MSG_LANGUAGE_ID_T langId = 0;
 };
 
@@ -90,14 +90,14 @@ public:
     virtual void ConvertMessageClass(enum SmsMessageClass msgClass);
     virtual int GetMsgRef();
     virtual int GetSegmentSize(
-        SmsCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
+        DataCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
     virtual void SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text, bool force7BitCode,
-        SmsCodingScheme &codingType, bool bPortNum);
+        DataCodingScheme &codingType, bool bPortNum);
     virtual int32_t GetIndexOnSim() const;
     virtual void SetIndexOnSim(int32_t index);
     virtual int32_t GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
     virtual int GetMaxSegmentSize(
-        SmsCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
+        DataCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
 
 protected:
     constexpr static int16_t MAX_MSG_TEXT_LEN = 1530;
@@ -129,16 +129,16 @@ protected:
     int codingGroup_;
     std::vector<uint8_t> rawPdu_;
     std::string rawUserData_;
-    struct SmsUserData smsUserData_;
+    struct SmsUDPackage smsUserData_;
     std::shared_ptr<SmsConcat> smsConcat_;
     std::shared_ptr<SmsAppPortAddr> portAddress_;
     std::shared_ptr<SpecialSmsIndication> specialSmsInd_;
     int32_t indexOnSim_ = -1;
 
 private:
-    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
-            const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
-    void ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType);
+    virtual int DecodeMessage(uint8_t *decodeData, unsigned int length, DataCodingScheme &codingType,
+        const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
+    void ConvertSpiltToUtf8(SplitInfo &split, const DataCodingScheme &codingType);
 };
 } // namespace Telephony
 } // namespace OHOS

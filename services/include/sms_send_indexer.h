@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,8 +87,8 @@ public:
     void SetEncodeSmca(const std::vector<uint8_t> &&smca);
     void SetAckPdu(const std::vector<uint8_t> &&ackPdu);
     void SetData(const std::vector<uint8_t> &&data);
-    void SetDcs(enum SmsCodingScheme dcs);
-    enum SmsCodingScheme GetDcs() const;
+    void SetDcs(enum DataCodingScheme dcs);
+    enum DataCodingScheme GetDcs() const;
     bool GetIsConcat() const;
     void SetIsConcat(bool concat);
     void SetSmsConcat(const SmsConcat &smsConcat);
@@ -121,7 +121,7 @@ private:
     sptr<ISendShortMessageCallback> sendCallback_ = nullptr;
     sptr<IDeliveryShortMessageCallback> deliveryCallback_ = nullptr;
     bool isFailure_ = false;
-    enum SmsCodingScheme dcs_ = SMS_CODING_7BIT;
+    enum DataCodingScheme dcs_ = DATA_CODING_7BIT;
     bool isConcat_ = false;
     SmsConcat smsConcat_ = {0, 0, 0, false};
     uint8_t langId_ = 0;

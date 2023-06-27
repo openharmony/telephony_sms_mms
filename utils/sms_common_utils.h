@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
- * Copyright (C) 2014 Samsung Electronics Co., Ltd. All rights reserved
+ * Copyright (C) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,29 +24,16 @@ namespace OHOS {
 namespace Telephony {
 class SmsCommonUtils {
 public:
-    static int Pack7bitChar(const unsigned char *userData, int dataLen, int fillBits, unsigned char *packData);
-    static int Unpack7bitChar(const unsigned char *tpdu, unsigned char dataLen, int fillBits,
-        unsigned char *unpackData, unsigned int unpackDataLen);
-    static int DigitToBcd(const char *digit, int digitLen, unsigned char *bcd);
-    static int BcdToDigit(const unsigned char *bcd, int bcdLen, char *digit);
-    static int BcdToDigitCdma(const unsigned char *bcd, int bcdLen, char *digit);
-    static int ConvertDigitToDTMF(const char *digit, int digitLen, int startBit, unsigned char *dtmf);
+    static int Pack7bitChar(
+        const uint8_t *userData, uint16_t dataLen, uint8_t fillBits, uint8_t *packData, uint16_t packLen);
+    static int Unpack7bitChar(
+        const uint8_t *tpdu, uint16_t dataLen, uint8_t fillBits, uint8_t *unpackData, uint16_t unpackDataLen);
     static int64_t ConvertTime(const struct SmsTimeAbs &timeAbs);
-    static unsigned char DigitToDtmfChar(const unsigned char c);
-    static unsigned char DtmfCharToDigit(const unsigned char c);
+    static uint8_t DtmfCharToDigit(const uint8_t c);
+    static uint8_t DigitToDtmfChar(const uint8_t c);
 
 private:
-    static char BcdToChar(const unsigned char c);
-    static void DisplayTime(const time_t &rawtime);
-
-    static constexpr uint8_t SMS_HEX_BYTE_STEP = 2;
-    static constexpr uint8_t SMS_ENCODE_GSM_BIT = 7;
-    static constexpr uint8_t SMS_BYTE_BIT = 8;
-    static constexpr uint16_t SEC_PER_HOUR = 3600;
-
-    static constexpr uint8_t BASE_GSM_YEAR = 100;
-    static constexpr uint16_t BASE_CDMA_YEAR = 1900;
-    static constexpr uint16_t BASE_CDMA_YEAR_V2 = 2000;
+    static void GetDisplayTime(const time_t &rawtime);
 };
 } // namespace Telephony
 } // namespace OHOS

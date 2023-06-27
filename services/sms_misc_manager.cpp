@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -360,7 +360,6 @@ int32_t SmsMiscManager::UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface
 
 int32_t SmsMiscManager::GetAllSimMessages(std::vector<ShortMessage> &message)
 {
-    TELEPHONY_LOGI("GetAllSimMessages");
     std::vector<std::string> pdus = CoreManagerInner::GetInstance().ObtainAllSmsOfIcc(slotId_);
     smsCapacityOfSim_ = static_cast<int32_t>(pdus.size());
     int index = 0;
@@ -374,6 +373,11 @@ int32_t SmsMiscManager::GetAllSimMessages(std::vector<ShortMessage> &message)
         return TELEPHONY_ERR_UNKNOWN_NETWORK_TYPE;
     }
     for (auto &v : pdus) {
+        v = v.substr(0, v.find("FFFFF"));
+        if (v.compare("00") == 0) {
+            index++;
+            continue;
+        }
         std::vector<unsigned char> pdu = StringUtils::HexToByteVector(v);
         ShortMessage item = ShortMessage::CreateIccMessage(pdu, specification, index);
         if (item.GetIccMessageStatus() != ShortMessage::SMS_SIM_MESSAGE_STATUS_FREE) {

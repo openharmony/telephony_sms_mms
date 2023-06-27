@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,12 +35,23 @@ ohos_shared_library("tel_sms_mms") {
     "services/cdma/cdma_sms_teleservice_message.cpp",
     "services/cdma/cdma_sms_transport_message.cpp",
     "services/gsm/gsm_sms_cb_handler.cpp",
+    "services/gsm/gsm_sms_common_utils.cpp",
     "services/gsm/gsm_sms_message.cpp",
     "services/gsm/gsm_sms_param_codec.cpp",
+    "services/gsm/gsm_sms_param_decode.cpp",
+    "services/gsm/gsm_sms_param_encode.cpp",
     "services/gsm/gsm_sms_receive_handler.cpp",
     "services/gsm/gsm_sms_sender.cpp",
     "services/gsm/gsm_sms_tpdu_codec.cpp",
-    "services/gsm/gsm_sms_udata_codec.cpp",
+    "services/gsm/gsm_sms_tpdu_decode.cpp",
+    "services/gsm/gsm_sms_tpdu_encode.cpp",
+    "services/gsm/gsm_user_data_decode.cpp",
+    "services/gsm/gsm_user_data_encode.cpp",
+    "services/gsm/gsm_user_data_pdu.cpp",
+    "services/gsm_cb_codec.cpp",
+    "services/gsm_cb_gsm_codec.cpp",
+    "services/gsm_cb_pdu_decode_buffer.cpp",
+    "services/gsm_cb_umts_codec.cpp",
     "services/ims_reg_state_callback_stub.cpp",
     "services/ims_service_interaction/src/ims_sms_callback_stub.cpp",
     "services/ims_service_interaction/src/ims_sms_client.cpp",
@@ -50,7 +61,6 @@ ohos_shared_library("tel_sms_mms") {
     "services/runner_pool.cpp",
     "services/sms_base_message.cpp",
     "services/sms_broadcast_subscriber_receiver.cpp",
-    "services/sms_cb_message.cpp",
     "services/sms_dump_helper.cpp",
     "services/sms_interface_manager.cpp",
     "services/sms_interface_stub.cpp",

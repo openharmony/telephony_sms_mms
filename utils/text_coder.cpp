@@ -250,7 +250,7 @@ int TextCoder::Utf8ToGsm7bit(uint8_t *dest, int maxLength, const uint8_t *src, i
     }
 
     int maxUcs2Length = srcLength;
-    if (maxUcs2Length >= UCS2_LEN_MAX) {
+    if (static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
         TELEPHONY_LOGE("src over size");
         return 0;
     }
@@ -294,10 +294,10 @@ int TextCoder::Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int 
     return (err < 0) ? -1 : (maxLength - remainedLength);
 }
 
-int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, SmsCodingScheme &scheme)
+int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme)
 {
     int maxUcs2Length = srcLength;
-    if (maxUcs2Length <= 0 || maxUcs2Length >= UCS2_LEN_MAX) {
+    if (maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
         TELEPHONY_LOGE("src over size");
         return 0;
     }
@@ -314,7 +314,7 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
     int ucs2Length = Utf8ToUcs2(reinterpret_cast<uint8_t *>(pUcs2Text), maxUcs2Length * sizeof(WCHAR), src, srcLength);
     int tempTextLen = 0;
     if (ucs2Length < 0) {
-        scheme = SMS_CODING_8BIT;
+        scheme = DATA_CODING_8BIT;
         tempTextLen = (srcLength > maxLength) ? maxLength : srcLength;
         if (memcpy_s(dest, tempTextLen, src, tempTextLen) != EOK) {
             TELEPHONY_LOGE("memcpy_s error");
@@ -324,7 +324,7 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
     bool unknown = false;
     int gsm7bitLength = Ucs2ToGsm7bitAuto(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length, unknown);
     if (unknown) {
-        scheme = SMS_CODING_UCS2;
+        scheme = DATA_CODING_UCS2;
         if (ucs2Length <= 0) {
             return gsm7bitLength;
         }
@@ -334,14 +334,14 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
         }
         return tempTextLen;
     }
-    scheme = SMS_CODING_7BIT;
+    scheme = DATA_CODING_7BIT;
     return gsm7bitLength;
 }
 
-int TextCoder::CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, SmsCodingScheme &scheme)
+int TextCoder::CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme)
 {
     int maxUcs2Length = srcLength;
-    if (maxUcs2Length <= 0 || maxUcs2Length >= UCS2_LEN_MAX) {
+    if (maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
         TELEPHONY_LOGE("src over size");
         return 0;
     }
@@ -358,7 +358,7 @@ int TextCoder::CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, 
     int ucs2Length = Utf8ToUcs2(reinterpret_cast<uint8_t *>(pUcs2Text), maxUcs2Length * sizeof(WCHAR), src, srcLength);
     int tempTextLen = 0;
     if (ucs2Length < 0) {
-        scheme = SMS_CODING_8BIT;
+        scheme = DATA_CODING_8BIT;
         tempTextLen = (srcLength > maxLength) ? maxLength : srcLength;
         if (memcpy_s(dest, tempTextLen, src, tempTextLen) != EOK) {
             TELEPHONY_LOGE("memcpy_s error");
@@ -368,7 +368,7 @@ int TextCoder::CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, 
     bool unknown = false;
     int gsm7bitLength = Ucs2ToAscii(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length, unknown);
     if (unknown) {
-        scheme = SMS_CODING_UCS2;
+        scheme = DATA_CODING_UCS2;
         if (ucs2Length <= 0) {
             return gsm7bitLength;
         }
@@ -378,7 +378,7 @@ int TextCoder::CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, 
         }
         return tempTextLen;
     }
-    scheme = SMS_CODING_ASCII7BIT;
+    scheme = DATA_CODING_ASCII7BIT;
     return gsm7bitLength;
 }
 
@@ -392,7 +392,7 @@ int TextCoder::Gsm7bitToUtf8(
     uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, const MsgLangInfo &langInfo)
 {
     int maxUcs2Length = srcLength;
-    if (maxUcs2Length <= 0 || maxUcs2Length >= UCS2_LEN_MAX) {
+    if (maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
         TELEPHONY_LOGE("src over size");
         return 0;
     }

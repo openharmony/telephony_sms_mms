@@ -33,8 +33,8 @@ public:
         std::string &encodeString, uint32_t charset, uint32_t valLength, const std::string &strEncodeString);
     int Utf8ToGsm7bit(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, MSG_LANGUAGE_ID_T &langId);
     int Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);
-    int CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, SmsCodingScheme &scheme);
-    int GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, SmsCodingScheme &scheme);
+    int CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme);
+    int GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme);
     int Gsm7bitToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, const MsgLangInfo &langInfo);
     int Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);
     int EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);

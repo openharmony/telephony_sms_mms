@@ -271,7 +271,7 @@ struct SmsEncodingSpecific {
 struct SmsTeleSvcUserData {
     SmsEncodingType encodeType;
     uint8_t msgType;
-    SmsUserData userData;
+    SmsUDPackage userData;
 };
 
 struct SmsTeleSvcCmasData {

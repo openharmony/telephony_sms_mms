@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
         return;
     }
     CdmaSmsMessage message;
-    SmsCodingScheme codingType;
+    DataCodingScheme codingType;
     std::vector<struct SplitInfo> splits;
     message.SplitMessage(splits, text, CheckForce7BitEncodeType(), codingType, false);
     if (splits.size() > MAX_SEGMENT_NUM) {
@@ -124,7 +124,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
 void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    SmsCodingScheme codingType;
+    DataCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
     std::vector<struct SplitInfo> cellsInfos;
     gsmSmsMessage.SplitMessage(cellsInfos, text, CheckForce7BitEncodeType(), codingType, false);
@@ -149,8 +149,9 @@ void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const stri
 
 void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo> cellsInfos, const string &desAddr,
     const string &scAddr, std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage gsmSmsMessage,
-    shared_ptr<uint8_t> unSentCellCount, shared_ptr<bool> hasCellFailed, SmsCodingScheme codingType, uint8_t msgRef8bit,
-    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+    shared_ptr<uint8_t> unSentCellCount, shared_ptr<bool> hasCellFailed, DataCodingScheme codingType,
+    uint8_t msgRef8bit, const sptr<ISendShortMessageCallback> &sendCallback,
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     std::string segmentText;
     segmentText.append((char *)(cellsInfos[i].encodeData.data()), cellsInfos[i].encodeData.size());
@@ -282,7 +283,7 @@ void CdmaSmsSender::SetPduSeqInfo(const std::shared_ptr<SmsSendIndexer> &smsInde
         transMsg->data.p2p.teleserviceId = static_cast<uint16_t>(SmsTransTelsvcId::WEMT);
         transMsg->data.p2p.telesvcMsg.data.submit.msgId.headerInd = true;
         transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.headerCnt = 1;
-        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = SMS_UDH_CONCAT_8BIT;
+        transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = UDH_CONCAT_8BIT;
         transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.msgRef = msgRef8bit;
         transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.totalSeg =
             static_cast<uint8_t>(size);
@@ -304,7 +305,7 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
         return;
     }
     CdmaSmsMessage message;
-    SmsCodingScheme codingType;
+    DataCodingScheme codingType;
     std::vector<struct SplitInfo> splits;
     std::string text((char *)data, dataLen);
     message.SplitMessage(splits, text, false, codingType, true);
@@ -615,7 +616,7 @@ void CdmaSmsSender::ResendTextDelivery(const std::shared_ptr<SmsSendIndexer> &sm
         return;
     }
     CdmaSmsMessage message;
-    SmsCodingScheme codingType = smsIndexer->GetDcs();
+    DataCodingScheme codingType = smsIndexer->GetDcs();
     std::unique_ptr<CdmaTransportMsg> transMsg = nullptr;
     bool bStatusReport = (smsIndexer->GetDeliveryCallback() == nullptr) ? false : true;
     transMsg = message.CreateSubmitTransMsg(
@@ -721,9 +722,9 @@ void CdmaSmsSender::SetConcact(
         transMsg->data.p2p.telesvcMsg.data.submit.msgId.headerInd = true;
         transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.headerCnt = 1;
         if (smsConcat.is8Bits) {
-            transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = SMS_UDH_CONCAT_8BIT;
+            transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = UDH_CONCAT_8BIT;
         } else {
-            transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = SMS_UDH_CONCAT_16BIT;
+            transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udhType = UDH_CONCAT_16BIT;
         }
         transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.msgRef = smsConcat.msgRef;
         transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.header[0].udh.concat8bit.totalSeg =
