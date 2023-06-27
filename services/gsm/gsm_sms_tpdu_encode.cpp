@@ -425,5 +425,163 @@ bool GsmSmsTpduEncode::EncodeDeliverReportPartData(SmsWriteBuffer &buffer, const
     }
     return result;
 }
+
+bool GsmSmsTpduEncode::EncodeStatusReportPdu(SmsWriteBuffer &buffer, const struct SmsStatusReport *pStatusRep)
+{
+    if (pStatusRep == nullptr) {
+        TELEPHONY_LOGE("nullptr error.");
+        return false;
+    }
+    /* TP-MTI : 10 */
+    if (!buffer.InsertByte(HEX_VALUE_02, buffer.GetIndex())) {
+        TELEPHONY_LOGE("write data error.");
+        return false;
+    }
+    /* TP-MMS */
+    uint8_t oneByte = 0;
+    if (pStatusRep->bMoreMsg == true) {
+        if (!buffer.GetTopValue(oneByte)) {
+            TELEPHONY_LOGE("get data error.");
+            return false;
+        }
+        if (!buffer.InsertByte(oneByte | HEX_VALUE_04, buffer.GetIndex())) {
+            TELEPHONY_LOGE("write data error.");
+            return false;
+        }
+    }
+    /* TP-SRQ */
+    if (pStatusRep->bStatusReport == true) {
+        if (!buffer.GetTopValue(oneByte)) {
+            TELEPHONY_LOGE("get data error.");
+            return false;
+        }
+        if (!buffer.InsertByte(oneByte | HEX_VALUE_20, buffer.GetIndex())) {
+            TELEPHONY_LOGE("write data error.");
+            return false;
+        }
+    }
+    /* TP-UDHI */
+    if (pStatusRep->bHeaderInd == true) {
+        if (!buffer.GetTopValue(oneByte)) {
+            TELEPHONY_LOGE("get data error.");
+            return false;
+        }
+        if (!buffer.WriteByte(oneByte | HEX_VALUE_40)) {
+            TELEPHONY_LOGE("write data error.");
+            return false;
+        }
+    }
+
+    /* TP-MR */
+    if (!buffer.WriteByte(pStatusRep->msgRef)) {
+        TELEPHONY_LOGE("write data error.");
+        return false;
+    }
+    return EncodeStatusReportPartData(buffer, pStatusRep);
+}
+
+bool GsmSmsTpduEncode::EncodeStatusReportPartData(SmsWriteBuffer &buffer, const struct SmsStatusReport *pStatusRep)
+{
+    if (paramCodec_ == nullptr) {
+        TELEPHONY_LOGE("nullptr error.");
+        return false;
+    }
+
+    /* TP-RA */
+    std::string address;
+    if (!paramCodec_->EncodeAddressPdu(&pStatusRep->recipAddress, address)) {
+        TELEPHONY_LOGE("encode addr fail.");
+        return false;
+    }
+
+    uint8_t length = address.size();
+    if (buffer.data_ == nullptr || (buffer.GetIndex() + length) > buffer.GetSize()) {
+        TELEPHONY_LOGE("buffer error.");
+        return false;
+    }
+    if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), length, address.data(), length) != EOK) {
+        TELEPHONY_LOGE("memcpy_s error.");
+        return false;
+    }
+    buffer.MoveForward(length);
+
+    /* TP-SCTS */
+    std::string scts;
+
+    paramCodec_->EncodeTimePdu(&pStatusRep->timeStamp, scts);
+    length = scts.size();
+    if (buffer.data_ == nullptr || (buffer.GetIndex() + length) > buffer.GetSize()) {
+        TELEPHONY_LOGE("buffer error.");
+        return false;
+    }
+    if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), length, scts.data(), length) != EOK) {
+        TELEPHONY_LOGE("memcpy_s error.");
+        return false;
+    }
+    buffer.MoveForward(length);
+
+    /* TP-DT */
+    std::string dt;
+    paramCodec_->EncodeTimePdu(&pStatusRep->dischargeTime, dt);
+    length = scts.size();
+    if (buffer.data_ == nullptr || (buffer.GetIndex() + length) > buffer.GetSize()) {
+        TELEPHONY_LOGE("buffer error.");
+        return false;
+    }
+    if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), length, dt.data(), length) != EOK) {
+        TELEPHONY_LOGE("memcpy_s error.");
+        return false;
+    }
+    buffer.MoveForward(length);
+    return EncodeStatusReportData(buffer, pStatusRep, length);
+}
+
+bool GsmSmsTpduEncode::EncodeStatusReportData(
+    SmsWriteBuffer &buffer, const struct SmsStatusReport *pStatusRep, uint8_t length)
+{
+    if (uDataCodec_ == nullptr) {
+        TELEPHONY_LOGE("nullptr error.");
+        return false;
+    }
+
+    /* TP-Status */
+    if (!buffer.WriteByte(pStatusRep->status)) {
+        TELEPHONY_LOGE("write data error.");
+        return false;
+    }
+    /* TP-PI */
+    if (!buffer.WriteByte(pStatusRep->paramInd)) {
+        TELEPHONY_LOGE("write data error.");
+        return false;
+    }
+    /* TP-PID */
+    if (pStatusRep->paramInd & 0x01) {
+        if (!buffer.WriteByte(pStatusRep->pid)) {
+            TELEPHONY_LOGE("write data error.");
+            return false;
+        }
+    }
+    /* TP-DCS */
+    if (pStatusRep->paramInd & HEX_VALUE_02) {
+        std::string dcs;
+        paramCodec_->EncodeDCS(&pStatusRep->dcs, dcs);
+        if (buffer.data_ == nullptr || (buffer.GetIndex() + length) > buffer.GetSize()) {
+            TELEPHONY_LOGE("buffer error.");
+            return false;
+        }
+        if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), length, dcs.data(), length) != EOK) {
+            TELEPHONY_LOGE("memcpy_s error.");
+            return false;
+        }
+        buffer.MoveForward(length);
+    }
+    /* TP-UDL & TP-UD */
+    bool result = false;
+    if (pStatusRep->paramInd & HEX_VALUE_04) {
+        const struct SmsUDPackage *pUserData = &(pStatusRep->userData);
+        result = uDataCodec_->EncodeUserDataPdu(buffer, pUserData, pStatusRep->dcs.codingScheme);
+    }
+    return result;
+}
 } // namespace Telephony
 } // namespace OHOS
