@@ -486,5 +486,235 @@ bool GsmCbCodec::GetWarningType(uint16_t &type) const
     type = cbHeader_->warningType;
     return true;
 }
+
+bool GsmCbCodec::IsEtwsPrimary(bool &primary) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    primary = (cbHeader_->cbEtwsType == ETWS_PRIMARY);
+    return true;
+}
+
+bool GsmCbCodec::IsEtwsMessage(bool &etws) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    etws = ((cbHeader_->msgId & ETWS_TYPE_MASK) == ETWS_TYPE);
+    return true;
+}
+
+bool GsmCbCodec::IsCmasMessage(bool &cmas) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    cmas = ((cbHeader_->msgId >= CMAS_FIRST_ID) && (cbHeader_->msgId <= CMAS_LAST_ID));
+    return true;
+}
+
+bool GsmCbCodec::IsEtwsEmergencyUserAlert(bool &alert) const
+{
+    uint16_t serial = 0;
+    if (!GetSerialNum(serial)) {
+        TELEPHONY_LOGE("Get serial num fail.");
+        return false;
+    }
+    alert = ((serial & EMERGENCY_USER_ALERT) != 0);
+    return true;
+}
+
+bool GsmCbCodec::IsEtwsPopupAlert(bool &alert) const
+{
+    uint16_t serial = 0;
+    if (!GetSerialNum(serial)) {
+        TELEPHONY_LOGE("Get serial num fail.");
+        return false;
+    }
+    alert = ((serial & ETWS_POPUP) != 0);
+    return true;
+}
+
+bool GsmCbCodec::GetCmasSeverity(uint8_t &severity) const
+{
+    uint16_t msgId = 0;
+    if (!GetMessageId(msgId)) {
+        TELEPHONY_LOGE("Get message id fail.");
+        return false;
+    }
+    switch (static_cast<CmasMsgType>(msgId)) {
+        case CmasMsgType::EXTREME_OBSERVED:
+        case CmasMsgType::EXTREME_OBSERVED_SPANISH:
+        case CmasMsgType::EXTREME_LIKELY:
+        case CmasMsgType::EXTREME_LIKELY_SPANISH:
+        case CmasMsgType::SEVERE_OBSERVED:
+        case CmasMsgType::SEVERE_OBSERVED_SPANISH:
+        case CmasMsgType::SEVERE_LIKELY:
+        case CmasMsgType::SEVERE_LIKELY_SPANISH:
+            severity = static_cast<uint8_t>(SmsCmaeSeverity::EXTREME);
+            break;
+        case CmasMsgType::ALERT_OBSERVED_DEFUALT:
+        case CmasMsgType::ALERT_OBSERVED_SPANISH:
+        case CmasMsgType::ALERT_LIKELY:
+        case CmasMsgType::ALERT_LIKELY_SPANISH:
+        case CmasMsgType::EXPECTED_OBSERVED:
+        case CmasMsgType::EXPECTED_OBSERVED_SPANISH:
+        case CmasMsgType::EXPECTED_LIKELY:
+        case CmasMsgType::EXPECTED_LIKELY_SPANISH:
+            severity = static_cast<uint8_t>(SmsCmaeSeverity::SEVERE);
+            break;
+        default:
+            severity = static_cast<uint8_t>(SmsCmaeSeverity::RESERVED);
+            break;
+    }
+    return true;
+}
+
+bool GsmCbCodec::GetCmasUrgency(uint8_t &urgency) const
+{
+    uint16_t msgId = 0;
+    if (!GetMessageId(msgId)) {
+        TELEPHONY_LOGE("Get message id fail.");
+        return false;
+    }
+    switch (static_cast<CmasMsgType>(msgId)) {
+        case CmasMsgType::EXTREME_OBSERVED:
+        case CmasMsgType::EXTREME_OBSERVED_SPANISH:
+        case CmasMsgType::EXTREME_LIKELY:
+        case CmasMsgType::EXTREME_LIKELY_SPANISH:
+        case CmasMsgType::ALERT_OBSERVED_DEFUALT:
+        case CmasMsgType::ALERT_OBSERVED_SPANISH:
+        case CmasMsgType::ALERT_LIKELY:
+        case CmasMsgType::ALERT_LIKELY_SPANISH:
+            urgency = static_cast<uint8_t>(SmsCmaeUrgency::IMMEDIATE);
+            break;
+        case CmasMsgType::SEVERE_OBSERVED:
+        case CmasMsgType::SEVERE_OBSERVED_SPANISH:
+        case CmasMsgType::SEVERE_LIKELY:
+        case CmasMsgType::SEVERE_LIKELY_SPANISH:
+        case CmasMsgType::EXPECTED_OBSERVED:
+        case CmasMsgType::EXPECTED_OBSERVED_SPANISH:
+        case CmasMsgType::EXPECTED_LIKELY:
+        case CmasMsgType::EXPECTED_LIKELY_SPANISH:
+            urgency = static_cast<uint8_t>(SmsCmaeUrgency::EXPECTED);
+            break;
+        default:
+            urgency = static_cast<uint8_t>(SmsCmaeUrgency::RESERVED);
+            break;
+    }
+    return true;
+}
+
+bool GsmCbCodec::GetCmasCertainty(uint8_t &certainty) const
+{
+    uint16_t msgId = 0;
+    if (!GetMessageId(msgId)) {
+        TELEPHONY_LOGE("Get message id fail.");
+        return false;
+    }
+    switch (static_cast<CmasMsgType>(msgId)) {
+        case CmasMsgType::EXTREME_OBSERVED:
+        case CmasMsgType::EXTREME_OBSERVED_SPANISH:
+        case CmasMsgType::SEVERE_OBSERVED:
+        case CmasMsgType::SEVERE_OBSERVED_SPANISH:
+        case CmasMsgType::ALERT_OBSERVED_DEFUALT:
+        case CmasMsgType::ALERT_OBSERVED_SPANISH:
+        case CmasMsgType::EXPECTED_OBSERVED:
+        case CmasMsgType::EXPECTED_OBSERVED_SPANISH:
+            certainty = static_cast<uint8_t>(SmsCmaeCertainty::OBSERVED);
+            break;
+        case CmasMsgType::EXTREME_LIKELY:
+        case CmasMsgType::EXTREME_LIKELY_SPANISH:
+        case CmasMsgType::SEVERE_LIKELY:
+        case CmasMsgType::SEVERE_LIKELY_SPANISH:
+        case CmasMsgType::ALERT_LIKELY:
+        case CmasMsgType::ALERT_LIKELY_SPANISH:
+        case CmasMsgType::EXPECTED_LIKELY:
+        case CmasMsgType::EXPECTED_LIKELY_SPANISH:
+            certainty = static_cast<uint8_t>(SmsCmaeCertainty::LIKELY);
+            break;
+        default:
+            certainty = static_cast<uint8_t>(SmsCmaeCertainty::RESERVED);
+            break;
+    }
+    return true;
+}
+
+bool GsmCbCodec::GetCmasCategory(uint8_t &cmasCategory) const
+{
+    cmasCategory = static_cast<uint8_t>(SmsCmaeCategory::RESERVED);
+    return true;
+}
+
+bool GsmCbCodec::GetCmasResponseType(uint8_t &cmasRes) const
+{
+    cmasRes = static_cast<uint8_t>(SmsCmaeResponseType::RESERVED);
+    return true;
+}
+
+bool GsmCbCodec::GetMessageId(uint16_t &msgId) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    msgId = cbHeader_->msgId;
+    return true;
+}
+
+bool GsmCbCodec::GetCmasMessageClass(uint8_t &cmasClass) const
+{
+    uint16_t cbMsgId = 0;
+    if (!GetMessageId(cbMsgId)) {
+        TELEPHONY_LOGE("get cb id fail.");
+        return false;
+    }
+    cmasClass = CMASClass(cbMsgId);
+    return true;
+}
+
+bool GsmCbCodec::GetMsgType(uint8_t &msgType) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    msgType = cbHeader_->cbMsgType;
+    return true;
+}
+
+bool GsmCbCodec::GetLangType(uint8_t &lan) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    lan = cbHeader_->langType;
+    return true;
+}
+
+bool GsmCbCodec::GetDcs(uint8_t &dcs) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("cbHeader_ is nullptr");
+        return false;
+    }
+    dcs = cbHeader_->dcs.codingScheme;
+    return true;
+}
+
+bool GsmCbCodec::GetReceiveTime(int64_t &receiveTime) const
+{
+    if (cbHeader_ == nullptr) {
+        TELEPHONY_LOGE("nullptr error.");
+        return false;
+    }
+    receiveTime = cbHeader_->recvTime;
+    return true;
+}
 } // namespace Telephony
 } // namespace OHOS
