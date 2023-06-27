@@ -455,5 +455,283 @@ bool GsmUserDataPdu::DecodeHeaderPartData(SmsReadBuffer &buffer, struct SmsUDH &
     }
     return true;
 }
+
+bool GsmUserDataPdu::DecodeHeaderConcat8Bit(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
+{
+    uint8_t oneByte = 0;
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    if (oneByte == 0) {
+        return false;
+    }
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.concat8bit.msgRef = oneByte;
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.concat8bit.totalSeg = oneByte;
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.concat8bit.seqNum = oneByte;
+    DebugDecodeHeader(pHeader);
+    return true;
+}
+
+bool GsmUserDataPdu::DecodeHeaderConcat16Bit(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
+{
+    uint8_t oneByte = 0;
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    if (oneByte == 0) {
+        return false;
+    }
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.concat16bit.msgRef = oneByte;
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    oneByte |= pHeader.udh.concat16bit.msgRef << NORMAL_BYTE_BITS;
+    pHeader.udh.concat16bit.msgRef = static_cast<uint16_t>(oneByte);
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.concat16bit.totalSeg = oneByte;
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.concat16bit.seqNum = oneByte;
+    DebugDecodeHeader(pHeader);
+    return true;
+}
+
+bool GsmUserDataPdu::DecodeHeaderAppPort8Bit(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
+{
+    uint8_t pickByte = 0;
+    uint8_t oneByte = 0;
+    if (!buffer.PickOneByte(pickByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    if (pickByte == 0) {
+        return false;
+    }
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.appPort8bit.destPort = oneByte;
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.appPort8bit.originPort = oneByte;
+    DebugDecodeHeader(pHeader);
+    return true;
+}
+
+bool GsmUserDataPdu::DecodeHeaderAppPort16Bit(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
+{
+    uint8_t pickByte = 0;
+    uint8_t oneByte = 0;
+    if (!buffer.PickOneByte(pickByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    if (pickByte == 0) {
+        return false;
+    }
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.appPort16bit.destPort = oneByte;
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    oneByte |= pHeader.udh.appPort16bit.destPort << NORMAL_BYTE_BITS;
+    pHeader.udh.appPort16bit.destPort = static_cast<uint16_t>(oneByte);
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.appPort16bit.originPort = oneByte;
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    oneByte |= pHeader.udh.appPort16bit.originPort << NORMAL_BYTE_BITS;
+    pHeader.udh.appPort16bit.originPort = static_cast<uint16_t>(oneByte);
+    DebugDecodeHeader(pHeader);
+    return true;
+}
+
+bool GsmUserDataPdu::DecodeHeaderSpecialSms(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
+{
+    uint8_t pickByte = 0;
+    uint8_t oneByte = 0;
+    if (!buffer.PickOneByte(pickByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    if (pickByte != HEX_VALUE_02) {
+        return false;
+    }
+    TELEPHONY_LOGI("Decoding special sms udh.");
+    if (!buffer.PickOneByte(pickByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.specialInd.bStore = static_cast<bool>(pickByte & HEX_VALUE_80);
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.specialInd.msgInd = static_cast<uint16_t>(oneByte & HEX_VALUE_7F);
+
+    if (!buffer.PickOneByte(pickByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.specialInd.waitMsgNum = pickByte;
+    return true;
+}
+
+bool GsmUserDataPdu::DecodeHeaderReplyAddress(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
+{
+    uint8_t oneByte = 0;
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    if (oneByte == 0) {
+        return false;
+    }
+    GsmSmsParamCodec codec;
+    if (!codec.DecodeAddressPdu(buffer, &(pHeader.udh.alternateAddress))) {
+        return false;
+    }
+    TELEPHONY_LOGI("alternate reply address [%{private}s]", pHeader.udh.alternateAddress.address);
+    return true;
+}
+
+bool GsmUserDataPdu::DecodeHeaderSingleShift(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
+{
+    uint8_t oneByte = 0;
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    if (oneByte == 0) {
+        return false;
+    }
+
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.singleShift.langId = oneByte;
+    TELEPHONY_LOGI("singleShift.langId [%{public}02x]", pHeader.udh.singleShift.langId);
+    return true;
+}
+
+bool GsmUserDataPdu::DecodeHeaderLockingShift(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
+{
+    uint8_t oneByte = 0;
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    if (oneByte == 0) {
+        return false;
+    }
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    pHeader.udh.lockingShift.langId = oneByte;
+    TELEPHONY_LOGI("lockingShift.langId [%{public}02x]", pHeader.udh.lockingShift.langId);
+    return true;
+}
+
+bool GsmUserDataPdu::DecodeHeaderDefaultCase(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
+{
+    uint8_t oneByte = 0;
+    TELEPHONY_LOGI("Not Supported Header Type [%{public}02x]", pHeader.udhType);
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    TELEPHONY_LOGI("IEDL [%{public}u]", oneByte);
+    return false;
+}
+
+void GsmUserDataPdu::DebugDecodeHeader(const struct SmsUDH &pHeader)
+{
+    switch (pHeader.udhType) {
+        case UDH_CONCAT_8BIT: {
+            TELEPHONY_LOGI("concat8bit.seqNum [%{public}02x]", pHeader.udh.concat8bit.seqNum);
+            break;
+        }
+        case UDH_CONCAT_16BIT: {
+            TELEPHONY_LOGI("concat16bit.seqNum [%{public}02x]", pHeader.udh.concat16bit.seqNum);
+            break;
+        }
+        case UDH_APP_PORT_8BIT: {
+            TELEPHONY_LOGI("appPort8bit.destPort [%{private}02x]", pHeader.udh.appPort8bit.destPort);
+            TELEPHONY_LOGI("appPort8bit.originPort [%{private}02x]", pHeader.udh.appPort8bit.originPort);
+            break;
+        }
+        case UDH_APP_PORT_16BIT: {
+            TELEPHONY_LOGI("appPort16bit.destPort [%{private}04x]", pHeader.udh.appPort16bit.destPort);
+            TELEPHONY_LOGI("appPort16bit.originPort [%{private}04x]", pHeader.udh.appPort16bit.originPort);
+            break;
+        }
+        case UDH_SPECIAL_SMS: {
+            TELEPHONY_LOGI("Decoding special sms udh.");
+            break;
+        }
+        case UDH_ALTERNATE_REPLY_ADDRESS:
+            break;
+        case UDH_SINGLE_SHIFT: {
+            TELEPHONY_LOGI("singleShift.langId [%{public}02x]", pHeader.udh.singleShift.langId);
+            break;
+        }
+        case UDH_LOCKING_SHIFT: {
+            TELEPHONY_LOGI("lockingShift.langId [%{public}02x]", pHeader.udh.lockingShift.langId);
+            break;
+        }
+        default:
+            break;
+    }
+}
 } // namespace Telephony
 } // namespace OHOS
