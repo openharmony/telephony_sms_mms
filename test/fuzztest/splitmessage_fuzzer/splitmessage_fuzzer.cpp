@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,7 @@ void SplitMessage(const uint8_t *data, size_t size)
     }
     smsSendManager->SplitMessage(messageData, splitMessage);
 
-    SmsCodingScheme codingType;
+    DataCodingScheme codingType;
     std::vector<struct SplitInfo> cellsInfos;
     GsmSmsMessage gsmSmsMessage;
     gsmSmsMessage.SplitMessage(cellsInfos, messageData, false, codingType, false);

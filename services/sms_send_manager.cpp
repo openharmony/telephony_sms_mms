@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -242,7 +242,7 @@ int32_t SmsSendManager::SplitMessage(const std::string &message, std::vector<std
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
 
-    SmsCodingScheme codingType;
+    DataCodingScheme codingType;
     std::vector<struct SplitInfo> cellsInfos;
     NetWorkType netWorkType = networkManager_->GetNetWorkType();
     switch (netWorkType) {

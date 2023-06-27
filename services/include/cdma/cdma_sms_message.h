@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,12 +55,12 @@ public:
     static std::shared_ptr<CdmaSmsMessage> CreateMessage(const std::string &pdu);
 
     std::unique_ptr<CdmaTransportMsg> CreateSubmitTransMsg(const std::string &dest, const std::string &sc,
-        const std::string &text, bool bStatusReport, const SmsCodingScheme codingScheme);
+        const std::string &text, bool bStatusReport, const DataCodingScheme codingScheme);
     std::unique_ptr<CdmaTransportMsg> CreateSubmitTransMsg(const std::string &dest, const std::string &sc, int32_t port,
         const uint8_t *data, uint32_t dataLen, bool bStatusReport);
 
 private:
-    SmsEncodingType CovertEncodingType(const SmsCodingScheme &codingScheme);
+    SmsEncodingType CovertEncodingType(const DataCodingScheme &codingScheme);
     bool PduAnalysis(const std::string &pduHex);
     void AnalysisP2pMsg(const CdmaP2PMsg &p2pMsg);
     void AnalysisCbMsg(const CdmaBroadCastMsg &cbMsg);
@@ -73,7 +73,7 @@ private:
     void AnalsisUserData(const SmsTeleSvcUserData &userData);
     void AnalsisCMASMsg(const TeleserviceDeliver &deliver);
     void AnalsisHeader(const SmsTeleSvcUserData &userData);
-    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
+    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, DataCodingScheme &codingType,
         const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
 
 private:

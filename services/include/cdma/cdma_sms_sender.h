@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ public:
         std::shared_ptr<bool> hasCellFailed, const sptr<ISendShortMessageCallback> &sendCallback);
     void SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo> cellsInfos, const std::string &desAddr,
         const std::string &scAddr, std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage gsmSmsMessage,
-        std::shared_ptr<uint8_t> unSentCellCount, std::shared_ptr<bool> hasCellFailed, SmsCodingScheme codingType,
+        std::shared_ptr<uint8_t> unSentCellCount, std::shared_ptr<bool> hasCellFailed, DataCodingScheme codingType,
         uint8_t msgRef8bit, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
     void ReadySendSms(GsmSmsMessage gsmSmsMessage, const std::string &scAddr, bool isMore,

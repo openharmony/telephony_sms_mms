@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,16 +36,18 @@ public:
     bool GetGsm() const;
     std::string GetReplyAddress() const;
 
-    int SetHeaderLang(int index, const SmsCodingScheme codingType, const MSG_LANGUAGE_ID_T langId);
+    int SetHeaderLang(int index, const DataCodingScheme codingType, const MSG_LANGUAGE_ID_T langId);
     int SetHeaderConcat(int index, const SmsConcat &concat);
     int SetHeaderReply(int index);
 
     std::shared_ptr<struct SmsTpdu> CreateDefaultSubmitSmsTpdu(const std::string &dest, const std::string &sc,
-        const std::string &text, bool bStatusReport, const SmsCodingScheme codingScheme);
+        const std::string &text, bool bStatusReport, const DataCodingScheme codingScheme);
     std::shared_ptr<struct SmsTpdu> CreateDataSubmitSmsTpdu(const std::string &desAddr, const std::string &scAddr,
         int32_t port, const uint8_t *data, uint32_t dataLen, uint8_t msgRef8bit, bool bStatusReport);
 
     std::shared_ptr<struct EncodeInfo> GetSubmitEncodeInfo(const std::string &sc, bool bMore);
+    std::shared_ptr<struct EncodeInfo> GetSubmitEncodeInfoPartData(
+        uint8_t *encodeSmscAddr, uint8_t encodeSmscLen, bool bMore);
     std::shared_ptr<struct SmsTpdu> CreateDeliverSmsTpdu();
     std::shared_ptr<struct SmsTpdu> CreateDeliverReportSmsTpdu();
     std::shared_ptr<struct SmsTpdu> CreateStatusReportSmsTpdu();
@@ -82,18 +84,18 @@ private:
     void AnalysisMsgDeliver(const SmsDeliver &deliver);
     void AnalysisMsgStatusReport(const SmsStatusReport &statusRep);
     void AnalysisMsgSubmit(const SmsSubmit &submit);
-    void CreateDefaultSubmit(bool bStatusReport, const SmsCodingScheme codingScheme);
+    void CreateDefaultSubmit(bool bStatusReport, const DataCodingScheme codingScheme);
     int SetSmsTpduDestAddress(std::shared_ptr<struct SmsTpdu> &tPdu, const std::string &desAddr);
-    int CalcReplyEncodeAddress(const std::string &replyAddress);
-    virtual int DecodeMessage(unsigned char *decodeData, unsigned int length, SmsCodingScheme &codingType,
+    uint8_t CalcReplyEncodeAddress(const std::string &replyAddress);
+    virtual int DecodeMessage(uint8_t *decodeData, unsigned int length, DataCodingScheme &codingType,
         const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
 };
 
 struct EncodeInfo {
     char tpduData_[GsmSmsMessage::TAPI_NETTEXT_SMDATA_SIZE_MAX + 1] = { 0 };
     char smcaData_[GsmSmsMessage::TAPI_SIM_SMSP_ADDRESS_LEN + 1] = { 0 };
-    int tpduLen = 0;
-    int smcaLen = 0;
+    uint16_t tpduLen = 0;
+    uint8_t smcaLen = 0;
     bool isMore_ = false;
 };
 } // namespace Telephony

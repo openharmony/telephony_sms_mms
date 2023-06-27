@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ static constexpr uint8_t SMS_MAX_ADDRESS_LEN = 21;
 static constexpr uint8_t MAX_UD_HEADER_NUM = 7;
 static constexpr uint8_t MAX_USER_DATA_LEN = 160;
 
-enum SmsNumberPlanType : unsigned char {
+enum SmsNumberPlanType : uint8_t {
     SMS_NPI_UNKNOWN = 0,
     SMS_NPI_ISDN = 1,
     SMS_NPI_DATA = 3,
@@ -45,10 +45,10 @@ enum SmsIndicatorType {
     SMS_OTHER_INDICATOR, // Other Message Waiting
 };
 
-enum SmsTimeFormat : unsigned char { SMS_TIME_EMPTY = 0, SMS_TIME_RELATIVE, SMS_TIME_ABSOLUTE };
+enum SmsTimeFormat : uint8_t { SMS_TIME_EMPTY = 0, SMS_TIME_RELATIVE, SMS_TIME_ABSOLUTE };
 
 // cdma
-typedef enum SmsRelativeTime : unsigned char {
+typedef enum SmsRelativeTime : uint8_t {
     SMS_REL_TIME_5_MINS = 0,
     SMS_REL_TIME_12_HOURS = 143,
     SMS_REL_TIME_1_DAY = 167,
@@ -63,17 +63,17 @@ typedef enum SmsRelativeTime : unsigned char {
 } SmsRelativeTimeEnum;
 
 struct SmsTimeRel {
-    unsigned char time;
+    uint8_t time;
 };
 
 struct SmsTimeAbs {
-    unsigned char year; /* range 00-99 (96~99 : 19xx, 00~95 : 20xx) */
-    unsigned char month; /* range 1-12 */
-    unsigned char day;
-    unsigned char hour; /* range 0-23 */
-    unsigned char minute; /* range 0-59 */
-    unsigned char second; /* range 0-59 */
-    int timeZone; // gsm
+    uint8_t year; /* range 00-99 (96~99 : 19xx, 00~95 : 20xx) */
+    uint8_t month; /* range 1-12 */
+    uint8_t day;
+    uint8_t hour; /* range 0-23 */
+    uint8_t minute; /* range 0-59 */
+    uint8_t second; /* range 0-59 */
+    int32_t timeZone; // gsm
 };
 
 /**
@@ -81,9 +81,9 @@ struct SmsTimeAbs {
  * from 3GPP TS 23.040 V5.1.0 9.2.3.24.1 Concatenated Short Messages
  */
 typedef struct SmsConcat8Bit {
-    unsigned char msgRef;
-    unsigned char totalSeg;
-    unsigned char seqNum;
+    uint8_t msgRef;
+    uint8_t totalSeg;
+    uint8_t seqNum;
 } SmsConcat8Bit_;
 
 /**
@@ -92,8 +92,8 @@ typedef struct SmsConcat8Bit {
  */
 typedef struct SmsConcat16Bit {
     unsigned short msgRef;
-    unsigned char totalSeg;
-    unsigned char seqNum;
+    uint8_t totalSeg;
+    uint8_t seqNum;
 } SmsConcat16Bit_;
 
 /**
@@ -101,8 +101,8 @@ typedef struct SmsConcat16Bit {
  * from 3GPP TS 23.040 V5.1.0 9.2.3.24.3 Application Port Addressing 8 bit address
  */
 typedef struct SmsAppPort8Bits {
-    unsigned char destPort;
-    unsigned char originPort;
+    uint8_t destPort;
+    uint8_t originPort;
 } SmsAppPort8Bits_;
 
 /**
@@ -125,16 +125,16 @@ typedef struct SmsSpecialIndication {
 } SmsSpecialIndication_;
 
 typedef struct MsgSingleShift {
-    unsigned char langId;
+    uint8_t langId;
 } MsgSingleShift_;
 
 typedef struct MsgLockingShifi {
-    unsigned char langId;
+    uint8_t langId;
 } MsgLockingShifi_;
 
-typedef struct SmsAddress {
-    unsigned char ton;
-    unsigned char npi;
+typedef struct AddressNumber {
+    uint8_t ton;
+    uint8_t npi;
     char address[SMS_MAX_ADDRESS_LEN + 1]; /* < null terminated string */
 } SmsAddress_S;
 
@@ -143,7 +143,7 @@ typedef struct SmsAddress {
  * from 3GPP TS 23.040 V5.1.0 9.2.3.24.6 UDH Source Indicator
  */
 struct SmsUDH {
-    unsigned char udhType;
+    uint8_t udhType;
     union {
         struct SmsConcat8Bit concat8bit;
         struct SmsConcat16Bit concat16bit;
@@ -152,18 +152,18 @@ struct SmsUDH {
         struct SmsSpecialIndication specialInd;
         struct MsgSingleShift singleShift;
         struct MsgLockingShifi lockingShift;
-        struct SmsAddress alternateAddress;
+        struct AddressNumber alternateAddress;
     } udh;
 };
 
 /**
- * @brief SmsUserData
+ * @brief SmsUDPackage
  * from 3GPP TS 23.040 V5.1.0 9.2.3.24	TP User Data (TP UD)
  */
-typedef struct SmsUserData {
-    int headerCnt;
+typedef struct SmsUDPackage {
+    uint8_t headerCnt;
     struct SmsUDH header[MAX_UD_HEADER_NUM];
-    int length;
+    uint8_t length;
     char data[MAX_USER_DATA_LEN + 1];
 } SmsUserData_;
 } // namespace Telephony

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
- * Copyright (C) 2014 Samsung Electronics Co., Ltd. All rights reserved
+ * Copyright (C) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef GSM_SMS_PARAMCODEC_H
-#define GSM_SMS_PARAMCODEC_H
+#ifndef GSM_SMS_PARAM_CODEC_H
+#define GSM_SMS_PARAM_CODEC_H
 
 #include "gsm_pdu_code_type.h"
+#include "sms_pdu_buffer.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -25,32 +25,20 @@ class GsmSmsParamCodec {
 public:
     GsmSmsParamCodec() = default;
     virtual ~GsmSmsParamCodec() = default;
+    bool EncodeAddressPdu(const struct AddressNumber *num, std::string &resultNum);
+    void EncodeTimePdu(const struct SmsTimeStamp *timeStamp, std::string &resultValue);
+    void EncodeDCS(const struct SmsDcs *dcsData, std::string &returnValue);
+    uint8_t EncodeSmscPdu(const char *num, uint8_t *resultNum);
+    uint8_t EncodeSmscPdu(const struct AddressNumber *num, uint8_t *smscNum, uint8_t smscLen);
 
-    static int EncodeAddress(const struct SmsAddress *pAddress, char **ppParam);
-    static int EncodeTime(const struct SmsTimeStamp *pTimeStamp, char **ppParam);
-    static int EncodeDCS(const struct SmsDcs *pDCS, char **ppParam);
-    static int EncodeSMSC(const char *pAddress, unsigned char *pEncodeAddr);
-    static int EncodeSMSC(const struct SmsAddress *pAddress, unsigned char *pSMSC, int smscLen);
+    bool DecodeAddressPdu(SmsReadBuffer &buffer, struct AddressNumber *resultNum);
+    bool DecodeTimePdu(SmsReadBuffer &bufferr, struct SmsTimeStamp *timeStamp);
+    bool DecodeDcsPdu(SmsReadBuffer &buffer, struct SmsDcs *smsDcs);
 
-    static int DecodeAddress(const unsigned char *pTpdu, int pduLen, struct SmsAddress *pAddress);
-    static int DecodeTime(const unsigned char *pTpdu, struct SmsTimeStamp *pTimeStamp);
-    static int DecodeDCS(const unsigned char *pTpdu, struct SmsDcs *pDCS);
-    static void DecodeSMSC(unsigned char *pAddress, int AddrLen, enum SmsTon ton, char *pDecodeAddr);
-    static int DecodeSMSC(const unsigned char *pTpdu, int pduLen, struct SmsAddress &pAddress);
-    static bool CheckCphsVmiMsg(const unsigned char *pTpdu, int *setType, int *indType);
-
-private:
-    constexpr static unsigned char NUMBER_TEN = 10;
-    static constexpr uint8_t MAX_TIME_LEN = 32;
-    static constexpr uint8_t MAX_ADDRESS_LEN = 21;
-    static constexpr uint8_t MAX_ADD_PARAM_LEN = 12;
-    static constexpr uint8_t MAX_REL_TIME_PARAM_LEN = 1;
-    static constexpr uint8_t MAX_SMSC_LEN = 20;
-    static constexpr uint8_t MAX_DCS_PARAM_LEN = 1;
-    static constexpr uint8_t MAX_ABS_TIME_PARAM_LEN = 7;
-    static constexpr uint8_t YEARY_OF_MON = 12;
-    static constexpr uint8_t HEX_BYTE_STEP = 2;
+    void DecodeSmscPdu(uint8_t *pAddress, uint8_t addrLen, enum TypeOfNum ton, std::string &decodeAddr);
+    uint8_t DecodeSmscPdu(const uint8_t *pTpdu, uint8_t pduLen, struct AddressNumber &address);
+    bool CheckVoicemail(SmsReadBuffer &buffer, int32_t *setType, int32_t *indType);
 };
 } // namespace Telephony
 } // namespace OHOS
-#endif /* SMS_PLUGIN_PARAMCODEC_H */
+#endif
