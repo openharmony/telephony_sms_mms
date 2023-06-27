@@ -242,7 +242,7 @@ int32_t SmsSendManager::SplitMessage(const std::string &message, std::vector<std
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
 
-    SmsCodingScheme codingType;
+    DataCodingScheme codingType;
     std::vector<struct SplitInfo> cellsInfos;
     NetWorkType netWorkType = networkManager_->GetNetWorkType();
     switch (netWorkType) {

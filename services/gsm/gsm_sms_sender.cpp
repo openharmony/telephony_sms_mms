@@ -47,7 +47,7 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
     int ret = 0;
     int headerCnt;
     unsigned char msgRef8bit;
-    SmsCodingScheme codingType;
+    DataCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
     std::vector<struct SplitInfo> cellsInfos;
     gsmSmsMessage.SplitMessage(cellsInfos, text, CheckForce7BitEncodeType(), codingType, false);
@@ -146,7 +146,7 @@ void GsmSmsSender::DataBasedSmsDelivery(const std::string &desAddr, const std::s
 {
     GsmSmsMessage gsmSmsMessage;
     std::vector<struct SplitInfo> cellsInfos;
-    SmsCodingScheme codingType;
+    DataCodingScheme codingType;
     std::string dataStr;
     CharArrayToString(data, dataLen, dataStr);
 
@@ -226,7 +226,7 @@ void GsmSmsSender::DataBasedSmsDeliveryPacketSplitPage(GsmSmsMessage &gsmSmsMess
         return;
     }
 
-    tpdu->data.submit.userData.header[headerCnt].udhType = SMS_UDH_APP_PORT_16BIT;
+    tpdu->data.submit.userData.header[headerCnt].udhType = UDH_APP_PORT_16BIT;
     tpdu->data.submit.userData.header[headerCnt].udh.appPort16bit.destPort = ((unsigned short)port & 0xFFFF);
     tpdu->data.submit.userData.header[headerCnt].udh.appPort16bit.originPort = 0;
     headerCnt++;
@@ -235,7 +235,7 @@ void GsmSmsSender::DataBasedSmsDeliveryPacketSplitPage(GsmSmsMessage &gsmSmsMess
     /* Set User Data Header for Alternate Reply Address */
     headerCnt += gsmSmsMessage.SetHeaderReply(headerCnt);
     /* Set User Data Header for National Language Single Shift */
-    SmsCodingScheme pCodingType = SMS_CODING_7BIT;
+    DataCodingScheme pCodingType = DATA_CODING_7BIT;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
     headerCnt += gsmSmsMessage.SetHeaderLang(headerCnt, pCodingType, langId);
     tpdu->data.submit.userData.headerCnt = headerCnt;
@@ -590,7 +590,7 @@ bool GsmSmsSender::SetPduInfo(
         TELEPHONY_LOGE("Indexer is nullptr");
         return ret;
     }
-    SmsCodingScheme codingType = smsIndexer->GetDcs();
+    DataCodingScheme codingType = smsIndexer->GetDcs();
     std::shared_ptr<struct SmsTpdu> tpdu = nullptr;
     tpdu = gsmSmsMessage.CreateDefaultSubmitSmsTpdu(smsIndexer->GetDestAddr(), smsIndexer->GetSmcaAddr(),
         smsIndexer->GetText(), (smsIndexer->GetDeliveryCallback() == nullptr) ? false : true, codingType);

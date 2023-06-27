@@ -40,6 +40,11 @@ uint16_t SmsPduBuffer::GetIndex()
     return index_;
 }
 
+uint16_t SmsPduBuffer::GetSize()
+{
+    return length_;
+}
+
 bool SmsPduBuffer::SetIndex(uint16_t index)
 {
     if (bitIndex_ != BIT0) {
@@ -96,6 +101,31 @@ uint16_t SmsPduBuffer::SkipBits()
     return index_;
 }
 
+std::unique_ptr<std::vector<uint8_t>> SmsPduBuffer::GetPduBuffer()
+{
+    if (data_ == nullptr || index_ == 0) {
+        TELEPHONY_LOGE("data is null");
+        return nullptr;
+    }
+    if (bitIndex_ != BIT0) {
+        TELEPHONY_LOGE("buffer in bit mode");
+        return nullptr;
+    }
+
+    if (index_ >= length_) {
+        TELEPHONY_LOGE("data error.");
+        return nullptr;
+    }
+
+    std::unique_ptr<std::vector<uint8_t>> data =
+        std::make_unique<std::vector<uint8_t>>(data_.get(), data_.get() + index_);
+    if (data == nullptr) {
+        TELEPHONY_LOGE("make unique error");
+        return nullptr;
+    }
+    return data;
+}
+
 SmsReadBuffer::SmsReadBuffer(const std::string &hex)
 {
     size_t len = hex.length();
@@ -141,6 +171,26 @@ bool SmsReadBuffer::ReadByte(uint8_t &v)
     }
 
     v = data_[index_++];
+    return true;
+}
+
+bool SmsReadBuffer::PickOneByte(uint8_t &v)
+{
+    if (data_ == nullptr || index_ >= length_) {
+        TELEPHONY_LOGE("peek one byte fail.");
+        return false;
+    }
+    v = data_[index_];
+    return true;
+}
+
+bool SmsReadBuffer::PickOneByteFromIndex(uint16_t index, uint8_t &v)
+{
+    if (data_ == nullptr || length_ == 0 || index >= length_) {
+        TELEPHONY_LOGE("peek index byte fail.");
+        return false;
+    }
+    v = data_[index];
     return true;
 }
 
@@ -266,25 +316,24 @@ bool SmsWriteBuffer::InsertByte(uint8_t v, uint16_t index)
     return false;
 }
 
-std::unique_ptr<std::vector<uint8_t>> SmsWriteBuffer::GetPduBuffer()
+bool SmsWriteBuffer::GetTopValue(uint8_t &oneByte)
 {
-    if (data_ == nullptr || index_ == 0) {
-        TELEPHONY_LOGE("data is null");
-        return nullptr;
+    if (data_ == nullptr || length_ == 0 || index_ >= length_) {
+        TELEPHONY_LOGE("buffer error");
+        return false;
     }
-    if (bitIndex_ != BIT0) {
-        TELEPHONY_LOGE("buffer in bit mode");
-        return nullptr;
-    }
-
-    std::unique_ptr<std::vector<uint8_t>> data =
-        std::make_unique<std::vector<uint8_t>>(data_.get(), data_.get() + index_);
-    if (data == nullptr) {
-        TELEPHONY_LOGE("make unique error");
-        return nullptr;
-    }
-    return data;
+    oneByte = data_[index_];
+    return true;
 }
 
+bool SmsWriteBuffer::GetValueFromIndex(uint16_t index, uint8_t &v)
+{
+    if (data_ == nullptr || length_ == 0 || index >= length_) {
+        TELEPHONY_LOGE("buffer error");
+        return false;
+    }
+    v = data_[index];
+    return true;
+}
 } // namespace Telephony
 } // namespace OHOS

@@ -139,7 +139,7 @@ std::shared_ptr<SmsConcat> SmsBaseMessage::GetConcatMsg()
 {
     smsConcat_ = nullptr;
     for (int i = 0; i < smsUserData_.headerCnt; i++) {
-        if (smsUserData_.header[i].udhType == SMS_UDH_CONCAT_8BIT) {
+        if (smsUserData_.header[i].udhType == UDH_CONCAT_8BIT) {
             smsConcat_ = std::make_shared<SmsConcat>();
             if (smsConcat_ == nullptr) {
                 TELEPHONY_LOGE("smsConcat is nullptr.");
@@ -150,7 +150,7 @@ std::shared_ptr<SmsConcat> SmsBaseMessage::GetConcatMsg()
             smsConcat_->seqNum = smsUserData_.header[i].udh.concat8bit.seqNum;
             smsConcat_->msgRef = smsUserData_.header[i].udh.concat8bit.msgRef;
             break;
-        } else if (smsUserData_.header[i].udhType == SMS_UDH_CONCAT_16BIT) {
+        } else if (smsUserData_.header[i].udhType == UDH_CONCAT_16BIT) {
             smsConcat_ = std::make_shared<SmsConcat>();
             if (smsConcat_ == nullptr) {
                 TELEPHONY_LOGE("smsConcat is nullptr.");
@@ -170,7 +170,7 @@ std::shared_ptr<SmsAppPortAddr> SmsBaseMessage::GetPortAddress()
 {
     portAddress_ = nullptr;
     for (int i = 0; i < smsUserData_.headerCnt; i++) {
-        if (smsUserData_.header[i].udhType == SMS_UDH_APP_PORT_8BIT) {
+        if (smsUserData_.header[i].udhType == UDH_APP_PORT_8BIT) {
             portAddress_ = std::make_shared<SmsAppPortAddr>();
             if (portAddress_ == nullptr) {
                 TELEPHONY_LOGE("portAddress_ is nullptr.");
@@ -180,7 +180,7 @@ std::shared_ptr<SmsAppPortAddr> SmsBaseMessage::GetPortAddress()
             portAddress_->destPort = smsUserData_.header[i].udh.appPort8bit.destPort;
             portAddress_->originPort = smsUserData_.header[i].udh.appPort8bit.originPort;
             break;
-        } else if (smsUserData_.header[i].udhType == SMS_UDH_APP_PORT_16BIT) {
+        } else if (smsUserData_.header[i].udhType == UDH_APP_PORT_16BIT) {
             portAddress_ = std::make_shared<SmsAppPortAddr>();
             if (portAddress_ == nullptr) {
                 TELEPHONY_LOGE("portAddress_ is nullptr.");
@@ -199,7 +199,7 @@ std::shared_ptr<SpecialSmsIndication> SmsBaseMessage::GetSpecialSmsInd()
 {
     specialSmsInd_ = nullptr;
     for (int i = 0; i < smsUserData_.headerCnt; i++) {
-        if (smsUserData_.header[i].udhType == SMS_UDH_SPECIAL_SMS) {
+        if (smsUserData_.header[i].udhType == UDH_SPECIAL_SMS) {
             specialSmsInd_ = std::make_shared<SpecialSmsIndication>();
             if (specialSmsInd_ == nullptr) {
                 TELEPHONY_LOGE("specialSmsInd_ is nullptr.");
@@ -255,7 +255,7 @@ int SmsBaseMessage::GetMsgRef()
 }
 
 int SmsBaseMessage::GetSegmentSize(
-    SmsCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const
+    DataCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const
 {
     const int headerLen = 1;
     const int concat = 5;
@@ -265,9 +265,9 @@ int SmsBaseMessage::GetSegmentSize(
     int headerSize = 0;
     int segSize = 0;
     int maxSize = 0;
-    if (codingScheme == SMS_CODING_7BIT || codingScheme == SMS_CODING_ASCII7BIT) {
+    if (codingScheme == DATA_CODING_7BIT || codingScheme == DATA_CODING_ASCII7BIT) {
         maxSize = MAX_GSM_7BIT_DATA_LEN;
-    } else if (codingScheme == SMS_CODING_8BIT || codingScheme == SMS_CODING_UCS2) {
+    } else if (codingScheme == DATA_CODING_8BIT || codingScheme == DATA_CODING_UCS2) {
         maxSize = MAX_UCS2_DATA_LEN;
     }
 
@@ -284,14 +284,14 @@ int SmsBaseMessage::GetSegmentSize(
         headerSize += replyAddrLen;
     }
 
-    if (codingScheme == SMS_CODING_7BIT || codingScheme == SMS_CODING_ASCII7BIT) {
+    if (codingScheme == DATA_CODING_7BIT || codingScheme == DATA_CODING_ASCII7BIT) {
         if ((dataLen + headerSize) > maxSize) {
             segSize =
                 ((GSM_BEAR_DATA_LEN * BYTE_BITS) - ((headerLen + concat + headerSize) * BYTE_BITS)) / CHARSET_7BIT_BITS;
         } else {
             segSize = dataLen;
         }
-    } else if (codingScheme == SMS_CODING_8BIT || codingScheme == SMS_CODING_UCS2) {
+    } else if (codingScheme == DATA_CODING_8BIT || codingScheme == DATA_CODING_UCS2) {
         if ((dataLen + headerSize) > maxSize) {
             segSize = GSM_BEAR_DATA_LEN - (headerLen + concat + headerSize);
         } else {
@@ -303,7 +303,7 @@ int SmsBaseMessage::GetSegmentSize(
 }
 
 int SmsBaseMessage::GetMaxSegmentSize(
-    SmsCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const
+    DataCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const
 {
     const int headerLen = 1;
     const int concat = 5;
@@ -313,9 +313,9 @@ int SmsBaseMessage::GetMaxSegmentSize(
     int headerSize = 0;
     int segSize = 0;
     int maxSize = 0;
-    if (codingScheme == SMS_CODING_7BIT || codingScheme == SMS_CODING_ASCII7BIT) {
+    if (codingScheme == DATA_CODING_7BIT || codingScheme == DATA_CODING_ASCII7BIT) {
         maxSize = MAX_GSM_7BIT_DATA_LEN;
-    } else if (codingScheme == SMS_CODING_8BIT || codingScheme == SMS_CODING_UCS2) {
+    } else if (codingScheme == DATA_CODING_8BIT || codingScheme == DATA_CODING_UCS2) {
         maxSize = MAX_UCS2_DATA_LEN;
     }
     if (bPortNum) {
@@ -328,14 +328,14 @@ int SmsBaseMessage::GetMaxSegmentSize(
         headerSize += reply;
         headerSize += replyAddrLen;
     }
-    if (codingScheme == SMS_CODING_7BIT || codingScheme == SMS_CODING_ASCII7BIT) {
+    if (codingScheme == DATA_CODING_7BIT || codingScheme == DATA_CODING_ASCII7BIT) {
         if ((dataLen + headerSize) > maxSize) {
             segSize =
                 ((GSM_BEAR_DATA_LEN * BYTE_BITS) - ((headerLen + concat + headerSize) * BYTE_BITS)) / CHARSET_7BIT_BITS;
         } else {
             segSize = maxSize - headerSize;
         }
-    } else if (codingScheme == SMS_CODING_8BIT || codingScheme == SMS_CODING_UCS2) {
+    } else if (codingScheme == DATA_CODING_8BIT || codingScheme == DATA_CODING_UCS2) {
         if ((dataLen + headerSize) > maxSize) {
             segSize = GSM_BEAR_DATA_LEN - (headerLen + concat + headerSize);
         } else {
@@ -345,7 +345,7 @@ int SmsBaseMessage::GetMaxSegmentSize(
     return segSize;
 }
 
-void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme &codingType)
+void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const DataCodingScheme &codingType)
 {
     if (split.encodeData.size() <= 0) {
         TELEPHONY_LOGE("data is null");
@@ -353,9 +353,9 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
     }
 
     int dataSize = 0;
-    unsigned char buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
+    uint8_t buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
     switch (codingType) {
-        case SMS_CODING_7BIT: {
+        case DATA_CODING_7BIT: {
             MsgLangInfo langInfo = {
                 0,
             };
@@ -365,7 +365,7 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
                 buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size(), langInfo);
             break;
         }
-        case SMS_CODING_UCS2: {
+        case DATA_CODING_UCS2: {
             dataSize = TextCoder::Instance().Ucs2ToUtf8(
                 buff, MAX_MSG_TEXT_LEN, split.encodeData.data(), split.encodeData.size());
             break;
@@ -390,10 +390,10 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const SmsCodingScheme 
 }
 
 void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text,
-    bool force7BitCode, SmsCodingScheme &codingType, bool bPortNum)
+    bool force7BitCode, DataCodingScheme &codingType, bool bPortNum)
 {
     std::string msgText(text);
-    unsigned char decodeData[(MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1];
+    uint8_t decodeData[(MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1];
     if (memset_s(decodeData, sizeof(decodeData), 0x00, sizeof(decodeData)) != EOK) {
         TELEPHONY_LOGE("SplitMessage memset_s error!");
         return;
@@ -402,7 +402,7 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
     int encodeLen = 0;
     bool bAbnormal = false;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
-    codingType = force7BitCode ? SMS_CODING_7BIT : SMS_CODING_AUTO;
+    codingType = force7BitCode ? DATA_CODING_7BIT : DATA_CODING_AUTO;
     encodeLen = DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
     if (encodeLen <= 0) {
         TELEPHONY_LOGE("encodeLen Less than or equal to 0");
@@ -438,7 +438,7 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
 
 int32_t SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo)
 {
-    unsigned char decodeData[(MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1];
+    uint8_t decodeData[(MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1];
     if (memset_s(decodeData, sizeof(decodeData), 0x00, sizeof(decodeData)) != EOK) {
         TELEPHONY_LOGE("SplitMessage memset_s error!");
         return TELEPHONY_ERR_MEMSET_FAIL;
@@ -450,7 +450,7 @@ int32_t SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool forc
     int encodeLen = 0;
     bool bAbnormal = false;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
-    SmsCodingScheme codingType = force7BitCode ? SMS_CODING_7BIT : SMS_CODING_AUTO;
+    DataCodingScheme codingType = force7BitCode ? DATA_CODING_7BIT : DATA_CODING_AUTO;
     encodeLen = DecodeMessage(decodeData, sizeof(decodeData), codingType, message, bAbnormal, langId);
     if (encodeLen <= 0) {
         TELEPHONY_LOGE("encodeLen Less than or equal to 0");
@@ -459,11 +459,11 @@ int32_t SmsBaseMessage::GetSmsSegmentsInfo(const std::string &message, bool forc
     int segSize = GetMaxSegmentSize(codingType, encodeLen, false, langId, MAX_ADD_PARAM_LEN);
     TELEPHONY_LOGI("segSize = %{public}d", segSize);
     lenInfo.msgEncodeCount = static_cast<uint16_t>(encodeLen);
-    if (codingType == SMS_CODING_7BIT || codingType == SMS_CODING_ASCII7BIT) {
+    if (codingType == DATA_CODING_7BIT || codingType == DATA_CODING_ASCII7BIT) {
         lenInfo.dcs = smsEncoding7Bit;
-    } else if (codingType == SMS_CODING_UCS2) {
+    } else if (codingType == DATA_CODING_UCS2) {
         lenInfo.dcs = smsEncoding16Bit;
-    } else if (codingType == SMS_CODING_8BIT) {
+    } else if (codingType == DATA_CODING_8BIT) {
         lenInfo.dcs = smsEncoding8Bit;
     } else {
         lenInfo.dcs = smsEncodingUnkown;

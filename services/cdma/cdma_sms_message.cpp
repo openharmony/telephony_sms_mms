@@ -26,7 +26,7 @@ namespace Telephony {
 static constexpr uint16_t CDMA_MAX_UD_HEADER_NUM = 7;
 
 std::unique_ptr<CdmaTransportMsg> CdmaSmsMessage::CreateSubmitTransMsg(const std::string &dest, const std::string &sc,
-    const std::string &text, bool bStatusReport, const SmsCodingScheme codingScheme)
+    const std::string &text, bool bStatusReport, const DataCodingScheme codingScheme)
 {
     std::unique_ptr<CdmaTransportMsg> transMsg = GreateTransMsg();
     if (transMsg == nullptr) {
@@ -126,20 +126,20 @@ std::unique_ptr<struct CdmaTransportMsg> CdmaSmsMessage::GreateTransMsg()
     return transMsg;
 }
 
-SmsEncodingType CdmaSmsMessage::CovertEncodingType(const SmsCodingScheme &codingScheme)
+SmsEncodingType CdmaSmsMessage::CovertEncodingType(const DataCodingScheme &codingScheme)
 {
     SmsEncodingType encodingType = SmsEncodingType::ASCII_7BIT;
     switch (codingScheme) {
-        case SMS_CODING_7BIT:
+        case DATA_CODING_7BIT:
             encodingType = SmsEncodingType::GSM7BIT;
             break;
-        case SMS_CODING_ASCII7BIT:
+        case DATA_CODING_ASCII7BIT:
             encodingType = SmsEncodingType::ASCII_7BIT;
             break;
-        case SMS_CODING_8BIT:
+        case DATA_CODING_8BIT:
             encodingType = SmsEncodingType::OCTET;
             break;
-        case SMS_CODING_UCS2:
+        case DATA_CODING_UCS2:
         default:
             encodingType = SmsEncodingType::UNICODE;
             break;
@@ -426,11 +426,11 @@ bool CdmaSmsMessage::AddUserDataHeader(const struct SmsUDH &header)
 
 void CdmaSmsMessage::AnalsisHeader(const SmsTeleSvcUserData &userData)
 {
-    if (memset_s(&smsUserData_, sizeof(SmsUserData), 0x00, sizeof(SmsUserData)) != EOK) {
+    if (memset_s(&smsUserData_, sizeof(SmsUDPackage), 0x00, sizeof(SmsUDPackage)) != EOK) {
         return;
     }
     headerDataLen_ = userData.userData.length;
-    if (memcpy_s(&smsUserData_, sizeof(SmsUserData), &(userData.userData), sizeof(SmsUserData)) != EOK) {
+    if (memcpy_s(&smsUserData_, sizeof(SmsUDPackage), &(userData.userData), sizeof(SmsUDPackage)) != EOK) {
         return;
     }
 
@@ -530,7 +530,7 @@ bool CdmaSmsMessage::IsBroadcastMsg() const
     return GetTransMsgType() == CdmaTransportMsgType::BROADCAST;
 }
 
-int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, SmsCodingScheme &codingType,
+int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, DataCodingScheme &codingType,
     const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId)
 {
     int decodeLen = 0;
@@ -544,7 +544,7 @@ int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, S
     }
 
     switch (codingType) {
-        case SMS_CODING_7BIT: {
+        case DATA_CODING_7BIT: {
             if (static_cast<unsigned int>(dataLen) > maxDecodeLen) {
                 TELEPHONY_LOGE("DecodeMessage memcpy_s data length invalid.");
                 return decodeLen;
@@ -554,10 +554,10 @@ int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, S
                 return decodeLen;
             }
             decodeLen = dataLen;
-            codingType = SMS_CODING_ASCII7BIT;
+            codingType = DATA_CODING_ASCII7BIT;
             break;
         }
-        case SMS_CODING_8BIT: {
+        case DATA_CODING_8BIT: {
             if (memcpy_s(decodeData, maxDecodeLen, pMsgText, dataLen) != EOK) {
                 TELEPHONY_LOGE("SplitMessage SMS_CHARSET_8BIT memcpy_s error!");
                 return decodeLen;
@@ -565,11 +565,11 @@ int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, S
             decodeLen = dataLen;
             break;
         }
-        case SMS_CODING_UCS2: {
+        case DATA_CODING_UCS2: {
             decodeLen = TextCoder::Instance().Utf8ToUcs2(decodeData, maxDecodeLen, pMsgText, dataLen);
             break;
         }
-        case SMS_CODING_AUTO:
+        case DATA_CODING_AUTO:
         default: {
             decodeLen = TextCoder::Instance().CdmaUtf8ToAuto(decodeData, maxDecodeLen, pMsgText, dataLen, codingType);
             break;

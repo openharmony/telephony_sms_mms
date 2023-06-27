@@ -67,7 +67,7 @@ void SplitMessage(const uint8_t *data, size_t size)
     }
     smsSendManager->SplitMessage(messageData, splitMessage);
 
-    SmsCodingScheme codingType;
+    DataCodingScheme codingType;
     std::vector<struct SplitInfo> cellsInfos;
     GsmSmsMessage gsmSmsMessage;
     gsmSmsMessage.SplitMessage(cellsInfos, messageData, false, codingType, false);
