@@ -113,7 +113,8 @@ ohos_shared_library("tel_sms_mms") {
     "data_share:datashare_consumer",
     "drivers_interface_ril:hril_innerkits",
     "eventhandler:libeventhandler",
-    "hisysevent_native:libhisysevent",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "ipc:ipc_single",
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
@@ -128,7 +129,6 @@ ohos_shared_library("tel_sms_mms") {
   public_configs = [ ":tel_sms_mms_config" ]
 
   if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
     external_deps += [ "init:libbegetutil" ]
   }
 
