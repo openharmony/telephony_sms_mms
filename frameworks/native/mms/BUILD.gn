@@ -48,6 +48,7 @@ ohos_source_set("mms_native_source") {
   external_deps = [
     "c_utils:utils",
     "core_service:libtel_common",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
@@ -57,12 +58,6 @@ ohos_source_set("mms_native_source") {
     "TELEPHONY_LOG_TAG = \"MmsApi\"",
     "LOG_DOMAIN = 0xD001F06",
   ]
-
-  if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
 
   public_configs = [ ":mms_native_config" ]
 
