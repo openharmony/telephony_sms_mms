@@ -342,7 +342,7 @@ bool GsmSmsTpduDecode::DecodeStatusReportData(SmsReadBuffer &buffer, struct SmsS
 
     uint8_t oneByte = 0;
     /* TP-PID */
-    if (statusRep->paramInd & 0x01) {
+    if (statusRep->paramInd & HEX_VALUE_01) {
         if (!buffer.ReadByte(oneByte)) {
             TELEPHONY_LOGE("get data error.");
             return false;

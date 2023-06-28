@@ -20,6 +20,7 @@ group("fuzztest") {
   deps += [ "addsimmessage_fuzzer:fuzztest" ]
   deps += [ "cdmasmsdecode_fuzzer:fuzztest" ]
   deps += [ "cdmasmsencode_fuzzer:fuzztest" ]
+  deps += [ "createsmsmessage_fuzzer:fuzztest" ]
   deps += [ "databasedsmsdelivery_fuzzer:fuzztest" ]
   deps += [ "updatesimmessage_fuzzer:fuzztest" ]
   deps += [ "splitmessage_fuzzer:fuzztest" ]

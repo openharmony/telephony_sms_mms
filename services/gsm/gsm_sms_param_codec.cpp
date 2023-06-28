@@ -121,12 +121,12 @@ bool GsmSmsParamCodec::CheckVoicemail(SmsReadBuffer &buffer, int32_t *setType, i
             TELEPHONY_LOGE("get data error.");
             return false;
         }
-        *setType = static_cast<int32_t>(oneByte & 0x01); /* 0 : clear, 1 : set */
+        *setType = static_cast<int32_t>(oneByte & HEX_VALUE_01); /* 0 : clear, 1 : set */
         if (!buffer.PickOneByte(oneByte)) {
             TELEPHONY_LOGE("get data error.");
             return false;
         }
-        *indType = static_cast<int32_t>(oneByte & 0x01); /* 0 : indicator 1, 1 : indicator 2 */
+        *indType = static_cast<int32_t>(oneByte & HEX_VALUE_01); /* 0 : indicator 1, 1 : indicator 2 */
         return true;
     }
     return false;

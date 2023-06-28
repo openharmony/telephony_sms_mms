@@ -234,21 +234,14 @@ public:
     static std::shared_ptr<GsmCbCodec> CreateCbMessage(const std::vector<uint8_t> &pdu);
     std::shared_ptr<GsmCbMessageHeader> GetCbHeader() const;
     void ConvertToUTF8(const std::string &raw, std::string &message) const;
+    void DecodeCbMsgDCS(const uint8_t dcsData, const unsigned short iosData, GsmCbMsgDcs &dcs) const;
     std::string GetCbMessageRaw() const;
-    void SetCbMessageRaw(std::string &raw);
-    bool IsSinglePageMsg() const;
-    std::string ToString() const;
     unsigned short EncodeCbSerialNum(const GsmCBMsgSerialNum &snFields);
     bool GetFormat(int8_t &cbFormat) const;
     bool GetPriority(int8_t &cbPriority) const;
     bool GetGeoScope(uint8_t &geoScope) const;
     bool GetSerialNum(uint16_t &cbSerial) const;
     bool GetServiceCategory(uint16_t &cbCategoty) const;
-    bool IsEtwsPrimary(bool &primary) const;
-    bool IsEtwsMessage(bool &etws) const;
-    bool IsCmasMessage(bool &cmas) const;
-    bool IsEtwsEmergencyUserAlert(bool &alert) const;
-    bool IsEtwsPopupAlert(bool &alert) const;
     bool GetWarningType(uint16_t &type) const;
     bool GetCmasSeverity(uint8_t &severity) const;
     bool GetCmasUrgency(uint8_t &urgency) const;
@@ -261,9 +254,17 @@ public:
     bool GetLangType(uint8_t &lan) const;
     bool GetDcs(uint8_t &dcs) const;
     bool GetReceiveTime(int64_t &receiveTime) const;
-    void DecodeCbMsgDCS(const uint8_t dcsData, const unsigned short iosData, GsmCbMsgDcs &dcs) const;
     int64_t GetRecvTime() const;
     void GetPduData(std::vector<uint8_t> &dataPdu);
+
+    bool IsEtwsPrimary(bool &primary) const;
+    bool IsEtwsMessage(bool &etws) const;
+    bool IsCmasMessage(bool &cmas) const;
+    bool IsEtwsEmergencyUserAlert(bool &alert) const;
+    bool IsEtwsPopupAlert(bool &alert) const;
+    bool IsSinglePageMsg() const;
+    void SetCbMessageRaw(std::string &raw);
+    std::string ToString() const;
 
 private:
     bool PduAnalysis(const std::vector<uint8_t> &pdu);
@@ -273,9 +274,9 @@ private:
     bool ParamsCheck(const std::vector<uint8_t> &pdu);
 
 private:
-    std::shared_ptr<GsmCbMessageHeader> cbHeader_;
+    std::shared_ptr<GsmCbMessageHeader> cbHeader_ { nullptr };
     std::string messageRaw_;
-    std::shared_ptr<GsmCbPduDecodeBuffer> cbPduBuffer_ = nullptr;
+    std::shared_ptr<GsmCbPduDecodeBuffer> cbPduBuffer_ { nullptr };
 };
 } // namespace Telephony
 } // namespace OHOS

@@ -15,6 +15,7 @@
 
 #include "gsm_user_data_encode.h"
 
+#include "gsm_pdu_hex_value.h"
 #include "gsm_sms_common_utils.h"
 #include "securec.h"
 #include "telephony_log_wrapper.h"
@@ -56,7 +57,7 @@ bool GsmUserDataEncode::EncodeGsmHeadPdu(SmsWriteBuffer &buffer, const struct Sm
     if (userData->headerCnt > 0) {
         buffer.MoveForward(SLIDE_DATA_STEP);
     } else {
-        buffer.MoveForward(0x01);
+        buffer.MoveForward(HEX_VALUE_01);
     }
     uint16_t udhl = buffer.GetIndex();
     for (uint8_t i = 0; i < userData->headerCnt; i++) {
@@ -129,7 +130,7 @@ bool GsmUserDataEncode::Encode8bitHeadPdu(SmsWriteBuffer &buffer, const struct S
     if (userData->headerCnt > 0) {
         buffer.MoveForward(SLIDE_DATA_STEP);
     } else {
-        buffer.MoveForward(0x01);
+        buffer.MoveForward(HEX_VALUE_01);
     }
 
     /* Encode User Data Header */
@@ -176,7 +177,7 @@ bool GsmUserDataEncode::Encode8bitBodyPdu(SmsWriteBuffer &buffer, const struct S
         TELEPHONY_LOGE("buffer error.");
         return false;
     }
-    uint16_t destLen = MAX_TPDU_LEN - buffer.GetIndex() - 0x01;
+    uint16_t destLen = MAX_TPDU_LEN - buffer.GetIndex() - HEX_VALUE_01;
     if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), destLen, userData->data, userData->length) != EOK) {
         TELEPHONY_LOGE("memcpy_s error");
         return false;
@@ -250,7 +251,7 @@ bool GsmUserDataEncode::EncodeUcs2BodyPdu(SmsWriteBuffer &buffer, const struct S
         TELEPHONY_LOGE("buffer error.");
         return false;
     }
-    uint16_t destLen = MAX_TPDU_LEN - buffer.GetIndex() - 0x01;
+    uint16_t destLen = MAX_TPDU_LEN - buffer.GetIndex() - HEX_VALUE_01;
     if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), destLen, userData->data, userData->length) != EOK) {
         TELEPHONY_LOGE("memcpy_s error");
         return false;

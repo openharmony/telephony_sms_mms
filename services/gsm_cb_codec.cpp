@@ -131,7 +131,7 @@ bool GsmCbCodec::PduAnalysis(const std::vector<unsigned char> &pdu)
         return false;
     }
 
-    if (!decodeResult || cbPduBuffer_->GetCurPosition() > pdu.size()) {
+    if (!decodeResult || cbPduBuffer_->GetCurPosition() >= pdu.size()) {
         TELEPHONY_LOGE("CB decode head fail.");
         return false;
     }
@@ -144,23 +144,23 @@ bool GsmCbCodec::PduAnalysis(const std::vector<unsigned char> &pdu)
     } else if (cbHeader_->cbNetType == UMTS_NET_CB) {
         decodeResult = umtsCodec->Decode3gCbMsg();
     }
-    TELEPHONY_LOGI("CB decode decodeResult:%{public}d.", decodeResult);
+    TELEPHONY_LOGI("CB decode result:%{public}d.", decodeResult);
     return decodeResult;
 }
 
 bool GsmCbCodec::ParamsCheck(const std::vector<unsigned char> &pdu)
 {
-    if (pdu.size() == 0) {
+    if (pdu.size() == 0 && pdu.size() > MAX_CB_MSG_LEN) {
         TELEPHONY_LOGE("pdu data error.");
         return false;
     }
     cbPduBuffer_ = std::make_shared<GsmCbPduDecodeBuffer>(pdu.size());
     cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
-    if (cbPduBuffer_ == nullptr || cbHeader_ == nullptr) {
+    if (cbPduBuffer_ == nullptr || cbHeader_ == nullptr || cbPduBuffer_->pduBuffer_ == nullptr) {
         TELEPHONY_LOGE("nullptr error.");
         return false;
     }
-    for (size_t index = 0; index < pdu.size(); index++) {
+    for (size_t index = 0; index < pdu.size() && index < cbPduBuffer_->GetSize(); index++) {
         cbPduBuffer_->pduBuffer_[index] = static_cast<char>(pdu[index]);
     }
     return true;
@@ -202,6 +202,7 @@ void GsmCbCodec::ConvertToUTF8(const std::string &raw, std::string &message) con
         } else if (cbHeader_->dcs.codingScheme == DATA_CODING_UCS2) {
             codeSize = TextCoder::Instance().Ucs2ToUtf8(outBuf, sizeof(outBuf), src, raw.length());
         } else {
+            TELEPHONY_LOGI("CB message data encoding 8bit");
             message.assign(raw);
             return;
         }
@@ -282,9 +283,9 @@ void GsmCbCodec::DecodeIos639Dcs(const uint8_t dcsData, const unsigned short ios
     uint8_t dcsLow = (dcsData & HEX_VALUE_0F);
     switch (dcsLow) {
         case 0x00:
-        case 0x01: {
+        case HEX_VALUE_01: {
             dcs.codingGroup = SMS_CBMSG_CODGRP_GENERAL_DCS;
-            dcs.codingScheme = (dcsData & 0x01) ? DATA_CODING_UCS2 : DATA_CODING_7BIT;
+            dcs.codingScheme = (dcsData & HEX_VALUE_01) ? DATA_CODING_UCS2 : DATA_CODING_7BIT;
             dcs.langType = CB_LANG_ISO639;
             uint8_t hight = (iosData >> SMS_BYTE_BIT);
             uint8_t low = iosData;
@@ -292,12 +293,12 @@ void GsmCbCodec::DecodeIos639Dcs(const uint8_t dcsData, const unsigned short ios
             // refer to 3GPP TS 23.038 V4.3.0 6.1.1 section Control characters
             if (hight && low) {
                 dcs.iso639Lang[0x00] = hight & HEX_VALUE_7F;
-                dcs.iso639Lang[0x01] = (hight & HEX_VALUE_80) >> HEX_VALUE_07;
-                dcs.iso639Lang[0x01] |= (low & HEX_VALUE_3F) << HEX_VALUE_01;
+                dcs.iso639Lang[HEX_VALUE_01] = (hight & HEX_VALUE_80) >> HEX_VALUE_07;
+                dcs.iso639Lang[HEX_VALUE_01] |= (low & HEX_VALUE_3F) << HEX_VALUE_01;
                 dcs.iso639Lang[HEX_VALUE_02] = HEX_VALUE_13; /* CR */
             } else {
                 dcs.iso639Lang[0x00] = HEX_VALUE_45; /* E */
-                dcs.iso639Lang[0x01] = HEX_VALUE_4E; /* N */
+                dcs.iso639Lang[HEX_VALUE_01] = HEX_VALUE_4E; /* N */
                 dcs.iso639Lang[HEX_VALUE_02] = HEX_VALUE_13; /* CR */
             }
             break;
@@ -322,7 +323,7 @@ void GsmCbCodec::DecodeGeneralDcs(const uint8_t dcsData, GsmCbMsgDcs &dcs) const
         case 0x00:
             dcs.codingScheme = DATA_CODING_7BIT;
             break;
-        case 0x01:
+        case HEX_VALUE_01:
             dcs.codingScheme = DATA_CODING_8BIT;
             break;
         case HEX_VALUE_02:
@@ -357,7 +358,7 @@ void GsmCbCodec::DecodeCbMsgDCS(const uint8_t dcsData, const unsigned short iosD
             dcs.codingGroup = SMS_CBMSG_CODGRP_GENERAL_DCS;
             dcs.langType = dcsData;
             break;
-        case 0x01:
+        case HEX_VALUE_01:
             DecodeIos639Dcs(dcsData, iosData, dcs);
             break;
         case HEX_VALUE_04:
