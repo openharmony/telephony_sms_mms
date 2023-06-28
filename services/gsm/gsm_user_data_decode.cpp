@@ -15,6 +15,7 @@
 
 #include "gsm_user_data_decode.h"
 
+#include "gsm_pdu_hex_value.h"
 #include "gsm_sms_common_utils.h"
 #include "securec.h"
 #include "telephony_log_wrapper.h"
@@ -70,11 +71,11 @@ bool GsmUserDataDecode::DecodeGsmHeadPdu(SmsReadBuffer &buffer, bool bHeaderInd,
     /* Setting for Wap Push */
     if (pTPUD != nullptr && udl > 0) {
         pTPUD->udl = udl;
-        if (udl > sizeof(pTPUD->ud) || buffer.GetIndex() + udl > buffer.GetSize()) {
+        if (udl > sizeof(pTPUD->ud) || buffer.GetIndex() + udl - 1 > buffer.GetSize()) {
             TELEPHONY_LOGE("udl length error");
             return false;
         }
-        if (buffer.data_ == nullptr || udl + buffer.GetIndex() > buffer.GetSize()) {
+        if (buffer.data_ == nullptr) {
             TELEPHONY_LOGE("buffer error.");
             return false;
         }
@@ -221,7 +222,7 @@ bool GsmUserDataDecode::Decode8bitPduPartData(SmsReadBuffer &buffer, bool bHeade
 
     if (udhl > 0 && udl > udhl + 1) {
         userData->length = (udl) - (udhl + 1);
-        buffer.MoveForward(0x01);
+        buffer.MoveForward(HEX_VALUE_01);
     } else {
         userData->length = udl;
     }
@@ -259,7 +260,7 @@ bool GsmUserDataDecode::DecodeUcs2Pdu(
         TELEPHONY_LOGE("get data error.");
         return false;
     }
-    if (udl > UCS2_USER_DATA_LEN || (udl + buffer.GetIndex()) > buffer.GetSize()) {
+    if (udl > UCS2_USER_DATA_LEN || (udl + buffer.GetIndex() - 1) > buffer.GetSize()) {
         TELEPHONY_LOGE("udl error.");
         userData->length = 0;
         userData->headerCnt = 0;
@@ -321,7 +322,7 @@ bool GsmUserDataDecode::DecodeUcs2PduPartData(
         userData->length = udl;
     }
 
-    if (buffer.data_ == nullptr || (buffer.GetIndex() + userData->length > buffer.GetSize())) {
+    if (buffer.data_ == nullptr || (buffer.GetIndex() + userData->length > buffer.GetSize() + 1)) {
         TELEPHONY_LOGE("buffer error.");
         return false;
     }

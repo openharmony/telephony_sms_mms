@@ -237,7 +237,7 @@ bool GsmSmsParamDecode::DecodeDcsPdu(SmsReadBuffer &buffer, struct SmsDcs *smsDc
         DecodeDcsGeneralGroupPdu(dcs, smsDcs);
     } else if (((dcs & HEX_VALUE_F0) >> HEX_VALUE_04) == HEX_VALUE_0F) {
         DecodeDcsClassGroupPdu(dcs, smsDcs);
-    } else if (((dcs & HEX_VALUE_C0) >> HEX_VALUE_06) == 0x01) {
+    } else if (((dcs & HEX_VALUE_C0) >> HEX_VALUE_06) == HEX_VALUE_01) {
         DecodeDcsDeleteGroupPdu(dcs, smsDcs);
     } else if (((dcs & HEX_VALUE_F0) >> HEX_VALUE_04) == HEX_VALUE_0C) {
         DecodeDcsDiscardGroupPdu(dcs, smsDcs);
@@ -361,7 +361,7 @@ void GsmSmsParamDecode::GetMwiType(const uint8_t dcs, struct SmsDcs &smsDcs)
     smsDcs.bCompressed = false;
     smsDcs.msgClass = SMS_CLASS_UNKNOWN;
     smsDcs.bMWI = true;
-    smsDcs.bIndActive = (((dcs & HEX_VALUE_08) >> HEX_VALUE_03) == 0x01) ? true : false;
+    smsDcs.bIndActive = (((dcs & HEX_VALUE_08) >> HEX_VALUE_03) == HEX_VALUE_01) ? true : false;
     smsDcs.indType = GetMsgIndicatorType(dcs & HEX_VALUE_03);
 }
 
