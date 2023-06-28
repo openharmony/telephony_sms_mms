@@ -34,10 +34,10 @@ private:
     bool Decode3gHeaderPartData(uint8_t dcs);
 
 private:
-    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> cbHeader_;
+    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> cbHeader_ { nullptr };
     std::string messageRaw_;
-    std::shared_ptr<GsmCbPduDecodeBuffer> cbPduBuffer_ = nullptr;
-    std::shared_ptr<GsmCbCodec> cbCodec_ = nullptr;
+    std::shared_ptr<GsmCbPduDecodeBuffer> cbPduBuffer_ { nullptr };
+    std::shared_ptr<GsmCbCodec> cbCodec_ { nullptr };
 };
 } // namespace Telephony
 } // namespace OHOS

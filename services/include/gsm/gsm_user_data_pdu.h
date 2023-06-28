@@ -24,22 +24,19 @@ class GsmUserDataPdu : public std::enable_shared_from_this<GsmUserDataPdu> {
 public:
     GsmUserDataPdu() = default;
     virtual ~GsmUserDataPdu() = default;
-    bool EncodeUserDataPdu(
-        SmsWriteBuffer &buffer, const struct SmsUDPackage *(&pUserData), DataCodingScheme codingScheme);
     bool DecodeUserDataPdu(
         SmsReadBuffer &buffer, bool bHeaderInd, DataCodingScheme CodingScheme, struct SmsUDPackage *pUserData);
     bool DecodeUserDataPdu(SmsReadBuffer &buffer, bool bHeaderInd, DataCodingScheme CodingScheme,
         struct SmsUDPackage *pUserData, struct SmsTpud *pTPUD);
-    void EncodeHeader(SmsWriteBuffer &buffer, const struct SmsUDH header);
-    void ResetUserData(struct SmsUDPackage &userData);
     bool DecodeHeader(SmsReadBuffer &buffer, struct SmsUDH &pHeader, uint16_t &headerLen);
     void DebugDecodeHeader(const struct SmsUDH &pHeader);
+    bool EncodeUserDataPdu(
+        SmsWriteBuffer &buffer, const struct SmsUDPackage *(&pUserData), DataCodingScheme codingScheme);
+    void EncodeHeader(SmsWriteBuffer &buffer, const struct SmsUDH header);
     bool GetHeaderCnt(SmsReadBuffer &buffer, struct SmsUDPackage *pUserData, uint8_t &udhl, uint16_t i);
+    void ResetUserData(struct SmsUDPackage &userData);
 
 private:
-    void EncodeHeaderAppPort8bit(SmsWriteBuffer &buffer, const struct SmsUDH header);
-    void EncodeHeaderAppPort16bit(SmsWriteBuffer &buffer, const struct SmsUDH header);
-    void EncodeHeaderReplyAddress(SmsWriteBuffer &buffer, const struct SmsUDH header);
     bool DecodeHeaderPartData(SmsReadBuffer &buffer, struct SmsUDH &pHeader, uint8_t oneByte);
     bool DecodeHeaderConcat8Bit(SmsReadBuffer &buffer, struct SmsUDH &pHeader);
     bool DecodeHeaderConcat16Bit(SmsReadBuffer &buffer, struct SmsUDH &pHeader);
@@ -50,6 +47,9 @@ private:
     bool DecodeHeaderSingleShift(SmsReadBuffer &buffer, struct SmsUDH &pHeader);
     bool DecodeHeaderLockingShift(SmsReadBuffer &buffer, struct SmsUDH &pHeader);
     bool DecodeHeaderDefaultCase(SmsReadBuffer &buffer, struct SmsUDH &pHeader);
+    void EncodeHeaderAppPort8bit(SmsWriteBuffer &buffer, const struct SmsUDH header);
+    void EncodeHeaderAppPort16bit(SmsWriteBuffer &buffer, const struct SmsUDH header);
+    void EncodeHeaderReplyAddress(SmsWriteBuffer &buffer, const struct SmsUDH header);
     void EncodeHeaderConcat(SmsWriteBuffer &buffer, const struct SmsUDH header);
     void EncodeHeaderConcat8Bit(SmsWriteBuffer &buffer, const struct SmsUDH &header);
     void EncodeHeaderConcat16Bit(SmsWriteBuffer &buffer, const struct SmsUDH &header);

@@ -21,9 +21,14 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
+static constexpr uint16_t MAX_CB_MSG_LEN = 4200;
 
-GsmCbPduDecodeBuffer::GsmCbPduDecodeBuffer(uint8_t len)
+GsmCbPduDecodeBuffer::GsmCbPduDecodeBuffer(uint32_t len)
 {
+    if (len == 0 && len > MAX_CB_MSG_LEN) {
+        TELEPHONY_LOGE("pdu data error.");
+        return;
+    }
     pduBuffer_ = std::make_unique<char[]>(len);
     if (pduBuffer_ == nullptr) {
         TELEPHONY_LOGE("pduBuffer_ nullptr error");
@@ -33,12 +38,7 @@ GsmCbPduDecodeBuffer::GsmCbPduDecodeBuffer(uint8_t len)
     totolLength_ = len;
 }
 
-GsmCbPduDecodeBuffer::~GsmCbPduDecodeBuffer()
-{
-    if (pduBuffer_ != nullptr) {
-        pduBuffer_.reset();
-    }
-}
+GsmCbPduDecodeBuffer::~GsmCbPduDecodeBuffer() {}
 
 bool GsmCbPduDecodeBuffer::PickOneByte(uint8_t &oneByte)
 {

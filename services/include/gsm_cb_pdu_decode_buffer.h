@@ -22,17 +22,17 @@ namespace OHOS {
 namespace Telephony {
 class GsmCbPduDecodeBuffer {
 public:
-    explicit GsmCbPduDecodeBuffer(uint8_t len);
+    explicit GsmCbPduDecodeBuffer(uint32_t len);
     virtual ~GsmCbPduDecodeBuffer();
-    bool PickOneByte(uint8_t &oneByte);
     bool GetOneByte(uint8_t &oneByte);
-    void IncreasePointer(uint32_t offset);
-    void SetPointer(uint32_t offset);
     uint32_t GetCurPosition();
     uint32_t GetSize();
+    void IncreasePointer(uint32_t offset);
+    bool PickOneByte(uint8_t &oneByte);
+    void SetPointer(uint32_t offset);
 
 public:
-    std::unique_ptr<char[]> pduBuffer_;
+    std::unique_ptr<char[]> pduBuffer_ { nullptr };
 
 private:
     uint32_t curPosition_ = 0;
