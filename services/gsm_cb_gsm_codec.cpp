@@ -40,12 +40,7 @@ GsmCbGsmCodec::GsmCbGsmCodec(std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> hea
     cbCodec_ = cbCodec;
 }
 
-GsmCbGsmCodec::~GsmCbGsmCodec()
-{
-    cbHeader_ = nullptr;
-    cbPduBuffer_ = nullptr;
-    cbCodec_ = nullptr;
-}
+GsmCbGsmCodec::~GsmCbGsmCodec() {}
 
 /**
  * refer to 3GPP TS 23.041 V4.1.0 9.4 Message Format on the Radio Network  – MS/UE Interface
@@ -187,6 +182,7 @@ bool GsmCbGsmCodec::Decode2gCbMsg()
                 TELEPHONY_LOGE("decode cb 7bit error.");
                 return false;
             }
+            break;
         }
         case DATA_CODING_8BIT:
         case DATA_CODING_UCS2: {
@@ -195,17 +191,17 @@ bool GsmCbGsmCodec::Decode2gCbMsg()
                 return false;
             }
             if (cbHeader_->dcs.iso639Lang[0]) {
+                TELEPHONY_LOGI("dcs.iso639Lang");
                 cbPduBuffer_->SetPointer(cbPduBuffer_->GetCurPosition() + HEX_VALUE_02);
                 dataLen -= HEX_VALUE_02;
             }
 
             if (dataLen == 0 || cbPduBuffer_->pduBuffer_ == nullptr ||
-                (cbPduBuffer_->GetSize() + dataLen) >= cbPduBuffer_->GetCurPosition()) {
+                (cbPduBuffer_->GetCurPosition() + dataLen) > cbPduBuffer_->GetSize()) {
                 TELEPHONY_LOGE("CB pdu data error.");
                 return false;
             }
-            uint8_t total = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition() - 1;
-            for (uint8_t i = 0; i < total; i++) {
+            for (uint8_t i = cbPduBuffer_->GetCurPosition(); i < cbPduBuffer_->GetSize(); i++) {
                 messageRaw_.push_back(cbPduBuffer_->pduBuffer_[i]);
             }
             cbCodec_->SetCbMessageRaw(messageRaw_);
@@ -241,7 +237,7 @@ bool GsmCbGsmCodec::Decode2gCbMsg7bit(uint16_t dataLen)
         return false;
     }
     for (uint8_t i = 0; i < unpackLen; i++) {
-        messageRaw_.push_back(pageData[i]);
+        messageRaw_.push_back(static_cast<char>(pageData[i]));
     }
     cbCodec_->SetCbMessageRaw(messageRaw_);
     return true;

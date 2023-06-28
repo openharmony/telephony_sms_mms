@@ -37,12 +37,7 @@ GsmCbUmtsCodec::GsmCbUmtsCodec(std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> h
     cbCodec_ = cbCodec;
 }
 
-GsmCbUmtsCodec::~GsmCbUmtsCodec()
-{
-    cbHeader_ = nullptr;
-    cbPduBuffer_ = nullptr;
-    cbCodec_ = nullptr;
-}
+GsmCbUmtsCodec::~GsmCbUmtsCodec() {}
 
 /**
  * refer to 3GPP TS 23.041 V4.1.0 9.4.2.1 General Description
@@ -191,8 +186,8 @@ bool GsmCbUmtsCodec::Decode3g7Bit()
         for (uint8_t i = 0; i < unpackLen; i++) {
             messageRaw_.push_back(pageData[i]);
         }
-        cbCodec_->SetCbMessageRaw(messageRaw_);
     }
+    cbCodec_->SetCbMessageRaw(messageRaw_);
     return true;
 }
 
@@ -212,11 +207,12 @@ bool GsmCbUmtsCodec::Decode3gUCS2()
 
     uint16_t dataLen = 0;
     uint16_t offset = 0;
-    uint16_t pduLen = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition() - 1;
+    uint16_t pduLen = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition();
 
     uint8_t *tpdu = dataPdu.data();
     uint16_t tpduLen = dataPdu.size();
     for (uint8_t i = 0; i < cbHeader_->totalPages; ++i) {
+        TELEPHONY_LOGI("cbHeader_->totalPages:%{public}d", cbHeader_->totalPages);
         uint8_t pageLenOffset = static_cast<uint8_t>((i + 1) * MAX_PAGE_PDU_LEN + i);
         if (pduLen <= pageLenOffset) {
             TELEPHONY_LOGE("pageLenOffset invalid.");
@@ -230,15 +226,13 @@ bool GsmCbUmtsCodec::Decode3gUCS2()
             dataLen = tpdu[pageLenOffset];
             offset = (i * MAX_PAGE_PDU_LEN) + i;
         }
-
-        if (dataLen > 0 && dataLen <= MAX_PAGE_PDU_LEN && offset + dataLen < tpduLen) {
-            for (uint8_t i = 0; i < dataLen; i++) {
-                messageRaw_.push_back(tpdu[i]);
+        if (dataLen > 0 && dataLen <= MAX_PAGE_PDU_LEN && dataLen < tpduLen) {
+            for (uint8_t i = offset; i < offset + dataLen; i++) {
+                messageRaw_.push_back(static_cast<char>(tpdu[i]));
             }
-            cbCodec_->SetCbMessageRaw(messageRaw_);
-            cbPduBuffer_->SetPointer(cbPduBuffer_->GetCurPosition() + dataLen);
         }
     }
+    cbCodec_->SetCbMessageRaw(messageRaw_);
     return true;
 }
 } // namespace Telephony

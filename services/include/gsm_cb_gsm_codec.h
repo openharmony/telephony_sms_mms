@@ -35,10 +35,10 @@ private:
     bool Decode2gCbMsg7bit(uint16_t dataLen);
 
 private:
-    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> cbHeader_;
+    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> cbHeader_ { nullptr };
     std::string messageRaw_;
-    std::shared_ptr<GsmCbPduDecodeBuffer> cbPduBuffer_ = nullptr;
-    std::shared_ptr<GsmCbCodec> cbCodec_ = nullptr;
+    std::shared_ptr<GsmCbPduDecodeBuffer> cbPduBuffer_ { nullptr };
+    std::shared_ptr<GsmCbCodec> cbCodec_ { nullptr };
 };
 } // namespace Telephony
 } // namespace OHOS

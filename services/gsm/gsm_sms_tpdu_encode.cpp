@@ -77,16 +77,16 @@ bool GsmSmsTpduEncode::EncodeSubmitPduPartData(SmsWriteBuffer &buffer, const str
     /* TP-DCS */
     std::string dcs;
     paramCodec_->EncodeDCS(&pSubmit->dcs, dcs);
-    if (buffer.data_ == nullptr || (buffer.GetIndex() + 0x01) > buffer.GetSize()) {
+    if (buffer.data_ == nullptr || (buffer.GetIndex() + HEX_VALUE_01) > buffer.GetSize()) {
         TELEPHONY_LOGE("buffer error.");
         return false;
     }
-    uint16_t bufferLen = buffer.GetSize() - buffer.GetIndex() - 0x01;
-    if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), bufferLen, dcs.data(), 0x01) != EOK) {
+    uint16_t bufferLen = buffer.GetSize() - buffer.GetIndex() - HEX_VALUE_01;
+    if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), bufferLen, dcs.data(), HEX_VALUE_01) != EOK) {
         TELEPHONY_LOGE("memcpy_s error.");
         return false;
     }
-    buffer.MoveForward(0x01);
+    buffer.MoveForward(HEX_VALUE_01);
     /* TP-VP */
     std::string vpTime;
     uint8_t position = 0;
@@ -112,7 +112,7 @@ bool GsmSmsTpduEncode::EncodeSubmitPduPartData(SmsWriteBuffer &buffer, const str
 
 void GsmSmsTpduEncode::EncodeSubmitTpduType(SmsWriteBuffer &buffer, const struct SmsSubmit &pSubmit)
 {
-    if (!buffer.InsertByte(0x01, buffer.GetIndex())) {
+    if (!buffer.InsertByte(HEX_VALUE_01, buffer.GetIndex())) {
         TELEPHONY_LOGE("write data error.");
         return;
     }
@@ -210,7 +210,7 @@ void GsmSmsTpduEncode::EncodeSubmitTypeData(SmsWriteBuffer &buffer, const struct
             return;
         }
     }
-    buffer.MoveForward(0x01);
+    buffer.MoveForward(HEX_VALUE_01);
 }
 
 bool GsmSmsTpduEncode::EncodeDeliverPdu(SmsWriteBuffer &buffer, const struct SmsDeliver *pDeliver)
@@ -317,12 +317,12 @@ bool GsmSmsTpduEncode::EncodeDeliverData(SmsWriteBuffer &buffer, const struct Sm
     /* TP-DCS */
     std::string dcs;
     paramCodec_->EncodeDCS(&pDeliver->dcs, dcs);
-    if (buffer.data_ == nullptr || (buffer.GetIndex() + 0x01) > buffer.GetSize()) {
+    if (buffer.data_ == nullptr || (buffer.GetIndex() + HEX_VALUE_01) > buffer.GetSize()) {
         TELEPHONY_LOGE("buffer error.");
         return false;
     }
-    uint16_t bufferLen = buffer.GetSize() - buffer.GetIndex() - 0x01;
-    if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), bufferLen, dcs.data(), 0x01) != EOK) {
+    uint16_t bufferLen = buffer.GetSize() - buffer.GetIndex() - HEX_VALUE_01;
+    if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), bufferLen, dcs.data(), HEX_VALUE_01) != EOK) {
         TELEPHONY_LOGE("memcpy_s error.");
         return false;
     }
@@ -332,7 +332,7 @@ bool GsmSmsTpduEncode::EncodeDeliverData(SmsWriteBuffer &buffer, const struct Sm
     std::string scts;
     paramCodec_->EncodeTimePdu(&pDeliver->timeStamp, scts);
     uint8_t length = scts.size();
-    if (buffer.data_ == nullptr || (buffer.GetIndex() + 0x01) > buffer.GetSize()) {
+    if (buffer.data_ == nullptr || (buffer.GetIndex() + HEX_VALUE_01) > buffer.GetSize()) {
         TELEPHONY_LOGE("buffer error.");
         return false;
     }
@@ -387,7 +387,7 @@ bool GsmSmsTpduEncode::EncodeDeliverReportPdu(SmsWriteBuffer &buffer, const stru
         return false;
     }
     /* TP-PID */
-    if (pDeliverRep->paramInd & 0x01) {
+    if (pDeliverRep->paramInd & HEX_VALUE_01) {
         if (!buffer.WriteByte(pDeliverRep->pid)) {
             TELEPHONY_LOGE("write data error.");
             return false;
@@ -406,12 +406,12 @@ bool GsmSmsTpduEncode::EncodeDeliverReportPartData(SmsWriteBuffer &buffer, const
     if (pDeliverRep->paramInd & HEX_VALUE_02) {
         std::string dcs;
         paramCodec_->EncodeDCS(&pDeliverRep->dcs, dcs);
-        if (buffer.data_ == nullptr || (buffer.GetIndex() + 0x01) > buffer.GetSize()) {
+        if (buffer.data_ == nullptr || (buffer.GetIndex() + HEX_VALUE_01) > buffer.GetSize()) {
             TELEPHONY_LOGE("buffer error.");
             return false;
         }
-        uint16_t bufferLen = buffer.GetSize() - buffer.GetIndex() - 0x01;
-        if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), bufferLen, dcs.data(), 0x01) != EOK) {
+        uint16_t bufferLen = buffer.GetSize() - buffer.GetIndex() - HEX_VALUE_01;
+        if (memcpy_s(buffer.data_.get() + buffer.GetIndex(), bufferLen, dcs.data(), HEX_VALUE_01) != EOK) {
             TELEPHONY_LOGE("memcpy_s error.");
             return false;
         }
@@ -555,7 +555,7 @@ bool GsmSmsTpduEncode::EncodeStatusReportData(
         return false;
     }
     /* TP-PID */
-    if (pStatusRep->paramInd & 0x01) {
+    if (pStatusRep->paramInd & HEX_VALUE_01) {
         if (!buffer.WriteByte(pStatusRep->pid)) {
             TELEPHONY_LOGE("write data error.");
             return false;

@@ -197,7 +197,7 @@ void GsmUserDataPdu::EncodeHeader(SmsWriteBuffer &buffer, const struct SmsUDH he
                 TELEPHONY_LOGE("write data error.");
                 return;
             }
-            if (!buffer.WriteByte(0x01)) {
+            if (!buffer.WriteByte(HEX_VALUE_01)) {
                 TELEPHONY_LOGE("write data error.");
                 return;
             }
@@ -211,7 +211,7 @@ void GsmUserDataPdu::EncodeHeader(SmsWriteBuffer &buffer, const struct SmsUDH he
                 TELEPHONY_LOGE("write data error.");
                 return;
             }
-            if (!buffer.WriteByte(0x01)) {
+            if (!buffer.WriteByte(HEX_VALUE_01)) {
                 TELEPHONY_LOGE("write data error.");
                 return;
             }
