@@ -22,7 +22,7 @@ namespace Telephony {
 class SmsMmsTestHelper {
 public:
     int32_t slotId = 0;
-    bool Run(void (*func)(SmsMmsTestHelper &), SmsMmsTestHelper &helper);
+    bool Run(void (*func)(SmsMmsTestHelper &), SmsMmsTestHelper &helper, int32_t waitTime = WAIT_TIME_SECOND);
     void NotifyAll();
     bool WaitForResult(int32_t timeoutSecond);
     void SetBoolResult(bool result);
@@ -44,6 +44,7 @@ private:
     std::string strResult_ = "";
     std::mutex mtx_;
     std::condition_variable cv_;
+    constexpr static const int32_t WAIT_TIME_SECOND = 10;
 };
 } // namespace Telephony
 } // namespace OHOS

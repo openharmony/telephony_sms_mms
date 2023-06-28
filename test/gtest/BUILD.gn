@@ -20,11 +20,19 @@ ohos_unittest("tel_sms_mms_gtest") {
   module_out_path = part_name + "/" + test_module
 
   sources = [
+    "cb_gtest.cpp",
+    "cdma_sms_gtest.cpp",
     "mms_gtest.cpp",
     "sms_broadcast_subscriber_gtest.cpp",
     "sms_delivery_callback_gtest.cpp",
+    "sms_gtest.cpp",
     "sms_mms_test_helper.cpp",
     "sms_send_callback_gtest.cpp",
+    "zero_branch_cb_test.cpp",
+    "zero_branch_cdma_sms_test.cpp",
+    "zero_branch_mms_test.cpp",
+    "zero_branch_sms_test.cpp",
+    "zero_branch_utils_test.cpp",
   ]
 
   include_dirs = [
