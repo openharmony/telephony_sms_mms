@@ -28,18 +28,6 @@ public:
     virtual ~ImsSmsCallbackInterface() = default;
 
     /**
-     * @brief Enumerates the request sent to IMS from SmsService.
-     */
-    enum {
-        /****************** sms basic ******************/
-        IMS_SEND_MESSAGE = 0,
-
-        /****************** sms config ******************/
-        IMS_SET_SMS_CONFIG,
-        IMS_GET_SMS_CONFIG,
-    };
-
-    /**
      * @brief ImsSendMessageResponse the result of send the sms by IMS.
      *
      * @param slotId Indicates the card slot index number,

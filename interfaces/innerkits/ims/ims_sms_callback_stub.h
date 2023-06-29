@@ -21,6 +21,7 @@
 #include "event_handler.h"
 #include "event_runner.h"
 #include "ims_sms_callback_interface.h"
+#include "ims_sms_callback_ipc_interface_code.h"
 #include "iremote_stub.h"
 
 

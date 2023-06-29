@@ -36,9 +36,11 @@ void ImsSmsCallbackStub::InitFuncMap()
 void ImsSmsCallbackStub::InitSmsBasicFuncMap()
 {
     /****************** sms basic ******************/
-    requestFuncMap_[IMS_SEND_MESSAGE] = &ImsSmsCallbackStub::OnImsSendMessageResponseInner;
-    requestFuncMap_[IMS_SET_SMS_CONFIG] = &ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner;
-    requestFuncMap_[IMS_GET_SMS_CONFIG] = &ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner;
+    requestFuncMap_[ImsSmsCallbackInterfaceCode::IMS_SEND_MESSAGE] = &ImsSmsCallbackStub::OnImsSendMessageResponseInner;
+    requestFuncMap_[ImsSmsCallbackInterfaceCode::IMS_SET_SMS_CONFIG] =
+        &ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner;
+    requestFuncMap_[ImsSmsCallbackInterfaceCode::IMS_GET_SMS_CONFIG] =
+        &ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner;
 }
 
 ImsSmsCallbackStub::~ImsSmsCallbackStub()
