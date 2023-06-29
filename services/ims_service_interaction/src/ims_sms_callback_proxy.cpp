@@ -40,13 +40,13 @@ int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(int32_t slotId, const SendSm
 int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(int32_t slotId, const HRilRadioResponseInfo &info)
 {
     return SendHRilRadioResponseInfo(__FUNCTION__, slotId,
-        static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_SEND_MESSAGE, info));
+        static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_SEND_MESSAGE), info);
 }
 
 int32_t ImsSmsCallbackProxy::ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info)
 {
     return SendHRilRadioResponseInfo(__FUNCTION__, slotId,
-        static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_SET_SMS_CONFIG, info));
+        static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_SET_SMS_CONFIG), info);
 }
 
 int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig)
@@ -66,7 +66,7 @@ int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(int32_t slotId, int32_t ims
 int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info)
 {
     return SendHRilRadioResponseInfo(__FUNCTION__, slotId,
-        static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_GET_SMS_CONFIG, info));
+        static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_GET_SMS_CONFIG), info);
 }
 
 int32_t ImsSmsCallbackProxy::WriteCommonInfo(std::string funcName, MessageParcel &in, int32_t slotId)
