@@ -20,7 +20,10 @@ ohos_shared_library("tel_sms_mms_api") {
     "sms:sms_native_source",
   ]
 
-  external_deps = [ "samgr:samgr_proxy" ]
+  external_deps = [
+    "hilog:libhilog",
+    "samgr:samgr_proxy",
+  ]
 
   defines = [
     "TELEPHONY_LOG_TAG = \"SmsMmsApi\"",
@@ -32,11 +35,6 @@ ohos_shared_library("tel_sms_mms_api") {
     "mms:mms_native_config",
   ]
 
-  if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
   innerapi_tags = [ "platformsdk" ]
   part_name = "sms_mms"
   subsystem_name = "telephony"

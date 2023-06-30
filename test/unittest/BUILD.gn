@@ -49,6 +49,7 @@ ohos_executable("tel_sms_mms_test") {
     "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "hilog:libhilog",
     "ipc:ipc_single",
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",
@@ -57,12 +58,6 @@ ohos_executable("tel_sms_mms_test") {
     "samgr:samgr_proxy",
     "telephony_data:tel_telephony_data",
   ]
-
-  if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
 
   defines = [
     "TELEPHONY_LOG_TAG = \"SmsMmmsUTest\"",
