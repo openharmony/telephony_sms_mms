@@ -34,17 +34,13 @@ ohos_shared_library("sms") {
   external_deps = [
     "c_utils:utils",
     "core_service:libtel_common",
+    "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
     "sms_mms:tel_sms_mms_api",
   ]
 
-  if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
   relative_install_dir = "module/telephony"
   part_name = "sms_mms"
   subsystem_name = "telephony"
