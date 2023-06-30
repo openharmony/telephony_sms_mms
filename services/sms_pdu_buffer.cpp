@@ -161,8 +161,7 @@ bool SmsReadBuffer::ReadByte(uint8_t &v)
         return false;
     }
     if (bitIndex_ != BIT0) {
-        TELEPHONY_LOGE("buffer in bit mode");
-        return false;
+        return ReadBits(v, BIT8);
     }
 
     if (index_ == length_) {
@@ -253,7 +252,10 @@ SmsWriteBuffer::SmsWriteBuffer()
 
 bool SmsWriteBuffer::WriteByte(uint8_t v)
 {
-    if (data_ != nullptr && index_ < length_ && bitIndex_ == BIT0) {
+    if (bitIndex_ != BIT0) {
+        return WriteBits(v, BIT8);
+    }
+    if (data_ != nullptr && index_ < length_) {
         data_[index_++] = v;
         return true;
     }
