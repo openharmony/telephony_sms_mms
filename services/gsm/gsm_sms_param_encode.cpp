@@ -138,7 +138,7 @@ uint8_t GsmSmsParamEncode::EncodeSmscPdu(const struct AddressNumber *num, uint8_
     } else {
         dataSize = SLIDE_DATA_STEP + (addrLen / SLIDE_DATA_STEP) + 1;
     }
-    if (dataSize > MAX_SMSC_LEN || dataSize >= smscLen || dataSize <= 1) {
+    if (dataSize > MAX_SMSC_LEN || dataSize >= smscLen || dataSize <= 1 || smscLen <= HEX_VALUE_02) {
         TELEPHONY_LOGE("DataSize error!");
         return 0;
     }
@@ -147,7 +147,7 @@ uint8_t GsmSmsParamEncode::EncodeSmscPdu(const struct AddressNumber *num, uint8_
     smscNum[1] = HEX_VALUE_80 + (static_cast<unsigned char>(num->ton << HEX_VALUE_04)) + num->npi;
     GsmSmsCommonUtils utils;
     uint8_t len = 0;
-    if (!utils.DigitToBcd(newNum, addrLen, &(smscNum[HEX_VALUE_02]), 0, len)) {
+    if (!utils.DigitToBcd(newNum, addrLen, &(smscNum[HEX_VALUE_02]), smscLen - HEX_VALUE_02, len)) {
         TELEPHONY_LOGE("digit to bcd error!");
         return 0;
     }
