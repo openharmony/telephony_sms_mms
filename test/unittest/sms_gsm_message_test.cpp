@@ -62,7 +62,6 @@ void SmsGsmMessageTest::ProcessTest() const
     bool loopFlag = true;
     while (loopFlag) {
         std::cout << "\nusage:please input a cmd num:\n"
-                     "usage:please input a cmd num:\n"
                      "0:Test7BitSubmitSms\n"
                      "1:TestUcs2SubmitSms\n"
                      "2:Test7BitDeliverySms\r\n"
