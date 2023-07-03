@@ -112,14 +112,12 @@ public:
     AccessMmsToken()
     {
         currentID_ = GetSelfTokenID();
-        std::cout << "AccessMmsToken currentID_" << currentID_ << std::endl;
         AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testMmsInfoParams, testMmsPolicyParams);
         accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
         SetSelfTokenID(tokenIdEx.tokenIDEx);
     }
     ~AccessMmsToken()
     {
-        std::cout << "AccessMmsToken  ~AccessMmsToken" << std::endl;
         AccessTokenKit::DeleteToken(accessID_);
         SetSelfTokenID(currentID_);
     }
