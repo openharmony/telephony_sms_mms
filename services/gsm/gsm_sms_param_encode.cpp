@@ -38,7 +38,7 @@ bool GsmSmsParamEncode::EncodeAddressPdu(const struct AddressNumber *num, std::s
         return false;
     }
     const char *temp = static_cast<const char *>(num->address);
-    if (strlen(temp) > MAX_ADD_PARAM_LEN) {
+    if (strlen(temp) > MAX_SMSC_LEN) {
         TELEPHONY_LOGE("temp over size!");
         return false;
     }
