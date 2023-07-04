@@ -30,6 +30,7 @@ static constexpr uint8_t MAX_SMSC_LEN = 20;
 static constexpr uint8_t SLIDE_DATA_STEP = 2;
 static constexpr uint8_t DIGIT_TEN = 10;
 static constexpr uint8_t REL_TIME_LEN = 1;
+static constexpr uint8_t MIN_SMSC_LEN = 2;
 
 bool GsmSmsParamEncode::EncodeAddressPdu(const struct AddressNumber *num, std::string &resultNum)
 {
@@ -147,7 +148,8 @@ uint8_t GsmSmsParamEncode::EncodeSmscPdu(const struct AddressNumber *num, uint8_
     smscNum[1] = HEX_VALUE_80 + (static_cast<unsigned char>(num->ton << HEX_VALUE_04)) + num->npi;
     GsmSmsCommonUtils utils;
     uint8_t len = 0;
-    if (!utils.DigitToBcd(newNum, addrLen, &(smscNum[HEX_VALUE_02]), smscLen - HEX_VALUE_02, len)) {
+    if (smscLen > MIN_SMSC_LEN &&
+        !utils.DigitToBcd(newNum, addrLen, &(smscNum[MIN_SMSC_LEN]), smscLen - MIN_SMSC_LEN, len)) {
         TELEPHONY_LOGE("digit to bcd error!");
         return 0;
     }

@@ -31,6 +31,7 @@ public:
     void TestStatusReportSms() const;
     void TestMultiPageSms() const;
     void TestWapPushSms() const;
+    void TestDataSmsDeliverySms() const;
 
 public:
     static std::unique_ptr<ShortMessage> gsmMessage_;

@@ -451,6 +451,7 @@ bool GsmUserDataPdu::DecodeHeaderPartData(SmsReadBuffer &buffer, struct SmsUDH &
                 TELEPHONY_LOGE("decode fail.");
                 return false;
             }
+            break;
         }
     }
     return true;
@@ -527,13 +528,13 @@ bool GsmUserDataPdu::DecodeHeaderConcat16Bit(SmsReadBuffer &buffer, struct SmsUD
 
 bool GsmUserDataPdu::DecodeHeaderAppPort8Bit(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
 {
-    uint8_t pickByte = 0;
     uint8_t oneByte = 0;
-    if (!buffer.PickOneByte(pickByte)) {
+    if (!buffer.ReadByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
     }
-    if (pickByte == 0) {
+    if (oneByte == 0) {
+        TELEPHONY_LOGE("oneByte 0.");
         return false;
     }
 
@@ -554,13 +555,14 @@ bool GsmUserDataPdu::DecodeHeaderAppPort8Bit(SmsReadBuffer &buffer, struct SmsUD
 
 bool GsmUserDataPdu::DecodeHeaderAppPort16Bit(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
 {
-    uint8_t pickByte = 0;
     uint8_t oneByte = 0;
-    if (!buffer.PickOneByte(pickByte)) {
+    if (!buffer.ReadByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
     }
-    if (pickByte == 0) {
+
+    if (oneByte == 0) {
+        TELEPHONY_LOGE("pickByte 0.");
         return false;
     }
 
@@ -574,8 +576,9 @@ bool GsmUserDataPdu::DecodeHeaderAppPort16Bit(SmsReadBuffer &buffer, struct SmsU
         TELEPHONY_LOGE("get data error.");
         return false;
     }
-    oneByte |= pHeader.udh.appPort16bit.destPort << NORMAL_BYTE_BITS;
-    pHeader.udh.appPort16bit.destPort = static_cast<uint16_t>(oneByte);
+    uint16_t port = oneByte;
+    port |= pHeader.udh.appPort16bit.destPort << NORMAL_BYTE_BITS;
+    pHeader.udh.appPort16bit.destPort = static_cast<uint16_t>(port);
 
     if (!buffer.ReadByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
@@ -587,24 +590,26 @@ bool GsmUserDataPdu::DecodeHeaderAppPort16Bit(SmsReadBuffer &buffer, struct SmsU
         TELEPHONY_LOGE("get data error.");
         return false;
     }
-    oneByte |= pHeader.udh.appPort16bit.originPort << NORMAL_BYTE_BITS;
-    pHeader.udh.appPort16bit.originPort = static_cast<uint16_t>(oneByte);
+
+    port = oneByte;
+    port |= pHeader.udh.appPort16bit.originPort << NORMAL_BYTE_BITS;
+    pHeader.udh.appPort16bit.originPort = static_cast<uint16_t>(port);
     DebugDecodeHeader(pHeader);
     return true;
 }
 
 bool GsmUserDataPdu::DecodeHeaderSpecialSms(SmsReadBuffer &buffer, struct SmsUDH &pHeader)
 {
-    uint8_t pickByte = 0;
     uint8_t oneByte = 0;
-    if (!buffer.PickOneByte(pickByte)) {
+    if (!buffer.ReadByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
     }
-    if (pickByte != HEX_VALUE_02) {
+    if (oneByte != HEX_VALUE_02) {
         return false;
     }
     TELEPHONY_LOGI("Decoding special sms udh.");
+    uint8_t pickByte = 0;
     if (!buffer.PickOneByte(pickByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
@@ -691,7 +696,8 @@ bool GsmUserDataPdu::DecodeHeaderDefaultCase(SmsReadBuffer &buffer, struct SmsUD
         return false;
     }
     TELEPHONY_LOGI("IEDL [%{public}u]", oneByte);
-    return false;
+    buffer.MoveForward(oneByte);
+    return true;
 }
 
 void GsmUserDataPdu::DebugDecodeHeader(const struct SmsUDH &pHeader)
@@ -706,13 +712,13 @@ void GsmUserDataPdu::DebugDecodeHeader(const struct SmsUDH &pHeader)
             break;
         }
         case UDH_APP_PORT_8BIT: {
-            TELEPHONY_LOGI("appPort8bit.destPort [%{private}02x]", pHeader.udh.appPort8bit.destPort);
-            TELEPHONY_LOGI("appPort8bit.originPort [%{private}02x]", pHeader.udh.appPort8bit.originPort);
+            TELEPHONY_LOGI("appPort8bit.destPort [%{public}02x]", pHeader.udh.appPort8bit.destPort);
+            TELEPHONY_LOGI("appPort8bit.originPort [%{public}02x]", pHeader.udh.appPort8bit.originPort);
             break;
         }
         case UDH_APP_PORT_16BIT: {
-            TELEPHONY_LOGI("appPort16bit.destPort [%{private}04x]", pHeader.udh.appPort16bit.destPort);
-            TELEPHONY_LOGI("appPort16bit.originPort [%{private}04x]", pHeader.udh.appPort16bit.originPort);
+            TELEPHONY_LOGI("appPort16bit.destPort [%{public}04x]", pHeader.udh.appPort16bit.destPort);
+            TELEPHONY_LOGI("appPort16bit.originPort [%{public}04x]", pHeader.udh.appPort16bit.originPort);
             break;
         }
         case UDH_SPECIAL_SMS: {
