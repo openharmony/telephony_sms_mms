@@ -51,6 +51,9 @@ void SmsGsmMessageTest::ProcessInput(int inputCMD, bool &loopFlag) const
         case 0x06:
             TestWapPushSms();
             break;
+        case 0x07:
+            TestDataSmsDeliverySms();
+            break;
         default:
             loopFlag = false;
             break;
@@ -69,6 +72,7 @@ void SmsGsmMessageTest::ProcessTest() const
                      "4:TestStatusReportSms\r\n"
                      "5:TestMultiPageSms\r\n"
                      "6:TestWapPushSms\r\n"
+                     "7:TestDataSmsDeliverySms\r\n"
                      "Other key:exit \n\n";
 
         int inputCMD = 0;
@@ -219,6 +223,26 @@ void SmsGsmMessageTest::TestWapPushSms() const
         std::cout << "TestWapPushSms fail!!!" << std::endl;
     } else {
         std::cout << "TestWapPushSms success!!!" << std::endl;
+    }
+}
+
+void SmsGsmMessageTest::TestDataSmsDeliverySms() const
+{
+    AccessMmsToken token;
+    std::vector<unsigned char> pdu = StringUtils::HexToByteVector(
+        "0891683110808805F0640D91686106571209F80000327030021205231306050400640000E8329BFD06DDDF723619");
+
+    ShortMessage *message = new ShortMessage();
+    if (message == nullptr) {
+        std::cout << "message is nullptr!" << std::endl;
+        return;
+    }
+    ShortMessage::CreateMessage(pdu, u"3gpp", *message);
+    gsmMessage_ = std::unique_ptr<ShortMessage>(message);
+    if (gsmMessage_ == nullptr) {
+        std::cout << "TestDataSmsDeliverySms fail!!!" << std::endl;
+    } else {
+        std::cout << "TestDataSmsDeliverySms success!!!" << std::endl;
     }
 }
 } // namespace Telephony
