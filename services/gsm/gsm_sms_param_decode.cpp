@@ -404,11 +404,12 @@ bool GsmSmsParamDecode::DecodeTimePdu(SmsReadBuffer &buffer, struct SmsTimeStamp
 bool GsmSmsParamDecode::DecodeTimePduPartData(SmsReadBuffer &buffer, struct SmsTimeStamp *timeStamp)
 {
     uint8_t pickByte = 0;
-    uint8_t oneByte = 0;
     if (!buffer.PickOneByte(pickByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
     }
+
+    uint8_t oneByte = 0;
     if (!buffer.ReadByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
@@ -448,11 +449,12 @@ bool GsmSmsParamDecode::DecodeTimePduData(SmsReadBuffer &buffer, struct SmsTimeS
     }
 
     uint8_t pickByte = 0;
-    uint8_t oneByte = 0;
     if (!buffer.PickOneByte(pickByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
     }
+
+    uint8_t oneByte = 0;
     if (!buffer.ReadByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
