@@ -151,7 +151,7 @@ declare namespace sms {
    * @syscap SystemCapability.Telephony.SmsMms
    * @since 10
    */
-     function sendShortMessage(options: SendMessageOptions, callback: AsyncCallback<void>): void;
+  function sendShortMessage(options: SendMessageOptions, callback: AsyncCallback<void>): void;
 
   /**
    * Sends a text or data SMS message.
@@ -171,7 +171,7 @@ declare namespace sms {
    * @syscap SystemCapability.Telephony.SmsMms
    * @since 10
    */
-   function sendShortMessage(options: SendMessageOptions): Promise<void>;
+  function sendShortMessage(options: SendMessageOptions): Promise<void>;
 
   /**
    * Sets the default SIM card for sending SMS messages. You can obtain the default SIM card by
