@@ -20,6 +20,7 @@
 
 #include "iremote_object.h"
 #include "iremote_proxy.h"
+#include "sms_service_ipc_interface_code.h"
 
 namespace OHOS {
 namespace Telephony {
