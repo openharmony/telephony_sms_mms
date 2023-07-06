@@ -33,7 +33,7 @@ int DeliveryShortMessageCallbackStub::OnRemoteRequest(
         return TELEPHONY_ERR_DESCRIPTOR_MISMATCH;
     }
     switch (code) {
-        case static_cast<int>(ON_SMS_DELIVERY_RESULT): {
+        case static_cast<int>(DeliveryShortMessageCallbackInterfaceCode::ON_SMS_DELIVERY_RESULT): {
             auto result = data.ReadString16();
             OnSmsDeliveryResult(result);
             return SMS_DEFAULT_RESULT;

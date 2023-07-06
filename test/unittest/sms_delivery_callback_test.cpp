@@ -27,7 +27,7 @@ void SmsDeliveryCallbackTest::OnSmsDeliveryResult(const std::u16string &pdu)
 int SmsDeliveryCallbackTest::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    if (code == static_cast<int>(ON_SMS_DELIVERY_RESULT)) {
+    if (code == static_cast<int>(DeliveryShortMessageCallbackInterfaceCode::ON_SMS_DELIVERY_RESULT)) {
         OnSmsDeliveryResult(data.ReadString16());
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
