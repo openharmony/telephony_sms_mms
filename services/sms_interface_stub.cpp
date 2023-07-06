@@ -33,28 +33,28 @@ static inline bool IsValidSlotId(int32_t slotId)
 
 SmsInterfaceStub::SmsInterfaceStub()
 {
-    memberFuncMap_[static_cast<uint32_t>(TEXT_BASED_SMS_DELIVERY)] = &SmsInterfaceStub::OnSendSmsTextRequest;
-    memberFuncMap_[static_cast<uint32_t>(DATA_BASED_SMS_DELIVERY)] = &SmsInterfaceStub::OnSendSmsDataRequest;
-    memberFuncMap_[static_cast<uint32_t>(SET_SMSC_ADDRESS)] = &SmsInterfaceStub::OnSetSmscAddr;
-    memberFuncMap_[static_cast<uint32_t>(GET_SMSC_ADDRESS)] = &SmsInterfaceStub::OnGetSmscAddr;
-    memberFuncMap_[static_cast<uint32_t>(ADD_SIM_MESSAGE)] = &SmsInterfaceStub::OnAddSimMessage;
-    memberFuncMap_[static_cast<uint32_t>(DEL_SIM_MESSAGE)] = &SmsInterfaceStub::OnDelSimMessage;
-    memberFuncMap_[static_cast<uint32_t>(UPDATE_SIM_MESSAGE)] = &SmsInterfaceStub::OnUpdateSimMessage;
-    memberFuncMap_[static_cast<uint32_t>(GET_ALL_SIM_MESSAGE)] = &SmsInterfaceStub::OnGetAllSimMessages;
-    memberFuncMap_[static_cast<uint32_t>(SET_CB_CONFIG)] = &SmsInterfaceStub::OnSetCBConfig;
-    memberFuncMap_[static_cast<uint32_t>(SET_IMS_SMS_CONFIG)] = &SmsInterfaceStub::OnSetImsSmsConfig;
-    memberFuncMap_[static_cast<uint32_t>(SET_DEFAULT_SMS_SLOT_ID)] = &SmsInterfaceStub::OnSetDefaultSmsSlotId;
-    memberFuncMap_[static_cast<uint32_t>(GET_DEFAULT_SMS_SLOT_ID)] = &SmsInterfaceStub::OnGetDefaultSmsSlotId;
-    memberFuncMap_[static_cast<uint32_t>(GET_DEFAULT_SMS_SIM_ID)] = &SmsInterfaceStub::OnGetDefaultSmsSimId;
-    memberFuncMap_[static_cast<uint32_t>(SPLIT_MESSAGE)] = &SmsInterfaceStub::OnSplitMessage;
-    memberFuncMap_[static_cast<uint32_t>(GET_SMS_SEGMENTS_INFO)] = &SmsInterfaceStub::OnGetSmsSegmentsInfo;
-    memberFuncMap_[static_cast<uint32_t>(GET_IMS_SHORT_MESSAGE_FORMAT)] = &SmsInterfaceStub::OnGetImsShortMessageFormat;
-    memberFuncMap_[static_cast<uint32_t>(IS_IMS_SMS_SUPPORTED)] = &SmsInterfaceStub::OnIsImsSmsSupported;
-    memberFuncMap_[static_cast<uint32_t>(HAS_SMS_CAPABILITY)] = &SmsInterfaceStub::OnHasSmsCapability;
-    memberFuncMap_[static_cast<uint32_t>(CREATE_MESSAGE)] = &SmsInterfaceStub::OnCreateMessage;
-    memberFuncMap_[static_cast<uint32_t>(MMS_BASE64_ENCODE)] = &SmsInterfaceStub::OnGetBase64Encode;
-    memberFuncMap_[static_cast<uint32_t>(MMS_BASE64_DECODE)] = &SmsInterfaceStub::OnGetBase64Decode;
-    memberFuncMap_[static_cast<uint32_t>(GET_ENCODE_STRING)] = &SmsInterfaceStub::OnGetEncodeStringFunc;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::TEXT_BASED_SMS_DELIVERY)] = &SmsInterfaceStub::OnSendSmsTextRequest;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::DATA_BASED_SMS_DELIVERY)] = &SmsInterfaceStub::OnSendSmsDataRequest;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SET_SMSC_ADDRESS)] = &SmsInterfaceStub::OnSetSmscAddr;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_SMSC_ADDRESS)] = &SmsInterfaceStub::OnGetSmscAddr;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::ADD_SIM_MESSAGE)] = &SmsInterfaceStub::OnAddSimMessage;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::DEL_SIM_MESSAGE)] = &SmsInterfaceStub::OnDelSimMessage;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::UPDATE_SIM_MESSAGE)] = &SmsInterfaceStub::OnUpdateSimMessage;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_ALL_SIM_MESSAGE)] = &SmsInterfaceStub::OnGetAllSimMessages;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SET_CB_CONFIG)] = &SmsInterfaceStub::OnSetCBConfig;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SET_IMS_SMS_CONFIG)] = &SmsInterfaceStub::OnSetImsSmsConfig;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SET_DEFAULT_SMS_SLOT_ID)] = &SmsInterfaceStub::OnSetDefaultSmsSlotId;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_DEFAULT_SMS_SLOT_ID)] = &SmsInterfaceStub::OnGetDefaultSmsSlotId;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_DEFAULT_SMS_SIM_ID)] = &SmsInterfaceStub::OnGetDefaultSmsSimId;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SPLIT_MESSAGE)] = &SmsInterfaceStub::OnSplitMessage;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_SMS_SEGMENTS_INFO)] = &SmsInterfaceStub::OnGetSmsSegmentsInfo;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_IMS_SHORT_MESSAGE_FORMAT)] = &SmsInterfaceStub::OnGetImsShortMessageFormat;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::IS_IMS_SMS_SUPPORTED)] = &SmsInterfaceStub::OnIsImsSmsSupported;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::HAS_SMS_CAPABILITY)] = &SmsInterfaceStub::OnHasSmsCapability;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::CREATE_MESSAGE)] = &SmsInterfaceStub::OnCreateMessage;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::MMS_BASE64_ENCODE)] = &SmsInterfaceStub::OnGetBase64Encode;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::MMS_BASE64_DECODE)] = &SmsInterfaceStub::OnGetBase64Decode;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_ENCODE_STRING)] = &SmsInterfaceStub::OnGetEncodeStringFunc;
 }
 
 SmsInterfaceStub::~SmsInterfaceStub()
