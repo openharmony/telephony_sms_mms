@@ -37,7 +37,7 @@ void SmsDeliveryShortMessageProxy::OnSmsDeliveryResult(const std::u16string &pdu
     if (remote == nullptr) {
         return;
     }
-    remote->SendRequest(ON_SMS_DELIVERY_RESULT, dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(ON_SMS_DELIVERY_RESULT), dataParcel, replyParcel, option);
 }
 } // namespace Telephony
 } // namespace OHOS

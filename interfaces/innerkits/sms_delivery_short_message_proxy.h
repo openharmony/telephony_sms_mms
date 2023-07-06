@@ -16,6 +16,7 @@
 #ifndef SMS_DELIVERY_SHORT_MESSAGE_PROXY_H
 #define SMS_DELIVERY_SHORT_MESSAGE_PROXY_H
 
+#include "delivery_short_message_callback_ipc_interface_code.h"
 #include "i_delivery_short_message_callback.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
