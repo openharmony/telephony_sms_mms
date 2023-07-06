@@ -191,13 +191,14 @@ static void NativeSendMessage(napi_env env, void *data)
     auto asyncContext = static_cast<SendMessageContext *>(data);
     if (asyncContext == nullptr) {
         TELEPHONY_LOGE("NativeSendMessage SendMessageContext is nullptr.");
-        NapiUtil::ThrowParameterError(env);
+        asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
         return;
     }
     asyncContext->errorCode = ActuallySendMessage(env, *asyncContext);
     if (asyncContext->errorCode == TELEPHONY_SUCCESS) {
         asyncContext->resolved = true;
     }
+    TELEPHONY_LOGI("NativeSendMessage end resolved = %{public}d", asyncContext->resolved);
 }
 
 static void SendMessageCallback(napi_env env, napi_status status, void *data)
@@ -329,6 +330,94 @@ static napi_value SendMessage(napi_env env, napi_callback_info info)
     napi_create_string_utf8(env, "SendMessage", NAPI_AUTO_LENGTH, &resourceName);
     napi_create_async_work(env, nullptr, resourceName, NativeSendMessage, SendMessageCallback,
         (void *)asyncContext, &(asyncContext->work));
+    napi_queue_async_work(env, asyncContext->work);
+    return NapiUtil::CreateUndefined(env);
+}
+
+static int32_t MatchSendShortMessageParameters(napi_env env, napi_value parameters[], size_t parameterCount)
+{
+    bool match = false;
+    switch (parameterCount) {
+        case ONE_PARAMETER: {
+            match = NapiUtil::MatchParameters(env, parameters, { napi_object });
+            break;
+        }
+        case TWO_PARAMETERS: {
+            match = NapiUtil::MatchParameters(env, parameters, { napi_object, napi_function });
+            break;
+        }
+        default:
+            break;
+    }
+    if (!match) {
+        return MESSAGE_PARAMETER_NOT_MATCH;
+    }
+
+    napi_value object = parameters[0];
+    bool hasSlotId = NapiUtil::HasNamedTypeProperty(env, object, napi_number, g_slotIdStr);
+    bool hasDestinationHost = NapiUtil::HasNamedTypeProperty(env, object, napi_string, g_destinationHostStr);
+    bool hasContent = NapiUtil::HasNamedProperty(env, object, g_contentStr);
+    bool hasNecessaryParameter = hasSlotId && hasDestinationHost && hasContent;
+    if (!hasNecessaryParameter) {
+        return MESSAGE_PARAMETER_NOT_MATCH;
+    }
+    napi_value contentValue = NapiUtil::GetNamedProperty(env, object, g_contentStr);
+    bool contentIsStr = NapiUtil::MatchValueType(env, contentValue, napi_string);
+    bool contentIsObj = NapiUtil::MatchValueType(env, contentValue, napi_object);
+    bool contentIsArray = false;
+    if (contentIsObj) {
+        napi_is_array(env, contentValue, &contentIsArray);
+    }
+    bool serviceCenterTypeMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_string, g_serviceCenterStr);
+    bool sendCallbackTypeMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_function, g_sendCallbackStr);
+    bool deliveryCallbackTypeMatch =
+        NapiUtil::MatchOptionPropertyType(env, object, napi_function, g_deliveryCallbackStr);
+    bool destindationPortMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_number, g_destinationPortStr);
+    if (contentIsStr && serviceCenterTypeMatch && sendCallbackTypeMatch && deliveryCallbackTypeMatch) {
+        return TEXT_MESSAGE_PARAMETER_MATCH;
+    } else if (contentIsArray && serviceCenterTypeMatch && sendCallbackTypeMatch && deliveryCallbackTypeMatch &&
+               destindationPortMatch) {
+        return RAW_DATA_MESSAGE_PARAMETER_MATCH;
+    }
+    return MESSAGE_PARAMETER_NOT_MATCH;
+}
+
+static napi_value SendShortMessage(napi_env env, napi_callback_info info)
+{
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = { 0 };
+    napi_value thisVar = nullptr;
+    void *data = nullptr;
+
+    napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
+    int32_t messageMatchResult = MatchSendShortMessageParameters(env, parameters, parameterCount);
+    if (messageMatchResult == MESSAGE_PARAMETER_NOT_MATCH) {
+        TELEPHONY_LOGE("SendShortMessage parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    auto asyncContext = std::make_unique<SendMessageContext>().release();
+    if (asyncContext == nullptr) {
+        TELEPHONY_LOGE("SendMessage SendMessageContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    ParseMessageParameter(messageMatchResult, env, parameters[0], *asyncContext);
+    napi_create_reference(env, thisVar, DEFAULT_REF_COUNT, &asyncContext->thisVarRef);
+
+    if (parameterCount == TWO_PARAMETERS) {
+        napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &asyncContext->callbackRef);
+    }
+    napi_value result = nullptr;
+    if (asyncContext->callbackRef == nullptr) {
+        napi_create_promise(env, &asyncContext->deferred, &result);
+    } else {
+        napi_get_undefined(env, &result);
+    }
+    napi_value resourceName = nullptr;
+    napi_create_string_utf8(env, "SendMessage", NAPI_AUTO_LENGTH, &resourceName);
+    napi_create_async_work(env, nullptr, resourceName, NativeSendMessage, SendMessageCallback, (void *)asyncContext,
+        &(asyncContext->work));
     napi_queue_async_work(env, asyncContext->work);
     return NapiUtil::CreateUndefined(env);
 }
@@ -1827,6 +1916,7 @@ napi_value InitNapiSmsRegistry(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("sendMessage", SendMessage),
+        DECLARE_NAPI_FUNCTION("sendShortMessage", SendShortMessage),
         DECLARE_NAPI_FUNCTION("createMessage", CreateMessage),
         DECLARE_NAPI_FUNCTION("setDefaultSmsSlotId", SetDefaultSmsSlotId),
         DECLARE_NAPI_FUNCTION("getDefaultSmsSlotId", GetDefaultSmsSlotId),
