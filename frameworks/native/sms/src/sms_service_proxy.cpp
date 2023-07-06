@@ -56,7 +56,7 @@ int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAdd
         TELEPHONY_LOGE("SendMessage with text Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(TEXT_BASED_SMS_DELIVERY), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::TEXT_BASED_SMS_DELIVERY), dataParcel, replyParcel, option);
     return replyParcel.ReadInt32();
 };
 
@@ -95,7 +95,7 @@ int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAdd
         TELEPHONY_LOGE("SendMessage with data Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(DATA_BASED_SMS_DELIVERY), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::DATA_BASED_SMS_DELIVERY), dataParcel, replyParcel, option);
     return replyParcel.ReadInt32();
 };
 
@@ -116,7 +116,7 @@ int32_t SmsServiceProxy::SetSmscAddr(int32_t slotId, const std::u16string &scAdd
         TELEPHONY_LOGE("SetSmscAddr Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(SET_SMSC_ADDRESS), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::SET_SMSC_ADDRESS), dataParcel, replyParcel, option);
     return replyParcel.ReadInt32();
 }
 
@@ -136,7 +136,7 @@ int32_t SmsServiceProxy::GetSmscAddr(int32_t slotId, std::u16string &smscAddress
         TELEPHONY_LOGE("GetSmscAddr Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(GET_SMSC_ADDRESS), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::GET_SMSC_ADDRESS), dataParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
     if (result == TELEPHONY_ERR_SUCCESS) {
         smscAddress = replyParcel.ReadString16();
@@ -164,7 +164,7 @@ int32_t SmsServiceProxy::AddSimMessage(
         TELEPHONY_LOGE("AddSimMessage Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(ADD_SIM_MESSAGE), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::ADD_SIM_MESSAGE), dataParcel, replyParcel, option);
     return replyParcel.ReadInt32();
 }
 
@@ -185,7 +185,7 @@ int32_t SmsServiceProxy::DelSimMessage(int32_t slotId, uint32_t msgIndex)
         TELEPHONY_LOGE("DelSimMessage Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(DEL_SIM_MESSAGE), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::DEL_SIM_MESSAGE), dataParcel, replyParcel, option);
     return replyParcel.ReadInt32();
 }
 
@@ -210,7 +210,7 @@ int32_t SmsServiceProxy::UpdateSimMessage(int32_t slotId, uint32_t msgIndex, Sim
         TELEPHONY_LOGE("UpdateSimMessage Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(UPDATE_SIM_MESSAGE), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::UPDATE_SIM_MESSAGE), dataParcel, replyParcel, option);
     return replyParcel.ReadInt32();
 }
 
@@ -230,7 +230,7 @@ int32_t SmsServiceProxy::GetAllSimMessages(int32_t slotId, std::vector<ShortMess
         TELEPHONY_LOGE("GetAllSimMessages Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(GET_ALL_SIM_MESSAGE), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::GET_ALL_SIM_MESSAGE), dataParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
     if (result != TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGE("GetAllSimMessages result is not TELEPHONY_ERR_SUCCESS");
@@ -268,7 +268,7 @@ int32_t SmsServiceProxy::SetCBConfig(
         TELEPHONY_LOGE("SetCBConfig Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(SET_CB_CONFIG), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::SET_CB_CONFIG), dataParcel, replyParcel, option);
     return replyParcel.ReadInt32();
 }
 
@@ -291,7 +291,7 @@ bool SmsServiceProxy::SetImsSmsConfig(
         TELEPHONY_LOGE("SetImsSmsConfig Remote is null");
         return result;
     }
-    remote->SendRequest(static_cast<int32_t>(SET_IMS_SMS_CONFIG), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::SET_IMS_SMS_CONFIG), dataParcel, replyParcel, option);
     return replyParcel.ReadBool();
 }
 
@@ -311,7 +311,7 @@ int32_t SmsServiceProxy::SetDefaultSmsSlotId(int32_t slotId)
         TELEPHONY_LOGE("SetDefaultSmsSlotId Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(SET_DEFAULT_SMS_SLOT_ID), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::SET_DEFAULT_SMS_SLOT_ID), dataParcel, replyParcel, option);
     return replyParcel.ReadInt32();
 }
 
@@ -331,7 +331,7 @@ int32_t SmsServiceProxy::GetDefaultSmsSlotId()
         TELEPHONY_LOGE("GetDefaultSmsSlotId Remote is null");
         return result;
     }
-    remote->SendRequest(static_cast<int32_t>(GET_DEFAULT_SMS_SLOT_ID), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::GET_DEFAULT_SMS_SLOT_ID), dataParcel, replyParcel, option);
     return replyParcel.ReadInt32();
 }
 
@@ -349,7 +349,7 @@ int32_t SmsServiceProxy::GetDefaultSmsSimId(int32_t &simId)
     }
     MessageParcel replyParcel;
     MessageOption option(MessageOption::TF_SYNC);
-    remote->SendRequest(static_cast<int32_t>(GET_DEFAULT_SMS_SIM_ID), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::GET_DEFAULT_SMS_SIM_ID), dataParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
     TELEPHONY_LOGI("end: result=%{public}d", result);
     if (result == TELEPHONY_ERR_SUCCESS) {
@@ -374,7 +374,7 @@ int32_t SmsServiceProxy::SplitMessage(const std::u16string &message, std::vector
         TELEPHONY_LOGE("SplitMessage Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(SPLIT_MESSAGE), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::SPLIT_MESSAGE), dataParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
     if (result != TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGE("SplitMessage result is not TELEPHONY_ERR_SUCCESS");
@@ -410,7 +410,7 @@ int32_t SmsServiceProxy::GetSmsSegmentsInfo(
         TELEPHONY_LOGE("GetSmsSegmentsInfo Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(GET_SMS_SEGMENTS_INFO), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::GET_SMS_SEGMENTS_INFO), dataParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
     if (result != TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGE("GetSmsSegmentsInfo ReadBool is null");
@@ -441,7 +441,7 @@ int32_t SmsServiceProxy::IsImsSmsSupported(int32_t slotId, bool &isSupported)
         TELEPHONY_LOGE("IsImsSmsSupported Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(IS_IMS_SMS_SUPPORTED), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::IS_IMS_SMS_SUPPORTED), dataParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
     if (result != TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGE("GetSmsSegmentsInfo ReadBool is null");
@@ -466,7 +466,7 @@ int32_t SmsServiceProxy::GetImsShortMessageFormat(std::u16string &format)
         TELEPHONY_LOGE("GetImsShortMessageFormat Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(GET_IMS_SHORT_MESSAGE_FORMAT), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::GET_IMS_SHORT_MESSAGE_FORMAT), dataParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
     if (result == TELEPHONY_ERR_SUCCESS) {
         format = replyParcel.ReadString16();
@@ -490,7 +490,7 @@ bool SmsServiceProxy::HasSmsCapability()
         TELEPHONY_LOGE("HasSmsCapability Remote is null");
         return result;
     }
-    remote->SendRequest(static_cast<int32_t>(HAS_SMS_CAPABILITY), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::HAS_SMS_CAPABILITY), dataParcel, replyParcel, option);
     return replyParcel.ReadBool();
 }
 
@@ -515,7 +515,7 @@ int32_t SmsServiceProxy::CreateMessage(std::string pdu, std::string specificatio
     if (remote == nullptr) {
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(CREATE_MESSAGE), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::CREATE_MESSAGE), dataParcel, replyParcel, option);
 
     int32_t result = replyParcel.ReadInt32();
     TELEPHONY_LOGI("SmsServiceProxy::CreateMessage result:%{public}d", result);
@@ -552,7 +552,7 @@ bool SmsServiceProxy::GetBase64Encode(std::string src, std::string &dest)
     if (remote == nullptr) {
         return result;
     }
-    remote->SendRequest(static_cast<int32_t>(MMS_BASE64_ENCODE), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::MMS_BASE64_ENCODE), dataParcel, replyParcel, option);
     result = replyParcel.ReadBool();
     TELEPHONY_LOGI("SmsServiceProxy::GetBase64Encode result:%{public}d", result);
     if (!result) {
@@ -583,7 +583,7 @@ bool SmsServiceProxy::GetBase64Decode(std::string src, std::string &dest)
     if (remote == nullptr) {
         return result;
     }
-    remote->SendRequest(static_cast<int32_t>(MMS_BASE64_DECODE), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::MMS_BASE64_DECODE), dataParcel, replyParcel, option);
     result = replyParcel.ReadBool();
     TELEPHONY_LOGI("SmsServiceProxy::GetBase64Decode result:%{public}d", result);
     if (!result) {
@@ -617,7 +617,7 @@ bool SmsServiceProxy::GetEncodeStringFunc(
     if (remote == nullptr) {
         return result;
     }
-    remote->SendRequest(static_cast<int32_t>(GET_ENCODE_STRING), dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::GET_ENCODE_STRING), dataParcel, replyParcel, option);
     result = replyParcel.ReadBool();
     TELEPHONY_LOGI("SmsServiceProxy::GetEncodeStringFunc result:%{public}d", result);
     if (!result) {
