@@ -16,6 +16,7 @@
 #ifndef SMS_SERVICE_IPC_INTERFACE_CODE_H
 #define SMS_SERVICE_IPC_INTERFACE_CODE_H
 
+/* SID:4008 */
 namespace OHOS {
 namespace Telephony {
 enum class SmsServiceInterfaceCode {

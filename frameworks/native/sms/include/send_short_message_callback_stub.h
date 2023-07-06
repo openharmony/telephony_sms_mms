@@ -21,6 +21,7 @@
 #include "iremote_stub.h"
 
 #include "i_send_short_message_callback.h"
+#include "send_short_message_callback_ipc_interface_code.h"
 
 namespace OHOS {
 namespace Telephony {

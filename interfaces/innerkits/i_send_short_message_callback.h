@@ -47,11 +47,6 @@ public:
     };
 
     /**
-     * @brief Indicates the call back event of sending SMS.
-     */
-    enum SendCallback { ON_SMS_SEND_RESULT };
-
-    /**
      * @brief OnSmsSendResult
      * Callback to indicate status of sending SMS messages to the SMS service center.
      *

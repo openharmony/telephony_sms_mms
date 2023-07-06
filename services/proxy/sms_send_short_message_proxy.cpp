@@ -37,7 +37,8 @@ void SmsSendShortMessageProxy::OnSmsSendResult(const SmsSendResult result)
     if (remote == nullptr) {
         return;
     }
-    remote->SendRequest(ON_SMS_SEND_RESULT, dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(SendShortMessageCallbackInterfaceCode::ON_SMS_SEND_RESULT), dataParcel,
+        replyParcel, option);
 }
 } // namespace Telephony
 } // namespace OHOS
