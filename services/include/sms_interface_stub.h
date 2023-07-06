@@ -27,6 +27,7 @@
 #include "sms_interface_manager.h"
 #include "sms_receive_manager.h"
 #include "sms_send_manager.h"
+#include "sms_service_ipc_interface_code.h"
 
 namespace OHOS {
 namespace Telephony {
