@@ -16,6 +16,7 @@
 #ifndef SEND_SHORT_MESSAGE_CALLBACK_IPC_INTERFACE_CODE_H
 #define SEND_SHORT_MESSAGE_CALLBACK_IPC_INTERFACE_CODE_H
 
+/* SAID:4008 */
 namespace OHOS {
 namespace Telephony {
 enum class SendShortMessageCallbackInterfaceCode {
