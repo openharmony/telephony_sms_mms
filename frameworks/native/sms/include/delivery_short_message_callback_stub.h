@@ -18,6 +18,7 @@
 
 #include <cstdint>
 
+#include "delivery_short_message_callback_ipc_interface_code.h"
 #include "iremote_stub.h"
 #include "i_delivery_short_message_callback.h"
 

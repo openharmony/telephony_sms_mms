@@ -16,6 +16,7 @@
 #ifndef I_DELIVERY_SHORT_MESSAGE_CALLBACK_H
 #define I_DELIVERY_SHORT_MESSAGE_CALLBACK_H
 
+#include "delivery_short_message_callback_ipc_interface_code.h"
 #include "iremote_broker.h"
 
 namespace OHOS {
@@ -23,7 +24,6 @@ namespace Telephony {
 class IDeliveryShortMessageCallback : public IRemoteBroker {
 public:
     virtual ~IDeliveryShortMessageCallback() = default;
-    enum DeliveryCallback { ON_SMS_DELIVERY_RESULT };
 
     /**
      * @brief OnSmsDeliveryResult
