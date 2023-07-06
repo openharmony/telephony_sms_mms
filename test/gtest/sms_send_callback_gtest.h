@@ -20,6 +20,7 @@
 
 #include "i_send_short_message_callback.h"
 #include "iremote_stub.h"
+#include "send_short_message_callback_ipc_interface_code.h"
 #include "sms_mms_test_helper.h"
 
 namespace OHOS {
