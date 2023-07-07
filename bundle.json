@@ -47,6 +47,9 @@
                 "safwk",
                 "samgr",
                 "telephony_data"
+            ],
+            "third_party": [
+                "glib"
             ]
         },
         "build": {
