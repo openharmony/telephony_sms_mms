@@ -31,6 +31,8 @@ ohos_shared_library("sms") {
     "LOG_DOMAIN = 0xD001F06",
   ]
 
+  deps = [ "$SUBSYSTEM_DIR/sms_mms/frameworks/native:tel_sms_mms_api" ]
+
   external_deps = [
     "c_utils:utils",
     "core_service:libtel_common",
@@ -38,7 +40,6 @@ ohos_shared_library("sms") {
     "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "sms_mms:tel_sms_mms_api",
   ]
 
   relative_install_dir = "module/telephony"
