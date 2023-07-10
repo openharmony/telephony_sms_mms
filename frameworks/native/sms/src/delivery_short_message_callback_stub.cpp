@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ int DeliveryShortMessageCallbackStub::OnRemoteRequest(
         return TELEPHONY_ERR_DESCRIPTOR_MISMATCH;
     }
     switch (code) {
-        case ON_SMS_DELIVERY_RESULT: {
+        case static_cast<int>(DeliveryShortMessageCallbackInterfaceCode::ON_SMS_DELIVERY_RESULT): {
             auto result = data.ReadString16();
             OnSmsDeliveryResult(result);
             return SMS_DEFAULT_RESULT;

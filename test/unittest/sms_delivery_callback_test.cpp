@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ void SmsDeliveryCallbackTest::OnSmsDeliveryResult(const std::u16string &pdu)
 int SmsDeliveryCallbackTest::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    if (code == ON_SMS_DELIVERY_RESULT) {
+    if (code == static_cast<int>(DeliveryShortMessageCallbackInterfaceCode::ON_SMS_DELIVERY_RESULT)) {
         OnSmsDeliveryResult(data.ReadString16());
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

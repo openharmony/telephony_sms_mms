@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,23 +18,12 @@
 
 #include "iremote_broker.h"
 #include "ims_sms_callback_interface.h"
+#include "ims_sms_ipc_interface_code.h"
 
 namespace OHOS {
 namespace Telephony {
 class ImsSmsInterface : public IRemoteBroker {
 public:
-    enum {
-        /****************** sms basic ******************/
-        IMS_SEND_MESSAGE = 6000,
-
-        /****************** sms config ******************/
-        IMS_SET_SMS_CONFIG = 6100,
-        IMS_GET_SMS_CONFIG,
-
-        /****************** callback ******************/
-        IMS_SMS_REGISTER_CALLBACK = 6500,
-    };
-
     /**
      * @brief IMS send message interface.
      *
