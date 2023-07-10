@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,18 +26,6 @@ namespace Telephony {
 class ImsSmsCallbackInterface : public IRemoteBroker {
 public:
     virtual ~ImsSmsCallbackInterface() = default;
-
-    /**
-     * @brief Enumerates the request sent to IMS from SmsService.
-     */
-    enum {
-        /****************** sms basic ******************/
-        IMS_SEND_MESSAGE = 0,
-
-        /****************** sms config ******************/
-        IMS_SET_SMS_CONFIG,
-        IMS_GET_SMS_CONFIG,
-    };
 
     /**
      * @brief ImsSendMessageResponse the result of send the sms by IMS.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,11 +45,6 @@ public:
          */
         SEND_SMS_FAILURE_SERVICE_UNAVAILABLE = 3
     };
-
-    /**
-     * @brief Indicates the call back event of sending SMS.
-     */
-    enum SendCallback { ON_SMS_SEND_RESULT };
 
     /**
      * @brief OnSmsSendResult

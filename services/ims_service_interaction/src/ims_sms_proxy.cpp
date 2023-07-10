@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ int32_t ImsSmsProxy::ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMes
         TELEPHONY_LOGE("[slot%{public}d]Write imsMessageInfo fail!", slotId);
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
-    return SendRequest(in, slotId, IMS_SEND_MESSAGE);
+    return SendRequest(in, slotId, static_cast<int32_t>(ImsSmsInterfaceCode::IMS_SEND_MESSAGE));
 }
 
 int32_t ImsSmsProxy::ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig)
@@ -58,7 +58,7 @@ int32_t ImsSmsProxy::ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig)
         TELEPHONY_LOGE("[slot%{public}d]Write imsSmsConfig fail!", slotId);
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
-    return SendRequest(in, slotId, IMS_SET_SMS_CONFIG);
+    return SendRequest(in, slotId, static_cast<int32_t>(ImsSmsInterfaceCode::IMS_SET_SMS_CONFIG));
 }
 
 int32_t ImsSmsProxy::ImsGetSmsConfig(int32_t slotId)
@@ -68,7 +68,7 @@ int32_t ImsSmsProxy::ImsGetSmsConfig(int32_t slotId)
     if (ret != TELEPHONY_SUCCESS) {
         return ret;
     }
-    return SendRequest(in, slotId, IMS_GET_SMS_CONFIG);
+    return SendRequest(in, slotId, static_cast<int32_t>(ImsSmsInterfaceCode::IMS_GET_SMS_CONFIG));
 }
 
 int32_t ImsSmsProxy::RegisterImsSmsCallback(const sptr<ImsSmsCallbackInterface> &callback)
@@ -95,7 +95,8 @@ int32_t ImsSmsProxy::RegisterImsSmsCallback(const sptr<ImsSmsCallbackInterface> 
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
-    int32_t error = remote->SendRequest(IMS_SMS_REGISTER_CALLBACK, in, out, option);
+    int32_t error = remote->SendRequest(static_cast<int32_t>(ImsSmsInterfaceCode::IMS_SMS_REGISTER_CALLBACK), in,
+        out, option);
     if (error == ERR_NONE) {
         return out.ReadInt32();
     }

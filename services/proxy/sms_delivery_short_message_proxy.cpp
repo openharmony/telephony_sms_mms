@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,8 @@ void SmsDeliveryShortMessageProxy::OnSmsDeliveryResult(const std::u16string &pdu
     if (remote == nullptr) {
         return;
     }
-    remote->SendRequest(ON_SMS_DELIVERY_RESULT, dataParcel, replyParcel, option);
+    remote->SendRequest(static_cast<int32_t>(DeliveryShortMessageCallbackInterfaceCode::ON_SMS_DELIVERY_RESULT),
+        dataParcel, replyParcel, option);
 }
 } // namespace Telephony
 } // namespace OHOS
