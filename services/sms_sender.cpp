@@ -116,14 +116,17 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         TELEPHONY_LOGE("SendMessageSucceed but smsIndexer drop!");
         return;
     }
+
     bool isLastPart = false;
-    std::shared_ptr<uint8_t> unSentCellCount = smsIndexer->GetUnSentCellCount();
-    if (unSentCellCount != nullptr) {
-        (*unSentCellCount) = (*unSentCellCount) - 1;
-        if ((*unSentCellCount) == 0) {
+    uint8_t unSentCellCount = smsIndexer->GetUnSentCellCount();
+    if (unSentCellCount > 0) {
+        unSentCellCount = unSentCellCount - 1;
+        smsIndexer->SetUnSentCellCount(unSentCellCount);
+        if (unSentCellCount == 0) {
             isLastPart = true;
         }
     }
+    TELEPHONY_LOGI("isLastPart:%{public}d", isLastPart);
     if (isLastPart) {
         smsIndexer->SetPsResendCount(INITIAL_COUNT);
         smsIndexer->SetCsResendCount(INITIAL_COUNT);
@@ -150,16 +153,17 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
     if (hasCellFailed != nullptr) {
         *hasCellFailed = true;
     }
+
     bool isLastPart = false;
-    std::shared_ptr<uint8_t> unSentCellCount = smsIndexer->GetUnSentCellCount();
-    if (unSentCellCount == nullptr) {
-        TELEPHONY_LOGE("unSentCellCount is nullptr");
-        return;
+    uint8_t unSentCellCount = smsIndexer->GetUnSentCellCount();
+    if (unSentCellCount > 0) {
+        unSentCellCount = unSentCellCount - 1;
+        smsIndexer->SetUnSentCellCount(unSentCellCount);
+        if (unSentCellCount == 0) {
+            isLastPart = true;
+        }
     }
-    (*unSentCellCount) = (*unSentCellCount) - 1;
-    if ((*unSentCellCount) == 0) {
-        isLastPart = true;
-    }
+    TELEPHONY_LOGI("isLastPart:%{public}d", isLastPart);
     if (isLastPart) {
         smsIndexer->SetPsResendCount(INITIAL_COUNT);
         smsIndexer->SetCsResendCount(INITIAL_COUNT);

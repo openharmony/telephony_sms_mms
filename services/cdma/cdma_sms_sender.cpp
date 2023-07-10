@@ -113,7 +113,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
         indexer->SetEncodePdu(*pdu);
         indexer->SetMsgRefId(msgRef8bit);
         indexer->SetNetWorkType(NET_TYPE_CDMA);
-        indexer->SetUnSentCellCount(unSentCellCount);
+        indexer->SetUnSentCellCount(*unSentCellCount);
         indexer->SetHasCellFailed(hasCellFailed);
         indexer->SetTimeStamp(timeStamp);
         indexer->SetMsgId(msgId);
@@ -222,7 +222,7 @@ void CdmaSmsSender::ReadySendSms(GsmSmsMessage gsmSmsMessage, const string &scAd
     }
 
     SetSendIndexerInfo(indexer, encodeInfo, msgRef8bit);
-    indexer->SetUnSentCellCount(unSentCellCount);
+    indexer->SetUnSentCellCount(*unSentCellCount);
     indexer->SetHasCellFailed(hasCellFailed);
     indexer->SetImsSmsForCdma(true);
     SendSmsToRil(indexer);
@@ -370,7 +370,7 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     indexer->SetEncodePdu(*pdu);
     indexer->SetMsgRefId(msgRef8bit);
     indexer->SetNetWorkType(NET_TYPE_CDMA);
-    indexer->SetUnSentCellCount(unSentCellCount);
+    indexer->SetUnSentCellCount(*unSentCellCount);
     indexer->SetHasCellFailed(hasCellFailed);
     indexer->SetTimeStamp(timeStamp);
     indexer->SetMsgId(msgId);
@@ -409,7 +409,7 @@ void CdmaSmsSender::DataBasedSmsDeliveryViaIms(const string &desAddr, const stri
     }
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
-    indexer->SetUnSentCellCount(unSentCellCount);
+    indexer->SetUnSentCellCount(*unSentCellCount);
     indexer->SetHasCellFailed(hasCellFailed);
     indexer->SetEncodeSmca(std::move(smca));
     indexer->SetEncodePdu(std::move(pdu));
