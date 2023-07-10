@@ -134,7 +134,7 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
             continue;
         }
         SetSendIndexerInfo(indexer, encodeInfo, msgRef8bit);
-        indexer->SetUnSentCellCount(unSentCellCount);
+        indexer->SetUnSentCellCount(*unSentCellCount);
         indexer->SetHasCellFailed(hasCellFailed);
         SendSmsToRil(indexer);
     }
@@ -291,7 +291,7 @@ void GsmSmsSender::DataBasedSmsDeliverySendSplitPage(std::shared_ptr<struct Enco
 
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     int64_t timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
-    indexer->SetUnSentCellCount(unSentCellCount);
+    indexer->SetUnSentCellCount(*unSentCellCount);
     indexer->SetHasCellFailed(hasCellFailed);
     indexer->SetEncodeSmca(std::move(smca));
     indexer->SetEncodePdu(std::move(pdu));
@@ -570,7 +570,7 @@ void GsmSmsSender::ResendDataDelivery(const std::shared_ptr<SmsSendIndexer> &sms
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     int64_t timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
 
-    smsIndexer->SetUnSentCellCount(unSentCellCount);
+    smsIndexer->SetUnSentCellCount(*unSentCellCount);
     smsIndexer->SetHasCellFailed(hasCellFailed);
     smsIndexer->SetEncodeSmca(std::move(smca));
     smsIndexer->SetEncodePdu(std::move(pdu));
