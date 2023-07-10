@@ -25,7 +25,6 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
-using namespace EventFwk;
 constexpr static uint16_t PDU_POS_OFFSET = 1;
 constexpr static uint8_t SMS_TYPE_GSM = 1;
 constexpr static uint8_t SMS_TYPE_CDMA = 2;
