@@ -361,14 +361,14 @@ HWTEST_F(BranchSmsTest, SmsSender_0002, Function | MediumTest | Level1)
     const std::string scAddr = "123";
     const std::string text = "123";
     auto smsIndexer = std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
-    smsIndexer->unSentCellCount_ = std::make_shared<uint8_t>(1);
+    smsIndexer->unSentCellCount_ = 1;
     smsSender->SendMessageSucceed(smsIndexer);
-    smsIndexer->unSentCellCount_ = std::make_shared<uint8_t>(1);
+    smsIndexer->unSentCellCount_ = 1;
     smsIndexer->hasCellFailed_ = std::make_shared<bool>(true);
     smsSender->SendMessageSucceed(smsIndexer);
-    smsIndexer->unSentCellCount_ = std::make_shared<uint8_t>(1);
+    smsIndexer->unSentCellCount_ = 1;
     smsSender->SendMessageFailed(smsIndexer);
-    smsIndexer->unSentCellCount_ = nullptr;
+    smsIndexer->unSentCellCount_ = 0;
     smsSender->SendMessageFailed(smsIndexer);
     smsSender->SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
     smsSender->SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);

@@ -64,8 +64,8 @@ public:
     void SetDeliveryCallback(const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
     std::string GetText() const;
     void SetText(const std::string &text);
-    std::shared_ptr<uint8_t> GetUnSentCellCount() const;
-    void SetUnSentCellCount(const std::shared_ptr<uint8_t> &unSentCellCount);
+    uint8_t GetUnSentCellCount() const;
+    void SetUnSentCellCount(const uint8_t unSentCellCount);
     std::shared_ptr<bool> GetHasCellFailed() const;
     void SetHasCellFailed(const std::shared_ptr<bool> &hasCellFailed);
     bool GetIsFailure() const;
@@ -116,7 +116,7 @@ private:
     uint8_t psResendCount_ = 0;
     uint8_t msgRefId_ = 0;
     int64_t msgRefId64Bit_ = 0;
-    std::shared_ptr<uint8_t> unSentCellCount_ = nullptr;
+    static uint8_t unSentCellCount_;
     std::shared_ptr<bool> hasCellFailed_ = nullptr;
     sptr<ISendShortMessageCallback> sendCallback_ = nullptr;
     sptr<IDeliveryShortMessageCallback> deliveryCallback_ = nullptr;
