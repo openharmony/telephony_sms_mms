@@ -16,6 +16,7 @@
 #ifndef CDMA_SMS_RECEIVE_HANDLER_H
 #define CDMA_SMS_RECEIVE_HANDLER_H
 
+#include "app/context.h"
 #include "sms_cb_data.h"
 #include "sms_receive_handler.h"
 #include "sms_sender.h"
