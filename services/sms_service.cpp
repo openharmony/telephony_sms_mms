@@ -157,13 +157,8 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
         TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    int32_t ret = interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
+    return interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
         StringUtils::ToUtf8(text), sendCallback, deliveryCallback);
-    std::string bundleName = GetBundleName();
-    if (bundleName != MMS_APP) {
-        InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(text));
-    }
-    return ret;
 }
 
 void SmsService::InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text)
