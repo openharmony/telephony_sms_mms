@@ -18,6 +18,7 @@
 #include "parcel.h"
 #include "sms_mms_errors.h"
 #include "string_utils.h"
+#include "telephony_common_utils.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
@@ -56,6 +57,8 @@ int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAdd
         TELEPHONY_LOGE("SendMessage with text Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
+    std::string bundleName = GetBundleName();
+    dataParcel.WriteString(bundleName);
     remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::TEXT_BASED_SMS_DELIVERY), dataParcel,
         replyParcel, option);
     return replyParcel.ReadInt32();

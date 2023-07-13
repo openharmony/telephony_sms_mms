@@ -17,6 +17,7 @@
 
 #include "sms_interface_manager.h"
 #include "sms_receive_reliability_handler.h"
+#include "sms_service.h"
 #include "string_utils.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
@@ -162,7 +163,13 @@ void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &
     }
     TELEPHONY_LOGI("MessageID::TEXT_BASED_SMS_DELIVERY %{public}d", slotId);
     RemoveSpacesInDesAddr(desAddr);
+    std::string bundleName = data.ReadString();
+    TELEPHONY_LOGI("bundleName = %{public}s", bundleName.c_str());
     int32_t result = SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback);
+    if (bundleName != MMS_APP) {
+        DelayedSingleton<SmsService>::GetInstance()->InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr),
+            StringUtils::ToUtf8(text));
+    }
     reply.WriteInt32(result);
 }
 
