@@ -73,6 +73,7 @@ private:
     using SmsServiceFunc = void (SmsInterfaceStub::*)(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     std::map<uint32_t, SmsServiceFunc> memberFuncMap_;
     std::mutex mutex_;
+    const std::string MMS_APP = "com.ohos.mms";
 };
 } // namespace Telephony
 } // namespace OHOS
