@@ -179,7 +179,12 @@ int32_t ImsSmsClient::RegisterImsSmsCallbackHandler(int32_t slotId,
 std::shared_ptr<AppExecFwk::EventHandler> ImsSmsClient::GetHandler(int32_t slotId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    return handlerMap_[slotId];
+    if (handlerMap_.find(slotId) != handlerMap_.end()) {
+        return handlerMap_[slotId];
+    } else {
+        TELEPHONY_LOGE("GetHandler  nullptr");
+        return nullptr;
+    }
 }
 
 int32_t ImsSmsClient::ReConnectService()
