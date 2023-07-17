@@ -18,12 +18,14 @@
 #define private public
 #include "addsmstoken_fuzzer.h"
 #include "cdma_sms_message.h"
+#include "ims_sms_callback_stub.h"
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
 static bool g_isInited = false;
 constexpr int32_t SLOT_NUM = 2;
+constexpr int32_t TYPE_NUM = 5;
 
 bool IsServiceInited()
 {
@@ -109,6 +111,148 @@ void IsImsSmsSupported(const uint8_t *data, size_t size)
     smsSendManager->IsImsSmsSupported(slotId, isSupported);
 }
 
+void OnRemoteRequest(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    if (!dataParcel.WriteInterfaceToken(SmsInterfaceStub::GetDescriptor())) {
+        TELEPHONY_LOGE("OnRemoteRequest WriteInterfaceToken is false");
+        return;
+    }
+
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    dataParcel.RewindRead(0);
+    uint32_t code = static_cast<uint32_t>(size);
+    DelayedSingleton<ImsSmsCallbackStub>::GetInstance()->OnRemoteRequest(code, dataParcel, replyParcel, option);
+    return;
+}
+
+void ImsSendMessageResponseInner(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    dataParcel.WriteInt32(slotId);
+    HRilRadioResponseInfo responseInfo;
+    responseInfo.flag = static_cast<uint32_t>(size);
+    responseInfo.serial = static_cast<uint32_t>(size);
+    responseInfo.error = static_cast<HRilErrType>(size);
+    responseInfo.type = static_cast<HRilResponseTypes>(size % TYPE_NUM);
+    dataParcel.WriteRawData((const void *)&responseInfo, sizeof(HRilRadioResponseInfo));
+    SendSmsResultInfo resultInfo;
+    resultInfo.msgRef = static_cast<uint32_t>(size);
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    resultInfo.pdu = pdu;
+    resultInfo.errCode = static_cast<uint32_t>(size);
+    resultInfo.flag = static_cast<int64_t>(size);
+    dataParcel.WriteRawData((const void *)&resultInfo, sizeof(SendSmsResultInfo));
+    dataParcel.RewindRead(0);
+    DelayedSingleton<ImsSmsCallbackStub>::GetInstance()->OnImsSendMessageResponseInner(dataParcel, replyParcel);
+}
+
+void ImsSetSmsConfigResponseInner(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    dataParcel.WriteInt32(slotId);
+    HRilRadioResponseInfo responseInfo;
+    responseInfo.flag = static_cast<uint32_t>(size);
+    responseInfo.serial = static_cast<uint32_t>(size);
+    responseInfo.error = static_cast<HRilErrType>(size);
+    responseInfo.type = static_cast<HRilResponseTypes>(size % TYPE_NUM);
+    dataParcel.WriteRawData((const void *)&responseInfo, sizeof(HRilRadioResponseInfo));
+    dataParcel.RewindRead(0);
+    DelayedSingleton<ImsSmsCallbackStub>::GetInstance()->OnImsSetSmsConfigResponseInner(dataParcel, replyParcel);
+}
+
+void CreateMessage(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    std::string reply(reinterpret_cast<const char *>(data), size);
+    dataParcel.WriteString(pdu);
+    dataParcel.WriteString(reply);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnCreateMessage(dataParcel, replyParcel, option);
+}
+
+void GetBase64Encode(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    std::string message(reinterpret_cast<const char *>(data), size);
+    auto messageU16 = Str8ToStr16(message);
+    dataParcel.WriteString16(messageU16);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetBase64Encode(dataParcel, replyParcel, option);
+}
+
+void GetBase64Decode(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    std::string messageSrc(reinterpret_cast<const char *>(data), size);
+    auto stringU16 = Str8ToStr16(messageSrc);
+    dataParcel.WriteString16(stringU16);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetBase64Decode(dataParcel, replyParcel, option);
+}
+
+void GetEncodeStringFunc(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    int32_t charset = static_cast<int32_t>(size);
+    int32_t valLength = static_cast<int32_t>(size);
+    std::string strEncode(reinterpret_cast<const char *>(data), size);
+    auto strEncodeU16 = Str8ToStr16(strEncode);
+    dataParcel.WriteInt32(charset);
+    dataParcel.WriteInt32(valLength);
+    dataParcel.WriteString16(strEncodeU16);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetEncodeStringFunc(dataParcel, replyParcel, option);
+}
+
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size == 0) {
@@ -117,6 +261,13 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 
     GetSmsSegmentsInfo(data, size);
     IsImsSmsSupported(data, size);
+    OnRemoteRequest(data, size);
+    ImsSendMessageResponseInner(data, size);
+    ImsSetSmsConfigResponseInner(data, size);
+    CreateMessage(data, size);
+    GetBase64Encode(data, size);
+    GetBase64Decode(data, size);
+    GetEncodeStringFunc(data, size);
 }
 }  // namespace OHOS
 
