@@ -86,6 +86,7 @@ private:
     bool InitLocation(SmsCbInfo &info);
     void GetCbData(const std::shared_ptr<GsmCbCodec> &cbMessage, SmsCbData::CbData &SendData);
 
+private:
     int32_t slotId_;
     std::vector<SmsCbInfo> cbMsgList_;
     int32_t cid_ = -1;

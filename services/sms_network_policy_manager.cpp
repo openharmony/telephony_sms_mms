@@ -174,8 +174,8 @@ void SmsNetworkPolicyManager::GetRadioState()
     CoreManagerInner::GetInstance().GetImsRegStatus(slotId_, ImsServiceType::TYPE_SMS, info);
     isImsNetDomain_ = info.imsRegState == ImsRegState::IMS_REGISTERED;
     voiceServiceState_ = CoreManagerInner::GetInstance().GetCsRegState(slotId_);
-    TELEPHONY_LOGD("netWorkType_ = %{public}d isImsNetDomain_ = %{public}s GetCsRegStatus = %{public}d",
-        netWorkType_, isImsNetDomain_ ? "true" : "false", voiceServiceState_);
+    TELEPHONY_LOGD("netWorkType_ = %{public}d isImsNetDomain_ = %{public}s GetCsRegStatus = %{public}d", netWorkType_,
+        isImsNetDomain_ ? "true" : "false", voiceServiceState_);
     for (const auto &item : callbackMap_) {
         if (item.second == nullptr) {
             TELEPHONY_LOGE("callbackList's item is nullptr");

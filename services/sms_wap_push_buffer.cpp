@@ -40,6 +40,10 @@ std::unique_ptr<char[]> SmsWapPushBuffer::ReadDataBuffer(uint32_t offset, uint32
     if ((desLen > totolLength_) || ((offset + desLen) > totolLength_)) {
         return nullptr;
     }
+    if (desLen > CODE_BUFFER_MAX_SIZE) {
+        TELEPHONY_LOGE("desLen over size error");
+        return nullptr;
+    }
     std::unique_ptr<char[]> result = std::make_unique<char[]>(desLen);
     if (result == nullptr) {
         return nullptr;

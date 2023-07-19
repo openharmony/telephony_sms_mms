@@ -16,10 +16,10 @@
 #ifndef MMS_HEADER_CATEG_H
 #define MMS_HEADER_CATEG_H
 
+#include <functional>
 #include <map>
 #include <stdint.h>
 
-#include <functional>
 #include "mms_codec_type.h"
 
 namespace OHOS {
@@ -40,8 +40,8 @@ private:
     void InitSendReqMap();
     void InitSendConfMap();
 
+private:
     std::map<uint8_t, MmsFieldValueType> mmsFieldDesMap_;
-
     std::map<uint8_t, MmsFieldOptType> mmsSendReqOptMap_;
     std::map<uint8_t, MmsFieldOptType> mmsSendConfOptMap_;
 };

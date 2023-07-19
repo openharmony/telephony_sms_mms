@@ -16,13 +16,10 @@
 #ifndef MMS_BODY_H
 #define MMS_BODY_H
 
+#include "mms_body_part.h"
 #include "mms_decode_buffer.h"
 #include "mms_encode_buffer.h"
-#include "mms_body_part.h"
 #include "mms_header.h"
-
-#include <string>
-#include <vector>
 
 namespace OHOS {
 namespace Telephony {
