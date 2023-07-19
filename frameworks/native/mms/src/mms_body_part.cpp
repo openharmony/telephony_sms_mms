@@ -59,6 +59,10 @@ MmsBodyPart &MmsBodyPart::operator=(const MmsBodyPart &srcBodyPart)
         return *this;
     }
 
+    if (srcBodyPart.bodyLen_ > MAX_MMS_MSG_PART_LEN) {
+        TELEPHONY_LOGE("srcBodyPart.bodyLen_ over size error");
+        return *this;
+    }
     bodyLen_ = srcBodyPart.bodyLen_;
     pbodyPartBuffer_ = std::make_unique<char[]>(bodyLen_);
     if (pbodyPartBuffer_ == nullptr || srcBodyPart.pbodyPartBuffer_ == nullptr) {
@@ -179,12 +183,8 @@ bool MmsBodyPart::DecodePartHeader(MmsDecodeBuffer &decodeBuffer, uint32_t heade
 bool MmsBodyPart::DecodePartBody(MmsDecodeBuffer &decodeBuffer, uint32_t bodyLength)
 {
     uint32_t offset = decodeBuffer.GetCurPosition();
-    if (offset + bodyLength > decodeBuffer.GetSize()) {
+    if (offset + bodyLength > decodeBuffer.GetSize() || bodyLength > MAX_MMS_MSG_PART_LEN) {
         TELEPHONY_LOGE("Decode Body Part buffer size err.");
-        return false;
-    }
-    if (bodyLength > MAX_MMS_MSG_PART_LEN) {
-        TELEPHONY_LOGE("Decode Body Part body length err.");
         return false;
     }
 
@@ -211,6 +211,10 @@ bool MmsBodyPart::DecodePartBody(MmsDecodeBuffer &decodeBuffer, uint32_t bodyLen
     if (encodebuffer.length()) {
         bodyLen_ = 0;
         uint32_t tempLen = encodebuffer.length();
+        if (tempLen > MAX_MMS_MSG_PART_LEN) {
+            TELEPHONY_LOGE("tempLen over size error");
+            return false;
+        }
         pbodyPartBuffer_ = std::make_unique<char[]>(tempLen);
         if (pbodyPartBuffer_ == nullptr) {
             TELEPHONY_LOGE("pbodyPartBuffer_ nullptr Error");
@@ -369,6 +373,10 @@ bool MmsBodyPart::EncodeMmsBodyPart(MmsEncodeBuffer &encodeBuffer)
     }
     uint32_t bodyLen = 0;
     std::unique_ptr<char[]> bodyBuff = ReadBodyPartBuffer(bodyLen);
+    if (bodyBuff == nullptr) {
+        TELEPHONY_LOGE("bodyBuff nullptr Error.");
+        return false;
+    }
     if (!encodeBuffer.WriteBuffer(std::move(bodyBuff), bodyLen)) {
         return false;
     }
@@ -522,8 +530,11 @@ MmsBodyPartHeader &MmsBodyPart::GetPartHeader()
 
 std::unique_ptr<char[]> MmsBodyPart::ReadBodyPartBuffer(uint32_t &len)
 {
-    len = bodyLen_;
-    std::unique_ptr<char[]> result = std::make_unique<char[]>(len);
+    if (bodyLen_ > MAX_MMS_MSG_PART_LEN) {
+        TELEPHONY_LOGE("srcBodyPart.bodyLen_ over size error");
+        return nullptr;
+    }
+    std::unique_ptr<char[]> result = std::make_unique<char[]>(bodyLen_);
     if (result == nullptr) {
         TELEPHONY_LOGE("Read BodyPart Buffer MakeUnique Error.");
         return nullptr;
@@ -532,6 +543,7 @@ std::unique_ptr<char[]> MmsBodyPart::ReadBodyPartBuffer(uint32_t &len)
         TELEPHONY_LOGE("Read BodyPart Buffer Memcpy_s Error.");
         return nullptr;
     }
+    len = bodyLen_;
     return result;
 }
 } // namespace Telephony

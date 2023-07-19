@@ -18,8 +18,6 @@
 
 #include "mms_content_type.h"
 
-#include <map>
-
 namespace OHOS {
 namespace Telephony {
 enum class MmsHeaderParam {

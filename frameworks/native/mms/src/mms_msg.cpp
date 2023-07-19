@@ -345,6 +345,10 @@ bool MmsMsg::GetAllAttachment(std::vector<MmsAttachment> &attachments)
 
         uint32_t partBodyLen = 0;
         std::unique_ptr<char[]> partBodyBuffer = part.ReadBodyPartBuffer(partBodyLen);
+        if (partBodyBuffer == nullptr) {
+            TELEPHONY_LOGE("partBodyBuffer nullptr Error.");
+            return false;
+        }
         attachment.SetDataBuffer(std::move(partBodyBuffer), partBodyLen);
         attachments.push_back(attachment);
     }

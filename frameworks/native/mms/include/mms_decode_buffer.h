@@ -16,8 +16,6 @@
 #ifndef MMS_DECODE_BUFFER_H
 #define MMS_DECODE_BUFFER_H
 
-#include <string>
-
 #include "mms_buffer.h"
 
 namespace OHOS {
