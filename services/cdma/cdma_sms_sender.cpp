@@ -329,9 +329,6 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     transMsg->data.p2p.telesvcMsg.data.submit.msgId.msgId = msgId;
     /* while user data header isn't exist, headerInd must be set false. */
     transMsg->data.p2p.telesvcMsg.data.submit.msgId.headerInd = true;
-
-    chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
-    long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
     transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.length = static_cast<int>(splits[0].encodeData.size());
     if (splits[0].encodeData.size() > sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data)) {
         TELEPHONY_LOGE("DataBasedSmsDelivery data length invalid.");
@@ -344,9 +341,17 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
         TELEPHONY_LOGE("memcpy_s return error.");
         return;
     }
+    std::shared_ptr<SmsSendIndexer> indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, port,
+        splits[0].encodeData.data(), splits[0].encodeData.size(), sendCallback, deliveryCallback);
+    EncodeMsgData(std::move(transMsg), indexer, msgRef8bit, sendCallback);
+}
+
+void CdmaSmsSender::EncodeMsgData(std::unique_ptr<CdmaTransportMsg> transMsg, std::shared_ptr<SmsSendIndexer> indexer,
+    uint8_t msgRef8bit, const sptr<ISendShortMessageCallback> &sendCallback)
+{
     /* encode msg data */
-    std::unique_ptr<CdmaSmsTransportMessage> msg = CdmaSmsTransportMessage::CreateTransportMessage(*transMsg.get());
     SmsWriteBuffer pduBuffer;
+    std::unique_ptr<CdmaSmsTransportMessage> msg = CdmaSmsTransportMessage::CreateTransportMessage(*transMsg.get());
     if (msg == nullptr || msg->IsEmpty() || !msg->Encode(pduBuffer)) {
         TELEPHONY_LOGE("EncodeMsg Error");
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -356,11 +361,8 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     }
 
     const uint8_t segmentCount = 1;
-    std::shared_ptr<SmsSendIndexer> indexer = nullptr;
     shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(segmentCount);
     shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
-    indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, port, splits[0].encodeData.data(),
-        splits[0].encodeData.size(), sendCallback, deliveryCallback);
     std::unique_ptr<std::vector<uint8_t>> pdu = pduBuffer.GetPduBuffer();
     if (indexer == nullptr || unSentCellCount == nullptr || hasCellFailed == nullptr || pdu == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -372,7 +374,10 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     indexer->SetNetWorkType(NET_TYPE_CDMA);
     indexer->SetUnSentCellCount(*unSentCellCount);
     indexer->SetHasCellFailed(hasCellFailed);
+    chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
+    long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
     indexer->SetTimeStamp(timeStamp);
+    uint16_t msgId = GetSubmitMsgId();
     indexer->SetMsgId(msgId);
     SendSmsToRil(indexer);
 }

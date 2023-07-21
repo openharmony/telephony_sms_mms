@@ -24,9 +24,9 @@ namespace OHOS {
 namespace Telephony {
 class SmsCommonUtils {
 public:
-    static int Pack7bitChar(
+    static uint16_t Pack7bitChar(
         const uint8_t *userData, uint16_t dataLen, uint8_t fillBits, uint8_t *packData, uint16_t packLen);
-    static int Unpack7bitChar(
+    static uint16_t Unpack7bitChar(
         const uint8_t *tpdu, uint16_t dataLen, uint8_t fillBits, uint8_t *unpackData, uint16_t unpackDataLen);
     static int64_t ConvertTime(const struct SmsTimeAbs &timeAbs);
     static uint8_t DtmfCharToDigit(const uint8_t c);

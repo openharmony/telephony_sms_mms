@@ -31,7 +31,7 @@ static constexpr uint8_t HEX_NUM_A = 0x0A;
 static constexpr uint8_t HEX_NUM_B = 0x0B;
 static constexpr uint8_t HEX_NUM_C = 0x0C;
 
-int SmsCommonUtils::Pack7bitChar(
+uint16_t SmsCommonUtils::Pack7bitChar(
     const uint8_t *userData, uint16_t dataLen, uint8_t fillBits, uint8_t *packData, uint16_t packLen)
 {
     uint16_t dstIdx = 0;
@@ -70,7 +70,7 @@ int SmsCommonUtils::Pack7bitChar(
     return dstIdx;
 }
 
-int SmsCommonUtils::Unpack7bitChar(
+uint16_t SmsCommonUtils::Unpack7bitChar(
     const uint8_t *tpdu, uint16_t dataLen, uint8_t fillBits, uint8_t *unpackData, uint16_t unpackDataLen)
 {
     uint16_t srcIdx = 0;

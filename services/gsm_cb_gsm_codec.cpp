@@ -228,7 +228,7 @@ bool GsmCbGsmCodec::Decode2gCbMsg7bit(uint16_t dataLen)
         dataPdu.data(), dataLen, 0x00, pageData, MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT);
 
     uint16_t offset = 0;
-    if (cbHeader_->dcs.iso639Lang[0]) {
+    if (cbHeader_->dcs.iso639Lang[0] && unpackLen >= GsmCbCodec::CB_IOS639_LANG_SIZE) {
         unpackLen = unpackLen - GsmCbCodec::CB_IOS639_LANG_SIZE;
         offset = GsmCbCodec::CB_IOS639_LANG_SIZE;
     }
