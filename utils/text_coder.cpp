@@ -281,17 +281,17 @@ int TextCoder::Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int 
         return 0;
     }
 
-    gsize textLen = srcLength;
+    gsize textLen = static_cast<gsize>(srcLength);
     auto unicodeTemp = reinterpret_cast<uint8_t *>(dest);
-    gsize remainedLength = maxLength;
-    int err = 0;
+    gsize remainedLength = static_cast<gsize>(maxLength);
+    uint32_t err = 0;
     GIConv cd = g_iconv_open("UTF16BE", "UTF8");
     if (cd != nullptr) {
         err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
             reinterpret_cast<gchar **>(&unicodeTemp), reinterpret_cast<gsize *>(&remainedLength));
     }
     g_iconv_close(cd);
-    return (err < 0) ? -1 : (maxLength - remainedLength);
+    return (err != 0) ? -1 : (maxLength - remainedLength);
 }
 
 int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme)
@@ -428,9 +428,9 @@ int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int 
         return 0;
     }
 
-    gsize textLen = srcLength;
-    int err = 0;
-    gsize remainedLength = maxLength;
+    gsize textLen = static_cast<gsize>(srcLength);
+    uint32_t err = 0;
+    gsize remainedLength = static_cast<gsize>(maxLength);
     GIConv cd = g_iconv_open("UTF8", "UTF16BE");
     if (cd != nullptr) {
         err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
@@ -438,9 +438,9 @@ int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int 
     }
     g_iconv_close(cd);
     if (err != 0) {
-        TELEPHONY_LOGE("g_iconv() return value = %{public}d", err);
+        TELEPHONY_LOGE("g_iconv result is %{public}u", err);
     }
-    int utf8Length = maxLength - remainedLength;
+    int utf8Length = static_cast<int>(maxLength - remainedLength);
     if (utf8Length < 0 || utf8Length >= maxLength) {
         return 0;
     }
@@ -459,9 +459,9 @@ int TextCoder::EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int
         return 0;
     }
 
-    gsize textLen = srcLength;
-    gsize remainedLength = maxLength;
-    int err = 0;
+    gsize textLen = static_cast<gsize>(srcLength);
+    gsize remainedLength = static_cast<gsize>(maxLength);
+    uint32_t err = 0;
     GIConv cd = g_iconv_open("UTF8", "EUCKR");
     if (cd != nullptr) {
         err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
@@ -469,9 +469,9 @@ int TextCoder::EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int
     }
     g_iconv_close(cd);
     if (err != 0) {
-        TELEPHONY_LOGE("g_iconv() return value = %{public}d", err);
+        TELEPHONY_LOGE("g_iconv result is %{public}u", err);
     }
-    int utf8Length = maxLength - remainedLength;
+    int utf8Length = static_cast<int>(maxLength - remainedLength);
     if (utf8Length < 0 || utf8Length >= maxLength) {
         return 0;
     }
@@ -490,17 +490,17 @@ int TextCoder::ShiftjisToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, 
         return 0;
     }
 
-    gsize textLen = srcLength;
-    gsize remainedLength = maxLength;
-    int err = 0;
+    gsize textLen = static_cast<gsize>(srcLength);
+    gsize remainedLength = static_cast<gsize>(maxLength);
+    uint32_t err = 0;
     GIConv cd = g_iconv_open("UTF8", "SHIFT-JIS");
     if (cd != nullptr) {
         err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
             reinterpret_cast<gchar **>(&dest), reinterpret_cast<gsize *>(&remainedLength));
     }
     g_iconv_close(cd);
-    TELEPHONY_LOGI("g_iconv() return value = %{public}d", err);
-    int utf8Length = maxLength - remainedLength;
+    TELEPHONY_LOGI("g_iconv result is %{public}u", err);
+    int utf8Length = static_cast<int>(maxLength - remainedLength);
     if (utf8Length < 0 || utf8Length >= maxLength) {
         return 0;
     }
@@ -774,7 +774,7 @@ int TextCoder::Gsm7bitToUcs2(
     int outTextLen = 0;
     uint8_t lowerByte = 0;
     uint8_t upperByte = 0;
-    uint16_t result;
+    uint16_t result = 0;
     for (int i = 0; i < srcLength && maxLength > UCS2_LEN_MIN; i++) {
         if (src[i] >= 0x80) {
             TELEPHONY_LOGE("a_pTextString[%{public}d]=%{public}x, The alpha isn't the gsm 7bit code", i, src[i]);

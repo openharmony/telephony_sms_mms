@@ -191,7 +191,6 @@ static void NativeSendMessage(napi_env env, void *data)
     auto asyncContext = static_cast<SendMessageContext *>(data);
     if (asyncContext == nullptr) {
         TELEPHONY_LOGE("NativeSendMessage SendMessageContext is nullptr.");
-        asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
         return;
     }
     asyncContext->errorCode = ActuallySendMessage(env, *asyncContext);
