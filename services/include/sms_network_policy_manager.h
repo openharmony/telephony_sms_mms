@@ -37,8 +37,6 @@ public:
     SmsNetworkPolicyManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
     virtual ~SmsNetworkPolicyManager() = default;
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
-    int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported);
-    int32_t GetImsShortMessageFormat(std::u16string &format);
     void Init();
     void UnRegisterHandler();
     NetWorkType GetNetWorkType();

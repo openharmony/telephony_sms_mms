@@ -75,7 +75,12 @@ bool GsmSmsTpduCodec::EncodeSmsPdu(std::shared_ptr<SmsTpdu> sourceData, char *pd
         TELEPHONY_LOGE("encode sms fail");
         return false;
     }
-    std::vector<uint8_t> buf = *(pduBuffer.GetPduBuffer());
+    auto bufferRet = pduBuffer.GetPduBuffer();
+    if (bufferRet == nullptr) {
+        TELEPHONY_LOGE("bufferRet nullptr");
+        return false;
+    }
+    std::vector<uint8_t> buf = *(bufferRet);
     for (uint16_t locate = 0; locate < bufLen; locate++) {
         pdu[locate] = static_cast<char>(buf[locate]);
     }
