@@ -23,6 +23,7 @@ const std::string g_mmsFilePathName = "mmsFilePathName";
 const std::string mmsTypeKey = "mmsType";
 const std::string attachmentKey = "attachment";
 static const int32_t DEFAULT_REF_COUNT = 1;
+static const uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
 } // namespace
 
 static void SetPropertyArray(napi_env env, napi_value object, const std::string &name, MmsAttachmentContext &context)
@@ -120,7 +121,7 @@ std::string parseDispositionValue(int32_t value)
             return "inline";
         default:
             TELEPHONY_LOGE("Invalid contentDisposition value");
-            return nullptr;
+            return "";
     }
 }
 
@@ -620,6 +621,10 @@ void ParseDecodeMmsParam(napi_env env, napi_value object, DecodeMmsContext &cont
         int32_t element = 0;
         uint32_t arrayLength = 0;
         napi_get_array_length(env, object, &arrayLength);
+        if (arrayLength > MAX_MMS_MSG_PART_LEN) {
+            TELEPHONY_LOGE("arrayLength over size error");
+            return;
+        }
         context.inLen = arrayLength;
         TELEPHONY_LOGI("napi_mms ParseDecodeMmsParam arrayLength = %{public}d", arrayLength);
         context.inBuffer = std::make_unique<char[]>(arrayLength);
@@ -1023,6 +1028,10 @@ MmsAttachmentContext BuildMmsAttachment(napi_env env, napi_value value)
         uint32_t arrayLength = 0;
         int32_t elementInt = 0;
         napi_get_array_length(env, inBuffValue, &arrayLength);
+        if (arrayLength > MAX_MMS_MSG_PART_LEN) {
+            TELEPHONY_LOGE("arrayLength over size error");
+            return attachmentContext;
+        }
         attachmentContext.inBuffLen = arrayLength;
         attachmentContext.inBuff = std::make_unique<char[]>(arrayLength);
         if (attachmentContext.inBuff == nullptr) {
@@ -1293,21 +1302,12 @@ void setReadRecIndToCore(MmsMsg &mmsMsg, MmsReadRecIndContext &context)
     mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_READ_STATUS, context.readStatus);
 }
 
-void NativeEncodeMms(napi_env env, void *data)
+void SetRequestToCore(MmsMsg &mmsMsg, EncodeMmsContext *context)
 {
-    if (data == nullptr) {
-        TELEPHONY_LOGE("NativeEncodeMms data is nullptr");
-        NapiUtil::ThrowParameterError(env);
+    if (context == nullptr) {
+        TELEPHONY_LOGE("context is nullptr");
         return;
     }
-    EncodeMmsContext *context = static_cast<EncodeMmsContext *>(data);
-    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
-        context->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
-        return;
-    }
-    MmsMsg mmsMsg;
-    mmsMsg.SetMmsMessageType(static_cast<uint8_t>(WrapEncodeMmsStatus(context->messageType)));
-    setAttachmentToCore(mmsMsg, context->attachment);
     switch (context->messageType) {
         case MessageType::TYPE_MMS_SEND_REQ:
             setSendReqToCore(mmsMsg, context->sendReq);
@@ -1339,9 +1339,38 @@ void NativeEncodeMms(napi_env env, void *data)
         default:
             break;
     }
-    context->outBuffer = mmsMsg.EncodeMsg(context->bufferLen);
-    context->errorCode = TELEPHONY_ERR_SUCCESS;
-    context->resolved = true;
+}
+
+void NativeEncodeMms(napi_env env, void *data)
+{
+    if (data == nullptr) {
+        TELEPHONY_LOGE("NativeEncodeMms data is nullptr");
+        NapiUtil::ThrowParameterError(env);
+        return;
+    }
+
+    EncodeMmsContext *context = static_cast<EncodeMmsContext *>(data);
+    if (context == nullptr) {
+        TELEPHONY_LOGE("context is nullptr");
+        return;
+    }
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        context->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+        return;
+    }
+    MmsMsg mmsMsg;
+    mmsMsg.SetMmsMessageType(static_cast<uint8_t>(WrapEncodeMmsStatus(context->messageType)));
+    setAttachmentToCore(mmsMsg, context->attachment);
+    SetRequestToCore(mmsMsg, context);
+    auto encodeResult = mmsMsg.EncodeMsg(context->bufferLen);
+    if (encodeResult != nullptr) {
+        context->outBuffer = std::move(encodeResult);
+        context->errorCode = TELEPHONY_ERR_SUCCESS;
+        context->resolved = true;
+    } else {
+        context->errorCode = TELEPHONY_ERR_FAIL;
+        context->resolved = false;
+    }
     TELEPHONY_LOGI("napi_mms  NativeEncodeMms end");
 }
 

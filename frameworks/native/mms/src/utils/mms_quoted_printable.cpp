@@ -21,9 +21,12 @@
 #include "securec.h"
 #include "string"
 #include "string.h"
+#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
+static constexpr uint32_t MAX_MMS_ATTACHMENT_LEN = 300 * 1024;
+
 std::string MmsQuotedPrintable::Encode(const std::string &input)
 {
     const unsigned char asciiMin = 33;
@@ -49,12 +52,14 @@ bool MmsQuotedPrintable::Decode(const std::string src, std::string &dest)
 
     uint32_t inLength = 0;
     inLength = src.length();
-    if (inLength == 0) {
+    if (inLength == 0 || inLength > MAX_MMS_ATTACHMENT_LEN) {
+        TELEPHONY_LOGE("inLength size error");
         return false;
     }
 
-    std::unique_ptr<char[]> tempBuffer = std::make_unique<char[]>(src.length());
+    std::unique_ptr<char[]> tempBuffer = std::make_unique<char[]>(inLength);
     if (tempBuffer == nullptr) {
+        TELEPHONY_LOGE("tempBuffer nullptr error.");
         return false;
     }
 

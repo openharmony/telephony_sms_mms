@@ -19,17 +19,18 @@
 #include <map>
 #include <vector>
 
-#include "mms_header_categ.h"
+#include "mms_address.h"
 #include "mms_content_type.h"
 #include "mms_decode_buffer.h"
 #include "mms_encode_string.h"
-#include "mms_address.h"
+#include "mms_header_categ.h"
 
 namespace OHOS {
 namespace Telephony {
 class MmsHeader {
 public:
     MmsHeader();
+    ~MmsHeader() = default;
     void DumpMmsHeader();
     bool DecodeMmsHeader(MmsDecodeBuffer &decodeBuffer);
     bool EncodeMmsHeader(MmsEncodeBuffer &encodeBuffer);
@@ -111,12 +112,12 @@ private:
     using Func = bool (MmsHeader::*)(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len);
     std::map<uint8_t, Func> memberFuncMap_;
 
+private:
     std::map<uint8_t, uint8_t> octetValueMap_;
     std::map<uint8_t, int64_t> longValueMap_;
     std::map<uint8_t, std::string> textValueMap_;
     std::map<uint8_t, MmsEncodeString> encodeStringsMap_;
     std::map<uint8_t, std::vector<MmsAddress>> addressMap_;
-private:
     MmsContentType mmsContentType_;
     MmsHeaderCateg mmsHaderCateg_;
 };

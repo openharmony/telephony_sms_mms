@@ -40,6 +40,10 @@ bool MmsAttachment::SetAttachmentFilePath(std::string strPath, bool isSmil)
 
 MmsAttachment::MmsAttachment(const MmsAttachment &srcAttachment)
 {
+    if (srcAttachment.dataLength_ > MAX_MMS_ATTACHMENT_LEN) {
+        TELEPHONY_LOGE("srcAttachment.dataLength_ over size error");
+        return;
+    }
     pAttachmentBuffer_ = std::make_unique<char[]>(srcAttachment.dataLength_);
     if (pAttachmentBuffer_ == nullptr) {
         TELEPHONY_LOGE("make unique attachment buffer nullptr error.");
@@ -187,6 +191,10 @@ void MmsAttachment::SetIsSmilFile(bool isSmilFile)
 
 std::unique_ptr<char[]> MmsAttachment::GetDataBuffer(uint32_t &len)
 {
+    if (dataLength_ > MAX_MMS_ATTACHMENT_LEN) {
+        TELEPHONY_LOGE("dataLength_ over size error");
+        return nullptr;
+    }
     len = dataLength_;
     std::unique_ptr<char[]> result = std::make_unique<char[]>(len);
     if (result == nullptr) {
