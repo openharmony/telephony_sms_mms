@@ -464,13 +464,13 @@ bool CdmaSmsUserData::EncodeGsm7Bit(SmsWriteBuffer &pdu)
         TELEPHONY_LOGE("make_unique error");
         return false;
     }
-    uint8_t size = SmsCommonUtils::Pack7bitChar(reinterpret_cast<const uint8_t *>(data_.userData.data),
+    uint16_t size = SmsCommonUtils::Pack7bitChar(reinterpret_cast<const uint8_t *>(data_.userData.data),
         data_.userData.length, 0, destPtr.get(), MAX_USER_DATA_LEN + 1);
     if (size > MAX_USER_DATA_LEN + 1) {
         TELEPHONY_LOGE("user data length error");
         return false;
     }
-    for (uint8_t i = 0; i < size; i++) {
+    for (uint16_t i = 0; i < size; i++) {
         if (!pdu.WriteBits(destPtr.get()[i], BIT8)) {
             TELEPHONY_LOGE("data write error");
             return false;

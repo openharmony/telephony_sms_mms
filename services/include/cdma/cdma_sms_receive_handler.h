@@ -40,6 +40,7 @@ private:
     bool RegisterHandler();
     bool SendCBBroadcast(const std::shared_ptr<SmsBaseMessage> smsBaseMessage);
     bool SetCBBroadcastParam(AppExecFwk::Want &want, SmsCbData::CbData &sendData);
+    int32_t HandleSmsOtherSvcid(const std::shared_ptr<SmsBaseMessage> smsBaseMessage);
     void GetCBData(
         const std::shared_ptr<SmsBaseMessage> smsBaseMessage, SmsCbData::CbData &sendData, bool &isEmergency);
 
