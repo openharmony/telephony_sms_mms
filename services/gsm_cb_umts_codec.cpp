@@ -142,7 +142,7 @@ bool GsmCbUmtsCodec::Decode3gCbMsg()
             break;
     }
     cbHeader_->totalPages = 1;
-    return true;
+    return decodeResult;
 }
 
 bool GsmCbUmtsCodec::Decode3g7Bit()
@@ -178,12 +178,12 @@ bool GsmCbUmtsCodec::Decode3g7Bit()
             messageRaw_.clear();
             return false;
         }
-        int unpackLen = 0;
+        uint16_t unpackLen = 0;
         dataLen = (dataLen * SMS_BYTE_BIT) / GSM_CODE_BIT;
         uint8_t pageData[MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT] = { 0 };
         unpackLen = SmsCommonUtils::Unpack7bitChar(
             &tpdu[offset], dataLen, 0x00, pageData, MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT);
-        for (uint8_t i = 0; i < unpackLen; i++) {
+        for (uint16_t i = 0; i < unpackLen; i++) {
             messageRaw_.push_back(pageData[i]);
         }
     }

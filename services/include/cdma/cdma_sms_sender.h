@@ -80,6 +80,8 @@ private:
 
     void SendCsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu);
     void SendImsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, int64_t &refId, std::string &pdu);
+    void EncodeMsgData(std::unique_ptr<CdmaTransportMsg> transMsg, std::shared_ptr<SmsSendIndexer> indexer,
+        uint8_t msgRef8bit, const sptr<ISendShortMessageCallback> &sendCallback);
 
     std::unique_ptr<std::vector<uint8_t>> EncodeMsg(CdmaTransportMsg &msg);
 

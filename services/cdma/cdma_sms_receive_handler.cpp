@@ -52,23 +52,32 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
     int service = message->GetTransTeleService();
-    if (static_cast<int>(SmsTransTelsvcId::WEMT) == service || static_cast<int>(SmsTransTelsvcId::CMT_95) == service) {
-        if (message->IsStatusReport() && !cdmaSmsSender_.expired()) {
-            std::shared_ptr<SmsSender> smsSender = cdmaSmsSender_.lock();
-            CdmaSmsSender *cdmaSend = static_cast<CdmaSmsSender *>(smsSender.get());
-            std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
-            if (statusInfo == nullptr) {
-                TELEPHONY_LOGE("statusInfo is null!");
-                return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
-            }
-            statusInfo->SetMsgRefId(message->GetMsgRef());
-            statusInfo->SetPdu(message->GetRawPdu());
-            cdmaSend->ReceiveStatusReport(statusInfo);
-            return AckIncomeCause::SMS_ACK_RESULT_OK;
-        }
-    } else {
+    if (static_cast<int>(SmsTransTelsvcId::WEMT) != service && static_cast<int>(SmsTransTelsvcId::CMT_95) != service) {
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
+    if (message->IsStatusReport() && !cdmaSmsSender_.expired()) {
+        std::shared_ptr<SmsSender> smsSender = cdmaSmsSender_.lock();
+        CdmaSmsSender *cdmaSend = static_cast<CdmaSmsSender *>(smsSender.get());
+        std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
+        if (statusInfo == nullptr) {
+            TELEPHONY_LOGE("statusInfo is null!");
+            return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+        }
+        statusInfo->SetMsgRefId(message->GetMsgRef());
+        statusInfo->SetPdu(message->GetRawPdu());
+        cdmaSend->ReceiveStatusReport(statusInfo);
+        return AckIncomeCause::SMS_ACK_RESULT_OK;
+    }
+    return HandleSmsOtherSvcid(smsBaseMessage);
+}
+
+int32_t CdmaSmsReceiveHandler::HandleSmsOtherSvcid(const std::shared_ptr<SmsBaseMessage> smsBaseMessage)
+{
+    if (smsBaseMessage == nullptr) {
+        TELEPHONY_LOGE("SmsBaseMessage is null!");
+        return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+    }
+    CdmaSmsMessage *message = static_cast<CdmaSmsMessage *>(smsBaseMessage.get());
     // Encapsulate key information to Tracker
     std::shared_ptr<SmsReceiveIndexer> indexer;
     if (!message->IsConcatMsg()) {
