@@ -90,6 +90,7 @@ bool SmsPersistHelper::QuerySession(DataShare::DataSharePredicates &predicates, 
     auto resultSet = helper->Query(uri, predicates, columns);
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
+        helper->Release();
         return false;
     }
     resultSet->GoToFirstRow();
@@ -102,6 +103,8 @@ bool SmsPersistHelper::QuerySession(DataShare::DataSharePredicates &predicates, 
     resultSet->GetColumnIndex("message_count", columnIndex);
     if (resultSet->GetInt(columnIndex, columnInt) == 0) {
         messageCount = columnInt;
+        resultSet->Close();
+        helper->Release();
         return true;
     }
     resultSet->Close();
@@ -134,6 +137,7 @@ bool SmsPersistHelper::Query(DataShare::DataSharePredicates &predicates, std::ve
     auto resultSet = helper->Query(uri, predicates, columns);
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
+        helper->Release();
         return false;
     }
 
@@ -162,6 +166,7 @@ bool SmsPersistHelper::QueryMaxGroupId(DataShare::DataSharePredicates &predicate
     auto resultSet = helper->Query(uri, predicates, columns);
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
+        helper->Release();
         return false;
     }
 
@@ -211,6 +216,7 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
     auto resultSet = helper->Query(uri, predicates, columns);
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
+        helper->Release();
         return result;
     }
     if (resultSet->GetRowCount(count) == 0 && count != 0) {
