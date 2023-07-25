@@ -39,17 +39,19 @@ bool GsmSmsParamEncode::EncodeAddressPdu(const struct AddressNumber *num, std::s
         return false;
     }
     const char *temp = static_cast<const char *>(num->address);
-    if (strlen(temp) > MAX_SMSC_LEN) {
+    size_t tempLen = strlen(temp);
+    if (tempLen > MAX_SMSC_LEN) {
         TELEPHONY_LOGE("temp over size!");
         return false;
     }
     unsigned char ton = 0;
     if (temp[0] == '+') {
-        resultNum.push_back(strlen(temp) - 1);
+        resultNum.push_back(tempLen - 1);
         temp++;
+        tempLen--;
         ton = TYPE_INTERNATIONAL;
     } else {
-        resultNum.push_back(strlen(temp));
+        resultNum.push_back(tempLen);
         ton = num->ton;
     }
 
@@ -58,7 +60,7 @@ bool GsmSmsParamEncode::EncodeAddressPdu(const struct AddressNumber *num, std::s
     GsmSmsCommonUtils utils;
     uint8_t length = 0;
     uint8_t bcd[MAX_ADD_PARAM_LEN] = { 0 };
-    if (!utils.DigitToBcd(temp, strlen(temp), bcd, MAX_ADD_PARAM_LEN, length)) {
+    if (!utils.DigitToBcd(temp, tempLen, bcd, MAX_ADD_PARAM_LEN, length)) {
         TELEPHONY_LOGE("DigitToBcd fail!");
         return false;
     }
