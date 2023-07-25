@@ -41,13 +41,13 @@ void CreateSmsMessage(const uint8_t *data, size_t size)
     if (!IsServiceInited()) {
         return;
     }
-    std::string strPdu(reinterpret_cast<const char *>(data), size);
-    std::vector<unsigned char> pdu = StringUtils::HexToByteVector(strPdu);
-    ShortMessage *message = new ShortMessage();
-    if (message == nullptr) {
-        return;
-    }
-    ShortMessage::CreateMessage(pdu, u"3gpp", *message);
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    dataParcel.WriteString(pdu);
+    dataParcel.WriteString("3gpp");
+    DelayedSingleton<SmsService>::GetInstance()->OnCreateMessage(dataParcel, replyParcel, option);
 }
 
 void CreateCbMessage(const uint8_t *data, size_t size)
