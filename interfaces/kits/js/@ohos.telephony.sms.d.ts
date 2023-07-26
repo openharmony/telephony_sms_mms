@@ -787,54 +787,58 @@ declare namespace sms {
    * Sends an MMS message.
    *
    * @permission ohos.permission.SEND_MESSAGES
-   * @param { MmsParam } mmsParam - Indicates the parameters of the MMS message.
+   * @param { Context } context - Indicates the context of application or capability.
+   * @param { MmsParams } mmsParams - Indicates the parameters of the MMS message.
    * @param { AsyncCallback<void> } callback - The callback of sendMms. For error code, see MmsFailCode.
    * @syscap SystemCapability.Telephony.SmsMms
    * @since 10
    */
-  function sendMms(mmsParam: MmsParam, callback: AsyncCallback<void>): void;
+  function sendMms(context: Context, mmsParams: MmsParams, callback: AsyncCallback<void>): void;
 
   /**
    * Sends an MMS message.
    *
    * @permission ohos.permission.SEND_MESSAGES
-   * @param { MmsParam } mmsParam - Indicates the parameters of the MMS message.
+   * @param { Context } context - Indicates the context of application or capability.
+   * @param { MmsParams } mmsParams - Indicates the parameters of the MMS message.
    * @returns { Promise<void> } The promise returned by the sendMms.
    * @syscap SystemCapability.Telephony.SmsMms
    * @since 10
    */
-  function sendMms(mmsParam: MmsParam): Promise<void>;
+  function sendMms(context: Context, mmsParams: MmsParams): Promise<void>;
 
   /**
    * Downloads an MMS message.
    *
    * @permission ohos.permission.RECEIVE_MMS
-   * @param { MmsParam }  mmsParam - Indicates the parameters of the MMS message.
+   * @param { Context } context - Indicates the context of application or capability.
+   * @param { MmsParams }  mmsParams - Indicates the parameters of the MMS message.
    * @param { AsyncCallback<void> } callback - The callback of downloadMms. For error code, see MmsFailCode.
    * @syscap SystemCapability.Telephony.SmsMms
    * @since 10
    */
-  function downloadMms(mmsParam: MmsParam, callback: AsyncCallback<void>): void;
+  function downloadMms(context: Context, mmsParams: MmsParams, callback: AsyncCallback<void>): void;
 
   /**
    * Downloads an MMS message.
    *
    * @permission ohos.permission.RECEIVE_MMS
-   * @param { MmsParam } - Indicates the parameters of the MMS message.
+   * @param { Context } context - Indicates the context of application or capability.
+   * @param { MmsParams }  mmsParams - Indicates the parameters of the MMS message.
    * @returns { Promise<void> } The promise returned by the downloadMms. For error code, see MmsFailCode.
    * @syscap SystemCapability.Telephony.SmsMms
    * @since 10
    */
-  function downloadMms(mmsParam: MmsParam): Promise<void>;
+  function downloadMms(context: Context, mmsParams: MmsParams): Promise<void>;
 
   /**
    * Defines the MMS message param.
    *
-   * @interface MmsParam
+   * @interface MmsParams
    * @syscap SystemCapability.Telephony.SmsMms
    * @since 10
    */
-  export interface MmsParam {
+  export interface MmsParams {
     /**
      * Indicates the ID of the SIM card slot used for sending the MMS message.
      *

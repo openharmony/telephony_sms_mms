@@ -236,6 +236,106 @@
     });
     ```
 
+### 发送彩信<a name="section172mcpsimp"></a>
+
+以中国联通SIM卡发送彩信为例，主要步骤和代码如下：
+
+1.  发送彩信，需要先编码再发送。
+2.  编码：将多媒体文件编码成彩信pdu。app将多媒体文件放入沙箱，调用编码接口encodeMms，app传入必要参数，返回的彩信pdu需要app写入沙箱
+3.  发送：将彩信pdu发送到对端手机。调用发送接口sendMms，app需传入必要参数，彩信中心需和运营商卡匹配。
+4.  可以通过callback或者Promise的方式调用sendMessage接口。
+5.  该接口为异步接口，相关执行结果会从callback中返回。
+
+    ```
+    import mms from "@ohos.telephony.sms";
+
+    // 获取MmsType,输入本机号码,目的手机号码
+    async function getMmstype(tid){
+      return {
+        from : {address: '+86xxxxxxxxxxx/TYPE=PLMN', charset: mms.UTF_8},
+        to: [{address: '+86xxxxxxxxxxx/TYPE=PLMN', charset: mms.UTF_8}],
+        contentType: "application/vnd.wap.multipart.related",
+        transactionId: tid,
+        version: mms.MMS_VERSION_1_2,
+        subject: "Test mms"
+      };
+    }
+    let MMSTYPE = await getMmstype("1");
+
+    // 只包括图片附件，图片名字picture.gif
+    const ATTACHMENT_PICTURE = [
+      {path: sandPath + 'picture.gif',
+        fileName: 'picture.gif',
+        contentId:'<picture.gif>',
+        contentLocation:'picture.gif',
+        contentDisposition: mms.ATTACHMENT,
+        contentTransferEncoding: 'binary',
+        contentType:'image/gif',
+        isSmil: false,
+        inBuff: [],
+        charset: mms.UTF_8
+      }
+    ];
+
+    // 编码彩信pdu
+    const wrapperStepForEncodeMms = async function (mmsType, attachment) {
+      try {
+        // 调用编码接口
+        const encodeData = await mms.encodeMms({messageType: mms.TYPE_MMS_SEND_REQ, mmsType, attachment});
+        console.log(`encodeMms Success, data length:${encodeData.length}`);
+        await writefd(casename, encodeData);
+      } catch (error) {
+        throw error;
+      }
+    };
+
+    // 进行彩信pdu编码,编码前将图片放入沙箱
+    try {
+      await wrapperStepForEncodeMms(MMSTYPE, ATTACHMENT_PICTURE);
+      console.log(`wrapperStepForEncodeMms success.`);
+    } catch (error) {
+      console.log(`wrapperStepForEncodeMms fail, error: ${toString(error)}`);
+      return;
+    }
+
+    const sandBoxPath = '/data/storage/el2/base/files/';
+    let filePath  = sandBoxPath + 'SendReq.mms';
+    // 彩信pdu写入沙箱
+    async function writefd(array){
+      let data = new Uint8Array(array).buffer;
+      try {
+        let fd = await fileio.open(filePath , 0o102, 0o666);
+        console.log(`fd: ${toString(fd)}`);
+        const number = await fileio.write(fd, data);
+        console.log(`write data to file success number: ${toString(number)}`);
+        await fileio.close(fd);
+      } catch (error) {
+        console.log(`write data to file failed with error: ${toString(error)}`);
+      }
+    }
+
+    // 彩信用户代理、用户代理描述配置。根据SIM卡配置,不清楚可默认
+    let mmsCfg = {
+      userAgent:'ua',
+      userAgentProfile: 'uaprof'
+    };
+
+    // 发送彩信参数
+    let mmsParams = {
+      slotId : DEFAULT_SLOTID,
+      mmsc: 'http://mmsc.myuni.com.cn',
+      data: filePath,
+      mmsConfig: mmsCfg
+    };
+    // 调用发送接口
+    mms.sendMms(globalThis.context, mmsParams, async(err) =>{
+      if (err) {
+        console.log(`sendMms fail, err : ${toString(err)}`);
+        return;
+      }
+      console.log(`sendMms Success`);
+    }
+    ```
 
 ## 相关仓<a name="section189mcpsimp"></a>
 
