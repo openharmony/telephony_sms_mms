@@ -53,7 +53,7 @@ private:
     const std::string CONTACT_BLOCK =
         "datashare:///com.ohos.contactsdataability/contacts/contact_blocklist";
 
-    std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper(std::string uri);
+    std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper(const std::string &uri);
     void ResultSetConvertToIndexer(
         SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
     void ConvertIntToIndexer(
