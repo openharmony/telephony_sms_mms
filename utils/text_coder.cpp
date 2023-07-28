@@ -291,7 +291,7 @@ int TextCoder::Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int 
             reinterpret_cast<gchar **>(&unicodeTemp), reinterpret_cast<gsize *>(&remainedLength));
     }
     g_iconv_close(cd);
-    return (err != 0) ? -1 : (maxLength - remainedLength);
+    return (err != 0) ? -1 : (maxLength - static_cast<int>(remainedLength));
 }
 
 int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme)
@@ -440,7 +440,7 @@ int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int 
     if (err != 0) {
         TELEPHONY_LOGE("g_iconv result is %{public}u", err);
     }
-    int utf8Length = static_cast<int>(maxLength - remainedLength);
+    int utf8Length = maxLength - static_cast<int>(remainedLength);
     if (utf8Length < 0 || utf8Length >= maxLength) {
         return 0;
     }
@@ -471,7 +471,7 @@ int TextCoder::EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int
     if (err != 0) {
         TELEPHONY_LOGE("g_iconv result is %{public}u", err);
     }
-    int utf8Length = static_cast<int>(maxLength - remainedLength);
+    int utf8Length = maxLength - static_cast<int>(remainedLength);
     if (utf8Length < 0 || utf8Length >= maxLength) {
         return 0;
     }
@@ -500,7 +500,7 @@ int TextCoder::ShiftjisToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, 
     }
     g_iconv_close(cd);
     TELEPHONY_LOGI("g_iconv result is %{public}u", err);
-    int utf8Length = static_cast<int>(maxLength - remainedLength);
+    int utf8Length = maxLength - static_cast<int>(remainedLength);
     if (utf8Length < 0 || utf8Length >= maxLength) {
         return 0;
     }
