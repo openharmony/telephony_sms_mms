@@ -116,7 +116,7 @@ private:
     uint8_t psResendCount_ = 0;
     uint8_t msgRefId_ = 0;
     int64_t msgRefId64Bit_ = 0;
-    static uint8_t unSentCellCount_;
+    uint8_t unSentCellCount_ = 0;
     std::shared_ptr<bool> hasCellFailed_ = nullptr;
     sptr<ISendShortMessageCallback> sendCallback_ = nullptr;
     sptr<IDeliveryShortMessageCallback> deliveryCallback_ = nullptr;

@@ -89,6 +89,7 @@ protected:
     void SendMessageFailed(const std::shared_ptr<SmsSendIndexer> &smsIndexer);
     bool CheckForce7BitEncodeType();
 
+protected:
     int32_t slotId_ = -1;
     std::list<std::shared_ptr<SmsSendIndexer>> reportList_;
     bool isImsNetDomain_ = false;
@@ -115,6 +116,9 @@ private:
     SmsSender &operator=(const SmsSender &&) = delete;
 
     void HandleResend(const std::shared_ptr<SmsSendIndexer> &smsIndexer);
+    void UpdateUnSentCellCount(uint8_t refId);
+
+private:
     std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun_;
     std::unordered_map<int64_t, std::shared_ptr<SmsSendIndexer>> sendCacheMap_;
     std::mutex sendCacheMapMutex_;
