@@ -157,7 +157,7 @@ void SmsReceiveReliabilityHandler::GetWapPushUserDataSinglePage(
         TELEPHONY_LOGE("baseMessage nullptr");
         return;
     }
-    userDataRaws->at(PDU_START_POS) = baseMessage->GetRawWapPushUserData();
+    userDataRaws->at(PDU_START_POS) = baseMessage->GetRawUserData();
 }
 
 void SmsReceiveReliabilityHandler::GetWapPushUserDataMultipage(int32_t &smsPagesCount,
