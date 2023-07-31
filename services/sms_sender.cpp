@@ -119,12 +119,8 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
 
     bool isLastPart = false;
     uint8_t unSentCellCount = smsIndexer->GetUnSentCellCount();
-    if (unSentCellCount > 0) {
-        unSentCellCount = unSentCellCount - 1;
-        smsIndexer->SetUnSentCellCount(unSentCellCount);
-        if (unSentCellCount == 0) {
-            isLastPart = true;
-        }
+    if (unSentCellCount == 0) {
+        isLastPart = true;
     }
     TELEPHONY_LOGI("isLastPart:%{public}d", isLastPart);
     if (isLastPart) {
@@ -156,12 +152,8 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
 
     bool isLastPart = false;
     uint8_t unSentCellCount = smsIndexer->GetUnSentCellCount();
-    if (unSentCellCount > 0) {
-        unSentCellCount = unSentCellCount - 1;
-        smsIndexer->SetUnSentCellCount(unSentCellCount);
-        if (unSentCellCount == 0) {
-            isLastPart = true;
-        }
+    if (unSentCellCount == 0) {
+        isLastPart = true;
     }
     TELEPHONY_LOGI("isLastPart:%{public}d", isLastPart);
     if (isLastPart) {
@@ -251,6 +243,7 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
             smsIndexer->SetErrorCode(ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
             smsIndexer->SetMsgRefId64Bit(res->flag);
             smsIndexer->SetIsFailure(true);
+            UpdateUnSentCellCount(smsIndexer->GetMsgRefId());
         }
         return smsIndexer;
     }
@@ -272,9 +265,25 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
             }
             smsIndexer->SetErrorCode(info->errCode);
             smsIndexer->SetMsgRefId64Bit(info->flag);
+            UpdateUnSentCellCount(smsIndexer->GetMsgRefId());
         }
     }
     return smsIndexer;
+}
+
+void SmsSender::UpdateUnSentCellCount(uint8_t refId)
+{
+    std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
+    for (auto it = sendCacheMap_.begin(); it != sendCacheMap_.end(); ++it) {
+        smsIndexer = it->second;
+        if (smsIndexer == nullptr) {
+            continue;
+        }
+        uint8_t unSentCount = smsIndexer->GetUnSentCellCount();
+        if (smsIndexer->GetMsgRefId() == refId && unSentCount > 0) {
+            smsIndexer->SetUnSentCellCount(unSentCount - 1);
+        }
+    }
 }
 
 bool SmsSender::SetImsSmsConfig(int32_t slotId, int32_t enable)
