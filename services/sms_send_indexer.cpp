@@ -18,8 +18,6 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
-uint8_t SmsSendIndexer::unSentCellCount_ = 0;
-
 SmsSendIndexer::SmsSendIndexer(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
