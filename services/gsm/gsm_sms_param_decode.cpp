@@ -176,13 +176,12 @@ uint8_t GsmSmsParamDecode::DecodeSmscPdu(const uint8_t *pTpdu, uint8_t pduLen, s
 
     uint8_t offset = 0;
     uint8_t addrLen = pTpdu[offset++];
-    if ((addrLen == 0) || (addrLen >= pduLen)) {
-        TELEPHONY_LOGE("smsc may be absent.");
-        return 0;
+    if (addrLen == 0) {
+        TELEPHONY_LOGI("smsc is 00.");
+        return offset;
     }
-
-    if (offset >= pduLen) {
-        TELEPHONY_LOGE("offset over size.");
+    if (addrLen >= pduLen || offset >= pduLen) {
+        TELEPHONY_LOGI("smsc absent.");
         return 0;
     }
     desAddrObj.ton = (pTpdu[offset] & HEX_VALUE_70) >> HEX_VALUE_04;
