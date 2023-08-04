@@ -166,7 +166,7 @@ void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &
     std::string bundleName = data.ReadString();
     TELEPHONY_LOGI("bundleName = %{public}s", bundleName.c_str());
     int32_t result = SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback);
-    if (bundleName != MMS_APP) {
+    if (bundleName != MMS_APP && result == TELEPHONY_ERR_SUCCESS) {
         DelayedSingleton<SmsService>::GetInstance()->InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr),
             StringUtils::ToUtf8(text));
     }
