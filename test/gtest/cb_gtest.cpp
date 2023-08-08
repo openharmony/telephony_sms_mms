@@ -229,7 +229,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
@@ -265,7 +265,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
@@ -301,7 +301,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**

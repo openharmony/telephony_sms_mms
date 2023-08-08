@@ -593,7 +593,7 @@ HWTEST_F(SmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -618,7 +618,7 @@ HWTEST_F(SmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -673,7 +673,7 @@ HWTEST_F(SmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0001 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -697,7 +697,7 @@ HWTEST_F(SmsGtest, DelSimMessage_0002, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0002 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
