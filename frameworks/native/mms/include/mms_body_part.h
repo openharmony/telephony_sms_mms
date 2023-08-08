@@ -59,6 +59,7 @@ private:
     bool WriteBodyFromFile(std::string path);
     void DecodeSetFileName();
 
+private:
     bool isSmilFile_ = false;
     std::string strFileName_ = "";
     uint32_t headerLen_ = 0;
@@ -66,11 +67,6 @@ private:
     MmsContentType bodyPartContentType_;
     MmsBodyPartHeader mmsBodyPartHeader_;
     std::unique_ptr<char[]> pbodyPartBuffer_ = nullptr;
-
-    static constexpr uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
-    const std::string ENCODE_BINARY = "binary";
-    const std::string ENCODE_BASE64 = "base64";
-    const std::string ENCODE_QUOTED_PRINTABLE = "quoted-printable";
 };
 } // namespace Telephony
 } // namespace OHOS

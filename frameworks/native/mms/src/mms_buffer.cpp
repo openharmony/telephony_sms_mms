@@ -19,7 +19,8 @@
 
 namespace OHOS {
 namespace Telephony {
-static constexpr const char *APP_SAND_DIR = "/data/app";
+static constexpr const char *APP_SAND_ABSOLUTE_DIR = "/data/app";
+static constexpr const char *APP_SAND_RELATIVE_DIR = "/data/storage";
 
 MmsBuffer::MmsBuffer()
 {
@@ -106,8 +107,10 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
     }
 
     std::string filePath = realPath;
-    std::string appDir = APP_SAND_DIR;
-    if (appDir.compare(filePath.substr(0, appDir.size())) != 0) {
+    std::string absDir = APP_SAND_ABSOLUTE_DIR;
+    std::string relDir = APP_SAND_RELATIVE_DIR;
+    if ((absDir.compare(filePath.substr(0, absDir.size())) != 0) &&
+        (relDir.compare(filePath.substr(0, relDir.size())) != 0)) {
         TELEPHONY_LOGE("filePath no app sand box.");
         return false;
     }
@@ -119,7 +122,7 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
     }
     (void)fseek(pFile, 0, SEEK_END);
     long fileLen = ftell(pFile);
-    if (fileLen <= 0 || fileLen > (long)CODE_BUFFER_MAX_SIZE) {
+    if (fileLen <= 0 || fileLen > static_cast<long>(CODE_BUFFER_MAX_SIZE)) {
         (void)fclose(pFile);
         TELEPHONY_LOGE("Mms Over Long Error .");
         return false;
