@@ -53,8 +53,7 @@ void SetSmscFuzz(const uint8_t *data, size_t size)
 
     dataParcel.WriteInt32(slotId);
     dataParcel.WriteString16(smscU16);
-    size_t dataSize = size - sizeof(uint32_t);
-    dataParcel.WriteBuffer(data + sizeof(uint32_t), dataSize);
+    dataParcel.WriteBuffer(data, size);
     dataParcel.RewindRead(0);
     DelayedSingleton<SmsService>::GetInstance()->OnSetSmscAddr(dataParcel, replyParcel, option);
 
@@ -77,8 +76,7 @@ void GetSmscFuzz(const uint8_t *data, size_t size)
 
     int32_t slotId = static_cast<int32_t>(size % SIM_COUNT);
     dataParcel.WriteInt32(slotId);
-    size_t dataSize = size - sizeof(uint32_t);
-    dataParcel.WriteBuffer(data + sizeof(uint32_t), dataSize);
+    dataParcel.WriteBuffer(data, size);
     dataParcel.RewindRead(0);
     DelayedSingleton<SmsService>::GetInstance()->OnGetSmscAddr(dataParcel, replyParcel, option);
 

@@ -64,8 +64,7 @@ void SetCBConfigFuzz(const uint8_t *data, size_t size)
     dataParcel.WriteUint32(toMsgId);
     dataParcel.WriteUint8(netType);
 
-    size_t dataSize = size - sizeof(uint32_t);
-    dataParcel.WriteBuffer(data + sizeof(uint32_t), dataSize);
+    dataParcel.WriteBuffer(data, size);
     dataParcel.RewindRead(0);
     DelayedSingleton<SmsService>::GetInstance()->OnSetCBConfig(dataParcel, replyParcel, option);
 
@@ -103,9 +102,7 @@ void SetImsSmsConfigFuzz(const uint8_t *data, size_t size)
     int32_t enable = slotId == 1 ? true : false;
     dataParcel.WriteInt32(slotId);
     dataParcel.WriteInt32(enable);
-    size_t dataSize = size - sizeof(uint32_t);
-
-    dataParcel.WriteBuffer(data + sizeof(uint32_t), dataSize);
+    dataParcel.WriteBuffer(data, size);
     dataParcel.RewindRead(0);
     DelayedSingleton<SmsService>::GetInstance()->OnSetImsSmsConfig(dataParcel, replyParcel, option);
 

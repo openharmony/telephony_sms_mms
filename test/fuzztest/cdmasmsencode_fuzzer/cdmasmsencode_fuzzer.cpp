@@ -22,6 +22,8 @@
 
 using namespace OHOS::Telephony;
 namespace OHOS {
+bool g_flag = false;
+
 void TeleserviceIdEncode(const uint8_t *data, size_t size)
 {
     uint16_t value;
@@ -466,6 +468,11 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     if (data == nullptr || size == 0) {
         return;
     }
+
+    if (g_flag) {
+        return;
+    }
+    g_flag = true;
 
     TransportMessageEncode(data, size);
     ParameterRecordEncode(data, size);
