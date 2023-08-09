@@ -79,6 +79,7 @@ std::unique_ptr<char[]> MmsMsg::EncodeMsg(uint32_t &outLen)
         }
     }
     outLen = encodeBuffer.GetCurPosition();
+    TELEPHONY_LOGI("NativeEncodeMms length:%{public}d", outLen);
     return encodeBuffer.ReadDataBuffer(0, outLen);
 }
 
