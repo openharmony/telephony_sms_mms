@@ -22,6 +22,8 @@ ohos_shared_library("sms") {
   sources = [
     "src/delivery_callback.cpp",
     "src/napi_mms.cpp",
+    "src/napi_mms_pdu.cpp",
+    "src/napi_mms_pdu_helper.cpp",
     "src/napi_sms.cpp",
     "src/send_callback.cpp",
   ]
@@ -34,12 +36,18 @@ ohos_shared_library("sms") {
   deps = [ "$SUBSYSTEM_DIR/sms_mms/frameworks/native:tel_sms_mms_api" ]
 
   external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:data_ability_helper",
+    "ability_runtime:napi_base_context",
     "c_utils:utils",
     "core_service:libtel_common",
+    "data_share:datashare_consumer",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "telephony_data:tel_telephony_data",
   ]
 
   relative_install_dir = "module/telephony"
