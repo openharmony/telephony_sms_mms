@@ -30,6 +30,7 @@ ohos_fuzztest("DataBasedSmsDeliveryFuzzTest") {
     "$SMS_MMS_SOURCE_DIR/test/fuzztest/common_fuzzer",
     "$SMS_MMS_SOURCE_DIR/interfaces/innerkits/",
     "$SMS_MMS_SOURCE_DIR/interfaces/innerkits/ims",
+    "//third_party/curl/include",
   ]
 
   deps = [
