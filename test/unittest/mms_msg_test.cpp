@@ -33,31 +33,31 @@ void MmsMsgTest::ProcessDecodeInput(int inputCMD) const
 {
     switch (inputCMD) {
         case 0x00:
-            MmsDecodeTest("/data/telephony/deSrc/SendReq.mms");
+            MmsDecodeTest("/data/app/deSrc/SendReq.mms");
             break;
         case 0x01:
-            MmsDecodeTest("/data/telephony/deSrc/SendConf.mms");
+            MmsDecodeTest("/data/app/deSrc/SendConf.mms");
             break;
         case 0x02:
-            MmsDecodeTest("/data/telephony/deSrc/NotificationInd.mms");
+            MmsDecodeTest("/data/app/deSrc/NotificationInd.mms");
             break;
         case 0x03:
-            MmsDecodeTest("/data/telephony/deSrc/NotifyRespInd.mms");
+            MmsDecodeTest("/data/app/deSrc/NotifyRespInd.mms");
             break;
         case 0x04:
-            MmsDecodeTest("/data/telephony/deSrc/RetrieveConf.mms");
+            MmsDecodeTest("/data/app/deSrc/RetrieveConf.mms");
             break;
         case 0x05:
-            MmsDecodeTest("/data/telephony/deSrc/AcknowledgeInd.mms");
+            MmsDecodeTest("/data/app/deSrc/AcknowledgeInd.mms");
             break;
         case 0x06:
-            MmsDecodeTest("/data/telephony/deSrc/DeliveryInd.mms");
+            MmsDecodeTest("/data/app/deSrc/DeliveryInd.mms");
             break;
         case 0x07:
-            MmsDecodeTest("/data/telephony/deSrc/ReadRecInd.mms");
+            MmsDecodeTest("/data/app/deSrc/ReadRecInd.mms");
             break;
         case 0x08:
-            MmsDecodeTest("/data/telephony/deSrc/ReadOrigInd.mms");
+            MmsDecodeTest("/data/app/deSrc/ReadOrigInd.mms");
             break;
         default:
             break;
@@ -231,19 +231,19 @@ void MmsMsgTest::MmsSendReqEncodeTest() const
         return;
     }
     // add smil file
-    const std::string filePathNameSmil = "/data/telephony/enSrc/618C0A89.smil";
+    const std::string filePathNameSmil = "/data/app/enSrc/618C0A89.smil";
     if (!MmsAddAttachment(encodeMsg, filePathNameSmil, "<0000>", "application/smil", true)) {
         std::cout << "MmsAddAttachment smil fail" << std::endl;
         return;
     }
     // add text file
-    const std::string filePathNameText = "/data/telephony/enSrc/content.text";
+    const std::string filePathNameText = "/data/app/enSrc/content.text";
     if (!MmsAddAttachment(encodeMsg, filePathNameText, "<content.text>", "text/plain", false)) {
         std::cout << "MmsAddAttachment text fail" << std::endl;
         return;
     }
     // add image file
-    const std::string filePathNameGif = "/data/telephony/enSrc/picture.gif";
+    const std::string filePathNameGif = "/data/app/enSrc/picture.gif";
     if (!MmsAddAttachment(encodeMsg, filePathNameGif, "<picture.gif>", "image/gif", false)) {
         std::cout << "MmsAddAttachment gif fail" << std::endl;
         return;
@@ -254,7 +254,7 @@ void MmsMsgTest::MmsSendReqEncodeTest() const
         std::cout << "encode fail result nullptr error." << std::endl;
         return;
     }
-    if (!WriteBufferToFile(std::move(result), len, "/data/telephony/deSrc/SendReq.mms")) {
+    if (!WriteBufferToFile(std::move(result), len, "/data/app/deSrc/SendReq.mms")) {
         std::cout << "Encode write to file error." << std::endl;
         return;
     }
@@ -288,7 +288,7 @@ void MmsMsgTest::MmsSendConfEncodeTest() const
         std::cout << "encode fail result nullptr error." << std::endl;
         return;
     }
-    if (!WriteBufferToFile(std::move(result), len, "/data/telephony/deSrc/SendConf.mms")) {
+    if (!WriteBufferToFile(std::move(result), len, "/data/app/deSrc/SendConf.mms")) {
         std::cout << "Encode write to file error." << std::endl;
         return;
     }
@@ -348,7 +348,7 @@ void MmsMsgTest::MmsNotificationIndEncodeTest() const
         std::cout << "encode fail result nullptr error." << std::endl;
         return;
     }
-    if (!WriteBufferToFile(std::move(result), len, "/data/telephony/deSrc/NotificationInd.mms")) {
+    if (!WriteBufferToFile(std::move(result), len, "/data/app/deSrc/NotificationInd.mms")) {
         std::cout << "Encode write to file error." << std::endl;
         return;
     }
@@ -382,7 +382,7 @@ void MmsMsgTest::MmsNotifyRespIndEncodeTest() const
         std::cout << "encode fail result nullptr error." << std::endl;
         return;
     }
-    if (!WriteBufferToFile(std::move(result), len, "/data/telephony/deSrc/NotifyRespInd.mms")) {
+    if (!WriteBufferToFile(std::move(result), len, "/data/app/deSrc/NotifyRespInd.mms")) {
         std::cout << "Encode write to file error." << std::endl;
         return;
     }
@@ -428,19 +428,19 @@ void MmsMsgTest::MmsRetrieveConfEncodeTest() const
         return;
     }
     // add smil file
-    const std::string filePathNameSmil = "/data/telephony/enSrc/618C0A89.smil";
+    const std::string filePathNameSmil = "/data/app/enSrc/618C0A89.smil";
     if (!MmsAddAttachment(encodeMsg, filePathNameSmil, "<0000>", "application/smil", true)) {
         std::cout << "MmsAddAttachment smil fail" << std::endl;
         return;
     }
     // add text file
-    const std::string filePathNameText = "/data/telephony/enSrc/content.text";
+    const std::string filePathNameText = "/data/app/enSrc/content.text";
     if (!MmsAddAttachment(encodeMsg, filePathNameText, "<content.text>", "text/plain", false)) {
         std::cout << "MmsAddAttachment text fail" << std::endl;
         return;
     }
     // add image file
-    const std::string filePathNameGif("/data/telephony/enSrc/picture.gif");
+    const std::string filePathNameGif("/data/app/enSrc/picture.gif");
     if (!MmsAddAttachment(encodeMsg, filePathNameGif, "picture.gif", "image/gif", false)) {
         std::cout << "MmsAddAttachment gif fail" << std::endl;
         return;
@@ -451,7 +451,7 @@ void MmsMsgTest::MmsRetrieveConfEncodeTest() const
         std::cout << "encode fail result nullptr error." << std::endl;
         return;
     }
-    if (!WriteBufferToFile(std::move(result), len, "/data/telephony/deSrc/RetrieveConf.mms")) {
+    if (!WriteBufferToFile(std::move(result), len, "/data/app/deSrc/RetrieveConf.mms")) {
         std::cout << "Encode write to file error." << std::endl;
         return;
     }
@@ -481,7 +481,7 @@ void MmsMsgTest::MmsAcknowledgeIndEncodeTest() const
         std::cout << "encode fail result nullptr error." << std::endl;
         return;
     }
-    if (!WriteBufferToFile(std::move(result), len, "/data/telephony/deSrc/AcknowledgeInd.mms")) {
+    if (!WriteBufferToFile(std::move(result), len, "/data/app/deSrc/AcknowledgeInd.mms")) {
         std::cout << "Encode write to file error." << std::endl;
         return;
     }
@@ -532,7 +532,7 @@ void MmsMsgTest::MmsDeliveryIndEncodeTest() const
         std::cout << "encode fail result nullptr error." << std::endl;
         return;
     }
-    if (!WriteBufferToFile(std::move(result), len, "/data/telephony/deSrc/DeliveryInd.mms")) {
+    if (!WriteBufferToFile(std::move(result), len, "/data/app/deSrc/DeliveryInd.mms")) {
         std::cout << "Encode write to file error." << std::endl;
         return;
     }
@@ -583,7 +583,7 @@ void MmsMsgTest::MmsReadRecIndEncodeTest() const
         std::cout << "encode fail result nullptr error." << std::endl;
         return;
     }
-    if (!WriteBufferToFile(std::move(result), len, "/data/telephony/deSrc/ReadRecInd.mms")) {
+    if (!WriteBufferToFile(std::move(result), len, "/data/app/deSrc/ReadRecInd.mms")) {
         std::cout << "Encode write to file error." << std::endl;
         return;
     }
@@ -637,7 +637,7 @@ void MmsMsgTest::MmsReadOrigIndEncodeTest() const
         std::cout << "encode fail result nullptr error." << std::endl;
         return;
     }
-    if (!WriteBufferToFile(std::move(result), len, "/data/telephony/deSrc/ReadOrigInd.mms")) {
+    if (!WriteBufferToFile(std::move(result), len, "/data/app/deSrc/ReadOrigInd.mms")) {
         std::cout << "Encode write to file error." << std::endl;
         return;
     }
@@ -781,6 +781,15 @@ void MmsMsgTest::MmsRetrieveConfDecodeTest(MmsMsg &decodeMsg) const
         if (buff != nullptr) {
             std::cout << "attachments buffer size = " << len << std::endl;
         }
+
+        std::string strPathName = "/data/app/enSrc/";
+        strPathName.append(it.GetFileName());
+        std::cout << "======= strPathName:" << strPathName << std::endl;
+        if (!WriteBufferToFile(std::move(buff), len, strPathName)) {
+            std::cout << "Encode write to file error." << std::endl;
+            return;
+        }
+
         std::cout << "======= part:" << attachmentCnt << " attachments infos ======" << std::endl;
         attachmentCnt++;
     }

@@ -86,6 +86,8 @@ public:
         funArray->emplace_back("TestGsmSendLongData",
             std::bind(&GsmSmsSenderTest::TestGsmSendLongData, param.gsmSmsSenderTest, smsService));
         funArray->emplace_back(
+            "TestSendMms", std::bind(&GsmSmsSenderTest::TestSendMms, param.gsmSmsSenderTest, smsService));
+        funArray->emplace_back(
             "TestSetSmscAddr", std::bind(&GsmSmsSenderTest::TestSetSmscAddr, param.gsmSmsSenderTest, smsService));
         funArray->emplace_back(
             "TestGetSmscAddr", std::bind(&GsmSmsSenderTest::TestGetSmscAddr, param.gsmSmsSenderTest, smsService));
