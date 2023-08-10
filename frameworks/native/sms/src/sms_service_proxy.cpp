@@ -513,6 +513,62 @@ bool SmsServiceProxy::HasSmsCapability()
     return replyParcel.ReadBool();
 }
 
+int32_t SmsServiceProxy::SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+    const std::u16string &ua, const std::u16string &uaprof)
+{
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("SendMms WriteInterfaceToken is false");
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteString16(mmsc);
+    dataParcel.WriteString16(data);
+    dataParcel.WriteString16(ua);
+    dataParcel.WriteString16(uaprof);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TELEPHONY_LOGE("SendMms Remote is null");
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::SEND_MMS), dataParcel, replyParcel, option);
+    int32_t result = replyParcel.ReadInt32();
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("SendMms result fail");
+    }
+    return result;
+}
+
+int32_t SmsServiceProxy::DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+    const std::u16string &ua, const std::u16string &uaprof)
+{
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("DownloadMms WriteInterfaceToken is false");
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteString16(mmsc);
+    dataParcel.WriteString16(data);
+    dataParcel.WriteString16(ua);
+    dataParcel.WriteString16(uaprof);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TELEPHONY_LOGE("DownloadMms Remote is null");
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::DOWNLOAD_MMS), dataParcel, replyParcel, option);
+    int32_t result = replyParcel.ReadInt32();
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("DownloadMms result fail");
+    }
+    return result;
+}
+
 int32_t SmsServiceProxy::CreateMessage(std::string pdu, std::string specification, ShortMessage &message)
 {
     if (pdu.empty() || specification.empty()) {

@@ -83,7 +83,6 @@ public:
     int32_t SetSmscAddr(int32_t slotId, const std::u16string &scAddr) override;
 
     /**
-     * @brief GetSmscAddr
      * Obtains the SMSC address based on a specified slot ID.
      * @param slotId Indicates the card slot index number,
      * ranging from {@code 0} to the maximum card slot index number supported by
@@ -94,29 +93,29 @@ public:
     int32_t GetSmscAddr(int32_t slotId, std::u16string &smscAddress) override;
 
     /**
-     * @brief AddSimMessage
      * Add a sms to sim card.
-     * @param slotId [in]
-     * @param smsc [in]
-     * @param pdu [in]
-     * @param status [in]
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param smsc Indicates the sms center address
+     * @param pdu Indicates the sms pdu data
+     * @param status Indicates the sms status, read or not
      * @return Returns {@code true} if add sim success; returns {@code false}
-
      */
     int32_t AddSimMessage(
         int32_t slotId, const std::u16string &smsc, const std::u16string &pdu, SimMessageStatus status) override;
 
     /**
-     * @brief DelSimMessage
      * Delete a sms in the sim card.
-     * @param slotId [in]
-     * @param msgIndex [in]
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param msgIndex Indicates the sim sms index in sim card
      * @return Returns {@code true} if delete sim success; returns {@code false}
      */
     int32_t DelSimMessage(int32_t slotId, uint32_t msgIndex) override;
 
     /**
-     * @brief UpdateSimMessage
      * Update a sms in the sim card.
      * @param slotId Indicates the card slot index number,
      * ranging from {@code 0} to the maximum card slot index number supported by
@@ -131,7 +130,6 @@ public:
         const std::u16string &smsc) override;
 
     /**
-     * @brief GetAllSimMessages
      * Get sim card all the sms.
      * @param slotId Indicates the card slot index number,
      * ranging from {@code 0} to the maximum card slot index number supported by
@@ -142,7 +140,6 @@ public:
     int32_t GetAllSimMessages(int32_t slotId, std::vector<ShortMessage> &message) override;
 
     /**
-     * @brief SetCBConfig
      * Configure a cell broadcast in a certain band range.
      * @param slotId [in]
      * @param enable [in]
@@ -154,17 +151,18 @@ public:
     int32_t SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) override;
 
     /**
-     * @brief SetImsSmsConfig enable or disable IMS SMS.
+     * enable or disable IMS SMS.
      * @param slotId Indicates the card slot index number,
-     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
      * @param enable Indicates enable or disable Ims sms
      * ranging {@code 0} disable Ims sms {@code 1} enable Ims sms
-     * @return Returns {@code true} if enable or disable Ims Sms success; returns {@code false} otherwise.
+     * @return Returns {@code true} if enable or disable Ims Sms success; returns
+     * {@code false} otherwise
      */
     bool SetImsSmsConfig(int32_t slotId, int32_t enable) override;
 
     /**
-     * @brief SetDefaultSmsSlotId
      * Set the Default Sms Slot Id To SmsService
      * @param slotId Indicates the card slot index number,
      * ranging from {@code 0} to the maximum card slot index number supported by
@@ -174,9 +172,8 @@ public:
     int32_t SetDefaultSmsSlotId(int32_t slotId) override;
 
     /**
-     * @brief GetDefaultSmsSlotId
      * Get the Default Sms Slot Id From SmsService
-     * @return int32_t
+     * @return Returns default sms slot id
      */
     int32_t GetDefaultSmsSlotId() override;
 
@@ -197,7 +194,6 @@ public:
     int32_t SplitMessage(const std::u16string &message, std::vector<std::u16string> &splitMessage) override;
 
     /**
-     * @brief GetSmsSegmentsInfo
      * calculate the Sms Message Segments Info
      * @param slotId Indicates the card slot index number,
      * ranging from {@code 0} to the maximum card slot index number supported by
@@ -211,7 +207,6 @@ public:
         ISmsServiceInterface::SmsSegmentsInfo &info) override;
 
     /**
-     * @brief IsImsSmsSupported
      * Check Sms Is supported Ims newtwork
      * Hide this for inner system use
      * @param slotId Indicates the card slot index number,
@@ -223,7 +218,6 @@ public:
     int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported) override;
 
     /**
-     * @brief GetImsShortMessageFormat
      * Get the Ims Short Message Format 3gpp/3gpp2
      * Hide this for inner system use
      * @return int32_t
@@ -231,10 +225,8 @@ public:
     int32_t GetImsShortMessageFormat(std::u16string &format) override;
 
     /**
-     * @brief HasSmsCapability
      * Check whether it is supported Sms Capability
-     * @return true
-     * @return false
+     * @return Returns {@code true} if support sms; returns {@code false}
      */
     bool HasSmsCapability() override;
 
@@ -294,6 +286,34 @@ public:
      */
     bool GetEncodeStringFunc(
         std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString) override;
+
+    /**
+     * Send a Mms.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param mmsc Indicates service center of mms
+     * @param data Indicates mms pdu byte array
+     * @param ua Indicates mms user agent
+     * @param uaprof Indicates mms user agent profile
+     * @return Returns {@code 0} if send mms success; returns {@code false} otherwise
+     */
+    int32_t SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua,
+        const std::u16string &uaprof) override;
+
+    /**
+     * Download a Mms.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param mmsc Indicates service center of mms
+     * @param data Indicates mms pdu byte array
+     * @param ua Indicates mms user agent
+     * @param uaprof Indicates mms user agent profile
+     * @return Returns {@code 0} if download mms success; returns {@code false} otherwise
+     */
+    int32_t DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+        const std::u16string &ua, const std::u16string &uaprof) override;
 
 private:
     bool Init();

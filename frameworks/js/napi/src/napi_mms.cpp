@@ -1578,6 +1578,9 @@ void NativeSendMms(napi_env env, void *data)
 
         asyncContext->data = NapiUtil::ToUtf16(helper.GetDbUrl());
     }
+    asyncContext->errorCode =
+        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMms(asyncContext->slotId, asyncContext->mmsc,
+            asyncContext->data, asyncContext->mmsConfig.userAgent, asyncContext->mmsConfig.userAgentProfile);
     if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
         asyncContext->resolved = true;
     } else {
@@ -1831,6 +1834,10 @@ void NativeDownloadMms(napi_env env, void *data)
         TELEPHONY_LOGE("store mms pdu fail");
         return;
     }
+
+    asyncContext->errorCode =
+        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DownloadMms(asyncContext->slotId, asyncContext->mmsc,
+            asyncContext->data, asyncContext->mmsConfig.userAgent, asyncContext->mmsConfig.userAgentProfile);
 
     if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
         asyncContext->resolved = true;

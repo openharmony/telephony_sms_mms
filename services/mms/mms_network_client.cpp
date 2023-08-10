@@ -236,7 +236,7 @@ std::string MmsNetworkClient::GetIfaceName()
     std::list<int32_t> netIdList;
     int32_t ret =
         NetConnClient::GetInstance().GetNetIdByIdentifier(SIMID_IDENT_PREFIX + std::to_string(simId), netIdList);
-    TELEPHONY_LOGI("netIdList size = %{public}d", netIdList.size());
+    TELEPHONY_LOGI("netIdList size = %{public}zu", netIdList.size());
     std::string ifaceName;
     if (ret != NETMANAGER_SUCCESS) {
         TELEPHONY_LOGE("get netIdList by identifier fail, ret = %{public}d", ret);

@@ -230,7 +230,7 @@ HWTEST_F(MmsGtest, MmsAddress_0001, Function | MediumTest | Level1)
 HWTEST_F(MmsGtest, MmsAttachment_0001, Function | MediumTest | Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::MmsAttachment_0001 -->");
-    const std::string pathName = "/data/telephony/enSrc/618C0A89.smil";
+    const std::string pathName = "/data/app/enSrc/618C0A89.smil";
     std::size_t pos = pathName.find_last_of('/');
     std::string fileName(pathName.substr(pos + 1));
     MmsAttachment attachment;
@@ -367,7 +367,7 @@ HWTEST_F(MmsGtest, MmsBuffer_0001, Function | MediumTest | Level1)
     MmsBuffer mmsBuffer;
     uint32_t len = 10;
     bool retBool;
-    std::string strPathName = "/data/telephony/enSrc/618C0A89.smil";
+    std::string strPathName = "/data/app/enSrc/618C0A89.smil";
     mmsBuffer.ReadDataBuffer(len);
     mmsBuffer.ReadDataBuffer(len, len);
     retBool = mmsBuffer.WriteDataBuffer(std::make_unique<char[]>(len), 0);

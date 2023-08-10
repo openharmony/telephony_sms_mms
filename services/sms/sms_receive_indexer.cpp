@@ -218,5 +218,15 @@ void SmsReceiveIndexer::SetRawUserData(const std::string &rawUserData)
 {
     rawUserData_ = rawUserData;
 }
+
+std::string SmsReceiveIndexer::GetWapPusRawUserData() const
+{
+    return rawWapPushUserData_;
+}
+
+void SmsReceiveIndexer::SetRawWapPushUserData(const std::string &rawWapPushUserData)
+{
+    rawWapPushUserData_ = rawWapPushUserData;
+}
 } // namespace Telephony
 } // namespace OHOS

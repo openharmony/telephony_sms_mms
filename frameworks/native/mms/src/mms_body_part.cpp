@@ -546,7 +546,7 @@ std::unique_ptr<char[]> MmsBodyPart::ReadBodyPartBuffer(uint32_t &len)
         TELEPHONY_LOGE("Read BodyPart Buffer MakeUnique Error.");
         return nullptr;
     }
-    if (memcpy_s(result.get(), len, pbodyPartBuffer_.get(), len) != EOK) {
+    if (memcpy_s(result.get(), bodyLen_, pbodyPartBuffer_.get(), bodyLen_) != EOK) {
         TELEPHONY_LOGE("Read BodyPart Buffer Memcpy_s Error.");
         return nullptr;
     }
