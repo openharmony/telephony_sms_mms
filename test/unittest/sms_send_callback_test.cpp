@@ -17,6 +17,8 @@
 
 #include <iostream>
 
+#include "send_short_message_callback_ipc_interface_code.h"
+
 namespace OHOS {
 namespace Telephony {
 void SmsSendCallbackTest::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResult result)
@@ -27,7 +29,7 @@ void SmsSendCallbackTest::OnSmsSendResult(const ISendShortMessageCallback::SmsSe
 int SmsSendCallbackTest::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    if (code == ON_SMS_SEND_RESULT) {
+    if (code == static_cast<uint32_t>(SendShortMessageCallbackInterfaceCode::ON_SMS_SEND_RESULT)) {
         OnSmsSendResult(static_cast<ISendShortMessageCallback::SmsSendResult>(data.ReadInt32()));
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
