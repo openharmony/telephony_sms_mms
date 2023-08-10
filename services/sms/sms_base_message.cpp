@@ -77,6 +77,11 @@ std::string SmsBaseMessage::GetRawUserData() const
     return rawUserData_;
 }
 
+std::string SmsBaseMessage::GetRawWapPushUserData() const
+{
+    return rawWapPushUserData_;
+}
+
 int64_t SmsBaseMessage::GetScTimestamp() const
 {
     return scTimestamp_;

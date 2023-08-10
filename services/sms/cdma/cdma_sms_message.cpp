@@ -362,7 +362,6 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
         }
     }
     visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
-    TELEPHONY_LOGI("AnalsisDeliverMsg userData == %{private}s", visibleMessageBody_.c_str());
 }
 
 void CdmaSmsMessage::AnalsisCMASMsg(const TeleserviceDeliver &deliver)
@@ -530,7 +529,7 @@ bool CdmaSmsMessage::IsBroadcastMsg() const
     return GetTransMsgType() == CdmaTransportMsgType::BROADCAST;
 }
 
-int CdmaSmsMessage::DecodeMessage(unsigned char *decodeData, unsigned int len, DataCodingScheme &codingType,
+int CdmaSmsMessage::DecodeMessage(uint8_t *decodeData, unsigned int len, DataCodingScheme &codingType,
     const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId)
 {
     int decodeLen = 0;

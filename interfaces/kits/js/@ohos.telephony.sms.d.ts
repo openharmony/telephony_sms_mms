@@ -789,8 +789,14 @@ declare namespace sms {
    * @permission ohos.permission.SEND_MESSAGES
    * @param { MmsParam } mmsParam - Indicates the parameters of the MMS message.
    * @param { AsyncCallback<void> } callback - The callback of sendMms. For error code, see MmsFailCode.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300999 - Unknown error code.
    * @syscap SystemCapability.Telephony.SmsMms
-   * @since 10
+   * @since 11
    */
   function sendMms(mmsParam: MmsParam, callback: AsyncCallback<void>): void;
 
@@ -800,8 +806,14 @@ declare namespace sms {
    * @permission ohos.permission.SEND_MESSAGES
    * @param { MmsParam } mmsParam - Indicates the parameters of the MMS message.
    * @returns { Promise<void> } The promise returned by the sendMms.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300999 - Unknown error code.
    * @syscap SystemCapability.Telephony.SmsMms
-   * @since 10
+   * @since 11
    */
   function sendMms(mmsParam: MmsParam): Promise<void>;
 
@@ -811,8 +823,14 @@ declare namespace sms {
    * @permission ohos.permission.RECEIVE_MMS
    * @param { MmsParam }  mmsParam - Indicates the parameters of the MMS message.
    * @param { AsyncCallback<void> } callback - The callback of downloadMms. For error code, see MmsFailCode.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300999 - Unknown error code.
    * @syscap SystemCapability.Telephony.SmsMms
-   * @since 10
+   * @since 11
    */
   function downloadMms(mmsParam: MmsParam, callback: AsyncCallback<void>): void;
 
@@ -822,8 +840,14 @@ declare namespace sms {
    * @permission ohos.permission.RECEIVE_MMS
    * @param { MmsParam } - Indicates the parameters of the MMS message.
    * @returns { Promise<void> } The promise returned by the downloadMms. For error code, see MmsFailCode.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300999 - Unknown error code.
    * @syscap SystemCapability.Telephony.SmsMms
-   * @since 10
+   * @since 11
    */
   function downloadMms(mmsParam: MmsParam): Promise<void>;
 
@@ -840,7 +864,7 @@ declare namespace sms {
      *
      * @type { number }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @since 11
      */
     slotId: number;
 
@@ -849,7 +873,7 @@ declare namespace sms {
      *
      * @type { string }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @since 11
      */
     mmsc: string;
 
@@ -858,7 +882,7 @@ declare namespace sms {
      *
      * @type { string }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @since 11
      */
     data: string;
 
@@ -867,7 +891,7 @@ declare namespace sms {
      *
      * @type { ?MmsConfig }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @since 11
      */
     mmsConfig?: MmsConfig;
   }
@@ -885,7 +909,7 @@ declare namespace sms {
      *
      * @type { string }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @since 11
      */
     userAgent: string;
 
@@ -894,7 +918,7 @@ declare namespace sms {
      *
      * @type { string }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @since 11
      */
     userAgentProfile: string;
   }

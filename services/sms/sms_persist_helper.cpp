@@ -28,7 +28,6 @@
 
 namespace OHOS {
 namespace Telephony {
-class AbsSharedResultSet;
 constexpr static uint8_t SMS_TYPE_CDMA = 2;
 
 SmsPersistHelper::SmsPersistHelper() {}

@@ -141,6 +141,7 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
     }
     if (indexer->GetIsWapPushMsg()) {
         if (smsWapPushHandler_ != nullptr) {
+            userDataRaw = indexer->GetWapPusRawUserData();
             if (!smsWapPushHandler_->DecodeWapPushPdu(indexer, userDataRaw)) {
                 SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::WAP_PUSH,
                     SmsMmsErrorCode::SMS_ERROR_PDU_DECODE_FAIL, "Wap push decode wap push fail");

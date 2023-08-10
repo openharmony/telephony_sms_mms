@@ -138,7 +138,6 @@ bool SmsWapPushHandler::DecodePushType(SmsWapPushBuffer &decodeBuffer)
         TELEPHONY_LOGE("Decode Transaction Id error.");
         return false;
     }
-
     pushType_ = 0;
     if (!decodeBuffer.GetOneByte(pushType_)) {
         TELEPHONY_LOGE("Decode PushType Error.");
@@ -146,7 +145,7 @@ bool SmsWapPushHandler::DecodePushType(SmsWapPushBuffer &decodeBuffer)
     }
     /** 8.2.4 Push and Confirmed Push Facilities **/
     if (pushType_ != PDU_TYPE_PUSH && pushType_ != PDU_TYPE_CONFIRMED_PUSH) {
-        TELEPHONY_LOGE("unSupported this pushType [%{public}ud]", pushType_);
+        TELEPHONY_LOGE("unSupported this pushType:%{public}d", pushType_);
         return false;
     }
     return true;
@@ -340,7 +339,7 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast(std::shared_ptr<SmsReceiveIn
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(true);
     std::vector<std::string> wappushPermissions;
-    wappushPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
+    wappushPermissions.emplace_back(Permission::RECEIVE_MMS);
     publishInfo.SetSubscriberPermissions(wappushPermissions);
 
     MatchingSkills smsSkills;

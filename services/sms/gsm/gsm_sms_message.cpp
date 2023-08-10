@@ -534,21 +534,22 @@ void GsmSmsMessage::ConvertUserData()
         TELEPHONY_LOGE("nullptr or memset_s error.");
         return;
     }
+
+    size_t udLen = sizeof(SmsUDPackage);
+    size_t tpduLen = sizeof(SmsTpud);
     switch (smsTpdu_->tpduType) {
         case SMS_TPDU_DELIVER:
             headerDataLen_ = smsTpdu_->data.deliver.userData.length;
-            ret = memcpy_s(&smsUserData_, sizeof(struct SmsUDPackage), &(smsTpdu_->data.deliver.userData),
-                sizeof(struct SmsUDPackage));
+            ret = memcpy_s(&smsUserData_, udLen, &(smsTpdu_->data.deliver.userData), udLen);
+            ret = ret && memcpy_s(&smsWapPushUserData_, tpduLen, &(smsTpdu_->data.deliver.udData), tpduLen);
             break;
         case SMS_TPDU_STATUS_REP:
             headerDataLen_ = smsTpdu_->data.statusRep.userData.length;
-            ret = memcpy_s(&smsUserData_, sizeof(struct SmsUDPackage), &(smsTpdu_->data.statusRep.userData),
-                sizeof(struct SmsUDPackage));
+            ret = memcpy_s(&smsUserData_, udLen, &(smsTpdu_->data.statusRep.userData), udLen);
             break;
         case SMS_TPDU_SUBMIT:
             headerDataLen_ = smsTpdu_->data.submit.userData.length;
-            ret =
-                memcpy_s(&smsUserData_, sizeof(SmsUDPackage), &(smsTpdu_->data.submit.userData), sizeof(SmsUDPackage));
+            ret = memcpy_s(&smsUserData_, udLen, &(smsTpdu_->data.submit.userData), udLen);
             break;
         default:
             break;
@@ -560,9 +561,7 @@ void GsmSmsMessage::ConvertUserData()
     if (smsUserData_.length > 0) {
         uint8_t buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
         if (codingScheme_ == DATA_CODING_7BIT) {
-            MsgLangInfo langInfo = {
-                0,
-            };
+            MsgLangInfo langInfo;
             langInfo.bSingleShift = false;
             langInfo.bLockingShift = false;
             int dataSize = TextCoder::Instance().Gsm7bitToUtf8(
@@ -576,6 +575,7 @@ void GsmSmsMessage::ConvertUserData()
             visibleMessageBody_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
         }
         rawUserData_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
+        rawWapPushUserData_.insert(0, smsWapPushUserData_.ud, smsWapPushUserData_.udl);
     }
 }
 

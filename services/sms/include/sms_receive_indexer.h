@@ -62,7 +62,9 @@ public:
     void SetPdu(const std::vector<uint8_t> &&pdu);
     bool IsSingleMsg() const;
     std::string GetRawUserData() const;
+    std::string GetWapPusRawUserData() const;
     void SetRawUserData(const std::string &rawUserData);
+    void SetRawWapPushUserData(const std::string &rawWapPushUserData);
 
 private:
     std::vector<uint8_t> pdu_;
@@ -79,6 +81,7 @@ private:
     std::string eraseRefId_;
     std::string visibleAddress_;
     std::string rawUserData_;
+    std::string rawWapPushUserData_;
 };
 } // namespace Telephony
 } // namespace OHOS

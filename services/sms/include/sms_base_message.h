@@ -72,6 +72,7 @@ public:
     virtual enum SmsMessageClass GetMessageClass() const;
     std::vector<uint8_t> GetRawPdu() const;
     std::string GetRawUserData() const;
+    std::string GetRawWapPushUserData() const;
     virtual int64_t GetScTimestamp() const;
     virtual int GetStatus() const;
     virtual int GetProtocolId() const;
@@ -129,7 +130,9 @@ protected:
     int codingGroup_;
     std::vector<uint8_t> rawPdu_;
     std::string rawUserData_;
+    std::string rawWapPushUserData_;
     struct SmsUDPackage smsUserData_;
+    struct SmsTpud smsWapPushUserData_;
     std::shared_ptr<SmsConcat> smsConcat_;
     std::shared_ptr<SmsAppPortAddr> portAddress_;
     std::shared_ptr<SpecialSmsIndication> specialSmsInd_;
