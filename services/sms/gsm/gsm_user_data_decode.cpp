@@ -28,6 +28,7 @@ static constexpr uint8_t NORMAL_BYTE_BITS = 8;
 static constexpr uint8_t GSM_ENCODE_BITS = 7;
 static constexpr uint8_t SLIDE_DATA_STEP = 2;
 static constexpr uint8_t UCS2_USER_DATA_LEN = 140;
+static constexpr uint8_t WAP_PUSH_USER_DATA_HEAD_LEN = 7;
 
 GsmUserDataDecode::GsmUserDataDecode(std::shared_ptr<GsmUserDataPdu> data)
 {
@@ -170,29 +171,33 @@ bool GsmUserDataDecode::Decode8bitPdu(
         TELEPHONY_LOGE("get data error.");
         return false;
     }
+    TELEPHONY_LOGI("udl:%{public}d", udl);
     uint16_t current = buffer.GetIndex();
 
     if (udl > UCS2_USER_DATA_LEN) {
         userData->length = 0;
+        TELEPHONY_LOGE("udl length error");
         return false;
     }
+
     /* Setting for Wap Push */
-    if (pTPUD != nullptr) {
-        pTPUD->udl = udl;
-        if (udl > sizeof(pTPUD->ud)) {
+    if (pTPUD != nullptr && udl > WAP_PUSH_USER_DATA_HEAD_LEN) {
+        pTPUD->udl = udl - WAP_PUSH_USER_DATA_HEAD_LEN;
+        if (pTPUD->udl > sizeof(pTPUD->ud)) {
             TELEPHONY_LOGE("udl length error");
             return false;
         }
 
-        if (buffer.data_ == nullptr || (buffer.GetIndex() + udl > buffer.GetSize())) {
+        if (buffer.data_ == nullptr || (buffer.GetIndex() + pTPUD->udl > buffer.GetSize())) {
             TELEPHONY_LOGE("buffer error.");
             return false;
         }
-        if (memcpy_s(pTPUD->ud, sizeof(pTPUD->ud), buffer.data_.get() + buffer.GetIndex(), udl) != EOK) {
+        if (memcpy_s(pTPUD->ud, sizeof(pTPUD->ud), buffer.data_.get() + buffer.GetIndex() + WAP_PUSH_USER_DATA_HEAD_LEN,
+                pTPUD->udl) != EOK) {
             TELEPHONY_LOGE("memcpy_s error.");
             return false;
         }
-        pTPUD->ud[udl] = '\0';
+        pTPUD->ud[pTPUD->udl] = '\0';
     }
     return Decode8bitPduPartData(buffer, bHeaderInd, userData, pTPUD, current, udl);
 }

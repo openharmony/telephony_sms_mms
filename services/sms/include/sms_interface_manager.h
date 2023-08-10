@@ -22,10 +22,12 @@
 #include <vector>
 
 #include "i_sms_service_interface.h"
-#include "sms_receive_manager.h"
-#include "sms_send_manager.h"
+#include "mms_receive_manager.h"
+#include "mms_send_manager.h"
 #include "sms_misc_manager.h"
 #include "sms_persist_helper.h"
+#include "sms_receive_manager.h"
+#include "sms_send_manager.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -58,12 +60,18 @@ public:
     int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported);
     int32_t GetImsShortMessageFormat(std::u16string &format);
     bool HasSmsCapability();
+    int32_t SendMms(
+        const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof);
+    int32_t DownloadMms(
+        const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof);
 
 private:
     int32_t slotId_;
     std::unique_ptr<SmsSendManager> smsSendManager_;
     std::unique_ptr<SmsReceiveManager> smsReceiveManager_;
     std::shared_ptr<SmsMiscManager> smsMiscManager_;
+    std::unique_ptr<MmsSendManager> mmsSendManager_;
+    std::unique_ptr<MmsReceiveManager> mmsReceiverManager_;
 };
 } // namespace Telephony
 } // namespace OHOS

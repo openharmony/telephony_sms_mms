@@ -24,8 +24,8 @@
 #include "sms_dump_helper.h"
 #include "sms_hisysevent.h"
 #include "string_utils.h"
-#include "telephony_log_wrapper.h"
 #include "telephony_common_utils.h"
+#include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
 #include "text_coder.h"
 
@@ -186,7 +186,8 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t 
     return DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySession(predicates, sessionId, messageCount);
 }
 
-void SmsService::InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text)
+void SmsService::InsertSmsMmsInfo(
+    int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text)
 {
     DataShare::DataSharePredicates predicates;
     uint16_t maxGroupId = 0;
@@ -217,8 +218,8 @@ void SmsService::InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std:
     DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(SMS_MMS_INFO, smsMmsInfoBucket);
 }
 
-bool SmsService::InsertSession(bool isNewSession, uint16_t messageCount, const std::string &number,
-    const std::string &text)
+bool SmsService::InsertSession(
+    bool isNewSession, uint16_t messageCount, const std::string &number, const std::string &text)
 {
     auto now = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
@@ -724,6 +725,18 @@ bool SmsService::GetEncodeStringFunc(
 {
     TextCoder::Instance().GetEncodeString(encodeString, charset, valLength, strEncodeString);
     return true;
+}
+
+int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+    const std::u16string &ua, const std::u16string &uaprof)
+{
+    return TELEPHONY_ERR_SUCCESS;
+}
+
+int32_t SmsService::DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+    const std::u16string &ua, const std::u16string &uaprof)
+{
+    return TELEPHONY_ERR_SUCCESS;
 }
 } // namespace Telephony
 } // namespace OHOS

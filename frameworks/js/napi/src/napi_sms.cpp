@@ -1934,6 +1934,8 @@ napi_value InitNapiSmsRegistry(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getImsShortMessageFormat", GetImsShortMessageFormat),
         DECLARE_NAPI_FUNCTION("decodeMms", NapiMms::DecodeMms),
         DECLARE_NAPI_FUNCTION("encodeMms", NapiMms::EncodeMms),
+        DECLARE_NAPI_FUNCTION("sendMms", NapiMms::SendMms),
+        DECLARE_NAPI_FUNCTION("downloadMms", NapiMms::DownloadMms),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     CreateEnumSendSmsResult(env, exports);
