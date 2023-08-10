@@ -19,10 +19,10 @@
 #include <cstring>
 #include <iostream>
 
-#include "securec.h"
-
-#include "data_ability_helper.h"
+#include "datashare_helper.h"
+#include "datashare_predicates.h"
 #include "i_sms_service_interface.h"
+#include "securec.h"
 #include "sms_service_proxy.h"
 #include "system_ability_definition.h"
 
@@ -33,6 +33,7 @@ public:
     void TestGsmSendShortData(const sptr<ISmsServiceInterface> &smsService) const;
     void TestGsmSendLongData(const sptr<ISmsServiceInterface> &smsService) const;
     void TestSendShortText(const sptr<ISmsServiceInterface> &smsService) const;
+    void TestSendMms(const sptr<ISmsServiceInterface> &smsService) const;
     void TestSendLongText(const sptr<ISmsServiceInterface> &smsService) const;
     void TestSetSmscAddr(const sptr<ISmsServiceInterface> &smsService) const;
     void TestGetSmscAddr(const sptr<ISmsServiceInterface> &smsService) const;
@@ -56,7 +57,7 @@ public:
     void TestHasSmsCapability(const sptr<ISmsServiceInterface> &smsService) const;
 
 private:
-    std::shared_ptr<AppExecFwk::DataAbilityHelper> CreateDataAHelper() const;
+    std::shared_ptr<DataShare::DataShareHelper> CreateDataAHelper() const;
 };
 } // namespace Telephony
 } // namespace OHOS

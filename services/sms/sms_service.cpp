@@ -730,13 +730,68 @@ bool SmsService::GetEncodeStringFunc(
 int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
     const std::u16string &ua, const std::u16string &uaprof)
 {
-    return TELEPHONY_ERR_SUCCESS;
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
+        TELEPHONY_LOGE("check permission failed");
+        return TELEPHONY_ERR_PERMISSION_ERR;
+    }
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr");
+        return TELEPHONY_ERR_SLOTID_INVALID;
+    }
+    if (mmsc.empty()) {
+        TELEPHONY_LOGE("mmsc URL is empty");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    if (data.empty()) {
+        TELEPHONY_LOGE("mms pdu file is empty");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+
+    if (interfaceManager->SendMms(mmsc, data, ua, uaprof) == TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGI("send mms successed");
+        return TELEPHONY_ERR_SUCCESS;
+    } else {
+        TELEPHONY_LOGI("send mms failed");
+        return TELEPHONY_ERR_FAIL;
+    }
 }
 
 int32_t SmsService::DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
     const std::u16string &ua, const std::u16string &uaprof)
 {
-    return TELEPHONY_ERR_SUCCESS;
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
+    if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MMS)) {
+        TELEPHONY_LOGE("check permission failed");
+        return TELEPHONY_ERR_PERMISSION_ERR;
+    }
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr error");
+        return TELEPHONY_ERR_SLOTID_INVALID;
+    }
+    if (mmsc.empty()) {
+        TELEPHONY_LOGE("mmsc URL is empty");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    if (data.empty()) {
+        TELEPHONY_LOGE("mms Pdu file is empty");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    if (interfaceManager->DownloadMms(mmsc, data, ua, uaprof) == TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGI("down mms successed");
+        return TELEPHONY_ERR_SUCCESS;
+    } else {
+        TELEPHONY_LOGI("down mms failed");
+        return TELEPHONY_ERR_FAIL;
+    }
 }
 } // namespace Telephony
 } // namespace OHOS
