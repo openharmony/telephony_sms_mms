@@ -108,7 +108,7 @@ int32_t GsmSmsReceiveHandler::CheckSmsSupport()
     }
     if (!reliabilityHandler->DeleteExpireSmsFromDB()) {
         TELEPHONY_LOGE("DeleteExpireSmsFromDB fail");
-        return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+        return AckIncomeCause::SMS_ACK_PROCESSED;
     }
     return AckIncomeCause::SMS_ACK_RESULT_OK;
 }
