@@ -51,6 +51,21 @@ void SmsInterfaceManager::InitInterfaceManager()
     }
     smsReceiveManager_->SetCdmaSender(smsSendManager_->GetCdmaSmsSender());
     smsMiscManager_ = make_shared<SmsMiscManager>(smsMiscRunner, slotId_);
+
+    mmsSendManager_ = make_unique<MmsSendManager>(smsMiscRunner, slotId_);
+    if (mmsSendManager_ == nullptr) {
+        TELEPHONY_LOGE("failed to create MmsSendManager");
+        return;
+    }
+    mmsSendManager_->Init();
+
+    mmsReceiverManager_ = make_unique<MmsReceiveManager>(smsMiscRunner, slotId_);
+    if (mmsReceiverManager_ == nullptr) {
+        TELEPHONY_LOGE("failed to create MmsReceiveManager");
+        return;
+    }
+    mmsReceiverManager_->Init();
+
     TELEPHONY_LOGI("SmsInterfaceManager::InitInterfaceManager success, %{public}d", slotId_);
 }
 
@@ -242,6 +257,26 @@ bool SmsInterfaceManager::HasSmsCapability()
         return true;
     }
     return helperPtr->QueryParamBoolean(SmsPersistHelper::SMS_CAPABLE_PARAM_KEY, true);
+}
+
+int32_t SmsInterfaceManager::SendMms(
+    const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof)
+{
+    if (mmsSendManager_ == nullptr) {
+        TELEPHONY_LOGE("mmsSendManager_ nullptr error");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    return mmsSendManager_->SendMms(mmsc, data, ua, uaprof);
+}
+
+int32_t SmsInterfaceManager::DownloadMms(
+    const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof)
+{
+    if (mmsReceiverManager_ == nullptr) {
+        TELEPHONY_LOGE("mmsReceiverManager_ nullptr error");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    return mmsReceiverManager_->DownloadMms(mmsc, data, ua, uaprof);
 }
 } // namespace Telephony
 } // namespace OHOS

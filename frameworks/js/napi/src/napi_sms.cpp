@@ -329,7 +329,7 @@ static napi_value SendMessage(napi_env env, napi_callback_info info)
     napi_create_string_utf8(env, "SendMessage", NAPI_AUTO_LENGTH, &resourceName);
     napi_create_async_work(env, nullptr, resourceName, NativeSendMessage, SendMessageCallback,
         (void *)asyncContext, &(asyncContext->work));
-    napi_queue_async_work(env, asyncContext->work);
+    napi_queue_async_work_with_qos(env, asyncContext->work, napi_qos_default);
     return NapiUtil::CreateUndefined(env);
 }
 
@@ -1916,6 +1916,8 @@ napi_value InitNapiSmsRegistry(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getImsShortMessageFormat", GetImsShortMessageFormat),
         DECLARE_NAPI_FUNCTION("decodeMms", NapiMms::DecodeMms),
         DECLARE_NAPI_FUNCTION("encodeMms", NapiMms::EncodeMms),
+        DECLARE_NAPI_FUNCTION("sendMms", NapiMms::SendMms),
+        DECLARE_NAPI_FUNCTION("downloadMms", NapiMms::DownloadMms),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     CreateEnumSendSmsResult(env, exports);

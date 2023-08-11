@@ -69,6 +69,9 @@ private:
     void OnGetEncodeStringFunc(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void RemoveSpacesInDesAddr(std::u16string &desAddr);
 
+    void OnSendMms(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnDownloadMms(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+
     std::map<uint32_t, std::shared_ptr<SmsInterfaceManager>> slotSmsInterfaceManagerMap_;
     using SmsServiceFunc = void (SmsInterfaceStub::*)(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     std::map<uint32_t, SmsServiceFunc> memberFuncMap_;
