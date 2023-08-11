@@ -142,6 +142,7 @@ int32_t GsmSmsReceiveHandler::HandleNormalSmsByType(const shared_ptr<SmsBaseMess
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
     indexer->SetRawUserData(message->GetRawUserData());
+    indexer->SetRawWapPushUserData(message->GetRawWapPushUserData());
 
     TELEPHONY_LOGI("received a gsm sms, this is %{public}d, a total of %{public}d", indexer->GetMsgSeqId(),
         indexer->GetMsgCount());

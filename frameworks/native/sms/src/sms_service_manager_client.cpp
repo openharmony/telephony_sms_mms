@@ -67,7 +67,6 @@ void SmsServiceManagerClient::ResetSmsServiceProxy()
     smsServiceInterface_ = nullptr;
 }
 
-
 int32_t SmsServiceManagerClient::SetDefaultSmsSlotId(int32_t slotId)
 {
     if (InitSmsServiceProxy()) {
@@ -92,8 +91,8 @@ int32_t SmsServiceManagerClient::GetDefaultSmsSlotId()
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 
-int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16string desAddr,
-    const std::u16string scAddr, const std::u16string text, const sptr<ISendShortMessageCallback> &callback,
+int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+    const std::u16string text, const sptr<ISendShortMessageCallback> &callback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (InitSmsServiceProxy()) {
@@ -102,9 +101,9 @@ int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16strin
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 
-int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16string desAddr,
-    const std::u16string scAddr, uint16_t port, const uint8_t *data, uint16_t dataLen,
-    const sptr<ISendShortMessageCallback> &callback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+    uint16_t port, const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &callback,
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (InitSmsServiceProxy()) {
         return smsServiceInterface_->SendMessage(
@@ -178,6 +177,24 @@ bool SmsServiceManagerClient::SetImsSmsConfig(int32_t slotId, int32_t enable)
         return smsServiceInterface_->SetImsSmsConfig(slotId, enable);
     }
     return false;
+}
+
+int32_t SmsServiceManagerClient::SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+    const std::u16string &ua, const std::u16string &uaprof)
+{
+    if (InitSmsServiceProxy()) {
+        return smsServiceInterface_->SendMms(slotId, mmsc, data, ua, uaprof);
+    }
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+}
+
+int32_t SmsServiceManagerClient::DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+    const std::u16string &ua, const std::u16string &uaprof)
+{
+    if (InitSmsServiceProxy()) {
+        return smsServiceInterface_->DownloadMms(slotId, mmsc, data, ua, uaprof);
+    }
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 
 int32_t SmsServiceManagerClient::SplitMessage(const std::u16string &message, std::vector<std::u16string> &splitMessage)

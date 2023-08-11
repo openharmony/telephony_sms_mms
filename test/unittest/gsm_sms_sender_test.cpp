@@ -21,16 +21,19 @@
 #include "ability_info.h"
 #include "access_mms_token.h"
 #include "context_deal.h"
-#include "data_ability_predicates.h"
 #include "iservice_registry.h"
 #include "sms_delivery_callback_test.h"
 #include "sms_send_callback_test.h"
 #include "string_utils.h"
 #include "telephony_errors.h"
-#include "values_bucket.h"
 
 namespace OHOS {
 namespace Telephony {
+namespace {
+const std::string CU_MMSC = "http://mmsc.myuni.com.cn";
+const std::string SEND_MMS_FILE_URL = "/data/app/deSrc/SendReq.mms";
+} // namespace
+
 void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;
@@ -113,6 +116,31 @@ void GsmSmsSenderTest::TestSendShortText(const sptr<ISmsServiceInterface> &smsSe
     smsService->SendMessage(slotId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
         StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
     std::cout << "TestGsmSendShortText" << std::endl;
+}
+
+void GsmSmsSenderTest::TestSendMms(const sptr<ISmsServiceInterface> &smsService) const
+{
+    AccessMmsToken token;
+    if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
+        return;
+    }
+    std::string dest;
+    std::cout << "Please enter the card id" << std::endl;
+    int32_t slotId;
+    std::cin >> dest;
+    slotId = atoi(dest.c_str());
+    dest.clear();
+    std::u16string mmsc(StringUtils::ToUtf16(CU_MMSC));
+    std::u16string data(StringUtils::ToUtf16(SEND_MMS_FILE_URL));
+    std::u16string ua(u"");
+    std::u16string uaprof(u"");
+    int32_t result = smsService->SendMms(slotId, mmsc, data, ua, uaprof);
+    if (result == 0) {
+        std::cout << "send mms success" << std::endl;
+    } else {
+        std::cout << "send mms fail" << std::endl;
+    }
 }
 
 void GsmSmsSenderTest::TestSendLongText(const sptr<ISmsServiceInterface> &smsService) const
@@ -533,7 +561,7 @@ void GsmSmsSenderTest::TestGetImsShortMessageFormat(const sptr<ISmsServiceInterf
 
 void GsmSmsSenderTest::TestAddBlockPhone() const
 {
-    std::shared_ptr<AppExecFwk::DataAbilityHelper> helper = CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataAHelper();
     if (helper == nullptr) {
         std::cout << "Creator helper nullptr error." << std::endl;
         return;
@@ -542,9 +570,9 @@ void GsmSmsSenderTest::TestAddBlockPhone() const
     std::cout << "Please enter block phone number" << std::endl;
     std::getline(std::cin, input);
 
-    Uri uri("dataability:///com.ohos.contactsdataability/contacts/contact_blocklist");
-    NativeRdb::ValuesBucket value;
-    value.PutString("phone_number", input);
+    Uri uri("datashare:///com.ohos.contactsdataability/contacts/contact_blocklist");
+    DataShare::DataShareValuesBucket value;
+    value.Put("phone_number", input);
     int ret = helper->Insert(uri, value);
     helper->Release();
     std::cout << "add block:" << input << ((ret >= 0) ? " success" : " error") << std::endl;
@@ -552,7 +580,7 @@ void GsmSmsSenderTest::TestAddBlockPhone() const
 
 void GsmSmsSenderTest::TestRemoveBlockPhone() const
 {
-    std::shared_ptr<AppExecFwk::DataAbilityHelper> helper = CreateDataAHelper();
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataAHelper();
     if (helper == nullptr) {
         std::cout << "Creator helper nullptr error." << std::endl;
         return;
@@ -560,8 +588,8 @@ void GsmSmsSenderTest::TestRemoveBlockPhone() const
     std::string input;
     std::cout << "Please enter Remove phone number" << std::endl;
     std::getline(std::cin, input);
-    Uri uri("dataability:///com.ohos.contactsdataability/contacts/contact_blocklist");
-    NativeRdb::DataAbilityPredicates predicates;
+    Uri uri("datashare:///com.ohos.contactsdataability/contacts/contact_blocklist");
+    DataShare::DataSharePredicates predicates;
     predicates.EqualTo("phone_number", input);
     int ret = helper->Delete(uri, predicates);
     helper->Release();
@@ -578,7 +606,7 @@ void GsmSmsSenderTest::TestHasSmsCapability(const sptr<ISmsServiceInterface> &sm
     std::cout << "HasSmsCapability:" << res << std::endl;
 }
 
-std::shared_ptr<AppExecFwk::DataAbilityHelper> GsmSmsSenderTest::CreateDataAHelper() const
+std::shared_ptr<DataShare::DataShareHelper> GsmSmsSenderTest::CreateDataAHelper() const
 {
     auto saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
@@ -590,13 +618,8 @@ std::shared_ptr<AppExecFwk::DataAbilityHelper> GsmSmsSenderTest::CreateDataAHelp
         std::cout << "GetSystemAbility Service Failed." << std::endl;
         return nullptr;
     }
-    const std::string uriContact("dataability:///com.ohos.contactsdataability");
-    std::shared_ptr<Uri> dataAbilityUri = std::make_shared<Uri>(uriContact);
-    if (dataAbilityUri == nullptr) {
-        std::cout << "make dataAbilityUri Error." << std::endl;
-        return nullptr;
-    }
-    return AppExecFwk::DataAbilityHelper::Creator(remoteObj, dataAbilityUri);
+    const std::string uriContact("datashare:///com.ohos.contactsdataability");
+    return DataShare::DataShareHelper::Creator(remoteObj, uriContact);
 }
 } // namespace Telephony
 } // namespace OHOS

@@ -73,6 +73,8 @@ SmsInterfaceStub::SmsInterfaceStub()
         &SmsInterfaceStub::OnGetBase64Decode;
     memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_ENCODE_STRING)] =
         &SmsInterfaceStub::OnGetEncodeStringFunc;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SEND_MMS)] = &SmsInterfaceStub::OnSendMms;
+    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::DOWNLOAD_MMS)] = &SmsInterfaceStub::OnDownloadMms;
 }
 
 SmsInterfaceStub::~SmsInterfaceStub()
@@ -496,9 +498,38 @@ void SmsInterfaceStub::OnGetEncodeStringFunc(MessageParcel &data, MessageParcel 
     reply.WriteString16(StringUtils::ToUtf16(encodeString));
 }
 
+void SmsInterfaceStub::OnSendMms(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    int32_t slotId = data.ReadInt32();
+    u16string mmsc = data.ReadString16();
+    u16string mmsData = data.ReadString16();
+    u16string ua = data.ReadString16();
+    u16string uaprof = data.ReadString16();
+    int32_t result = SendMms(slotId, mmsc, mmsData, ua, uaprof);
+    if (!reply.WriteInt32(result)) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnSendMms write reply failed");
+        return;
+    }
+}
+
+void SmsInterfaceStub::OnDownloadMms(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    int32_t slotId = data.ReadInt32();
+    u16string mmsc = data.ReadString16();
+    u16string mmsData = data.ReadString16();
+    u16string ua = data.ReadString16();
+    u16string uaprof = data.ReadString16();
+    int32_t result = DownloadMms(slotId, mmsc, mmsData, ua, uaprof);
+    if (!reply.WriteInt32(result)) {
+        TELEPHONY_LOGE("SmsInterfaceStub::OnDownloadMms write reply failed");
+        return;
+    }
+}
+
 int SmsInterfaceStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
+    TELEPHONY_LOGI("SmsInterfaceStub::OnRemoteRequest code:%{public}d", code);
     std::u16string myDescripter = SmsInterfaceStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (myDescripter != remoteDescripter) {
