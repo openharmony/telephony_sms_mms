@@ -329,7 +329,7 @@ static napi_value SendMessage(napi_env env, napi_callback_info info)
     napi_create_string_utf8(env, "SendMessage", NAPI_AUTO_LENGTH, &resourceName);
     napi_create_async_work(env, nullptr, resourceName, NativeSendMessage, SendMessageCallback,
         (void *)asyncContext, &(asyncContext->work));
-    napi_queue_async_work(env, asyncContext->work);
+    napi_queue_async_work_with_qos(env, asyncContext->work, napi_qos_default);
     return NapiUtil::CreateUndefined(env);
 }
 
@@ -417,7 +417,7 @@ static napi_value SendShortMessage(napi_env env, napi_callback_info info)
     napi_create_string_utf8(env, "SendMessage", NAPI_AUTO_LENGTH, &resourceName);
     napi_create_async_work(env, nullptr, resourceName, NativeSendMessage, SendMessageCallback, (void *)asyncContext,
         &(asyncContext->work));
-    napi_queue_async_work(env, asyncContext->work);
+    napi_queue_async_work_with_qos(env, asyncContext->work, napi_qos_default);
     return NapiUtil::CreateUndefined(env);
 }
 
@@ -626,7 +626,7 @@ static napi_value SetDefaultSmsSlotId(napi_env env, napi_callback_info info)
     napi_create_string_utf8(env, "SetDefaultSmsSlotId", NAPI_AUTO_LENGTH, &resourceName);
     napi_create_async_work(env, nullptr, resourceName, NativeSetDefaultSmsSlotId, SetDefaultSmsSlotIdCallback,
         (void *)context, &(context->work));
-    napi_queue_async_work(env, context->work);
+    napi_queue_async_work_with_qos(env, context->work, napi_qos_default);
     return result;
 }
 
