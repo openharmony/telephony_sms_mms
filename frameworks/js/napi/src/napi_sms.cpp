@@ -407,18 +407,9 @@ static napi_value SendShortMessage(napi_env env, napi_callback_info info)
     if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &asyncContext->callbackRef);
     }
-    napi_value result = nullptr;
-    if (asyncContext->callbackRef == nullptr) {
-        napi_create_promise(env, &asyncContext->deferred, &result);
-    } else {
-        napi_get_undefined(env, &result);
-    }
-    napi_value resourceName = nullptr;
-    napi_create_string_utf8(env, "SendMessage", NAPI_AUTO_LENGTH, &resourceName);
-    napi_create_async_work(env, nullptr, resourceName, NativeSendMessage, SendMessageCallback, (void *)asyncContext,
-        &(asyncContext->work));
-    napi_queue_async_work_with_qos(env, asyncContext->work, napi_qos_default);
-    return NapiUtil::CreateUndefined(env);
+    napi_value result =
+        NapiUtil::HandleAsyncWork(env, asyncContext, "SendShortMessage", NativeSendMessage, SendMessageCallback);
+    return result;
 }
 
 static void NativeCreateMessage(napi_env env, void *data)
@@ -616,17 +607,8 @@ static napi_value SetDefaultSmsSlotId(napi_env env, napi_callback_info info)
     if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
-    napi_value result = nullptr;
-    if (context->callbackRef == nullptr) {
-        napi_create_promise(env, &context->deferred, &result);
-    } else {
-        napi_get_undefined(env, &result);
-    }
-    napi_value resourceName = nullptr;
-    napi_create_string_utf8(env, "SetDefaultSmsSlotId", NAPI_AUTO_LENGTH, &resourceName);
-    napi_create_async_work(env, nullptr, resourceName, NativeSetDefaultSmsSlotId, SetDefaultSmsSlotIdCallback,
-        (void *)context, &(context->work));
-    napi_queue_async_work_with_qos(env, context->work, napi_qos_default);
+    napi_value result = NapiUtil::HandleAsyncWork(
+        env, context, "SetDefaultSmsSlotId", NativeSetDefaultSmsSlotId, SetDefaultSmsSlotIdCallback);
     return result;
 }
 
