@@ -318,8 +318,7 @@ public:
 private:
     bool Init();
     void WaitCoreServiceToInit();
-    bool NoPermissionOrParametersCheckFail(
-        int32_t slotId, const std::u16string desAddr, const sptr<ISendShortMessageCallback> &sendCallback);
+    bool CheckSmsPermission(const sptr<ISendShortMessageCallback> &sendCallback);
     bool ValidDestinationAddress(std::string desAddr);
     void TrimSmscAddr(std::string &sca);
     bool CheckSimMessageIndexValid(int32_t slotId, uint32_t msgIndex);
