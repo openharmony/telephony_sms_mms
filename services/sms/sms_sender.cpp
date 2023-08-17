@@ -251,7 +251,7 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
 
     std::shared_ptr<SendSmsResultInfo> info = event->GetSharedObject<SendSmsResultInfo>();
     if (info != nullptr) {
-        TELEPHONY_LOGI("flag = %{public}lld", info->flag);
+        TELEPHONY_LOGI("flag = %{public}d", static_cast<int32_t>(info->flag));
         auto iter = sendCacheMap_.find(info->flag);
         if (iter != sendCacheMap_.end()) {
             TELEPHONY_LOGI("msgRef = %{public}d", info->msgRef);
