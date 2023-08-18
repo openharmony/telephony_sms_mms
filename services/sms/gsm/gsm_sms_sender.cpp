@@ -421,7 +421,7 @@ void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &e
         auto iter = oldIndexer++;
         if (*iter != nullptr && (message->GetMsgRef() == (*iter)->GetMsgRefId())) {
             // save the message to db, or updata to db msg state(success or failed)
-            TELEPHONY_LOGI("StatusReport %{public}d %{public}d", message->GetMsgRef(), (*iter)->GetMsgRefId());
+            TELEPHONY_LOGI("StatusReport %{public}d", message->GetMsgRef());
             deliveryCallback = (*iter)->GetDeliveryCallback();
             reportList_.erase(iter);
         }
