@@ -439,6 +439,7 @@ void CdmaSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &
         return;
     }
     std::string pdu = StringUtils::StringToHex(statusInfo->GetPdu());
+    TELEPHONY_LOGI("StatusReport pdu size == %{public}zu", pdu.length());
     std::shared_ptr<CdmaSmsMessage> message = CdmaSmsMessage::CreateMessage(pdu);
     if (message == nullptr) {
         TELEPHONY_LOGE("message is nullptr.");
@@ -451,6 +452,7 @@ void CdmaSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &
         if (*iter != nullptr) {
             if (message->GetMsgRef() == (*iter)->GetMsgRefId()) {
                 // save the message to db, or updata to db msg state(success or fail)
+                TELEPHONY_LOGI("StatusReport %{public}d", message->GetMsgRef());
                 deliveryCallback = (*iter)->GetDeliveryCallback();
                 reportList_.erase(iter);
             }
