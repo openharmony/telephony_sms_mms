@@ -55,6 +55,13 @@ const int32_t INVALID_SLOTID = 2;
 const int32_t VALUE_LENGTH = 2;
 static constexpr uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
 const uint32_t CODE_BUFFER_MAX_SIZE = 300 * 1024;
+const char *TEST_STR = "str";
+const char *INPUT_STR = "00";
+const char *SRC_STR = "123";
+const char *BEGIN_STR = "01";
+const char *END_STR = "FF";
+const char PDU_COUNT = 10;
+const char INPUT_INTEGER = 128;
 } // namespace
 
 class BranchMmsTest : public testing::Test {
@@ -83,7 +90,7 @@ HWTEST_F(BranchMmsTest, MmsHeader_0001, Function | MediumTest | Level1)
     MmsEncodeString encodeString;
     MmsDecodeBuffer decodeBuffer;
     MmsEncodeBuffer encodeBuffer;
-    std::string encodeAddress = "123";
+    std::string encodeAddress = SRC_STR;
     uint8_t value = 0;
     MmsAddress address(encodeAddress);
     std::vector<MmsAddress> addressValue;
@@ -136,7 +143,7 @@ HWTEST_F(BranchMmsTest, MmsHeader_0002, Function | MediumTest | Level1)
     auto mmsHeader = std::make_shared<MmsHeader>();
     int64_t value = 0;
     std::string valueStr = "";
-    std::string encodeAddress = "123";
+    std::string encodeAddress = SRC_STR;
     MmsAddress address(encodeAddress);
     std::vector<MmsAddress> addressValue;
     addressValue.push_back(address);
@@ -159,7 +166,7 @@ HWTEST_F(BranchMmsTest, MmsHeader_0002, Function | MediumTest | Level1)
     EXPECT_TRUE(mmsHeader->GetTextValue(1, valueStr));
     EXPECT_TRUE(mmsHeader->GetEncodeStringValue(1, encodeString));
     EXPECT_FALSE(mmsHeader->SetTextValue(MMS_CANCEL_STATUS, ""));
-    EXPECT_FALSE(mmsHeader->SetTextValue(MMS_CANCEL_STATUS, "123"));
+    EXPECT_FALSE(mmsHeader->SetTextValue(MMS_CANCEL_STATUS, SRC_STR));
     EXPECT_FALSE(mmsHeader->SetOctetValue(MMS_MM_FLAGS, MMS_MM_FLAGS));
     EXPECT_FALSE(mmsHeader->SetOctetValue(MMS_CONTENT_CLASS, MMS_CONTENT_CLASS));
     EXPECT_FALSE(mmsHeader->SetOctetValue(MMS_MESSAGE_CLASS, MMS_MESSAGE_CLASS));
@@ -184,7 +191,7 @@ HWTEST_F(BranchMmsTest, MmsHeader_0003, Function | MediumTest | Level1)
     auto mmsHeader = std::make_shared<MmsHeader>();
     MmsDecodeBuffer decodeBuffer;
     MmsEncodeBuffer buff;
-    std::string encodeAddress = "123";
+    std::string encodeAddress = SRC_STR;
     MmsAddress address(encodeAddress);
     std::vector<MmsAddress> addressValue;
     addressValue.push_back(address);
@@ -236,7 +243,7 @@ HWTEST_F(BranchMmsTest, MmsHeader_0004, Function | MediumTest | Level1)
 {
     auto mmsHeader = std::make_shared<MmsHeader>();
     MmsEncodeBuffer buff;
-    std::string encodeAddress = "123";
+    std::string encodeAddress = SRC_STR;
     MmsAddress address(encodeAddress);
     std::vector<MmsAddress> addrs;
     mmsHeader->longValueMap_.insert(pair<uint8_t, int64_t>(MMS_EXPIRY, 1));
@@ -626,6 +633,7 @@ HWTEST_F(BranchMmsTest, MmsBodyPart_0001, Function | MediumTest | Level3)
     decoderBuffer.curPosition_ = 0;
     decoderBuffer.totolLength_ = 1;
     decoderBuffer.pduBuffer_[0] = 0x5;
+    mmsBodyPart.DumpMmsBodyPart();
     ASSERT_FALSE(mmsBodyPart.DecodePartHeader(decoderBuffer, testLen));
 }
 
@@ -656,8 +664,15 @@ HWTEST_F(BranchMmsTest, MmsBodyPart_0002, Function | MediumTest | Level3)
     ASSERT_FALSE(mmsBodyPart.WriteBodyFromAttachmentBuffer(mmsAttachment));
     mmsAttachment.strFileName_ = "test";
     ASSERT_FALSE(mmsBodyPart.WriteBodyFromAttachmentBuffer(mmsAttachment));
+    MmsBodyPart bodyPart;
+    mmsBodyPart.bodyLen_ = 1;
+    bodyPart = mmsBodyPart;
     uint32_t len = 0;
-    ASSERT_TRUE(mmsBodyPart.ReadBodyPartBuffer(len) == nullptr);
+    ASSERT_TRUE(bodyPart.ReadBodyPartBuffer(len) == nullptr);
+    mmsBodyPart.bodyLen_ = MAX_MMS_MSG_PART_LEN + 1;
+    bodyPart = mmsBodyPart;
+    len = 0;
+    ASSERT_TRUE(bodyPart.ReadBodyPartBuffer(len) == nullptr);
 }
 
 /**
@@ -840,20 +855,80 @@ HWTEST_F(BranchMmsTest, SmsMmsGtest_MmsBody_0001, Function | MediumTest | Level1
     MmsHeader mmsHeader;
     MmsEncodeBuffer mmsEncodeBuffer;
     MmsBodyPart mmsBodyPart;
-    mmsDecodeBuffer.curPosition_ = 1;
+    mmsDecodeBuffer.curPosition_ = 0;
+    mmsDecodeBuffer.totolLength_ = PDU_COUNT;
+    MmsBodyPart part;
+    mmsBody.mmsBodyParts_.push_back(part);
+    EXPECT_TRUE(mmsBody.DecodeMultipart(mmsDecodeBuffer));
+    EXPECT_FALSE(mmsBody.DecodeMmsBody(mmsDecodeBuffer, mmsHeader));
+    EXPECT_FALSE(mmsBody.EncodeMmsBody(mmsEncodeBuffer));
+    EXPECT_FALSE(mmsBody.EncodeMmsHeaderContentType(mmsHeader, mmsEncodeBuffer));
+    EXPECT_TRUE(mmsBody.IsContentLocationPartExist(""));
+    EXPECT_TRUE(mmsBody.IsContentIdPartExist(""));
+    mmsBody.DumpMmsBody();
+    mmsBody.GetBodyPartCount();
+    std::vector<MmsBodyPart> parts;
+    mmsBody.GetMmsBodyPart(parts);
+
+    mmsDecodeBuffer.curPosition_ = PDU_COUNT;
     mmsDecodeBuffer.totolLength_ = 0;
     EXPECT_FALSE(mmsBody.DecodeMultipart(mmsDecodeBuffer));
     EXPECT_FALSE(mmsBody.DecodeMmsBody(mmsDecodeBuffer, mmsHeader));
-    EXPECT_TRUE(mmsBody.EncodeMmsBody(mmsEncodeBuffer));
+    EXPECT_FALSE(mmsBody.EncodeMmsBody(mmsEncodeBuffer));
     EXPECT_FALSE(mmsBody.EncodeMmsHeaderContentType(mmsHeader, mmsEncodeBuffer));
-    EXPECT_FALSE(mmsBody.IsContentLocationPartExist(""));
-    EXPECT_FALSE(mmsBody.IsContentIdPartExist(""));
-    EXPECT_FALSE(mmsBody.IsBodyPartExist(mmsBodyPart));
+    EXPECT_TRUE(mmsBody.IsContentLocationPartExist(""));
+    EXPECT_TRUE(mmsBody.IsContentIdPartExist(""));
+
+    EXPECT_TRUE(mmsBody.IsBodyPartExist(mmsBodyPart));
     EXPECT_TRUE(mmsBody.AddMmsBodyPart(mmsBodyPart));
     mmsBodyPart.isSmilFile_ = true;
     EXPECT_TRUE(mmsBody.AddMmsBodyPart(mmsBodyPart));
+    mmsBodyPart.isSmilFile_ = false;
     mmsBody.bHaveSmilPart_ = true;
-    EXPECT_FALSE(mmsBody.AddMmsBodyPart(mmsBodyPart));
+    EXPECT_TRUE(mmsBody.AddMmsBodyPart(mmsBodyPart));
+    mmsBodyPart.isSmilFile_ = true;
+    mmsBodyPart.SetSmilFile(false);
+    mmsBodyPart.IsSmilFile();
+    EXPECT_TRUE(mmsBody.AddMmsBodyPart(mmsBodyPart));
+}
+
+/**
+
+ * @tc.number   Telephony_SmsMmsGtest_MmsBody_0002
+ * @tc.name     Test MmsBody
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, SmsMmsGtest_MmsBody_0002, Function | MediumTest | Level1)
+{
+    MmsBody mmsBody;
+    MmsDecodeBuffer mmsDecodeBuffer;
+    MmsHeader mmsHeader;
+    MmsEncodeBuffer mmsEncodeBuffer;
+    MmsBodyPart mmsBodyPart;
+    mmsDecodeBuffer.curPosition_ = 0;
+    mmsDecodeBuffer.totolLength_ = PDU_COUNT;
+    MmsBodyPart part;
+    std::string strCt = INPUT_STR;
+    std::string getCt;
+    part.SetContentType(strCt);
+    part.GetContentType(getCt);
+    EXPECT_STREQ(strCt.c_str(), getCt.c_str());
+    part.SetContentId(strCt);
+    part.GetContentId(getCt);
+    EXPECT_STREQ(strCt.c_str(), getCt.c_str());
+    part.SetContentLocation(strCt);
+    part.GetContentLocation(getCt);
+    EXPECT_STREQ(strCt.c_str(), getCt.c_str());
+    part.SetContentDisposition(strCt);
+    part.GetContentDisposition(getCt);
+    EXPECT_STREQ(strCt.c_str(), getCt.c_str());
+    part.SetFileName(strCt);
+    EXPECT_STREQ(strCt.c_str(), part.GetPartFileName().c_str());
+    part.GetContentType();
+    part.GetPartHeader();
+    EXPECT_STREQ(strCt.c_str(), getCt.c_str());
+    mmsBody.mmsBodyParts_.push_back(part);
+    EXPECT_TRUE(mmsBody.AddMmsBodyPart(mmsBodyPart));
 }
 
 /**
@@ -871,8 +946,12 @@ HWTEST_F(BranchMmsTest, SmsMmsGtest_MmsMsg_0001, Function | MediumTest | Level1)
     EXPECT_FALSE(mmsMsg.DecodeMsg(""));
     EXPECT_FALSE(mmsMsg.DecodeMsg(nullptr, 0));
     mmsMsg.EncodeMsg(outLen);
+    MmsAddress address(INPUT_STR);
+    mmsMsg.SetMmsFrom(address);
     mmsMsg.GetMmsFrom();
     EXPECT_FALSE(mmsMsg.SetMmsTo(toAddrs));
+    std::string value = INPUT_STR;
+    mmsMsg.SetHeaderStringValue(0, value);
     mmsMsg.GetHeaderStringValue(0);
     mmsMsg.GetHeaderContentTypeStart();
     EXPECT_FALSE(mmsMsg.AddAttachment(mmsAttachment));
@@ -880,8 +959,53 @@ HWTEST_F(BranchMmsTest, SmsMmsGtest_MmsMsg_0001, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_MmsMsg_0002
+ * @tc.name     Test MmsMsg
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, SmsMmsGtest_MmsMsg_0002, Function | MediumTest | Level1)
+{
+    MmsMsg mmsMsg;
+    std::vector<MmsAddress> toAddrs = {};
+    MmsAttachment mmsAttachment;
+    std::vector<MmsAttachment> attachments = {};
+    std::unique_ptr<char[]> inBuff = std::make_unique<char[]>(2);
+    inBuff[0] = 1;
+    inBuff[1] = 1;
+    EXPECT_FALSE(mmsMsg.DecodeMsg(std::move(inBuff), 2));
+
+    mmsMsg.SetMmsVersion(1);
+    mmsMsg.GetMmsVersion();
+    mmsMsg.SetMmsMessageType(1);
+    mmsMsg.GetMmsMessageType();
+    mmsMsg.SetMmsTransactionId("1");
+    mmsMsg.GetMmsTransactionId();
+    mmsMsg.SetMmsDate(1);
+    mmsMsg.GetMmsDate();
+    EXPECT_FALSE(mmsMsg.SetMmsTo(toAddrs));
+    mmsMsg.GetMmsTo(toAddrs);
+    mmsMsg.SetHeaderOctetValue(0, 0);
+    mmsMsg.GetHeaderOctetValue(0);
+    mmsMsg.SetHeaderIntegerValue(0, 0);
+    mmsMsg.GetHeaderIntegerValue(0);
+    mmsMsg.SetHeaderLongValue(0, 0);
+    mmsMsg.GetHeaderLongValue(0);
+
+    mmsMsg.SetHeaderEncodedStringValue(0, INPUT_STR, 0);
+    MmsAddress address(INPUT_STR);
+    mmsMsg.AddHeaderAddressValue(0, address);
+    std::vector<MmsAddress> addressValue;
+    mmsMsg.GetHeaderAllAddressValue(0, addressValue);
+    mmsMsg.SetHeaderContentType(INPUT_STR);
+    mmsMsg.GetHeaderContentType();
+    mmsMsg.GetHeaderContentTypeStart();
+    EXPECT_FALSE(mmsMsg.AddAttachment(mmsAttachment));
+    EXPECT_FALSE(mmsMsg.GetAllAttachment(attachments));
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_MmsBodyPartHeader_0001
- * @tc.name     Test SmsMiscManager
+ * @tc.name     Test MmsBodyPartHeader
  * @tc.desc     Function test
  */
 HWTEST_F(BranchMmsTest, MmsBodyPartHeader_0001, Function | MediumTest | Level1)
@@ -892,19 +1016,146 @@ HWTEST_F(BranchMmsTest, MmsBodyPartHeader_0001, Function | MediumTest | Level1)
     decodeBuffer.curPosition_ = 0;
     decodeBuffer.totolLength_ = 0;
     EXPECT_FALSE(mmsBodyPartHeader->DecodeContentDisposition(decodeBuffer, len));
+    EXPECT_FALSE(mmsBodyPartHeader->DecodeContentLocation(decodeBuffer, len));
+    EXPECT_FALSE(mmsBodyPartHeader->DecodeContentId(decodeBuffer, len));
+
+    uint32_t dispLen = 1;
+    uint32_t beginPos = 1;
+    EXPECT_TRUE(mmsBodyPartHeader->DecodeDispositionParameter(decodeBuffer, dispLen, beginPos));
+    EXPECT_FALSE(mmsBodyPartHeader->DecodeWellKnownHeader(decodeBuffer, len));
+    EXPECT_FALSE(mmsBodyPartHeader->DecodeApplicationHeader(decodeBuffer, len));
+
+    std::string str = TEST_STR;
+    mmsBodyPartHeader->SetContentId(str);
+    EXPECT_TRUE(mmsBodyPartHeader->GetContentId(str));
+    mmsBodyPartHeader->SetContentTransferEncoding(str);
+    EXPECT_TRUE(mmsBodyPartHeader->GetContentTransferEncoding(str));
+    mmsBodyPartHeader->SetContentLocation(str);
+    EXPECT_TRUE(mmsBodyPartHeader->GetContentDisposition(str));
+
     MmsEncodeBuffer encodeBuffer;
     mmsBodyPartHeader->strContentTransferEncoding_ = "";
     EXPECT_TRUE(mmsBodyPartHeader->EncodeContentTransferEncoding(encodeBuffer));
     EXPECT_TRUE(mmsBodyPartHeader->EncodeContentLocation(encodeBuffer));
+
+    mmsBodyPartHeader->strContentTransferEncoding_ = str;
+    EXPECT_TRUE(mmsBodyPartHeader->EncodeContentLocation(encodeBuffer));
     EXPECT_TRUE(mmsBodyPartHeader->EncodeContentId(encodeBuffer));
+    EXPECT_TRUE(mmsBodyPartHeader->EncodeContentDisposition(encodeBuffer));
+
     encodeBuffer.curPosition_ = CODE_BUFFER_MAX_SIZE;
-    mmsBodyPartHeader->strContentLocation_ = "123";
+    mmsBodyPartHeader->strContentLocation_ = SRC_STR;
     EXPECT_FALSE(mmsBodyPartHeader->EncodeMmsBodyPartHeader(encodeBuffer));
-    mmsBodyPartHeader->strContentID_ = "123";
+    mmsBodyPartHeader->strContentID_ = SRC_STR;
     encodeBuffer.curPosition_ = CODE_BUFFER_MAX_SIZE;
+    auto otherBodyPartHeader = std::make_shared<MmsBodyPartHeader>();
+    *otherBodyPartHeader = *mmsBodyPartHeader;
+    otherBodyPartHeader->DumpBodyPartHeader();
     EXPECT_FALSE(mmsBodyPartHeader->EncodeContentLocation(encodeBuffer));
     EXPECT_FALSE(mmsBodyPartHeader->EncodeContentId(encodeBuffer));
     EXPECT_FALSE(mmsBodyPartHeader->EncodeMmsBodyPartHeader(encodeBuffer));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsBuffer_0002
+ * @tc.name     Test MmsBuffer
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, MmsBuffer_0002, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::MmsBuffer_0002 -->");
+    MmsBuffer mmsBuffer;
+    uint32_t len = 1;
+    bool retBool;
+    mmsBuffer.ReadDataBuffer(len);
+    mmsBuffer.ReadDataBuffer(len, MAX_MMS_MSG_PART_LEN + 1);
+    mmsBuffer.ReadDataBuffer(MAX_MMS_MSG_PART_LEN, len);
+    retBool = mmsBuffer.WriteDataBuffer(nullptr, 0);
+    retBool = mmsBuffer.WriteDataBuffer(std::make_unique<char[]>(len), MAX_MMS_MSG_PART_LEN + 1);
+    retBool = mmsBuffer.WriteDataBuffer(std::make_unique<char[]>(len), 0);
+    EXPECT_FALSE(retBool);
+    retBool = mmsBuffer.WriteDataBuffer(std::make_unique<char[]>(len), len);
+    EXPECT_TRUE(retBool);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsEncodeBuffer_0001
+ * @tc.name     Test MmsEncodeBuffer
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, MmsEncodeBuffer_0001, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::MmsEncodeBuffer_0001 -->");
+    MmsEncodeBuffer mmsEncodeBuffer;
+    bool retBool;
+    retBool = mmsEncodeBuffer.EncodeShortLength(1);
+    EXPECT_TRUE(retBool);
+    retBool = mmsEncodeBuffer.EncodeShortLength(31);
+    EXPECT_FALSE(retBool);
+
+    retBool = mmsEncodeBuffer.EncodeShortInteger(1);
+    EXPECT_TRUE(retBool);
+    retBool = mmsEncodeBuffer.EncodeShortLength(31);
+    EXPECT_FALSE(retBool);
+    mmsEncodeBuffer.curPosition_ = MAX_MMS_MSG_PART_LEN + 1;
+    retBool = mmsEncodeBuffer.EncodeShortLength(1);
+    EXPECT_FALSE(retBool);
+
+    mmsEncodeBuffer.curPosition_ = 0;
+    retBool = mmsEncodeBuffer.EncodeOctet(1);
+    EXPECT_TRUE(retBool);
+    mmsEncodeBuffer.curPosition_ = MAX_MMS_MSG_PART_LEN + 1;
+    retBool = mmsEncodeBuffer.EncodeShortLength(1);
+    EXPECT_FALSE(retBool);
+
+    mmsEncodeBuffer.curPosition_ = 0;
+    retBool = mmsEncodeBuffer.EncodeValueLength(1);
+    EXPECT_TRUE(retBool);
+    retBool = mmsEncodeBuffer.EncodeValueLength(31);
+    EXPECT_TRUE(retBool);
+    retBool = mmsEncodeBuffer.EncodeValueLength(31);
+    mmsEncodeBuffer.curPosition_ = MAX_MMS_MSG_PART_LEN + 1;
+    EXPECT_TRUE(retBool);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsEncodeBuffer_0002
+ * @tc.name     Test MmsEncodeBuffer
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, MmsEncodeBuffer_0002, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::MmsEncodeBuffer_0002 -->");
+    MmsEncodeBuffer mmsEncodeBuffer;
+    bool retBool;
+    mmsEncodeBuffer.curPosition_ = 0;
+    retBool = mmsEncodeBuffer.EncodeInteger(1);
+    EXPECT_TRUE(retBool);
+    retBool = mmsEncodeBuffer.EncodeInteger(INPUT_INTEGER);
+    EXPECT_TRUE(retBool);
+
+    retBool = mmsEncodeBuffer.EncodeLongInteger(0);
+    EXPECT_TRUE(retBool);
+    retBool = mmsEncodeBuffer.EncodeLongInteger(1);
+    EXPECT_TRUE(retBool);
+
+    retBool = mmsEncodeBuffer.EncodeQuotedText("");
+    EXPECT_TRUE(retBool);
+    mmsEncodeBuffer.curPosition_ = MAX_MMS_MSG_PART_LEN + 1;
+    retBool = mmsEncodeBuffer.EncodeQuotedText(BEGIN_STR);
+    EXPECT_FALSE(retBool);
+    mmsEncodeBuffer.curPosition_ = 0;
+    retBool = mmsEncodeBuffer.EncodeQuotedText(END_STR);
+    EXPECT_TRUE(retBool);
+
+    retBool = mmsEncodeBuffer.EncodeTokenText("");
+    EXPECT_TRUE(retBool);
+    mmsEncodeBuffer.curPosition_ = MAX_MMS_MSG_PART_LEN + 1;
+    retBool = mmsEncodeBuffer.EncodeTokenText(BEGIN_STR);
+    EXPECT_FALSE(retBool);
+    mmsEncodeBuffer.curPosition_ = 0;
+    retBool = mmsEncodeBuffer.EncodeTokenText(END_STR);
+    EXPECT_TRUE(retBool);
 }
 } // namespace Telephony
 } // namespace OHOS
