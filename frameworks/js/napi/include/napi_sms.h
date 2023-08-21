@@ -50,6 +50,7 @@ constexpr int32_t ONE_PARAMETER = 1;
 constexpr int32_t TWO_PARAMETERS = 2;
 constexpr int32_t THREE_PARAMETERS = 3;
 constexpr int32_t FOUR_PARAMETERS = 4;
+constexpr int32_t PARAMETERS_INDEX_TWO = 2;
 constexpr int32_t INVALID_PORT = -1;
 constexpr int32_t MIN_PORT = 0;
 constexpr int32_t MAX_PORT = 0xffff;
