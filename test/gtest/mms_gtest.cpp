@@ -78,6 +78,17 @@ void MmsGtest::TearDown() {}
 const int32_t DEFAULT_SIM_SLOT_ID_1 = 1;
 const uint16_t MESSAGE_TYPE = 4;
 const uint16_t WAPPUSH_PDU_LEN = 164;
+const uint32_t MAX_MMS_ATTACHMENT_LEN = 300 * 1024;
+const char PDU_TEST_DATA = 35;
+const char MIN_SHORT_OCTET = 30;
+const char QUOTE_CHAR_LEN = 0X7F - 1;
+const char VALUE_CHAR = 8;
+const char PDU_COUNT = 10;
+const char PDU_CUSITION = 5;
+const char PDU_LENGTH = 4;
+const char *ENCODE_CHARSET = "01010101";
+const uint32_t ENCODE_CHARSET1 = 0x0100;
+const uint32_t ENCODE_CHARSET2 = 0x0001;
 
 void MmsGtest::SetUpTestCase()
 {
@@ -268,6 +279,9 @@ HWTEST_F(MmsGtest, MmsAttachment_0001, Function | MediumTest | Level1)
     EXPECT_EQ(true, retBool);
     retStr = attachment.GetFileName();
     EXPECT_STREQ(retStr.c_str(), fileName.c_str());
+    attachment.strFileName_ = "";
+    retStr = attachment.GetFileName();
+    EXPECT_STRNE(retStr.c_str(), fileName.c_str());
 }
 
 /**
@@ -297,6 +311,7 @@ HWTEST_F(MmsGtest, MmsAttachment_0002, Function | MediumTest | Level1)
     retU32t = attachment.GetCharSet();
     EXPECT_EQ(charset, retU32t);
     retBool = attachment.SetDataBuffer(nullptr, 0);
+    retBool = attachment.SetDataBuffer(nullptr, MAX_MMS_ATTACHMENT_LEN + 1);
     EXPECT_EQ(false, retBool);
     retBool = attachment.SetDataBuffer(std::make_unique<char[]>(len + 1), len + 1);
     EXPECT_EQ(false, retBool);
@@ -305,6 +320,8 @@ HWTEST_F(MmsGtest, MmsAttachment_0002, Function | MediumTest | Level1)
     retBool = attachment.SetDataBuffer(std::make_unique<char[]>(len - 1), len + 1);
     EXPECT_EQ(false, retBool);
     EXPECT_FALSE(attachment.GetDataBuffer(len) == nullptr);
+    attachment.dataLength_ = MAX_MMS_ATTACHMENT_LEN + 1;
+    EXPECT_TRUE(attachment.GetDataBuffer(len) == nullptr);
     MmsAttachment attachment1(attachment);
     attachment1.SetContentType("application/smil");
     retStr = attachment1.GetContentType();
@@ -414,6 +431,15 @@ HWTEST_F(MmsGtest, MmsContentParam_0001, Function | MediumTest | Level1)
     mmsContentParam2.SetFileName("fileName");
     mmsContentParam2.GetFileName(testStr);
     EXPECT_STREQ(testStr.c_str(), "fileName");
+
+    mmsContentParam.textMap_.clear();
+    mmsContentParam.AddNormalField(field, "value");
+    mmsContentParam.textMap_.clear();
+    mmsContentParam.GetNormalField(field, testStr);
+    mmsContentParam.GetStart(testStr);
+    mmsContentParam2.GetFileName(testStr);
+    mmsContentParam.DumpContentParam();
+    EXPECT_STREQ(testStr.c_str(), "fileName");
 }
 
 /**
@@ -430,16 +456,34 @@ HWTEST_F(MmsGtest, MmsContentType_0001, Function | MediumTest | Level1)
     int32_t len = 10;
     uint8_t type = 10;
     std::string testStr;
+    uint8_t count = 10;
+    uint8_t index = 0;
+    while (index < count) {
+        decodeBuffer.pduBuffer_[index] = '1';
+        index++;
+    }
     mmsContentType.DumpMmsContentType();
+
+    decodeBuffer.curPosition_ = 0;
+    decodeBuffer.pduBuffer_[decodeBuffer.curPosition_++] = PDU_TEST_DATA;
+    decodeBuffer.pduBuffer_[decodeBuffer.curPosition_++] = PDU_TEST_DATA;
+    decodeBuffer.pduBuffer_[decodeBuffer.curPosition_] = PDU_TEST_DATA;
     mmsContentType.DecodeMmsContentType(decodeBuffer, len);
+
+    decodeBuffer.curPosition_ = 0;
     mmsContentType.DecodeMmsCTGeneralForm(decodeBuffer, len);
     mmsContentType.GetContentTypeFromInt(type);
     mmsContentType.GetContentTypeFromString("");
+
+    decodeBuffer.curPosition_ = 0;
     mmsContentType.DecodeParameter(decodeBuffer, len);
     mmsContentType.SetContentParam(contentParam);
     mmsContentType.DecodeTextField(decodeBuffer, type, len);
+
+    decodeBuffer.curPosition_ = 0;
     mmsContentType.DecodeCharsetField(decodeBuffer, len);
     mmsContentType.DecodeTypeField(decodeBuffer, len);
+
     MmsEncodeBuffer encodeBuffer;
     mmsContentType.EncodeTextField(encodeBuffer);
     mmsContentType.EncodeCharsetField(encodeBuffer);
@@ -463,27 +507,155 @@ HWTEST_F(MmsGtest, MmsDecodeBuffer_0001, Function | MediumTest | Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::MmsDecodeBuffer_0001 -->");
     uint8_t byteVar = 1;
-    uint32_t intVar = 10;
-    uint64_t longVar = 10;
+    uint32_t intVar = PDU_COUNT;
     std::string testStr;
     MmsDecodeBuffer mmsDecodeBuffer;
+    uint8_t count = PDU_COUNT;
+    uint8_t index = 0;
+    while (index < count) {
+        mmsDecodeBuffer.pduBuffer_[index] = '1';
+        index++;
+    }
+
     mmsDecodeBuffer.PeekOneByte(byteVar);
     mmsDecodeBuffer.GetOneByte(byteVar);
     mmsDecodeBuffer.IncreasePointer(intVar);
     mmsDecodeBuffer.DecreasePointer(intVar);
+    mmsDecodeBuffer.curPosition_ = PDU_CUSITION;
+    mmsDecodeBuffer.totolLength_ = PDU_LENGTH;
+    mmsDecodeBuffer.PeekOneByte(byteVar);
+    mmsDecodeBuffer.GetOneByte(byteVar);
+    mmsDecodeBuffer.IncreasePointer(intVar);
+    mmsDecodeBuffer.DecreasePointer(intVar);
+
+    mmsDecodeBuffer.curPosition_ = 0;
     mmsDecodeBuffer.DecodeUintvar(intVar, intVar);
     mmsDecodeBuffer.DecodeShortLength(byteVar);
+
+    char testChar = MIN_SHORT_OCTET + 1;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar;
+    mmsDecodeBuffer.DecodeShortLength(byteVar);
+    mmsDecodeBuffer.curPosition_ = 0;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = MIN_SHORT_OCTET;
     mmsDecodeBuffer.DecodeValueLengthReturnLen(intVar, intVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar;
+    mmsDecodeBuffer.DecodeValueLengthReturnLen(intVar, intVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar + 1;
+    mmsDecodeBuffer.DecodeValueLengthReturnLen(intVar, intVar);
+
+    uint8_t errVar = -1;
+    bool ret = mmsDecodeBuffer.CharIsToken(errVar);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsDecodeBuffer_0002
+ * @tc.name     Test MmsDecodeBuffer
+ * @tc.desc     Function test
+ */
+HWTEST_F(MmsGtest, MmsDecodeBuffer_0002, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::MmsDecodeBuffer_0002 -->");
+    uint32_t intVar = 10;
+    std::string testStr;
+    MmsDecodeBuffer mmsDecodeBuffer;
+    uint8_t count = 10;
+    uint8_t index = 0;
+    while (index < count) {
+        mmsDecodeBuffer.pduBuffer_[index] = '1';
+        index++;
+    }
+    mmsDecodeBuffer.curPosition_ = 0;
+    char testChar = MIN_SHORT_OCTET + 1;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = MIN_SHORT_OCTET;
     mmsDecodeBuffer.DecodeValueLength(intVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar;
+    mmsDecodeBuffer.DecodeValueLength(intVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar + 1;
+    mmsDecodeBuffer.DecodeValueLength(intVar);
+
+    mmsDecodeBuffer.curPosition_ = 0;
+    testChar += 1;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar;
     mmsDecodeBuffer.DecodeTokenText(testStr, intVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar + 1;
+    mmsDecodeBuffer.DecodeTokenText(testStr, intVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = QUOTE_CHAR_LEN;
+    mmsDecodeBuffer.DecodeTokenText(testStr, intVar);
+
+    mmsDecodeBuffer.curPosition_ = 0;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = QUOTE_CHAR_LEN - 1;
     mmsDecodeBuffer.DecodeText(testStr, intVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = QUOTE_CHAR_LEN;
+    mmsDecodeBuffer.DecodeText(testStr, intVar);
+
+    mmsDecodeBuffer.curPosition_ = 0;
+    testChar += 1;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar;
     mmsDecodeBuffer.DecodeQuotedText(testStr, intVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar + 1;
+    mmsDecodeBuffer.DecodeQuotedText(testStr, intVar);
+
+    uint8_t errVar = -1;
+    bool ret = mmsDecodeBuffer.CharIsToken(errVar);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsDecodeBuffer_0003
+ * @tc.name     Test MmsDecodeBuffer
+ * @tc.desc     Function test
+ */
+HWTEST_F(MmsGtest, MmsDecodeBuffer_0003, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::MmsDecodeBuffer_0003 -->");
+    uint8_t byteVar = 1;
+    uint64_t longVar = 10;
+    std::string testStr;
+    MmsDecodeBuffer mmsDecodeBuffer;
+    uint8_t count = 10;
+    uint8_t index = 0;
+    while (index < count) {
+        mmsDecodeBuffer.pduBuffer_[index] = '1';
+        index++;
+    }
+
+    mmsDecodeBuffer.curPosition_ = 0;
+    char testChar = QUOTE_CHAR_LEN + 1;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar;
     mmsDecodeBuffer.DecodeShortInteger(byteVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar + 1;
+    mmsDecodeBuffer.DecodeShortInteger(byteVar);
+
+    mmsDecodeBuffer.curPosition_ = 0;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = VALUE_CHAR;
     mmsDecodeBuffer.DecodeLongInteger(longVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = VALUE_CHAR + 1;
+    mmsDecodeBuffer.DecodeLongInteger(longVar);
+
+    mmsDecodeBuffer.curPosition_ = 0;
     mmsDecodeBuffer.DecodeInteger(longVar);
+    mmsDecodeBuffer.curPosition_ = 0;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar;
     mmsDecodeBuffer.DecodeIsShortInt();
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar + 1;
+    mmsDecodeBuffer.DecodeIsShortInt();
+
+    mmsDecodeBuffer.curPosition_ = 0;
+    char srcChar = MIN_SHORT_OCTET + 1;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = srcChar;
     mmsDecodeBuffer.DecodeIsString();
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = srcChar + 1;
+    mmsDecodeBuffer.DecodeIsString();
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = testChar + 1;
+    mmsDecodeBuffer.DecodeIsString();
+
+    mmsDecodeBuffer.curPosition_ = 0;
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = srcChar;
     mmsDecodeBuffer.DecodeIsValueLength();
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = srcChar + 1;
+    mmsDecodeBuffer.DecodeIsValueLength();
+
     mmsDecodeBuffer.MarkPosition();
     mmsDecodeBuffer.UnMarkPosition();
     uint8_t errVar = -1;
@@ -503,14 +675,28 @@ HWTEST_F(MmsGtest, MmsEncodeString_0001, Function | MediumTest | Level1)
     MmsDecodeBuffer decodeBuffer;
     MmsEncodeBuffer encodeBuffer;
     std::string testStr;
-    uint32_t charset = 10;
+    uint32_t charset = PDU_COUNT;
     MmsAddress addrsss;
+    uint32_t len = PDU_COUNT;
+    std::unique_ptr<char[]> inBuff = std::make_unique<char[]>(len);
+    for (uint32_t i = 0; i < len; i++) {
+        inBuff[i] = 1;
+    }
+    decodeBuffer.WriteDataBuffer(std::move(inBuff), len);
     mmsEncodeString.DecodeEncodeString(decodeBuffer);
+    decodeBuffer.curPosition_ = MAX_MMS_ATTACHMENT_LEN + 1;
+    mmsEncodeString.DecodeEncodeString(decodeBuffer);
+    mmsEncodeString.charset_ = ENCODE_CHARSET1;
+    mmsEncodeString.EncodeEncodeString(encodeBuffer);
+    mmsEncodeString.charset_ = ENCODE_CHARSET2;
     mmsEncodeString.EncodeEncodeString(encodeBuffer);
     mmsEncodeString.GetEncodeString(testStr);
     mmsEncodeString.SetAddressString(addrsss);
     MmsEncodeString mmsEncodeString1(mmsEncodeString);
+    charset = 0;
     bool ret = mmsEncodeString1.SetEncodeString(charset, testStr);
+    EXPECT_EQ(true, ret);
+    ret = mmsEncodeString1.SetEncodeString(charset, testStr);
     EXPECT_EQ(true, ret);
 }
 
@@ -526,6 +712,8 @@ HWTEST_F(MmsGtest, MmsHeaderCateg_0001, Function | MediumTest | Level1)
     uint8_t fieldId = 0;
     mmsHeaderCateg.FindSendReqOptType(fieldId);
     mmsHeaderCateg.FindSendConfOptType(fieldId);
+    mmsHeaderCateg.FindFieldDes(fieldId);
+    mmsHeaderCateg.CheckIsValueLen(fieldId);
     bool ret = mmsHeaderCateg.CheckIsValueLen(fieldId);
     EXPECT_EQ(false, ret);
 }
