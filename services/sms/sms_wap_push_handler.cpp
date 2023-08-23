@@ -287,7 +287,7 @@ bool SmsWapPushHandler::DecodeXWapAbandonHeaderValue(SmsWapPushBuffer &decodeBuf
         return false;
     }
 
-    if ((oneByte >= 0) && (oneByte <= wapShortLengthMax)) {
+    if (oneByte <= wapShortLengthMax) {
         if (!decodeBuffer.IncreasePointer(oneByte)) {
             TELEPHONY_LOGE("Wap push IncreasePointer fail.");
             return false;

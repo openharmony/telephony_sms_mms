@@ -96,8 +96,6 @@ void MmsApnInfo::PdpProfileSelect(const std::shared_ptr<DataShare::DataShareHelp
         return;
     }
     int columnIndex;
-    std::string mccmncVal;
-    std::string apnVal;
     std::string homeUrlVal;
     std::string mmsIPAddressVal;
 

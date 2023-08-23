@@ -138,9 +138,8 @@ bool MmsPersistHelper::QueryMmsPdu(const std::string &dbUrl)
     resultSet->Close();
     helper->Release();
     std::string mmsPdu;
-    char pduChar = 0x00;
     for (size_t i = 0; i + 1 < blobValue.size(); i = i + SLIDE_STEP) {
-        pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);
+        char pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);
         mmsPdu += static_cast<char>(pduChar);
     }
     TELEPHONY_LOGI("blob len:%{public}d, mmsPdu len:%{public}d", static_cast<uint32_t>(blobValue.size()),

@@ -191,14 +191,13 @@ bool SmsWapPushContentType::DecodeCTGeneralForm(SmsWapPushBuffer &decodeBuffer, 
  */
 bool SmsWapPushContentType::DecodeParameter(SmsWapPushBuffer &decodeBuffer, int32_t valueLength)
 {
-    uint8_t oneByte = 0;
-    uint8_t paramCode = 0;
     while (valueLength > 0) {
+        uint8_t oneByte = 0;
         if (!decodeBuffer.GetOneByte(oneByte)) {
             TELEPHONY_LOGE("Wap push DecodeParameter GetOneByte fail.");
             return false;
         }
-        paramCode = oneByte;
+        uint8_t paramCode = oneByte;
         valueLength--;
         switch (static_cast<WapContentParam>(paramCode)) {
             case WapContentParam::CT_P_CHARSET: {
