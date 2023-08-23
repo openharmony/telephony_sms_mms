@@ -158,21 +158,18 @@ bool GsmCbUmtsCodec::Decode3g7Bit()
         TELEPHONY_LOGE("dataPdu empty.");
         return false;
     }
-
-    uint16_t offset = 0;
-    uint16_t dataLen = 0;
     uint16_t pduLen = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition();
 
     const uint8_t *tpdu = dataPdu.data();
     for (uint8_t i = 0; i < cbHeader_->totalPages; ++i) {
-        uint8_t pageLenOffset = (i + 1) * MAX_PAGE_PDU_LEN + i;
+        uint16_t pageLenOffset = (i + 1) * MAX_PAGE_PDU_LEN + i;
         if (pduLen <= pageLenOffset) {
             TELEPHONY_LOGE("CB Msg Size err [%{pulbic}d]", pduLen);
             messageRaw_.clear();
             return false;
         }
-        dataLen = tpdu[pageLenOffset];
-        offset = (i * MAX_PAGE_PDU_LEN) + i;
+        uint16_t dataLen = tpdu[pageLenOffset];
+        uint16_t offset = (i * MAX_PAGE_PDU_LEN) + i;
         if (dataLen > MAX_PAGE_PDU_LEN) {
             TELEPHONY_LOGE("CB Msg Size is over MAX [%{pulbic}d]", dataLen);
             messageRaw_.clear();
@@ -183,8 +180,8 @@ bool GsmCbUmtsCodec::Decode3g7Bit()
         uint8_t pageData[MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT] = { 0 };
         unpackLen = SmsCommonUtils::Unpack7bitChar(
             &tpdu[offset], dataLen, 0x00, pageData, MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT);
-        for (uint16_t i = 0; i < unpackLen; i++) {
-            messageRaw_.push_back(pageData[i]);
+        for (uint16_t position = 0; position < unpackLen; position++) {
+            messageRaw_.push_back(pageData[position]);
         }
     }
     cbCodec_->SetCbMessageRaw(messageRaw_);
@@ -213,7 +210,7 @@ bool GsmCbUmtsCodec::Decode3gUCS2()
     uint16_t tpduLen = dataPdu.size();
     for (uint8_t i = 0; i < cbHeader_->totalPages; ++i) {
         TELEPHONY_LOGI("cbHeader_->totalPages:%{public}d", cbHeader_->totalPages);
-        uint8_t pageLenOffset = static_cast<uint8_t>((i + 1) * MAX_PAGE_PDU_LEN + i);
+        uint16_t pageLenOffset = static_cast<uint8_t>((i + 1) * MAX_PAGE_PDU_LEN + i);
         if (pduLen <= pageLenOffset) {
             TELEPHONY_LOGE("pageLenOffset invalid.");
             messageRaw_.clear();
@@ -227,8 +224,8 @@ bool GsmCbUmtsCodec::Decode3gUCS2()
             offset = (i * MAX_PAGE_PDU_LEN) + i;
         }
         if (dataLen > 0 && dataLen <= MAX_PAGE_PDU_LEN && dataLen < tpduLen) {
-            for (uint8_t i = offset; i < offset + dataLen; i++) {
-                messageRaw_.push_back(static_cast<char>(tpdu[i]));
+            for (uint8_t position = offset; position < offset + dataLen; position++) {
+                messageRaw_.push_back(static_cast<char>(tpdu[position]));
             }
         }
     }

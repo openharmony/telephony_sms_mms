@@ -232,12 +232,12 @@ int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, const std::string &sto
 std::string MmsNetworkClient::GetIfaceName()
 {
     int32_t simId = CoreManagerInner::GetInstance().GetSimId(slotId_);
-    TELEPHONY_LOGI("slot = %{public}d, simId = %{public}d", slotId_, simId);
     std::list<int32_t> netIdList;
     int32_t ret =
         NetConnClient::GetInstance().GetNetIdByIdentifier(SIMID_IDENT_PREFIX + std::to_string(simId), netIdList);
-    TELEPHONY_LOGI("netIdList size = %{public}zu", netIdList.size());
-    std::string ifaceName;
+    TELEPHONY_LOGI(
+        "slot = %{public}d, simId = %{public}d, netIdList size = %{public}zu", slotId_, simId, netIdList.size());
+    std::string ifaceName = "";
     if (ret != NETMANAGER_SUCCESS) {
         TELEPHONY_LOGE("get netIdList by identifier fail, ret = %{public}d", ret);
         return ifaceName;
@@ -251,16 +251,22 @@ std::string MmsNetworkClient::GetIfaceName()
     for (sptr<NetHandle> netHandle : netList) {
         TELEPHONY_LOGI("netHandle->GetNetId() = %{public}d", netHandle->GetNetId());
         for (auto netId : netIdList) {
-            if (netId == netHandle->GetNetId()) {
-                NetLinkInfo info;
-                NetConnClient::GetInstance().GetConnectionProperties(*netHandle, info);
-                ifaceName = info.ifaceName_;
-                TELEPHONY_LOGI("data is connected ifaceName = %{public}s", ifaceName.c_str());
-                return ifaceName;
+            if (netId != netHandle->GetNetId()) {
+                continue;
             }
+            NetAllCapabilities capabilities;
+            NetConnClient::GetInstance().GetNetCapabilities(*netHandle, capabilities);
+            auto search = capabilities.netCaps_.find(NetCap::NET_CAPABILITY_MMS);
+            if (search == capabilities.netCaps_.end()) {
+                continue;
+            }
+            NetLinkInfo info;
+            NetConnClient::GetInstance().GetConnectionProperties(*netHandle, info);
+            ifaceName = info.ifaceName_;
+            TELEPHONY_LOGI("data is connected ifaceName = %{public}s", ifaceName.c_str());
+            return ifaceName;
         }
     }
-
     TELEPHONY_LOGI("slot = %{public}d data is not connected for this slot", slotId_);
     return ifaceName;
 }

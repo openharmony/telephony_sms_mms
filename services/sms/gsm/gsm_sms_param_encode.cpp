@@ -103,7 +103,7 @@ uint8_t GsmSmsParamEncode::EncodeSmscPdu(const char *num, uint8_t *resultNum)
         TELEPHONY_LOGE("digit to bcd error!");
         return 0;
     }
-    if (encodeLen < 0 || encodeLen >= MAX_SMSC_LEN) {
+    if (encodeLen == 0 || encodeLen >= MAX_SMSC_LEN) {
         TELEPHONY_LOGE("encodeLen error!");
         return 0;
     }

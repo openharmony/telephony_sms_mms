@@ -89,10 +89,9 @@ bool GsmSmsTpduEncode::EncodeSubmitPduPartData(SmsWriteBuffer &buffer, const str
     buffer.MoveForward(HEX_VALUE_01);
     /* TP-VP */
     std::string vpTime;
-    uint8_t position = 0;
     if (pSubmit->vpf != SMS_VPF_NOT_PRESENT) {
         paramCodec_->EncodeTimePdu(&pSubmit->validityPeriod, vpTime);
-        position = vpTime.size();
+        uint8_t position = vpTime.size();
         if (position > 0) {
             if (buffer.data_ == nullptr || (buffer.GetIndex() + position) > buffer.GetSize()) {
                 TELEPHONY_LOGE("buffer error.");
@@ -117,8 +116,8 @@ void GsmSmsTpduEncode::EncodeSubmitTpduType(SmsWriteBuffer &buffer, const struct
         return;
     }
     /* TP-RD */
-    uint8_t oneByte = 0;
     if (pSubmit.bRejectDup) {
+        uint8_t oneByte = 0;
         if (!buffer.GetTopValue(oneByte)) {
             TELEPHONY_LOGE("get data error.");
             return;
@@ -269,9 +268,9 @@ bool GsmSmsTpduEncode::EncodeDeliverPartData(SmsWriteBuffer &buffer, const struc
         return false;
     }
 
-    uint8_t oneByte = 0;
     /* TP-RP */
     if (pDeliver->bReplyPath == true) {
+        uint8_t oneByte = 0;
         if (!buffer.GetTopValue(oneByte)) {
             TELEPHONY_LOGE("get data error.");
             return false;
@@ -361,8 +360,8 @@ bool GsmSmsTpduEncode::EncodeDeliverReportPdu(SmsWriteBuffer &buffer, const stru
         return false;
     }
     /* TP-UDHI */
-    uint8_t oneByte = 0;
     if (pDeliverRep->bHeaderInd == true) {
+        uint8_t oneByte = 0;
         if (!buffer.GetTopValue(oneByte)) {
             TELEPHONY_LOGE("get data error.");
             return false;

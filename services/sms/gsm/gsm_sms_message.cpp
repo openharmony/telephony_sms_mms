@@ -541,7 +541,9 @@ void GsmSmsMessage::ConvertUserData()
         case SMS_TPDU_DELIVER:
             headerDataLen_ = smsTpdu_->data.deliver.userData.length;
             ret = memcpy_s(&smsUserData_, udLen, &(smsTpdu_->data.deliver.userData), udLen);
-            ret = ret && memcpy_s(&smsWapPushUserData_, tpduLen, &(smsTpdu_->data.deliver.udData), tpduLen);
+            if (ret == EOK) {
+                ret = memcpy_s(&smsWapPushUserData_, tpduLen, &(smsTpdu_->data.deliver.udData), tpduLen);
+            }
             break;
         case SMS_TPDU_STATUS_REP:
             headerDataLen_ = smsTpdu_->data.statusRep.userData.length;
