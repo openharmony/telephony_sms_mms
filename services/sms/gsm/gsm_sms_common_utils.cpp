@@ -203,10 +203,8 @@ bool GsmSmsCommonUtils::BcdToDigit(const uint8_t *bcd, uint8_t bcdLen, std::stri
         TELEPHONY_LOGE("data error.");
         return false;
     }
-
-    uint8_t temp;
     for (uint8_t i = 0; i < bcdLen; i++) {
-        temp = bcd[i] & HEX_VALUE_0F;
+        uint8_t temp = bcd[i] & HEX_VALUE_0F;
         if (digit.size() + MIN_REMAIN_LEN >= maxDigitLen) {
             TELEPHONY_LOGE("digit size over max");
             return false;
