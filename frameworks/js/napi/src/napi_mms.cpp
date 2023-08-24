@@ -1815,8 +1815,7 @@ void GetMmsPduFromDataBase(NapiMmsPduHelper &helper)
     helper.NotifyAll();
 }
 
-static bool StoreDownloadMmsPduToDataBase(MmsContext &context, std::string &dbUrl, std::string &storeFileName,
-    std::shared_ptr<OHOS::DataShare::DataShareHelper> g_dbHelper)
+static bool StoreDownloadMmsPduToDataBase(MmsContext &context, std::string &dbUrl, std::string &storeFileName)
 {
     if (!STORE_MMS_PDU_TO_FILE) {
         storeFileName = NapiUtil::ToUtf8(context.data);
@@ -1845,8 +1844,6 @@ void NativeDownloadMms(napi_env env, void *data)
     auto asyncContext = static_cast<MmsContext *>(data);
     if (asyncContext == nullptr) {
         TELEPHONY_LOGE("asyncContext nullptr");
-        asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
-        asyncContext->resolved = false;
         return;
     }
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
@@ -1862,7 +1859,7 @@ void NativeDownloadMms(napi_env env, void *data)
     }
     std::string dbUrl;
     std::string storeFileName;
-    if (!StoreDownloadMmsPduToDataBase(*asyncContext, dbUrl, storeFileName, g_dbHelper)) {
+    if (!StoreDownloadMmsPduToDataBase(*asyncContext, dbUrl, storeFileName)) {
         TELEPHONY_LOGE("store mms pdu fail");
         return;
     }
