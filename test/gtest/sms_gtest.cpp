@@ -894,8 +894,8 @@ void SendDataMessageTestFuc(SmsMmsTestHelper &helper)
 
 void SendDataMessageTestFuc2(SmsMmsTestHelper &helper)
 {
-    std::string dest = DES_ADDR;
     std::u16string simcardNumber;
+    std::string dest = DES_ADDR;
     if (!CoreServiceClient::GetInstance().GetSimTelephoneNumber(helper.slotId, simcardNumber) &&
         !simcardNumber.empty()) {
         dest = StringUtils::ToUtf8(simcardNumber);
@@ -1003,8 +1003,8 @@ void SendTextMessageTestFuc(SmsMmsTestHelper &helper)
     }
 
     std::string sca("");
-    OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
     OHOS::sptr<SmsDeliveryCallbackGTest> deliveryCallBackPtr(new SmsDeliveryCallbackGTest(helper));
+    OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
     std::string text = TEXT_SMS_CONTENT;
     if (sendCallBackPtr == nullptr) {
         TELEPHONY_LOGI("sendCallBackPtr is nullptr");
@@ -1024,16 +1024,16 @@ void SendTextMessageTestFuc(SmsMmsTestHelper &helper)
 
 void SendTextMessageTestFuc2(SmsMmsTestHelper &helper)
 {
-    std::string dest = DES_ADDR;
     std::u16string simcardNumber;
+    std::string dest = DES_ADDR;
     if (!CoreServiceClient::GetInstance().GetSimTelephoneNumber(helper.slotId, simcardNumber) &&
         !simcardNumber.empty()) {
         dest = StringUtils::ToUtf8(simcardNumber);
     }
 
     std::string sca("");
-    OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
     OHOS::sptr<SmsDeliveryCallbackGTest> deliveryCallBackPtr(new SmsDeliveryCallbackGTest(helper));
+    OHOS::sptr<SmsSendCallbackGTest> sendCallBackPtr(new SmsSendCallbackGTest(helper));
     std::string text = TEXT_SMS_CONTENT;
     if (sendCallBackPtr == nullptr) {
         TELEPHONY_LOGI("sendCallBackPtr is nullptr");

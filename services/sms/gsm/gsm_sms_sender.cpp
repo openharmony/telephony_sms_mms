@@ -105,12 +105,12 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
         if (cellsInfosSize > 1) {
             indexer->SetIsConcat(true);
             SmsConcat concat;
-            concat.is8Bits = true;
             concat.msgRef = msgRef8bit;
             concat.totalSeg = static_cast<uint16_t>(cellsInfosSize);
             concat.seqNum = static_cast<uint16_t>(i + 1);
             indexer->SetSmsConcat(concat);
             headerCnt += gsmSmsMessage.SetHeaderConcat(headerCnt, concat);
+            concat.is8Bits = true;
         }
         /* Set User Data Header for Alternate Reply Address */
         headerCnt += gsmSmsMessage.SetHeaderReply(headerCnt);
@@ -121,8 +121,9 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
         tpdu->data.submit.bHeaderInd = (headerCnt > 0) ? true : false;
 
         if (cellsInfosSize > 1 && i < (cellsInfosSize - 1)) {
-            tpdu->data.submit.bStatusReport = false;
             isMore = true;
+            tpdu->data.submit.bStatusReport = false;
+
         } else {
             tpdu->data.submit.bStatusReport = isStatusReport;
             isMore = false;

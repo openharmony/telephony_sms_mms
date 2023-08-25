@@ -50,8 +50,8 @@ public:
     static bool CharIsToken(uint8_t oneByte);
     bool DecodeTokenText(std::string &str, uint32_t &len);
     bool DecodeQuotedText(std::string &str, uint32_t &len);
-    bool DecodeShortInteger(uint8_t &sInteger);
     bool DecodeIsShortInt();
+    bool DecodeShortInteger(uint8_t &sInteger);
     bool DecodeLongInteger(uint64_t &lInteger);
     bool DecodeInteger(uint64_t &iInteger);
     bool DecodeIsValueLength();
