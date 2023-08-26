@@ -246,8 +246,8 @@ bool CdmaSmsAddressParameter::Decode(SmsReadBuffer &pdu)
         return false;
     }
 
-    uint8_t v1 = 0;
     uint8_t v2 = 0;
+    uint8_t v1 = 0;
     if (!pdu.ReadBits(v1) || !pdu.ReadBits(v2)) {
         TELEPHONY_LOGE("digit mode or number mode read error");
         return false;

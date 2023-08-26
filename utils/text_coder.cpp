@@ -303,12 +303,12 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
     }
     std::unique_ptr<WCHAR[]> ucs2Text = std::make_unique<WCHAR[]>(maxUcs2Length);
     if (ucs2Text == nullptr) {
-        TELEPHONY_LOGE("make_unique error");
+        TELEPHONY_LOGE("GsmUtf8ToAuto make_unique error");
         return 0;
     }
     WCHAR *pUcs2Text = ucs2Text.get();
     if (memset_s(pUcs2Text, maxUcs2Length * sizeof(WCHAR), 0x00, maxUcs2Length * sizeof(WCHAR)) != EOK) {
-        TELEPHONY_LOGE("memset_s error");
+        TELEPHONY_LOGE("GsmUtf8ToAuto memset_s error");
         return 0;
     }
     int ucs2Length = Utf8ToUcs2(reinterpret_cast<uint8_t *>(pUcs2Text), maxUcs2Length * sizeof(WCHAR), src, srcLength);
@@ -317,16 +317,16 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
         scheme = DATA_CODING_8BIT;
         tempTextLen = (srcLength > maxLength) ? maxLength : srcLength;
         if (memcpy_s(dest, tempTextLen, src, tempTextLen) != EOK) {
-            TELEPHONY_LOGE("memcpy_s error");
+            TELEPHONY_LOGE("GsmUtf8ToAuto memcpy_s error");
         }
         return tempTextLen;
     }
     bool unknown = false;
-    int gsm7bitLength = Ucs2ToGsm7bitAuto(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length, unknown);
+    int length = Ucs2ToGsm7bitAuto(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length, unknown);
     if (unknown) {
         scheme = DATA_CODING_UCS2;
         if (ucs2Length <= 0) {
-            return gsm7bitLength;
+            return length;
         }
         tempTextLen = (ucs2Length > maxLength) ? maxLength : ucs2Length;
         if (memcpy_s(dest, tempTextLen, pUcs2Text, tempTextLen) != EOK) {
@@ -335,24 +335,24 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
         return tempTextLen;
     }
     scheme = DATA_CODING_7BIT;
-    return gsm7bitLength;
+    return length;
 }
 
 int TextCoder::CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme)
 {
     int maxUcs2Length = srcLength;
     if (maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
-        TELEPHONY_LOGE("src over size");
+        TELEPHONY_LOGE("CdmaUtf8ToAuto src over size");
         return 0;
     }
     std::unique_ptr<WCHAR[]> ucs2Text = std::make_unique<WCHAR[]>(maxUcs2Length);
     if (ucs2Text == nullptr) {
-        TELEPHONY_LOGE("make_unique error");
+        TELEPHONY_LOGE("CdmaUtf8ToAuto make_unique error");
         return 0;
     }
     WCHAR *pUcs2Text = ucs2Text.get();
     if (memset_s(pUcs2Text, maxUcs2Length * sizeof(WCHAR), 0x00, maxUcs2Length * sizeof(WCHAR)) != EOK) {
-        TELEPHONY_LOGE("memset_s error");
+        TELEPHONY_LOGE("CdmaUtf8ToAuto memset_s error");
         return 0;
     }
     int ucs2Length = Utf8ToUcs2(reinterpret_cast<uint8_t *>(pUcs2Text), maxUcs2Length * sizeof(WCHAR), src, srcLength);
@@ -393,21 +393,21 @@ int TextCoder::Gsm7bitToUtf8(
 {
     int maxUcs2Length = srcLength;
     if (maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
-        TELEPHONY_LOGE("src over size");
+        TELEPHONY_LOGE("Gsm7bitToUtf8 src over size");
         return 0;
     }
     std::unique_ptr<WCHAR[]> ucs2Text = std::make_unique<WCHAR[]>(maxUcs2Length);
     if (ucs2Text == nullptr) {
-        TELEPHONY_LOGE("make_unique error");
+        TELEPHONY_LOGE("Gsm7bitToUtf8 make_unique error");
         return 0;
     }
     WCHAR *pUcs2Text = ucs2Text.get();
     if (memset_s(pUcs2Text, maxUcs2Length * sizeof(WCHAR), 0x00, maxUcs2Length * sizeof(WCHAR)) != EOK) {
-        TELEPHONY_LOGE("memset_s error");
+        TELEPHONY_LOGE("Gsm7bitToUtf8 memset_s error");
         return 0;
     }
-    TELEPHONY_LOGI("srcLength = %{public}d", srcLength);
     TELEPHONY_LOGI("max dest Length = %{public}d", maxLength);
+    TELEPHONY_LOGI("srcLength = %{public}d", srcLength);
     int ucs2Length =
         Gsm7bitToUcs2(reinterpret_cast<uint8_t *>(pUcs2Text), maxUcs2Length * sizeof(WCHAR), src, srcLength, langInfo);
     if (ucs2Length > maxLength) {
@@ -440,12 +440,12 @@ int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int 
     if (err != 0) {
         TELEPHONY_LOGE("g_iconv result is %{public}u", err);
     }
-    int utf8Length = maxLength - static_cast<int>(remainedLength);
-    if (utf8Length < 0 || utf8Length >= maxLength) {
+    int length = maxLength - static_cast<int>(remainedLength);
+    if (length < 0 || length >= maxLength) {
         return 0;
     }
-    dest[utf8Length] = 0x00;
-    return utf8Length;
+    dest[length] = 0x00;
+    return length;
 }
 
 int TextCoder::EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength)
@@ -459,8 +459,8 @@ int TextCoder::EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int
         return 0;
     }
 
-    gsize textLen = static_cast<gsize>(srcLength);
     gsize remainedLength = static_cast<gsize>(maxLength);
+    gsize textLen = static_cast<gsize>(srcLength);
     uint32_t err = 0;
     GIConv cd = g_iconv_open("UTF8", "EUCKR");
     if (cd != nullptr) {
@@ -572,9 +572,9 @@ int TextCoder::Ucs2ToGsm7bitAuto(uint8_t *dest, int maxLength, const uint8_t *sr
     std::map<uint16_t, uint8_t>::iterator itChar;
     std::map<uint16_t, uint8_t>::iterator itExt;
     uint16_t inText;
-    for (int index = 0; index < srcLength - 1; index += UCS2_LEN_MIN) {
-        inText = src[index];
-        inText = ((inText << 0x08) & 0xFF00) | src[index + 1];
+    for (int i = 0; i < srcLength - 1; i += UCS2_LEN_MIN) {
+        inText = src[i];
+        inText = ((inText << 0x08) & 0xFF00) | src[i + 1];
         itChar = gsm7bitDefMap_.find(inText); // check gsm7bit default char
         if (itChar != gsm7bitDefMap_.end()) {
             dest[outTextLen++] = static_cast<uint8_t>(itChar->second);
@@ -674,7 +674,7 @@ int TextCoder::FindGsm7bitExt(uint8_t *dest, int maxLength, const uint16_t inTex
     }
     // prevent buffer overflow
     if (maxLength <= outTextLen + 1) {
-        TELEPHONY_LOGE("buffer overflow");
+        TELEPHONY_LOGE("FindGsm7bitExt buffer overflow");
         return outTextLen;
     }
     dest[outTextLen++] = 0x1B;
@@ -697,7 +697,7 @@ int TextCoder::FindTurkish(uint8_t *dest, int maxLength, const uint16_t inText)
     }
     // prevent buffer overflow
     if (maxLength <= outTextLen + 1) {
-        TELEPHONY_LOGE("buffer overflow");
+        TELEPHONY_LOGE("FindTurkish buffer overflow");
         return outTextLen;
     }
     dest[outTextLen++] = 0x1B;
@@ -720,7 +720,7 @@ int TextCoder::FindSpanish(uint8_t *dest, int maxLength, const uint16_t inText)
     }
     // prevent buffer overflow
     if (maxLength <= outTextLen + 1) {
-        TELEPHONY_LOGE("buffer overflow");
+        TELEPHONY_LOGE("FindSpanish buffer overflow");
         return outTextLen;
     }
     dest[outTextLen++] = 0x1B;
@@ -743,7 +743,7 @@ int TextCoder::FindPortu(uint8_t *dest, int maxLength, const uint16_t inText)
     }
     // prevent buffer overflow
     if (maxLength <= outTextLen + 1) {
-        TELEPHONY_LOGE("buffer overflow");
+        TELEPHONY_LOGE("FindPortu buffer overflow");
         return outTextLen;
     }
     dest[outTextLen++] = 0x1B;
