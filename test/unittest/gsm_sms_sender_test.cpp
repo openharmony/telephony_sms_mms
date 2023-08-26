@@ -43,18 +43,18 @@ void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &sm
     }
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
+    int32_t slotIdTesta;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
-    dest.clear();
+    slotIdTesta = atoi(dest.c_str());
     std::cout << "Please enter the receiver's telephone number" << std::endl;
+    dest.clear();
     std::cin >> dest;
     std::string sca("");
     OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
     OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
     uint16_t port = 100;
     uint8_t data[] = "hello world";
-    smsService->SendMessage(slotId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
+    smsService->SendMessage(slotIdTesta, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
         (sizeof(data) / sizeof(data[0]) - 1), sendCallBackPtr, deliveryCallBackPtr);
     std::cout << "TestGsmSendShortData" << std::endl;
 }
@@ -66,11 +66,11 @@ void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &sms
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
+    int32_t slotIdTestb;
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
+    slotIdTestb = atoi(dest.c_str());
     dest.clear();
     std::cout << "Please enter the receiver's telephone number" << std::endl;
     std::cin >> dest;
@@ -86,7 +86,7 @@ void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &sms
         This is the test data!This is the test data!This is the test data!)";
     uint16_t port = 100;
 
-    smsService->SendMessage(slotId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
+    smsService->SendMessage(slotIdTestb, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
         sizeof(data) / sizeof(data[0]), sendCallBackPtr, deliveryCallBackPtr);
     std::cout << "TestGsmSendLongData" << std::endl;
 }
@@ -100,9 +100,9 @@ void GsmSmsSenderTest::TestSendShortText(const sptr<ISmsServiceInterface> &smsSe
     }
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
+    int32_t slotIdTestc;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
+    slotIdTestc = atoi(dest.c_str());
     dest.clear();
     std::string text;
     std::cin.ignore();
@@ -113,7 +113,7 @@ void GsmSmsSenderTest::TestSendShortText(const sptr<ISmsServiceInterface> &smsSe
     std::string sca("");
     OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
     OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
-    smsService->SendMessage(slotId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
+    smsService->SendMessage(slotIdTestc, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
         StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
     std::cout << "TestGsmSendShortText" << std::endl;
 }
@@ -150,11 +150,11 @@ void GsmSmsSenderTest::TestSendLongText(const sptr<ISmsServiceInterface> &smsSer
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
+    int32_t slotIdTestd;
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
+    slotIdTestd = atoi(dest.c_str());
     dest.clear();
     std::cout << "Please enter the receiver's telephone number" << std::endl;
     std::cin >> dest;
@@ -168,7 +168,7 @@ void GsmSmsSenderTest::TestSendLongText(const sptr<ISmsServiceInterface> &smsSer
         This is the test data!This is the test data!This is the test data!)");
     OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
     OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
-    smsService->SendMessage(slotId, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
+    smsService->SendMessage(slotIdTestd, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
         StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
     std::cout << "TestGsmSendLongText" << std::endl;
 }
@@ -183,9 +183,9 @@ void GsmSmsSenderTest::TestSetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
     }
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
+    int32_t slotIdTeste;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
+    slotIdTeste = atoi(dest.c_str());
     dest.clear();
     std::string sca;
     std::cout << "Please enter smsc" << std::endl;
@@ -208,11 +208,11 @@ void GsmSmsSenderTest::TestGetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
     }
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
+    int32_t slotIdTestf;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
+    slotIdTestf = atoi(dest.c_str());
     dest.clear();
-    smsService->GetSmscAddr(slotId, result);
+    smsService->GetSmscAddr(slotIdTestf, result);
     std::cout << "TestGetSmscAddr:" << StringUtils::ToUtf8(result) << std::endl;
 }
 
@@ -226,10 +226,9 @@ void GsmSmsSenderTest::TestAddSimMessage(const sptr<ISmsServiceInterface> &smsSe
     }
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
+    int32_t slotIdTestg;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
-    dest.clear();
+    slotIdTestg = atoi(dest.c_str());
     std::string smsc;
     std::cout << "Please enter smsc" << std::endl;
     std::cin >> smsc;
@@ -240,7 +239,7 @@ void GsmSmsSenderTest::TestAddSimMessage(const sptr<ISmsServiceInterface> &smsSe
     std::cout << "Please enter status" << std::endl;
     std::cin >> input;
     uint32_t status = std::atoi(input.c_str());
-    result = smsService->AddSimMessage(slotId, StringUtils::ToUtf16(smsc), StringUtils::ToUtf16(pdu),
+    result = smsService->AddSimMessage(slotIdTestg, StringUtils::ToUtf16(smsc), StringUtils::ToUtf16(pdu),
         static_cast<ISmsServiceInterface::SimMessageStatus>(status));
     if (result) {
         std::cout << "TestAddSimMessage OK!" << std::endl;
@@ -257,17 +256,18 @@ void GsmSmsSenderTest::TestDelSimMessage(const sptr<ISmsServiceInterface> &smsSe
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
+    bool result = false;
+    int32_t slotIdTesth;
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
+    slotIdTesth = atoi(dest.c_str());
     dest.clear();
     std::string input;
     std::cout << "Please enter msgIndex" << std::endl;
     std::cin >> input;
     uint32_t msgIndex = std::atoi(input.c_str());
-    result = smsService->DelSimMessage(slotId, msgIndex);
+    result = smsService->DelSimMessage(slotIdTesth, msgIndex);
     if (result) {
         std::cout << "TestDelSimMessage OK!" << std::endl;
     } else {
@@ -283,11 +283,12 @@ void GsmSmsSenderTest::TestUpdateSimMessage(const sptr<ISmsServiceInterface> &sm
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
+    bool result = true;
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
+    int32_t slotIdTesti;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
+    slotIdTesti = atoi(dest.c_str());
     dest.clear();
     std::string input;
     std::cout << "Please enter msgIndex" << std::endl;
@@ -305,7 +306,7 @@ void GsmSmsSenderTest::TestUpdateSimMessage(const sptr<ISmsServiceInterface> &sm
     std::u16string pduData = StringUtils::ToUtf16(pdu);
     std::u16string smscData = StringUtils::ToUtf16(smsc);
     result = smsService->UpdateSimMessage(
-        slotId, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
+        slotIdTesti, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
     if (result) {
         std::cout << "TestUpdateSimMessage OK!" << std::endl;
     } else {
@@ -323,11 +324,11 @@ void GsmSmsSenderTest::TestGetAllSimMessages(const sptr<ISmsServiceInterface> &s
     }
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
+    int32_t slotIdTestj;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
+    slotIdTestj = atoi(dest.c_str());
     dest.clear();
-    smsService->GetAllSimMessages(slotId, result);
+    smsService->GetAllSimMessages(slotIdTestj, result);
     std::cout << "TestGetAllSimMessages Begin:" << std::endl;
     for (auto &item : result) {
         std::cout << "[" << item.GetIndexOnSim() << "] " << StringUtils::StringToHex(item.GetPdu()) << std::endl;
@@ -346,22 +347,22 @@ void GsmSmsSenderTest::TestEnableCBRangeConfig(const sptr<ISmsServiceInterface> 
     }
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
+    int32_t slotIdTestk;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
-    dest.clear();
     bool enable = true;
+    slotIdTestk = atoi(dest.c_str());
+    dest.clear();
+    uint8_t ranType = 1;
     uint32_t startMessageId = 0;
     uint32_t endMessageId = 0;
-    uint8_t ranType = 1;
-    std::string input;
     std::cout << "Please enter startMessageId" << std::endl;
+    std::string input;
     std::cin >> input;
     startMessageId = std::atoi(input.c_str());
     std::cout << "Please enter endMessageId" << std::endl;
     std::cin >> input;
     endMessageId = std::atoi(input.c_str());
-    int32_t result = smsService->SetCBConfig(slotId, enable, startMessageId, endMessageId, ranType);
+    int32_t result = smsService->SetCBConfig(slotIdTestk, enable, startMessageId, endMessageId, ranType);
     std::cout << "TestEnableCBRangeConfig:" << result << std::endl;
 }
 
@@ -374,10 +375,9 @@ void GsmSmsSenderTest::TestDisableCBRangeConfig(const sptr<ISmsServiceInterface>
     }
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
-    dest.clear();
+    int32_t slotIdTestl;
+    slotIdTestl = atoi(dest.c_str());
     bool enable = false;
     uint32_t startMessageId = 0;
     uint32_t endMessageId = 0;
@@ -389,7 +389,7 @@ void GsmSmsSenderTest::TestDisableCBRangeConfig(const sptr<ISmsServiceInterface>
     std::cout << "Please enter endMessageId" << std::endl;
     std::cin >> input;
     endMessageId = std::atoi(input.c_str());
-    int32_t result = smsService->SetCBConfig(slotId, enable, startMessageId, endMessageId, ranType);
+    int32_t result = smsService->SetCBConfig(slotIdTestl, enable, startMessageId, endMessageId, ranType);
     std::cout << "TestDisableCBRangeConfig:" << result << std::endl;
 }
 
@@ -402,9 +402,9 @@ void GsmSmsSenderTest::TestEnableCBConfig(const sptr<ISmsServiceInterface> &smsS
     }
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
+    int32_t slotIdTestm;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
+    slotIdTestm = atoi(dest.c_str());
     dest.clear();
     bool enable = true;
     uint32_t identifier = 0;
@@ -413,7 +413,7 @@ void GsmSmsSenderTest::TestEnableCBConfig(const sptr<ISmsServiceInterface> &smsS
     std::cout << "Please enter identifier" << std::endl;
     std::cin >> input;
     identifier = std::atoi(input.c_str());
-    int32_t result = smsService->SetCBConfig(slotId, enable, identifier, identifier, ranType);
+    int32_t result = smsService->SetCBConfig(slotIdTestm, enable, identifier, identifier, ranType);
     std::cout << "TestEnableCBConfig:" << result << std::endl;
 }
 
@@ -426,9 +426,9 @@ void GsmSmsSenderTest::TestDisableCBConfig(const sptr<ISmsServiceInterface> &sms
     }
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
-    int32_t slotId;
+    int32_t slotIdTestn;
     std::cin >> dest;
-    slotId = atoi(dest.c_str());
+    slotIdTestn = atoi(dest.c_str());
     dest.clear();
     bool enable = false;
     uint32_t identifier = 0;
@@ -437,7 +437,7 @@ void GsmSmsSenderTest::TestDisableCBConfig(const sptr<ISmsServiceInterface> &sms
     std::cout << "Please enter identifier" << std::endl;
     std::cin >> input;
     identifier = std::atoi(input.c_str());
-    int32_t result = smsService->SetCBConfig(slotId, enable, identifier, identifier, ranType);
+    int32_t result = smsService->SetCBConfig(slotIdTestn, enable, identifier, identifier, ranType);
     std::cout << "TestDisableCBConfig:" << result << std::endl;
 }
 

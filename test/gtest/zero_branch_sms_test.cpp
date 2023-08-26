@@ -142,9 +142,9 @@ HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
     if (deliveryCallback == nullptr) {
         return;
     }
+    const std::string text = "123";
     const std::string desAddr = "qwe";
     const std::string scAddr = "123";
-    const std::string text = "123";
     cdmaSmsSender->isImsNetDomain_ = true;
     cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
     cdmaSmsSender->TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback);

@@ -282,8 +282,8 @@ bool MmsDecodeBuffer::DecodeTokenText(std::string &str, uint32_t &len)
     while (GetOneByte(oneByte)) {
         if (oneByte != 0) {
             if (CharIsToken(oneByte)) {
-                str += oneByte;
                 len++;
+                str += oneByte;
             }
         } else {
             break;

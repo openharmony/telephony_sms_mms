@@ -135,8 +135,8 @@ bool GsmUserDataEncode::Encode8bitHeadPdu(SmsWriteBuffer &buffer, const struct S
 
     /* Encode User Data Header */
     uint16_t udhl = buffer.GetIndex();
-    for (uint8_t i = 0; i < userData->headerCnt; i++) {
-        userData_->EncodeHeader(buffer, userData->header[i]);
+    for (uint8_t index = 0; index < userData->headerCnt; index++) {
+        userData_->EncodeHeader(buffer, userData->header[index]);
     }
     if (buffer.GetIndex() > udhl) {
         udhl = buffer.GetIndex() - udhl;
@@ -146,16 +146,16 @@ bool GsmUserDataEncode::Encode8bitHeadPdu(SmsWriteBuffer &buffer, const struct S
     /* Set UDL, UDHL */
     if (udhl > 0) {
         if (!buffer.InsertByte(static_cast<uint8_t>(udhl + 1 + userData->length), location)) {
-            TELEPHONY_LOGE("write data error.");
+            TELEPHONY_LOGE("Encode8bitHeadPdu write data error.");
             return false;
         }
         if (!buffer.InsertByte(static_cast<uint8_t>(udhl), location + 1)) {
-            TELEPHONY_LOGE("write data error.");
+            TELEPHONY_LOGE("Encode8bitHeadPdu write data error.");
             return false;
         }
     } else {
         if (!buffer.InsertByte(userData->length, location)) {
-            TELEPHONY_LOGE("write data error.");
+            TELEPHONY_LOGE("Encode8bitHeadPdu write data error.");
             return false;
         }
     }
@@ -209,8 +209,8 @@ bool GsmUserDataEncode::EncodeUcs2HeadPdu(SmsWriteBuffer &buffer, const struct S
 
     /* Encode User Data Header */
     uint16_t udhl = buffer.GetIndex();
-    for (uint8_t i = 0; i < userData->headerCnt; i++) {
-        userData_->EncodeHeader(buffer, userData->header[i]);
+    for (uint8_t j = 0; j < userData->headerCnt; j++) {
+        userData_->EncodeHeader(buffer, userData->header[j]);
     }
     if (buffer.GetIndex() > udhl) {
         udhl = buffer.GetIndex() - udhl;
@@ -221,16 +221,16 @@ bool GsmUserDataEncode::EncodeUcs2HeadPdu(SmsWriteBuffer &buffer, const struct S
     /* Set UDL, UDHL */
     if (udhl > 0) {
         if (!buffer.InsertByte(static_cast<uint8_t>(udhl + 1 + userData->length), location)) {
-            TELEPHONY_LOGE("write data error.");
+            TELEPHONY_LOGE("EncodeUcs2HeadPdu write data error.");
             return false;
         }
         if (!buffer.InsertByte(static_cast<uint8_t>(udhl), location + 1)) {
-            TELEPHONY_LOGE("write data error.");
+            TELEPHONY_LOGE("EncodeUcs2HeadPdu write data error.");
             return false;
         }
     } else {
         if (!buffer.InsertByte(userData->length, location)) {
-            TELEPHONY_LOGE("write data error.");
+            TELEPHONY_LOGE("EncodeUcs2HeadPdu write data error.");
             return false;
         }
     }
