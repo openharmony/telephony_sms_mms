@@ -212,6 +212,18 @@ static void SendMessageCallback(napi_env env, napi_status status, void *data)
         TELEPHONY_LOGI("asyncContext->errorCode:%{public}d.", error.errorCode);
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
+    if (asyncContext->destinationHost.capacity() != 0) {
+        asyncContext->destinationHost = u"";
+    }
+    if (asyncContext->serviceCenter.capacity() != 0) {
+        asyncContext->serviceCenter = u"";
+    }
+    if (asyncContext->textContent.capacity() != 0) {
+        asyncContext->textContent = u"";
+    }
+    if (asyncContext->messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
+        std::vector<unsigned char>().swap(asyncContext->rawDataContent);
+    }
     NapiUtil::Handle1ValueCallback(env, asyncContext, callbackValue);
 }
 
@@ -475,6 +487,9 @@ static void CreateMessageCallback(napi_env env, napi_status status, void *data)
     }
     if (asyncContext->pdu.capacity() != 0) {
         std::vector<unsigned char>().swap(asyncContext->pdu);
+    }
+    if (asyncContext->specification.capacity() != 0) {
+        std::string().swap(asyncContext->specification);
     }
     NapiUtil::Handle2ValueCallback(env, asyncContext, callbackValue);
 }
@@ -781,6 +796,9 @@ static void SetSmscAddrCallback(napi_env env, napi_status status, void *data)
             context->errorCode, "setSmscAddr", "ohos.permission.SET_TELEPHONY_STATE");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
+    if (context->smscAddr.capacity() != 0) {
+        std::string().swap(context->smscAddr);
+    }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
 
@@ -859,6 +877,9 @@ static void GetSmscAddrCallback(napi_env env, napi_status status, void *data)
         JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
             context->errorCode, "getSmscAddr", "ohos.permission.GET_TELEPHONY_STATE");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    if (context->smscAddr.capacity() != 0) {
+        std::string().swap(context->smscAddr);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
@@ -946,6 +967,12 @@ static void AddSimMessageCallback(napi_env env, napi_status status, void *data)
         JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
             context->errorCode, "addSimMessage", "ohos.permission.SEND_MESSAGES");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    if (context->smsc.capacity() != 0) {
+        std::string().swap(context->smsc);
+    }
+    if (context->pdu.capacity() != 0) {
+        std::string().swap(context->pdu);
     }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
@@ -1128,6 +1155,12 @@ static void UpdateSimMessageCallback(napi_env env, napi_status status, void *dat
             context->errorCode, "updateSimMessage", "ohos.permission.SEND_MESSAGES");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
+    if (context->smsc.capacity() != 0) {
+        std::string().swap(context->smsc);
+    }
+    if (context->pdu.capacity() != 0) {
+        std::string().swap(context->pdu);
+    }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
 
@@ -1242,6 +1275,9 @@ static void GetAllSimMessagesCallback(napi_env env, napi_status status, void *da
         JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
             context->errorCode, "getAllSimMessages", "ohos.permission.RECEIVE_SMS");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    if (context->messageArray.capacity() != 0) {
+        std::vector<ShortMessage>().swap(context->messageArray);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
@@ -1417,6 +1453,12 @@ static void SplitMessageCallback(napi_env env, napi_status status, void *data)
             context->errorCode, "splitMessage", "ohos.permission.SEND_MESSAGES");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
+    if (context->content.capacity() != 0) {
+        std::string().swap(context->content);
+    }
+    if (context->messageArray.capacity() != 0) {
+        std::vector<std::u16string>().swap(context->messageArray);
+    }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
 
@@ -1506,6 +1548,9 @@ static void GetSmsSegmentsInfoCallback(napi_env env, napi_status status, void *d
         JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
             context->errorCode, "getSmsSegmentsInfo", "ohos.permission.GET_TELEPHONY_STATE");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    if (context->content.capacity() != 0) {
+        std::string().swap(context->content);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }

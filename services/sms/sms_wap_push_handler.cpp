@@ -303,7 +303,7 @@ bool SmsWapPushHandler::DecodeXWapAbandonHeaderValue(SmsWapPushBuffer &decodeBuf
             TELEPHONY_LOGE("Wap push IncreasePointer fail.");
             return false;
         }
-    } else if ((wapLengthQuote < oneByte) && (oneByte <= textLengthMax)) {
+    } else if (oneByte <= textLengthMax) {
         std::string strTemp = "";
         uint32_t length = 0;
         if (!decodeBuffer.DecodeText(strTemp, length)) {
