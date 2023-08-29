@@ -201,9 +201,6 @@ bool GsmCbUmtsCodec::Decode3gUCS2()
         TELEPHONY_LOGE("dataPdu empty.");
         return false;
     }
-
-    uint16_t dataLen = 0;
-    uint16_t offset = 0;
     uint16_t pduLen = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition();
 
     uint8_t *tpdu = dataPdu.data();
@@ -216,6 +213,8 @@ bool GsmCbUmtsCodec::Decode3gUCS2()
             messageRaw_.clear();
             return false;
         }
+        uint16_t dataLen = 0;
+        uint16_t offset = 0;
         if (cbHeader_->dcs.iso639Lang[0]) {
             dataLen = tpdu[pageLenOffset] - HEX_VALUE_02;
             offset = (i * MAX_PAGE_PDU_LEN) + i + HEX_VALUE_02;
