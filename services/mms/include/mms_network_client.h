@@ -66,11 +66,11 @@ private:
     static constexpr int32_t DEFAULT_ERROR_SIZE = 256;
     static constexpr int32_t MAX_MMSC_SIZE = 50;
     static constexpr int32_t MAX_MMSC_PROXY_SIZE = 50;
-    char errorBuffer_[DEFAULT_ERROR_SIZE];
-    char mmscChar_[MAX_MMSC_SIZE];
-    char proxyChar_[MAX_MMSC_PROXY_SIZE];
-    int64_t connectionTimeout_;
-    int64_t transOpTimeout_;
+    char errorBuffer_[DEFAULT_ERROR_SIZE] = { 0 };
+    char mmscChar_[MAX_MMSC_SIZE] = { 0 };
+    char proxyChar_[MAX_MMSC_PROXY_SIZE] = { 0 };
+    int64_t connectionTimeout_ = 0;
+    int64_t transOpTimeout_ = 0;
     int64_t lastTransTime_ = 0;
     std::string ifaceName_;
     int32_t slotId_ = -1;
