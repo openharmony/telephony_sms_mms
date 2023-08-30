@@ -274,6 +274,34 @@ public:
     bool GetEncodeStringFunc(
         std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString);
 
+    /**
+     * Send a Mms.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param mmsc Indicates service center of mms
+     * @param data Indicates mms pdu byte array
+     * @param ua Indicates mms user agent
+     * @param uaprof Indicates mms user agent profile
+     * @return Returns {@code 0} if send mms success; returns {@code false} otherwise
+     */
+    int32_t SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua,
+        const std::u16string &uaprof);
+
+    /**
+     * Download a Mms.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param mmsc Indicates service center of mms
+     * @param data Indicates mms pdu byte array
+     * @param ua Indicates mms user agent
+     * @param uaprof Indicates mms user agent profile
+     * @return Returns {@code 0} if download mms success; returns {@code false} otherwise
+     */
+    int32_t DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+        const std::u16string &ua, const std::u16string &uaprof);
+
 private:
     std::mutex mutex_;
     sptr<ISmsServiceInterface> smsServiceInterface_;

@@ -118,9 +118,9 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
         pContext->callbackRef = callbackRef_;
         pContext->result = WrapSmsSendResult(result);
         work->data = static_cast<void *>(pContext);
-        uv_queue_work(
+        uv_queue_work_with_qos(
             loop, work, [](uv_work_t *work) {},
-            [](uv_work_t *work, int status) { CompleteSmsSendWork(work, status); });
+            [](uv_work_t *work, int status) { CompleteSmsSendWork(work, status); }, uv_qos_default);
     }
 }
 } // namespace Telephony

@@ -15,6 +15,10 @@
 #include "napi_mms.h"
 
 #include "telephony_permission.h"
+#include "ability.h"
+#include "napi_base_context.h"
+#include "napi_mms_pdu.h"
+#include "napi_mms_pdu_helper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -22,8 +26,13 @@ namespace {
 const std::string g_mmsFilePathName = "mmsFilePathName";
 const std::string mmsTypeKey = "mmsType";
 const std::string attachmentKey = "attachment";
+const std::string SMS_PROFILE_URI = "datashare:///com.ohos.smsmmsability";
 static const int32_t DEFAULT_REF_COUNT = 1;
 static const uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
+const bool STORE_MMS_PDU_TO_FILE = false;
+const uint32_t MMS_PDU_MAX_SIZE = 300 * 1024;
+const int32_t ARGS_ONE = 1;
+std::shared_ptr<DataShare::DataShareHelper> g_dbHelper = nullptr;
 } // namespace
 
 static void SetPropertyArray(napi_env env, napi_value object, const std::string &name, MmsAttachmentContext &context)
@@ -298,6 +307,7 @@ void NativeDecodeMms(napi_env env, void *data)
     }
     auto context = static_cast<DecodeMmsContext *>(data);
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
         context->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
         return;
     }
@@ -644,6 +654,23 @@ void ParseDecodeMmsParam(napi_env env, napi_value object, DecodeMmsContext &cont
 int32_t GetMatchDecodeMmsResult(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
     TELEPHONY_LOGI("napi_mms GetMatchDecodeMmsResult start");
+    int32_t paramsTypeMatched = MESSAGE_PARAMETER_NOT_MATCH;
+    switch (parameterCount) {
+        case ONE_PARAMETER:
+            paramsTypeMatched = NapiUtil::MatchParameters(env, parameters, { napi_object }) ||
+                                NapiUtil::MatchParameters(env, parameters, { napi_string });
+            break;
+        case TWO_PARAMETERS:
+            paramsTypeMatched = NapiUtil::MatchParameters(env, parameters, { napi_object, napi_function }) ||
+                                NapiUtil::MatchParameters(env, parameters, { napi_string, napi_function });
+            break;
+        default:
+            return MESSAGE_PARAMETER_NOT_MATCH;
+    }
+    if (!paramsTypeMatched) {
+        return MESSAGE_PARAMETER_NOT_MATCH;
+    }
+
     bool filePathIsStr = NapiUtil::MatchValueType(env, parameters[0], napi_string);
     bool filePathIsObj = NapiUtil::MatchValueType(env, parameters[0], napi_object);
     bool filePathIsArray = false;
@@ -705,6 +732,7 @@ bool MatchEncodeMms(napi_env env, const napi_value parameters[], size_t paramete
             return false;
     }
     if (!paramsTypeMatched) {
+        TELEPHONY_LOGE("encodeMms parameter not match");
         return false;
     }
     if (NapiUtil::HasNamedProperty(env, parameters[0], "attachment")) {
@@ -1193,7 +1221,9 @@ void setSendReqToCore(MmsMsg &mmsMsg, MmsSendReqContext &context)
     if (context.subject.size() > 0) {
         mmsMsg.SetMmsSubject(context.subject);
     }
-    mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_MESSAGE_CLASS, context.messageClass);
+    if (context.messageClass > 0) {
+        mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_MESSAGE_CLASS, context.messageClass);
+    }
     if (context.expiry > 0) {
         mmsMsg.SetHeaderIntegerValue(MmsFieldCode::MMS_EXPIRY, context.expiry);
     }
@@ -1341,6 +1371,39 @@ void SetRequestToCore(MmsMsg &mmsMsg, EncodeMmsContext *context)
     }
 }
 
+std::shared_ptr<OHOS::DataShare::DataShareHelper> GetDataAbilityHelper(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGS_ONE;
+    napi_value argv[ARGS_ONE] = { 0 };
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
+    bool isStageMode = false;
+    napi_status status = OHOS::AbilityRuntime::IsStageContext(env, argv[0], isStageMode);
+    if (status != napi_ok || !isStageMode) {
+        auto ability = OHOS::AbilityRuntime::GetCurrentAbility(env);
+        if (ability == nullptr) {
+            TELEPHONY_LOGE("Failed to get native ability instance");
+            return nullptr;
+        }
+        auto context = ability->GetContext();
+        if (context == nullptr) {
+            TELEPHONY_LOGE("Failed to get native context instance");
+            return nullptr;
+        }
+        dataShareHelper = DataShare::DataShareHelper::Creator(context->GetToken(), SMS_PROFILE_URI);
+    } else {
+        auto context = OHOS::AbilityRuntime::GetStageModeContext(env, argv[0]);
+        if (context == nullptr) {
+            TELEPHONY_LOGE("Failed to get native stage context instance");
+            return nullptr;
+        }
+        dataShareHelper = DataShare::DataShareHelper::Creator(context->GetToken(), SMS_PROFILE_URI);
+    }
+    return dataShareHelper;
+}
+
 void NativeEncodeMms(napi_env env, void *data)
 {
     if (data == nullptr) {
@@ -1355,6 +1418,7 @@ void NativeEncodeMms(napi_env env, void *data)
         return;
     }
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
         context->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
         return;
     }
@@ -1371,7 +1435,7 @@ void NativeEncodeMms(napi_env env, void *data)
         context->errorCode = TELEPHONY_ERR_FAIL;
         context->resolved = false;
     }
-    TELEPHONY_LOGI("napi_mms  NativeEncodeMms end");
+    TELEPHONY_LOGD("napi_mms NativeEncodeMms length:%{private}d", context->bufferLen);
 }
 
 void EncodeMmsCallback(napi_env env, napi_status status, void *data)
@@ -1414,6 +1478,7 @@ napi_value NapiMms::EncodeMms(napi_env env, napi_callback_info info)
         NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
+
     if (!ParseEncodeMmsParam(env, parameters[0], *context)) {
         free(context);
         context = nullptr;
@@ -1423,8 +1488,447 @@ napi_value NapiMms::EncodeMms(napi_env env, napi_callback_info info)
     if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
+
     result = NapiUtil::HandleAsyncWork(env, context, "EncodeMms", NativeEncodeMms, EncodeMmsCallback);
     TELEPHONY_LOGI("napi_mms EncodeMms end");
+    return result;
+}
+
+bool GetMmsPduFromFile(const std::string &fileName, std::string &mmsPdu)
+{
+    char realPath[PATH_MAX] = { 0 };
+    if (fileName.empty() || realpath(fileName.c_str(), realPath) == nullptr) {
+        TELEPHONY_LOGE("path or realPath is nullptr");
+        return false;
+    }
+
+    FILE *pFile = fopen(realPath, "rb");
+    if (pFile == nullptr) {
+        TELEPHONY_LOGE("openFile Error");
+        return false;
+    }
+
+    (void)fseek(pFile, 0, SEEK_END);
+    long fileLen = ftell(pFile);
+    if (fileLen <= 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
+        (void)fclose(pFile);
+        TELEPHONY_LOGE("fileLen Over Max Error");
+        return false;
+    }
+
+    std::unique_ptr<char[]> pduBuffer = std::make_unique<char[]>(fileLen);
+    if (!pduBuffer) {
+        (void)fclose(pFile);
+        TELEPHONY_LOGE("make unique pduBuffer nullptr Error");
+        return false;
+    }
+    (void)fseek(pFile, 0, SEEK_SET);
+    int32_t totolLength = static_cast<int32_t>(fread(pduBuffer.get(), 1, MMS_PDU_MAX_SIZE, pFile));
+    TELEPHONY_LOGI("fread totolLength%{private}d", totolLength);
+
+    long i = 0;
+    while (i < fileLen) {
+        mmsPdu += pduBuffer[i];
+        i++;
+    }
+    (void)fclose(pFile);
+    return true;
+}
+
+void StoreSendMmsPduToDataBase(NapiMmsPduHelper &helper)
+{
+    std::shared_ptr<NAPIMmsPdu> mmsPduObj = std::make_shared<NAPIMmsPdu>();
+    if (mmsPduObj == nullptr) {
+        TELEPHONY_LOGE("mmsPduObj nullptr");
+        helper.NotifyAll();
+        return;
+    }
+    std::string mmsPdu;
+    if (!GetMmsPduFromFile(helper.GetPduFileName(), mmsPdu)) {
+        TELEPHONY_LOGE("get mmsPdu fail");
+        helper.NotifyAll();
+        return;
+    }
+    mmsPduObj->InsertMmsPdu(helper, mmsPdu);
+}
+
+void StoreTempDataToDataBase(NapiMmsPduHelper &helper)
+{
+    std::shared_ptr<NAPIMmsPdu> mmsPduObj = std::make_shared<NAPIMmsPdu>();
+    if (mmsPduObj == nullptr) {
+        TELEPHONY_LOGE("mmsPduObj nullptr");
+        helper.NotifyAll();
+        return;
+    }
+    std::string mmsPdu = "tempData";
+    mmsPduObj->InsertMmsPdu(helper, mmsPdu);
+}
+
+void NativeSendMms(napi_env env, void *data)
+{
+    auto asyncContext = static_cast<MmsContext *>(data);
+    if (asyncContext == nullptr) {
+        TELEPHONY_LOGE("asyncContext nullptr");
+        return;
+    }
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        asyncContext->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+        return;
+    }
+    if (!STORE_MMS_PDU_TO_FILE) {
+        std::string pduFileName = NapiUtil::ToUtf8(asyncContext->data);
+        if (pduFileName.empty()) {
+            asyncContext->errorCode = TELEPHONY_ERR_ARGUMENT_INVALID;
+            asyncContext->resolved = false;
+            TELEPHONY_LOGE("pduFileName empty");
+            return;
+        }
+
+        if (g_dbHelper == nullptr) {
+            asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
+            asyncContext->resolved = false;
+            TELEPHONY_LOGE("g_dbHelper is nullptr");
+            return;
+        }
+        NapiMmsPduHelper helper;
+        helper.SetDataAbilityHelper(g_dbHelper);
+        helper.SetPduFileName(pduFileName);
+        if (!helper.Run(StoreSendMmsPduToDataBase, helper)) {
+            TELEPHONY_LOGE("StoreMmsPdu fail");
+            asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
+            asyncContext->resolved = false;
+            return;
+        }
+
+        asyncContext->data = NapiUtil::ToUtf16(helper.GetDbUrl());
+    }
+    asyncContext->errorCode =
+        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMms(asyncContext->slotId, asyncContext->mmsc,
+            asyncContext->data, asyncContext->mmsConfig.userAgent, asyncContext->mmsConfig.userAgentProfile);
+    if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
+        asyncContext->resolved = true;
+    } else {
+        asyncContext->resolved = false;
+    }
+    TELEPHONY_LOGI("NativeSendMms end resolved = %{public}d", asyncContext->resolved);
+}
+
+void SendMmsCallback(napi_env env, napi_status status, void *data)
+{
+    auto context = static_cast<MmsContext *>(data);
+    if (context == nullptr) {
+        TELEPHONY_LOGE("SendMmsCallback context nullptr");
+        return;
+    }
+    napi_value callbackValue = nullptr;
+    if (context->resolved) {
+        napi_get_undefined(env, &callbackValue);
+    } else {
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "sendMms", "ohos.permission.SEND_MESSAGES");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    NapiUtil::Handle1ValueCallback(env, context, callbackValue);
+}
+
+bool MatchMmsParameters(napi_env env, napi_value parameters[], size_t parameterCount)
+{
+    bool typeMatch = false;
+    switch (parameterCount) {
+        case TWO_PARAMETERS: {
+            typeMatch = NapiUtil::MatchParameters(env, parameters, { napi_object, napi_object });
+            break;
+        }
+        case THREE_PARAMETERS: {
+            typeMatch = NapiUtil::MatchParameters(env, parameters, { napi_object, napi_object, napi_function });
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    if (typeMatch) {
+        return NapiUtil::MatchObjectProperty(env, parameters[1],
+            {
+                { "slotId", napi_number },
+                { "mmsc", napi_string },
+                { "data", napi_string },
+                { "mmsConfig", napi_object },
+            });
+    }
+    return false;
+}
+
+static bool GetMmsValueLength(napi_env env, napi_value param)
+{
+    size_t len = 0;
+    napi_status status = napi_get_value_string_utf8(env, param, nullptr, 0, &len);
+    if (status != napi_ok) {
+        TELEPHONY_LOGE("Get length failed");
+        return false;
+    }
+    return (len > 0) && (len < BUFF_LENGTH);
+}
+
+static void GetMmsNameProperty(napi_env env, napi_value param, MmsContext &context)
+{
+    napi_value slotIdValue = NapiUtil::GetNamedProperty(env, param, "slotId");
+    if (slotIdValue != nullptr) {
+        napi_get_value_int32(env, slotIdValue, &(context.slotId));
+    }
+    napi_value mmscValue = NapiUtil::GetNamedProperty(env, param, "mmsc");
+    if (mmscValue != nullptr && GetMmsValueLength(env, mmscValue)) {
+        char strChars[NORMAL_STRING_SIZE] = { 0 };
+        size_t strLength = 0;
+        napi_get_value_string_utf8(env, mmscValue, strChars, BUFF_LENGTH, &strLength);
+        std::string str8(strChars, strLength);
+        context.mmsc = NapiUtil::ToUtf16(str8);
+    }
+    napi_value dataValue = NapiUtil::GetNamedProperty(env, param, "data");
+    if (dataValue != nullptr && GetMmsValueLength(env, dataValue)) {
+        char strChars[NORMAL_STRING_SIZE] = { 0 };
+        size_t strLength = 0;
+        napi_get_value_string_utf8(env, dataValue, strChars, BUFF_LENGTH, &strLength);
+        std::string str8(strChars, strLength);
+        context.data = NapiUtil::ToUtf16(str8);
+    }
+    napi_value configValue = NapiUtil::GetNamedProperty(env, param, "mmsConfig");
+    if (configValue != nullptr) {
+        napi_value uaValue = NapiUtil::GetNamedProperty(env, configValue, "userAgent");
+        if (uaValue != nullptr && GetMmsValueLength(env, uaValue)) {
+            char strChars[NORMAL_STRING_SIZE] = { 0 };
+            size_t strLength = 0;
+            napi_get_value_string_utf8(env, uaValue, strChars, BUFF_LENGTH, &strLength);
+            std::string str8(strChars, strLength);
+            context.mmsConfig.userAgent = NapiUtil::ToUtf16(str8);
+        }
+        napi_value uaprofValue = NapiUtil::GetNamedProperty(env, configValue, "userAgentProfile");
+        if (uaprofValue != nullptr && GetMmsValueLength(env, uaprofValue)) {
+            char strChars[NORMAL_STRING_SIZE] = { 0 };
+            size_t strLength = 0;
+            napi_get_value_string_utf8(env, uaprofValue, strChars, BUFF_LENGTH, &strLength);
+            std::string str8(strChars, strLength);
+            context.mmsConfig.userAgentProfile = NapiUtil::ToUtf16(str8);
+        }
+    }
+}
+
+napi_value NapiMms::SendMms(napi_env env, napi_callback_info info)
+{
+    size_t parameterCount = THREE_PARAMETERS;
+    napi_value parameters[THREE_PARAMETERS] = { 0 };
+    napi_value thisVar = nullptr;
+    void *data = nullptr;
+
+    napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
+    if (!MatchMmsParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    auto context = std::make_unique<MmsContext>().release();
+    if (context == nullptr) {
+        TELEPHONY_LOGE("MmsContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    if (g_dbHelper == nullptr) {
+        g_dbHelper = GetDataAbilityHelper(env, info);
+    }
+    GetMmsNameProperty(env, parameters[1], *context);
+    if (parameterCount == THREE_PARAMETERS) {
+        napi_create_reference(env, parameters[PARAMETERS_INDEX_TWO], DEFAULT_REF_COUNT, &context->callbackRef);
+    }
+    napi_value result = NapiUtil::HandleAsyncWork(env, context, "SendMms", NativeSendMms, SendMmsCallback);
+    return result;
+}
+
+bool WriteBufferToFile(const std::unique_ptr<char[]> &buff, uint32_t len, const std::string &strPathName)
+{
+    if (buff == nullptr) {
+        TELEPHONY_LOGE("buff nullptr");
+        return false;
+    }
+
+    char realPath[PATH_MAX] = { 0 };
+    if (strPathName.empty() || realpath(strPathName.c_str(), realPath) == nullptr) {
+        TELEPHONY_LOGE("path or realPath is nullptr");
+        return false;
+    }
+
+    FILE *pFile = fopen(realPath, "wb");
+    if (pFile == nullptr) {
+        TELEPHONY_LOGE("openFile Error");
+        return false;
+    }
+    uint32_t fileLen = fwrite(buff.get(), len, 1, pFile);
+    (void)fclose(pFile);
+    if (fileLen > 0) {
+        TELEPHONY_LOGI("write mms buffer to file success");
+        return true;
+    } else {
+        TELEPHONY_LOGI("write mms buffer to file error");
+        return false;
+    }
+}
+
+bool StoreMmsPduToFile(const std::string &fileName, const std::string &mmsPdu)
+{
+    uint32_t len = static_cast<uint32_t>(mmsPdu.size());
+    if (len > MMS_PDU_MAX_SIZE || len == 0) {
+        TELEPHONY_LOGE("MMS pdu length invalid");
+        return false;
+    }
+
+    std::unique_ptr<char[]> resultResponse = std::make_unique<char[]>(len);
+    if (memset_s(resultResponse.get(), len, 0x00, len) != EOK) {
+        TELEPHONY_LOGE("memset_s err");
+        return false;
+    }
+    if (memcpy_s(resultResponse.get(), len, &mmsPdu[0], len) != EOK) {
+        TELEPHONY_LOGE("memcpy_s error");
+        return false;
+    }
+
+    TELEPHONY_LOGI("len:%{public}d", len);
+    if (!WriteBufferToFile(std::move(resultResponse), len, fileName)) {
+        TELEPHONY_LOGE("write to file error");
+        return false;
+    }
+    return true;
+}
+
+void GetMmsPduFromDataBase(NapiMmsPduHelper &helper)
+{
+    NAPIMmsPdu mmsPduObj;
+    std::string mmsPdu = mmsPduObj.GetMmsPdu(helper);
+    if (mmsPdu.empty()) {
+        TELEPHONY_LOGE("from dataBase empty");
+        return;
+    }
+
+    mmsPduObj.DeleteMmsPdu(helper);
+    if (!StoreMmsPduToFile(helper.GetStoreFileName(), mmsPdu)) {
+        TELEPHONY_LOGE("store mmsPdu fail");
+    }
+    helper.NotifyAll();
+}
+
+static bool StoreDownloadMmsPduToDataBase(MmsContext &context, std::string &dbUrl, std::string &storeFileName)
+{
+    if (!STORE_MMS_PDU_TO_FILE) {
+        storeFileName = NapiUtil::ToUtf8(context.data);
+        if (storeFileName.empty()) {
+            TELEPHONY_LOGE("storeFileName empty");
+            context.errorCode = TELEPHONY_ERR_ARGUMENT_INVALID;
+            context.resolved = false;
+            return false;
+        }
+        NapiMmsPduHelper helper;
+        helper.SetDataAbilityHelper(g_dbHelper);
+        if (!helper.Run(StoreTempDataToDataBase, helper)) {
+            TELEPHONY_LOGE("StoreMmsPdu fail");
+            context.errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
+            context.resolved = false;
+            return false;
+        }
+        dbUrl = helper.GetDbUrl();
+        context.data = NapiUtil::ToUtf16(dbUrl);
+    }
+    return true;
+}
+
+void NativeDownloadMms(napi_env env, void *data)
+{
+    auto asyncContext = static_cast<MmsContext *>(data);
+    if (asyncContext == nullptr) {
+        TELEPHONY_LOGE("asyncContext nullptr");
+        return;
+    }
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        asyncContext->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+        return;
+    }
+    if (g_dbHelper == nullptr) {
+        TELEPHONY_LOGE("g_dbHelper is nullptr");
+        asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
+        asyncContext->resolved = false;
+        return;
+    }
+    std::string dbUrl;
+    std::string storeFileName;
+    if (!StoreDownloadMmsPduToDataBase(*asyncContext, dbUrl, storeFileName)) {
+        TELEPHONY_LOGE("store mms pdu fail");
+        return;
+    }
+
+    asyncContext->errorCode =
+        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DownloadMms(asyncContext->slotId, asyncContext->mmsc,
+            asyncContext->data, asyncContext->mmsConfig.userAgent, asyncContext->mmsConfig.userAgentProfile);
+
+    if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
+        asyncContext->resolved = true;
+        if (!STORE_MMS_PDU_TO_FILE) {
+            NapiMmsPduHelper helper;
+            helper.SetDataAbilityHelper(g_dbHelper);
+            helper.SetDbUrl(dbUrl);
+            helper.SetStoreFileName(storeFileName);
+            if (!helper.Run(GetMmsPduFromDataBase, helper)) {
+                TELEPHONY_LOGE("StoreMmsPdu fail");
+                asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
+                asyncContext->resolved = false;
+                return;
+            }
+        }
+    } else {
+        asyncContext->resolved = false;
+    }
+    TELEPHONY_LOGI("NativeDownloadMms end resolved = %{public}d", asyncContext->resolved);
+}
+
+void DownloadMmsCallback(napi_env env, napi_status status, void *data)
+{
+    auto context = static_cast<MmsContext *>(data);
+    napi_value callbackValue = nullptr;
+    if (context->resolved) {
+        napi_get_undefined(env, &callbackValue);
+    } else {
+        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
+            context->errorCode, "downloadMms", "ohos.permission.RECEIVE_MMS");
+        callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    NapiUtil::Handle1ValueCallback(env, context, callbackValue);
+}
+
+napi_value NapiMms::DownloadMms(napi_env env, napi_callback_info info)
+{
+    size_t parameterCount = THREE_PARAMETERS;
+    napi_value parameters[THREE_PARAMETERS] = { 0 };
+    napi_value thisVar = nullptr;
+    void *data = nullptr;
+
+    napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
+    if (!MatchMmsParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("DownloadMms parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    auto context = std::make_unique<MmsContext>().release();
+    if (context == nullptr) {
+        TELEPHONY_LOGE("DownloadMms MmsContext is nullptr.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    if (g_dbHelper == nullptr) {
+        g_dbHelper = GetDataAbilityHelper(env, info);
+    }
+    GetMmsNameProperty(env, parameters[1], *context);
+    if (parameterCount == THREE_PARAMETERS) {
+        napi_create_reference(env, parameters[PARAMETERS_INDEX_TWO], DEFAULT_REF_COUNT, &context->callbackRef);
+    }
+    napi_value result = NapiUtil::HandleAsyncWork(env, context, "DownloadMms", NativeDownloadMms, DownloadMmsCallback);
     return result;
 }
 

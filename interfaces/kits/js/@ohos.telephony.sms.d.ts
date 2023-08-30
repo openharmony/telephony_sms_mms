@@ -14,6 +14,7 @@
  */
 
 import {AsyncCallback} from "./basic";
+import type Context from './application/BaseContext';
 
 /**
  * Provides the capabilities and methods for obtaining Short Message Service (SMS) management objects.
@@ -790,8 +791,16 @@ declare namespace sms {
    * @param { Context } context - Indicates the context of application or capability.
    * @param { MmsParams } mmsParams - Indicates the parameters of the MMS message.
    * @param { AsyncCallback<void> } callback - The callback of sendMms. For error code, see MmsFailCode.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300999 - Unknown error code.
    * @syscap SystemCapability.Telephony.SmsMms
-   * @since 10
+   * @systemapi Hide this for inner system use.
+   * @since 11
    */
   function sendMms(context: Context, mmsParams: MmsParams, callback: AsyncCallback<void>): void;
 
@@ -802,8 +811,16 @@ declare namespace sms {
    * @param { Context } context - Indicates the context of application or capability.
    * @param { MmsParams } mmsParams - Indicates the parameters of the MMS message.
    * @returns { Promise<void> } The promise returned by the sendMms.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300999 - Unknown error code.
    * @syscap SystemCapability.Telephony.SmsMms
-   * @since 10
+   * @systemapi Hide this for inner system use.
+   * @since 11
    */
   function sendMms(context: Context, mmsParams: MmsParams): Promise<void>;
 
@@ -814,8 +831,16 @@ declare namespace sms {
    * @param { Context } context - Indicates the context of application or capability.
    * @param { MmsParams }  mmsParams - Indicates the parameters of the MMS message.
    * @param { AsyncCallback<void> } callback - The callback of downloadMms. For error code, see MmsFailCode.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300999 - Unknown error code.
    * @syscap SystemCapability.Telephony.SmsMms
-   * @since 10
+   * @systemapi Hide this for inner system use.
+   * @since 11
    */
   function downloadMms(context: Context, mmsParams: MmsParams, callback: AsyncCallback<void>): void;
 
@@ -826,8 +851,16 @@ declare namespace sms {
    * @param { Context } context - Indicates the context of application or capability.
    * @param { MmsParams }  mmsParams - Indicates the parameters of the MMS message.
    * @returns { Promise<void> } The promise returned by the downloadMms. For error code, see MmsFailCode.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300999 - Unknown error code.
    * @syscap SystemCapability.Telephony.SmsMms
-   * @since 10
+   * @systemapi Hide this for inner system use.
+   * @since 11
    */
   function downloadMms(context: Context, mmsParams: MmsParams): Promise<void>;
 
@@ -836,7 +869,8 @@ declare namespace sms {
    *
    * @interface MmsParams
    * @syscap SystemCapability.Telephony.SmsMms
-   * @since 10
+   * @systemapi Hide this for inner system use.
+   * @since 11
    */
   export interface MmsParams {
     /**
@@ -844,7 +878,8 @@ declare namespace sms {
      *
      * @type { number }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @systemapi Hide this for inner system use.
+     * @since 11
      */
     slotId: number;
 
@@ -853,7 +888,8 @@ declare namespace sms {
      *
      * @type { string }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @systemapi Hide this for inner system use.
+     * @since 11
      */
     mmsc: string;
 
@@ -862,7 +898,8 @@ declare namespace sms {
      *
      * @type { string }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @systemapi Hide this for inner system use.
+     * @since 11
      */
     data: string;
 
@@ -871,7 +908,8 @@ declare namespace sms {
      *
      * @type { ?MmsConfig }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @systemapi Hide this for inner system use.
+     * @since 11
      */
     mmsConfig?: MmsConfig;
   }
@@ -881,7 +919,8 @@ declare namespace sms {
    *
    * @interface MmsConfig
    * @syscap SystemCapability.Telephony.SmsMms
-   * @since 10
+   * @systemapi Hide this for inner system use.
+   * @since 11
    */
   export interface MmsConfig {
     /**
@@ -889,7 +928,8 @@ declare namespace sms {
      *
      * @type { string }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @systemapi Hide this for inner system use.
+     * @since 11
      */
     userAgent: string;
 
@@ -898,7 +938,8 @@ declare namespace sms {
      *
      * @type { string }
      * @syscap SystemCapability.Telephony.SmsMms
-     * @since 10
+     * @systemapi Hide this for inner system use.
+     * @since 11
      */
     userAgentProfile: string;
   }

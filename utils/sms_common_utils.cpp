@@ -76,7 +76,8 @@ uint16_t SmsCommonUtils::Unpack7bitChar(
     uint16_t srcIdx = 0;
     uint16_t dstIdx = 0;
     auto shift = fillBits;
-    if (unpackData == nullptr || tpdu == nullptr || dataLen > unpackDataLen) {
+    if (unpackData == nullptr || tpdu == nullptr || dataLen == 0 || unpackDataLen == 0 || dataLen > unpackDataLen) {
+        TELEPHONY_LOGE("userData error.");
         return dstIdx;
     }
     if (shift > 0) {
@@ -92,7 +93,7 @@ uint16_t SmsCommonUtils::Unpack7bitChar(
                 break;
             }
         }
-        if (shift > 0) {
+        if (shift > 0 && srcIdx < dataLen && dstIdx < unpackDataLen) {
             unpackData[dstIdx] = ((unsigned int)tpdu[srcIdx - 1] >> shift) + (tpdu[srcIdx] << (SMS_BYTE_BIT - shift));
             unpackData[dstIdx] &= 0x7F;
             shift--;

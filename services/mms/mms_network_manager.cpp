@@ -1,0 +1,85 @@
+/*
+ * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "mms_network_manager.h"
+
+#include "core_manager_inner.h"
+#include "net_conn_client.h"
+#include "net_specifier.h"
+#include "telephony_log_wrapper.h"
+
+namespace OHOS {
+namespace Telephony {
+using namespace NetManagerStandard;
+static constexpr uint32_t NET_REGISTER_TIMEOUT_MS = 20000;
+constexpr const char *SIMID_IDENT_PREFIX = "simId";
+static bool g_libCurlInit = false;
+
+int32_t MmsNetworkManager::AcquireNetwork(int32_t slotId, uint8_t requestId)
+{
+    NetSpecifier netSpecifier;
+    NetAllCapabilities netAllCapabilities;
+    netAllCapabilities.netCaps_.insert(NetCap::NET_CAPABILITY_MMS);
+    netAllCapabilities.bearerTypes_.insert(NetBearType::BEARER_CELLULAR);
+
+    int32_t simId = CoreManagerInner::GetInstance().GetSimId(slotId);
+    TELEPHONY_LOGI("requestId = %{public}d, slot = %{public}d, simId = %{public}d", requestId, slotId, simId);
+    netSpecifier.ident_ = SIMID_IDENT_PREFIX + std::to_string(simId);
+    netSpecifier.netCapabilities_ = netAllCapabilities;
+
+    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier(netSpecifier);
+    if (specifier == nullptr) {
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    callback_ = new (std::nothrow) MmsConnCallbackStub();
+    if (callback_ == nullptr) {
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+
+    int32_t result =
+        NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback_, NET_REGISTER_TIMEOUT_MS);
+    TELEPHONY_LOGI("acquire network result = %{public}d", result);
+    return result;
+}
+
+void MmsNetworkManager::ReleaseNetwork(u_int8_t requestId, bool shouldDelayRelease)
+{
+    TELEPHONY_LOGI("requestId:%{public}d,shouldDelayRelease:%{public}d", requestId, shouldDelayRelease);
+    if (callback_ != nullptr) {
+        TELEPHONY_LOGI("UnregisterNetConnCallback");
+        NetConnClient ::GetInstance().UnregisterNetConnCallback(callback_);
+        callback_ = nullptr;
+    }
+    if (mmsNetworkClient_ != nullptr && g_libCurlInit) {
+        mmsNetworkClient_->DestoryLibCurl();
+        g_libCurlInit = false;
+    }
+}
+
+std::shared_ptr<MmsNetworkClient> MmsNetworkManager::GetOrCreateHttpClient(int32_t slotId)
+{
+    if (mmsNetworkClient_ == nullptr) {
+        TELEPHONY_LOGE("mmsNetworkClient_ nullptr");
+        mmsNetworkClient_ = std::make_shared<OHOS::Telephony::MmsNetworkClient>(slotId);
+    }
+    if (!g_libCurlInit) {
+        mmsNetworkClient_->InitLibCurl();
+        g_libCurlInit = true;
+    }
+
+    return mmsNetworkClient_;
+}
+} // namespace Telephony
+} // namespace OHOS
