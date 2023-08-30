@@ -322,7 +322,9 @@ bool SmsWapPushContentType::DecodeCharsetField(SmsWapPushBuffer &decodeBuffer, i
         }
         charset = static_cast<int32_t>(temp);
         uint32_t endPosition = decodeBuffer.GetCurPosition();
-        valueLength -= static_cast<int32_t>(endPosition - startPosition);
+        if (endPosition >= startPosition) {
+            valueLength -= static_cast<int32_t>(endPosition - startPosition);
+        }
     }
     charset_ = static_cast<uint32_t>(charset);
     return true;

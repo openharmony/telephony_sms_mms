@@ -170,32 +170,34 @@ bool MmsBodyPartHeader::DecodeDispositionParameter(
     MmsDecodeBuffer &decodeBuffer, uint32_t dispLen, uint32_t beginPos)
 {
     const uint8_t pFileNameValue = 0x98;
-
     uint32_t endPostion = decodeBuffer.GetCurPosition();
     uint8_t oneByte = 0;
-    if (dispLen > (endPostion - beginPos)) {
-        if (!decodeBuffer.GetOneByte(oneByte)) {
-            TELEPHONY_LOGE("Body part header decode get one byte fail.");
+    if ((endPostion < beginPos) || dispLen <= (endPostion - beginPos)) {
+        TELEPHONY_LOGE("Body part header data error.");
+        return false;
+    }
+
+    if (!decodeBuffer.GetOneByte(oneByte)) {
+        TELEPHONY_LOGE("Body part header decode get one byte fail.");
+        return false;
+    }
+    if (oneByte == pFileNameValue) {
+        std::string strTmp = "";
+        uint32_t tmpLen = 0;
+        if (!decodeBuffer.DecodeText(strTmp, tmpLen)) {
+            TELEPHONY_LOGE("Body part header decode text fail.");
             return false;
         }
-        if (oneByte == pFileNameValue) {
-            std::string strTmp = "";
-            uint32_t tmpLen = 0;
-            if (!decodeBuffer.DecodeText(strTmp, tmpLen)) {
-                TELEPHONY_LOGE("Body part header decode text fail.");
-                return false;
-            }
-            strFileName_ = strTmp;
-        }
-        endPostion = decodeBuffer.GetCurPosition();
-        if (dispLen < (endPostion - beginPos)) {
-            TELEPHONY_LOGE("Body part header decode content disposition length err.");
-            return false;
-        }
-        if (!decodeBuffer.IncreasePointer(dispLen - (endPostion - beginPos))) {
-            TELEPHONY_LOGE("Body part header decode content disposition move pointer err.");
-            return false;
-        }
+        strFileName_ = strTmp;
+    }
+    endPostion = decodeBuffer.GetCurPosition();
+    if ((endPostion < beginPos) || dispLen < (endPostion - beginPos)) {
+        TELEPHONY_LOGE("Body part header data error.");
+        return false;
+    }
+    if (!decodeBuffer.IncreasePointer(dispLen - (endPostion - beginPos))) {
+        TELEPHONY_LOGE("Body part header decode content disposition move pointer err.");
+        return false;
     }
     return true;
 }

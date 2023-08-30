@@ -189,8 +189,8 @@ void SmsNetworkPolicyManager::GetRadioState()
 void SmsNetworkPolicyManager::GetImsRegState()
 {
     ImsServiceType imsSrvType = TYPE_VOICE;
-    callback_ = (std::make_unique<ImsRegStateCallbackStub>(shared_from_this())).release();
-    int32_t ret = CoreServiceClient::GetInstance().RegisterImsRegInfoCallback(slotId_, imsSrvType, callback_);
+    sptr<ImsRegInfoCallback> callback = new ImsRegStateCallbackStub(shared_from_this());
+    int32_t ret = CoreServiceClient::GetInstance().RegisterImsRegInfoCallback(slotId_, imsSrvType, callback);
     TELEPHONY_LOGI("SmsNetworkPolicyManager::GetImsRegState ret:%{public}d", ret);
 }
 
