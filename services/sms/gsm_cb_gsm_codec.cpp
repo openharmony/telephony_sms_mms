@@ -158,9 +158,13 @@ bool GsmCbGsmCodec::Decode2gHeaderCommonCb()
     if ((cbHeader_->msgId & HEX_VALUE_FFF8) == GSM_ETWS_BASE_MASK) {
         cbHeader_->bEtwsMessage = true;
         cbHeader_->cbEtwsType = GsmCbCodec::ETWS_GSM;
-        cbHeader_->warningType = cbHeader_->msgId - GSM_ETWS_BASE_MASK;
+        if (cbHeader_->msgId >= GSM_ETWS_BASE_MASK) {
+            cbHeader_->warningType = cbHeader_->msgId - GSM_ETWS_BASE_MASK;
+        }
     }
-    cbPduBuffer_->SetPointer(cbPduBuffer_->GetCurPosition() - HEX_VALUE_02);
+    if (cbPduBuffer_->GetCurPosition() >= HEX_VALUE_02) {
+        cbPduBuffer_->SetPointer(cbPduBuffer_->GetCurPosition() - HEX_VALUE_02);
+    }
     return true;
 }
 

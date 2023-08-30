@@ -113,7 +113,9 @@ bool GsmCbUmtsCodec::Decode3gHeaderPartData(uint8_t dcs)
     cbCodec_->DecodeCbMsgDCS(dcs, iosTemp, cbHeader_->dcs);
     cbHeader_->langType = cbHeader_->dcs.langType;
     cbHeader_->recvTime = static_cast<time_t>(cbCodec_->GetRecvTime());
-    cbPduBuffer_->SetPointer(cbPduBuffer_->GetCurPosition() - HEX_VALUE_02);
+    if (cbPduBuffer_->GetCurPosition() >= HEX_VALUE_02) {
+        cbPduBuffer_->SetPointer(cbPduBuffer_->GetCurPosition() - HEX_VALUE_02);
+    }
     return true;
 }
 
@@ -216,7 +218,9 @@ bool GsmCbUmtsCodec::Decode3gUCS2()
         uint16_t dataLen = 0;
         uint16_t offset = 0;
         if (cbHeader_->dcs.iso639Lang[0]) {
-            dataLen = tpdu[pageLenOffset] - HEX_VALUE_02;
+            if (tpdu[pageLenOffset] >= HEX_VALUE_02) {
+                dataLen = tpdu[pageLenOffset] - HEX_VALUE_02;
+            }
             offset = (i * MAX_PAGE_PDU_LEN) + i + HEX_VALUE_02;
         } else {
             dataLen = tpdu[pageLenOffset];
