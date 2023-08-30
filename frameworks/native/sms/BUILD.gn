@@ -27,7 +27,7 @@ config("sms_native_config") {
 
 ohos_source_set("sms_native_source") {
   sources = [
-    "$SUBSYSTEM_DIR/sms_mms/services/ims_service_interaction/src/ims_sms_callback_proxy.cpp",
+    "$SUBSYSTEM_DIR/sms_mms/services/sms/ims_service_interaction/src/ims_sms_callback_proxy.cpp",
     "$SUBSYSTEM_DIR/sms_mms/utils/string_utils.cpp",
     "src/delivery_short_message_callback_stub.cpp",
     "src/send_short_message_callback_stub.cpp",
@@ -43,7 +43,6 @@ ohos_source_set("sms_native_source") {
     "c_utils:utils",
     "core_service:libtel_common",
     "core_service:tel_core_service_api",
-    "drivers_interface_ril:hril_innerkits",
     "hilog:libhilog",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",

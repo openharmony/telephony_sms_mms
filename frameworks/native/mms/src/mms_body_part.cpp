@@ -23,8 +23,13 @@
 
 namespace OHOS {
 namespace Telephony {
+static constexpr uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
+const std::string ENCODE_BINARY = "binary";
+const std::string ENCODE_BASE64 = "base64";
+const std::string ENCODE_QUOTED_PRINTABLE = "quoted-printable";
 using namespace std;
-static constexpr const char *APP_SAND_DIR = "/data/app";
+static constexpr const char *APP_SAND_ABSOLUTE_DIR = "/data/app";
+static constexpr const char *APP_SAND_RELATIVE_DIR = "/data/storage";
 
 MmsBodyPart::MmsBodyPart() : headerLen_(0), bodyLen_(0) {}
 
@@ -430,15 +435,17 @@ void MmsBodyPart::DecodeSetFileName()
 bool MmsBodyPart::WriteBodyFromFile(std::string path)
 {
     FILE *pFile = nullptr;
-    char realPath[PATH_MAX] = {0};
+    char realPath[PATH_MAX] = { 0 };
     if (path.empty() || realpath(path.c_str(), realPath) == NULL) {
         TELEPHONY_LOGE("path or realPath is NULL");
         return false;
     }
 
     std::string filePath = realPath;
-    std::string appDir = APP_SAND_DIR;
-    if (appDir.compare(filePath.substr(0, appDir.size())) != 0) {
+    std::string absDir = APP_SAND_ABSOLUTE_DIR;
+    std::string relDir = APP_SAND_RELATIVE_DIR;
+    if ((absDir.compare(filePath.substr(0, absDir.size())) != 0) &&
+        (relDir.compare(filePath.substr(0, relDir.size())) != 0)) {
         TELEPHONY_LOGE("filePath no app sand box.");
         return false;
     }
@@ -449,7 +456,7 @@ bool MmsBodyPart::WriteBodyFromFile(std::string path)
     }
     (void)fseek(pFile, 0, SEEK_END);
     long fileLen = ftell(pFile);
-    if (fileLen <= 0 || fileLen > (long)MAX_MMS_MSG_PART_LEN) {
+    if (fileLen <= 0 || fileLen > static_cast<long>(MAX_MMS_MSG_PART_LEN)) {
         (void)fclose(pFile);
         TELEPHONY_LOGE("fileLen is invalid [%{public}ld]", fileLen);
         return false;
@@ -539,7 +546,7 @@ std::unique_ptr<char[]> MmsBodyPart::ReadBodyPartBuffer(uint32_t &len)
         TELEPHONY_LOGE("Read BodyPart Buffer MakeUnique Error.");
         return nullptr;
     }
-    if (memcpy_s(result.get(), len, pbodyPartBuffer_.get(), len) != EOK) {
+    if (memcpy_s(result.get(), bodyLen_, pbodyPartBuffer_.get(), bodyLen_) != EOK) {
         TELEPHONY_LOGE("Read BodyPart Buffer Memcpy_s Error.");
         return nullptr;
     }

@@ -25,6 +25,7 @@
 using namespace OHOS::Telephony;
 namespace OHOS {
 static constexpr uint16_t PDU_BUFFER_MAX_SIZE = 0xFF;
+bool g_flag = false;
 
 void TeleserviceIdDecode(const uint8_t *data, size_t size)
 {
@@ -673,6 +674,11 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     if (data == nullptr || size == 0 || size > PDU_BUFFER_MAX_SIZE) {
         return;
     }
+
+    if (g_flag) {
+        return;
+    }
+    g_flag = true;
 
     TransportMessageDecode(data, size);
     ParameterRecordDecode(data, size);

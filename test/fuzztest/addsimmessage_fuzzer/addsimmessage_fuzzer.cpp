@@ -53,8 +53,7 @@ void OnRemoteRequest(const uint8_t *data, size_t size)
     MessageParcel replyParcel;
     MessageOption option(MessageOption::TF_SYNC);
 
-    size_t dataSize = size - sizeof(uint32_t);
-    dataParcel.WriteBuffer(data + sizeof(uint32_t), dataSize);
+    dataParcel.WriteBuffer(data, size);
     dataParcel.RewindRead(0);
     uint32_t code = static_cast<uint32_t>(size);
 

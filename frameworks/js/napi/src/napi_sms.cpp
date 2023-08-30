@@ -212,6 +212,18 @@ static void SendMessageCallback(napi_env env, napi_status status, void *data)
         TELEPHONY_LOGI("asyncContext->errorCode:%{public}d.", error.errorCode);
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
+    if (asyncContext->destinationHost.capacity() != 0) {
+        asyncContext->destinationHost = u"";
+    }
+    if (asyncContext->serviceCenter.capacity() != 0) {
+        asyncContext->serviceCenter = u"";
+    }
+    if (asyncContext->textContent.capacity() != 0) {
+        asyncContext->textContent = u"";
+    }
+    if (asyncContext->messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
+        std::vector<unsigned char>().swap(asyncContext->rawDataContent);
+    }
     NapiUtil::Handle1ValueCallback(env, asyncContext, callbackValue);
 }
 
@@ -329,7 +341,7 @@ static napi_value SendMessage(napi_env env, napi_callback_info info)
     napi_create_string_utf8(env, "SendMessage", NAPI_AUTO_LENGTH, &resourceName);
     napi_create_async_work(env, nullptr, resourceName, NativeSendMessage, SendMessageCallback,
         (void *)asyncContext, &(asyncContext->work));
-    napi_queue_async_work(env, asyncContext->work);
+    napi_queue_async_work_with_qos(env, asyncContext->work, napi_qos_default);
     return NapiUtil::CreateUndefined(env);
 }
 
@@ -407,18 +419,9 @@ static napi_value SendShortMessage(napi_env env, napi_callback_info info)
     if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &asyncContext->callbackRef);
     }
-    napi_value result = nullptr;
-    if (asyncContext->callbackRef == nullptr) {
-        napi_create_promise(env, &asyncContext->deferred, &result);
-    } else {
-        napi_get_undefined(env, &result);
-    }
-    napi_value resourceName = nullptr;
-    napi_create_string_utf8(env, "SendMessage", NAPI_AUTO_LENGTH, &resourceName);
-    napi_create_async_work(env, nullptr, resourceName, NativeSendMessage, SendMessageCallback, (void *)asyncContext,
-        &(asyncContext->work));
-    napi_queue_async_work(env, asyncContext->work);
-    return NapiUtil::CreateUndefined(env);
+    napi_value result =
+        NapiUtil::HandleAsyncWork(env, asyncContext, "SendShortMessage", NativeSendMessage, SendMessageCallback);
+    return result;
 }
 
 static void NativeCreateMessage(napi_env env, void *data)
@@ -484,6 +487,9 @@ static void CreateMessageCallback(napi_env env, napi_status status, void *data)
     }
     if (asyncContext->pdu.capacity() != 0) {
         std::vector<unsigned char>().swap(asyncContext->pdu);
+    }
+    if (asyncContext->specification.capacity() != 0) {
+        std::string().swap(asyncContext->specification);
     }
     NapiUtil::Handle2ValueCallback(env, asyncContext, callbackValue);
 }
@@ -616,17 +622,8 @@ static napi_value SetDefaultSmsSlotId(napi_env env, napi_callback_info info)
     if (parameterCount == TWO_PARAMETERS) {
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
-    napi_value result = nullptr;
-    if (context->callbackRef == nullptr) {
-        napi_create_promise(env, &context->deferred, &result);
-    } else {
-        napi_get_undefined(env, &result);
-    }
-    napi_value resourceName = nullptr;
-    napi_create_string_utf8(env, "SetDefaultSmsSlotId", NAPI_AUTO_LENGTH, &resourceName);
-    napi_create_async_work(env, nullptr, resourceName, NativeSetDefaultSmsSlotId, SetDefaultSmsSlotIdCallback,
-        (void *)context, &(context->work));
-    napi_queue_async_work(env, context->work);
+    napi_value result = NapiUtil::HandleAsyncWork(
+        env, context, "SetDefaultSmsSlotId", NativeSetDefaultSmsSlotId, SetDefaultSmsSlotIdCallback);
     return result;
 }
 
@@ -799,6 +796,9 @@ static void SetSmscAddrCallback(napi_env env, napi_status status, void *data)
             context->errorCode, "setSmscAddr", "ohos.permission.SET_TELEPHONY_STATE");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
+    if (context->smscAddr.capacity() != 0) {
+        std::string().swap(context->smscAddr);
+    }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
 
@@ -877,6 +877,9 @@ static void GetSmscAddrCallback(napi_env env, napi_status status, void *data)
         JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
             context->errorCode, "getSmscAddr", "ohos.permission.GET_TELEPHONY_STATE");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    if (context->smscAddr.capacity() != 0) {
+        std::string().swap(context->smscAddr);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
@@ -964,6 +967,12 @@ static void AddSimMessageCallback(napi_env env, napi_status status, void *data)
         JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
             context->errorCode, "addSimMessage", "ohos.permission.SEND_MESSAGES");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    if (context->smsc.capacity() != 0) {
+        std::string().swap(context->smsc);
+    }
+    if (context->pdu.capacity() != 0) {
+        std::string().swap(context->pdu);
     }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
@@ -1146,6 +1155,12 @@ static void UpdateSimMessageCallback(napi_env env, napi_status status, void *dat
             context->errorCode, "updateSimMessage", "ohos.permission.SEND_MESSAGES");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
+    if (context->smsc.capacity() != 0) {
+        std::string().swap(context->smsc);
+    }
+    if (context->pdu.capacity() != 0) {
+        std::string().swap(context->pdu);
+    }
     NapiUtil::Handle1ValueCallback(env, context, callbackValue);
 }
 
@@ -1260,6 +1275,9 @@ static void GetAllSimMessagesCallback(napi_env env, napi_status status, void *da
         JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
             context->errorCode, "getAllSimMessages", "ohos.permission.RECEIVE_SMS");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    if (context->messageArray.capacity() != 0) {
+        std::vector<ShortMessage>().swap(context->messageArray);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
@@ -1435,6 +1453,12 @@ static void SplitMessageCallback(napi_env env, napi_status status, void *data)
             context->errorCode, "splitMessage", "ohos.permission.SEND_MESSAGES");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
+    if (context->content.capacity() != 0) {
+        std::string().swap(context->content);
+    }
+    if (context->messageArray.capacity() != 0) {
+        std::vector<std::u16string>().swap(context->messageArray);
+    }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
 
@@ -1524,6 +1548,9 @@ static void GetSmsSegmentsInfoCallback(napi_env env, napi_status status, void *d
         JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
             context->errorCode, "getSmsSegmentsInfo", "ohos.permission.GET_TELEPHONY_STATE");
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    if (context->content.capacity() != 0) {
+        std::string().swap(context->content);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
@@ -1934,6 +1961,8 @@ napi_value InitNapiSmsRegistry(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getImsShortMessageFormat", GetImsShortMessageFormat),
         DECLARE_NAPI_FUNCTION("decodeMms", NapiMms::DecodeMms),
         DECLARE_NAPI_FUNCTION("encodeMms", NapiMms::EncodeMms),
+        DECLARE_NAPI_FUNCTION("sendMms", NapiMms::SendMms),
+        DECLARE_NAPI_FUNCTION("downloadMms", NapiMms::DownloadMms),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     CreateEnumSendSmsResult(env, exports);

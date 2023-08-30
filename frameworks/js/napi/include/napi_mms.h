@@ -16,26 +16,15 @@
 #ifndef NAPI_MMS_H
 #define NAPI_MMS_H
 #include <codecvt>
-#include <locale>
-#include <string>
-#include <vector>
 #include <cstring>
-#include <memory>
+#include <locale>
 
+#include "base_context.h"
+#include "mms_codec_type.h"
+#include "mms_msg.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "i_sms_service_interface.h"
-#include "base_context.h"
-#include "short_message.h"
 #include "napi_sms.h"
-
-#include "mms_msg.h"
-#include "mms_address.h"
-#include "mms_attachment.h"
-#include "telephony_log_wrapper.h"
-#include "napi_util.h"
-#include "mms_codec_type.h"
-#include "mms_header.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -116,7 +105,7 @@ struct MmsNotificationIndContext {
 };
 
 struct MmsRespIndContext {
-    std::string transactionId = 0;
+    std::string transactionId = "";
     uint8_t status = 0;
     uint16_t version = DEFAULT_ERROR;
     uint8_t reportAllowed = 0;
@@ -206,6 +195,18 @@ struct EncodeMmsContext : BaseContext {
     struct MmsReadRecIndContext readRecInd;
 };
 
+struct MmsConfigPara {
+    std::u16string userAgent = u"";
+    std::u16string userAgentProfile = u"";
+};
+
+struct MmsContext : BaseContext {
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    std::u16string mmsc = u"";
+    std::u16string data = u"";
+    MmsConfigPara mmsConfig;
+};
+
 class NapiMms {
 public:
     NapiMms();
@@ -225,6 +226,8 @@ public:
     static napi_value InitSupportEnumVersionType(napi_env env, napi_value exports);
     static napi_value InitSupportEnumDispositionType(napi_env env, napi_value exports);
     static napi_value InitSupportEnumReportAllowedType(napi_env env, napi_value exports);
+    static napi_value SendMms(napi_env env, napi_callback_info info);
+    static napi_value DownloadMms(napi_env env, napi_callback_info info);
 };
 } // namespace Telephony
 } // namespace OHOS

@@ -338,7 +338,9 @@ bool MmsContentType::DecodeCharsetField(MmsDecodeBuffer &decodeBuffer, int32_t &
         }
         charset = (int32_t)tmp;
         uint32_t endPosition = decodeBuffer.GetCurPosition();
-        valueLength -= static_cast<int32_t>(endPosition - startPosition);
+        if (endPosition >= startPosition) {
+            valueLength -= static_cast<int32_t>(endPosition - startPosition);
+        }
     }
     msgContentParm_.SetCharSet(charset);
     return true;
