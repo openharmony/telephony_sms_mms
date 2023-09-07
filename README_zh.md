@@ -314,7 +314,7 @@
       }
     }
 
-    // 彩信用户代理、用户代理描述配置。根据SIM卡配置,不清楚可默认
+    // 彩信用户代理、用户代理描述配置。根据运营商要求配置，默认ua，uaprof
     let mmsCfg = {
       userAgent:'ua',
       userAgentProfile: 'uaprof'
