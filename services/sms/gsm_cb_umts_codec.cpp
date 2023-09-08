@@ -178,7 +178,6 @@ bool GsmCbUmtsCodec::Decode3g7Bit()
             return false;
         }
         uint16_t unpackLen = 0;
-        dataLen = (dataLen * SMS_BYTE_BIT) / GSM_CODE_BIT;
         uint8_t pageData[MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT] = { 0 };
         unpackLen = SmsCommonUtils::Unpack7bitChar(
             &tpdu[offset], dataLen, 0x00, pageData, MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT);
