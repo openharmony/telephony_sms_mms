@@ -64,9 +64,9 @@ void NapiMmsPduHelper::SetDbUrl(const std::string &dbUrl)
     dbUrl_ = dbUrl;
 }
 
-void NapiMmsPduHelper::SetDataAbilityHelper(std::shared_ptr<DataShare::DataShareHelper> &dbHelper)
+void NapiMmsPduHelper::SetDataShareHelper(std::shared_ptr<DataShare::DataShareHelper> &datashareHelper)
 {
-    dbHelper_ = dbHelper;
+    datashareHelper_ = datashareHelper;
 }
 
 std::string NapiMmsPduHelper::GetPduFileName()
@@ -84,9 +84,9 @@ std::string NapiMmsPduHelper::GetDbUrl()
     return dbUrl_;
 }
 
-std::shared_ptr<DataShare::DataShareHelper> NapiMmsPduHelper::GetDataAbilityHelper()
+std::shared_ptr<DataShare::DataShareHelper> NapiMmsPduHelper::GetDataShareHelper()
 {
-    return dbHelper_;
+    return datashareHelper_;
 }
 } // namespace Telephony
 } // namespace OHOS
