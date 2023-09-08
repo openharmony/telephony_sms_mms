@@ -789,7 +789,7 @@ declare namespace sms {
    *
    * @permission ohos.permission.SEND_MESSAGES
    * @param { Context } context - Indicates the context of application or capability.
-   * @param { MmsParam } mmsParam - Indicates the parameters of the MMS message.
+   * @param { MmsParams } mmsParams - Indicates the parameters of the MMS message.
    * @param { AsyncCallback<void> } callback - The callback of sendMms. For error code, see MmsFailCode.
    * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
@@ -802,14 +802,14 @@ declare namespace sms {
    * @systemapi Hide this for inner system use.
    * @since 11
    */
-  function sendMms(context: Context, mmsParam: MmsParam, callback: AsyncCallback<void>): void;
+  function sendMms(context: Context, mmsParams: MmsParams, callback: AsyncCallback<void>): void;
 
   /**
    * Sends an MMS message.
    *
    * @permission ohos.permission.SEND_MESSAGES
    * @param { Context } context - Indicates the context of application or capability.
-   * @param { MmsParam } mmsParam - Indicates the parameters of the MMS message.
+   * @param { MmsParams } mmsParams - Indicates the parameters of the MMS message.
    * @returns { Promise<void> } The promise returned by the sendMms.
    * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
@@ -822,14 +822,14 @@ declare namespace sms {
    * @systemapi Hide this for inner system use.
    * @since 11
    */
-  function sendMms(context: Context, mmsParam: MmsParam): Promise<void>;
+  function sendMms(context: Context, mmsParams: MmsParams): Promise<void>;
 
   /**
    * Downloads an MMS message.
    *
    * @permission ohos.permission.RECEIVE_MMS
    * @param { Context } context - Indicates the context of application or capability.
-   * @param { MmsParam }  mmsParam - Indicates the parameters of the MMS message.
+   * @param { MmsParams }  mmsParams - Indicates the parameters of the MMS message.
    * @param { AsyncCallback<void> } callback - The callback of downloadMms. For error code, see MmsFailCode.
    * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
@@ -842,14 +842,14 @@ declare namespace sms {
    * @systemapi Hide this for inner system use.
    * @since 11
    */
-  function downloadMms(context: Context, mmsParam: MmsParam, callback: AsyncCallback<void>): void;
+  function downloadMms(context: Context, mmsParams: MmsParams, callback: AsyncCallback<void>): void;
 
   /**
    * Downloads an MMS message.
    *
    * @permission ohos.permission.RECEIVE_MMS
    * @param { Context } context - Indicates the context of application or capability.
-   * @param { MmsParam }  mmsParam - Indicates the parameters of the MMS message.
+   * @param { MmsParams }  mmsParams - Indicates the parameters of the MMS message.
    * @returns { Promise<void> } The promise returned by the downloadMms. For error code, see MmsFailCode.
    * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
@@ -862,17 +862,17 @@ declare namespace sms {
    * @systemapi Hide this for inner system use.
    * @since 11
    */
-  function downloadMms(context: Context, mmsParam: MmsParam): Promise<void>;
+  function downloadMms(context: Context, mmsParams: MmsParams): Promise<void>;
 
   /**
    * Defines the MMS message param.
    *
-   * @interface MmsParam
+   * @interface MmsParams
    * @syscap SystemCapability.Telephony.SmsMms
    * @systemapi Hide this for inner system use.
    * @since 11
    */
-  export interface MmsParam {
+  export interface MmsParams {
     /**
      * Indicates the ID of the SIM card slot used for sending the MMS message.
      *
