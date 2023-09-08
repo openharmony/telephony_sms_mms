@@ -173,8 +173,8 @@ bool MmsBodyPartHeader::DecodeDispositionParameter(
     uint32_t endPostion = decodeBuffer.GetCurPosition();
     uint8_t oneByte = 0;
     if ((endPostion < beginPos) || dispLen <= (endPostion - beginPos)) {
-        TELEPHONY_LOGE("Body part header data error.");
-        return false;
+        TELEPHONY_LOGI("Body part header data.");
+        return true;
     }
 
     if (!decodeBuffer.GetOneByte(oneByte)) {

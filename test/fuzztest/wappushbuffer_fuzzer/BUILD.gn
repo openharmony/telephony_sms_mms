@@ -53,6 +53,7 @@ ohos_fuzztest("WapPushBufferFuzzTest") {
     "ipc:ipc_single",
     "napi:ace_napi",
     "netmanager_base:net_conn_manager_if",
+    "netstack:http_client",
     "telephony_data:tel_telephony_data",
   ]
   defines = [

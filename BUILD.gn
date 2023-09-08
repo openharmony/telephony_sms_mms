@@ -129,6 +129,7 @@ ohos_shared_library("tel_sms_mms") {
     "hisysevent:libhisysevent",
     "ipc:ipc_single",
     "netmanager_base:net_conn_manager_if",
+    "netstack:http_client",
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "telephony_data:tel_telephony_data",

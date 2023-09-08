@@ -35,9 +35,9 @@ void NAPIMmsPdu::DeleteMmsPdu(NapiMmsPduHelper &pduHelper)
         TELEPHONY_LOGE("mmsPdu_ is nullptr");
         return;
     }
-    std::shared_ptr<DataShare::DataShareHelper> dbHelper = pduHelper.GetDataAbilityHelper();
-    if (dbHelper == nullptr) {
-        TELEPHONY_LOGE("dbHelper is nullptr");
+    std::shared_ptr<DataShare::DataShareHelper> datashareHelper = pduHelper.GetDataShareHelper();
+    if (datashareHelper == nullptr) {
+        TELEPHONY_LOGE("datashareHelper is nullptr");
         return;
     }
 
@@ -45,17 +45,16 @@ void NAPIMmsPdu::DeleteMmsPdu(NapiMmsPduHelper &pduHelper)
 
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(ID, pduHelper.GetDbUrl());
-    int32_t result = dbHelper->Delete(uri, predicates);
-    dbHelper->Release();
+    int32_t result = datashareHelper->Delete(uri, predicates);
     mmsPdu_ = "";
     TELEPHONY_LOGI("result:%{public}d", result);
 }
 
 bool NAPIMmsPdu::InsertMmsPdu(NapiMmsPduHelper &pduHelper, const std::string &mmsPdu)
 {
-    std::shared_ptr<DataShare::DataShareHelper> dbHelper = pduHelper.GetDataAbilityHelper();
-    if (dbHelper == nullptr) {
-        TELEPHONY_LOGE("dbHelper is nullptr");
+    std::shared_ptr<DataShare::DataShareHelper> datashareHelper = pduHelper.GetDataShareHelper();
+    if (datashareHelper == nullptr) {
+        TELEPHONY_LOGE("datashareHelper is nullptr");
         return false;
     }
     std::string targetMmsPdu;
@@ -66,8 +65,7 @@ bool NAPIMmsPdu::InsertMmsPdu(NapiMmsPduHelper &pduHelper, const std::string &mm
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
     DataShare::DataShareValuesBucket bucket;
     bucket.Put(PDU_CONTENT, targetMmsPdu);
-    int32_t result = dbHelper->Insert(uri, bucket);
-    dbHelper->Release();
+    int32_t result = datashareHelper->Insert(uri, bucket);
     std::string dbUrl = std::to_string(result);
     TELEPHONY_LOGI("insert db, dbUrl:%{public}s,pduLen:%{public}d,targetPduLen:%{public}d", dbUrl.c_str(),
         static_cast<uint32_t>(mmsPdu.size()), static_cast<uint32_t>(targetMmsPdu.size()));
@@ -91,19 +89,18 @@ void NAPIMmsPdu::SetMmsPdu(const std::string &mmsPdu)
 
 bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
 {
-    std::shared_ptr<DataShare::DataShareHelper> dbHelper = pduHelper.GetDataAbilityHelper();
-    if (dbHelper == nullptr) {
-        TELEPHONY_LOGE("dbHelper is nullptr");
+    std::shared_ptr<DataShare::DataShareHelper> datashareHelper = pduHelper.GetDataShareHelper();
+    if (datashareHelper == nullptr) {
+        TELEPHONY_LOGE("datashareHelper is nullptr");
         return false;
     }
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
     std::vector<std::string> colume;
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(ID, pduHelper.GetDbUrl());
-    auto resultSet = dbHelper->Query(uri, predicates, colume);
+    auto resultSet = datashareHelper->Query(uri, predicates, colume);
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("resultSet is nullptr");
-        dbHelper->Release();
         return false;
     }
     int count;
@@ -111,7 +108,6 @@ bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
     if (count <= 0) {
         TELEPHONY_LOGE("pdu count: %{public}d error", count);
         resultSet->Close();
-        dbHelper->Release();
         return false;
     }
     int columnIndex;
@@ -122,7 +118,6 @@ bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
         resultSet->GetBlob(columnIndex, blobValue);
     }
     resultSet->Close();
-    dbHelper->Release();
     std::string mmsPdu;
     for (size_t i = 0; i + 1 < blobValue.size(); i = i + SLIDE_STEP) {
         char pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);

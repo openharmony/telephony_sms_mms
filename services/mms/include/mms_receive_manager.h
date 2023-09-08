@@ -32,7 +32,6 @@ public:
 
 private:
     std::shared_ptr<MmsReceive> mmsReceiver_;
-    std::mutex receiverMmsMutex_;
     int32_t slotId_;
 };
 } // namespace Telephony

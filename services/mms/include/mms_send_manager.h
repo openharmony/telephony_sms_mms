@@ -32,7 +32,6 @@ public:
 
 private:
     std::shared_ptr<MmsSender> mmsSender_;
-    std::mutex sendMmsMutex_;
     int32_t slotId_;
 };
 } // namespace Telephony
