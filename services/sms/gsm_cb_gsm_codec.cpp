@@ -219,7 +219,6 @@ bool GsmCbGsmCodec::Decode2gCbMsg()
 
 bool GsmCbGsmCodec::Decode2gCbMsg7bit(uint16_t dataLen)
 {
-    dataLen = (dataLen * SMS_BYTE_BIT) / GSM_CODE_BIT;
     uint8_t pageData[MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT] = { 0 };
     std::vector<uint8_t> dataPdu;
     cbCodec_->GetPduData(dataPdu);
