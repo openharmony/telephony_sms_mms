@@ -40,7 +40,7 @@ private:
 
 private:
     std::string mmsPdu_;
-    std::shared_ptr<DataShare::DataShareHelper> mmsPduDataAbilityHelper_ = nullptr;
+    std::shared_ptr<DataShare::DataShareHelper> mmsPduDataShareHelper_ = nullptr;
 };
 } // namespace Telephony
 } // namespace OHOS
