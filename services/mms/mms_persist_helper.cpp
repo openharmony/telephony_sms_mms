@@ -28,10 +28,10 @@ static constexpr uint8_t SLIDE_STEP = 2;
 
 std::shared_ptr<DataShare::DataShareHelper> MmsPersistHelper::CreateSmsHelper()
 {
-    if (mmsPduDataAbilityHelper_ == nullptr) {
-        mmsPduDataAbilityHelper_ = CreateDataAHelper(TELEPHONY_SMS_MMS_SYS_ABILITY_ID, SMS_PROFILE_URI);
+    if (mmsPduDataShareHelper_ == nullptr) {
+        mmsPduDataShareHelper_ = CreateDataAHelper(TELEPHONY_SMS_MMS_SYS_ABILITY_ID, SMS_PROFILE_URI);
     }
-    return mmsPduDataAbilityHelper_;
+    return mmsPduDataShareHelper_;
 }
 
 std::shared_ptr<DataShare::DataShareHelper> MmsPersistHelper::CreateDataAHelper(

@@ -32,7 +32,7 @@ static const uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
 const bool STORE_MMS_PDU_TO_FILE = false;
 const uint32_t MMS_PDU_MAX_SIZE = 300 * 1024;
 const int32_t ARGS_ONE = 1;
-std::shared_ptr<DataShare::DataShareHelper> g_dbHelper = nullptr;
+std::shared_ptr<DataShare::DataShareHelper> g_datashareHelper = nullptr;
 } // namespace
 
 static void SetPropertyArray(napi_env env, napi_value object, const std::string &name, MmsAttachmentContext &context)
@@ -1371,7 +1371,7 @@ void SetRequestToCore(MmsMsg &mmsMsg, EncodeMmsContext *context)
     }
 }
 
-std::shared_ptr<OHOS::DataShare::DataShareHelper> GetDataAbilityHelper(napi_env env, napi_callback_info info)
+std::shared_ptr<OHOS::DataShare::DataShareHelper> GetDataShareHelper(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGS_ONE;
     napi_value argv[ARGS_ONE] = { 0 };
@@ -1584,15 +1584,14 @@ void NativeSendMms(napi_env env, void *data)
             TELEPHONY_LOGE("pduFileName empty");
             return;
         }
-
-        if (g_dbHelper == nullptr) {
+        if (g_datashareHelper == nullptr) {
             asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
             asyncContext->resolved = false;
-            TELEPHONY_LOGE("g_dbHelper is nullptr");
+            TELEPHONY_LOGE("g_datashareHelper is nullptr");
             return;
         }
         NapiMmsPduHelper helper;
-        helper.SetDataAbilityHelper(g_dbHelper);
+        helper.SetDataShareHelper(g_datashareHelper);
         helper.SetPduFileName(pduFileName);
         if (!helper.Run(StoreSendMmsPduToDataBase, helper)) {
             TELEPHONY_LOGE("StoreMmsPdu fail");
@@ -1600,7 +1599,6 @@ void NativeSendMms(napi_env env, void *data)
             asyncContext->resolved = false;
             return;
         }
-
         asyncContext->data = NapiUtil::ToUtf16(helper.GetDbUrl());
     }
     asyncContext->errorCode =
@@ -1617,6 +1615,9 @@ void NativeSendMms(napi_env env, void *data)
 void SendMmsCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<MmsContext *>(data);
+    if (g_datashareHelper != nullptr) {
+        g_datashareHelper->Release();
+    }
     if (context == nullptr) {
         TELEPHONY_LOGE("SendMmsCallback context nullptr");
         return;
@@ -1733,8 +1734,8 @@ napi_value NapiMms::SendMms(napi_env env, napi_callback_info info)
         NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
-    if (g_dbHelper == nullptr) {
-        g_dbHelper = GetDataAbilityHelper(env, info);
+    if (!STORE_MMS_PDU_TO_FILE) {
+        g_datashareHelper = GetDataShareHelper(env, info);
     }
     GetMmsNameProperty(env, parameters[1], *context);
     if (parameterCount == THREE_PARAMETERS) {
@@ -1826,7 +1827,7 @@ static bool StoreDownloadMmsPduToDataBase(MmsContext &context, std::string &dbUr
             return false;
         }
         NapiMmsPduHelper helper;
-        helper.SetDataAbilityHelper(g_dbHelper);
+        helper.SetDataShareHelper(g_datashareHelper);
         if (!helper.Run(StoreTempDataToDataBase, helper)) {
             TELEPHONY_LOGE("StoreMmsPdu fail");
             context.errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
@@ -1849,10 +1850,11 @@ void NativeDownloadMms(napi_env env, void *data)
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
         TELEPHONY_LOGE("Non-system applications use system APIs!");
         asyncContext->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+        asyncContext->resolved = false;
         return;
     }
-    if (g_dbHelper == nullptr) {
-        TELEPHONY_LOGE("g_dbHelper is nullptr");
+    if (g_datashareHelper == nullptr) {
+        TELEPHONY_LOGE("g_datashareHelper is nullptr");
         asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
         asyncContext->resolved = false;
         return;
@@ -1872,7 +1874,7 @@ void NativeDownloadMms(napi_env env, void *data)
         asyncContext->resolved = true;
         if (!STORE_MMS_PDU_TO_FILE) {
             NapiMmsPduHelper helper;
-            helper.SetDataAbilityHelper(g_dbHelper);
+            helper.SetDataShareHelper(g_datashareHelper);
             helper.SetDbUrl(dbUrl);
             helper.SetStoreFileName(storeFileName);
             if (!helper.Run(GetMmsPduFromDataBase, helper)) {
@@ -1891,6 +1893,13 @@ void NativeDownloadMms(napi_env env, void *data)
 void DownloadMmsCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<MmsContext *>(data);
+    if (g_datashareHelper != nullptr) {
+        g_datashareHelper->Release();
+    }
+    if (context == nullptr) {
+        TELEPHONY_LOGE("SendMmsCallback context nullptr");
+        return;
+    }
     napi_value callbackValue = nullptr;
     if (context->resolved) {
         napi_get_undefined(env, &callbackValue);
@@ -1921,8 +1930,8 @@ napi_value NapiMms::DownloadMms(napi_env env, napi_callback_info info)
         NapiUtil::ThrowParameterError(env);
         return nullptr;
     }
-    if (g_dbHelper == nullptr) {
-        g_dbHelper = GetDataAbilityHelper(env, info);
+    if (!STORE_MMS_PDU_TO_FILE) {
+        g_datashareHelper = GetDataShareHelper(env, info);
     }
     GetMmsNameProperty(env, parameters[1], *context);
     if (parameterCount == THREE_PARAMETERS) {

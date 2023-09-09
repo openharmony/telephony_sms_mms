@@ -25,7 +25,6 @@ namespace Telephony {
 using namespace NetManagerStandard;
 static constexpr uint32_t NET_REGISTER_TIMEOUT_MS = 20000;
 constexpr const char *SIMID_IDENT_PREFIX = "simId";
-static bool g_libCurlInit = false;
 
 int32_t MmsNetworkManager::AcquireNetwork(int32_t slotId, uint8_t requestId)
 {
@@ -62,10 +61,6 @@ void MmsNetworkManager::ReleaseNetwork(u_int8_t requestId, bool shouldDelayRelea
         NetConnClient ::GetInstance().UnregisterNetConnCallback(callback_);
         callback_ = nullptr;
     }
-    if (mmsNetworkClient_ != nullptr && g_libCurlInit) {
-        mmsNetworkClient_->DestoryLibCurl();
-        g_libCurlInit = false;
-    }
 }
 
 std::shared_ptr<MmsNetworkClient> MmsNetworkManager::GetOrCreateHttpClient(int32_t slotId)
@@ -74,11 +69,6 @@ std::shared_ptr<MmsNetworkClient> MmsNetworkManager::GetOrCreateHttpClient(int32
         TELEPHONY_LOGE("mmsNetworkClient_ nullptr");
         mmsNetworkClient_ = std::make_shared<OHOS::Telephony::MmsNetworkClient>(slotId);
     }
-    if (!g_libCurlInit) {
-        mmsNetworkClient_->InitLibCurl();
-        g_libCurlInit = true;
-    }
-
     return mmsNetworkClient_;
 }
 } // namespace Telephony

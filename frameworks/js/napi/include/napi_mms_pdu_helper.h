@@ -31,18 +31,18 @@ public:
     void SetPduFileName(const std::string &pduFileName);
     void SetStoreFileName(const std::string &storeFileName);
     void SetDbUrl(const std::string &dbUrl);
-    void SetDataAbilityHelper(std::shared_ptr<DataShare::DataShareHelper> &dbHelper);
+    void SetDataShareHelper(std::shared_ptr<DataShare::DataShareHelper> &datashareHelper);
 
     std::string GetPduFileName();
     std::string GetStoreFileName();
     std::string GetDbUrl();
-    std::shared_ptr<DataShare::DataShareHelper> GetDataAbilityHelper();
+    std::shared_ptr<DataShare::DataShareHelper> GetDataShareHelper();
 
 private:
     std::string pduFileName_;
     std::mutex mtx_;
     std::condition_variable cv_;
-    std::shared_ptr<DataShare::DataShareHelper> dbHelper_;
+    std::shared_ptr<DataShare::DataShareHelper> datashareHelper_;
     std::string dbUrl_;
     std::string storeFileName_;
 };

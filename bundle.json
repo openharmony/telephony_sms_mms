@@ -44,6 +44,7 @@
                 "ipc",
                 "napi",
                 "netmanager_base",
+                "netstack",
                 "resource_management",
                 "safwk",
                 "samgr",

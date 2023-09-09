@@ -15,63 +15,60 @@
 
 #include "mms_network_client.h"
 
+#include <curl/curl.h>
+#include <curl/easy.h>
+
 #include "core_manager_inner.h"
+#include "http_client.h"
+#include "http_client_constant.h"
+#include "http_client_error.h"
+#include "http_client_request.h"
+#include "http_client_response.h"
 #include "mms_apn_info.h"
 #include "mms_persist_helper.h"
 #include "net_conn_client.h"
 #include "net_handle.h"
 #include "net_link_info.h"
 #include "securec.h"
+#include "telephony_common_utils.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
 using namespace NetManagerStandard;
+using namespace NetStack::HttpClient;
 std::string METHOD_POST = "POST";
 std::string METHOD_GET = "GET";
-static constexpr int32_t URL_SIZE = 1024;
 static constexpr uint32_t CODE_BUFFER_MAX_SIZE = 300 * 1024;
-static constexpr int64_t CONNECTION_TIMEOUT = 60000;
-static constexpr int64_t TRANS_OP_TIMEOUT = 60000;
-static constexpr uint8_t LOW_DOWNLOAD_RATE = 5;
 constexpr const char *SIMID_IDENT_PREFIX = "simId";
 const bool STORE_MMS_PDU_TO_FILE = false;
+constexpr static const int32_t WAIT_TIME_SECOND = 30;
 
 MmsNetworkClient::MmsNetworkClient(int32_t slotId)
 {
     slotId_ = slotId;
-    connectionTimeout_ = CONNECTION_TIMEOUT;
-    transOpTimeout_ = TRANS_OP_TIMEOUT;
 }
 
 MmsNetworkClient::~MmsNetworkClient() {}
 
 int32_t MmsNetworkClient::Execute(const std::string &method, const std::string &mmsc, const std::string &data)
 {
+    int32_t ret = TELEPHONY_ERR_FAIL;
     if (METHOD_POST.compare(method) == 0) {
-        return PostUrl(mmsc, data);
+        ret = PostUrl(mmsc, data);
+        responseData_ = "";
+        return ret;
     } else if (METHOD_GET.compare(method) == 0) {
-        return GetUrl(mmsc, data);
+        ret = GetUrl(mmsc, data);
+        responseData_ = "";
+        return ret;
     }
-    TELEPHONY_LOGI("Execute method error");
+    TELEPHONY_LOGI("mms http request fail");
     return TELEPHONY_ERR_FAIL;
 }
 
-void MmsNetworkClient::InitLibCurl()
-{
-    CURLcode errCode = curl_global_init(CURL_GLOBAL_ALL);
-    if (errCode != CURLE_OK) {
-        TELEPHONY_LOGE("curl init failed, errCode:[%{public}x]!", errCode);
-    }
-}
-
-void MmsNetworkClient::DestoryLibCurl()
-{
-    curl_global_cleanup();
-}
-
-int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fileName)
+int32_t MmsNetworkClient::GetMmscFromDb(const std::string &mmsc)
 {
     std::shared_ptr<MmsApnInfo> mmsApnInfo = std::make_shared<MmsApnInfo>(slotId_);
     if (mmsApnInfo == nullptr) {
@@ -84,7 +81,11 @@ int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fi
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
 
-    std::string strBuf;
+    return TELEPHONY_SUCCESS;
+}
+
+int32_t MmsNetworkClient::GetMmsDataBuf(std::string &strBuf, const std::string &fileName)
+{
     if (STORE_MMS_PDU_TO_FILE) {
         if (!GetMmsPduFromFile(fileName, strBuf)) {
             TELEPHONY_LOGE("Get MmsPdu from file fail");
@@ -96,22 +97,168 @@ int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fi
             return TELEPHONY_ERR_DATABASE_READ_FAIL;
         }
     }
+    return TELEPHONY_SUCCESS;
+}
 
-    SetIfaceName(GetIfaceName());
-    TELEPHONY_LOGI("strBuf length:%{public}d", static_cast<uint32_t>(strBuf.size()));
-    std::string strResponse = "";
-    int32_t ret = HttpPost(mmscFromDataBase, strBuf, strResponse);
-    TELEPHONY_LOGI("ret: %{public}d,strResponse len: %{public}d", ret, static_cast<uint32_t>(strResponse.size()));
+int32_t MmsNetworkClient::GetMmsApnPorxy(NetStack::HttpClient::HttpProxy &httpProxy)
+{
+    std::shared_ptr<MmsApnInfo> mmsApnInfo = std::make_shared<MmsApnInfo>(slotId_);
+    if (mmsApnInfo == nullptr) {
+        TELEPHONY_LOGE("mmsApnInfo is nullptr");
+        return TELEPHONY_ERR_MMS_FAIL_APN_INVALID;
+    }
+    std::string proxy = mmsApnInfo->getMmsProxyAddressAndProxyPort();
+    if (proxy.empty()) {
+        TELEPHONY_LOGE("proxy empty");
+        return TELEPHONY_ERR_MMS_FAIL_APN_INVALID;
+    }
+    int32_t locate = proxy.find(":");
+    if (locate <= 0 || static_cast<size_t>(locate + 1) == proxy.size()) {
+        TELEPHONY_LOGE("mms apn error");
+        return TELEPHONY_ERR_MMS_FAIL_APN_INVALID;
+    }
 
-    CURLcode errCode = static_cast<CURLcode>(ret);
+    httpProxy.host = proxy.substr(0, locate);
+    std::string port = proxy.substr(locate + 1);
+    if (!IsValidDecValue(port)) {
+        TELEPHONY_LOGE("port not decimal");
+        return TELEPHONY_ERR_MMS_FAIL_APN_INVALID;
+    }
+    httpProxy.port = std::stoi(port);
+    return TELEPHONY_SUCCESS;
+}
+
+int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fileName)
+{
+    int32_t ret = GetMmscFromDb(mmsc);
+    if (ret != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("post request fail");
+        return ret;
+    }
+
+    std::unique_lock<std::mutex> lck(clientCts_);
+    std::string strBuf;
+    ret = GetMmsDataBuf(strBuf, fileName);
+    if (ret != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("post request fail");
+        return ret;
+    }
+    if (HttpRequest(METHOD_POST, mmsc, strBuf) != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("http fail error");
+        return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
+    }
+
+    httpFinish_ = false;
+    while (!httpFinish_) {
+        TELEPHONY_LOGI("wait(), networkReady = false");
+        if (clientCv_.wait_for(lck, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
+            break;
+        }
+    }
     if (!STORE_MMS_PDU_TO_FILE) {
         DeleteMmsPdu(fileName);
     }
-    if (errCode != CURLE_OK) {
+    if (!httpSuccess_) {
+        TELEPHONY_LOGI("send mms failed");
         return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
     } else {
         TELEPHONY_LOGI("send mms successed");
         return TELEPHONY_ERR_SUCCESS;
+    }
+}
+
+int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::string &url, const std::string &data)
+{
+    HttpClientRequest httpReq;
+    httpReq.SetURL(url);
+    httpReq.SetHttpProxyType(HttpProxyType::USE_SPECIFIED);
+    NetStack::HttpClient::HttpProxy httpProxy;
+    int32_t ret = GetMmsApnPorxy(httpProxy);
+    if (ret != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("get mms apn error");
+        return ret;
+    }
+    httpReq.SetHttpProxy(httpProxy);
+    if (method.compare(METHOD_POST) == 0) {
+        httpReq.SetBody(data.c_str(), data.size());
+        httpReq.SetMethod(HttpConstant::HTTP_METHOD_POST);
+        httpReq.SetHeader("content-type", "application/vnd.wap.mms-message; charset=utf-8");
+        httpReq.SetHeader("Accept", "application/vnd.wap.mms-message, application/vnd.wap.sic");
+    } else {
+        httpReq.SetMethod(HttpConstant::HTTP_METHOD_GET);
+    }
+    HttpSession &session = HttpSession::GetInstance();
+    auto task = session.CreateTask(httpReq);
+    if (task == nullptr || task->GetCurlHandle() == nullptr) {
+        TELEPHONY_LOGE("task nullptr error");
+        return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
+    }
+
+    if (GetIfaceName().empty()) {
+        TELEPHONY_LOGE("Ifacename empty");
+        return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
+    }
+    CURLcode errCode = CURLE_OK;
+    errCode = curl_easy_setopt(task->GetCurlHandle(), CURLOPT_INTERFACE, GetIfaceName().c_str());
+    if (errCode != CURLE_OK) {
+        TELEPHONY_LOGE("CURLOPT_INTERFACE failed errCode:%{public}d", errCode);
+        return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
+    }
+    HttpCallBack(task);
+    task->Start();
+    return TELEPHONY_ERR_SUCCESS;
+}
+
+int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, const std::string &storeDirName)
+{
+    std::unique_lock<std::mutex> lck(clientCts_);
+    std::string strData = "";
+    if (HttpRequest(METHOD_GET, mmsc, strData) != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("http fail error");
+        return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
+    }
+    httpFinish_ = false;
+    while (!httpFinish_) {
+        TELEPHONY_LOGI("wait(), networkReady = false");
+        if (clientCv_.wait_for(lck, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
+            break;
+        }
+    }
+    TELEPHONY_LOGI("responseData_ len: %{public}d", static_cast<uint32_t>(responseData_.size()));
+    return UpdateMmsPduToStorage(storeDirName);
+}
+
+int32_t MmsNetworkClient::UpdateMmsPduToStorage(const std::string &storeDirName)
+{
+    uint32_t len = responseData_.size();
+    if (len > CODE_BUFFER_MAX_SIZE || len == 0) {
+        TELEPHONY_LOGE("MMS pdu length invalid");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    if (STORE_MMS_PDU_TO_FILE) {
+        std::unique_ptr<char[]> resultResponse = std::make_unique<char[]>(len);
+        if (memset_s(resultResponse.get(), len, 0x00, len) != EOK) {
+            TELEPHONY_LOGE("memset_s error");
+            return TELEPHONY_ERR_MEMSET_FAIL;
+        }
+        if (memcpy_s(resultResponse.get(), len, &responseData_[0], len) != EOK) {
+            TELEPHONY_LOGE("memcpy_s error");
+            return TELEPHONY_ERR_MEMCPY_FAIL;
+        }
+        if (!WriteBufferToFile(std::move(resultResponse), len, storeDirName)) {
+            TELEPHONY_LOGE("write to file error");
+            return TELEPHONY_ERR_WRITE_DATA_FAIL;
+        }
+        return TELEPHONY_ERR_SUCCESS;
+    } else {
+        std::shared_ptr<MmsPersistHelper> mmsPduObj = std::make_shared<MmsPersistHelper>();
+        if (mmsPduObj == nullptr) {
+            TELEPHONY_LOGE("mmsPduObj nullptr");
+            return TELEPHONY_ERR_LOCAL_PTR_NULL;
+        }
+        bool ret = mmsPduObj->UpdateMmsPdu(responseData_, storeDirName);
+        TELEPHONY_LOGI("ret:%{public}d, length:%{public}d", ret, len);
+        return ret ? TELEPHONY_ERR_SUCCESS : TELEPHONY_ERR_FAIL;
     }
 }
 
@@ -146,7 +293,7 @@ bool MmsNetworkClient::GetMmsPduFromFile(const std::string &fileName, std::strin
     }
     (void)fseek(pFile, 0, SEEK_SET);
     int32_t totolLength = static_cast<int32_t>(fread(pduBuffer.get(), 1, CODE_BUFFER_MAX_SIZE, pFile));
-    TELEPHONY_LOGI("sendMms fread totolLength%{public}d", totolLength);
+    TELEPHONY_LOGI("sendMms totolLength:%{public}d", totolLength);
     (void)fclose(pFile);
 
     long i = 0;
@@ -186,58 +333,13 @@ void MmsNetworkClient::DeleteMmsPdu(const std::string &dbUrl)
     mmsPdu->DeleteMmsPdu(dbUrl);
 }
 
-int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, const std::string &storeDirName)
-{
-    std::string strResponse;
-    SetIfaceName(GetIfaceName());
-    int32_t getResult = HttpGet(mmsc, strResponse);
-    if (getResult != CURLE_OK) {
-        TELEPHONY_LOGE("LibCurl HttpGet fail");
-        return getResult;
-    }
-
-    uint32_t len = strResponse.size();
-    if (len > CODE_BUFFER_MAX_SIZE || len == 0) {
-        TELEPHONY_LOGE("MMS pdu length invalid");
-        return TELEPHONY_ERR_LOCAL_PTR_NULL;
-    }
-
-    std::unique_ptr<char[]> resultResponse = std::make_unique<char[]>(len);
-    if (STORE_MMS_PDU_TO_FILE) {
-        if (memset_s(resultResponse.get(), len, 0x00, len) != EOK) {
-            TELEPHONY_LOGE("memset_s err");
-            return TELEPHONY_ERR_MEMSET_FAIL;
-        }
-        if (memcpy_s(resultResponse.get(), len, &strResponse[0], len) != EOK) {
-            TELEPHONY_LOGE("memcpy_s error");
-            return TELEPHONY_ERR_MEMCPY_FAIL;
-        }
-        if (!WriteBufferToFile(std::move(resultResponse), len, storeDirName)) {
-            TELEPHONY_LOGE("write to file error");
-            return TELEPHONY_ERR_WRITE_DATA_FAIL;
-        }
-        return TELEPHONY_ERR_SUCCESS;
-    } else {
-        std::shared_ptr<MmsPersistHelper> mmsPduObj = std::make_shared<MmsPersistHelper>();
-        if (mmsPduObj == nullptr) {
-            TELEPHONY_LOGE("GetUrl mmsPduObj nullptr");
-            return TELEPHONY_ERR_LOCAL_PTR_NULL;
-        }
-        bool ret = mmsPduObj->UpdateMmsPdu(strResponse, storeDirName);
-        TELEPHONY_LOGI("ret:%{public}d, length:%{public}d", ret, len);
-        return ret ? TELEPHONY_ERR_SUCCESS : TELEPHONY_ERR_FAIL;
-    }
-}
-
 std::string MmsNetworkClient::GetIfaceName()
 {
     int32_t simId = CoreManagerInner::GetInstance().GetSimId(slotId_);
     std::list<int32_t> netIdList;
     int32_t ret =
         NetConnClient::GetInstance().GetNetIdByIdentifier(SIMID_IDENT_PREFIX + std::to_string(simId), netIdList);
-    TELEPHONY_LOGI(
-        "slot = %{public}d, simId = %{public}d, netIdList size = %{public}zu", slotId_, simId, netIdList.size());
-    std::string ifaceName = "";
+    std::string ifaceName;
     if (ret != NETMANAGER_SUCCESS) {
         TELEPHONY_LOGE("get netIdList by identifier fail, ret = %{public}d", ret);
         return ifaceName;
@@ -249,7 +351,6 @@ std::string MmsNetworkClient::GetIfaceName()
         return ifaceName;
     }
     for (sptr<NetHandle> netHandle : netList) {
-        TELEPHONY_LOGI("netHandle->GetNetId() = %{public}d", netHandle->GetNetId());
         for (auto netId : netIdList) {
             if (netId != netHandle->GetNetId()) {
                 continue;
@@ -269,193 +370,6 @@ std::string MmsNetworkClient::GetIfaceName()
     }
     TELEPHONY_LOGI("slot = %{public}d data is not connected for this slot", slotId_);
     return ifaceName;
-}
-
-void MmsNetworkClient::SetIfaceName(const std::string &name)
-{
-    const std::string prefix("if!");
-    const auto preLen = prefix.length();
-    if ((name.length() > preLen && name.substr(0, preLen) == prefix) || name.empty()) {
-        ifaceName_ = name;
-    } else {
-        ifaceName_ = prefix + name;
-    }
-}
-
-int32_t MmsNetworkClient::HttpGet(const std::string &strUrl, std::string &strResponse)
-{
-    return HttpRequestExec(HttpReqType::HTTP_REQUEST_TYPE_GET, strUrl, "", strResponse);
-}
-
-int32_t MmsNetworkClient::HttpPost(const std::string &strUrl, const std::string &strData, std::string &strResponse)
-{
-    return HttpRequestExec(HttpReqType::HTTP_REQUEST_TYPE_POST, strUrl, strData, strResponse);
-}
-
-void CURLClean::operator()(CURL *p) const
-{
-    if (p) {
-        curl_easy_cleanup(p);
-    }
-}
-
-int32_t MmsNetworkClient::HttpRequestExec(
-    HttpReqType type, const std::string &strUrl, const std::string &strData, std::string &strResponse)
-{
-    if (strUrl.empty() || strUrl.length() > URL_SIZE) {
-        TELEPHONY_LOGE("URL error!");
-        return -1;
-    }
-
-    std::unique_ptr<CURL, CURLClean> mmsCurl(curl_easy_init(), CURLClean());
-    if (mmsCurl.get() == nullptr) {
-        TELEPHONY_LOGE("mmsCurl nullptr");
-        return -1;
-    }
-
-    int32_t result = SetCurlOpt(mmsCurl, type, strUrl, strData, strResponse);
-    if (result == 0) {
-        CURLcode errCode = CURLE_OK;
-        TELEPHONY_LOGI("HttpRequestExec send http request");
-        errCode = curl_easy_perform(mmsCurl.get());
-        result = static_cast<int32_t>(errCode);
-    }
-    if (mmsHttpHeaderlist_ != nullptr) {
-        curl_slist_free_all(mmsHttpHeaderlist_);
-    }
-    return ParseExecResult(mmsCurl, result);
-}
-
-int32_t MmsNetworkClient::ParseExecResult(const std::unique_ptr<CURL, CURLClean> &mmsCurl, int32_t result)
-{
-    CURLcode retCode = static_cast<CURLcode>(result);
-    if (retCode != CURLE_OK) {
-        TELEPHONY_LOGE("HTTP request failed, errStr:[%{public}s], errorBuffer_:[%{public}s]!",
-            curl_easy_strerror(retCode), errorBuffer_);
-        return result;
-    }
-
-    lastTransTime_ = 0;
-    curl_off_t totalTimeUs = 0L;
-    retCode = curl_easy_getinfo(mmsCurl.get(), CURLINFO_TOTAL_TIME_T, &totalTimeUs);
-    if (retCode == CURLE_OK) {
-        lastTransTime_ = static_cast<int64_t>(totalTimeUs / 1000L);
-        TELEPHONY_LOGI("HTTP request OK,total time in ms:[%{public}" PRId64 "]", lastTransTime_);
-    }
-    return static_cast<int32_t>(retCode);
-}
-
-int32_t MmsNetworkClient::SetCurlOpt(const std::unique_ptr<CURL, CURLClean> &mmsCurl, HttpReqType type,
-    const std::string &strUrl, const std::string &strData, std::string &strResponse)
-{
-    int32_t rlt = SetCurlOptCommon(mmsCurl, strUrl);
-    if (rlt != 0) {
-        return rlt;
-    }
-
-    /* receive the http header */
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_HEADERFUNCTION, nullptr);
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_HEADERDATA, nullptr);
-
-    /* receive the whole http response */
-    strResponse.clear();
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_WRITEFUNCTION, DataCallback);
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_WRITEDATA, &strResponse);
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_FAILONERROR, 1L);
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_LOW_SPEED_LIMIT, 1);
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_LOW_SPEED_TIME, LOW_DOWNLOAD_RATE);
-    if (type == HttpReqType::HTTP_REQUEST_TYPE_POST) {
-        /* Specify post content */
-        curl_easy_setopt(mmsCurl.get(), CURLOPT_POST, 1L);
-        curl_easy_setopt(mmsCurl.get(), CURLOPT_POSTFIELDSIZE, strData.length());
-        curl_easy_setopt(mmsCurl.get(), CURLOPT_POSTFIELDS, strData.c_str());
-
-        mmsHttpHeaderlist_ =
-            curl_slist_append(mmsHttpHeaderlist_, "Content-Type:application/vnd.wap.mms-message; charset=utf-8");
-        mmsHttpHeaderlist_ =
-            curl_slist_append(mmsHttpHeaderlist_, "Accept:application/vnd.wap.mms-message, application/vnd.wap.sic");
-        curl_easy_setopt(mmsCurl.get(), CURLOPT_HTTPHEADER, mmsHttpHeaderlist_);
-    }
-    return 0;
-}
-
-int32_t MmsNetworkClient::SetCurlOptCommon(const std::unique_ptr<CURL, CURLClean> &mmsCurl, const std::string &strUrl)
-{
-    /* Print request connection process and return http data on the screen */
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_VERBOSE, 0L);
-
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_ERRORBUFFER, errorBuffer_);
-    /* not include the headers in the write callback */
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_HEADER, 0L);
-    /* Specify url content */
-    if (memset_s(mmscChar_, MAX_MMSC_SIZE, 0x00, MAX_MMSC_SIZE) != EOK) {
-        TELEPHONY_LOGE("set mmsc memset_s err");
-        return CURLE_FAILED_INIT;
-    }
-    if (memcpy_s(mmscChar_, strUrl.length(), &strUrl[0], strUrl.length()) != EOK) {
-        TELEPHONY_LOGE("set mmsc memcpy_s err");
-        return CURLE_FAILED_INIT;
-    }
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_URL, mmscChar_);
-
-    /* https support */
-    /* the connection succeeds regardless of the peer certificate validation */
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_SSL_VERIFYPEER, 0L);
-    /* the connection succeeds regardless of the names in the certificate. */
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_SSL_VERIFYHOST, 0L);
-
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_NOSIGNAL, 1L);
-
-    /* Allow redirect */
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_FOLLOWLOCATION, 1L);
-    /* Set the maximum number of subsequent redirects */
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_MAXREDIRS, 1L);
-
-    /* connection timeout time */
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_CONNECTTIMEOUT_MS, connectionTimeout_);
-    /* transfer operation timeout time */
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_TIMEOUT_MS, transOpTimeout_);
-
-    std::shared_ptr<MmsApnInfo> mmsApnInfo = std::make_shared<MmsApnInfo>(slotId_);
-    if (mmsApnInfo == nullptr) {
-        TELEPHONY_LOGE("mmsApnInfo is nullptr");
-        return CURLE_FAILED_INIT;
-    }
-
-    std::string proxy = mmsApnInfo->getMmsProxyAddressAndProxyPort();
-    if (proxy.empty() || static_cast<int32_t>(proxy.length()) > MAX_MMSC_PROXY_SIZE) {
-        return static_cast<int32_t>(CURLE_BAD_FUNCTION_ARGUMENT);
-    }
-    if (memset_s(proxyChar_, MAX_MMSC_PROXY_SIZE, 0x00, MAX_MMSC_PROXY_SIZE) != EOK) {
-        TELEPHONY_LOGE("set mmsc proxy memset_s err");
-        return CURLE_FAILED_INIT;
-    }
-    if (memcpy_s(proxyChar_, proxy.length(), &proxy[0], proxy.length()) != EOK) {
-        TELEPHONY_LOGE("set mmsc proxy memcpy_s err");
-        return CURLE_FAILED_INIT;
-    }
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_PROXY, proxyChar_);
-    curl_easy_setopt(mmsCurl.get(), CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-
-    CURLcode errCode = CURLE_OK;
-    if (!ifaceName_.empty()) {
-        errCode = curl_easy_setopt(mmsCurl.get(), CURLOPT_INTERFACE, ifaceName_.c_str());
-        if (errCode != CURLE_OK) {
-            TELEPHONY_LOGE("CURLOPT_INTERFACE failed errCode:%{public}d", errCode);
-        }
-    }
-    return static_cast<int32_t>(errCode);
-}
-
-int32_t MmsNetworkClient::DataCallback(const std::string &data, size_t size, size_t nmemb, std::string *strBuffer)
-{
-    if (strBuffer == nullptr || size == 0) {
-        return 0;
-    }
-
-    int32_t writtenLen = static_cast<int32_t>(size * nmemb);
-    strBuffer->append(data, writtenLen);
-    return writtenLen;
 }
 
 bool MmsNetworkClient::WriteBufferToFile(
@@ -484,6 +398,36 @@ bool MmsNetworkClient::WriteBufferToFile(
     }
     (void)fclose(pFile);
     return true;
+}
+
+void MmsNetworkClient::HttpCallBack(std::shared_ptr<HttpClientTask> task)
+{
+    task->OnSuccess([task, this](const HttpClientRequest &request, const HttpClientResponse &response) {
+        TELEPHONY_LOGI("OnSuccess");
+        httpFinish_ = true;
+        httpSuccess_ = true;
+        clientCv_.notify_one();
+    });
+    task->OnCancel([this](const HttpClientRequest &request, const HttpClientResponse &response) {
+        TELEPHONY_LOGI("OnCancel");
+        httpFinish_ = true;
+        clientCv_.notify_one();
+    });
+    task->OnFail(
+        [this](const HttpClientRequest &request, const HttpClientResponse &response, const HttpClientError &error) {
+            TELEPHONY_LOGE("OnFailed, responseCode:%{public}d", response.GetResponseCode());
+            httpFinish_ = true;
+            clientCv_.notify_one();
+        });
+    task->OnDataReceive([this](const HttpClientRequest &request, const uint8_t *data, size_t length) {
+        if (data == nullptr || length == 0) {
+            return;
+        }
+        responseData_.insert(responseData_.size(), reinterpret_cast<const char *>(data), length);
+    });
+    task->OnProgress([](const HttpClientRequest &request, u_long dltotal, u_long dlnow, u_long ultotal, u_long ulnow) {
+        TELEPHONY_LOGD("OnProgress");
+    });
 }
 } // namespace Telephony
 } // namespace OHOS
