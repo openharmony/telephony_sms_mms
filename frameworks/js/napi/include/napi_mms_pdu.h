@@ -33,6 +33,8 @@ public:
 private:
     bool QueryMmsPdu(NapiMmsPduHelper &helper);
     void SetMmsPdu(const std::string &mmsPdu);
+    std::vector<std::string> SplitPdu(const std::string &mmsPdu);
+    std::vector<std::string> SplitUrl(std::string url);
 
 private:
     std::string mmsPdu_;
