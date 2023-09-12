@@ -25,9 +25,12 @@ namespace Telephony {
 const std::string SMS_PROFILE_MMS_PDU_URI = "datashare:///com.ohos.smsmmsability/sms_mms/mms_pdu";
 static constexpr const char *PDU_CONTENT = "pdu_content";
 static constexpr const char *ID = "id";
+static constexpr const char *PDU = "pdu";
 static constexpr uint8_t SLIDE_STEP = 2;
 static constexpr uint8_t HEX_VALUE_F0 = 0xF0;
 static constexpr uint8_t HEX_VALUE_0F = 0x0F;
+static constexpr uint32_t SPLIT_PDU_LENGTH = 195 * 1024;
+static constexpr uint32_t MAX_PDU_PAGES = 4;
 
 void NAPIMmsPdu::DeleteMmsPdu(NapiMmsPduHelper &pduHelper)
 {
@@ -42,10 +45,18 @@ void NAPIMmsPdu::DeleteMmsPdu(NapiMmsPduHelper &pduHelper)
     }
 
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
-
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(ID, pduHelper.GetDbUrl());
-    int32_t result = datashareHelper->Delete(uri, predicates);
+    std::vector<std::string> dbUrls = SplitUrl(pduHelper.GetDbUrl());
+    int32_t result = -1;
+    for (std::string url : dbUrls) {
+        predicates.EqualTo(ID, url);
+        result = datashareHelper->Delete(uri, predicates);
+        if (result < 0) {
+            TELEPHONY_LOGE("delete mms pdu fail");
+            mmsPdu_ = "";
+            return;
+        }
+    }
     mmsPdu_ = "";
     TELEPHONY_LOGI("result:%{public}d", result);
 }
@@ -57,21 +68,55 @@ bool NAPIMmsPdu::InsertMmsPdu(NapiMmsPduHelper &pduHelper, const std::string &mm
         TELEPHONY_LOGE("datashareHelper is nullptr");
         return false;
     }
-    std::string targetMmsPdu;
-    for (size_t i = 0; i < mmsPdu.size(); i++) {
-        targetMmsPdu += static_cast<char>((mmsPdu[i] & 0x0F) | 0xF0);
-        targetMmsPdu += static_cast<char>((mmsPdu[i] & 0xF0) | 0x0F);
-    }
+
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
     DataShare::DataShareValuesBucket bucket;
-    bucket.Put(PDU_CONTENT, targetMmsPdu);
-    int32_t result = datashareHelper->Insert(uri, bucket);
-    std::string dbUrl = std::to_string(result);
-    TELEPHONY_LOGI("insert db, dbUrl:%{public}s,pduLen:%{public}d,targetPduLen:%{public}d", dbUrl.c_str(),
-        static_cast<uint32_t>(mmsPdu.size()), static_cast<uint32_t>(targetMmsPdu.size()));
+    std::vector<std::string> mmsPdus = SplitPdu(mmsPdu);
+
+    std::string dbUrl;
+    for (std::string mmsPdu : mmsPdus) {
+        bucket.Put(PDU_CONTENT, mmsPdu);
+        int32_t result = datashareHelper->Insert(uri, bucket);
+        if (result < 0) {
+            TELEPHONY_LOGE("mms pdu insert fail");
+            return false;
+        }
+        dbUrl += std::to_string(result) + ',';
+    }
+
+    TELEPHONY_LOGI("insert db, dbUrl:%{public}s", dbUrl.c_str());
     pduHelper.SetDbUrl(dbUrl);
     pduHelper.NotifyAll();
-    return result >= 0 ? true : false;
+    return dbUrl.empty() ? false : true;
+}
+
+std::vector<std::string> NAPIMmsPdu::SplitPdu(const std::string &mmsPdu)
+{
+    std::vector<std::string> mmsPdus;
+    if (mmsPdu.compare(PDU) == 0) {
+        for (uint32_t locate = 0; locate < MAX_PDU_PAGES; locate++) {
+            mmsPdus.push_back(PDU);
+        }
+        return mmsPdus;
+    }
+    std::string targetMmsPdu;
+    for (size_t i = 0; i < mmsPdu.size(); i++) {
+        targetMmsPdu += static_cast<char>((mmsPdu[i] & HEX_VALUE_0F) | HEX_VALUE_F0);
+        targetMmsPdu += static_cast<char>((mmsPdu[i] & HEX_VALUE_F0) | HEX_VALUE_0F);
+    }
+    std::string mmsPduData;
+    for (uint32_t locate = 0; locate * SPLIT_PDU_LENGTH < targetMmsPdu.size(); locate++) {
+        if ((locate + 1) * SPLIT_PDU_LENGTH < targetMmsPdu.size()) {
+            mmsPduData = targetMmsPdu.substr(locate * SPLIT_PDU_LENGTH, SPLIT_PDU_LENGTH);
+            mmsPdus.push_back(mmsPduData);
+        } else {
+            mmsPduData = targetMmsPdu.substr(locate * SPLIT_PDU_LENGTH);
+            mmsPdus.push_back(mmsPduData);
+            break;
+        }
+    }
+    TELEPHONY_LOGI("pduLen:%{public}zu,targetPduLen:%{public}zu", mmsPdu.size(), targetMmsPdu.size());
+    return mmsPdus;
 }
 
 std::string NAPIMmsPdu::GetMmsPdu(NapiMmsPduHelper &pduHelper)
@@ -87,6 +132,20 @@ void NAPIMmsPdu::SetMmsPdu(const std::string &mmsPdu)
     mmsPdu_ = mmsPdu;
 }
 
+std::vector<std::string> NAPIMmsPdu::SplitUrl(std::string url)
+{
+    std::vector<std::string> dbUrls;
+    while (url.size() > 0) {
+        int32_t locate = url.find_first_of(',');
+        if (locate < 1) {
+            break;
+        }
+        dbUrls.push_back(url.substr(0, locate));
+        url = url.substr(locate + 1);
+    }
+    return dbUrls;
+}
+
 bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
 {
     std::shared_ptr<DataShare::DataShareHelper> datashareHelper = pduHelper.GetDataShareHelper();
@@ -94,34 +153,38 @@ bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
         TELEPHONY_LOGE("datashareHelper is nullptr");
         return false;
     }
-    Uri uri(SMS_PROFILE_MMS_PDU_URI);
-    std::vector<std::string> colume;
-    DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(ID, pduHelper.GetDbUrl());
-    auto resultSet = datashareHelper->Query(uri, predicates, colume);
-    if (resultSet == nullptr) {
-        TELEPHONY_LOGE("resultSet is nullptr");
-        return false;
-    }
-    int count;
-    resultSet->GetRowCount(count);
-    if (count <= 0) {
-        TELEPHONY_LOGE("pdu count: %{public}d error", count);
-        resultSet->Close();
-        return false;
-    }
-    int columnIndex;
-    std::vector<uint8_t> blobValue;
-    for (int row = 0; row < count; row++) {
-        resultSet->GoToRow(row);
-        resultSet->GetColumnIndex(PDU_CONTENT, columnIndex);
-        resultSet->GetBlob(columnIndex, blobValue);
-    }
-    resultSet->Close();
+    std::vector<std::string> dbUrls = SplitUrl(pduHelper.GetDbUrl());
     std::string mmsPdu;
-    for (size_t i = 0; i + 1 < blobValue.size(); i = i + SLIDE_STEP) {
-        char pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);
-        mmsPdu += static_cast<char>(pduChar);
+    for (std::string url : dbUrls) {
+        Uri uri(SMS_PROFILE_MMS_PDU_URI);
+        std::vector<std::string> colume;
+        DataShare::DataSharePredicates predicates;
+        predicates.EqualTo(ID, url);
+        auto resultSet = datashareHelper->Query(uri, predicates, colume);
+        if (resultSet == nullptr) {
+            TELEPHONY_LOGE("resultSet is nullptr");
+            return false;
+        }
+        int count;
+        resultSet->GetRowCount(count);
+        if (count <= 0) {
+            TELEPHONY_LOGE("pdu count: %{public}d error", count);
+            resultSet->Close();
+            return false;
+        }
+        int columnIndex;
+        std::vector<uint8_t> blobValue;
+        for (int row = 0; row < count; row++) {
+            resultSet->GoToRow(row);
+            resultSet->GetColumnIndex(PDU_CONTENT, columnIndex);
+            resultSet->GetBlob(columnIndex, blobValue);
+        }
+        resultSet->Close();
+        char pduChar = 0x00;
+        for (size_t i = 0; i + 1 < blobValue.size(); i = i + SLIDE_STEP) {
+            pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);
+            mmsPdu += static_cast<char>(pduChar);
+        }
     }
     TELEPHONY_LOGI("mmsPdu size:%{public}d", static_cast<uint32_t>(mmsPdu.size()));
     SetMmsPdu(mmsPdu);

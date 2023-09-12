@@ -37,6 +37,8 @@ private:
         int32_t systemAbilityId, const std::string &dataAbilityUri) const;
     bool QueryMmsPdu(const std::string &dbUrl);
     void SetMmsPdu(const std::string &mmsPdu);
+    std::vector<std::string> SplitPdu(const std::string &mmsPdu);
+    std::vector<std::string> SplitUrl(std::string url);
 
 private:
     std::string mmsPdu_;
