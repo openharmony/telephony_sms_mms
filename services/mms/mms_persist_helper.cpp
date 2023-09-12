@@ -25,6 +25,7 @@ const std::string SMS_PROFILE_MMS_PDU_URI = "datashare:///com.ohos.smsmmsability
 static constexpr const char *PDU_CONTENT = "pdu_content";
 static constexpr const char *ID = "id";
 static constexpr uint8_t SLIDE_STEP = 2;
+static constexpr uint32_t SPLIT_PDU_LENGTH = 195 * 1024;
 
 std::shared_ptr<DataShare::DataShareHelper> MmsPersistHelper::CreateSmsHelper()
 {
@@ -59,10 +60,18 @@ void MmsPersistHelper::DeleteMmsPdu(const std::string &dbUrl)
     }
 
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
-
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo("id", dbUrl);
-    int32_t result = helper->Delete(uri, predicates);
+    std::vector<std::string> dbUrls = SplitUrl(dbUrl);
+    int32_t result = -1;
+    for (std::string url : dbUrls) {
+        predicates.EqualTo("id", url);
+        result = helper->Delete(uri, predicates);
+        if (result < 0) {
+            TELEPHONY_LOGE("delete mms pdu fail");
+            helper->Release();
+            return;
+        }
+    }
     helper->Release();
     mmsPdu_ = "";
     TELEPHONY_LOGI("result:%{public}d", result);
@@ -78,18 +87,47 @@ bool MmsPersistHelper::UpdateMmsPdu(const std::string &mmsPdu, const std::string
 
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
     DataShare::DataShareValuesBucket bucket;
-    std::string targetMmsPdu;
-    for (size_t i = 0; i < mmsPdu.size(); i++) {
-        targetMmsPdu += static_cast<char>((mmsPdu[i] & 0x0F) | 0xF0);
-        targetMmsPdu += static_cast<char>((mmsPdu[i] & 0xF0) | 0x0F);
+    std::vector<std::string> mmsPdus = SplitPdu(mmsPdu);
+    std::vector<std::string> dbUrls = SplitUrl(dbUrl);
+    int32_t result = -1;
+    for (uint32_t locate = 0; locate < mmsPdus.size() && locate < dbUrls.size(); locate++) {
+        bucket.Put(PDU_CONTENT, mmsPdus[locate]);
+        DataShare::DataSharePredicates predicates;
+        predicates.EqualTo(ID, dbUrls[locate]);
+        result = helper->Update(uri, predicates, bucket);
+        if (result < 0) {
+            TELEPHONY_LOGE("update db fail");
+            return false;
+        }
     }
-    bucket.Put(PDU_CONTENT, targetMmsPdu);
-    DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(ID, dbUrl);
-    int32_t result = helper->Update(uri, predicates, bucket);
     helper->Release();
     TELEPHONY_LOGI("result:%{public}d", result);
     return result >= 0 ? true : false;
+}
+
+std::vector<std::string> MmsPersistHelper::SplitPdu(const std::string &mmsPdu)
+{
+    std::string targetMmsPdu;
+    for (size_t i = 0; i < mmsPdu.size(); i++) {
+        targetMmsPdu += static_cast<char>((mmsPdu[i] & HEX_VALUE_0F) | HEX_VALUE_F0);
+        targetMmsPdu += static_cast<char>((mmsPdu[i] & HEX_VALUE_F0) | HEX_VALUE_0F);
+    }
+
+    std::vector<std::string> mmsPdus;
+    for (uint32_t locate = 0; locate * SPLIT_PDU_LENGTH < targetMmsPdu.size(); locate++) {
+        std::string mmsPduData;
+        if ((locate + 1) * SPLIT_PDU_LENGTH < targetMmsPdu.size()) {
+            mmsPduData = targetMmsPdu.substr(locate * SPLIT_PDU_LENGTH, SPLIT_PDU_LENGTH);
+            mmsPdus.push_back(mmsPduData);
+        } else {
+            mmsPduData = targetMmsPdu.substr(locate * SPLIT_PDU_LENGTH);
+            mmsPdus.push_back(mmsPduData);
+            break;
+        }
+    }
+    TELEPHONY_LOGI("pduLen:%{public}zu,target:%{public}zu,pageLen:%{public}zu", mmsPdu.size(), targetMmsPdu.size(),
+        mmsPdus.size());
+    return mmsPdus;
 }
 
 std::string MmsPersistHelper::GetMmsPdu(const std::string &dbUrl)
@@ -105,6 +143,20 @@ void MmsPersistHelper::SetMmsPdu(const std::string &mmsPdu)
     mmsPdu_ = mmsPdu;
 }
 
+std::vector<std::string> MmsPersistHelper::SplitUrl(std::string url)
+{
+    std::vector<std::string> dbUrls;
+    while (url.size() > 0) {
+        int32_t locate = url.find_first_of(',');
+        if (locate < 1) {
+            break;
+        }
+        dbUrls.push_back(url.substr(0, locate));
+        url = url.substr(locate + 1);
+    }
+    return dbUrls;
+}
+
 bool MmsPersistHelper::QueryMmsPdu(const std::string &dbUrl)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateSmsHelper();
@@ -112,38 +164,44 @@ bool MmsPersistHelper::QueryMmsPdu(const std::string &dbUrl)
         TELEPHONY_LOGE("helper is nullptr");
         return false;
     }
-    Uri uri(SMS_PROFILE_MMS_PDU_URI);
-    std::vector<std::string> colume;
-    DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(ID, dbUrl);
-    auto resultSet = helper->Query(uri, predicates, colume);
-    if (resultSet == nullptr) {
-        TELEPHONY_LOGE("Query Result Set nullptr Failed.");
-        helper->Release();
-        return false;
-    }
-    int count = 0;
-    resultSet->GetRowCount(count);
-    if (count <= 0) {
-        TELEPHONY_LOGE("MmsPdu count: %{public}d error", count);
-        resultSet->Close();
-        helper->Release();
-        return false;
-    }
-    int columnIndex;
-    std::vector<uint8_t> blobValue;
-    resultSet->GoToFirstRow();
-    resultSet->GetColumnIndex(PDU_CONTENT, columnIndex);
-    resultSet->GetBlob(columnIndex, blobValue);
-    resultSet->Close();
-    helper->Release();
+
+    std::vector<std::string> dbUrls = SplitUrl(dbUrl);
     std::string mmsPdu;
-    for (size_t i = 0; i + 1 < blobValue.size(); i = i + SLIDE_STEP) {
-        char pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);
-        mmsPdu += static_cast<char>(pduChar);
+    for (std::string url : dbUrls) {
+        Uri uri(SMS_PROFILE_MMS_PDU_URI);
+        std::vector<std::string> colume;
+        DataShare::DataSharePredicates predicates;
+        predicates.EqualTo(ID, url);
+        auto resultSet = helper->Query(uri, predicates, colume);
+        if (resultSet == nullptr) {
+            TELEPHONY_LOGE("Query Result Set nullptr Failed.");
+            helper->Release();
+            return false;
+        }
+        int count = 0;
+        resultSet->GetRowCount(count);
+        if (count <= 0) {
+            TELEPHONY_LOGE("MmsPdu count: %{public}d error", count);
+            resultSet->Close();
+            helper->Release();
+            return false;
+        }
+        int columnIndex;
+        std::vector<uint8_t> blobValue;
+        resultSet->GoToFirstRow();
+        resultSet->GetColumnIndex(PDU_CONTENT, columnIndex);
+        resultSet->GetBlob(columnIndex, blobValue);
+
+        char pduChar = 0x00;
+        for (size_t i = 0; i + 1 < blobValue.size(); i = i + SLIDE_STEP) {
+            pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);
+            mmsPdu += static_cast<char>(pduChar);
+        }
+        TELEPHONY_LOGI("blob len:%{public}zu, ", blobValue.size());
+        resultSet->Close();
     }
-    TELEPHONY_LOGI("blob len:%{public}d, mmsPdu len:%{public}d", static_cast<uint32_t>(blobValue.size()),
-        static_cast<uint32_t>(mmsPdu.size()));
+    helper->Release();
+    TELEPHONY_LOGI("mmsPdu len:%{public}zu", mmsPdu.size());
     SetMmsPdu(mmsPdu);
     return true;
 }
