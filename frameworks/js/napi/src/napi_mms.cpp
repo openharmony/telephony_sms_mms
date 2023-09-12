@@ -27,6 +27,7 @@ const std::string g_mmsFilePathName = "mmsFilePathName";
 const std::string mmsTypeKey = "mmsType";
 const std::string attachmentKey = "attachment";
 const std::string SMS_PROFILE_URI = "datashare:///com.ohos.smsmmsability";
+static constexpr const char *PDU = "pdu";
 static const int32_t DEFAULT_REF_COUNT = 1;
 static const uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
 const bool STORE_MMS_PDU_TO_FILE = false;
@@ -1560,7 +1561,7 @@ void StoreTempDataToDataBase(NapiMmsPduHelper &helper)
         helper.NotifyAll();
         return;
     }
-    std::string mmsPdu = "tempData";
+    std::string mmsPdu = PDU;
     mmsPduObj->InsertMmsPdu(helper, mmsPdu);
 }
 

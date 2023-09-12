@@ -23,7 +23,8 @@
 namespace OHOS {
 namespace Telephony {
 const std::string PDP_PROFILE_NET_URI = "datashare:///com.ohos.pdpprofileability/net/pdp_profile";
-const std::string APN_TYPE = "mms";
+const std::string MMS_APN_TYPE = "mms";
+const std::string ALL_APN_TYPE = "*";
 
 MmsApnInfo::MmsApnInfo(int32_t slotId) : slotId_(slotId)
 {
@@ -80,7 +81,10 @@ void MmsApnInfo::PdpProfileSelect(const std::shared_ptr<DataShare::DataShareHelp
     }
     TELEPHONY_LOGI("query mms apn data base");
     predicates.EqualTo(PdpProfileData::MCCMNC, mccmnc);
-    predicates.EqualTo(PdpProfileData::APN_TYPES, APN_TYPE);
+    std::vector<std::string> apnTypes;
+    apnTypes.push_back(MMS_APN_TYPE);
+    apnTypes.push_back(ALL_APN_TYPE);
+    predicates.In(PdpProfileData::APN_TYPES, apnTypes);
     auto resultSet = helper->Query(uri, predicates, colume);
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("resultSet nullptr");
