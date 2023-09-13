@@ -19,7 +19,7 @@ SMS_MMS_SOURCE_DIR = "../../../"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("SetGetSmscFuzzTest") {
-  module_output_path = "sms_mms/SetGetSmscFuzzTest"
+  module_output_path = "sms_mms/sms_mms"
   module_out_path = module_output_path
   fuzz_config_file = "$SMS_MMS_SOURCE_DIR/test/fuzztest/setgetsmsc_fuzzer"
 
