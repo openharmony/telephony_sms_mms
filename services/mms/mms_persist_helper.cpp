@@ -86,11 +86,12 @@ bool MmsPersistHelper::UpdateMmsPdu(const std::string &mmsPdu, const std::string
     }
 
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
-    DataShare::DataShareValuesBucket bucket;
+
     std::vector<std::string> mmsPdus = SplitPdu(mmsPdu);
     std::vector<std::string> dbUrls = SplitUrl(dbUrl);
     int32_t result = -1;
     for (uint32_t locate = 0; locate < mmsPdus.size() && locate < dbUrls.size(); locate++) {
+        DataShare::DataShareValuesBucket bucket;
         bucket.Put(PDU_CONTENT, mmsPdus[locate]);
         DataShare::DataSharePredicates predicates;
         predicates.EqualTo(ID, dbUrls[locate]);
@@ -191,7 +192,7 @@ bool MmsPersistHelper::QueryMmsPdu(const std::string &dbUrl)
         resultSet->GoToFirstRow();
         resultSet->GetColumnIndex(PDU_CONTENT, columnIndex);
         resultSet->GetBlob(columnIndex, blobValue);
-
+        blobValue.pop_back();
         char pduChar = 0x00;
         for (size_t i = 0; i + 1 < blobValue.size(); i = i + SLIDE_STEP) {
             pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);
