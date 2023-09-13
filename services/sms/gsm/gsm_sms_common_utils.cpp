@@ -128,23 +128,25 @@ bool GsmSmsCommonUtils::Unpack7bitChar(SmsReadBuffer &buffer, uint8_t dataLen, u
             }
         }
 
+        uint8_t oneByte = 0;
+        if (!buffer.PickOneByteFromIndex(buffer.GetIndex() - 1, oneByte)) {
+            TELEPHONY_LOGI("data unpack finish.");
+            return true;
+        }
+        uint8_t nextByte = 0;
+        if (!buffer.PickOneByte(nextByte)) {
+            TELEPHONY_LOGI("data unpack finish.");
+            unpackData[dstIdx] = (oneByte >> shift);
+            if (unpackData[dstIdx] != 0) {
+                dstIdx++;
+            }
+            return true;
+        }
+        unpackData[dstIdx] = (oneByte >> shift) + (nextByte << (SMS_BYTE_BIT - shift));
+        unpackData[dstIdx] &= HEX_VALUE_7F;
+        shift--;
         if (shift > 0) {
-            uint8_t oneByte = 0;
-            if (!buffer.PickOneByteFromIndex(buffer.GetIndex() - 1, oneByte)) {
-                TELEPHONY_LOGI("data unpack finish.");
-                return true;
-            }
-            uint8_t nextByte = 0;
-            if (!buffer.PickOneByte(nextByte)) {
-                TELEPHONY_LOGI("data unpack finish.");
-                return true;
-            }
-            unpackData[dstIdx] = (oneByte >> shift) + (nextByte << (SMS_BYTE_BIT - shift));
-            unpackData[dstIdx] &= HEX_VALUE_7F;
-            shift--;
-            if (shift > 0) {
-                buffer.MoveForward(1);
-            }
+            buffer.MoveForward(1);
         }
     }
     return true;
