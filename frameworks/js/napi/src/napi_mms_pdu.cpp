@@ -70,11 +70,12 @@ bool NAPIMmsPdu::InsertMmsPdu(NapiMmsPduHelper &pduHelper, const std::string &mm
     }
 
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
-    DataShare::DataShareValuesBucket bucket;
+
     std::vector<std::string> mmsPdus = SplitPdu(mmsPdu);
 
     std::string dbUrl;
     for (std::string mmsPdu : mmsPdus) {
+        DataShare::DataShareValuesBucket bucket;
         bucket.Put(PDU_CONTENT, mmsPdu);
         int32_t result = datashareHelper->Insert(uri, bucket);
         if (result < 0) {
@@ -180,6 +181,7 @@ bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
             resultSet->GetBlob(columnIndex, blobValue);
         }
         resultSet->Close();
+        blobValue.pop_back();
         char pduChar = 0x00;
         for (size_t i = 0; i + 1 < blobValue.size(); i = i + SLIDE_STEP) {
             pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);
