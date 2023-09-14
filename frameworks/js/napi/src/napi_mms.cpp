@@ -1154,7 +1154,7 @@ bool ParseEncodeMmsParam(napi_env env, napi_value object, EncodeMmsContext &cont
     return result;
 }
 
-void setAttachmentToCore(MmsMsg &mmsMsg, std::vector<MmsAttachmentContext> &attachment)
+bool SetAttachmentToCore(MmsMsg &mmsMsg, std::vector<MmsAttachmentContext> &attachment)
 {
     if (attachment.size() > 0) {
         int i = 0;
@@ -1188,10 +1188,14 @@ void setAttachmentToCore(MmsMsg &mmsMsg, std::vector<MmsAttachmentContext> &atta
             if (it->inBuffLen > 0) {
                 itAttachment.SetDataBuffer(std::move(it->inBuff), it->inBuffLen);
             }
-            mmsMsg.AddAttachment(itAttachment);
+            if (!mmsMsg.AddAttachment(itAttachment)) {
+                TELEPHONY_LOGE("attachment file error");
+                return false;
+            }
             i++;
         }
     }
+    return true;
 }
 
 void setSendReqToCore(MmsMsg &mmsMsg, MmsSendReqContext &context)
@@ -1425,7 +1429,10 @@ void NativeEncodeMms(napi_env env, void *data)
     }
     MmsMsg mmsMsg;
     mmsMsg.SetMmsMessageType(static_cast<uint8_t>(WrapEncodeMmsStatus(context->messageType)));
-    setAttachmentToCore(mmsMsg, context->attachment);
+    if (!SetAttachmentToCore(mmsMsg, context->attachment)) {
+        context->errorCode = TELEPHONY_ERR_FAIL;
+        context->resolved = false;
+    }
     SetRequestToCore(mmsMsg, context);
     auto encodeResult = mmsMsg.EncodeMsg(context->bufferLen);
     if (encodeResult != nullptr) {
