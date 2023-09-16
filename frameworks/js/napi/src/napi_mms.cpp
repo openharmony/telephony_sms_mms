@@ -1432,6 +1432,7 @@ void NativeEncodeMms(napi_env env, void *data)
     if (!SetAttachmentToCore(mmsMsg, context->attachment)) {
         context->errorCode = TELEPHONY_ERR_FAIL;
         context->resolved = false;
+        return;
     }
     SetRequestToCore(mmsMsg, context);
     auto encodeResult = mmsMsg.EncodeMsg(context->bufferLen);
