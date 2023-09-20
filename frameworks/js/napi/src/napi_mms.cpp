@@ -321,6 +321,7 @@ void NativeDecodeMms(napi_env env, void *data)
     }
     if (!mmsResult) {
         TELEPHONY_LOGE("napi_mms DecodeMsg error!");
+        context->errorCode = TELEPHONY_ERR_FAIL;
         return;
     }
     mmsMsg.DumpMms();
@@ -1849,6 +1850,39 @@ static bool StoreDownloadMmsPduToDataBase(MmsContext &context, std::string &dbUr
     return true;
 }
 
+static bool DownloadExceptionCase(
+    MmsContext &context, std::shared_ptr<OHOS::DataShare::DataShareHelper> g_datashareHelper)
+{
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        context.errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+        context.resolved = false;
+        return false;
+    }
+    if (g_datashareHelper == nullptr) {
+        TELEPHONY_LOGE("g_datashareHelper is nullptr");
+        context.errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
+        context.resolved = false;
+        return false;
+    }
+    std::string fileName = NapiUtil::ToUtf8(context.data);
+    char realPath[PATH_MAX] = { 0 };
+    if (fileName.empty() || realpath(fileName.c_str(), realPath) == nullptr) {
+        TELEPHONY_LOGE("path or realPath is nullptr");
+        context.errorCode = TELEPHONY_ERR_FAIL;
+        context.resolved = false;
+        return false;
+    }
+    FILE *pFile = fopen(realPath, "wb");
+    if (pFile == nullptr) {
+        TELEPHONY_LOGE("openFile Error");
+        context.errorCode = TELEPHONY_ERR_FAIL;
+        context.resolved = false;
+        return false;
+    }
+    return true;
+}
+
 void NativeDownloadMms(napi_env env, void *data)
 {
     auto asyncContext = static_cast<MmsContext *>(data);
@@ -1856,29 +1890,22 @@ void NativeDownloadMms(napi_env env, void *data)
         TELEPHONY_LOGE("asyncContext nullptr");
         return;
     }
-    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
-        TELEPHONY_LOGE("Non-system applications use system APIs!");
-        asyncContext->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
-        asyncContext->resolved = false;
+    if (!DownloadExceptionCase(*asyncContext, g_datashareHelper)) {
+        TELEPHONY_LOGE("Exception case");
         return;
     }
-    if (g_datashareHelper == nullptr) {
-        TELEPHONY_LOGE("g_datashareHelper is nullptr");
-        asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
-        asyncContext->resolved = false;
-        return;
-    }
+
     std::string dbUrl;
     std::string storeFileName;
     if (!StoreDownloadMmsPduToDataBase(*asyncContext, dbUrl, storeFileName)) {
         TELEPHONY_LOGE("store mms pdu fail");
+        asyncContext->errorCode = TELEPHONY_ERR_FAIL;
+        asyncContext->resolved = false;
         return;
     }
-
     asyncContext->errorCode =
         DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DownloadMms(asyncContext->slotId, asyncContext->mmsc,
             asyncContext->data, asyncContext->mmsConfig.userAgent, asyncContext->mmsConfig.userAgentProfile);
-
     if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
         asyncContext->resolved = true;
         if (!STORE_MMS_PDU_TO_FILE) {
@@ -1894,6 +1921,7 @@ void NativeDownloadMms(napi_env env, void *data)
             }
         }
     } else {
+        asyncContext->errorCode = TELEPHONY_ERR_FAIL;
         asyncContext->resolved = false;
     }
     TELEPHONY_LOGI("NativeDownloadMms end resolved = %{public}d", asyncContext->resolved);
