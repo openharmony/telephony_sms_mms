@@ -134,11 +134,6 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
 
     indexer->SetVisibleMessageBody(messagBody);
     indexer->SetRawUserData(userDataRaw);
-
-    if (reliabilityHandler->CheckBlockedPhoneNumber(indexer->GetOriginatingAddress())) {
-        TELEPHONY_LOGI("indexer display address is block");
-        return;
-    }
     if (indexer->GetIsWapPushMsg()) {
         if (smsWapPushHandler_ != nullptr) {
             userDataRaw = indexer->GetWapPusRawUserData();

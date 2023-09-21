@@ -21,6 +21,7 @@
 #include "runner_pool.h"
 #include "sms_common.h"
 #include "sms_hisysevent.h"
+#include "sms_persist_helper.h"
 #include "sms_receive_reliability_handler.h"
 #include "telephony_log_wrapper.h"
 
@@ -89,6 +90,14 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> s
     int ret = CheckSmsSupport();
     if (ret != AckIncomeCause::SMS_ACK_RESULT_OK) {
         return ret;
+    }
+    bool block = DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryBlockPhoneNumber(
+        smsBaseMessage->GetOriginatingAddress());
+    if (block) {
+        TELEPHONY_LOGE("sms address is blocked");
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_ADDRESS_BLOCKED, "The SMS address is blocked");
+        return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
     return HandleNormalSmsByType(smsBaseMessage);
 }
