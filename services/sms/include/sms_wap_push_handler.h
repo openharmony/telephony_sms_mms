@@ -41,6 +41,7 @@ public:
 
 private:
     void HiSysEventWapPushResult(bool publishResult);
+    void DeleteWapPush(std::shared_ptr<SmsReceiveIndexer> indexer);
 
 private:
     int32_t slotId_ = 0;
