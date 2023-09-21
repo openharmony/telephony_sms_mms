@@ -81,7 +81,6 @@ bool SmsWapPushHandler::DecodeWapPushPdu(std::shared_ptr<SmsReceiveIndexer> inde
         TELEPHONY_LOGE("indexer is nullptr");
         return false;
     }
-
     SmsWapPushBuffer decodeBuffer;
     if (!decodeBuffer.WriteRawStringBuffer(wapPdu)) {
         TELEPHONY_LOGE("Wap push WriteRawStringBuffer fail.");
@@ -91,14 +90,12 @@ bool SmsWapPushHandler::DecodeWapPushPdu(std::shared_ptr<SmsReceiveIndexer> inde
         TELEPHONY_LOGE("Wap push DecodePushType fail.");
         return false;
     }
-
     uint32_t count = 0;
     uint32_t headerLength = 0;
     if (!decodeBuffer.DecodeUintvar(headerLength, count)) {
         TELEPHONY_LOGE("Wap push DecodeUintvar fail.");
         return false;
     }
-
     int32_t contentTypeLength = 0;
     uint32_t startHeader = decodeBuffer.GetCurPosition();
     if (!contentType_.DecodeContentType(decodeBuffer, contentTypeLength)) {
@@ -118,13 +115,25 @@ bool SmsWapPushHandler::DecodeWapPushPdu(std::shared_ptr<SmsReceiveIndexer> inde
         TELEPHONY_LOGE("Wap push DecodeWapPushPduData fail.");
         return false;
     }
-
     if (DeocdeCheckIsBlock(hexWbXmlData_)) {
         TELEPHONY_LOGI("Wap Push Mms-message Is Blocked Dispatcher.");
+        DeleteWapPush(indexer);
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_ADDRESS_BLOCKED, "The Wap Push address is blocked");
         return true;
     }
     SendWapPushMessageBroadcast(indexer);
     return true;
+}
+
+void SmsWapPushHandler::DeleteWapPush(std::shared_ptr<SmsReceiveIndexer> indexer)
+{
+    auto handler = std::make_shared<SmsReceiveReliabilityHandler>(slotId_);
+    if (handler == nullptr) {
+        TELEPHONY_LOGE("handler is nullptr.");
+        return;
+    }
+    handler->DeleteMessageFormDb(indexer->GetMsgRefId(), indexer->GetDataBaseId());
 }
 
 /*
@@ -188,11 +197,13 @@ bool SmsWapPushHandler::DeocdeCheckIsBlock(std::string &hexData)
         }
         std::string address = fromAddress.GetAddressString();
         std::size_t pos = address.find('/');
-        if (pos != std::string::npos) {
-            return helper->QueryBlockPhoneNumber(address.substr(pos));
+        if (pos == 0 || pos == std::string::npos) {
+            TELEPHONY_LOGE("pos invalid.");
+            return false;
         }
+        return helper->QueryBlockPhoneNumber(address.substr(0, pos));
     }
-    TELEPHONY_LOGI("wap push decode is block.");
+    TELEPHONY_LOGI("wap push is not blocked.");
     return false;
 }
 
