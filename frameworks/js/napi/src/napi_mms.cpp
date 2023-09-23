@@ -1431,7 +1431,7 @@ void NativeEncodeMms(napi_env env, void *data)
     MmsMsg mmsMsg;
     mmsMsg.SetMmsMessageType(static_cast<uint8_t>(WrapEncodeMmsStatus(context->messageType)));
     if (!SetAttachmentToCore(mmsMsg, context->attachment)) {
-        context->errorCode = TELEPHONY_ERR_FAIL;
+        context->errorCode = TELEPHONY_ERR_ARGUMENT_INVALID;
         context->resolved = false;
         return;
     }
@@ -1869,14 +1869,14 @@ static bool DownloadExceptionCase(
     char realPath[PATH_MAX] = { 0 };
     if (fileName.empty() || realpath(fileName.c_str(), realPath) == nullptr) {
         TELEPHONY_LOGE("path or realPath is nullptr");
-        context.errorCode = TELEPHONY_ERR_FAIL;
+        context.errorCode = TELEPHONY_ERR_ARGUMENT_INVALID;
         context.resolved = false;
         return false;
     }
     FILE *pFile = fopen(realPath, "wb");
     if (pFile == nullptr) {
         TELEPHONY_LOGE("openFile Error");
-        context.errorCode = TELEPHONY_ERR_FAIL;
+        context.errorCode = TELEPHONY_ERR_ARGUMENT_INVALID;
         context.resolved = false;
         return false;
     }
@@ -1921,7 +1921,6 @@ void NativeDownloadMms(napi_env env, void *data)
             }
         }
     } else {
-        asyncContext->errorCode = TELEPHONY_ERR_FAIL;
         asyncContext->resolved = false;
     }
     TELEPHONY_LOGI("NativeDownloadMms end resolved = %{public}d", asyncContext->resolved);
