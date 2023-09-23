@@ -143,9 +143,10 @@ int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fi
         TELEPHONY_LOGE("post request fail");
         return ret;
     }
-    if (HttpRequest(METHOD_POST, mmsc, strBuf) != TELEPHONY_ERR_SUCCESS) {
+    ret = HttpRequest(METHOD_POST, mmsc, strBuf);
+    if (ret != TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGE("http fail error");
-        return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
+        return ret;
     }
 
     httpFinish_ = false;
