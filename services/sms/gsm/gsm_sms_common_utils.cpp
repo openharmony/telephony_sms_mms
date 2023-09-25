@@ -160,24 +160,8 @@ bool GsmSmsCommonUtils::DigitToBcd(const char *digit, uint8_t digitLen, uint8_t 
     }
 
     len = 0;
-    uint8_t temp;
     for (uint8_t i = 0; i < digitLen; i++) {
-        switch (digit[i]) {
-            case '*':
-                temp = HEX_VALUE_0A;
-                break;
-            case '#':
-                temp = HEX_VALUE_0B;
-                break;
-            case 'P':
-            case 'p':
-                temp = HEX_VALUE_0C;
-                break;
-            default:
-                temp = digit[i] - '0';
-                break;
-        }
-
+        uint8_t temp = static_cast<uint8_t>(digit[i] - '0');
         if (len >= bcdLen) {
             TELEPHONY_LOGE("len invalid.");
             return false;
@@ -223,21 +207,7 @@ bool GsmSmsCommonUtils::BcdToDigit(const uint8_t *bcd, uint8_t bcdLen, std::stri
 
 char GsmSmsCommonUtils::BcdToChar(const uint8_t c)
 {
-    char temp = 0;
-    switch (c) {
-        case HEX_VALUE_0A:
-            temp = '*';
-            break;
-        case HEX_VALUE_0B:
-            temp = '#';
-            break;
-        case HEX_VALUE_0C:
-            temp = 'P';
-            break;
-        default:
-            temp = c + '0';
-            break;
-    }
+    char temp = static_cast<char>(c + '0');
     return temp;
 }
 } // namespace Telephony
