@@ -65,7 +65,7 @@ int32_t MmsNetworkClient::Execute(const std::string &method, const std::string &
         return ret;
     }
     TELEPHONY_LOGI("mms http request fail");
-    return TELEPHONY_ERR_FAIL;
+    return ret;
 }
 
 int32_t MmsNetworkClient::GetMmscFromDb(const std::string &mmsc)
@@ -112,8 +112,8 @@ int32_t MmsNetworkClient::GetMmsApnPorxy(NetStack::HttpClient::HttpProxy &httpPr
         TELEPHONY_LOGE("proxy empty");
         return TELEPHONY_ERR_MMS_FAIL_APN_INVALID;
     }
-    int32_t locate = proxy.find(":");
-    if (locate <= 0 || static_cast<size_t>(locate + 1) == proxy.size()) {
+    size_t locate = proxy.find(":");
+    if (locate == 0 || locate == std::string::npos || static_cast<size_t>(locate + 1) == proxy.size()) {
         TELEPHONY_LOGE("mms apn error");
         return TELEPHONY_ERR_MMS_FAIL_APN_INVALID;
     }

@@ -137,7 +137,7 @@ std::vector<std::string> NAPIMmsPdu::SplitUrl(std::string url)
 {
     std::vector<std::string> dbUrls;
     while (url.size() > 0) {
-        int32_t locate = url.find_first_of(',');
+        size_t locate = url.find_first_of(',');
         if (locate < 1) {
             break;
         }
@@ -182,9 +182,8 @@ bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
         }
         resultSet->Close();
         blobValue.pop_back();
-        char pduChar = 0x00;
         for (size_t i = 0; i + 1 < blobValue.size(); i = i + SLIDE_STEP) {
-            pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);
+            char pduChar = (blobValue[i] & HEX_VALUE_0F) | (blobValue[i + 1] & HEX_VALUE_F0);
             mmsPdu += static_cast<char>(pduChar);
         }
     }
