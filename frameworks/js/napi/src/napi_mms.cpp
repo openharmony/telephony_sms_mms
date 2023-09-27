@@ -1880,6 +1880,7 @@ static bool DownloadExceptionCase(
         context.resolved = false;
         return false;
     }
+    (void)fclose(pFile);
     return true;
 }
 

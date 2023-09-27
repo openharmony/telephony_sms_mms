@@ -376,8 +376,7 @@ void GsmSmsSenderTest::TestDisableCBRangeConfig(const sptr<ISmsServiceInterface>
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
     std::cin >> dest;
-    int32_t slotIdTestl;
-    slotIdTestl = atoi(dest.c_str());
+    int32_t slotIdTestl = atoi(dest.c_str());
     bool enable = false;
     uint32_t startMessageId = 0;
     uint32_t endMessageId = 0;
