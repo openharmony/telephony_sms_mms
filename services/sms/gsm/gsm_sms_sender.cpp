@@ -123,7 +123,6 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
         if (cellsInfosSize > 1 && i < (cellsInfosSize - 1)) {
             isMore = true;
             tpdu->data.submit.bStatusReport = false;
-
         } else {
             tpdu->data.submit.bStatusReport = isStatusReport;
             isMore = false;
