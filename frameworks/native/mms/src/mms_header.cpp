@@ -124,17 +124,17 @@ void MmsHeader::DumpMmsHeader()
     std::string fieldName;
     for (auto it = octetValueMap_.begin(); it != octetValueMap_.end(); it++) {
         find = FindHeaderFieldName(it->first, fieldName);
-        TELEPHONY_LOGI("%{public}s : 0x%{public}02X", find ? fieldName.c_str() : "unkown field", it->second);
+        TELEPHONY_LOGI("%{private}s : 0x%{private}02X", find ? fieldName.c_str() : "unkown field", it->second);
     }
 
     for (auto it = longValueMap_.begin(); it != longValueMap_.end(); it++) {
         find = FindHeaderFieldName(it->first, fieldName);
-        TELEPHONY_LOGI("%{public}s : %{public}" PRId64 "", find ? fieldName.c_str() : "unkown field", it->second);
+        TELEPHONY_LOGI("%{private}s : %{private}" PRId64 "", find ? fieldName.c_str() : "unkown field", it->second);
     }
 
     for (auto it = textValueMap_.begin(); it != textValueMap_.end(); it++) {
         find = FindHeaderFieldName(it->first, fieldName);
-        TELEPHONY_LOGI("%{public}s : %{public}s", find ? fieldName.c_str() : "unkown field", it->second.c_str());
+        TELEPHONY_LOGI("%{private}s : %{private}s", find ? fieldName.c_str() : "unkown field", it->second.c_str());
     }
 
     for (auto it = encodeStringsMap_.begin(); it != encodeStringsMap_.end(); it++) {
@@ -143,7 +143,7 @@ void MmsHeader::DumpMmsHeader()
         if (find) {
             it->second.GetEncodeString(enString);
         }
-        TELEPHONY_LOGI("%{public}s : %{public}s", find ? fieldName.c_str() : "unkown field", enString.c_str());
+        TELEPHONY_LOGI("%{private}s : %{private}s", find ? fieldName.c_str() : "unkown field", enString.c_str());
     }
 
     for (auto it = addressMap_.begin(); it != addressMap_.end(); it++) {
@@ -151,7 +151,7 @@ void MmsHeader::DumpMmsHeader()
         std::vector<MmsAddress> address = it->second;
         for (auto itAddress : address) {
             std::string enString = itAddress.GetAddressString();
-            TELEPHONY_LOGI("%{public}s : %{public}s", find ? fieldName.c_str() : "unkown field", enString.c_str());
+            TELEPHONY_LOGI("%{private}s : %{private}s", find ? fieldName.c_str() : "unkown field", enString.c_str());
         }
     }
 }

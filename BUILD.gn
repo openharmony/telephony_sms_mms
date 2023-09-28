@@ -106,6 +106,10 @@ ohos_shared_library("tel_sms_mms") {
     "//third_party/curl/include",
     "//third_party/glib/glib",
     "//third_party/glib",
+    "//third_party/libphonenumber/cpp/src",
+    "//third_party/libphonenumber/cpp/src/phonenumbers",
+    "//third_party/protobuf/src",
+    "//third_party/protobuf/src/google/protobuf",
   ]
 
   deps = [
@@ -113,6 +117,7 @@ ohos_shared_library("tel_sms_mms") {
     "frameworks/native/mms:mms_native_source",
     "//third_party/curl:curl",
     "//third_party/glib:glib_packages",
+    "//third_party/libphonenumber/cpp:phonenumber_standard",
   ]
 
   external_deps = [
