@@ -49,10 +49,10 @@ void MmsBodyPart::DumpMmsBodyPart()
 {
     TELEPHONY_LOGI("============== Start BodyPart Info ==========");
     std::string isSmil = isSmilFile_ ? "ture" : "false";
-    TELEPHONY_LOGI("isSmilFile : %{public}s", isSmil.c_str());
-    TELEPHONY_LOGI("strFileName : %{public}s", strFileName_.c_str());
-    TELEPHONY_LOGI("headerLen : %{public}u", headerLen_);
-    TELEPHONY_LOGI("bodyPartLen : %{public}u", bodyLen_);
+    TELEPHONY_LOGI("isSmilFile : %{private}s", isSmil.c_str());
+    TELEPHONY_LOGI("strFileName : %{private}s", strFileName_.c_str());
+    TELEPHONY_LOGI("headerLen : %{private}u", headerLen_);
+    TELEPHONY_LOGI("bodyPartLen : %{private}u", bodyLen_);
     bodyPartContentType_.DumpMmsContentType();
     mmsBodyPartHeader_.DumpBodyPartHeader();
     TELEPHONY_LOGI("============== End BodyPart Info ==========");

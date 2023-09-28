@@ -190,7 +190,7 @@ void GsmSmsSenderTest::TestSetSmscAddr(const sptr<ISmsServiceInterface> &smsServ
     std::string sca;
     std::cout << "Please enter smsc" << std::endl;
     std::cin >> sca;
-    result = smsService->SetSmscAddr(slotId, StringUtils::ToUtf16(sca));
+    result = smsService->SetSmscAddr(slotIdTeste, StringUtils::ToUtf16(sca));
     if (result) {
         std::cout << "TestSetSmscAddr OK!" << std::endl;
     } else {
@@ -251,7 +251,6 @@ void GsmSmsSenderTest::TestAddSimMessage(const sptr<ISmsServiceInterface> &smsSe
 void GsmSmsSenderTest::TestDelSimMessage(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;
-    bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
@@ -278,12 +277,11 @@ void GsmSmsSenderTest::TestDelSimMessage(const sptr<ISmsServiceInterface> &smsSe
 void GsmSmsSenderTest::TestUpdateSimMessage(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;
-    bool result = false;
     if (smsService == nullptr) {
         std::cout << "smsService is nullptr." << std::endl;
         return;
     }
-    bool result = true;
+    bool result = false;
     std::string dest;
     std::cout << "Please enter the card id" << std::endl;
     int32_t slotIdTesti;
