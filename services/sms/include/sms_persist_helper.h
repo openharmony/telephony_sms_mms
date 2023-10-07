@@ -16,13 +16,12 @@
 #ifndef SMS_PERSIST_HELPER_H
 #define SMS_PERSIST_HELPER_H
 
-#include "singleton.h"
-
 #include "datashare_helper.h"
 #include "datashare_predicates.h"
-
-#include "sms_receive_indexer.h"
+#include "phonenumberutil.h"
+#include "singleton.h"
 #include "sms_mms_data.h"
+#include "sms_receive_indexer.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -38,21 +37,13 @@ public:
     bool QueryParamBoolean(const std::string key, bool defValue);
     bool QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId);
     bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount);
-    
+
     inline static const std::string SMS_CAPABLE_KEY = "sms_config_capable";
     inline static const std::string SMS_ENCODING_KEY = "sms_config_force_7bit_encoding";
     inline static const std::string SMS_CAPABLE_PARAM_KEY = "const.telephony.sms.capable";
     inline static const std::string SMS_ENCODING_PARAM_KEY = "persist.sys.sms.config.7bitforce";
 
 private:
-    const std::string SMS_URI = "datashare:///com.ohos.smsmmsability";
-    const std::string SMS_SUBSECTION = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
-    const std::string SMS_MMS_INFO = "datashare:///com.ohos.smsmmsability/sms_mms/sms_mms_info";
-    const std::string SMS_SESSION = "datashare:///com.ohos.smsmmsability/sms_mms/session";
-    const std::string CONTACT_URI = "datashare:///com.ohos.contactsdataability";
-    const std::string CONTACT_BLOCK =
-        "datashare:///com.ohos.contactsdataability/contacts/contact_blocklist";
-
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper(const std::string &uri);
     void ResultSetConvertToIndexer(
         SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
@@ -60,6 +51,9 @@ private:
         SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
     void ConvertStringToIndexer(
         SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
+    int32_t FormatSmsNumber(const std::string &num, std::string countryCode,
+        const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo, std::string &formatNum);
+    void TrimSpace(std::string &num);
 };
 } // namespace Telephony
 } // namespace OHOS
