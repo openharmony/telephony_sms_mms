@@ -18,17 +18,26 @@
 #include "ability_manager_interface.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
+#include "parameter.h"
+#include "phonenumbers/phonenumber.pb.h"
+#include "resource_manager.h"
+#include "string_utils.h"
 #include "system_ability.h"
 #include "system_ability_definition.h"
-#include "resource_manager.h"
-#include "parameter.h"
-
+#include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
-#include "string_utils.h"
 
 namespace OHOS {
 namespace Telephony {
 constexpr static uint8_t SMS_TYPE_CDMA = 2;
+const std::string SMS_URI = "datashare:///com.ohos.smsmmsability";
+const std::string SMS_SUBSECTION = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
+const std::string SMS_MMS_INFO = "datashare:///com.ohos.smsmmsability/sms_mms/sms_mms_info";
+const std::string SMS_SESSION = "datashare:///com.ohos.smsmmsability/sms_mms/session";
+const std::string CONTACT_URI = "datashare:///com.ohos.contactsdataability";
+const std::string CONTACT_BLOCK = "datashare:///com.ohos.contactsdataability/contacts/contact_blocklist";
+const std::string ISO_COUNTRY_CODE = "CN";
+const std::string PHONE_NUMBER = "phone_number";
 
 SmsPersistHelper::SmsPersistHelper() {}
 
@@ -198,8 +207,6 @@ bool SmsPersistHelper::Delete(DataShare::DataSharePredicates &predicates)
 bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
 {
     bool result = false;
-    int count = 0;
-    const std::string phoneNumber = "phone_number";
     if (phoneNum.empty()) {
         return result;
     }
@@ -211,13 +218,28 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
     Uri uri(CONTACT_BLOCK);
     std::vector<std::string> columns;
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(phoneNumber, phoneNum);
+    std::string nationalNum;
+    std::string internationalNum;
+    int32_t ret = FormatSmsNumber(
+        phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, nationalNum);
+    if (ret != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("Phone Number format Failed.");
+        return false;
+    }
+    ret = FormatSmsNumber(phoneNum, ISO_COUNTRY_CODE,
+        i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::INTERNATIONAL, internationalNum);
+    if (ret != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("Phone Number format Failed.");
+        return false;
+    }
+    predicates.EqualTo(PHONE_NUMBER, nationalNum)->Or()->EqualTo(PHONE_NUMBER, internationalNum);
     auto resultSet = helper->Query(uri, predicates, columns);
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
         helper->Release();
         return result;
     }
+    int count = 0;
     if (resultSet->GetRowCount(count) == 0 && count != 0) {
         result = true;
     }
@@ -225,6 +247,44 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
     helper->Release();
     helper = nullptr;
     return result;
+}
+
+int32_t SmsPersistHelper::FormatSmsNumber(const std::string &num, std::string countryCode,
+    const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo, std::string &formatNum)
+{
+    if (num.empty()) {
+        TELEPHONY_LOGE("num is nullptr!");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    i18n::phonenumbers::PhoneNumberUtil *phoneUtils = i18n::phonenumbers::PhoneNumberUtil::GetInstance();
+    if (phoneUtils == nullptr) {
+        TELEPHONY_LOGE("phoneUtils is nullptr");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+
+    transform(countryCode.begin(), countryCode.end(), countryCode.begin(), ::toupper);
+    i18n::phonenumbers::PhoneNumber parseResult;
+    phoneUtils->Parse(num, countryCode, &parseResult);
+    if (phoneUtils->IsValidNumber(parseResult)) {
+        phoneUtils->Format(parseResult, formatInfo, &formatNum);
+    }
+    if (formatNum.empty() || formatNum == "0") {
+        TELEPHONY_LOGE("FormatSmsNumber failed!");
+        return TELEPHONY_ERROR;
+    }
+    TrimSpace(formatNum);
+    return TELEPHONY_SUCCESS;
+}
+
+void SmsPersistHelper::TrimSpace(std::string &num)
+{
+    std::string word;
+    std::stringstream streamNum(num);
+    std::string store;
+    while (streamNum >> word) {
+        store += word;
+    }
+    num = store;
 }
 
 bool SmsPersistHelper::QueryParamBoolean(const std::string key, bool defValue)
