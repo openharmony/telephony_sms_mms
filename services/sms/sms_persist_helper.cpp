@@ -224,13 +224,13 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
         phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, nationalNum);
     if (ret != TELEPHONY_SUCCESS) {
         TELEPHONY_LOGE("Phone Number format Failed.");
-        return false;
+        nationalNum = phoneNum;
     }
     ret = FormatSmsNumber(phoneNum, ISO_COUNTRY_CODE,
         i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::INTERNATIONAL, internationalNum);
     if (ret != TELEPHONY_SUCCESS) {
         TELEPHONY_LOGE("Phone Number format Failed.");
-        return false;
+        internationalNum = phoneNum;
     }
     predicates.EqualTo(PHONE_NUMBER, nationalNum)->Or()->EqualTo(PHONE_NUMBER, internationalNum);
     auto resultSet = helper->Query(uri, predicates, columns);
