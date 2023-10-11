@@ -197,11 +197,14 @@ bool SmsWapPushHandler::DeocdeCheckIsBlock(std::string &hexData)
         }
         std::string address = fromAddress.GetAddressString();
         std::size_t pos = address.find('/');
-        if (pos == 0 || pos == std::string::npos) {
+        if (pos == 0) {
             TELEPHONY_LOGE("pos invalid.");
             return false;
+        } else if (pos == std::string::npos) {
+            return helper->QueryBlockPhoneNumber(address);
+        } else {
+            return helper->QueryBlockPhoneNumber(address.substr(0, pos));
         }
-        return helper->QueryBlockPhoneNumber(address.substr(0, pos));
     }
     TELEPHONY_LOGI("wap push is not blocked.");
     return false;
