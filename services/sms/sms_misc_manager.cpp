@@ -324,9 +324,10 @@ int32_t SmsMiscManager::AddSimMessage(
         return result;
     }
     int32_t smsCountCurrent = static_cast<int32_t>(message.size());
+    TELEPHONY_LOGI("smsCountCurrent = %{public}d smsCapacityOfSim_ = %{public}d", smsCountCurrent, smsCapacityOfSim_);
     if (smsCountCurrent >= smsCapacityOfSim_) {
         TELEPHONY_LOGE("AddSimMessage sim card is full");
-        return false;
+        return TELEPHONY_ERR_FAIL;
     }
 
     TELEPHONY_LOGI("smscLen = %{public}zu pudLen = %{public}zu status = %{public}d", smsc.size(), pdu.size(), status);
@@ -343,6 +344,12 @@ int32_t SmsMiscManager::AddSimMessage(
 int32_t SmsMiscManager::DelSimMessage(uint32_t msgIndex)
 {
     TELEPHONY_LOGI("messageIndex = %{public}d", msgIndex);
+    bool hasSimCard = false;
+    CoreManagerInner::GetInstance().HasSimCard(slotId_, hasSimCard);
+    if (!hasSimCard) {
+        TELEPHONY_LOGE("no sim card");
+        return TELEPHONY_ERR_SLOTID_INVALID;
+    }
     return CoreManagerInner::GetInstance().DelSmsIcc(slotId_, msgIndex);
 }
 
@@ -360,9 +367,16 @@ int32_t SmsMiscManager::UpdateSimMessage(uint32_t msgIndex, ISmsServiceInterface
 
 int32_t SmsMiscManager::GetAllSimMessages(std::vector<ShortMessage> &message)
 {
+    bool hasSimCard = false;
+    CoreManagerInner::GetInstance().HasSimCard(slotId_, hasSimCard);
+    if (!hasSimCard) {
+        TELEPHONY_LOGE("no sim card");
+        return TELEPHONY_ERR_SLOTID_INVALID;
+    }
     std::vector<std::string> pdus = CoreManagerInner::GetInstance().ObtainAllSmsOfIcc(slotId_);
     smsCapacityOfSim_ = static_cast<int32_t>(pdus.size());
-    int index = 0;
+    TELEPHONY_LOGI("smsCapacityOfSim_[%{public}d]", smsCapacityOfSim_);
+    int index = 1;
     PhoneType type = CoreManagerInner::GetInstance().GetPhoneType(slotId_);
     std::string specification;
     if (PhoneType::PHONE_TYPE_IS_GSM == type) {

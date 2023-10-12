@@ -241,7 +241,7 @@ void GsmSmsSenderTest::TestAddSimMessage(const sptr<ISmsServiceInterface> &smsSe
     uint32_t status = std::atoi(input.c_str());
     result = smsService->AddSimMessage(slotIdTestg, StringUtils::ToUtf16(smsc), StringUtils::ToUtf16(pdu),
         static_cast<ISmsServiceInterface::SimMessageStatus>(status));
-    if (result) {
+    if (result == 0) {
         std::cout << "TestAddSimMessage OK!" << std::endl;
     } else {
         std::cout << "TestAddSimMessage failed!" << std::endl;
@@ -267,7 +267,7 @@ void GsmSmsSenderTest::TestDelSimMessage(const sptr<ISmsServiceInterface> &smsSe
     std::cin >> input;
     uint32_t msgIndex = std::atoi(input.c_str());
     result = smsService->DelSimMessage(slotIdTesth, msgIndex);
-    if (result) {
+    if (result == 0) {
         std::cout << "TestDelSimMessage OK!" << std::endl;
     } else {
         std::cout << "TestDelSimMessage failed!" << std::endl;
