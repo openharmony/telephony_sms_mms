@@ -424,6 +424,7 @@ declare namespace sms {
    * @syscap SystemCapability.Telephony.SmsMms
    * @systemapi Hide this for inner system use.
    * @since 7
+   * @deprecated since 11
    */
   function updateSimMessage(options: UpdateSimMessageOptions, callback: AsyncCallback<void>): void;
 
@@ -443,6 +444,7 @@ declare namespace sms {
    * @syscap SystemCapability.Telephony.SmsMms
    * @systemapi Hide this for inner system use.
    * @since 7
+   * @deprecated since 11
    */
   function updateSimMessage(options: UpdateSimMessageOptions): Promise<void>;
 
@@ -2417,6 +2419,7 @@ declare namespace sms {
    * @syscap SystemCapability.Telephony.SmsMms
    * @systemapi Hide this for inner system use.
    * @since 7
+   * @deprecated since 11
    */
   export interface UpdateSimMessageOptions {
     /**
@@ -2426,6 +2429,7 @@ declare namespace sms {
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
+     * @deprecated since 11
      */
     slotId: number;
 
@@ -2436,6 +2440,7 @@ declare namespace sms {
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
+     * @deprecated since 11
      */
     msgIndex: number;
 
@@ -2446,6 +2451,7 @@ declare namespace sms {
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
+     * @deprecated since 11
      */
     newStatus: SimMessageStatus;
 
@@ -2456,6 +2462,7 @@ declare namespace sms {
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
+     * @deprecated since 11
      */
     pdu: string;
 
@@ -2466,6 +2473,7 @@ declare namespace sms {
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
+     * @deprecated since 11
      */
     smsc: string;
   }
