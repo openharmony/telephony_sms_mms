@@ -205,6 +205,7 @@ bool SmsWapPushHandler::DeocdeCheckIsBlock(std::string &hexData)
         } else {
             return helper->QueryBlockPhoneNumber(address.substr(0, pos));
         }
+        DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateContact(address);
     }
     TELEPHONY_LOGI("wap push is not blocked.");
     return false;
@@ -362,7 +363,7 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast(std::shared_ptr<SmsReceiveIn
     smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     auto handler = std::make_shared<SmsReceiveReliabilityHandler>(slotId_);
     auto wapPushReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(
-        smsSubscriberInfo, handler, indexer->GetMsgRefId(), indexer->GetDataBaseId());
+        smsSubscriberInfo, handler, indexer->GetMsgRefId(), indexer->GetDataBaseId(), indexer->GetOriginatingAddress());
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, wapPushReceiver);
     HiSysEventWapPushResult(publishResult);
     return true;

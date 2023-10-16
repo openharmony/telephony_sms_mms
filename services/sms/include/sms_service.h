@@ -325,6 +325,7 @@ private:
     void InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text);
     bool InsertSession(bool isNewSession, uint16_t messageCount, const std::string &number, const std::string &text);
     bool QuerySessionByTelephone(const std::string &telephone, uint16_t &sessionId, uint16_t &messageCount);
+    void UpdateSmsContact(const std::string &address);
 
 private:
     int64_t bindTime_ = 0;

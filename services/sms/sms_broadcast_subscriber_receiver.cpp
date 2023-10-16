@@ -15,6 +15,7 @@
 
 #include "sms_broadcast_subscriber_receiver.h"
 
+#include "sms_persist_helper.h"
 #include "telephony_log_wrapper.h"
 #include "want.h"
 
@@ -23,23 +24,29 @@ namespace Telephony {
 using namespace EventFwk;
 
 SmsBroadcastSubscriberReceiver::SmsBroadcastSubscriberReceiver(const CommonEventSubscribeInfo &subscriberInfo,
-    std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, uint16_t dataBaseId)
+    std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, uint16_t dataBaseId,
+    const std::string &address)
     : CommonEventSubscriber(subscriberInfo)
 {
     handler_ = handler;
     refId_ = refId;
     dataBaseId_ = dataBaseId;
+    address_ = address;
 }
 
 void SmsBroadcastSubscriberReceiver::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
-    if (action == CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED ||
-        action == CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED) {
+    bool isSms = action == CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED;
+    bool isWapPush = action == CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED;
+    if (isSms || isWapPush) {
         TELEPHONY_LOGI("OnReceiveEvent refId_ =%{public}d, dataBaseId_ =%{public}d", refId_, dataBaseId_);
         if (handler_ == nullptr) {
             TELEPHONY_LOGE("handler_ is nullptr");
             return;
+        }
+        if (!address_.empty() && isSms) {
+            DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateContact(address_);
         }
 
         handler_->DeleteMessageFormDb(refId_, dataBaseId_);
