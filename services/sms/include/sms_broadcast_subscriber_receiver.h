@@ -29,14 +29,16 @@ namespace Telephony {
 class SmsBroadcastSubscriberReceiver : public EventFwk::CommonEventSubscriber {
 public:
     SmsBroadcastSubscriberReceiver(const OHOS::EventFwk::CommonEventSubscribeInfo &subscriberInfo,
-        std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, uint16_t dataBaseId);
+        std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, uint16_t dataBaseId,
+        const std::string &address);
     ~SmsBroadcastSubscriberReceiver() = default;
     virtual void OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data);
 
-public:
+private:
     std::shared_ptr<SmsReceiveReliabilityHandler> handler_ = nullptr;
     uint16_t refId_ = 0;
     uint16_t dataBaseId_ = 0;
+    std::string address_;
 };
 } // namespace Telephony
 } // namespace OHOS

@@ -36,8 +36,17 @@ const std::string SMS_MMS_INFO = "datashare:///com.ohos.smsmmsability/sms_mms/sm
 const std::string SMS_SESSION = "datashare:///com.ohos.smsmmsability/sms_mms/session";
 const std::string CONTACT_URI = "datashare:///com.ohos.contactsdataability";
 const std::string CONTACT_BLOCK = "datashare:///com.ohos.contactsdataability/contacts/contact_blocklist";
+const std::string CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data";
+const std::string RAW_CONTACT = "datashare:///com.ohos.contactsdataability/contacts/raw_contact";
 const std::string ISO_COUNTRY_CODE = "CN";
 const std::string PHONE_NUMBER = "phone_number";
+const std::string DETAIL_INFO = "detail_info";
+const std::string TYPE_ID = "type_id";
+std::string ID = "id";
+const std::string RAW_CONTACT_ID = "raw_contact_id";
+const std::string CONTACTED_COUNT = "contacted_count";
+const std::string LASTEST_CONTACTED_TIME = "lastest_contacted_time";
+constexpr static uint8_t TYPE_ID_VALUE = 5;
 
 SmsPersistHelper::SmsPersistHelper() {}
 
@@ -285,6 +294,128 @@ void SmsPersistHelper::TrimSpace(std::string &num)
         store += word;
     }
     num = store;
+}
+
+bool SmsPersistHelper::UpdateContact(const std::string &address)
+{
+    bool result = false;
+    if (address.empty()) {
+        TELEPHONY_LOGE("address empty");
+        return result;
+    }
+    int32_t rawCountId = 0;
+    int32_t contactedCount = 0;
+    bool ret = QueryContactedCount(address, rawCountId, contactedCount);
+    if (!ret) {
+        TELEPHONY_LOGE("get contacted count fail");
+        return result;
+    }
+    TELEPHONY_LOGI("rawCountId:%{public}d, contactedCount:%{public}d", rawCountId, contactedCount);
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(CONTACT_URI);
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    std::time_t timep;
+    int64_t currentTime = time(&timep);
+    Uri uri(RAW_CONTACT);
+    std::vector<std::string> columns;
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(ID, rawCountId);
+    DataShare::DataShareValuesBucket bucket;
+    bucket.Put(CONTACTED_COUNT, contactedCount + 1);
+    bucket.Put(LASTEST_CONTACTED_TIME, std::to_string(currentTime));
+    auto updateValue = helper->Update(uri, predicates, bucket);
+    TELEPHONY_LOGI("updateValue:%{public}d", updateValue);
+    helper->Release();
+    helper = nullptr;
+    return updateValue >= 0 ? true : false;
+}
+
+bool SmsPersistHelper::QueryContactedCount(const std::string &address, int32_t &rawCountId, int32_t &contactedCount)
+{
+    bool ret = QueryRawContactId(address, rawCountId);
+    if (!ret) {
+        TELEPHONY_LOGE("no sms address in contact");
+        return ret;
+    }
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(CONTACT_URI);
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    Uri uri(RAW_CONTACT);
+    std::vector<std::string> columns;
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(ID, rawCountId);
+    auto resultSet = helper->Query(uri, predicates, columns);
+    bool result = false;
+    if (resultSet == nullptr) {
+        TELEPHONY_LOGE("result set nullptr.");
+        helper->Release();
+        return result;
+    }
+    int32_t count = 0;
+    if (resultSet->GetRowCount(count) == 0 && count != 0) {
+        resultSet->GoToFirstRow();
+        int columnIndex;
+        resultSet->GetColumnIndex(CONTACTED_COUNT, columnIndex);
+        if (resultSet->GetInt(columnIndex, contactedCount) == 0) {
+            result = true;
+        }
+    }
+    resultSet->Close();
+    helper->Release();
+    helper = nullptr;
+    return result;
+}
+
+bool SmsPersistHelper::QueryRawContactId(const std::string &address, int32_t &rawCountId)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(CONTACT_URI);
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    Uri uri(CONTACT_DATA);
+    std::vector<std::string> columns;
+    DataShare::DataSharePredicates predicates;
+    std::string nationalNum;
+    std::string internationalNum;
+    int32_t ret = FormatSmsNumber(
+        address, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, nationalNum);
+    if (ret != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("Phone Number format Failed.");
+        nationalNum = address;
+    }
+    ret = FormatSmsNumber(address, ISO_COUNTRY_CODE,
+        i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::INTERNATIONAL, internationalNum);
+    if (ret != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("Phone Number format Failed.");
+        internationalNum = address;
+    }
+    predicates.EqualTo(DETAIL_INFO, nationalNum)->Or()->EqualTo(DETAIL_INFO, internationalNum);
+    predicates.EqualTo(TYPE_ID, TYPE_ID_VALUE);
+    auto resultSet = helper->Query(uri, predicates, columns);
+    bool result = false;
+    if (resultSet == nullptr) {
+        TELEPHONY_LOGE("result set nullptr.");
+        helper->Release();
+        return result;
+    }
+    int32_t count = 0;
+    if (resultSet->GetRowCount(count) == 0 && count != 0) {
+        resultSet->GoToFirstRow();
+        int columnIndex;
+        resultSet->GetColumnIndex(RAW_CONTACT_ID, columnIndex);
+        if (resultSet->GetInt(columnIndex, rawCountId) == 0) {
+            result = true;
+        }
+    }
+    resultSet->Close();
+    helper->Release();
+    helper = nullptr;
+    return result;
 }
 
 bool SmsPersistHelper::QueryParamBoolean(const std::string key, bool defValue)

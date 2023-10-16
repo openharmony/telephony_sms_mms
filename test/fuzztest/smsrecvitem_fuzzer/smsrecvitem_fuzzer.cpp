@@ -135,7 +135,8 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     std::string strData(reinterpret_cast<const char *>(data), size);
     smsSkills.AddEvent(strData);
     CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
-    auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo, nullptr, size, size);
+    std::string addr(reinterpret_cast<const char *>(data), size);
+    auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo, nullptr, size, size, addr);
     CommonEventData comData;
     smsReceiver->OnReceiveEvent(comData);
 
