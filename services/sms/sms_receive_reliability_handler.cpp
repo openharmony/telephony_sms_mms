@@ -354,8 +354,8 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
     CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
     smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
-    auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(
-        smsSubscriberInfo, shared_from_this(), indexer->GetMsgRefId(), indexer->GetDataBaseId());
+    auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo, shared_from_this(),
+        indexer->GetMsgRefId(), indexer->GetDataBaseId(), indexer->GetOriginatingAddress());
     bool cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, smsReceiver);
     HiSysEventCBResult(cbResult);
 }

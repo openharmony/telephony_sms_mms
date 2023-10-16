@@ -162,8 +162,10 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
         TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    return interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
+    bool ret = interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
         StringUtils::ToUtf8(text), sendCallback, deliveryCallback);
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateContact(StringUtils::ToUtf8(desAddr));
+    return ret;
 }
 
 void SmsService::InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text)
@@ -277,8 +279,10 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
         TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    return interfaceManager->DataBasedSmsDelivery(
+    bool ret = interfaceManager->DataBasedSmsDelivery(
         StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr), port, data, dataLen, sendCallback, deliveryCallback);
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateContact(StringUtils::ToUtf8(desAddr));
+    return ret;
 }
 
 bool SmsService::CheckSmsPermission(const sptr<ISendShortMessageCallback> &sendCallback)
