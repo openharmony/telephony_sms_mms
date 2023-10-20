@@ -72,29 +72,34 @@ int32_t ImsSmsCallbackStub::OnRemoteRequest(
 int32_t ImsSmsCallbackStub::OnImsSendMessageResponseInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t slotId = data.ReadInt32();
-    auto info = (HRilRadioResponseInfo *)data.ReadRawData(sizeof(HRilRadioResponseInfo));
-    if (info != nullptr) {
-        reply.WriteInt32(ImsSendMessageResponse(slotId, *info));
+    HRilRadioResponseInfo hRilRadioResponseInfo;
+    SendSmsResultInfo sendSmsResultInfo;
+    if (data.GetRawDataSize() == sizeof(HRilRadioResponseInfo)) {
+        hRilRadioResponseInfo.flag = data.ReadInt32();
+        hRilRadioResponseInfo.serial = data.ReadInt32();
+        hRilRadioResponseInfo.error = static_cast<const HRilErrType>(data.ReadInt32());
+        hRilRadioResponseInfo.type = static_cast<const HRilResponseTypes>(data.ReadInt32());
+        reply.WriteInt32(ImsSendMessageResponse(slotId, hRilRadioResponseInfo));
+        return TELEPHONY_SUCCESS;
+    } else {
+        sendSmsResultInfo.msgRef = data.ReadInt32();
+        sendSmsResultInfo.pdu = data.ReadString();
+        sendSmsResultInfo.errCode = data.ReadInt32();
+        sendSmsResultInfo.flag = data.ReadInt64();
+        reply.WriteInt32(ImsSendMessageResponse(slotId, sendSmsResultInfo));
         return TELEPHONY_SUCCESS;
     }
-    auto result = (SendSmsResultInfo *)data.ReadRawData(sizeof(SendSmsResultInfo));
-    if (result == nullptr) {
-        TELEPHONY_LOGE("[slot%{public}d]SendSmsResultInfo is nullptr", slotId);
-        return TELEPHONY_ERR_ARGUMENT_INVALID;
-    }
-    reply.WriteInt32(ImsSendMessageResponse(slotId, *result));
-    return TELEPHONY_SUCCESS;
 }
 
 int32_t ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t slotId = data.ReadInt32();
-    auto info = (HRilRadioResponseInfo *)data.ReadRawData(sizeof(HRilRadioResponseInfo));
-    if (info == nullptr) {
-        TELEPHONY_LOGE("[slot%{public}d]HRilRadioResponseInfo is nullptr", slotId);
-        return TELEPHONY_ERR_ARGUMENT_INVALID;
-    }
-    reply.WriteInt32(ImsSetSmsConfigResponse(slotId, *info));
+    HRilRadioResponseInfo hRilRadioResponseInfo;
+    hRilRadioResponseInfo.flag = data.ReadInt32();
+    hRilRadioResponseInfo.serial = data.ReadInt32();
+    hRilRadioResponseInfo.error = static_cast<const HRilErrType>(data.ReadInt32());
+    hRilRadioResponseInfo.type = static_cast<const HRilResponseTypes>(data.ReadInt32());
+    reply.WriteInt32(ImsSetSmsConfigResponse(slotId, hRilRadioResponseInfo));
     return TELEPHONY_SUCCESS;
 }
 
