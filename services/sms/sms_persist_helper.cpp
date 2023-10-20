@@ -319,7 +319,6 @@ bool SmsPersistHelper::UpdateContact(const std::string &address)
     std::time_t timep;
     int64_t currentTime = time(&timep);
     Uri uri(RAW_CONTACT);
-    std::vector<std::string> columns;
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(ID, rawCountId);
     DataShare::DataShareValuesBucket bucket;
