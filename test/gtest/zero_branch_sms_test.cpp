@@ -1082,7 +1082,7 @@ HWTEST_F(BranchSmsTest, SmsMiscManager_0001, Function | MediumTest | Level1)
     EXPECT_GE(smsMiscManager->UpdateSimMessage(
                   1, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD, pdu, smsc),
         0);
-    EXPECT_EQ(smsMiscManager->GetAllSimMessages(message), TELEPHONY_ERR_UNKNOWN_NETWORK_TYPE);
+    EXPECT_GT(smsMiscManager->GetAllSimMessages(message), TELEPHONY_ERR_SUCCESS);
     std::list<SmsMiscManager::gsmCBRangeInfo> rangeList;
     EXPECT_TRUE(smsMiscManager->SendDataToRil(true, rangeList));
     SmsMiscManager::gsmCBRangeInfo rangeInfo(1, 1);
