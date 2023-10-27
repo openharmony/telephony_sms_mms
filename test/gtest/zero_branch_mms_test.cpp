@@ -23,6 +23,9 @@
 #include "mms_encode_buffer.h"
 #include "mms_header.h"
 #include "mms_msg.h"
+#include "mms_network_manager.h"
+#include "mms_persist_helper.h"
+#include "sms_mms_gtest.h"
 #include "sms_service.h"
 #include "sms_wap_push_buffer.h"
 #include "sms_wap_push_content_type.h"
@@ -62,6 +65,21 @@ const char *BEGIN_STR = "01";
 const char *END_STR = "FF";
 const char PDU_COUNT = 10;
 const char INPUT_INTEGER = 128;
+const std::string METHOD_POST = "POST";
+const std::string METHOD_GET = "GET";
+const std::string TEST_DATA = "test data test data";
+const std::string TEST_PATH = "testPath";
+const std::string TEST_URLS = "url1, url2, url3,";
+const size_t URL_COUNT = 3;
+constexpr uint32_t SPLIT_PDU_LENGTH = 195 * 1024;
+const size_t SPLIT_PDU_COUNT = 3;
+const size_t BUF_LEN = 10;
+const int VALUE_4 = 4;
+const int VALUE_9 = 9;
+const int VALUE_16 = 0x10;
+const int VALUE_31 = 31;
+const int VALUE_32 = 32;
+const int VALUE_AF = 0xAF;
 } // namespace
 
 class BranchMmsTest : public testing::Test {
@@ -466,6 +484,55 @@ HWTEST_F(BranchMmsTest, SmsWapPushHandler_0001, Function | MediumTest | Level1)
     decodeBuffer.totolLength_ = 1;
     EXPECT_FALSE(smsWapPushHandler->DecodeXWapApplication(decodeBuffer, 1));
     EXPECT_TRUE(smsWapPushHandler->SendWapPushMessageBroadcast(indexer));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsWapPushHandler_0002
+ * @tc.name     Test SmsWapPushHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, SmsWapPushHandler_0002, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::SmsWapPushHandler_0002 -->");
+    auto smsWapPushHandler = std::make_shared<SmsWapPushHandler>(INVALID_SLOTID);
+    SmsWapPushBuffer decodeBuffer;
+    auto dataBuf = std::make_unique<char[]>(BUF_LEN);
+    decodeBuffer.WriteDataBuffer(std::move(dataBuf), BUF_LEN);
+    EXPECT_FALSE(smsWapPushHandler->DecodeXWapApplication(decodeBuffer, 1));
+
+    std::string appId = TEST_PATH;
+    decodeBuffer.curPosition_ = 0;
+    decodeBuffer.pduBuffer_[0] = VALUE_9;
+    EXPECT_FALSE(smsWapPushHandler->DecodeXWapApplicationField(decodeBuffer, appId));
+    appId = TEST_PATH;
+    decodeBuffer.curPosition_ = 0;
+    decodeBuffer.pduBuffer_[0] = VALUE_AF;
+    EXPECT_TRUE(smsWapPushHandler->DecodeXWapApplicationField(decodeBuffer, appId));
+
+    appId = TEST_PATH;
+    decodeBuffer.curPosition_ = 0;
+    decodeBuffer.pduBuffer_[0] = VALUE_AF;
+    EXPECT_TRUE(smsWapPushHandler->DecodeXWapApplicationValue(decodeBuffer, appId));
+    appId = TEST_PATH;
+    decodeBuffer.curPosition_ = 0;
+    decodeBuffer.pduBuffer_[0] = VALUE_9;
+    EXPECT_FALSE(smsWapPushHandler->DecodeXWapApplicationValue(decodeBuffer, appId));
+
+    decodeBuffer.curPosition_ = 0;
+    decodeBuffer.pduBuffer_[0] = VALUE_4;
+    EXPECT_TRUE(smsWapPushHandler->DecodeXWapAbandonHeaderValue(decodeBuffer));
+    decodeBuffer.curPosition_ = 0;
+    decodeBuffer.pduBuffer_[0] = VALUE_16;
+    EXPECT_FALSE(smsWapPushHandler->DecodeXWapAbandonHeaderValue(decodeBuffer));
+    decodeBuffer.curPosition_ = 0;
+    decodeBuffer.pduBuffer_[0] = VALUE_31;
+    EXPECT_TRUE(smsWapPushHandler->DecodeXWapAbandonHeaderValue(decodeBuffer));
+    decodeBuffer.curPosition_ = VALUE_9;
+    decodeBuffer.pduBuffer_[VALUE_9] = VALUE_31;
+    EXPECT_FALSE(smsWapPushHandler->DecodeXWapAbandonHeaderValue(decodeBuffer));
+    decodeBuffer.curPosition_ = 0;
+    decodeBuffer.pduBuffer_[0] = VALUE_32;
+    EXPECT_FALSE(smsWapPushHandler->DecodeXWapAbandonHeaderValue(decodeBuffer));
 }
 
 /**
@@ -1076,6 +1143,113 @@ HWTEST_F(BranchMmsTest, MmsBuffer_0002, Function | MediumTest | Level1)
     EXPECT_FALSE(retBool);
     retBool = mmsBuffer.WriteDataBuffer(std::make_unique<char[]>(len), len);
     EXPECT_TRUE(retBool);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsConnCallback_0001
+ * @tc.name     Test MmsConnCallback
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, MmsConnCallback_0001, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::MmsConnCallback_0001 -->");
+    MmsConnCallbackStub connCallback;
+    sptr<NetManagerStandard::NetHandle> nullHandle;
+    sptr<NetManagerStandard::NetAllCapabilities> nullCap;
+    sptr<NetManagerStandard::NetLinkInfo> nullInfo;
+    EXPECT_EQ(connCallback.NetAvailable(nullHandle), TELEPHONY_ERR_FAIL);
+    EXPECT_EQ(connCallback.NetCapabilitiesChange(nullHandle, nullCap), ERR_NONE);
+    EXPECT_EQ(connCallback.NetConnectionPropertiesChange(nullHandle, nullInfo), ERR_NONE);
+    EXPECT_EQ(connCallback.NetLost(nullHandle), ERR_NONE);
+    EXPECT_EQ(connCallback.NetUnavailable(), ERR_NONE);
+    EXPECT_EQ(connCallback.NetBlockStatusChange(nullHandle, false), ERR_NONE);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsNetworkManager_0001
+ * @tc.name     Test MmsNetworkManager
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, MmsNetworkManager_0001, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::MmsNetworkManager_0001 -->");
+    MmsNetworkManager mmsNetworkMgr;
+    EXPECT_GE(mmsNetworkMgr.AcquireNetwork(0, 0), 0);
+    mmsNetworkMgr.ReleaseNetwork(0, 0);
+    EXPECT_NE(mmsNetworkMgr.GetOrCreateHttpClient(0), nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsNetworkClient_0001
+ * @tc.name     Test MmsNetworkClient
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, MmsNetworkClient_0001, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::MmsNetworkClient_0001 -->");
+    AccessMmsToken token;
+    MmsNetworkClient client(0);
+    client.GetIfaceName();
+    client.Execute(METHOD_POST, "", TEST_DATA);
+    client.Execute(METHOD_GET, "", TEST_DATA);
+    client.HttpRequest(METHOD_POST, "", TEST_DATA);
+    client.DeleteMmsPdu("");
+
+    EXPECT_NE(client.UpdateMmsPduToStorage(""), TELEPHONY_ERR_SUCCESS);
+    client.responseData_ = TEST_DATA;
+    EXPECT_NE(client.UpdateMmsPduToStorage(""), TELEPHONY_ERR_SUCCESS);
+    client.responseData_ = "";
+
+    std::string strBuf = TEST_DATA;
+    EXPECT_EQ(client.GetMmsPduFromFile("", strBuf), false);
+    EXPECT_EQ(client.GetMmsPduFromFile(TEST_PATH, strBuf), false);
+
+    std::unique_ptr<char[]> bufp = std::make_unique<char[]>(BUF_LEN);
+    EXPECT_EQ(client.WriteBufferToFile(nullptr, BUF_LEN, ""), false);
+    EXPECT_EQ(client.WriteBufferToFile(bufp, BUF_LEN, ""), false);
+    EXPECT_EQ(client.WriteBufferToFile(bufp, BUF_LEN, TEST_PATH), false);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsPersistHelper_0001
+ * @tc.name     Test MmsPersistHelper
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, MmsPersistHelper_0001, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::PersistHelper_0001 -->");
+    MmsPersistHelper persistHelper;
+
+    std::string urlStr = TEST_URLS;
+    std::vector<std::string> urls = persistHelper.SplitUrl(urlStr);
+    EXPECT_EQ(urls.size(), URL_COUNT);
+
+    std::string *pduData = new (std::nothrow) std::string(SPLIT_PDU_COUNT * SPLIT_PDU_LENGTH, 'a');
+    std::vector<std::string> pdus = persistHelper.SplitPdu(*pduData);
+    EXPECT_EQ(pdus.size(), SPLIT_PDU_COUNT * 2);
+    delete pduData;
+
+    persistHelper.SetMmsPdu(TEST_DATA);
+    persistHelper.GetMmsPdu(TEST_PATH);
+    persistHelper.DeleteMmsPdu(TEST_PATH);
+    EXPECT_FALSE(persistHelper.UpdateMmsPdu(TEST_DATA, TEST_PATH));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsPersistHelper_0002
+ * @tc.name     Test MmsPersistHelper
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, MmsPersistHelper_0002, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::PersistHelper_0002 -->");
+    AccessMmsToken token;
+    MmsPersistHelper persistHelper;
+
+    persistHelper.SetMmsPdu(TEST_DATA);
+    persistHelper.GetMmsPdu(TEST_PATH);
+    persistHelper.DeleteMmsPdu(TEST_PATH);
+    EXPECT_FALSE(persistHelper.UpdateMmsPdu(TEST_DATA, TEST_PATH));
 }
 
 /**
