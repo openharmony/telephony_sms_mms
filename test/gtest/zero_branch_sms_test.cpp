@@ -35,8 +35,8 @@
 #include "sms_send_manager.h"
 #include "sms_sender.h"
 #include "sms_service.h"
+#include "sms_state_handler.h"
 #include "telephony_errors.h"
-
 
 namespace OHOS {
 namespace Telephony {
@@ -1156,6 +1156,20 @@ HWTEST_F(BranchSmsTest, SmsService_0002, Function | MediumTest | Level1)
     EXPECT_GE(smsService->CreateMessage(scAddr, specification, messages), TELEPHONY_ERR_SUCCESS);
     specification = "3gpp2";
     EXPECT_GE(smsService->CreateMessage(scAddr, specification, messages), TELEPHONY_ERR_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsStateHandler_0001
+ * @tc.name     Test SmsStateHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsStateHandler_0001, Function | MediumTest | Level1)
+{
+    SmsStateHandler handler;
+    handler.Init();
+    handler.UnInit();
+    EXPECT_TRUE(handler.RegisterHandler());
+    EXPECT_TRUE(handler.UnRegisterHandler());
 }
 
 /**
