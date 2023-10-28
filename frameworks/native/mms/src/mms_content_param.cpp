@@ -72,6 +72,11 @@ void MmsContentParam::GetFileName(std::string &fileName)
     uint8_t fieldCode = static_cast<uint8_t>(ContentParam::CT_P_NAME);
     if (textMap_.find(fieldCode) != textMap_.end()) {
         fileName = textMap_[fieldCode];
+        return;
+    }
+    fieldCode = static_cast<uint8_t>(ContentParam::CT_P_NAME_VALUE);
+    if (textMap_.find(fieldCode) != textMap_.end()) {
+        fileName = textMap_[fieldCode];
     }
 }
 
