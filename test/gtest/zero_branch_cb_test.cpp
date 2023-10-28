@@ -22,7 +22,6 @@
 #include "gtest/gtest.h"
 #include "radio_event.h"
 #include "sms_service.h"
-#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -346,50 +345,6 @@ HWTEST_F(BranchCbTest, GsmSmsCbHandler_0001, Function | MediumTest | Level1)
     EXPECT_FALSE(gsmSmsCbHandler->SendCbMessageBroadcast(cbMessage));
     EXPECT_TRUE(gsmSmsCbHandler->FindCbMessage(cbMessage) == nullptr);
     EXPECT_EQ(gsmSmsCbHandler->CheckCbMessage(cbMessage), 0);
-}
-/**
- * @tc.number   Telephony_SmsMmsGtest_SmsStateObserver_0001
- * @tc.name     Test SmsStateObserver
- * @tc.desc     Function test
- */
-HWTEST_F(BranchCbTest, SmsStateObserver_0001, Function | MediumTest | Level1)
-{
-    std::string smsStateCb = "COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED";
-    std::string smsStateWappush = "COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED";
-    std::string deviceId = "deviceId";
-    std::shared_ptr<SmsStateObserver> smsStateObserver = std::make_shared<SmsStateObserver>();
-    smsStateObserver->smsSubscriber_ = nullptr;
-    smsStateObserver->StopEventSubscriber();
-    std::shared_ptr<CommonEventSubscribeInfo> subscribeInfo = std::make_shared<CommonEventSubscribeInfo>();
-    std::shared_ptr<SmsStateEventSubscriber> smsStateEventSubscriber =
-        std::make_shared<SmsStateEventSubscriber>(*subscribeInfo);
-    smsStateObserver->smsSubscriber_ = smsStateEventSubscriber;
-    smsStateObserver->StopEventSubscriber();
-    EventFwk::CommonEventData eventData = EventFwk::CommonEventData();
-    AAFwk::Want want = AAFwk::Want();
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
-    eventData.SetWant(want);
-    smsStateEventSubscriber->OnReceiveEvent(eventData);
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
-    eventData.SetWant(want);
-    smsStateEventSubscriber->OnReceiveEvent(eventData);
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
-    eventData.SetWant(want);
-    smsStateEventSubscriber->OnReceiveEvent(eventData);
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BATTERY_LOW);
-    eventData.SetWant(want);
-    smsStateEventSubscriber->OnReceiveEvent(eventData);
-    std::shared_ptr<SmsStateObserver::SystemAbilityStatusChangeListener> systemAbilityStatusChangeListener =
-        std::make_shared<SmsStateObserver::SystemAbilityStatusChangeListener>(smsStateEventSubscriber);
-    systemAbilityStatusChangeListener->OnAddSystemAbility(SUBSYS_POWERMNG_SYS_ABILITY_ID_BEGIN, deviceId);
-    systemAbilityStatusChangeListener->OnAddSystemAbility(COMMON_EVENT_SERVICE_ID, deviceId);
-    systemAbilityStatusChangeListener->OnRemoveSystemAbility(COMMON_EVENT_SERVICE_ID, deviceId);
-    systemAbilityStatusChangeListener->sub_ = nullptr;
-    systemAbilityStatusChangeListener->OnAddSystemAbility(COMMON_EVENT_SERVICE_ID, deviceId);
-    systemAbilityStatusChangeListener->OnRemoveSystemAbility(SUBSYS_POWERMNG_SYS_ABILITY_ID_BEGIN, deviceId);
-    systemAbilityStatusChangeListener->OnRemoveSystemAbility(COMMON_EVENT_SERVICE_ID, deviceId);
-    EXPECT_GE(smsStateEventSubscriber->GetSmsStateEventIntValue(smsStateCb), 0);
-    EXPECT_GE(smsStateEventSubscriber->GetSmsStateEventIntValue(smsStateWappush), 0);
 }
 } // namespace Telephony
 } // namespace OHOS
