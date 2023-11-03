@@ -35,8 +35,8 @@
 #include "sms_send_manager.h"
 #include "sms_sender.h"
 #include "sms_service.h"
+#include "sms_state_handler.h"
 #include "telephony_errors.h"
-
 
 namespace OHOS {
 namespace Telephony {
@@ -118,6 +118,63 @@ HWTEST_F(BranchSmsTest, SmsReceiveHandler_0001, Function | MediumTest | Level1)
     smsReceiveHandler->IsRepeatedMessagePart(indexer);
     indexer = nullptr;
     EXPECT_FALSE(smsReceiveHandler->AddMsgToDB(indexer));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveReliabilityHandler_0001
+ * @tc.name     Test SmsReceiveReliabilityHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsReceiveReliabilityHandler_0001, Function | MediumTest | Level1)
+{
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(INVALID_SLOTID);
+    reliabilityHandler->DeleteMessageFormDb(SMS_REF_ID);
+
+    std::vector<SmsReceiveIndexer> dbIndexers;
+    std::string strData = "qwe";
+    auto indexer = SmsReceiveIndexer(StringUtils::HexToByteVector(strData), strData.size(), strData.size(), false,
+        strData, strData, strData.size(), strData.size(), strData.size(), false, strData);
+
+    dbIndexers.push_back(indexer);
+    indexer = SmsReceiveIndexer(
+        StringUtils::HexToByteVector(strData), strData.size(), strData.size(), false, false, strData, strData, strData);
+    dbIndexers.push_back(indexer);
+    reliabilityHandler->CheckUnReceiveWapPush(dbIndexers);
+
+    std::shared_ptr<std::vector<std::string>> userDataRaws = std::make_shared<std::vector<std::string>>();
+    userDataRaws->push_back(strData);
+
+    int32_t pages = 0;
+    reliabilityHandler->GetWapPushUserDataSinglePage(indexer, userDataRaws);
+    reliabilityHandler->ReadyDecodeWapPushUserData(indexer, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(pages, dbIndexers, 0, userDataRaws);
+    reliabilityHandler->ReadySendSmsBroadcast(indexer, userDataRaws);
+    reliabilityHandler->DeleteMessageFormDb(strData.size(), strData.size());
+    reliabilityHandler->RemoveBlockedSms(dbIndexers);
+
+    std::shared_ptr<SmsReceiveIndexer> indexerPtr =
+        std::make_shared<SmsReceiveIndexer>(StringUtils::HexToByteVector(strData), strData.size(), strData.size(),
+            false, strData, strData, strData.size(), strData.size(), strData.size(), false, strData);
+    if (indexerPtr == nullptr) {
+        return;
+    }
+    reliabilityHandler->SendBroadcast(indexerPtr, userDataRaws);
+    EXPECT_TRUE(reliabilityHandler->CheckSmsCapable());
+    EXPECT_FALSE(reliabilityHandler->CheckBlockedPhoneNumber(BLOCK_NUMBER));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsStateHandler_0001
+ * @tc.name     Test SmsStateHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsStateHandler_0001, Function | MediumTest | Level1)
+{
+    SmsStateHandler handler;
+    handler.Init();
+    handler.UnInit();
+    EXPECT_TRUE(handler.RegisterHandler());
+    EXPECT_TRUE(handler.UnRegisterHandler());
 }
 
 /**
@@ -1156,49 +1213,6 @@ HWTEST_F(BranchSmsTest, SmsService_0002, Function | MediumTest | Level1)
     EXPECT_GE(smsService->CreateMessage(scAddr, specification, messages), TELEPHONY_ERR_SUCCESS);
     specification = "3gpp2";
     EXPECT_GE(smsService->CreateMessage(scAddr, specification, messages), TELEPHONY_ERR_SUCCESS);
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_SmsReceiveReliabilityHandler_0001
- * @tc.name     Test SmsReceiveReliabilityHandler
- * @tc.desc     Function test
- */
-HWTEST_F(BranchSmsTest, SmsReceiveReliabilityHandler_0001, Function | MediumTest | Level1)
-{
-    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(INVALID_SLOTID);
-    reliabilityHandler->DeleteMessageFormDb(SMS_REF_ID);
-
-    std::vector<SmsReceiveIndexer> dbIndexers;
-    std::string strData = "qwe";
-    auto indexer = SmsReceiveIndexer(StringUtils::HexToByteVector(strData), strData.size(), strData.size(), false,
-        strData, strData, strData.size(), strData.size(), strData.size(), false, strData);
-
-    dbIndexers.push_back(indexer);
-    indexer = SmsReceiveIndexer(
-        StringUtils::HexToByteVector(strData), strData.size(), strData.size(), false, false, strData, strData, strData);
-    dbIndexers.push_back(indexer);
-    reliabilityHandler->CheckUnReceiveWapPush(dbIndexers);
-
-    std::shared_ptr<std::vector<std::string>> userDataRaws = std::make_shared<std::vector<std::string>>();
-    userDataRaws->push_back(strData);
-
-    int32_t pages = 0;
-    reliabilityHandler->GetWapPushUserDataSinglePage(indexer, userDataRaws);
-    reliabilityHandler->ReadyDecodeWapPushUserData(indexer, userDataRaws);
-    reliabilityHandler->GetSmsUserDataMultipage(pages, dbIndexers, 0, userDataRaws);
-    reliabilityHandler->ReadySendSmsBroadcast(indexer, userDataRaws);
-    reliabilityHandler->DeleteMessageFormDb(strData.size(), strData.size());
-    reliabilityHandler->RemoveBlockedSms(dbIndexers);
-
-    std::shared_ptr<SmsReceiveIndexer> indexerPtr =
-        std::make_shared<SmsReceiveIndexer>(StringUtils::HexToByteVector(strData), strData.size(), strData.size(),
-            false, strData, strData, strData.size(), strData.size(), strData.size(), false, strData);
-    if (indexerPtr == nullptr) {
-        return;
-    }
-    reliabilityHandler->SendBroadcast(indexerPtr, userDataRaws);
-    EXPECT_TRUE(reliabilityHandler->CheckSmsCapable());
-    EXPECT_FALSE(reliabilityHandler->CheckBlockedPhoneNumber(BLOCK_NUMBER));
 }
 } // namespace Telephony
 } // namespace OHOS
