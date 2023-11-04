@@ -70,6 +70,8 @@ private:
     bool DecodeFieldPreviouslySentDate(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len);
     bool DecodeFieldMBox(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len);
     bool DecodeFieldMMFlag(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len);
+    bool SetOctetValuePartData(uint8_t fieldId, uint8_t value);
+    bool SetOctetValuePortionData(uint8_t fieldId, uint8_t value);
 
     // encode value length feild
     bool EncodeFieldExpriyValue(MmsEncodeBuffer &buff, int64_t value);

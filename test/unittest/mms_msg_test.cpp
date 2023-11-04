@@ -64,7 +64,7 @@ void MmsMsgTest::ProcessDecodeInput(int inputCMD) const
     }
 }
 
-void MmsMsgTest::ProcessEncodeInput(int inputCMD) const
+void MmsMsgTest::ProcessEncodeInput(int inputCMD)
 {
     switch (inputCMD) {
         case 0x09:
@@ -99,7 +99,7 @@ void MmsMsgTest::ProcessEncodeInput(int inputCMD) const
     }
 }
 
-void MmsMsgTest::ProcessTest() const
+void MmsMsgTest::ProcessTest()
 {
     bool loopFlag = true;
     const int exitKey = 100;
@@ -185,10 +185,8 @@ void MmsMsgTest::MmsDecodeTest(std::string strPath) const
     }
 }
 
-void MmsMsgTest::MmsSendReqEncodeTest() const
+void MmsMsgTest::GetSendReqDataTest(MmsMsg &encodeMsg)
 {
-    std::cout << "Start MmsSendReqEncodeTest" << std::endl;
-    MmsMsg encodeMsg;
     // Mandatory
     if (!encodeMsg.SetMmsMessageType(MMS_MSGTYPE_SEND_REQ)) {
         std::cout << "SetMmsMessageType fail" << std::endl;
@@ -221,6 +219,13 @@ void MmsMsgTest::MmsSendReqEncodeTest() const
         std::cout << "SetHeaderOctetValue MMS_CONTENT_CLASS fail" << std::endl;
         return;
     }
+}
+
+void MmsMsgTest::MmsSendReqEncodeTest()
+{
+    std::cout << "Start MmsSendReqEncodeTest" << std::endl;
+    MmsMsg encodeMsg;
+    GetSendReqDataTest(encodeMsg);
     std::vector<MmsAddress> vecAddrs;
     MmsAddress toAddrs("+8613888888888/TYPE=PLMN");
     vecAddrs.push_back(toAddrs);
@@ -295,12 +300,10 @@ void MmsMsgTest::MmsSendConfEncodeTest() const
     std::cout << "MmsSendConfEncodeTest encode success, data len =" << len << std::endl;
 }
 
-void MmsMsgTest::MmsNotificationIndEncodeTest() const
+void MmsMsgTest::GetMmsNotificationIndDataTest(MmsMsg &encodeMsg)
 {
-    std::cout << "Start MmsNotificationIndEncodeTest" << std::endl;
     const long expiryTemp = 1637141707;
     const long messageSize = 12345678;
-    MmsMsg encodeMsg;
     // Mandatory
     if (!encodeMsg.SetMmsMessageType(MMS_MSGTYPE_NOTIFICATION_IND)) {
         std::cout << "SetMmsMessageType fail" << std::endl;
@@ -331,6 +334,13 @@ void MmsMsgTest::MmsNotificationIndEncodeTest() const
         std::cout << "SetHeaderStringValue fail" << std::endl;
         return;
     } // need to confirmation
+}
+
+void MmsMsgTest::MmsNotificationIndEncodeTest()
+{
+    std::cout << "Start MmsNotificationIndEncodeTest" << std::endl;
+    MmsMsg encodeMsg;
+    GetMmsNotificationIndDataTest(encodeMsg);
     // Optional
     MmsAddress address;
     address.SetMmsAddressString("+8613812345678/TYPE=PLMN");
@@ -389,10 +399,8 @@ void MmsMsgTest::MmsNotifyRespIndEncodeTest() const
     std::cout << "MmsNotifyRespIndEncodeTest encode success, data len =" << len << std::endl;
 }
 
-void MmsMsgTest::MmsRetrieveConfEncodeTest() const
+void MmsMsgTest::MmsRetrieveConfDataTest(MmsMsg &encodeMsg)
 {
-    std::cout << "Start MmsRetrieveConfEncodeTest" << std::endl;
-    MmsMsg encodeMsg;
     // Mandatory
     if (!encodeMsg.SetMmsMessageType(MMS_MSGTYPE_RETRIEVE_CONF)) {
         std::cout << "SetMmsMessageType fail" << std::endl;
@@ -415,7 +423,6 @@ void MmsMsgTest::MmsRetrieveConfEncodeTest() const
         std::cout << "SetHeaderContentType fail" << std::endl;
         return;
     }
-
     // Optional
     MmsAddress address;
     address.SetMmsAddressString("+8613812345678/TYPE=PLMN");
@@ -427,6 +434,13 @@ void MmsMsgTest::MmsRetrieveConfEncodeTest() const
         std::cout << "SetMmsSubject fail" << std::endl;
         return;
     }
+}
+
+void MmsMsgTest::MmsRetrieveConfEncodeTest()
+{
+    std::cout << "Start MmsRetrieveConfEncodeTest" << std::endl;
+    MmsMsg encodeMsg;
+    MmsRetrieveConfDataTest(encodeMsg);
     // add smil file
     const std::string filePathNameSmil = "/data/app/enSrc/618C0A89.smil";
     if (!MmsAddAttachment(encodeMsg, filePathNameSmil, "<0000>", "application/smil", true)) {

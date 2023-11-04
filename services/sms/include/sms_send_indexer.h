@@ -16,9 +16,6 @@
 #ifndef SMS_SEND_INDEXER_H
 #define SMS_SEND_INDEXER_H
 
-#include <map>
-#include <memory>
-#include <string>
 #include <vector>
 
 #include "i_sms_service_interface.h"

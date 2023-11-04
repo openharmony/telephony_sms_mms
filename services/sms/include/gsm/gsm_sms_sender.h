@@ -17,16 +17,12 @@
 #define GSM_SMS_SENDER_H
 
 #include <functional>
-#include <memory>
 #include <mutex>
-#include <string>
 
-#include "event_runner.h"
 #include "gsm_sms_message.h"
 #include "i_delivery_short_message_callback.h"
 #include "i_send_short_message_callback.h"
 #include "ims_sms_client.h"
-#include "sms_send_indexer.h"
 #include "sms_sender.h"
 #include "telephony_types.h"
 
@@ -41,6 +37,11 @@ public:
     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
         const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
+    void TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
+        std::vector<struct SplitInfo> cellsInfos, DataCodingScheme codingType, bool isStatusReport,
+        std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage &gsmSmsMessage,
+        const sptr<ISendShortMessageCallback> &sendCallback,
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
     void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, int32_t port,
         const uint8_t *data, uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;

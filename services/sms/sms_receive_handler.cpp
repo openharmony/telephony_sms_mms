@@ -19,7 +19,6 @@
 #include "radio_event.h"
 #include "sms_hisysevent.h"
 #include "sms_persist_helper.h"
-#include "sms_receive_reliability_handler.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -96,40 +95,7 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
         userDataRaw.append(indexer->GetRawUserData());
         pdus->push_back(pdu);
     } else {
-        pdus->assign(MAX_SEGMENT_NUM, "");
-        int msgSeg = static_cast<int>(indexer->GetMsgCount());
-        int8_t count = 0;
-        int8_t notNullPart = msgSeg;
-
-        std::vector<SmsReceiveIndexer> dbIndexers;
-        DataShare::DataSharePredicates predicates;
-        predicates.EqualTo(SmsSubsection::SENDER_NUMBER, indexer->GetOriginatingAddress())
-            ->And()
-            ->EqualTo(SmsSubsection::SMS_SUBSECTION_ID, std::to_string(indexer->GetMsgRefId()))
-            ->And()
-            ->EqualTo(SmsSubsection::SIZE, std::to_string(indexer->GetMsgCount()));
-        DelayedSingleton<SmsPersistHelper>::GetInstance()->Query(predicates, dbIndexers);
-
-        for (const auto &v : dbIndexers) {
-            ++count;
-            string pdu = StringUtils::StringToHex(v.GetPdu());
-            if ((v.GetMsgSeqId() - PDU_POS_OFFSET >= MAX_SEGMENT_NUM) || (v.GetMsgSeqId() - PDU_POS_OFFSET < 0)) {
-                reliabilityHandler->DeleteMessageFormDb(indexer->GetMsgRefId());
-                return;
-            }
-            pdus->at(v.GetMsgSeqId() - PDU_POS_OFFSET) = pdu;
-            if (v.GetPdu().size() == 0) {
-                --notNullPart;
-            }
-            std::shared_ptr<SmsBaseMessage> baseMessage = GsmSmsMessage::CreateMessage(pdu);
-            if (baseMessage != nullptr) {
-                userDataRaw.append(baseMessage->GetRawUserData());
-                messagBody.append(baseMessage->GetVisibleMessageBody());
-            }
-        }
-        if ((count != msgSeg) || (pdus->empty()) || (notNullPart != msgSeg)) {
-            return;
-        }
+        CombineMultiPageMessage(indexer, pdus, reliabilityHandler, messagBody, userDataRaw);
     }
 
     indexer->SetVisibleMessageBody(messagBody);
@@ -145,6 +111,44 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
         return;
     }
     reliabilityHandler->SendBroadcast(indexer, pdus);
+}
+
+void SmsReceiveHandler::CombineMultiPageMessage(const std::shared_ptr<SmsReceiveIndexer> &indexer,
+    std::shared_ptr<std::vector<std::string>> pdus, std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler,
+    std::string &messagBody, std::string &userDataRaw)
+{
+    pdus->assign(MAX_SEGMENT_NUM, "");
+    int msgSeg = static_cast<int>(indexer->GetMsgCount());
+    int8_t notNullPart = msgSeg;
+    std::vector<SmsReceiveIndexer> dbIndexers;
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(SmsSubsection::SENDER_NUMBER, indexer->GetOriginatingAddress())
+        ->And()
+        ->EqualTo(SmsSubsection::SMS_SUBSECTION_ID, std::to_string(indexer->GetMsgRefId()))
+        ->And()
+        ->EqualTo(SmsSubsection::SIZE, std::to_string(indexer->GetMsgCount()));
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->Query(predicates, dbIndexers);
+    int8_t count = 0;
+    for (const auto &v : dbIndexers) {
+        ++count;
+        string pdu = StringUtils::StringToHex(v.GetPdu());
+        if ((v.GetMsgSeqId() - PDU_POS_OFFSET >= MAX_SEGMENT_NUM) || (v.GetMsgSeqId() - PDU_POS_OFFSET < 0)) {
+            reliabilityHandler->DeleteMessageFormDb(indexer->GetMsgRefId());
+            return;
+        }
+        pdus->at(v.GetMsgSeqId() - PDU_POS_OFFSET) = pdu;
+        if (v.GetPdu().size() == 0) {
+            --notNullPart;
+        }
+        std::shared_ptr<SmsBaseMessage> baseMessage = GsmSmsMessage::CreateMessage(pdu);
+        if (baseMessage != nullptr) {
+            messagBody.append(baseMessage->GetVisibleMessageBody());
+            userDataRaw.append(baseMessage->GetRawUserData());
+        }
+    }
+    if ((count != msgSeg) || (pdus->empty()) || (notNullPart != msgSeg)) {
+        return;
+    }
 }
 
 bool SmsReceiveHandler::IsRepeatedMessagePart(const shared_ptr<SmsReceiveIndexer> &smsIndexer)
