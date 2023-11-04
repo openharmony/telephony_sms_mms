@@ -14,8 +14,11 @@
  */
 
 #include "napi_sms.h"
-#include "napi_mms.h"
+
 #include "delivery_callback.h"
+#include "napi_mms.h"
+#include "napi_mms_codec.h"
+#include "napi_send_recv_mms.h"
 #include "send_callback.h"
 #include "sms_mms_errors.h"
 
@@ -1959,10 +1962,10 @@ napi_value InitNapiSmsRegistry(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getSmsSegmentsInfo", GetSmsSegmentsInfo),
         DECLARE_NAPI_FUNCTION("isImsSmsSupported", IsImsSmsSupported),
         DECLARE_NAPI_FUNCTION("getImsShortMessageFormat", GetImsShortMessageFormat),
-        DECLARE_NAPI_FUNCTION("decodeMms", NapiMms::DecodeMms),
-        DECLARE_NAPI_FUNCTION("encodeMms", NapiMms::EncodeMms),
-        DECLARE_NAPI_FUNCTION("sendMms", NapiMms::SendMms),
-        DECLARE_NAPI_FUNCTION("downloadMms", NapiMms::DownloadMms),
+        DECLARE_NAPI_FUNCTION("decodeMms", NapiMmsCodec::DecodeMms),
+        DECLARE_NAPI_FUNCTION("encodeMms", NapiMmsCodec::EncodeMms),
+        DECLARE_NAPI_FUNCTION("sendMms", NapiSendRecvMms::SendMms),
+        DECLARE_NAPI_FUNCTION("downloadMms", NapiSendRecvMms::DownloadMms),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     CreateEnumSendSmsResult(env, exports);

@@ -230,7 +230,7 @@ void SmsInterfaceStub::OnSetSmscAddr(MessageParcel &data, MessageParcel &reply, 
     int32_t slotId = data.ReadInt32();
     std::u16string scAddr = data.ReadString16();
     int32_t result = SetSmscAddr(slotId, scAddr);
-    TELEPHONY_LOGI("SetSmscAddr result %{public}d", result);
+    TELEPHONY_LOGI("set smsc result:%{public}d", result == TELEPHONY_ERR_SUCCESS);
     reply.WriteInt32(result);
 }
 
@@ -239,7 +239,6 @@ void SmsInterfaceStub::OnGetSmscAddr(MessageParcel &data, MessageParcel &reply, 
     std::u16string smscAddress;
     int32_t slotId = data.ReadInt32();
     int32_t result = GetSmscAddr(slotId, smscAddress);
-    TELEPHONY_LOGI("GetSmscAddr result size %{public}d", result);
     if (!reply.WriteInt32(result)) {
         TELEPHONY_LOGE("SmsInterfaceStub::OnGetSmscAddr write reply failed.");
         return;

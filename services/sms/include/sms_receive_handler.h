@@ -16,11 +16,14 @@
 #ifndef SMS_RECEIVE_HANDLER_H
 #define SMS_RECEIVE_HANDLER_H
 
+#include <vector>
+
 #include "event_handler.h"
 #include "event_runner.h"
 #include "hril_sms_parcel.h"
 #include "sms_base_message.h"
 #include "sms_receive_indexer.h"
+#include "sms_receive_reliability_handler.h"
 #include "sms_wap_push_handler.h"
 
 namespace OHOS {
@@ -45,6 +48,10 @@ private:
     SmsReceiveHandler &operator=(const SmsReceiveHandler &) = delete;
     SmsReceiveHandler &operator=(const SmsReceiveHandler &&) = delete;
     void HandleReceivedSms(const std::shared_ptr<SmsBaseMessage> smsBaseMessage);
+    void CombineMultiPageMessage(const std::shared_ptr<SmsReceiveIndexer> &indexer,
+        std::shared_ptr<std::vector<std::string>> pdus,
+        std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler, std::string &messagBody,
+        std::string &userDataRaw);
 
 protected:
     int32_t slotId_ = -1;

@@ -138,7 +138,7 @@ std::vector<std::string> NAPIMmsPdu::SplitUrl(std::string url)
     std::vector<std::string> dbUrls;
     while (url.size() > 0) {
         size_t locate = url.find_first_of(',');
-        if (locate < 1) {
+        if (locate == 0 || locate == std::string::npos) {
             break;
         }
         dbUrls.push_back(url.substr(0, locate));

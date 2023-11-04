@@ -23,15 +23,15 @@ class MmsMsgTest {
 public:
     MmsMsgTest();
     ~MmsMsgTest();
-    void ProcessTest() const;
+    void ProcessTest();
     void ProcessDecodeInput(int inputCMD) const;
-    void ProcessEncodeInput(int inputCMD) const;
+    void ProcessEncodeInput(int inputCMD);
     void MmsDecodeTest(std::string strPath) const;
-    void MmsSendReqEncodeTest() const;
+    void MmsSendReqEncodeTest();
     void MmsSendConfEncodeTest() const;
-    void MmsNotificationIndEncodeTest() const;
+    void MmsNotificationIndEncodeTest();
     void MmsNotifyRespIndEncodeTest() const;
-    void MmsRetrieveConfEncodeTest() const;
+    void MmsRetrieveConfEncodeTest();
     void MmsAcknowledgeIndEncodeTest() const;
     void MmsDeliveryIndEncodeTest() const;
     void MmsReadRecIndEncodeTest() const;
@@ -51,6 +51,9 @@ private:
         MmsMsg &msg, std::string pathName, std::string contentId, std::string contenType, bool isSmil) const;
     std::string BuffToHex(const std::unique_ptr<char[]> &buff, uint32_t len) const;
     bool WriteBufferToFile(const std::unique_ptr<char[]> &buff, uint32_t len, const std::string &strPathName) const;
+    void GetSendReqDataTest(MmsMsg &encodeMsg);
+    void GetMmsNotificationIndDataTest(MmsMsg &encodeMsg);
+    void MmsRetrieveConfDataTest(MmsMsg &encodeMsg);
 };
 } // namespace Telephony
 } // namespace OHOS

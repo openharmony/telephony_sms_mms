@@ -56,31 +56,13 @@ public:
     bool PduAnalysis(const std::string &pdu);
     void ConvertMessageDcs();
     void ConvertUserData();
+    void ConvertUserPartData();
     bool GetIsTypeZeroInd() const;
     bool GetIsSIMDataTypeDownload() const;
     void ConvertMsgTimeStamp(const struct SmsTimeStamp &times);
     bool IsSpecialMessage() const;
 
-    static constexpr uint16_t TAPI_NETTEXT_SMDATA_SIZE_MAX = 255;
-    static constexpr uint8_t TAPI_SIM_SMSP_ADDRESS_LEN = 20;
-
 private:
-    static constexpr uint16_t DEFAULT_PORT = -1;
-    static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
-    static constexpr uint8_t MAX_SMSC_LEN = 20;
-    static constexpr uint16_t MAX_TPDU_DATA_LEN = 255;
-    static constexpr uint16_t TAPI_TEXT_SIZE_MAX = 520;
-    static constexpr uint8_t GSM_BEAR_DATA_LEN = 140;
-    static constexpr uint8_t BYTE_BITS = 8;
-    static constexpr uint8_t CHARSET_7BIT_BITS = 7;
-
-    std::string fullText_;
-    std::string destAddress_;
-    std::string replyAddress_;
-    uint16_t destPort_ = -1;
-    bool bSmsText_ = false;
-    std::shared_ptr<struct SmsTpdu> smsTpdu_;
-
     void AnalysisMsgDeliver(const SmsDeliver &deliver);
     void AnalysisMsgStatusReport(const SmsStatusReport &statusRep);
     void AnalysisMsgSubmit(const SmsSubmit &submit);
@@ -89,6 +71,19 @@ private:
     uint8_t CalcReplyEncodeAddress(const std::string &replyAddress);
     virtual int DecodeMessage(uint8_t *decodeData, unsigned int length, DataCodingScheme &codingType,
         const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
+    bool PduAnalysisMsg();
+
+public:
+    static constexpr uint16_t TAPI_NETTEXT_SMDATA_SIZE_MAX = 255;
+    static constexpr uint8_t TAPI_SIM_SMSP_ADDRESS_LEN = 20;
+
+private:
+    std::string fullText_;
+    std::string destAddress_;
+    std::string replyAddress_;
+    uint16_t destPort_ = -1;
+    bool bSmsText_ = false;
+    std::shared_ptr<struct SmsTpdu> smsTpdu_;
 };
 
 struct EncodeInfo {
