@@ -22,6 +22,9 @@
 
 namespace OHOS {
 namespace Telephony {
+static constexpr const char *PDU = "pdu";
+static const int32_t CALLBACK_VALUE_LEN = 2;
+
 DeliveryCallback::DeliveryCallback(bool hasCallback, napi_env env, napi_ref thisVarRef, napi_ref callbackRef)
     : hasCallback_(hasCallback), env_(env), thisVarRef_(thisVarRef), callbackRef_(callbackRef)
 {}
@@ -31,6 +34,30 @@ DeliveryCallback::~DeliveryCallback()
     env_ = nullptr;
     thisVarRef_ = nullptr;
     callbackRef_ = nullptr;
+}
+
+void GetCallbackValues(napi_env &env, const std::string &pdu, napi_value *values, uint32_t len)
+{
+    if (len < CALLBACK_VALUE_LEN) {
+        TELEPHONY_LOGE("callback values len invalid");
+        return;
+    }
+    if (!pdu.empty()) {
+        values[0] = NapiUtil::CreateUndefined(env);
+        napi_create_object(env, &values[1]);
+        napi_value arrayValue = nullptr;
+        napi_create_array(env, &arrayValue);
+        for (uint32_t i = 0; i < static_cast<uint32_t>(pdu.size()); ++i) {
+            napi_value element = nullptr;
+            int32_t intValue = pdu[i];
+            napi_create_int32(env, intValue, &element);
+            napi_set_element(env, arrayValue, i, element);
+        }
+        napi_set_named_property(env, values[1], PDU, arrayValue);
+    } else {
+        values[0] = NapiUtil::CreateErrorMessage(env, "invalid delivery report");
+        values[1] = NapiUtil::CreateUndefined(env);
+    }
 }
 
 void CompleteSmsDeliveryWork(uv_work_t *work, int status)
@@ -58,24 +85,8 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     }
     napi_value callbackFunc = nullptr;
     napi_get_reference_value(env_, callbackRef_, &callbackFunc);
-    napi_value callbackValues[2] = {0};
-    if (!pduStr_.empty()) {
-        callbackValues[0] = NapiUtil::CreateUndefined(env_);
-        napi_create_object(env_, &callbackValues[1]);
-        napi_value arrayValue = nullptr;
-        napi_create_array(env_, &arrayValue);
-        for (uint32_t i = 0; i < static_cast<uint32_t>(pduStr_.size()); ++i) {
-            napi_value element = nullptr;
-            int32_t intValue = pduStr_[i];
-            napi_create_int32(env_, intValue, &element);
-            napi_set_element(env_, arrayValue, i, element);
-        }
-        std::string pduStr = "pdu";
-        napi_set_named_property(env_, callbackValues[1], pduStr.c_str(), arrayValue);
-    } else {
-        callbackValues[0] = NapiUtil::CreateErrorMessage(env_, "invalid delivery report");
-        callbackValues[1] = NapiUtil::CreateUndefined(env_);
-    }
+    napi_value callbackValues[CALLBACK_VALUE_LEN] = { 0 };
+    GetCallbackValues(env_, pduStr_, callbackValues, CALLBACK_VALUE_LEN);
     napi_value callbackResult = nullptr;
     napi_value thisVar = nullptr;
     size_t argc = sizeof(callbackValues) / sizeof(callbackValues[0]);

@@ -198,14 +198,12 @@ int8_t MmsContentType::GetContentTypeFromString(std::string str)
  */
 bool MmsContentType::DecodeParameter(MmsDecodeBuffer &decodeBuffer, int32_t valueLength)
 {
-    uint8_t oneByte = 0;
     uint8_t paramCode = 0;
     while (valueLength > 0) {
-        if (!decodeBuffer.GetOneByte(oneByte)) {
+        if (!decodeBuffer.GetOneByte(paramCode)) {
             TELEPHONY_LOGE("Decode contentType GetOneByte fail.");
             return false;
         }
-        paramCode = oneByte;
         valueLength--;
         switch (static_cast<ContentParam>(paramCode)) {
             case ContentParam::CT_P_CHARSET: {

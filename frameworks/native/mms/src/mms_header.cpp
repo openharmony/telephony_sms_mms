@@ -256,7 +256,89 @@ bool MmsHeader::SetOctetValue(uint8_t fieldId, uint8_t value)
     if (CheckBooleanValue(fieldId, value)) {
         return true;
     }
+    if (!SetOctetValuePartData(fieldId, value)) {
+        TELEPHONY_LOGE("The fieldId[%{public}02X] value invalid.", fieldId);
+        return false;
+    }
 
+    switch (fieldId) {
+        case MMS_CONTENT_CLASS:
+            if (value < static_cast<uint8_t>(MmsContentClass::MMS_TEXT) ||
+                value > static_cast<uint8_t>(MmsContentClass::MMS_CONTENT_RICH)) {
+                TELEPHONY_LOGE("The MMS_CONTENT_CLASS value invalid.");
+                return false;
+            }
+            break;
+        case MMS_CANCEL_STATUS:
+            if (value < static_cast<uint8_t>(MmsCancelStatus::MMS_CANCEL_REQUEST_SUCCESSFULLY_RECEIVED) ||
+                value > static_cast<uint8_t>(MmsCancelStatus::MMS_CANCEL_REQUEST_CORRUPTED)) {
+                TELEPHONY_LOGE("The MMS_CANCEL_STATUS value invalid.");
+                return false;
+            }
+            break;
+        case MMS_MESSAGE_CLASS:
+            if (value < static_cast<uint8_t>(MmsMessageClass::PERSONAL) ||
+                value > static_cast<uint8_t>(MmsMessageClass::AUTO)) {
+                TELEPHONY_LOGE("The MMS_MESSAGE_CLASS value invalid.");
+                return false;
+            }
+            break;
+        default:
+            TELEPHONY_LOGE("The fieldId[%{public}02X] value invalid.", fieldId);
+            return false;
+    }
+    auto ret = octetValueMap_.emplace(fieldId, value);
+    return ret.second;
+}
+
+bool MmsHeader::SetOctetValuePartData(uint8_t fieldId, uint8_t value)
+{
+    if (!SetOctetValuePortionData(fieldId, value)) {
+        return false;
+    }
+    switch (fieldId) {
+        case MMS_READ_STATUS:
+            if (value < static_cast<uint8_t>(MmsReadStatus::MMS_READ) ||
+                value > static_cast<uint8_t>(MmsReadStatus::MMS_DELETED_WITHOUT_BEING_READ)) {
+                TELEPHONY_LOGE("The MMS_READ_STATUS value invalid.");
+                return false;
+            }
+            break;
+        case MMS_REPLY_CHARGING:
+            if (value < static_cast<uint8_t>(MmsReplyCharging::MMS_REQUESTED) ||
+                value > static_cast<uint8_t>(MmsReplyCharging::MMS_ACCEPTED_TEXT_ONLY)) {
+                TELEPHONY_LOGE("The MMS_REPLY_CHARGING value invalid.");
+                return false;
+            }
+            break;
+        case MMS_MM_STATE:
+            if (value < static_cast<uint8_t>(MmsMmState::MMS_MM_STATE_DRAFT) ||
+                value > static_cast<uint8_t>(MmsMmState::MMS_MM_STATE_FORWARDED)) {
+                TELEPHONY_LOGE("The MMS_MM_STATE value invalid.");
+                return false;
+            }
+            break;
+        case MMS_MM_FLAGS:
+            if (value < static_cast<uint8_t>(MmsMmFlags::MMS_ADD_TOKEN) ||
+                value > static_cast<uint8_t>(MmsMmFlags::MMS_FILTER_TOKEN)) {
+                TELEPHONY_LOGE("The MMS_MM_FLAGS value invalid.");
+                return false;
+            }
+            break;
+        case MMS_STORE_STATUS:
+            if (!CheckStoreStatus(value)) {
+                TELEPHONY_LOGE("The MMS_STORE_STATUS value invalid.");
+                return false;
+            }
+            break;
+        default:
+            return true;
+    }
+    return true;
+}
+
+bool MmsHeader::SetOctetValuePortionData(uint8_t fieldId, uint8_t value)
+{
     switch (fieldId) {
         case MMS_MESSAGE_TYPE:
             if (value < static_cast<uint8_t>(MmsMsgType::MMS_MSGTYPE_SEND_REQ) ||
@@ -298,67 +380,10 @@ bool MmsHeader::SetOctetValue(uint8_t fieldId, uint8_t value)
                 return false;
             }
             break;
-        case MMS_READ_STATUS:
-            if (value < static_cast<uint8_t>(MmsReadStatus::MMS_READ) ||
-                value > static_cast<uint8_t>(MmsReadStatus::MMS_DELETED_WITHOUT_BEING_READ)) {
-                TELEPHONY_LOGE("The MMS_READ_STATUS value invalid.");
-                return false;
-            }
-            break;
-        case MMS_REPLY_CHARGING:
-            if (value < static_cast<uint8_t>(MmsReplyCharging::MMS_REQUESTED) ||
-                value > static_cast<uint8_t>(MmsReplyCharging::MMS_ACCEPTED_TEXT_ONLY)) {
-                TELEPHONY_LOGE("The MMS_REPLY_CHARGING value invalid.");
-                return false;
-            }
-            break;
-        case MMS_MM_STATE:
-            if (value < static_cast<uint8_t>(MmsMmState::MMS_MM_STATE_DRAFT) ||
-                value > static_cast<uint8_t>(MmsMmState::MMS_MM_STATE_FORWARDED)) {
-                TELEPHONY_LOGE("The MMS_MM_STATE value invalid.");
-                return false;
-            }
-            break;
-        case MMS_MM_FLAGS:
-            if (value < static_cast<uint8_t>(MmsMmFlags::MMS_ADD_TOKEN) ||
-                value > static_cast<uint8_t>(MmsMmFlags::MMS_FILTER_TOKEN)) {
-                TELEPHONY_LOGE("The MMS_MM_FLAGS value invalid.");
-                return false;
-            }
-            break;
-        case MMS_STORE_STATUS:
-            if (!CheckStoreStatus(value)) {
-                TELEPHONY_LOGE("The MMS_STORE_STATUS value invalid.");
-                return false;
-            }
-            break;
-        case MMS_CONTENT_CLASS:
-            if (value < static_cast<uint8_t>(MmsContentClass::MMS_TEXT) ||
-                value > static_cast<uint8_t>(MmsContentClass::MMS_CONTENT_RICH)) {
-                TELEPHONY_LOGE("The MMS_CONTENT_CLASS value invalid.");
-                return false;
-            }
-            break;
-        case MMS_CANCEL_STATUS:
-            if (value < static_cast<uint8_t>(MmsCancelStatus::MMS_CANCEL_REQUEST_SUCCESSFULLY_RECEIVED) ||
-                value > static_cast<uint8_t>(MmsCancelStatus::MMS_CANCEL_REQUEST_CORRUPTED)) {
-                TELEPHONY_LOGE("The MMS_CANCEL_STATUS value invalid.");
-                return false;
-            }
-            break;
-        case MMS_MESSAGE_CLASS:
-            if (value < static_cast<uint8_t>(MmsMessageClass::PERSONAL) ||
-                value > static_cast<uint8_t>(MmsMessageClass::AUTO)) {
-                TELEPHONY_LOGE("The MMS_MESSAGE_CLASS value invalid.");
-                return false;
-            }
-            break;
         default:
-            TELEPHONY_LOGE("The fieldId[%{public}02X] value invalid.", fieldId);
-            return false;
+            return true;
     }
-    auto ret = octetValueMap_.emplace(fieldId, value);
-    return ret.second;
+    return true;
 }
 
 bool MmsHeader::GetLongValue(uint8_t fieldId, int64_t &value) const

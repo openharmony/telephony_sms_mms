@@ -204,6 +204,13 @@ HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
     const std::string scAddr = "123";
     cdmaSmsSender->isImsNetDomain_ = true;
     cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    std::vector<struct SplitInfo> splits;
+    std::unique_ptr<CdmaTransportMsg> transMsg;
+    uint8_t msgRef8bit = 0;
+    uint16_t msgId = 0;
+    long timeStamp = 0;
+    cdmaSmsSender->TextBasedSmsSplitDelivery(
+        desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp, sendCallback, deliveryCallback);
     cdmaSmsSender->TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback);
     std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
     cdmaSmsSender->SendSmsToRil(smsIndexer);
