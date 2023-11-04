@@ -19,7 +19,6 @@
 #include "radio_event.h"
 #include "securec.h"
 #include "sms_hisysevent.h"
-#include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -43,10 +42,6 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
     const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    bool isMore = false;
-    int ret = 0;
-    int headerCnt;
-    unsigned char msgRef8bit;
     DataCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
     std::vector<struct SplitInfo> cellsInfos;
@@ -66,17 +61,27 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
             SmsMmsErrorCode::SMS_ERROR_EXCEED_MAX_SEGMENT_NUM, "text sms gsm message cellsInfosSize exceed the limit");
         return;
     }
-    msgRef8bit = GetMsgRef8Bit();
     isStatusReport = tpdu->data.submit.bStatusReport;
 
     TELEPHONY_LOGI("TextBasedSmsDelivery isStatusReport= %{public}d", isStatusReport);
+    std::unique_lock<std::mutex> lock(mutex_);
+    TextBasedSmsSplitDelivery(
+        desAddr, scAddr, cellsInfos, codingType, isStatusReport, tpdu, gsmSmsMessage, sendCallback, deliveryCallback);
+}
+
+void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
+    std::vector<struct SplitInfo> cellsInfos, DataCodingScheme codingType, bool isStatusReport,
+    std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage &gsmSmsMessage,
+    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+{
+    int cellsInfosSize = static_cast<int>(cellsInfos.size());
+    unsigned char msgRef8bit = GetMsgRef8Bit();
     shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(cellsInfosSize);
     shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
     if (unSentCellCount == nullptr || hasCellFailed == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         return;
     }
-    std::unique_lock<std::mutex> lock(mutex_);
     for (int i = 0; i < cellsInfosSize; i++) {
         std::shared_ptr<SmsSendIndexer> indexer = nullptr;
         std::string segmentText;
@@ -87,13 +92,12 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
             return;
         }
         indexer->SetDcs(cellsInfos[i].encodeType);
-        headerCnt = 0;
         (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
         if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1) {
             TELEPHONY_LOGE("TextBasedSmsDelivery data length invalid.");
             return;
         }
-        ret = memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, &cellsInfos[i].encodeData[0],
+        int ret = memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, &cellsInfos[i].encodeData[0],
             cellsInfos[i].encodeData.size());
         if (ret != EOK) {
             SendResultCallBack(indexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -102,6 +106,7 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
         tpdu->data.submit.userData.length = cellsInfos[i].encodeData.size();
         tpdu->data.submit.userData.data[cellsInfos[i].encodeData.size()] = 0;
         tpdu->data.submit.msgRef = msgRef8bit;
+        int headerCnt = 0;
         if (cellsInfosSize > 1) {
             indexer->SetIsConcat(true);
             SmsConcat concat;
@@ -119,7 +124,7 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
         indexer->SetLangId(cellsInfos[i].langId);
         tpdu->data.submit.userData.headerCnt = headerCnt;
         tpdu->data.submit.bHeaderInd = (headerCnt > 0) ? true : false;
-
+        bool isMore = false;
         if (cellsInfosSize > 1 && i < (cellsInfosSize - 1)) {
             isMore = true;
             tpdu->data.submit.bStatusReport = false;

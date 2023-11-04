@@ -69,15 +69,22 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
     /* 2. Set msg ID. */
     uint16_t msgId = GetSubmitMsgId();
     transMsg->data.p2p.telesvcMsg.data.submit.msgId.msgId = msgId;
-    shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(splits.size());
+    chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
+    long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
+    TextBasedSmsSplitDelivery(
+        desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp, sendCallback, deliveryCallback);
+}
+
+void CdmaSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
+    std::vector<struct SplitInfo> splits, std::unique_ptr<CdmaTransportMsg> transMsg, uint8_t msgRef8bit,
+    uint16_t msgId, long timeStamp, const sptr<ISendShortMessageCallback> &sendCallback,
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+{
     shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
-    if (unSentCellCount == nullptr || hasCellFailed == nullptr) {
+    if (hasCellFailed == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         return;
     }
-    chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
-    long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
-
     for (std::size_t i = 0; i < splits.size(); i++) {
         (void)memset_s(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data,
             sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data), 0x00,
@@ -86,16 +93,16 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
             TELEPHONY_LOGE("data length invalid");
             return;
         }
-        if (memcpy_s(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data,
+        int value = memcpy_s(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data,
             sizeof(transMsg->data.p2p.telesvcMsg.data.submit.userData.userData.data), splits[i].encodeData.data(),
-            splits[i].encodeData.size()) != EOK) {
+            splits[i].encodeData.size());
+        if (value != EOK) {
             SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
             return;
         }
         std::string segmentText;
         segmentText.append((char *)(splits[i].encodeData.data()), splits[i].encodeData.size());
-        std::shared_ptr<SmsSendIndexer> indexer = nullptr;
-        indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, segmentText, sendCallback, deliveryCallback);
+        auto indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, segmentText, sendCallback, deliveryCallback);
         if (indexer == nullptr) {
             SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
             return;
@@ -113,7 +120,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
         indexer->SetEncodePdu(*pdu);
         indexer->SetMsgRefId(msgRef8bit);
         indexer->SetNetWorkType(NET_TYPE_CDMA);
-        indexer->SetUnSentCellCount(*unSentCellCount);
+        indexer->SetUnSentCellCount(splits.size());
         indexer->SetHasCellFailed(hasCellFailed);
         indexer->SetTimeStamp(timeStamp);
         indexer->SetMsgId(msgId);
