@@ -57,6 +57,11 @@ const int32_t HEADER_LENGTH = 7;
 const uint32_t CODE_BUFFER_MAX_SIZE = 300 * 1024;
 const unsigned int SMS_REF_ID = 10;
 static constexpr uint16_t MAX_TPDU_DATA_LEN = 255;
+const std::string CB_RANGE_MIDS = "0-1,2-3";
+const std::string CB_RANGE_DCSS = "0-255";
+const std::string CB_RANGE_DELI = ",";
+const std::string CB_RANGE_MID = "0-1";
+const std::string CB_RANGE_DELIM = "-";
 } // namespace
 
 class BranchSmsTest : public testing::Test {
@@ -1134,10 +1139,7 @@ HWTEST_F(BranchSmsTest, SmsMiscManager_0001, Function | MediumTest | Level1)
     smsMiscManager->rangeList_.clear();
     smsMiscManager->rangeList_.emplace_back(VALUE_LENGTH, 1);
     EXPECT_EQ(smsMiscManager->SetCBConfig(true, 1, 1, 1), TELEPHONY_ERR_RIL_CMD_FAIL);
-    auto oldIter = smsMiscManager->rangeList_.begin();
     SmsMiscManager::infoData data(1, 1);
-    EXPECT_TRUE(smsMiscManager->ExpandMsgId(1, 1, oldIter, data));
-    EXPECT_TRUE(smsMiscManager->ExpandMsgId(1, 0, oldIter, data));
     std::string smsc = "";
     std::string pdu = "";
     std::vector<ShortMessage> message;
@@ -1158,8 +1160,44 @@ HWTEST_F(BranchSmsTest, SmsMiscManager_0001, Function | MediumTest | Level1)
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_SmsService_0001
+ * @tc.number   Telephony_SmsMmsGtest_SmsMiscManager_0003
  * @tc.name     Test SmsMiscManager
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsMiscManager_0003, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    auto smsMiscManager = std::make_shared<SmsMiscManager>(runner, 0);
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(SmsMiscManager::GET_CB_CONFIG_FINISH, 1);
+    smsMiscManager->ProcessEvent(event);
+    std::shared_ptr<CBConfigInfo> res = std::make_shared<CBConfigInfo>();
+    res->mids = CB_RANGE_MIDS;
+    res->dcss = CB_RANGE_DCSS;
+    smsMiscManager->UpdateCbRangList(res);
+    smsMiscManager->rangeList_.emplace_back(1, 1);
+    smsMiscManager->rangeList_.emplace_back(0, 1);
+    smsMiscManager->rangeList_.emplace_back(0, 0);
+    smsMiscManager->CombineCBRange();
+    EXPECT_FALSE(smsMiscManager->SendDataToRil(true, smsMiscManager->rangeList_));
+    std::string src = CB_RANGE_MIDS;
+    std::vector<std::string> dest;
+    std::string delimiter = CB_RANGE_DELI;
+    smsMiscManager->SplitMids(src, dest, delimiter);
+    std::string value = CB_RANGE_MID;
+    std::string start;
+    std::string end;
+    std::string dlm = CB_RANGE_DELIM;
+    smsMiscManager->SplitMidValue(value, start, end, dlm);
+    smsMiscManager->hasGotCbRange_ = true;
+    smsMiscManager->GetModemCBRange();
+    smsMiscManager->hasGotCbRange_ = false;
+    smsMiscManager->GetModemCBRange();
+    EXPECT_FALSE(smsMiscManager->SendDataToRil(true, smsMiscManager->rangeList_));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsService_0001
+ * @tc.name     Test SmsService
  * @tc.desc     Function test
  */
 HWTEST_F(BranchSmsTest, SmsService_0001, Function | MediumTest | Level1)
@@ -1201,7 +1239,7 @@ HWTEST_F(BranchSmsTest, SmsService_0001, Function | MediumTest | Level1)
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsService_0002
- * @tc.name     Test SmsMiscManager
+ * @tc.name     Test SmsService
  * @tc.desc     Function test
  */
 HWTEST_F(BranchSmsTest, SmsService_0002, Function | MediumTest | Level1)
