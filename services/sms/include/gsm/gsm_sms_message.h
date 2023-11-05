@@ -56,7 +56,6 @@ public:
     bool PduAnalysis(const std::string &pdu);
     void ConvertMessageDcs();
     void ConvertUserData();
-    void ConvertUserPartData();
     bool GetIsTypeZeroInd() const;
     bool GetIsSIMDataTypeDownload() const;
     void ConvertMsgTimeStamp(const struct SmsTimeStamp &times);
@@ -72,6 +71,7 @@ private:
     virtual int DecodeMessage(uint8_t *decodeData, unsigned int length, DataCodingScheme &codingType,
         const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
     bool PduAnalysisMsg();
+    void ConvertUserPartData();
 
 public:
     static constexpr uint16_t TAPI_NETTEXT_SMDATA_SIZE_MAX = 255;

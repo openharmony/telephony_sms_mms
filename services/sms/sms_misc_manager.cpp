@@ -16,10 +16,10 @@
 #include "sms_misc_manager.h"
 
 #include "core_manager_inner.h"
-#include "hril_sms_parcel.h"
 #include "short_message.h"
 #include "sms_mms_errors.h"
 #include "string_utils.h"
+#include "telephony_common_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -28,6 +28,7 @@ static constexpr int32_t WAIT_TIME_SECOND = 1;
 static constexpr uint8_t GSM_TYPE = 1;
 static constexpr uint8_t MIN_SMSC_LEN = 2;
 static constexpr uint32_t RANG_MAX = 65535;
+bool SmsMiscManager::hasGotCbRange_ = false;
 
 SmsMiscManager::SmsMiscManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
     : AppExecFwk::EventHandler(runner), slotId_(slotId)
@@ -37,23 +38,37 @@ int32_t SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t to
 {
     bool ret = false;
     if ((toMsgId > RANG_MAX) || (fromMsgId > toMsgId) || (netType != GSM_TYPE)) {
+        TELEPHONY_LOGI("cb channel invalid");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    oldRangeList_ = rangeList_;
+    bool disableCBSuccess = false;
+    if (!hasGotCbRange_) {
+        GetModemCBRange();
+        if (mdRangeList_.size() != 0) {
+            if (!SendDataToRil(false, mdRangeList_)) {
+                hasGotCbRange_ = false;
+                return TELEPHONY_ERR_RIL_CMD_FAIL;
+            } else {
+                disableCBSuccess = true;
+            }
+            mdRangeList_.clear();
+        }
+    }
+    std::list<gsmCBRangeInfo> oldRangeList = rangeList_;
     if (enable) {
         ret = OpenCBRange(fromMsgId, toMsgId);
     } else {
         ret = CloseCBRange(fromMsgId, toMsgId);
     }
     if (ret) {
-        if (!SendDataToRil(false, oldRangeList_)) {
-            rangeList_ = oldRangeList_;
+        if (!disableCBSuccess && !SendDataToRil(false, oldRangeList)) {
+            rangeList_ = oldRangeList;
             return TELEPHONY_ERR_RIL_CMD_FAIL;
         } else {
-            oldRangeList_.clear();
+            oldRangeList.clear();
         }
         if (!SendDataToRil(true, rangeList_)) {
-            rangeList_ = oldRangeList_;
+            rangeList_ = oldRangeList;
             return TELEPHONY_ERR_RIL_CMD_FAIL;
         }
     }
@@ -65,86 +80,23 @@ std::list<SmsMiscManager::gsmCBRangeInfo> SmsMiscManager::GetRangeInfo() const
     return rangeList_;
 }
 
-bool SmsMiscManager::ExpandMsgId(
-    uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data)
-{
-    if (static_cast<int32_t>(toMsgId) < static_cast<int32_t>((*oldIter).fromMsgId) - 1) {
-        return true;
-    } else if (static_cast<int32_t>(toMsgId) == static_cast<int32_t>((*oldIter).fromMsgId) - 1) {
-        data.endPos = (*oldIter).toMsgId;
-        rangeList_.erase(oldIter);
-        return true;
-    } else if (toMsgId > (*oldIter).fromMsgId) {
-        data.endPos = (*oldIter).toMsgId;
-        rangeList_.erase(oldIter);
-        return true;
-    } else if ((static_cast<int32_t>(toMsgId) == static_cast<int32_t>((*oldIter).fromMsgId) - 1) ||
-               (toMsgId == (*oldIter).fromMsgId)) {
-        data.endPos = (*oldIter).toMsgId;
-        rangeList_.erase(oldIter);
-        return false;
-    } else if (((fromMsgId >= (*oldIter).fromMsgId && fromMsgId <= (*oldIter).toMsgId &&
-                    toMsgId > (*oldIter).toMsgId) ||
-                   (static_cast<int32_t>(fromMsgId) - 1 == static_cast<int32_t>((*oldIter).toMsgId)) ||
-                   ((fromMsgId < (*oldIter).fromMsgId) && (toMsgId > (*oldIter).toMsgId)))) {
-        data.isMerge = true;
-        data.startPos = (data.startPos < (*oldIter).fromMsgId) ? data.startPos : (*oldIter).fromMsgId;
-        rangeList_.erase(oldIter);
-        return false;
-    } else {
-        return false;
-    }
-}
-
 // from 3GPP TS 27.005 3.3.4 Select Cell Broadcast Message Types
 bool SmsMiscManager::OpenCBRange(uint32_t fromMsgId, uint32_t toMsgId)
 {
     infoData data(fromMsgId, toMsgId);
-    if (rangeList_.size() == 0) {
-        rangeList_.emplace_back(fromMsgId, toMsgId);
-        return true;
-    }
-    auto iter = rangeList_.begin();
-    while (iter != rangeList_.end()) {
-        auto oldIter = iter++;
-        auto &info = *oldIter;
-        if (fromMsgId >= info.fromMsgId && toMsgId <= info.toMsgId) {
-            return false;
-        } else if (!data.isMerge) {
-            if (ExpandMsgId(fromMsgId, toMsgId, oldIter, data)) {
-                break;
-            }
-        } else {
-            if (static_cast<int32_t>(toMsgId) < static_cast<int32_t>(info.fromMsgId) - 1) {
-                data.endPos = toMsgId;
-                break;
-            } else if (static_cast<int32_t>(toMsgId) == static_cast<int32_t>(info.fromMsgId) - 1) {
-                data.endPos = info.toMsgId;
-                rangeList_.erase(oldIter);
-                break;
-            } else if (toMsgId >= info.fromMsgId && toMsgId <= info.toMsgId) {
-                data.endPos = info.toMsgId;
-                rangeList_.erase(oldIter);
-                break;
-            } else if (toMsgId > info.toMsgId) {
-                rangeList_.erase(oldIter);
-            }
-        }
-    }
-    rangeList_.emplace_back(data.startPos, data.endPos);
-    rangeList_.sort();
+    rangeList_.emplace_back(fromMsgId, toMsgId);
+    CombineCBRange();
     return true;
 }
 
 void SmsMiscManager::SplitMsgId(
     uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data)
 {
-    data.isMerge = true;
     auto &info = *oldIter;
-    if (info.fromMsgId == fromMsgId && info.toMsgId == toMsgId) {
-        rangeList_.erase(oldIter);
-    } else if (info.fromMsgId == fromMsgId && info.toMsgId != toMsgId) {
+    if (info.fromMsgId == fromMsgId && info.toMsgId != toMsgId) {
         rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
+        rangeList_.erase(oldIter);
+    } else if (info.fromMsgId == fromMsgId && info.toMsgId == toMsgId) {
         rangeList_.erase(oldIter);
     } else if (info.fromMsgId != fromMsgId && info.toMsgId == toMsgId) {
         rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
@@ -168,43 +120,22 @@ bool SmsMiscManager::CloseCBRange(uint32_t fromMsgId, uint32_t toMsgId)
         if (fromMsgId >= info.fromMsgId && toMsgId <= info.toMsgId) {
             SplitMsgId(fromMsgId, toMsgId, oldIter, data);
             ret = true;
-            break;
-        } else if (fromMsgId <= info.fromMsgId && toMsgId >= info.toMsgId && !data.isMerge) {
-            data.isMerge = true;
+        } else if (fromMsgId > info.fromMsgId && fromMsgId <= info.toMsgId && toMsgId > info.toMsgId) {
+            ret = true;
+            rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
+            rangeList_.erase(oldIter);
+            ret = true;
+        } else if (fromMsgId <= info.fromMsgId && toMsgId >= info.toMsgId) {
             ret = true;
             rangeList_.erase(oldIter);
-        } else if (data.isMerge && toMsgId >= info.toMsgId) {
-            ret = true;
-            rangeList_.erase(oldIter);
-        } else if (data.isMerge && toMsgId < info.toMsgId && toMsgId >= info.fromMsgId) {
+        } else if (fromMsgId < info.fromMsgId && toMsgId >= info.fromMsgId) {
             ret = true;
             rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
             rangeList_.erase(oldIter);
-            rangeList_.sort();
-            break;
-        } else if ((fromMsgId > info.fromMsgId && fromMsgId < info.toMsgId) && toMsgId >= info.toMsgId &&
-            !data.isMerge) {
-            data.isMerge = true;
-            ret = true;
-            rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
-            rangeList_.erase(oldIter);
-            rangeList_.sort();
-        } else if (fromMsgId == info.toMsgId && toMsgId >= info.toMsgId && !data.isMerge) {
-            data.isMerge = true;
-            ret = true;
-            rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
-            rangeList_.erase(oldIter);
-            rangeList_.sort();
-        } else if (fromMsgId < info.toMsgId && toMsgId <= info.toMsgId) {
-            if (toMsgId != info.toMsgId) {
-                rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
-                rangeList_.sort();
-            }
-            rangeList_.erase(oldIter);
-            ret = true;
-            break;
         }
     }
+    rangeList_.sort();
+    rangeList_.unique();
     return ret;
 }
 
@@ -227,6 +158,11 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
                 isSuccess_ = (res->error == HRilErrType::NONE);
             }
             NotifyHasResponse();
+            break;
+        }
+        case GET_CB_CONFIG_FINISH: {
+            std::unique_lock<std::mutex> lock(mutex_);
+            GetCBConfigFinish(event);
             break;
         }
         case SET_SMSC_ADDR_FINISH: {
@@ -254,6 +190,18 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     }
 }
 
+void SmsMiscManager::GetCBConfigFinish(const AppExecFwk::InnerEvent::Pointer &event)
+{
+    isSuccess_ = true;
+    std::shared_ptr<CBConfigInfo> res = event->GetSharedObject<CBConfigInfo>();
+    if (res == nullptr) {
+        isSuccess_ = false;
+    } else {
+        UpdateCbRangList(res);
+    }
+    NotifyHasResponse();
+}
+
 bool SmsMiscManager::IsEmpty() const
 {
     return rangeList_.empty();
@@ -268,6 +216,94 @@ void SmsMiscManager::NotifyHasResponse()
         return;
     }
     condVar_.notify_all();
+}
+
+void SmsMiscManager::UpdateCbRangList(std::shared_ptr<CBConfigInfo> res)
+{
+    mdRangeList_.clear();
+    if (res->mids.empty()) {
+        return;
+    }
+    std::vector<std::string> dest;
+    SplitMids(res->mids, dest, ",");
+    for (auto v : dest) {
+        std::string start;
+        std::string end;
+        if (!SplitMidValue(v, start, end, "-")) {
+            continue;
+        }
+        if (!IsValidDecValue(start) || !IsValidDecValue(end)) {
+            TELEPHONY_LOGE("start or end not decimal");
+            return;
+        }
+        if (std::stoi(start) <= std::stoi(end)) {
+            infoData data(std::stoi(start), std::stoi(end));
+            mdRangeList_.emplace_back(data.startPos, data.endPos);
+        }
+    }
+    rangeList_ = mdRangeList_;
+    CombineCBRange();
+}
+
+void SmsMiscManager::CombineCBRange()
+{
+    rangeList_.sort();
+    rangeList_.unique();
+    auto iter = rangeList_.begin();
+    while (iter != rangeList_.end()) {
+        auto OtherIter = iter;
+        OtherIter++;
+        bool eraseFlag = false;
+        while (OtherIter != rangeList_.end()) {
+            if (OtherIter->fromMsgId == iter->fromMsgId) {
+                eraseFlag = true;
+                break;
+            } else if (OtherIter->toMsgId <= iter->toMsgId) {
+                OtherIter = rangeList_.erase(OtherIter);
+                continue;
+            } else if (OtherIter->fromMsgId <= static_cast<uint32_t>(iter->toMsgId + 1) &&
+                       OtherIter->toMsgId > iter->toMsgId) {
+                iter->toMsgId = OtherIter->toMsgId;
+                OtherIter = rangeList_.erase(OtherIter);
+                continue;
+            }
+            OtherIter++;
+        }
+        if (eraseFlag) {
+            iter = rangeList_.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+}
+
+void SmsMiscManager::SplitMids(std::string src, std::vector<std::string> &dest, const std::string delimiter)
+{
+    size_t pos = src.find(delimiter);
+    while (pos != std::string::npos) {
+        dest.push_back(src.substr(0, pos));
+        src.erase(0, pos + delimiter.length());
+        pos = src.find(delimiter);
+    }
+    dest.push_back(src);
+}
+
+bool SmsMiscManager::SplitMidValue(std::string value, std::string &start, std::string &end, const std::string delimiter)
+{
+    if (value.empty()) {
+        return false;
+    }
+    size_t pos = value.find(delimiter);
+    if (pos == 0 || pos == value.size() - 1) {
+        return false;
+    } else if (pos == std::string::npos) {
+        start = value;
+        end = value;
+        return true;
+    }
+    start = value.substr(0, pos);
+    end = value.substr(pos + 1);
+    return true;
 }
 
 std::string SmsMiscManager::RangeListToString(const std::list<gsmCBRangeInfo> &rangeList)
@@ -311,6 +347,22 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list)
         return isSuccess_;
     } else {
         return true;
+    }
+}
+
+void SmsMiscManager::GetModemCBRange()
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (!hasGotCbRange_) {
+        isSuccess_ = false;
+        CoreManagerInner::GetInstance().GetCBConfig(slotId_, SmsMiscManager::GET_CB_CONFIG_FINISH, shared_from_this());
+        while (!isSuccess_) {
+            TELEPHONY_LOGI("GetCBConfig::wait(), isSuccess_ = false");
+            if (condVar_.wait_for(lock, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
+                break;
+            }
+        }
+        hasGotCbRange_ = true;
     }
 }
 
