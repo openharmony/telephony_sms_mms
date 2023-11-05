@@ -16,15 +16,15 @@
 #ifndef SMS_MISC_MANAGER_H
 #define SMS_MISC_MANAGER_H
 
-#include <vector>
+#include <condition_variable>
 #include <list>
 #include <mutex>
 #include <string>
-#include <condition_variable>
+#include <vector>
 
 #include "event_handler.h"
 #include "event_runner.h"
-
+#include "hril_sms_parcel.h"
 #include "i_sms_service_interface.h"
 
 namespace OHOS {
@@ -33,6 +33,7 @@ class SmsMiscManager : public AppExecFwk::EventHandler {
 public:
     enum {
         SET_CB_CONFIG_FINISH = 0,
+        GET_CB_CONFIG_FINISH,
         SET_SMSC_ADDR_FINISH,
         GET_SMSC_ADDR_FINISH,
     };
@@ -46,7 +47,11 @@ public:
         uint32_t toMsgId = 0;
         bool operator<(const RangeInfo &other) const
         {
-            return fromMsgId < other.fromMsgId;
+            return fromMsgId < other.fromMsgId || (fromMsgId == other.fromMsgId && toMsgId < other.toMsgId);
+        }
+        bool operator==(const RangeInfo &other) const
+        {
+            return fromMsgId == other.fromMsgId && toMsgId == other.toMsgId;
         }
     };
     SmsMiscManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
@@ -66,19 +71,6 @@ public:
     int32_t GetDefaultSmsSlotId();
     int32_t GetDefaultSmsSimId(int32_t &simId);
 
-protected:
-    bool OpenCBRange(uint32_t fromMsgId, uint32_t toMsgId);
-    bool CloseCBRange(uint32_t fromMsgId, uint32_t toMsgId);
-    void NotifyHasResponse();
-    bool IsEmpty() const;
-    std::string RangeListToString(const std::list<gsmCBRangeInfo> &rangeList);
-
-    std::list<int32_t> fairList_;
-    int32_t fairVar_ = -1;
-    int32_t conditonVar_ = 0;
-    bool isSuccess_ = false;
-    int32_t slotId_;
-
 private:
     using infoData = struct info {
         info(uint32_t fromMsgId, uint32_t toMsgId)
@@ -91,19 +83,36 @@ private:
         uint32_t endPos = 0;
     };
 
+private:
+    bool OpenCBRange(uint32_t fromMsgId, uint32_t toMsgId);
+    bool CloseCBRange(uint32_t fromMsgId, uint32_t toMsgId);
+    void NotifyHasResponse();
+    bool IsEmpty() const;
+    std::string RangeListToString(const std::list<gsmCBRangeInfo> &rangeList);
     bool SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list);
-    bool ExpandMsgId(
-        uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data);
     void SplitMsgId(
         uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data);
+    void UpdateCbRangList(std::shared_ptr<CBConfigInfo> res);
+    void SplitMids(std::string src, std::vector<std::string> &dest, const std::string delimiter);
+    bool SplitMidValue(std::string value, std::string &start, std::string &end, const std::string delimiter);
+    void GetModemCBRange();
+    void CombineCBRange();
+    void GetCBConfigFinish(const AppExecFwk::InnerEvent::Pointer &event);
 
+private:
+    std::list<int32_t> fairList_;
+    int32_t fairVar_ = -1;
+    int32_t conditonVar_ = 0;
+    bool isSuccess_ = false;
+    int32_t slotId_;
     std::list<gsmCBRangeInfo> rangeList_;
     std::condition_variable condVar_;
     std::mutex mutex_;
     std::string smscAddr_;
-    std::string codeScheme_ {"0-255"};
-    std::list<gsmCBRangeInfo> oldRangeList_;
+    std::string codeScheme_ { "0-255" };
+    std::list<gsmCBRangeInfo> mdRangeList_;
     int32_t smsCapacityOfSim_ = 0;
+    static bool hasGotCbRange_;
 };
 } // namespace Telephony
 } // namespace OHOS
