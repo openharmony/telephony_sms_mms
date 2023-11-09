@@ -22,7 +22,6 @@ ohos_shared_library("sms") {
   sources = [
     "src/delivery_callback.cpp",
     "src/napi_mms.cpp",
-    "src/napi_mms_codec.cpp",
     "src/napi_mms_pdu.cpp",
     "src/napi_mms_pdu_helper.cpp",
     "src/napi_send_recv_mms.cpp",

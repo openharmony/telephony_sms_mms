@@ -256,7 +256,8 @@ bool MmsHeader::SetOctetValue(uint8_t fieldId, uint8_t value)
     if (CheckBooleanValue(fieldId, value)) {
         return true;
     }
-    if (!SetOctetValuePartData(fieldId, value)) {
+    bool match = false;
+    if (!SetOctetValuePartData(fieldId, value, match)) {
         TELEPHONY_LOGE("The fieldId[%{public}02X] value invalid.", fieldId);
         return false;
     }
@@ -284,17 +285,22 @@ bool MmsHeader::SetOctetValue(uint8_t fieldId, uint8_t value)
             }
             break;
         default:
-            TELEPHONY_LOGE("The fieldId[%{public}02X] value invalid.", fieldId);
-            return false;
+            if (!match) {
+                TELEPHONY_LOGE("The 111fieldId[%{public}02X] value invalid.", fieldId);
+                return false;
+            }
     }
     auto ret = octetValueMap_.emplace(fieldId, value);
     return ret.second;
 }
 
-bool MmsHeader::SetOctetValuePartData(uint8_t fieldId, uint8_t value)
+bool MmsHeader::SetOctetValuePartData(uint8_t fieldId, uint8_t value, bool &match)
 {
-    if (!SetOctetValuePortionData(fieldId, value)) {
+    if (!SetOctetValuePortionData(fieldId, value, match)) {
         return false;
+    }
+    if (match) {
+        return match;
     }
     switch (fieldId) {
         case MMS_READ_STATUS:
@@ -332,13 +338,15 @@ bool MmsHeader::SetOctetValuePartData(uint8_t fieldId, uint8_t value)
             }
             break;
         default:
+            match = false;
             return true;
     }
     return true;
 }
 
-bool MmsHeader::SetOctetValuePortionData(uint8_t fieldId, uint8_t value)
+bool MmsHeader::SetOctetValuePortionData(uint8_t fieldId, uint8_t value, bool &match)
 {
+    match = true;
     switch (fieldId) {
         case MMS_MESSAGE_TYPE:
             if (value < static_cast<uint8_t>(MmsMsgType::MMS_MSGTYPE_SEND_REQ) ||
@@ -381,6 +389,7 @@ bool MmsHeader::SetOctetValuePortionData(uint8_t fieldId, uint8_t value)
             }
             break;
         default:
+            match = false;
             return true;
     }
     return true;
