@@ -361,5 +361,15 @@ int32_t SmsSendManager::GetImsShortMessageFormat(std::u16string &format)
     }
     return TELEPHONY_ERR_SUCCESS;
 }
+
+void SmsSendManager::OnRilAdapterHostDied()
+{
+    if (gsmSmsSender_ != nullptr) {
+        gsmSmsSender_->OnRilAdapterHostDied();
+    }
+    if (cdmaSmsSender_ != nullptr) {
+        cdmaSmsSender_->OnRilAdapterHostDied();
+    }
+}
 } // namespace Telephony
 } // namespace OHOS

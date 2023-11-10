@@ -30,8 +30,8 @@ SmsServiceManagerClient::~SmsServiceManagerClient() {}
 
 bool SmsServiceManagerClient::InitSmsServiceProxy()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (smsServiceInterface_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mutex_);
         sptr<ISystemAbilityManager> systemAbilityManager =
             SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (!systemAbilityManager) {
@@ -48,7 +48,7 @@ bool SmsServiceManagerClient::InitSmsServiceProxy()
             TELEPHONY_LOGE("Get SMS Service Proxy Failed.");
             return false;
         }
-        recipient_ = new SmsServiceInterfaceDeathRecipient();
+        recipient_ = new SmsServiceInterfaceDeathRecipient(*this);
         if (!recipient_) {
             TELEPHONY_LOGE("Failed to create death Recipient ptr SmsServiceInterfaceDeathRecipient!");
             return false;

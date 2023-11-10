@@ -278,5 +278,15 @@ int32_t SmsInterfaceManager::DownloadMms(
     }
     return mmsReceiverManager_->DownloadMms(mmsc, data, ua, uaprof);
 }
+
+int32_t SmsInterfaceManager::OnRilAdapterHostDied()
+{
+    if (smsSendManager_ == nullptr) {
+        TELEPHONY_LOGE("smsSendManager is nullptr error.");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    smsSendManager_->OnRilAdapterHostDied();
+    return TELEPHONY_ERR_SUCCESS;
+}
 } // namespace Telephony
 } // namespace OHOS
