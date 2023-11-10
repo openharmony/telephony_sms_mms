@@ -95,7 +95,10 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
         userDataRaw.append(indexer->GetRawUserData());
         pdus->push_back(pdu);
     } else {
-        CombineMultiPageMessage(indexer, pdus, reliabilityHandler, messagBody, userDataRaw);
+        if (!CombineMultiPageMessage(indexer, pdus, reliabilityHandler, messagBody, userDataRaw)) {
+            TELEPHONY_LOGI("The multi-page text didn't all arrive");
+            return;
+        }
     }
 
     indexer->SetVisibleMessageBody(messagBody);
@@ -113,7 +116,7 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
     reliabilityHandler->SendBroadcast(indexer, pdus);
 }
 
-void SmsReceiveHandler::CombineMultiPageMessage(const std::shared_ptr<SmsReceiveIndexer> &indexer,
+bool SmsReceiveHandler::CombineMultiPageMessage(const std::shared_ptr<SmsReceiveIndexer> &indexer,
     std::shared_ptr<std::vector<std::string>> pdus, std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler,
     std::string &messagBody, std::string &userDataRaw)
 {
@@ -134,7 +137,7 @@ void SmsReceiveHandler::CombineMultiPageMessage(const std::shared_ptr<SmsReceive
         string pdu = StringUtils::StringToHex(v.GetPdu());
         if ((v.GetMsgSeqId() - PDU_POS_OFFSET >= MAX_SEGMENT_NUM) || (v.GetMsgSeqId() - PDU_POS_OFFSET < 0)) {
             reliabilityHandler->DeleteMessageFormDb(indexer->GetMsgRefId());
-            return;
+            return false;
         }
         pdus->at(v.GetMsgSeqId() - PDU_POS_OFFSET) = pdu;
         if (v.GetPdu().size() == 0) {
@@ -147,8 +150,9 @@ void SmsReceiveHandler::CombineMultiPageMessage(const std::shared_ptr<SmsReceive
         }
     }
     if ((count != msgSeg) || (pdus->empty()) || (notNullPart != msgSeg)) {
-        return;
+        return false;
     }
+    return true;
 }
 
 bool SmsReceiveHandler::IsRepeatedMessagePart(const shared_ptr<SmsReceiveIndexer> &smsIndexer)

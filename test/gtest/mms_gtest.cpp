@@ -692,6 +692,7 @@ HWTEST_F(MmsGtest, MmsEncodeString_0001, Function | MediumTest | Level1)
     mmsEncodeString.EncodeEncodeString(encodeBuffer);
     mmsEncodeString.GetEncodeString(testStr);
     mmsEncodeString.SetAddressString(addrsss);
+    mmsEncodeString.GetStrEncodeString();
     MmsEncodeString mmsEncodeString1(mmsEncodeString);
     charset = 0;
     bool ret = mmsEncodeString1.SetEncodeString(charset, testStr);

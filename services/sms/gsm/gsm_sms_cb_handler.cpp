@@ -66,7 +66,7 @@ uint8_t GsmSmsCbHandler::CheckCbMessage(const std::shared_ptr<GsmCbCodec> &cbMes
     }
 
     std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> cbHeader = cbMessage->GetCbHeader();
-    if (cbHeader == nullptr || cbHeader->totalPages == 0) {
+    if (cbHeader == nullptr) {
         TELEPHONY_LOGE("CheckCbMessage GetCbHeader err.");
         return currPageCnt;
     }

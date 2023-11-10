@@ -145,5 +145,10 @@ bool MmsEncodeString::SetAddressString(MmsAddress &addrsss)
     MmsCharSets chartSets = addrsss.GetAddressCharset();
     return SetEncodeString(static_cast<uint32_t>(chartSets), enString);
 }
+
+std::string MmsEncodeString::GetStrEncodeString()
+{
+    return strEncodeString_;
+}
 } // namespace Telephony
 } // namespace OHOS
