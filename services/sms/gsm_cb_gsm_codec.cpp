@@ -82,7 +82,6 @@ bool GsmCbGsmCodec::Decode2gHeader()
         return false;
     }
     cbHeader_->msgId = (temp << HEX_VALUE_08) | oneByte;
-
     if ((cbHeader_->msgId & HEX_VALUE_FFF8) == GSM_ETWS_BASE_MASK && cbPduBuffer_->GetSize() <= MAX_ETWS_PDU_LEN) {
         if (!Decode2gHeaderEtws()) {
             TELEPHONY_LOGE("etws head error.");
@@ -112,6 +111,7 @@ bool GsmCbGsmCodec::Decode2gHeaderEtws()
         TELEPHONY_LOGE("get data error.");
         return false;
     }
+    cbHeader_->totalPages = 1;
     cbHeader_->warningType = (temp << HEX_VALUE_08) | oneByte;
     return true;
 }
@@ -229,7 +229,6 @@ bool GsmCbGsmCodec::Decode2gCbMsg7bit(uint16_t dataLen)
     }
     uint16_t unpackLen = SmsCommonUtils::Unpack7bitChar(
         dataPdu.data(), dataLen, 0x00, pageData, MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT);
-
     uint16_t offset = 0;
     if (cbHeader_->dcs.iso639Lang[0] && unpackLen >= GsmCbCodec::CB_IOS639_LANG_SIZE) {
         unpackLen = unpackLen - GsmCbCodec::CB_IOS639_LANG_SIZE;
@@ -253,11 +252,8 @@ bool GsmCbGsmCodec::DecodeEtwsMsg()
         TELEPHONY_LOGE("CB pdu data error.");
         return false;
     }
-    uint8_t total = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition() - 1;
-    for (uint8_t i = 0; i < total; i++) {
-        messageRaw_.push_back(cbPduBuffer_->pduBuffer_[i]);
-    }
-    return true;
+    uint8_t total = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition() + 1;
+    return Decode2gCbMsg7bit(total);
 }
 } // namespace Telephony
 } // namespace OHOS
