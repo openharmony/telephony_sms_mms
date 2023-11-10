@@ -19,6 +19,7 @@
 #include "core_service_client.h"
 #include "ims_reg_info_callback_stub.h"
 #include "radio_event.h"
+#include "sms_service.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -43,42 +44,32 @@ void SmsNetworkPolicyManager::Init()
 void SmsNetworkPolicyManager::RegisterHandler()
 {
     TELEPHONY_LOGI("SmsNetworkPolicyManager::RegisterHandler Ok.");
-    CoreManagerInner::GetInstance().RegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_ATTACHED, nullptr);
-    CoreManagerInner::GetInstance().RegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_DETACHED, nullptr);
-    CoreManagerInner::GetInstance().RegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_ON, nullptr);
-    CoreManagerInner::GetInstance().RegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_OFF, nullptr);
-    CoreManagerInner::GetInstance().RegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_STATE_CHANGED, nullptr);
-    CoreManagerInner::GetInstance().RegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_PS_RAT_CHANGED, nullptr);
-    CoreManagerInner::GetInstance().RegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_NETWORK_STATE, nullptr);
-    CoreManagerInner::GetInstance().RegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED, nullptr);
+    CoreManagerInner &coreInner = CoreManagerInner::GetInstance();
+    coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_ATTACHED, nullptr);
+    coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_DETACHED, nullptr);
+    coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_ON, nullptr);
+    coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_OFF, nullptr);
+    coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_STATE_CHANGED, nullptr);
+    coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_PS_RAT_CHANGED, nullptr);
+    coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_NETWORK_STATE, nullptr);
+    coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED, nullptr);
+    coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED, nullptr);
     GetRadioState();
     GetImsRegState();
 }
 
 void SmsNetworkPolicyManager::UnRegisterHandler()
 {
-    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_ATTACHED);
-    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_DETACHED);
-    CoreManagerInner::GetInstance().UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_ON);
-    CoreManagerInner::GetInstance().UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_OFF);
-    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_STATE_CHANGED);
-    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_PS_RAT_CHANGED);
-    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_NETWORK_STATE);
-    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED);
+    CoreManagerInner &coreInner = CoreManagerInner::GetInstance();
+    coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_ATTACHED);
+    coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_PS_CONNECTION_DETACHED);
+    coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_ON);
+    coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_OFF);
+    coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_STATE_CHANGED);
+    coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_PS_RAT_CHANGED);
+    coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_NETWORK_STATE);
+    coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED);
+    coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED);
     callbackMap_.clear();
 }
 
@@ -103,6 +94,9 @@ void SmsNetworkPolicyManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer
         case RadioEvent::RADIO_PS_CONNECTION_ATTACHED:
         case NotificationType::NOTIFICATION_TYPE_IMS:
             GetRadioState();
+            break;
+        case RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED:
+            DelayedSingleton<SmsService>::GetInstance()->OnRilAdapterHostDied(slotId_);
             break;
         default:
             break;

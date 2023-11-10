@@ -46,6 +46,7 @@ public:
     int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported);
     bool SetImsSmsConfig(int32_t slotId, int32_t enable);
     int32_t GetImsShortMessageFormat(std::u16string &format);
+    void OnRilAdapterHostDied();
 
 private:
     SmsSendManager &operator=(const SmsSendManager &) = delete;

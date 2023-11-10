@@ -314,6 +314,7 @@ public:
      */
     int32_t DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
         const std::u16string &ua, const std::u16string &uaprof) override;
+    int32_t OnRilAdapterHostDied(int32_t slotId);
 
 private:
     bool Init();
