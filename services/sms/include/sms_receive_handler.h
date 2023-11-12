@@ -48,7 +48,7 @@ private:
     SmsReceiveHandler &operator=(const SmsReceiveHandler &) = delete;
     SmsReceiveHandler &operator=(const SmsReceiveHandler &&) = delete;
     void HandleReceivedSms(const std::shared_ptr<SmsBaseMessage> smsBaseMessage);
-    void CombineMultiPageMessage(const std::shared_ptr<SmsReceiveIndexer> &indexer,
+    bool CombineMultiPageMessage(const std::shared_ptr<SmsReceiveIndexer> &indexer,
         std::shared_ptr<std::vector<std::string>> pdus,
         std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler, std::string &messagBody,
         std::string &userDataRaw);
