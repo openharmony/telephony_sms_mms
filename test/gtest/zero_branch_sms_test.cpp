@@ -448,6 +448,33 @@ HWTEST_F(BranchSmsTest, SmsSender_0002, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_SmsSender_0003
+ * @tc.name     Test SmsSender
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsSender_0003, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
+    std::shared_ptr<SmsSender> smsSender = std::make_shared<CdmaSmsSender>(runner, INVALID_SLOTID, fun);
+    const sptr<ISendShortMessageCallback> sendCallback =
+        iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
+    const sptr<IDeliveryShortMessageCallback> deliveryCallback =
+        iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+    const std::string desAddr = "qwe";
+    const std::string scAddr = "123";
+    const std::string text = "123";
+    auto smsIndexer = std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    EXPECT_TRUE(smsSender->SendCacheMapAddItem(1, smsIndexer));
+    smsIndexer->isFailure_ = true;
+    smsSender->OnRilAdapterHostDied();
+    smsIndexer->isFailure_ = false;
+    smsIndexer->msgRefId64Bit_ = 0;
+    smsSender->OnRilAdapterHostDied();
+    EXPECT_TRUE(smsIndexer->isFailure_);
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_SmsSendManager_0001
  * @tc.name     Test SmsSendManager
  * @tc.desc     Function test
@@ -558,6 +585,32 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0002, Function | MediumTest | Level1)
     EXPECT_EQ(smsSendManager->IsImsSmsSupported(INVALID_SLOTID, isSupported), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(smsSendManager->SplitMessage(scAddr, splitMessage), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(smsSendManager->GetSmsSegmentsInfo(scAddr, true, lenInfo), TELEPHONY_ERR_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceManager_0001
+ * @tc.name     Test SmsInterfaceManager
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsInterfaceManager_0001, Function | MediumTest | Level1)
+{
+    auto smsSendManager = std::make_shared<SmsSendManager>(INVALID_SLOTID);
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
+    std::string scAddr = "123";
+    const sptr<ISendShortMessageCallback> sendCallback =
+        iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
+    const sptr<IDeliveryShortMessageCallback> deliveryCallback =
+        iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+    auto smsIndexer = std::make_shared<SmsSendIndexer>("", scAddr, "", sendCallback, deliveryCallback);
+
+    auto smsInterfaceManager = std::make_shared<SmsInterfaceManager>(INVALID_SLOTID);
+    EXPECT_EQ(smsInterfaceManager->OnRilAdapterHostDied(), TELEPHONY_ERR_LOCAL_PTR_NULL);
+
+    smsSendManager->gsmSmsSender_ = std::make_shared<GsmSmsSender>(runner, INVALID_SLOTID, fun);
+    smsSendManager->cdmaSmsSender_ = std::make_shared<CdmaSmsSender>(runner, INVALID_SLOTID, fun);
+    smsInterfaceManager->InitInterfaceManager();
+    EXPECT_EQ(smsInterfaceManager->OnRilAdapterHostDied(), TELEPHONY_ERR_SUCCESS);
 }
 
 /**
@@ -1258,6 +1311,24 @@ HWTEST_F(BranchSmsTest, SmsService_0002, Function | MediumTest | Level1)
     EXPECT_GE(smsService->CreateMessage(scAddr, specification, messages), TELEPHONY_ERR_SUCCESS);
     specification = "3gpp2";
     EXPECT_GE(smsService->CreateMessage(scAddr, specification, messages), TELEPHONY_ERR_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsService_0003
+ * @tc.name     Test SmsService
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsService_0003, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
+    auto smsNwPolicyManager = std::make_shared<SmsNetworkPolicyManager>(runner, INVALID_SLOTID);
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED);
+    smsNwPolicyManager->ProcessEvent(event);
+
+    auto smsService = DelayedSingleton<SmsService>::GetInstance();
+    EXPECT_EQ(smsService->OnRilAdapterHostDied(INVALID_SLOTID), TELEPHONY_ERR_LOCAL_PTR_NULL);
+    smsService->slotSmsInterfaceManagerMap_[INVALID_SLOTID] = std::make_shared<SmsInterfaceManager>(INVALID_SLOTID);
+    EXPECT_EQ(smsService->OnRilAdapterHostDied(INVALID_SLOTID), TELEPHONY_ERR_SUCCESS);
 }
 } // namespace Telephony
 } // namespace OHOS

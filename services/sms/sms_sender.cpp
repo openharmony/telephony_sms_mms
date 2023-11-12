@@ -385,5 +385,26 @@ void SmsSender::SetNetworkId(std::optional<int32_t> &id)
 {
     networkId_ = id;
 }
+
+void SmsSender::OnRilAdapterHostDied()
+{
+    std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
+    for (auto it = sendCacheMap_.begin(); it != sendCacheMap_.end(); ++it) {
+        smsIndexer = it->second;
+        if (smsIndexer == nullptr || smsIndexer->GetIsFailure()) {
+            TELEPHONY_LOGE("smsIndexer is nullptr");
+            continue;
+        }
+        if (!SendCacheMapEraseItem(smsIndexer->GetMsgRefId64Bit())) {
+            TELEPHONY_LOGE("SendCacheMapEraseItem fail !!!!!");
+        }
+        smsIndexer->SetIsFailure(true);
+        smsIndexer->SetPsResendCount(INITIAL_COUNT);
+        smsIndexer->SetCsResendCount(INITIAL_COUNT);
+        sptr<ISendShortMessageCallback> sendCallback = smsIndexer->GetSendCallback();
+        SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGI("Message(s) failed to send due to RIL died.");
+    }
+}
 } // namespace Telephony
 } // namespace OHOS

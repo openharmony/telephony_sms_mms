@@ -69,6 +69,7 @@ public:
     void SetNetworkId(std::optional<int32_t> &id);
     void SyncSwitchISmsResponse();
     bool SetImsSmsConfig(int32_t slotId, int32_t enable);
+    void OnRilAdapterHostDied();
 
 public:
     bool resIsSmsReady_ = false;
