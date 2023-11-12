@@ -253,6 +253,37 @@ void GetEncodeStringFunc(const uint8_t *data, size_t size)
     DelayedSingleton<SmsService>::GetInstance()->OnGetEncodeStringFunc(dataParcel, replyParcel, option);
 }
 
+void HighRiskInterface(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    MessageParcel dataParcel;
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteBuffer(data, size);
+    dataParcel.RewindRead(0);
+
+    MessageParcel replyParcel;
+    uint32_t code = static_cast<uint32_t>(size);
+    MessageOption option(MessageOption::TF_SYNC);
+
+    DelayedSingleton<SmsService>::GetInstance()->OnRemoteRequest(code, dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnSendSmsTextRequest(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnSendSmsDataRequest(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetSmscAddr(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnAddSimMessage(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnUpdateSimMessage(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetAllSimMessages(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnSplitMessage(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnCreateMessage(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetBase64Encode(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetBase64Decode(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetEncodeStringFunc(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetSmsSegmentsInfo(dataParcel, replyParcel, option);
+}
+
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size == 0) {
@@ -268,6 +299,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     GetBase64Encode(data, size);
     GetBase64Decode(data, size);
     GetEncodeStringFunc(data, size);
+    HighRiskInterface(data, size);
 }
 }  // namespace OHOS
 
