@@ -335,7 +335,7 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list)
         isSuccess_ = false;
         int32_t condition = conditonVar_++;
         fairList_.push_back(condition);
-        CBConfigParam cbData {.mode = enable ? 0 : 1, .idList = RangeListToString(list), .dcsList = codeScheme_};
+        CBConfigParam cbData { .mode = enable ? 1 : 0, .idList = RangeListToString(list), .dcsList = codeScheme_ };
         CoreManagerInner::GetInstance().SetCBConfig(
             slotId_, SmsMiscManager::SET_CB_CONFIG_FINISH, cbData, shared_from_this());
         while (!isSuccess_) {

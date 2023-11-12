@@ -736,6 +736,9 @@ bool MmsHeader::DecodeFromValue(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t 
 
         std::string encodeAddress;
         encodeString.GetEncodeString(encodeAddress);
+        if (encodeAddress.empty()) {
+            encodeAddress = encodeString.GetStrEncodeString();
+        }
         MmsAddress address(encodeAddress);
 
         std::vector<MmsAddress> vecAddress;

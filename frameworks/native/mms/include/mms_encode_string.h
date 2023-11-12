@@ -34,6 +34,8 @@ public:
     bool GetEncodeString(std::string &encodeString);
     bool SetEncodeString(uint32_t charset, const std::string &encodeStringt);
     bool SetAddressString(MmsAddress &addrsss);
+    std::string GetStrEncodeString();
+
 private:
     static constexpr uint32_t CHARSET_UTF8 = 0x6A;
     uint32_t charset_ = 0;
