@@ -17,14 +17,18 @@
 #define SMS_SERVICE_INTERFACE_DEATH_RECIPIENT_H
 
 #include "iremote_object.h"
+#include "sms_service_manager_client.h"
 
 namespace OHOS {
 namespace Telephony {
 class SmsServiceInterfaceDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    SmsServiceInterfaceDeathRecipient() = default;
+    explicit SmsServiceInterfaceDeathRecipient(SmsServiceManagerClient &client);
     virtual ~SmsServiceInterfaceDeathRecipient() = default;
     virtual void OnRemoteDied(const wptr<IRemoteObject> &remote) override;
+
+private:
+    SmsServiceManagerClient &client_;
 };
 } // namespace Telephony
 } // namespace OHOS

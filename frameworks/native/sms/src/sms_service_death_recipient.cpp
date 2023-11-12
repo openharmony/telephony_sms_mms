@@ -15,15 +15,18 @@
 
 #include "sms_service_interface_death_recipient.h"
 
-#include "sms_service_manager_client.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
+SmsServiceInterfaceDeathRecipient::SmsServiceInterfaceDeathRecipient(
+    SmsServiceManagerClient &client) : client_(client)
+{}
+
 void SmsServiceInterfaceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    TELEPHONY_LOGI("sms service died,remove the proxy object");
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->ResetSmsServiceProxy();
+    TELEPHONY_LOGI("sms service died, remove the proxy object");
+    client_.ResetSmsServiceProxy();
 }
 } // namespace Telephony
 } // namespace OHOS

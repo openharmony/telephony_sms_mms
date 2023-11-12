@@ -59,8 +59,12 @@ int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAdd
     }
     std::string bundleName = GetBundleName();
     dataParcel.WriteString(bundleName);
-    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::TEXT_BASED_SMS_DELIVERY), dataParcel,
-        replyParcel, option);
+    int32_t errCode = remote->SendRequest(
+        static_cast<int32_t>(SmsServiceInterfaceCode::TEXT_BASED_SMS_DELIVERY), dataParcel, replyParcel, option);
+    if (errCode != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("SendMessage failed, errcode:%{public}d", errCode);
+        return errCode;
+    }
     return replyParcel.ReadInt32();
 };
 
@@ -99,8 +103,12 @@ int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAdd
         TELEPHONY_LOGE("SendMessage with data Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::DATA_BASED_SMS_DELIVERY), dataParcel,
-        replyParcel, option);
+    int32_t errCode = remote->SendRequest(
+        static_cast<int32_t>(SmsServiceInterfaceCode::DATA_BASED_SMS_DELIVERY), dataParcel, replyParcel, option);
+    if (errCode != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("SendMessage with data failed, errcode:%{public}d", errCode);
+        return errCode;
+    }
     return replyParcel.ReadInt32();
 };
 
@@ -533,12 +541,13 @@ int32_t SmsServiceProxy::SendMms(int32_t slotId, const std::u16string &mmsc, con
         TELEPHONY_LOGE("SendMms Remote is null");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::SEND_MMS), dataParcel, replyParcel, option);
-    int32_t result = replyParcel.ReadInt32();
-    if (result != TELEPHONY_ERR_SUCCESS) {
-        TELEPHONY_LOGE("SendMms result fail");
+    int32_t errCode =
+        remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::SEND_MMS), dataParcel, replyParcel, option);
+    if (errCode != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("SendMms failed, errcode:%{public}d", errCode);
+        return errCode;
     }
-    return result;
+    return replyParcel.ReadInt32();
 }
 
 int32_t SmsServiceProxy::DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,

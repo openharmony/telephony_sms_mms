@@ -802,5 +802,16 @@ int32_t SmsService::DownloadMms(int32_t slotId, const std::u16string &mmsc, cons
         return ret;
     }
 }
+
+int32_t SmsService::OnRilAdapterHostDied(int32_t slotId)
+{
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager is nullptr error.");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    interfaceManager->OnRilAdapterHostDied();
+    return TELEPHONY_ERR_SUCCESS;
+}
 } // namespace Telephony
 } // namespace OHOS

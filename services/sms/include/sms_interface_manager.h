@@ -64,6 +64,7 @@ public:
         const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof);
     int32_t DownloadMms(
         const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof);
+    int32_t OnRilAdapterHostDied();
 
 private:
     int32_t slotId_;
