@@ -215,11 +215,11 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDefaultSubmitSmsTpdu(const 
 
 std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std::string &desAddr,
     const std::string &scAddr, int32_t port, const uint8_t *data, uint32_t dataLen, uint8_t msgRef8bit,
-    bool bStatusReport)
+    DataCodingScheme codingType, bool bStatusReport)
 {
     SetSmscAddr(scAddr);
     SetDestAddress(desAddr);
-    CreateDefaultSubmit(bStatusReport, DATA_CODING_7BIT);
+    CreateDefaultSubmit(bStatusReport, codingType);
     SetSmsTpduDestAddress(smsTpdu_, desAddr);
     int endcodeLen = 0;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
