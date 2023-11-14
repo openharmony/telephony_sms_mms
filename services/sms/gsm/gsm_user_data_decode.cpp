@@ -236,18 +236,17 @@ bool GsmUserDataDecode::Decode8bitPduPartData(SmsReadBuffer &buffer, bool bHeade
     } else {
         userData->length = udl;
     }
-    if (udl > sizeof(pTPUD->ud)) {
-        TELEPHONY_LOGE("udl length error");
+    if (udl > sizeof(pTPUD->ud) || buffer.GetIndex() >= buffer.GetSize()) {
+        TELEPHONY_LOGE("udl length or buffer error");
         return false;
     }
-
-    if (buffer.data_ == nullptr || (buffer.GetIndex() + userData->length) > buffer.GetSize() + 1) {
+    uint8_t remain = buffer.GetSize() - buffer.GetIndex();
+    uint8_t len = userData->length < remain ? userData->length : remain;
+    if (buffer.data_ == nullptr || len > sizeof(userData->data)) {
         TELEPHONY_LOGE("buffer error.");
         return false;
     }
-
-    if (memcpy_s(userData->data, sizeof(userData->data), buffer.data_.get() + buffer.GetIndex(), userData->length) !=
-        EOK) {
+    if (memcpy_s(userData->data, sizeof(userData->data), buffer.data_.get() + buffer.GetIndex(), len) != EOK) {
         TELEPHONY_LOGE("memcpy_s error");
         return false;
     }
