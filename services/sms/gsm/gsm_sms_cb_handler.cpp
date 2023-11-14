@@ -15,6 +15,7 @@
 
 #include "gsm_sms_cb_handler.h"
 
+#include "cb_start_ability.h"
 #include "common_event_support.h"
 #include "core_manager_inner.h"
 #include "radio_event.h"
@@ -260,6 +261,7 @@ bool GsmSmsCbHandler::SendCbMessageBroadcast(const std::shared_ptr<GsmCbCodec> &
         TELEPHONY_LOGE("SendCbMessageBroadcast SetWantData fail.");
         return false;
     }
+    DelayedSingleton<CbStartAbility>::GetInstance()->StartAbility(want);
     data.SetWant(want);
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(true);
