@@ -393,45 +393,22 @@ void CdmaSmsSender::DataBasedSmsDeliveryViaIms(const string &desAddr, const stri
     const uint8_t *data, uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
-    uint8_t msgRef8bit = GetMsgRef8Bit();
     GsmSmsMessage gsmSmsMessage;
+    std::vector<struct SplitInfo> cellsInfos;
+    DataCodingScheme codingType;
+    std::string dataStr;
+    CharArrayToString(data, dataLen, dataStr);
+    gsmSmsMessage.SplitMessage(cellsInfos, dataStr, CheckForce7BitEncodeType(), codingType, true);
+    uint8_t msgRef8bit = GetMsgRef8Bit();
     std::shared_ptr<struct SmsTpdu> tpdu = gsmSmsMessage.CreateDataSubmitSmsTpdu(
-        desAddr, scAddr, port, data, dataLen, msgRef8bit, (deliveryCallback == nullptr) ? false : true);
-    std::shared_ptr<struct EncodeInfo> encodeInfo = gsmSmsMessage.GetSubmitEncodeInfo(scAddr, false);
-    if (encodeInfo == nullptr || tpdu == nullptr) {
+        desAddr, scAddr, port, data, dataLen, msgRef8bit, codingType, (deliveryCallback == nullptr) ? false : true);
+    if (tpdu == nullptr) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("DataBasedSmsDelivery encodeInfo or tpdu nullptr error.");
+        TELEPHONY_LOGE("tpdu nullptr error.");
         return;
     }
-    shared_ptr<SmsSendIndexer> indexer = nullptr;
-    indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, port, data, dataLen, sendCallback, deliveryCallback);
-    if (indexer == nullptr) {
-        SendResultCallBack(indexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("DataBasedSmsDelivery create SmsSendIndexer nullptr");
-        return;
-    }
-
-    std::vector<uint8_t> smca(encodeInfo->smcaData_, encodeInfo->smcaData_ + encodeInfo->smcaLen);
-    std::vector<uint8_t> pdu(encodeInfo->tpduData_, encodeInfo->tpduData_ + encodeInfo->tpduLen);
-    std::shared_ptr<uint8_t> unSentCellCount = make_shared<uint8_t>(1);
-    std::shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
-    if (unSentCellCount == nullptr || hasCellFailed == nullptr) {
-        SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        return;
-    }
-    chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
-    long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
-    indexer->SetUnSentCellCount(*unSentCellCount);
-    indexer->SetHasCellFailed(hasCellFailed);
-    indexer->SetEncodeSmca(std::move(smca));
-    indexer->SetEncodePdu(std::move(pdu));
-    indexer->SetHasMore(encodeInfo->isMore_);
-    indexer->SetMsgRefId(msgRef8bit);
-    indexer->SetNetWorkType(NET_TYPE_GSM);
-    indexer->SetTimeStamp(timeStamp);
-    std::unique_lock<std::mutex> lock(mutex_);
-    indexer->SetImsSmsForCdma(true);
-    SendSmsToRil(indexer);
+    DataBasedSmsDeliverySplitPage(
+        gsmSmsMessage, cellsInfos, tpdu, msgRef8bit, desAddr, scAddr, port, sendCallback, deliveryCallback);
 }
 
 void CdmaSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event)
@@ -490,7 +467,7 @@ void CdmaSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
 
     std::string pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
     bool sendImsSMS = smsIndexer->IsImsSmsForCdma();
-    if (lastSmsDomain_ == IMS_DOMAIN && smsIndexer->GetPsResendCount() < MAX_SEND_RETRIES) {
+    if (smsIndexer->GetPsResendCount() < MAX_SEND_RETRIES) {
         sendImsSMS = true;
     }
 
