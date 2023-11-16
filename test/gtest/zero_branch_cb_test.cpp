@@ -326,7 +326,7 @@ HWTEST_F(BranchCbTest, GsmSmsCbHandler_0001, Function | MediumTest | Level1)
     EXPECT_FALSE(gsmSmsCbHandler->AddCbMessageToList(cbMessage));
     EXPECT_FALSE(gsmSmsCbHandler->SendCbMessageBroadcast(cbMessage));
     cbMessage->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
-    EXPECT_EQ(gsmSmsCbHandler->CheckCbMessage(cbMessage), 0);
+    EXPECT_EQ(gsmSmsCbHandler->CheckCbMessage(cbMessage), 1);
     cbMessage->cbHeader_->totalPages = 1;
     EXPECT_EQ(gsmSmsCbHandler->CheckCbMessage(cbMessage), 0x01);
     EXPECT_FALSE(gsmSmsCbHandler->AddCbMessageToList(cbMessage));

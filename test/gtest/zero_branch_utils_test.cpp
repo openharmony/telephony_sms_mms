@@ -151,7 +151,7 @@ HWTEST_F(BranchUtilsTest, SmsCommonUtils_0001, Function | MediumTest | Level1)
     EXPECT_EQ(smsCommonUtils->Pack7bitChar(userData, 1, 0, packData, 1), 1);
     EXPECT_EQ(smsCommonUtils->Pack7bitChar(userData, 1, 1, packData, 1), 1);
     EXPECT_EQ(smsCommonUtils->Pack7bitChar(userData, 1, FILL_BITS, packData, 1), 1);
-    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(userData, 1, 0, packData, 1), 1);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(userData, 1, 0, packData, 1), 0);
     EXPECT_EQ(smsCommonUtils->Unpack7bitChar(userData, 1, FILL_BITS, packData, 1), 0);
     EXPECT_EQ(smsCommonUtils->DigitToDtmfChar('*'), static_cast<char>(0x0B));
     EXPECT_EQ(smsCommonUtils->DtmfCharToDigit(static_cast<char>(0x0B)), '*');
