@@ -799,6 +799,8 @@ HWTEST_F(BranchSmsTest, GsmSmsUDataCodec_0001, Function | MediumTest | Level1)
     EXPECT_FALSE(decode->DecodeGsmPdu(*decodeBuffer, false, userData, pTPUD));
     EXPECT_FALSE(decode->DecodeUcs2Pdu(*decodeBuffer, true, userData, pTPUD));
     EXPECT_FALSE(decode->DecodeGsmPdu(*decodeBuffer, false, userData, pTPUD));
+    decode->userData_ = nullptr;
+    EXPECT_FALSE(decode->Decode8bitPduPartData(*decodeBuffer, false, userData, pTPUD, 0, 0));
 }
 
 /**
