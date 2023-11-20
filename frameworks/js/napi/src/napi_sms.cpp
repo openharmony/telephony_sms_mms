@@ -196,7 +196,7 @@ static void NativeSendMessage(napi_env env, void *data)
         return;
     }
     asyncContext->errorCode = ActuallySendMessage(env, *asyncContext);
-    if (asyncContext->errorCode == TELEPHONY_SUCCESS) {
+    if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
         asyncContext->resolved = true;
     }
     TELEPHONY_LOGI("NativeSendMessage end resolved = %{public}d", asyncContext->resolved);
