@@ -108,7 +108,6 @@ struct SendMessageContext : BaseContext {
     napi_ref deliveryCallbackRef = nullptr;
     int32_t messageType = MESSAGE_PARAMETER_NOT_MATCH;
     uint16_t destinationPort = 0;
-    bool resolved = false;
 };
 
 struct CreateMessageContext : BaseContext {
