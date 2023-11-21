@@ -710,8 +710,8 @@ bool CdmaSmsUserData::DecodeGsm7Bit(SmsReadBuffer &pdu, uint8_t numFields, uint8
             return false;
         }
     }
-    SmsCommonUtils::Unpack7bitChar(dest.get(), data_.userData.length, 0x00,
-        reinterpret_cast<uint8_t *>(data_.userData.data), MAX_USER_DATA_LEN + 1);
+    SmsCommonUtils::Unpack7bitChar(
+        dest.get(), udBytes, 0x00, reinterpret_cast<uint8_t *>(data_.userData.data), MAX_USER_DATA_LEN + 1);
     pdu.SkipBits();
     return true;
 }

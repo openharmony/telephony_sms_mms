@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Telephony {
 const std::string BUNDLE_NAME_BEGIN = "com.hua";
-const std::string BUNDLE_NAME_END = "wei.ohos.cellbroadcast";
+const std::string BUNDLE_NAME_END = "wei.hmos.cellbroadcast";
 constexpr const char *ABILITY_NAME = "AlertService";
 constexpr const char *MODULE_NAME = "entry";
 static constexpr int32_t USER_ID = 100;
