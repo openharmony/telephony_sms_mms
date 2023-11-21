@@ -128,7 +128,7 @@ uint8_t GsmSmsParamEncode::EncodeSmscPdu(const struct AddressNumber *num, uint8_
     if (num->address[0] == '+') {
         ret = memcpy_s(newNum, sizeof(newNum), num->address + 1, strlen(num->address) - 1);
     } else {
-        ret = memcpy_s(newNum, sizeof(newNum), num->address, strlen(num->address));
+        ret = memcpy_s(newNum, sizeof(newNum), num->address, sizeof(newNum));
     }
     if (ret != EOK) {
         TELEPHONY_LOGE("memory copy error!");

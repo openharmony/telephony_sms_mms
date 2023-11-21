@@ -28,7 +28,7 @@ static constexpr uint8_t NORMAL_BYTE_BITS = 8;
 static constexpr uint8_t GSM_ENCODE_BITS = 7;
 static constexpr uint8_t SLIDE_DATA_STEP = 2;
 static constexpr uint8_t UCS2_USER_DATA_LEN = 140;
-static constexpr uint8_t WAP_PUSH_USER_DATA_HEAD_LEN = 7;
+static constexpr uint8_t WAP_PUSH_UDHL = 7;
 
 GsmUserDataDecode::GsmUserDataDecode(std::shared_ptr<GsmUserDataPdu> data)
 {
@@ -80,7 +80,7 @@ bool GsmUserDataDecode::DecodeGsmHeadPdu(SmsReadBuffer &buffer, bool bHeaderInd,
         if (buffer.GetIndex() + udl >= buffer.GetSize()) {
             len = buffer.GetSize() - buffer.GetIndex();
         }
-        if (buffer.data_ == nullptr) {
+        if (buffer.data_ == nullptr || len > sizeof(pTPUD->ud)) {
             TELEPHONY_LOGE("buffer error.");
             return false;
         }
@@ -181,18 +181,18 @@ bool GsmUserDataDecode::Decode8bitPdu(
     }
 
     /* Setting for Wap Push */
-    if (pTPUD != nullptr && udl > WAP_PUSH_USER_DATA_HEAD_LEN) {
-        pTPUD->udl = udl - WAP_PUSH_USER_DATA_HEAD_LEN;
+    if (pTPUD != nullptr && udl > WAP_PUSH_UDHL) {
+        pTPUD->udl = udl - WAP_PUSH_UDHL;
         if (pTPUD->udl > sizeof(pTPUD->ud)) {
             TELEPHONY_LOGE("udl length error");
             return false;
         }
 
-        if (buffer.data_ == nullptr || (buffer.GetIndex() + pTPUD->udl > buffer.GetSize())) {
+        if (buffer.data_ == nullptr || (buffer.GetIndex() + pTPUD->udl + WAP_PUSH_UDHL > buffer.GetSize())) {
             TELEPHONY_LOGE("buffer error.");
             return false;
         }
-        if (memcpy_s(pTPUD->ud, sizeof(pTPUD->ud), buffer.data_.get() + buffer.GetIndex() + WAP_PUSH_USER_DATA_HEAD_LEN,
+        if (memcpy_s(pTPUD->ud, sizeof(pTPUD->ud), buffer.data_.get() + buffer.GetIndex() + WAP_PUSH_UDHL,
                 pTPUD->udl) != EOK) {
             TELEPHONY_LOGE("memcpy_s error.");
             return false;
@@ -282,13 +282,16 @@ bool GsmUserDataDecode::DecodeUcs2Pdu(
     /* Setting for Wap Push */
     if (pTPUD != nullptr) {
         pTPUD->udl = udl;
+        if (udl > sizeof(pTPUD->ud) || (buffer.GetIndex() + udl) > buffer.GetSize()) {
+            TELEPHONY_LOGE("udl error.");
+            return false;
+        }
         if (memcpy_s(pTPUD->ud, sizeof(pTPUD->ud), buffer.data_.get() + buffer.GetIndex(), udl) != EOK) {
             TELEPHONY_LOGE("memcpy_s error.");
             return false;
         }
         pTPUD->ud[udl] = '\0';
     }
-
     return DecodeUcs2PduPartData(buffer, bHeaderInd, userData, current, udl);
 }
 
@@ -300,6 +303,7 @@ bool GsmUserDataDecode::DecodeUcs2PduPartData(
         return false;
     }
     uint8_t udhl = 0;
+    userData->headerCnt = 0;
     /* Decode User Data Header */
     if (bHeaderInd == true) {
         /* UDHL */
@@ -307,7 +311,6 @@ bool GsmUserDataDecode::DecodeUcs2PduPartData(
             TELEPHONY_LOGE("get data error.");
             return false;
         }
-        userData->headerCnt = 0;
         for (uint8_t i = 0; buffer.GetIndex() < udhl + current && i < MAX_UD_HEADER_NUM; i++) {
             uint16_t headerLen;
             if (!userData_->DecodeHeader(buffer, userData->header[i], headerLen)) {
@@ -321,8 +324,6 @@ bool GsmUserDataDecode::DecodeUcs2PduPartData(
             }
             userData->headerCnt++;
         }
-    } else {
-        userData->headerCnt = 0;
     }
 
     if (udhl > 0 && udl > udhl + 1) {
@@ -331,12 +332,17 @@ bool GsmUserDataDecode::DecodeUcs2PduPartData(
         userData->length = udl;
     }
 
-    if (buffer.data_ == nullptr || (buffer.GetIndex() + userData->length > buffer.GetSize() + 1)) {
+    if (buffer.GetIndex() >= buffer.GetSize()) {
+        TELEPHONY_LOGE("udl length or buffer error");
+        return false;
+    }
+    uint8_t remain = buffer.GetSize() - buffer.GetIndex();
+    uint8_t len = userData->length < remain ? userData->length : remain;
+    if (buffer.data_ == nullptr || len > sizeof(userData->data)) {
         TELEPHONY_LOGE("buffer error.");
         return false;
     }
-    if (memcpy_s(userData->data, sizeof(userData->data), buffer.data_.get() + buffer.GetIndex(), userData->length) !=
-        EOK) {
+    if (memcpy_s(userData->data, sizeof(userData->data), buffer.data_.get() + buffer.GetIndex(), len) != EOK) {
         TELEPHONY_LOGE("memcpy_s error.");
         return false;
     }
