@@ -56,7 +56,6 @@ protected:
 private:
     int32_t GetId();
     void GetImsRegState();
-    bool IsCtSimCard();
 
 private:
     int32_t slotId_;
