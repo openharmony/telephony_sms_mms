@@ -24,13 +24,6 @@
 
 namespace OHOS {
 namespace Telephony {
-const std::vector<std::string> CT_ICCID_ARRAY = { "898603", "898606", "898611", "8985302", "8985307" };
-const std::vector<std::string> CT_CPLMNS = { "46003", "46005", "46011", "46012", "47008", "45002", "45007" };
-constexpr int32_t ICCID_LEN_MINIMUM = 7;
-constexpr int32_t PREFIX_LOCAL_ICCID_LEN = 4;
-constexpr const char *PREFIX_LOCAL_ICCID = "8986";
-constexpr int32_t ICCID_LEN_SIX = 6;
-
 SmsNetworkPolicyManager::SmsNetworkPolicyManager(
     const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
     : AppExecFwk::EventHandler(runner), slotId_(slotId)
@@ -108,57 +101,11 @@ NetWorkType SmsNetworkPolicyManager::GetNetWorkType()
     return netWorkType_;
 }
 
-bool SmsNetworkPolicyManager::IsCtSimCard()
-{
-    CardType cardType = CardType::UNKNOWN_CARD;
-    CoreManagerInner::GetInstance().GetCardType(slotId_, cardType);
-    bool isCTCardType = false;
-    bool result = false;
-    TELEPHONY_LOGD("[slot%{public}d] cardType = %{public}d", slotId_, cardType);
-    switch (cardType) {
-        case CardType::SINGLE_MODE_USIM_CARD:
-        case CardType::CT_NATIONAL_ROAMING_CARD:
-        case CardType::DUAL_MODE_TELECOM_LTE_CARD:
-            isCTCardType = true;
-            break;
-        default:
-            isCTCardType = false;
-            break;
-    }
-    if (isCTCardType) {
-        std::u16string tempIccId;
-        CoreManagerInner::GetInstance().GetSimIccId(slotId_, tempIccId);
-        std::string iccid = Str16ToStr8(tempIccId);
-        if (!iccid.empty() && iccid.length() >= ICCID_LEN_MINIMUM) {
-            std::string subIccId = iccid.substr(0, ICCID_LEN_MINIMUM);
-            if (!subIccId.empty() && (subIccId.compare(0, PREFIX_LOCAL_ICCID_LEN, PREFIX_LOCAL_ICCID) == 0) &&
-                subIccId.length() >= ICCID_LEN_MINIMUM) {
-                subIccId = subIccId.substr(0, ICCID_LEN_SIX);
-            }
-            auto iccIdRet = find(CT_ICCID_ARRAY.begin(), CT_ICCID_ARRAY.end(), subIccId);
-            result = iccIdRet != CT_ICCID_ARRAY.end();
-        } else {
-            result = false;
-        }
-    } else {
-        result = isCTCardType;
-    }
-    if (!result) {
-        std::u16string operatorNumeric;
-        CoreManagerInner::GetInstance().GetSimOperatorNumeric(slotId_, operatorNumeric);
-        std::string cplmn = Str16ToStr8(operatorNumeric);
-        if (!cplmn.empty()) {
-            auto cplmnRet = find(CT_CPLMNS.begin(), CT_CPLMNS.end(), cplmn);
-            result = cplmnRet != CT_CPLMNS.end();
-        }
-    }
-    TELEPHONY_LOGD("[slot%{public}d] result = %{public}d", slotId_, result);
-    return result;
-}
-
 void SmsNetworkPolicyManager::GetRadioState()
 {
-    if (IsCtSimCard()) {
+    bool isCTSimCard = false;
+    CoreManagerInner::GetInstance().IsCTSimCard(slotId_, isCTSimCard);
+    if (isCTSimCard) {
         netWorkType_ = NET_TYPE_CDMA;
     } else {
         netWorkType_ = NET_TYPE_GSM;

@@ -1325,7 +1325,9 @@ HWTEST_F(BranchSmsTest, SmsService_0003, Function | MediumTest | Level1)
 {
     std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
     auto smsNwPolicyManager = std::make_shared<SmsNetworkPolicyManager>(runner, INVALID_SLOTID);
-    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED);
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_ON);
+    smsNwPolicyManager->ProcessEvent(event);
+    event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED);
     smsNwPolicyManager->ProcessEvent(event);
 
     auto smsService = DelayedSingleton<SmsService>::GetInstance();
