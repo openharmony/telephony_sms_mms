@@ -17,12 +17,14 @@
 #define protected public
 
 #include "cdma_sms_transport_message.h"
+#include "core_manager_inner.h"
 #include "core_service_client.h"
 #include "gtest/gtest.h"
 #include "i_sms_service_interface.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "mms_address.h"
+#include "mms_apn_info.h"
 #include "mms_attachment.h"
 #include "mms_base64.h"
 #include "mms_body.h"
@@ -33,7 +35,9 @@
 #include "mms_decode_buffer.h"
 #include "mms_header.h"
 #include "mms_msg.h"
+#include "mms_persist_helper.h"
 #include "mms_quoted_printable.h"
+#include "pdp_profile_data.h"
 #include "radio_event.h"
 #include "sms_broadcast_subscriber_gtest.h"
 #include "sms_mms_gtest.h"
@@ -43,6 +47,7 @@
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_types.h"
+#include "uri.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -89,6 +94,16 @@ const char PDU_LENGTH = 4;
 const char *ENCODE_CHARSET = "01010101";
 const uint32_t ENCODE_CHARSET1 = 0x0100;
 const uint32_t ENCODE_CHARSET2 = 0x0001;
+const uint32_t MMS_PDU_MAX_SIZE = 300 * 1024;
+static constexpr const char *PDU = "pdu";
+static constexpr uint32_t MAX_PDU_PAGES = 4;
+static constexpr uint8_t HEX_VALUE_0F = 0x0F;
+static constexpr uint8_t HEX_VALUE_F0 = 0xF0;
+static constexpr uint32_t SPLIT_PDU_LENGTH = 195 * 1024;
+const std::string PDP_PROFILE_NET_URI = "datashare:///com.ohos.pdpprofileability/net/pdp_profile";
+const std::string MMS_APN_TYPE = "mms";
+const std::string ALL_APN_TYPE = "*";
+const std::string MMS_FILE_ADDRESS = "/data/app/test.mms";
 
 void MmsGtest::SetUpTestCase()
 {
@@ -131,6 +146,253 @@ void ReceiveWapPushTestFunc(SmsMmsTestHelper &helper)
 
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_GSM_SMS, message);
     smsReceiveHandler->ProcessEvent(event);
+}
+
+void GetSendReqDataTest(MmsMsg &encodeMsg, std::string number)
+{
+    if (!encodeMsg.SetMmsMessageType(MMS_MSGTYPE_SEND_REQ)) {
+        TELEPHONY_LOGE("SetMmsMessageType fail");
+    }
+    if (!encodeMsg.SetMmsTransactionId("2077.1427358451410")) {
+        TELEPHONY_LOGE("SetMmsTransactionId fail");
+    }
+    if (!encodeMsg.SetMmsVersion(static_cast<uint16_t>(MmsVersionType::MMS_VERSION_1_2))) {
+        TELEPHONY_LOGE("SetMmsVersion fail");
+    }
+    MmsAddress address;
+    address.SetMmsAddressString(number);
+    if (!encodeMsg.SetMmsFrom(address)) {
+        TELEPHONY_LOGE("SetMmsFrom fail");
+    }
+    if (!encodeMsg.SetHeaderContentType("application/vnd.wap.multipart.related")) {
+        TELEPHONY_LOGE("SetHeaderContentType fail");
+    }
+    if (!encodeMsg.SetMmsSubject("mms")) {
+        TELEPHONY_LOGE("SetMmsSubject fail");
+    }
+    if (!encodeMsg.SetHeaderOctetValue(MMS_CONTENT_CLASS, static_cast<uint8_t>(MmsContentClass::MMS_TEXT))) {
+        TELEPHONY_LOGE("SetHeaderOctetValue MMS_CONTENT_CLASS fail");
+    }
+}
+
+bool MmsAddAttachment(MmsMsg &msg, std::string pathName, std::string contentId, std::string contenType, bool isSmil)
+{
+    MmsAttachment imageAttachment;
+    std::size_t pos = pathName.find_last_of('/');
+    std::string fileName(pathName.substr(pos + 1));
+    if (!imageAttachment.SetAttachmentFilePath(pathName, isSmil)) {
+        TELEPHONY_LOGE("MmsAddAttachment SetAttachmentFilePath fail");
+        return false;
+    }
+    if (!imageAttachment.SetFileName(fileName)) {
+        TELEPHONY_LOGE("MmsAddAttachment SetFileName fail");
+        return false;
+    }
+    if (!imageAttachment.SetContentId(contentId)) {
+        TELEPHONY_LOGE("MmsAddAttachment SetContentId fail");
+        return false;
+    }
+    if (!imageAttachment.SetContentLocation(fileName)) {
+        TELEPHONY_LOGE("MmsAddAttachment SetContentLocation fail");
+        return false;
+    }
+    if (!imageAttachment.SetContentType(contenType)) {
+        TELEPHONY_LOGE("MmsAddAttachment SetContentType fail");
+        return false;
+    }
+    imageAttachment.SetContentDisposition("attachment");
+    if (!msg.AddAttachment(imageAttachment)) {
+        TELEPHONY_LOGE("MmsAddAttachment AddAttachment fail");
+        return false;
+    }
+    return true;
+}
+
+bool WriteBufferToFile(const std::unique_ptr<char[]> &buff, uint32_t len, const std::string &strPathName)
+{
+    FILE *pFile = nullptr;
+    pFile = fopen(strPathName.c_str(), "wb");
+    if (!pFile || buff == nullptr) {
+        return false;
+    }
+    uint32_t fileLen = fwrite(buff.get(), len, 1, pFile);
+    if (fileLen > 0) {
+        TELEPHONY_LOGD("write mms buffer to file success");
+    } else {
+        TELEPHONY_LOGE("write mms buffer to file error");
+    }
+    (void)fclose(pFile);
+    return true;
+}
+
+bool GetMmsPduFromFile(const std::string &fileName, std::string &mmsPdu)
+{
+    char realPath[PATH_MAX] = { 0 };
+    if (fileName.empty() || realpath(fileName.c_str(), realPath) == nullptr) {
+        TELEPHONY_LOGE("path or realPath is nullptr");
+        return false;
+    }
+    FILE *pFile = fopen(realPath, "rb");
+    if (pFile == nullptr) {
+        TELEPHONY_LOGE("openFile Error");
+        return false;
+    }
+    (void)fseek(pFile, 0, SEEK_END);
+    long fileLen = ftell(pFile);
+    if (fileLen <= 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
+        (void)fclose(pFile);
+        TELEPHONY_LOGE("fileLen Over Max Error");
+        return false;
+    }
+    std::unique_ptr<char[]> pduBuffer = std::make_unique<char[]>(fileLen);
+    if (!pduBuffer) {
+        (void)fclose(pFile);
+        TELEPHONY_LOGE("make unique pduBuffer nullptr Error");
+        return false;
+    }
+    (void)fseek(pFile, 0, SEEK_SET);
+    int32_t totolLength = static_cast<int32_t>(fread(pduBuffer.get(), 1, MMS_PDU_MAX_SIZE, pFile));
+    TELEPHONY_LOGI("fread totolLength%{public}d", totolLength);
+    long i = 0;
+    while (i < fileLen) {
+        mmsPdu += pduBuffer[i];
+        i++;
+    }
+    (void)fclose(pFile);
+    return true;
+}
+
+std::vector<std::string> SplitPdu(const std::string &mmsPdu)
+{
+    std::vector<std::string> mmsPdus;
+    if (mmsPdu.compare(PDU) == 0) {
+        for (uint32_t locate = 0; locate < MAX_PDU_PAGES; locate++) {
+            mmsPdus.push_back(PDU);
+        }
+        return mmsPdus;
+    }
+    std::string targetMmsPdu;
+    for (size_t i = 0; i < mmsPdu.size(); i++) {
+        targetMmsPdu += static_cast<char>((mmsPdu[i] & HEX_VALUE_0F) | HEX_VALUE_F0);
+        targetMmsPdu += static_cast<char>((mmsPdu[i] & HEX_VALUE_F0) | HEX_VALUE_0F);
+    }
+    std::string mmsPduData;
+    for (uint32_t locate = 0; locate * SPLIT_PDU_LENGTH < targetMmsPdu.size(); locate++) {
+        if ((locate + 1) * SPLIT_PDU_LENGTH < targetMmsPdu.size()) {
+            mmsPduData = targetMmsPdu.substr(locate * SPLIT_PDU_LENGTH, SPLIT_PDU_LENGTH);
+            mmsPdus.push_back(mmsPduData);
+        } else {
+            mmsPduData = targetMmsPdu.substr(locate * SPLIT_PDU_LENGTH);
+            mmsPdus.push_back(mmsPduData);
+            break;
+        }
+    }
+    TELEPHONY_LOGI("pduLen:%{public}zu,targetPduLen:%{public}zu", mmsPdu.size(), targetMmsPdu.size());
+    return mmsPdus;
+}
+
+void GetPduToFile(int32_t slotId)
+{
+    SmsMmsTestHelper smsMmsTestHelper;
+    smsMmsTestHelper.slotId = slotId;
+    std::string dest = "10086";
+    std::u16string simcardNumber;
+    if (!CoreServiceClient::GetInstance().GetSimTelephoneNumber(smsMmsTestHelper.slotId, simcardNumber) &&
+        !simcardNumber.empty()) {
+        dest = StringUtils::ToUtf8(simcardNumber);
+    }
+    MmsMsg encodeMsg;
+    std::vector<MmsAddress> vecAddrs;
+    std::string toAddr = dest + "/TYPE=PLMN";
+    MmsAddress toAddrs(toAddr);
+    GetSendReqDataTest(encodeMsg, toAddr);
+    vecAddrs.push_back(toAddrs);
+    if (!encodeMsg.SetMmsTo(vecAddrs)) {
+        TELEPHONY_LOGE("SetMmsTo fail");
+    }
+    const std::string filePathNameText = "/data/app/mms.text";
+    const char *source = "mms";
+    size_t sourceLen = std::strlen(source);
+    std::unique_ptr<char[]> text = std::make_unique<char[]>(sourceLen + 1);
+    snprintf_s(text.get(), sourceLen + 1, sourceLen + 1, "%s", source);
+    if (!WriteBufferToFile(std::move(text), std::strlen(source) + 1, filePathNameText)) {
+        TELEPHONY_LOGE("file error.");
+    }
+    if (!MmsAddAttachment(encodeMsg, filePathNameText, "<content.text>", "text/plain", false)) {
+        TELEPHONY_LOGE("MmsAddAttachment text fail");
+    }
+    uint32_t len = 0;
+    std::unique_ptr<char[]> results = encodeMsg.EncodeMsg(len);
+    if (results == nullptr) {
+        TELEPHONY_LOGE("encode fail result nullptr !!!!");
+    }
+    if (!WriteBufferToFile(std::move(results), len, MMS_FILE_ADDRESS)) {
+        TELEPHONY_LOGE("Encode write to file error.");
+    }
+}
+
+std::string GetFileToDb()
+{
+    std::string mmsPdu;
+    GetMmsPduFromFile(MMS_FILE_ADDRESS, mmsPdu);
+    std::string SMS_PROFILE_MMS_PDU_URI = "datashare:///com.ohos.smsmmsability/sms_mms/mms_pdu";
+    Uri uri(SMS_PROFILE_MMS_PDU_URI);
+    static constexpr const char *PDU_CONTENT = "pdu_content";
+    std::shared_ptr<MmsPersistHelper> mmsPersistHelper = std::make_shared<MmsPersistHelper>();
+    std::shared_ptr<DataShare::DataShareHelper> helper = mmsPersistHelper->CreateSmsHelper();
+    std::vector<std::string> mmsPdus = SplitPdu(mmsPdu);
+    std::string dbUrl;
+    for (std::string mmsPdu : mmsPdus) {
+        DataShare::DataShareValuesBucket bucket;
+        bucket.Put(PDU_CONTENT, mmsPdu);
+        int32_t result = helper->Insert(uri, bucket);
+        if (result < 0) {
+            TELEPHONY_LOGE("mms pdu insert fail");
+        }
+        dbUrl += std::to_string(result) + ',';
+    }
+    helper->Release();
+    return dbUrl;
+}
+
+std::string GetMmsc(int32_t slotId)
+{
+    Uri pdpUri(PDP_PROFILE_NET_URI);
+    std::vector<std::string> colume;
+    DataShare::DataSharePredicates predicates;
+    std::u16string operatorNumeric;
+    CoreServiceClient::GetInstance().GetSimOperatorNumeric(slotId, operatorNumeric);
+    std::string mccmnc = StringUtils::ToUtf8(operatorNumeric);
+    predicates.EqualTo(PdpProfileData::MCCMNC, mccmnc);
+    std::vector<std::string> apnTypes;
+    apnTypes.push_back(MMS_APN_TYPE);
+    apnTypes.push_back(ALL_APN_TYPE);
+    predicates.In(PdpProfileData::APN_TYPES, apnTypes);
+    std::shared_ptr<MmsApnInfo> mmsApnInfo = std::make_shared<MmsApnInfo>(slotId);
+    std::shared_ptr<DataShare::DataShareHelper> pdpHelper = mmsApnInfo->CreatePdpProfileHelper();
+    auto resultSet = pdpHelper->Query(pdpUri, predicates, colume);
+    if (resultSet == nullptr) {
+        pdpHelper->Release();
+    }
+    int count;
+    resultSet->GetRowCount(count);
+    if (count <= 0) {
+        resultSet->Close();
+        pdpHelper->Release();
+    }
+    int columnIndex;
+    std::string homeUrlVal;
+    std::string mmsIPAddressVal;
+    for (int row = 0; row < count; row++) {
+        resultSet->GoToRow(row);
+        resultSet->GetColumnIndex(PdpProfileData::HOME_URL, columnIndex);
+        resultSet->GetString(columnIndex, homeUrlVal);
+        resultSet->GetColumnIndex(PdpProfileData::MMS_IP_ADDRESS, columnIndex);
+        resultSet->GetString(columnIndex, mmsIPAddressVal);
+    }
+    resultSet->Close();
+    pdpHelper->Release();
+    return homeUrlVal;
 }
 
 /**
@@ -764,6 +1026,32 @@ HWTEST_F(MmsGtest, MmsQuotedPrintable_0001, Function | MediumTest | Level1)
     mmsQuotedPrintable.Decode(valueStr, valueStr);
     bool ret = mmsQuotedPrintable.Decode("", valueStr);
     EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.number   Telephony_SmsServiceTest_0001
+ * @tc.name     Test MmsQuotedPrintable
+ * @tc.desc     Function test
+ */
+HWTEST_F(MmsGtest, SmsServiceTest_0001, Function | MediumTest | Level1)
+{
+    AccessMmsToken token;
+    int32_t slotId = 0;
+    std::string homeUrlVal;
+    std::string dbUrl;
+    GetPduToFile(slotId);
+    dbUrl = GetFileToDb();
+    homeUrlVal = GetMmsc(slotId);
+    auto smsService = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    std::u16string mmsc = StringUtils::ToUtf16(homeUrlVal);
+    std::u16string data = StringUtils::ToUtf16(dbUrl);
+    std::u16string ua = u"";
+    std::u16string uaprof = u"";
+    smsService->SendMms(slotId, mmsc, data, ua, uaprof);
+    smsService->DownloadMms(slotId, mmsc, data, ua, uaprof);
+    EXPECT_GE(dbUrl.length(), 0);
+    EXPECT_GE(homeUrlVal.length(), 0);
+    EXPECT_TRUE(smsService != nullptr);
 }
 #endif // TEL_TEST_UNSUPPORT
 } // namespace Telephony

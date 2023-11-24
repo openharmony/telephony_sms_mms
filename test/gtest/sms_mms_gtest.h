@@ -100,11 +100,47 @@ class AccessMmsToken {
         .grantStatus = { PermissionState::PERMISSION_GRANTED },
         .grantFlags = { 2 }, // PERMISSION_USER_SET
     };
+    PermissionDef testSetDataBaseDef = {
+        .permissionName = "ohos.permission.READ_MESSAGES",
+        .bundleName = "tel_sms_mms_gtest",
+        .grantMode = 1, // SYSTEM_GRANT
+        .availableLevel = APL_SYSTEM_BASIC,
+        .label = "label",
+        .labelId = 1,
+        .description = "Test sms manager",
+        .descriptionId = 1,
+    };
+    PermissionStateFull testSetDataBaseState = {
+        .permissionName = "ohos.permission.READ_MESSAGES",
+        .isGeneral = true,
+        .resDeviceID = { "local" },
+        .grantStatus = { PermissionState::PERMISSION_GRANTED },
+        .grantFlags = { 2 }, // PERMISSION_USER_SET
+    };
+    PermissionDef testGetDef = {
+        .permissionName = "ohos.permission.RECEIVE_MMS",
+        .bundleName = "tel_sms_mms_gtest",
+        .grantMode = 1, // SYSTEM_GRANT
+        .availableLevel = APL_SYSTEM_BASIC,
+        .label = "label",
+        .labelId = 1,
+        .description = "Test sms manager",
+        .descriptionId = 1,
+    };
+    PermissionStateFull testGetState = {
+        .permissionName = "ohos.permission.RECEIVE_MMS",
+        .isGeneral = true,
+        .resDeviceID = { "local" },
+        .grantStatus = { PermissionState::PERMISSION_GRANTED },
+        .grantFlags = { 2 }, // PERMISSION_USER_SET
+    };
     HapPolicyParams testMmsPolicyParams = {
         .apl = APL_SYSTEM_BASIC,
         .domain = "test.domain",
-        .permList = { testPermReceiveSmsDef, testPermSendSmsDef, testPermSetTelephonyDef, testPermGetTelephonyDef },
-        .permStateList = { testReceiveSmsState, testSendSmsState, testSetTelephonyState, testGetTelephonyState },
+        .permList = { testPermReceiveSmsDef, testPermSendSmsDef, testPermSetTelephonyDef, testPermGetTelephonyDef,
+            testSetDataBaseDef, testGetDef, },
+        .permStateList = { testReceiveSmsState, testSendSmsState, testSetTelephonyState, testGetTelephonyState,
+            testSetDataBaseState, testGetState, },
     };
 
 public:
