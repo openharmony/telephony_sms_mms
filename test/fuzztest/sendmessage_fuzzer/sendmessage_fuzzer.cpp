@@ -91,6 +91,53 @@ void GetDefaultSmsSlotId(const uint8_t *data, size_t size)
     return;
 }
 
+void SmsServiceInterfaceTest(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+    int32_t fd = static_cast<int32_t>(data[0]);
+    auto service = DelayedSingleton<SmsService>::GetInstance();
+    std::vector<std::u16string> args;
+    service->Dump(-1, args);
+    service->Dump(fd, args);
+    std::string argsStr(reinterpret_cast<const char *>(data), size);
+    std::u16string argsStrU16 = StringUtils::ToUtf16(argsStr);
+    args.push_back(argsStrU16);
+    service->Dump(fd, args);
+    service->GetBindTime();
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    service->InsertSessionAndDetail(slotId, argsStr, argsStr);
+    uint16_t num = static_cast<uint16_t>(size);
+    service->QuerySessionByTelephone(argsStr, num, num);
+    service->InsertSmsMmsInfo(slotId, num, argsStr, argsStr);
+    bool value = slotId == 0 ? true : false;
+    service->InsertSession(value, num, argsStr, argsStr);
+    service->IsImsSmsSupported(slotId, value);
+    service->GetImsShortMessageFormat(argsStrU16);
+    service->HasSmsCapability();
+    service->SetSmscAddr(slotId, argsStrU16);
+    service->TrimSmscAddr(argsStr);
+    service->GetSmscAddr(slotId, argsStrU16);
+    uint32_t index = static_cast<uint32_t>(size);
+    service->CheckSimMessageIndexValid(slotId, index);
+    service->SetImsSmsConfig(slotId, value);
+    service->SetDefaultSmsSlotId(slotId);
+    service->GetDefaultSmsSlotId();
+    int32_t simId;
+    service->GetDefaultSmsSimId(simId);
+    service->GetServiceRunningState();
+    service->GetEndTime();
+    service->ValidDestinationAddress(argsStr);
+    service->GetSpendTime();
+    service->GetBase64Encode(argsStr, argsStr);
+    service->GetBase64Decode(argsStr, argsStr);
+    service->GetEncodeStringFunc(argsStr, index, index, argsStr);
+    service->SendMms(slotId, argsStrU16, argsStrU16, argsStrU16, argsStrU16);
+    service->DownloadMms(slotId, argsStrU16, argsStrU16, argsStrU16, argsStrU16);
+}
+
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size == 0) {
@@ -99,6 +146,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 
     SendSmsTextRequest(data, size);
     GetDefaultSmsSlotId(data, size);
+    SmsServiceInterfaceTest(data, size);
 }
 } // namespace OHOS
 

@@ -46,12 +46,41 @@ void DoSentIssueTest(const uint8_t *data, size_t size, std::shared_ptr<SmsSendMa
     const std::shared_ptr<SmsSendIndexer> smsSendIndexer =
         std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
     smsSendManager->gsmSmsSender_->SendMessageSucceed(smsSendIndexer);
+    smsSendManager->gsmSmsSender_->HandleMessageResponse(smsSendIndexer);
+    smsSendManager->gsmSmsSender_->SyncSwitchISmsResponse();
+
+    smsSendManager->gsmSmsSender_->SendResultCallBack(
+        smsSendIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+
+    smsSendManager->gsmSmsSender_->SendCacheMapTimeoutCheck();
+    int64_t id = static_cast<int16_t>(size);
+    smsSendManager->gsmSmsSender_->SendCacheMapAddItem(id, smsSendIndexer);
+    smsSendManager->gsmSmsSender_->SendCacheMapEraseItem(id);
+    uint8_t refId = static_cast<uint8_t>(size);
+    smsSendManager->gsmSmsSender_->UpdateUnSentCellCount(refId);
+
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    bool value = slotId == 0 ? true : false;
+    smsSendManager->gsmSmsSender_->SetImsSmsConfig(slotId, value);
+    smsSendManager->gsmSmsSender_->GetMsgRef8Bit();
+    smsSendManager->gsmSmsSender_->GetMsgRef64Bit();
+    smsSendManager->gsmSmsSender_->CheckForce7BitEncodeType();
+    smsSendManager->gsmSmsSender_->GetNetworkId();
+
     smsSendManager->cdmaSmsSender_->SendMessageSucceed(smsSendIndexer);
     smsSendManager->gsmSmsSender_->SendMessageFailed(smsSendIndexer);
     smsSendManager->cdmaSmsSender_->SendMessageFailed(smsSendIndexer);
     smsSendManager->gsmSmsSender_->HandleResend(smsSendIndexer);
     smsSendManager->cdmaSmsSender_->HandleResend(smsSendIndexer);
+    smsSendManager->cdmaSmsSender_->SendMessageSucceed(nullptr);
+    smsSendManager->gsmSmsSender_->SendMessageFailed(nullptr);
+    smsSendManager->cdmaSmsSender_->SendMessageFailed(nullptr);
+    smsSendManager->gsmSmsSender_->HandleResend(nullptr);
+    smsSendManager->cdmaSmsSender_->HandleResend(nullptr);
+}
 
+void DoSentIssuePartTest(const uint8_t *data, size_t size, std::shared_ptr<SmsSendManager> smsSendManager)
+{
     std::int64_t erase = static_cast<int64_t>(size);
     smsSendManager->gsmSmsSender_->SendCacheMapEraseItem(erase);
     smsSendManager->cdmaSmsSender_->SendCacheMapEraseItem(erase);
@@ -111,6 +140,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     smsSendManager->cdmaSmsSender_->ProcessEvent(response);
 
     DoSentIssueTest(data, size, smsSendManager);
+    DoSentIssuePartTest(data, size, smsSendManager);
 }
 } // namespace OHOS
 
