@@ -29,12 +29,14 @@
 #include "short_message.h"
 #include "sms_common_utils.h"
 #include "sms_misc_manager.h"
+#include "sms_mms_gtest.h"
 #include "sms_pdu_buffer.h"
 #include "sms_receive_handler.h"
 #include "sms_receive_reliability_handler.h"
 #include "sms_send_manager.h"
 #include "sms_sender.h"
 #include "sms_service.h"
+#include "sms_service_manager_client.h"
 #include "sms_state_handler.h"
 #include "telephony_errors.h"
 
@@ -62,6 +64,8 @@ const std::string CB_RANGE_DCSS = "0-255";
 const std::string CB_RANGE_DELI = ",";
 const std::string CB_RANGE_MID = "0-1";
 const std::string CB_RANGE_DELIM = "-";
+static constexpr const char *SLOT_ID = "slot_id";
+const std::string TABLE_URL = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
 } // namespace
 
 class BranchSmsTest : public testing::Test {
@@ -117,6 +121,7 @@ HWTEST_F(BranchSmsTest, SmsReceiveHandler_0001, Function | MediumTest | Level1)
     string pud = "qwe";
     pdus->push_back(pud);
     reliabilityHandler->SendBroadcast(indexer, pdus);
+    smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler, pud, pud);
     indexer->destPort_ = TEXT_PORT_NUM;
     reliabilityHandler->SendBroadcast(indexer, pdus);
     smsReceiveHandler->AddMsgToDB(indexer);
@@ -151,6 +156,10 @@ HWTEST_F(BranchSmsTest, SmsReceiveReliabilityHandler_0001, Function | MediumTest
 
     int32_t pages = 0;
     reliabilityHandler->GetWapPushUserDataSinglePage(indexer, userDataRaws);
+    int32_t count;
+    reliabilityHandler->GetWapPushUserDataMultipage(count, dbIndexers, 0, userDataRaws);
+    reliabilityHandler->GetWapPushUserDataMultipage(count, dbIndexers, VALUE_LENGTH, userDataRaws);
+    reliabilityHandler->GetWapPushUserDataMultipage(count, dbIndexers, VALUE_LENGTH + 1, userDataRaws);
     reliabilityHandler->ReadyDecodeWapPushUserData(indexer, userDataRaws);
     reliabilityHandler->GetSmsUserDataMultipage(pages, dbIndexers, 0, userDataRaws);
     reliabilityHandler->ReadySendSmsBroadcast(indexer, userDataRaws);
@@ -270,6 +279,41 @@ HWTEST_F(BranchSmsTest, ShortMessage_0001, Function | MediumTest | Level1)
     EXPECT_EQ(shortMessage->CreateIccMessage(pdu, str, 1).simMessageStatus_,
         ShortMessage::SmsSimMessageStatus::SMS_SIM_MESSAGE_STATUS_FREE);
     EXPECT_FALSE(shortMessage->ReadFromParcel(parcel));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_ShortMessage_0002
+ * @tc.name     Test ShortMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, ShortMessage_0002, Function | MediumTest | Level1)
+{
+    auto shortMessage = DelayedSingleton<ShortMessage>::GetInstance();
+    MessageParcel reply;
+    int32_t result = 0;
+    reply.WriteInt32(result);
+    shortMessage->UnMarshalling(reply);
+    shortMessage->GetVisibleMessageBody();
+    shortMessage->GetVisibleRawAddress();
+    shortMessage->GetMessageClass();
+    std::u16string smscAddress = u"13677884499";
+    shortMessage->GetScAddress(smscAddress);
+    shortMessage->GetScTimestamp();
+    shortMessage->IsReplaceMessage();
+    shortMessage->GetStatus();
+    shortMessage->IsSmsStatusReportMessage();
+    shortMessage->HasReplyPath();
+    shortMessage->GetIccMessageStatus();
+    shortMessage->GetProtocolId();
+    shortMessage->GetPdu();
+    std::vector<unsigned char> pdus;
+    unsigned char data = 255;
+    pdus.push_back(data);
+    std::u16string specification = u"";
+    ShortMessage messageObj;
+    shortMessage->CreateMessage(pdus, specification, messageObj);
+    shortMessage->GetIndexOnSim();
+    EXPECT_TRUE(shortMessage != nullptr);
 }
 
 /**
@@ -1334,6 +1378,115 @@ HWTEST_F(BranchSmsTest, SmsService_0003, Function | MediumTest | Level1)
     EXPECT_EQ(smsService->OnRilAdapterHostDied(INVALID_SLOTID), TELEPHONY_ERR_LOCAL_PTR_NULL);
     smsService->slotSmsInterfaceManagerMap_[INVALID_SLOTID] = std::make_shared<SmsInterfaceManager>(INVALID_SLOTID);
     EXPECT_EQ(smsService->OnRilAdapterHostDied(INVALID_SLOTID), TELEPHONY_ERR_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsPersistHelper_0001
+ * @tc.name     Test SmsService
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsPersistHelper_0001, Function | MediumTest | Level1)
+{
+    AccessMmsToken token;
+    auto smsPersistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
+    DataShare::DataSharePredicates predicates;
+    uint16_t maxGroupId = 0;
+    smsPersistHelper->QueryMaxGroupId(predicates, maxGroupId);
+    EXPECT_GE(maxGroupId, 0);
+
+    std::string num = "";
+    std::string countryCode = "123";
+    i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo =
+        i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL;
+    std::string formatNum = "";
+    smsPersistHelper->FormatSmsNumber(num, countryCode, formatInfo, formatNum);
+    num = "123";
+    smsPersistHelper->FormatSmsNumber(num, countryCode, formatInfo, formatNum);
+    formatNum = "123";
+    int32_t value = smsPersistHelper->FormatSmsNumber(num, countryCode, formatInfo, formatNum);
+    EXPECT_GE(value, 0);
+
+    DataShare::DataShareValuesBucket bucket;
+    std::string id = "1";
+    bucket.Put(SLOT_ID, id);
+    uint16_t dataBaseId = 0;
+    smsPersistHelper->Insert(bucket, dataBaseId);
+    smsPersistHelper->Insert(TABLE_URL, bucket);
+    uint16_t sessionId = 0;
+    uint16_t messageCount = 0;
+    smsPersistHelper->QuerySession(predicates, sessionId, messageCount);
+    EXPECT_GE(sessionId, 0);
+
+    smsPersistHelper->Update(predicates, bucket);
+    std::vector<SmsReceiveIndexer> indexers;
+    smsPersistHelper->Query(predicates, indexers);
+    smsPersistHelper->Delete(predicates);
+    std::string phoneNum = "";
+    smsPersistHelper->QueryBlockPhoneNumber(phoneNum);
+    smsPersistHelper->UpdateContact(phoneNum);
+    EXPECT_GE(phoneNum.size(), 0);
+
+    phoneNum = "13866666666";
+    smsPersistHelper->QueryBlockPhoneNumber(phoneNum);
+    smsPersistHelper->UpdateContact(phoneNum);
+    int32_t rawCountId = 1;
+    int32_t contactedCount = 1;
+    smsPersistHelper->QueryContactedCount(phoneNum, rawCountId, contactedCount);
+    EXPECT_TRUE(smsPersistHelper != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsServiceManagerClient_0001
+ * @tc.name     Test SmsServiceManagerClient
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Level1)
+{
+    int32_t slotId = 0;
+    std::u16string desAddr = u"";
+    sptr<ISendShortMessageCallback> sendCallback;
+    sptr<IDeliveryShortMessageCallback> deliveryCallback;
+    auto smsServiceManagerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    int32_t ret = 0;
+    ret = smsServiceManagerClient->SetDefaultSmsSlotId(slotId);
+    EXPECT_GE(ret, 0);
+    smsServiceManagerClient->GetDefaultSmsSlotId();
+    smsServiceManagerClient->GetDefaultSmsSimId(slotId);
+    smsServiceManagerClient->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback);
+    uint16_t port = 1;
+    uint8_t *data = nullptr;
+    smsServiceManagerClient->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
+    std::u16string scAddr = u"1234";
+    smsServiceManagerClient->SetScAddress(slotId, scAddr);
+    smsServiceManagerClient->GetScAddress(slotId, scAddr);
+    std::u16string smsc = u"test";
+    smsServiceManagerClient->AddSimMessage(
+        slotId, smsc, smsc, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD);
+    uint32_t msgIndex = 1;
+    smsServiceManagerClient->DelSimMessage(slotId, msgIndex);
+    smsServiceManagerClient->UpdateSimMessage(
+        slotId, msgIndex, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD, smsc, smsc);
+    std::vector<ShortMessage> messages;
+    smsServiceManagerClient->GetAllSimMessages(slotId, messages);
+    bool enable = true;
+    uint8_t ranType = 1;
+    smsServiceManagerClient->SetCBConfig(slotId, enable, msgIndex, msgIndex, ranType);
+    smsServiceManagerClient->SetImsSmsConfig(slotId, enable);
+    std::vector<std::u16string> splitMessage;
+    smsServiceManagerClient->SplitMessage(desAddr, splitMessage);
+    ISmsServiceInterface::SmsSegmentsInfo segInfo;
+    smsServiceManagerClient->GetSmsSegmentsInfo(slotId, desAddr, enable, segInfo);
+    smsServiceManagerClient->IsImsSmsSupported(slotId, enable);
+    smsServiceManagerClient->GetImsShortMessageFormat(desAddr);
+    smsServiceManagerClient->HasSmsCapability();
+    std::string pdu = "";
+    ShortMessage message;
+    smsServiceManagerClient->CreateMessage(pdu, pdu, message);
+    smsServiceManagerClient->GetBase64Encode(pdu, pdu);
+    smsServiceManagerClient->GetBase64Decode(pdu, pdu);
+    uint32_t charset = 1;
+    smsServiceManagerClient->GetEncodeStringFunc(pdu, charset, charset, pdu);
+    EXPECT_TRUE(smsServiceManagerClient != nullptr);
 }
 } // namespace Telephony
 } // namespace OHOS
