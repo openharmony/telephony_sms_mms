@@ -480,6 +480,7 @@ HWTEST_F(BranchMmsTest, SmsWapPushHandler_0001, Function | MediumTest | Level1)
     EXPECT_FALSE(smsWapPushHandler->DecodePushType(decodeBuffer));
     EXPECT_FALSE(smsWapPushHandler->DeocdeCheckIsBlock(wapPdu));
     EXPECT_FALSE(smsWapPushHandler->DecodeXWapApplication(decodeBuffer, 1));
+    smsWapPushHandler->DeleteWapPush(indexer);
     EXPECT_FALSE(smsWapPushHandler->DecodeXWapAbandonHeaderValue(decodeBuffer));
     decodeBuffer.totolLength_ = 1;
     EXPECT_FALSE(smsWapPushHandler->DecodeXWapApplication(decodeBuffer, 1));
@@ -1251,6 +1252,23 @@ HWTEST_F(BranchMmsTest, MmsPersistHelper_0002, Function | MediumTest | Level1)
     persistHelper.GetMmsPdu(TEST_PATH);
     persistHelper.DeleteMmsPdu(TEST_PATH);
     EXPECT_FALSE(persistHelper.UpdateMmsPdu(TEST_DATA, TEST_PATH));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_MmsPersistHelper_0003
+ * @tc.name     Test MmsPersistHelper
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, MmsPersistHelper_0003, Function | MediumTest | Level1)
+{
+    AccessMmsToken token;
+    auto mmsPersistHelper = DelayedSingleton<MmsPersistHelper>::GetInstance();
+    std::string dbUrl = "1,";
+    mmsPersistHelper->DeleteMmsPdu(dbUrl);
+    std::string mmsPdu = "text";
+    mmsPersistHelper->UpdateMmsPdu(mmsPdu, dbUrl);
+    mmsPersistHelper->GetMmsPdu(dbUrl);
+    EXPECT_TRUE(mmsPersistHelper != nullptr);
 }
 
 /**

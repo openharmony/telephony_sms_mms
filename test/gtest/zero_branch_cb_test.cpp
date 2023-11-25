@@ -30,6 +30,14 @@ using namespace testing::ext;
 namespace {
 const int32_t INVALID_SLOTID = 2;
 const uint16_t PWS_FIRST_ID = 0x1100;
+const std::string ETWS_PDU = "000B1100011165FA7D4E9BD564";
+const std::string CMAS_PDU = "000D11120111E376784E9BDD60";
+const std::string CBS_PDU = "00031112011163F19C36BBC11A";
+const std::string CMAS_JP_PDU =
+    "01A41F51101102EA3030A830EA30A230E130FC30EB914D4FE130C630B930C8000D000A3053308C306F8A669A137528306E30E130C330BB30FC"
+    "30B8306730593002000D000AFF080032003000310033002F00310031002F003252EA300037002000310035003A00340034FF09000D000AFF08"
+    "30A830EA30A25E02FF090000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    "0022";
 } // namespace
 
 class BranchCbTest : public testing::Test {
@@ -303,6 +311,277 @@ HWTEST_F(BranchCbTest, GsmCbCodec_0006, Function | MediumTest | Level1)
     EXPECT_EQ(smsCbMessage->CMASClass(GsmCbCodec::OPERATOR_ALERT), GsmCbCodec::GSMCbMsgSubType::CMAS_OPERATOR_DEFINED);
     EXPECT_EQ(smsCbMessage->CMASClass(GsmCbCodec::OPERATOR_ALERT_SPANISH),
         GsmCbCodec::GSMCbMsgSubType::CMAS_OPERATOR_DEFINED);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbGsmCodec_0001
+ * @tc.name     Test GsmCbGsmCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbGsmCodec_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    if (cbMsg == nullptr) {
+        TELEPHONY_LOGI("cbMsg nullptr");
+        EXPECT_TRUE(false);
+        return;
+    }
+    cbMsg->CreateCbMessage(ETWS_PDU);
+    std::vector<unsigned char> pdu = StringUtils::HexToByteVector(ETWS_PDU);
+    cbMsg->cbPduBuffer_ = std::make_shared<GsmCbPduDecodeBuffer>(pdu.size());
+    cbMsg->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
+    for (size_t index = 0; index < pdu.size() && index < cbMsg->cbPduBuffer_->GetSize(); index++) {
+        cbMsg->cbPduBuffer_->pduBuffer_[index] = static_cast<char>(pdu[index]);
+    }
+    auto gsmMsg = std::make_shared<GsmCbGsmCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
+    auto umtsMsg = std::make_shared<GsmCbUmtsCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
+    gsmMsg->cbPduBuffer_ = cbMsg->cbPduBuffer_;
+    umtsMsg->cbPduBuffer_ = cbMsg->cbPduBuffer_;
+    gsmMsg->Decode2gHeader();
+    gsmMsg->Decode2gHeaderEtws();
+    EXPECT_TRUE(gsmMsg->Decode2gCbMsg());
+
+    gsmMsg->Decode2gHeaderCommonCb();
+    uint16_t dataLen = gsmMsg->cbPduBuffer_->GetSize() - gsmMsg->cbPduBuffer_->GetCurPosition();
+    gsmMsg->Decode2gCbMsg7bit(dataLen);
+    EXPECT_TRUE(gsmMsg->DecodeEtwsMsg());
+
+    umtsMsg->Decode3gHeader();
+    umtsMsg->Decode3gHeaderPartData(0);
+    umtsMsg->Decode3gCbMsg();
+    umtsMsg->Decode3g7Bit();
+    EXPECT_FALSE(umtsMsg->Decode3gUCS2());
+    cbMsg->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_7BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_8BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_UCS2;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_ASCII7BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->totalPages = 1;
+    umtsMsg->Decode3g7Bit();
+    EXPECT_FALSE(umtsMsg->Decode3gUCS2());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbGsmCodec_0002
+ * @tc.name     Test GsmCbGsmCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbGsmCodec_0002, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    if (cbMsg == nullptr) {
+        TELEPHONY_LOGI("cbMsg nullptr");
+        EXPECT_TRUE(false);
+        return;
+    }
+    cbMsg->CreateCbMessage(CMAS_PDU);
+    std::vector<unsigned char> pdu = StringUtils::HexToByteVector(CMAS_PDU);
+    cbMsg->cbPduBuffer_ = std::make_shared<GsmCbPduDecodeBuffer>(pdu.size());
+    cbMsg->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
+    for (size_t index = 0; index < pdu.size() && index < cbMsg->cbPduBuffer_->GetSize(); index++) {
+        cbMsg->cbPduBuffer_->pduBuffer_[index] = static_cast<char>(pdu[index]);
+    }
+    auto gsmMsg = std::make_shared<GsmCbGsmCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
+    auto umtsMsg = std::make_shared<GsmCbUmtsCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
+    gsmMsg->cbPduBuffer_ = cbMsg->cbPduBuffer_;
+    umtsMsg->cbPduBuffer_ = cbMsg->cbPduBuffer_;
+    gsmMsg->Decode2gHeader();
+    gsmMsg->Decode2gHeaderEtws();
+    EXPECT_TRUE(gsmMsg->Decode2gCbMsg());
+
+    gsmMsg->Decode2gHeaderCommonCb();
+    uint16_t dataLen = gsmMsg->cbPduBuffer_->GetSize() - gsmMsg->cbPduBuffer_->GetCurPosition();
+    gsmMsg->Decode2gCbMsg7bit(dataLen);
+    EXPECT_TRUE(gsmMsg->DecodeEtwsMsg());
+
+    umtsMsg->Decode3gHeader();
+    umtsMsg->Decode3gHeaderPartData(0);
+    umtsMsg->Decode3gCbMsg();
+    umtsMsg->Decode3g7Bit();
+    EXPECT_FALSE(umtsMsg->Decode3gUCS2());
+    cbMsg->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_7BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_8BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_UCS2;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_ASCII7BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->totalPages = 1;
+    umtsMsg->Decode3g7Bit();
+    EXPECT_FALSE(umtsMsg->Decode3gUCS2());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbGsmCodec_0003
+ * @tc.name     Test GsmCbGsmCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbGsmCodec_0003, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    if (cbMsg == nullptr) {
+        TELEPHONY_LOGI("cbMsg nullptr");
+        EXPECT_TRUE(false);
+        return;
+    }
+    cbMsg->CreateCbMessage(CBS_PDU);
+    std::vector<unsigned char> pdu = StringUtils::HexToByteVector(CBS_PDU);
+    cbMsg->cbPduBuffer_ = std::make_shared<GsmCbPduDecodeBuffer>(pdu.size());
+    cbMsg->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
+    for (size_t index = 0; index < pdu.size() && index < cbMsg->cbPduBuffer_->GetSize(); index++) {
+        cbMsg->cbPduBuffer_->pduBuffer_[index] = static_cast<char>(pdu[index]);
+    }
+    auto gsmMsg = std::make_shared<GsmCbGsmCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
+    auto umtsMsg = std::make_shared<GsmCbUmtsCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
+    gsmMsg->cbPduBuffer_ = cbMsg->cbPduBuffer_;
+    umtsMsg->cbPduBuffer_ = cbMsg->cbPduBuffer_;
+    gsmMsg->Decode2gHeader();
+    gsmMsg->Decode2gHeaderEtws();
+    EXPECT_TRUE(gsmMsg->Decode2gCbMsg());
+
+    gsmMsg->Decode2gHeaderCommonCb();
+    uint16_t dataLen = gsmMsg->cbPduBuffer_->GetSize() - gsmMsg->cbPduBuffer_->GetCurPosition();
+    gsmMsg->Decode2gCbMsg7bit(dataLen);
+    EXPECT_TRUE(gsmMsg->DecodeEtwsMsg());
+
+    umtsMsg->Decode3gHeader();
+    umtsMsg->Decode3gHeaderPartData(0);
+    umtsMsg->Decode3gCbMsg();
+    umtsMsg->Decode3g7Bit();
+    EXPECT_FALSE(umtsMsg->Decode3gUCS2());
+    cbMsg->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_7BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_8BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_UCS2;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_ASCII7BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->totalPages = 1;
+    umtsMsg->Decode3g7Bit();
+    EXPECT_FALSE(umtsMsg->Decode3gUCS2());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbGsmCodec_0004
+ * @tc.name     Test GsmCbGsmCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbGsmCodec_0004, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    if (cbMsg == nullptr) {
+        TELEPHONY_LOGI("cbMsg nullptr");
+        EXPECT_TRUE(false);
+        return;
+    }
+    cbMsg->CreateCbMessage(CMAS_JP_PDU);
+    std::vector<unsigned char> pdu = StringUtils::HexToByteVector(CMAS_JP_PDU);
+    cbMsg->cbPduBuffer_ = std::make_shared<GsmCbPduDecodeBuffer>(pdu.size());
+    cbMsg->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
+    for (size_t index = 0; index < pdu.size() && index < cbMsg->cbPduBuffer_->GetSize(); index++) {
+        cbMsg->cbPduBuffer_->pduBuffer_[index] = static_cast<char>(pdu[index]);
+    }
+    auto gsmMsg = std::make_shared<GsmCbGsmCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
+    auto umtsMsg = std::make_shared<GsmCbUmtsCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
+    gsmMsg->cbPduBuffer_ = cbMsg->cbPduBuffer_;
+    umtsMsg->cbPduBuffer_ = cbMsg->cbPduBuffer_;
+    gsmMsg->Decode2gHeader();
+    gsmMsg->Decode2gHeaderEtws();
+    EXPECT_TRUE(gsmMsg->Decode2gCbMsg());
+
+    gsmMsg->Decode2gHeaderCommonCb();
+    uint16_t dataLen = gsmMsg->cbPduBuffer_->GetSize() - gsmMsg->cbPduBuffer_->GetCurPosition();
+    gsmMsg->Decode2gCbMsg7bit(dataLen);
+    EXPECT_FALSE(gsmMsg->DecodeEtwsMsg());
+
+    umtsMsg->Decode3gHeader();
+    umtsMsg->Decode3gHeaderPartData(0);
+    umtsMsg->Decode3gCbMsg();
+    umtsMsg->Decode3g7Bit();
+    EXPECT_TRUE(umtsMsg->Decode3gUCS2());
+    cbMsg->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_7BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_TRUE(umtsMsg->Decode3gCbMsg());
+
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_8BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_TRUE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_UCS2;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_TRUE(umtsMsg->Decode3gCbMsg());
+
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_ASCII7BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_TRUE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->totalPages = 1;
+    umtsMsg->Decode3g7Bit();
+    EXPECT_TRUE(umtsMsg->Decode3gUCS2());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbGsmCodec_0005
+ * @tc.name     Test GsmCbGsmCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbGsmCodec_0005, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    unsigned char data = 1;
+    std::vector<unsigned char> pdu;
+    pdu.push_back(data);
+    cbMsg->PduAnalysis(pdu);
+    auto gsmMsg = std::make_shared<GsmCbGsmCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
+    auto umtsMsg = std::make_shared<GsmCbUmtsCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
+    if (cbMsg == nullptr || gsmMsg == nullptr || umtsMsg == nullptr) {
+        EXPECT_TRUE(false);
+        return;
+    }
+
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_7BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_8BIT;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_UCS2;
+    gsmMsg->Decode2gCbMsg();
+    EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
+    cbMsg->cbHeader_->dcs.codingScheme = DataCodingScheme::DATA_CODING_ASCII7BIT;
+    gsmMsg->Decode2gCbMsg();
+    umtsMsg->Decode3gCbMsg();
+    cbMsg->cbHeader_->totalPages = 1;
+    umtsMsg->Decode3g7Bit();
+    EXPECT_FALSE(umtsMsg->Decode3gUCS2());
 }
 
 /**
