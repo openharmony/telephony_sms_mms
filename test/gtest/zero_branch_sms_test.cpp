@@ -18,6 +18,7 @@
 
 #include "delivery_short_message_callback_stub.h"
 #include "gsm_sms_message.h"
+#include "gsm_sms_param_decode.h"
 #include "gsm_sms_receive_handler.h"
 #include "gsm_sms_tpdu_decode.h"
 #include "gsm_sms_tpdu_encode.h"
@@ -66,6 +67,13 @@ const std::string CB_RANGE_MID = "0-1";
 const std::string CB_RANGE_DELIM = "-";
 static constexpr const char *SLOT_ID = "slot_id";
 const std::string TABLE_URL = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
+const std::string SMS_READ_PDU = "123456";
+const size_t DECODE_SIZE = 10;
+const int EIGHT_BIT = 8;
+const int FOUR_BIT = 4;
+const int FIVE_BIT = 5;
+const int SIX_BIT = 6;
+const int TWO_BIT = 2;
 } // namespace
 
 class BranchSmsTest : public testing::Test {
@@ -1487,6 +1495,202 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     uint32_t charset = 1;
     smsServiceManagerClient->GetEncodeStringFunc(pdu, charset, charset, pdu);
     EXPECT_TRUE(smsServiceManagerClient != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmUserDataPdu_0001
+ * @tc.name     Test GsmUserDataPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmUserDataPdu_0001, Function | MediumTest | Level1)
+{
+    const struct SmsUDPackage *userData = nullptr;
+    struct SmsUDPackage *pUserData = nullptr;
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    auto gsmUserDataPdu = DelayedSingleton<GsmUserDataPdu>::GetInstance();
+    gsmUserDataPdu->EncodeUserDataPdu(*encodeBuffer, userData, DataCodingScheme::DATA_CODING_7BIT);
+    auto deBuffer = std::make_shared<SmsReadBuffer>(SMS_READ_PDU);
+    gsmUserDataPdu->DecodeUserDataPdu(*deBuffer, true, DataCodingScheme::DATA_CODING_7BIT, pUserData);
+    SmsTpud *pTPUD = new SmsTpud();
+    gsmUserDataPdu->DecodeUserDataPdu(*deBuffer, true, DataCodingScheme::DATA_CODING_7BIT, pUserData, pTPUD);
+    delete pTPUD;
+    pTPUD = nullptr;
+    pUserData = new SmsUDPackage();
+    gsmUserDataPdu->ResetUserData(*pUserData);
+    auto smsReadBuffer = std::make_shared<SmsReadBuffer>(SMS_READ_PDU);
+    uint8_t udhl = 0;
+    uint16_t i = 0;
+    gsmUserDataPdu->GetHeaderCnt(*smsReadBuffer, pUserData, udhl, i);
+    delete pUserData;
+    pUserData = nullptr;
+    SmsWriteBuffer buffer;
+    uint8_t v = 1;
+    buffer.WriteByte(v);
+    SmsUDH header;
+    header.udhType = UDH_CONCAT_16BIT;
+    SmsUDH *pHeader = new SmsUDH();
+    uint16_t headerLen = 0;
+    auto decodeBuffer = std::make_shared<SmsReadBuffer>(SMS_READ_PDU);
+    decodeBuffer->data_.reset(new uint8_t[DECODE_SIZE]());
+    decodeBuffer->data_[0] = 0;
+    decodeBuffer->data_[1] = EIGHT_BIT;
+    decodeBuffer->data_[TWO_BIT] = FOUR_BIT;
+    decodeBuffer->data_[DIGIT_LEN] = FIVE_BIT;
+    decodeBuffer->data_[FOUR_BIT] = SIX_BIT;
+    decodeBuffer->index_ = 0;
+    gsmUserDataPdu->DecodeHeader(*decodeBuffer, *pHeader, headerLen);
+    decodeBuffer->index_ = 1;
+    gsmUserDataPdu->DecodeHeader(*decodeBuffer, *pHeader, headerLen);
+    decodeBuffer->index_ = TWO_BIT;
+    gsmUserDataPdu->DecodeHeader(*decodeBuffer, *pHeader, headerLen);
+    decodeBuffer->index_ = DIGIT_LEN;
+    gsmUserDataPdu->DecodeHeader(*decodeBuffer, *pHeader, headerLen);
+    decodeBuffer->index_ = FOUR_BIT;
+    gsmUserDataPdu->DecodeHeader(*decodeBuffer, *pHeader, headerLen);
+    delete pHeader;
+    pHeader = nullptr;
+    EXPECT_TRUE(decodeBuffer != nullptr);
+    EXPECT_TRUE(gsmUserDataPdu != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmUserDataPdu_0002
+ * @tc.name     Test GsmUserDataPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmUserDataPdu_0002, Function | MediumTest | Level1)
+{
+    SmsUDH *pHeader = new SmsUDH();
+    auto decodeBuffer = std::make_shared<SmsReadBuffer>(SMS_READ_PDU);
+    auto gsmUserDataPdu = DelayedSingleton<GsmUserDataPdu>::GetInstance();
+    uint8_t oneByte = UDH_ALTERNATE_REPLY_ADDRESS;
+    gsmUserDataPdu->DecodeHeaderPartData(*decodeBuffer, *pHeader, oneByte);
+    oneByte = UDH_SINGLE_SHIFT;
+    gsmUserDataPdu->DecodeHeaderPartData(*decodeBuffer, *pHeader, oneByte);
+    oneByte = UDH_LOCKING_SHIFT;
+    gsmUserDataPdu->DecodeHeaderPartData(*decodeBuffer, *pHeader, oneByte);
+    gsmUserDataPdu->DecodeHeaderConcat8Bit(*decodeBuffer, *pHeader);
+    decodeBuffer->data_[0] = 0;
+    gsmUserDataPdu->DecodeHeaderConcat8Bit(*decodeBuffer, *pHeader);
+    decodeBuffer->index_ = 0;
+    gsmUserDataPdu->DecodeHeaderConcat8Bit(*decodeBuffer, *pHeader);
+    decodeBuffer->data_[1] = 1;
+    decodeBuffer->index_ = 1;
+    gsmUserDataPdu->DecodeHeaderConcat8Bit(*decodeBuffer, *pHeader);
+    auto sixteenDecodeBuffer = std::make_shared<SmsReadBuffer>(SMS_READ_PDU);
+    gsmUserDataPdu->DecodeHeaderConcat16Bit(*sixteenDecodeBuffer, *pHeader);
+    gsmUserDataPdu->DecodeHeaderAppPort8Bit(*sixteenDecodeBuffer, *pHeader);
+    sixteenDecodeBuffer->data_[0] = 0;
+    gsmUserDataPdu->DecodeHeaderAppPort8Bit(*sixteenDecodeBuffer, *pHeader);
+    sixteenDecodeBuffer->index_ = 0;
+    gsmUserDataPdu->DecodeHeaderAppPort8Bit(*sixteenDecodeBuffer, *pHeader);
+    decodeBuffer->data_[1] = 1;
+    decodeBuffer->index_ = 1;
+    EXPECT_TRUE(decodeBuffer != nullptr);
+    gsmUserDataPdu->DecodeHeaderAppPort8Bit(*sixteenDecodeBuffer, *pHeader);
+    auto appPortDecodeBuffer = std::make_shared<SmsReadBuffer>(SMS_READ_PDU);
+    gsmUserDataPdu->DecodeHeaderAppPort16Bit(*appPortDecodeBuffer, *pHeader);
+    gsmUserDataPdu->DecodeHeaderReplyAddress(*appPortDecodeBuffer, *pHeader);
+    appPortDecodeBuffer->data_[0] = 0;
+    gsmUserDataPdu->DecodeHeaderReplyAddress(*appPortDecodeBuffer, *pHeader);
+    appPortDecodeBuffer->index_ = 0;
+    gsmUserDataPdu->DecodeHeaderReplyAddress(*appPortDecodeBuffer, *pHeader);
+    appPortDecodeBuffer->data_[1] = 1;
+    appPortDecodeBuffer->index_ = 1;
+    EXPECT_TRUE(appPortDecodeBuffer != nullptr);
+    gsmUserDataPdu->DecodeHeaderReplyAddress(*appPortDecodeBuffer, *pHeader);
+    auto singleShiftDecodeBuffer = std::make_shared<SmsReadBuffer>(SMS_READ_PDU);
+    gsmUserDataPdu->DecodeHeaderSingleShift(*singleShiftDecodeBuffer, *pHeader);
+    gsmUserDataPdu->DecodeHeaderLockingShift(*singleShiftDecodeBuffer, *pHeader);
+    gsmUserDataPdu->DecodeHeaderDefaultCase(*singleShiftDecodeBuffer, *pHeader);
+    delete pHeader;
+    pHeader = nullptr;
+    EXPECT_TRUE(gsmUserDataPdu != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsSender_0002
+ * @tc.name     Test GsmSmsSender
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsSender_0002, Function | MediumTest | Level1)
+{
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun = nullptr;
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(TEXT_SMS_CONTENT);
+    auto gsmSmsSender = std::make_shared<GsmSmsSender>(runner, INVALID_SLOTID, sendRetryFun);
+    EXPECT_TRUE(runner != nullptr);
+    GsmSimMessageParam smsData;
+    smsData.refId = 1;
+    smsData.smscPdu = SMS_READ_PDU;
+    smsData.pdu = SMS_READ_PDU;
+    const std::shared_ptr<SmsSendIndexer> indexer = nullptr;
+    gsmSmsSender->SendImsSms(indexer, smsData);
+    EXPECT_TRUE(gsmSmsSender != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsMessage_0003
+ * @tc.name     Test GsmSmsMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsMessage_0003, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    const std::string replyAddress = "";
+    gsmSmsMessage->CalcReplyEncodeAddress(replyAddress);
+    gsmSmsMessage->CalcReplyEncodeAddress(SMS_READ_PDU);
+    gsmSmsMessage->CreateStatusReportSmsTpdu();
+    gsmSmsMessage->IsSpecialMessage();
+    gsmSmsMessage->GetIsSIMDataTypeDownload();
+    gsmSmsMessage->GetIsTypeZeroInd();
+    EXPECT_TRUE(gsmSmsMessage->GetGsm());
+    gsmSmsMessage->GetIsSmsText();
+    gsmSmsMessage->GetDestAddress();
+    gsmSmsMessage->GetFullText();
+    gsmSmsMessage->SetDestPort(INVALID_SLOTID);
+    EXPECT_TRUE(gsmSmsMessage != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamDecode_0001
+ * @tc.name     Test GsmSmsParamDecode
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamDecode_0001, Function | MediumTest | Level1)
+{
+    auto gsmSmsParamDecode = std::make_shared<GsmSmsParamDecode>();
+    auto buffer = std::make_shared<SmsReadBuffer>(SMS_READ_PDU);
+    AddressNumber *pAddress = new AddressNumber();
+    uint8_t bcdLen = 1;
+    uint8_t addrLen = 1;
+    gsmSmsParamDecode->DecodeAddressAlphaNum(*buffer, pAddress, bcdLen, addrLen);
+    SmsDcs *smsDcs = nullptr;
+    gsmSmsParamDecode->DecodeDcsClassGroupPdu(bcdLen, smsDcs);
+    gsmSmsParamDecode->DecodeDcsDiscardGroupPdu(bcdLen, smsDcs);
+    gsmSmsParamDecode->DecodeDcsStoreGsmGroupPdu(bcdLen, smsDcs);
+    gsmSmsParamDecode->DecodeDcsStoreUCS2GroupPdu(bcdLen, smsDcs);
+    gsmSmsParamDecode->DecodeDcsUnknownGroupPdu(bcdLen, smsDcs);
+    enum SmsIndicatorType ret = gsmSmsParamDecode->GetMsgIndicatorType(bcdLen);
+    EXPECT_GE(ret, 0);
+    SmsDcs *mwiTypeSmsDcs = new SmsDcs();
+    gsmSmsParamDecode->GetMwiType(bcdLen, *mwiTypeSmsDcs);
+    EXPECT_TRUE(gsmSmsParamDecode != nullptr);
+    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(TEXT_SMS_CONTENT);
+    int32_t slotId = 0;
+    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(runner, slotId);
+    std::shared_ptr<GsmCbCodec> cbMessage = nullptr;
+    gsmSmsCbHandler->RemoveCbMessageFromList(cbMessage);
+    delete pAddress;
+    pAddress = nullptr;
+    delete mwiTypeSmsDcs;
+    mwiTypeSmsDcs = nullptr;
+    EXPECT_TRUE(gsmSmsCbHandler != nullptr);
+    std::shared_ptr<AppExecFwk::EventRunner> receiveRunner = AppExecFwk::EventRunner::Create(TEXT_SMS_CONTENT);
+    auto gsmSmsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(receiveRunner, slotId);
+    gsmSmsReceiveHandler->CheckSmsSupport();
+    std::shared_ptr<SmsBaseMessage> smsBaseMessage = nullptr;
+    gsmSmsReceiveHandler->HandleNormalSmsByType(smsBaseMessage);
+    EXPECT_TRUE(gsmSmsReceiveHandler != nullptr);
 }
 } // namespace Telephony
 } // namespace OHOS
