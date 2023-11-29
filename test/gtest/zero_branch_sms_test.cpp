@@ -1692,5 +1692,98 @@ HWTEST_F(BranchSmsTest, GsmSmsParamDecode_0001, Function | MediumTest | Level1)
     gsmSmsReceiveHandler->HandleNormalSmsByType(smsBaseMessage);
     EXPECT_TRUE(gsmSmsReceiveHandler != nullptr);
 }
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsService_0004
+ * @tc.name     Test SmsService
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsService_0004, Function | MediumTest | Level1)
+{
+    int32_t slotId = 0;
+    std::u16string desAddr = u"";
+    sptr<ISendShortMessageCallback> sendCallback;
+    sptr<IDeliveryShortMessageCallback> deliveryCallback;
+    auto smsService = DelayedSingleton<SmsService>::GetInstance();
+    AccessMmsToken token;
+    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback);
+    uint16_t port = 1;
+    uint8_t *data = nullptr;
+    smsService->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
+    slotId = -1;
+    desAddr = u"test";
+    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback);
+    smsService->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
+    slotId = 0;
+    std::string telephone = "13888888888";
+    smsService->InsertSessionAndDetail(slotId, telephone, telephone);
+    bool isSupported = false;
+    slotId = -1;
+    smsService->IsImsSmsSupported(slotId, isSupported);
+    std::u16string format = u"";
+    smsService->GetImsShortMessageFormat(format);
+    smsService->HasSmsCapability();
+    int32_t setSmscRes = 0;
+    setSmscRes = smsService->SetSmscAddr(slotId, desAddr);
+    desAddr = u" test";
+    string sca = StringUtils::ToUtf8(desAddr);
+    smsService->TrimSmscAddr(sca);
+    desAddr = u"test ";
+    sca = StringUtils::ToUtf8(desAddr);
+    smsService->TrimSmscAddr(sca);
+    int32_t smscRes = 0;
+    smscRes = smsService->GetSmscAddr(slotId, desAddr);
+    EXPECT_GE(setSmscRes, TELEPHONY_ERR_SLOTID_INVALID);
+    EXPECT_GE(smscRes, TELEPHONY_ERR_ARGUMENT_INVALID);
+    EXPECT_TRUE(smsService != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsService_0005
+ * @tc.name     Test SmsService
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsService_0005, Function | MediumTest | Level1)
+{
+    int32_t slotId = 0;
+    std::u16string desAddr = u"";
+    sptr<ISendShortMessageCallback> sendCallback;
+    sptr<IDeliveryShortMessageCallback> deliveryCallback;
+    auto smsService = DelayedSingleton<SmsService>::GetInstance();
+    AccessMmsToken token;
+    smsService->AddSimMessage(
+        slotId, desAddr, desAddr, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD);
+    uint32_t msgIndex = 1;
+    smsService->DelSimMessage(slotId, msgIndex);
+    smsService->UpdateSimMessage(
+        slotId, msgIndex, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD, desAddr, desAddr);
+    smsService->CheckSimMessageIndexValid(slotId, msgIndex);
+    uint32_t fromMsgId = 1;
+    uint32_t toMsgId = 1;
+    uint8_t netType = 1;
+    smsService->SetCBConfig(slotId, true, fromMsgId, toMsgId, netType);
+    int32_t enable = 1;
+    smsService->SetImsSmsConfig(slotId, enable);
+    smsService->SetDefaultSmsSlotId(slotId);
+    smsService->GetDefaultSmsSlotId();
+    smsService->GetDefaultSmsSimId(slotId);
+    std::u16string message = u"";
+    ISmsServiceInterface::SmsSegmentsInfo info;
+    std::vector<std::u16string> splitMessage;
+    bool text = true;
+    int32_t splitRes = 0;
+    int32_t smsRes = 0;
+    splitRes = smsService->SplitMessage(message, splitMessage);
+    smsRes = smsService->GetSmsSegmentsInfo(slotId, message, text, info);
+    message = u"text";
+    splitRes = smsService->SplitMessage(message, splitMessage);
+    smsRes = smsService->GetSmsSegmentsInfo(slotId, message, text, info);
+    smsService->GetServiceRunningState();
+    smsService->GetEndTime();
+    smsService->GetSpendTime();
+    EXPECT_GE(splitRes, TELEPHONY_ERR_ARGUMENT_INVALID);
+    EXPECT_GE(smsRes, TELEPHONY_ERR_ARGUMENT_INVALID);
+    EXPECT_TRUE(smsService != nullptr);
+}
 } // namespace Telephony
 } // namespace OHOS
