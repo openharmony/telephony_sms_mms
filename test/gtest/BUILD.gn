@@ -31,6 +31,7 @@ ohos_unittest("tel_sms_mms_gtest") {
     "zero_branch_cb_test.cpp",
     "zero_branch_cdma_sms_test.cpp",
     "zero_branch_mms_test.cpp",
+    "zero_branch_sms_part_test.cpp",
     "zero_branch_sms_test.cpp",
     "zero_branch_utils_test.cpp",
   ]

@@ -80,6 +80,7 @@ const char *BEGIN_STR = "01";
 const char *END_STR = "FF";
 const char PDU_COUNT = 10;
 const char INPUT_INTEGER = 128;
+const std::string VNET_MMSC = "http://mmsc.vnet.mobi";
 } // namespace
 
 class BranchMmsTest : public testing::Test {
@@ -482,8 +483,12 @@ HWTEST_F(BranchMmsTest, SmsWapPushHandler_0001, Function | MediumTest | Level1)
     EXPECT_FALSE(smsWapPushHandler->DecodeXWapApplication(decodeBuffer, 1));
     smsWapPushHandler->DeleteWapPush(indexer);
     EXPECT_FALSE(smsWapPushHandler->DecodeXWapAbandonHeaderValue(decodeBuffer));
+    auto dataBuf = std::make_unique<char[]>(BUF_LEN);
+    decodeBuffer.WriteDataBuffer(std::move(dataBuf), BUF_LEN);
     decodeBuffer.totolLength_ = 1;
     EXPECT_FALSE(smsWapPushHandler->DecodeXWapApplication(decodeBuffer, 1));
+    decodeBuffer.totolLength_ = 0;
+    EXPECT_FALSE(smsWapPushHandler->DecodeXWapApplication(decodeBuffer, 0));
     EXPECT_TRUE(smsWapPushHandler->SendWapPushMessageBroadcast(indexer));
 }
 
@@ -1349,6 +1354,52 @@ HWTEST_F(BranchMmsTest, MmsEncodeBuffer_0002, Function | MediumTest | Level1)
     mmsEncodeBuffer.curPosition_ = 0;
     retBool = mmsEncodeBuffer.EncodeTokenText(END_STR);
     EXPECT_TRUE(retBool);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SendMms_0001
+ * @tc.name     Test SendMms_0001
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, SendMms_0001, Function | MediumTest | Level1)
+{
+    std::shared_ptr<SmsService> smsService = std::make_shared<SmsService>();
+    int32_t slotId = 0;
+    std::u16string mmsc = u"";
+    std::u16string data = u"";
+    std::u16string ua = u"";
+    std::u16string uaprof = u"";
+    int32_t notAccess = smsService->SendMms(slotId, mmsc, data, ua, uaprof);
+    AccessMmsToken token;
+    int32_t noMmsc = smsService->SendMms(slotId, mmsc, data, ua, uaprof);
+    mmsc = StringUtils::ToUtf16(VNET_MMSC);
+    int32_t noData = smsService->SendMms(slotId, mmsc, data, ua, uaprof);
+    EXPECT_GE(notAccess, 0);
+    EXPECT_GE(noMmsc, 0);
+    EXPECT_GE(noData, 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_DownloadMms_0001
+ * @tc.name     Test DownloadMms_0001
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, DownloadMms_0001, Function | MediumTest | Level1)
+{
+    std::shared_ptr<SmsService> smsService = std::make_shared<SmsService>();
+    int32_t slotId = 0;
+    std::u16string mmsc = u"";
+    std::u16string data = u"";
+    std::u16string ua = u"";
+    std::u16string uaprof = u"";
+    int32_t notAccess = smsService->DownloadMms(slotId, mmsc, data, ua, uaprof);
+    AccessMmsToken token;
+    int32_t noMmsc = smsService->DownloadMms(slotId, mmsc, data, ua, uaprof);
+    mmsc = StringUtils::ToUtf16(VNET_MMSC);
+    int32_t noData = smsService->DownloadMms(slotId, mmsc, data, ua, uaprof);
+    EXPECT_GE(notAccess, 0);
+    EXPECT_GE(noMmsc, 0);
+    EXPECT_GE(noData, 0);
 }
 } // namespace Telephony
 } // namespace OHOS
