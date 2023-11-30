@@ -75,8 +75,6 @@ ohos_fuzztest("SendMessageDataFuzzTest") {
   ]
   sources = [
     "$SMS_MMS_SOURCE_DIR/test/fuzztest/common_fuzzer/addsmstoken_fuzzer.cpp",
-    "delivery_send_call_back_stub.cpp",
-    "send_call_back_stub.cpp",
     "sendmessagedata_fuzzer.cpp",
   ]
 }

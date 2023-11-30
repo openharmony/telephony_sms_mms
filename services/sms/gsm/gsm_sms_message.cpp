@@ -241,7 +241,8 @@ std::shared_ptr<struct SmsTpdu> GsmSmsMessage::CreateDataSubmitSmsTpdu(const std
         TELEPHONY_LOGE("memset_s is error!");
         return nullptr;
     }
-    if ((unsigned int)endcodeLen > sizeof(smsTpdu_->data.submit.userData.data)) {
+    if ((unsigned int)endcodeLen >= sizeof(smsTpdu_->data.submit.userData.data)) {
+        endcodeLen = sizeof(smsTpdu_->data.submit.userData.data) -1;
         if (memcpy_s(smsTpdu_->data.submit.userData.data, sizeof(smsTpdu_->data.submit.userData.data), encodeData,
                 sizeof(smsTpdu_->data.submit.userData.data)) != EOK) {
             TELEPHONY_LOGE("memcpy_s is error!");

@@ -1023,7 +1023,8 @@ HWTEST_F(MmsGtest, MmsQuotedPrintable_0001, Function | MediumTest | Level1)
     MmsQuotedPrintable mmsQuotedPrintable;
     std::string valueStr = "123";
     mmsQuotedPrintable.Encode(valueStr);
-    mmsQuotedPrintable.Decode(valueStr, valueStr);
+    std::string destStr = "";
+    mmsQuotedPrintable.Decode(valueStr, destStr);
     bool ret = mmsQuotedPrintable.Decode("", valueStr);
     EXPECT_EQ(false, ret);
 }

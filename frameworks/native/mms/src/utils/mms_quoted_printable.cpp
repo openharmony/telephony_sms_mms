@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace Telephony {
 static constexpr uint32_t MAX_MMS_ATTACHMENT_LEN = 300 * 1024;
+static constexpr int END_LINE_CHAR_NUM = 3;
 
 std::string MmsQuotedPrintable::Encode(const std::string &input)
 {
@@ -48,8 +49,6 @@ std::string MmsQuotedPrintable::Encode(const std::string &input)
 
 bool MmsQuotedPrintable::Decode(const std::string src, std::string &dest)
 {
-    const int endLineCharNum = 3;
-
     uint32_t inLength = 0;
     inLength = src.length();
     if (inLength == 0 || inLength > MAX_MMS_ATTACHMENT_LEN) {
@@ -57,7 +56,7 @@ bool MmsQuotedPrintable::Decode(const std::string src, std::string &dest)
         return false;
     }
 
-    std::unique_ptr<char[]> tempBuffer = std::make_unique<char[]>(inLength);
+    std::unique_ptr<char[]> tempBuffer = std::make_unique<char[]>(inLength + 1);
     if (tempBuffer == nullptr) {
         TELEPHONY_LOGE("tempBuffer nullptr error.");
         return false;
@@ -67,15 +66,15 @@ bool MmsQuotedPrintable::Decode(const std::string src, std::string &dest)
     uint32_t outLength = 0;
     const char *input = src.data();
     while (index < inLength) {
-        if (strncmp(input, "=/r/n", endLineCharNum) == 0) {
-            input += endLineCharNum;
-            index += endLineCharNum;
+        if (strncmp(input, "=/r/n", END_LINE_CHAR_NUM) == 0) {
+            input += END_LINE_CHAR_NUM;
+            index += END_LINE_CHAR_NUM;
         } else {
             uint32_t hexChar = 0;
             if (*input == '=' && sscanf_s(input, "=%02X", &hexChar) >= 1) {
                 tempBuffer[outLength] = static_cast<char>(hexChar);
-                input += endLineCharNum;
-                index += endLineCharNum;
+                input += END_LINE_CHAR_NUM;
+                index += END_LINE_CHAR_NUM;
             } else {
                 tempBuffer[outLength] = *input;
                 input++;
