@@ -23,6 +23,12 @@ config("mms_native_config") {
 }
 
 ohos_source_set("mms_native_source") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
   sources = [
     "src/mms_address.cpp",
     "src/mms_attachment.cpp",

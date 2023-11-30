@@ -18,8 +18,8 @@
 #define private public
 
 #include "addsmstoken_fuzzer.h"
-#include "delivery_send_call_back_stub.h"
-#include "send_call_back_stub.h"
+#include "delivery_short_message_callback_stub.h"
+#include "send_short_message_callback_stub.h"
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;
@@ -57,8 +57,9 @@ void SendSmsTextRequest(const uint8_t *data, size_t size)
     auto scAddrU16 = Str8ToStr16(scAddr);
     auto textU16 = Str8ToStr16(text);
 
-    std::unique_ptr<SendCallbackStub> sendCallback = std::make_unique<SendCallbackStub>();
-    std::unique_ptr<DeliverySendCallbackStub> deliveryCallback = std::make_unique<DeliverySendCallbackStub>();
+    std::unique_ptr<SendShortMessageCallbackStub> sendCallback = std::make_unique<SendShortMessageCallbackStub>();
+    std::unique_ptr<DeliveryShortMessageCallbackStub> deliveryCallback =
+        std::make_unique<DeliveryShortMessageCallbackStub>();
 
     dataParcel.WriteInt32(slotId);
     dataParcel.WriteString16(desAddrU16);

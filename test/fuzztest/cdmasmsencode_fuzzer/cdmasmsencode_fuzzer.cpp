@@ -23,6 +23,7 @@
 using namespace OHOS::Telephony;
 namespace OHOS {
 bool g_flag = false;
+constexpr int32_t BOOL_NUM = 2;
 
 void TeleserviceIdEncode(const uint8_t *data, size_t size)
 {
@@ -90,6 +91,8 @@ void AddressParameterEncode(const uint8_t *data, size_t size)
     if (memcpy_s(&value, sizeof(value), data, size) != EOK) {
         return;
     }
+    value.digitMode = static_cast<bool>(size % BOOL_NUM);
+    value.numberMode = static_cast<bool>(size % BOOL_NUM);
     auto parameter = std::make_unique<CdmaSmsAddressParameter>(value, CdmaSmsParameterRecord::ORG_ADDRESS);
     if (parameter == nullptr) {
         return;
@@ -105,6 +108,7 @@ void SubaddressEncode(const uint8_t *data, size_t size)
     if (memcpy_s(&value, sizeof(value), data, size) != EOK) {
         return;
     }
+    value.odd = static_cast<bool>(size % BOOL_NUM);
     auto parameter = std::make_unique<CdmaSmsSubaddress>(value, CdmaSmsParameterRecord::ORG_SUB_ADDRESS);
     if (parameter == nullptr) {
         return;
@@ -161,6 +165,7 @@ void MessageIdEncode(const uint8_t *data, size_t size)
     if (memcpy_s(&value, sizeof(value), data, size) != EOK) {
         return;
     }
+    value.headerInd = static_cast<bool>(size % BOOL_NUM);
     auto parameter = std::make_unique<CdmaSmsMessageId>(value, CdmaSmsTeleserviceMessage::DELIVER);
     if (parameter == nullptr) {
         return;
@@ -295,6 +300,7 @@ void CallbackNumberEncode(const uint8_t *data, size_t size)
     if (memcpy_s(&value, sizeof(value), data, size) != EOK) {
         return;
     }
+    value.digitMode = static_cast<bool>(size % BOOL_NUM);
     auto parameter = std::make_unique<CdmaSmsCallbackNumber>(value);
     if (parameter == nullptr) {
         return;

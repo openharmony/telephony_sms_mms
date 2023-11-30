@@ -106,7 +106,7 @@ bool GsmSmsCommonUtils::Unpack7bitChar(SmsReadBuffer &buffer, uint8_t dataLen, u
     uint8_t unpackDataLen, uint8_t &dstIdx)
 {
     auto shift = fillBits;
-    if (unpackData == nullptr || dataLen >= unpackDataLen) {
+    if (unpackData == nullptr || dataLen >= unpackDataLen || fillBits > SMS_BYTE_BIT - 1) {
         TELEPHONY_LOGE("data error.");
         return false;
     }

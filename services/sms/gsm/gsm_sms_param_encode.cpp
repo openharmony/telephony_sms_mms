@@ -189,7 +189,9 @@ void GsmSmsParamEncode::EncodeDCS(const struct SmsDcs *dcsData, std::string &ret
     }
 
     char value = returnValue.front();
-    returnValue.pop_back();
+    if (!returnValue.empty()) {
+        returnValue.pop_back();
+    }
     switch (dcsData->codingScheme) {
         case DATA_CODING_7BIT:
             break;
