@@ -373,12 +373,14 @@ std::string GetMmsc(int32_t slotId)
     auto resultSet = pdpHelper->Query(pdpUri, predicates, colume);
     if (resultSet == nullptr) {
         pdpHelper->Release();
+        return "";
     }
     int count;
     resultSet->GetRowCount(count);
     if (count <= 0) {
         resultSet->Close();
         pdpHelper->Release();
+        return "";
     }
     int columnIndex;
     std::string homeUrlVal;
