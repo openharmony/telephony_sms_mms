@@ -57,6 +57,7 @@ private:
     void TrimSpace(std::string &num);
     bool QueryContactedCount(const std::string &address, int32_t &rawCountId, int32_t &contactedCount);
     bool QueryRawContactId(const std::string &address, int32_t &rawCountId);
+    bool HasBCPhoneNumber(const std::string &phoneNumber);
 };
 } // namespace Telephony
 } // namespace OHOS
