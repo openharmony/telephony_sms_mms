@@ -71,6 +71,8 @@ int32_t SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t to
             rangeList_ = oldRangeList;
             return TELEPHONY_ERR_RIL_CMD_FAIL;
         }
+    } else {
+        rangeList_ = oldRangeList;
     }
     return TELEPHONY_ERR_SUCCESS;
 }
@@ -90,53 +92,56 @@ bool SmsMiscManager::OpenCBRange(uint32_t fromMsgId, uint32_t toMsgId)
 }
 
 void SmsMiscManager::SplitMsgId(
-    uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data)
+    uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter)
 {
     auto &info = *oldIter;
-    if (info.fromMsgId == fromMsgId && info.toMsgId != toMsgId) {
-        rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
-        rangeList_.erase(oldIter);
-    } else if (info.fromMsgId == fromMsgId && info.toMsgId == toMsgId) {
-        rangeList_.erase(oldIter);
-    } else if (info.fromMsgId != fromMsgId && info.toMsgId == toMsgId) {
-        rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
-        rangeList_.erase(oldIter);
-    } else if (fromMsgId > info.fromMsgId && toMsgId < info.toMsgId) {
-        rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
-        rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
-        rangeList_.erase(oldIter);
-    }
+    rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
+    rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
+    rangeList_.erase(oldIter);
 }
 
 // from 3GPP TS 27.005 3.3.4 Select Cell Broadcast Message Types
 bool SmsMiscManager::CloseCBRange(uint32_t fromMsgId, uint32_t toMsgId)
 {
-    bool ret = false;
-    infoData data(fromMsgId, toMsgId);
     auto iter = rangeList_.begin();
     while (iter != rangeList_.end()) {
         auto oldIter = iter++;
         auto &info = *oldIter;
-        if (fromMsgId >= info.fromMsgId && toMsgId <= info.toMsgId) {
-            SplitMsgId(fromMsgId, toMsgId, oldIter, data);
-            ret = true;
-        } else if (fromMsgId > info.fromMsgId && fromMsgId <= info.toMsgId && toMsgId > info.toMsgId) {
-            ret = true;
-            rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
+        if (fromMsgId == info.fromMsgId && toMsgId == info.toMsgId) {
             rangeList_.erase(oldIter);
-            ret = true;
-        } else if (fromMsgId <= info.fromMsgId && toMsgId >= info.toMsgId) {
-            ret = true;
+            continue;
+        } else if (fromMsgId == info.fromMsgId && toMsgId > info.toMsgId) {
             rangeList_.erase(oldIter);
-        } else if (fromMsgId < info.fromMsgId && toMsgId >= info.fromMsgId) {
-            ret = true;
+            continue;
+        } else if (fromMsgId == info.fromMsgId && toMsgId < info.toMsgId) {
             rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
             rangeList_.erase(oldIter);
+            continue;
+        } else if (fromMsgId < info.fromMsgId && toMsgId == info.toMsgId) {
+            rangeList_.erase(oldIter);
+            continue;
+        } else if (fromMsgId > info.fromMsgId && toMsgId == info.toMsgId) {
+            rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
+            rangeList_.erase(oldIter);
+            continue;
+        } else if (fromMsgId > info.fromMsgId && toMsgId < info.toMsgId) {
+            SplitMsgId(fromMsgId, toMsgId, oldIter);
+            continue;
+        } else if (fromMsgId > info.fromMsgId && fromMsgId <= info.toMsgId) {
+            rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
+            rangeList_.erase(oldIter);
+            continue;
+        } else if (fromMsgId < info.fromMsgId && toMsgId > info.toMsgId) {
+            rangeList_.erase(oldIter);
+            continue;
+        } else if (toMsgId < info.toMsgId && toMsgId >= info.fromMsgId) {
+            rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
+            rangeList_.erase(oldIter);
+            continue;
         }
     }
-    rangeList_.sort();
-    rangeList_.unique();
-    return ret;
+    CombineCBRange();
+    return true;
 }
 
 void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
@@ -261,8 +266,7 @@ void SmsMiscManager::CombineCBRange()
             } else if (OtherIter->toMsgId <= iter->toMsgId) {
                 OtherIter = rangeList_.erase(OtherIter);
                 continue;
-            } else if (OtherIter->fromMsgId <= static_cast<uint32_t>(iter->toMsgId + 1) &&
-                       OtherIter->toMsgId > iter->toMsgId) {
+            } else if (OtherIter->fromMsgId <= static_cast<uint32_t>(iter->toMsgId + 1)) {
                 iter->toMsgId = OtherIter->toMsgId;
                 OtherIter = rangeList_.erase(OtherIter);
                 continue;
@@ -327,6 +331,7 @@ std::string SmsMiscManager::RangeListToString(const std::list<gsmCBRangeInfo> &r
 
 bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list)
 {
+    TELEPHONY_LOGI("enable CB channel:%{public}d", enable);
     for (auto &item : list) {
         TELEPHONY_LOGI("[%{public}d-%{public}d]", item.fromMsgId, item.toMsgId);
     }
