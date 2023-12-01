@@ -90,8 +90,7 @@ private:
     bool IsEmpty() const;
     std::string RangeListToString(const std::list<gsmCBRangeInfo> &rangeList);
     bool SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list);
-    void SplitMsgId(
-        uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter, infoData &data);
+    void SplitMsgId(uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter);
     void UpdateCbRangList(std::shared_ptr<CBConfigInfo> res);
     void SplitMids(std::string src, std::vector<std::string> &dest, const std::string delimiter);
     bool SplitMidValue(std::string value, std::string &start, std::string &end, const std::string delimiter);
