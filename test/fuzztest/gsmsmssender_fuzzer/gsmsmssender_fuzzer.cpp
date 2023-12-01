@@ -29,6 +29,7 @@ namespace OHOS {
 static bool g_isInited = false;
 constexpr int32_t SLOT_NUM = 2;
 static int32_t STATUS_COUNT = 4;
+constexpr int32_t TYPE_NUM = 6;
 
 bool IsServiceInited()
 {
@@ -154,9 +155,10 @@ void SendSmsTest(const uint8_t *data, size_t size)
     std::vector<struct SplitInfo> cellsInfos;
     struct SplitInfo cellInfo;
     cellInfo.langId = static_cast<MSG_LANGUAGE_ID_T>(data[0]);
-    cellInfo.encodeType = static_cast<DataCodingScheme>(data[0]);
+    cellInfo.encodeType = static_cast<DataCodingScheme>(data[0] % TYPE_NUM);
+    cellInfo.encodeData.push_back(data[0]);
     cellsInfos.push_back(cellInfo);
-    DataCodingScheme codingType = static_cast<DataCodingScheme>(data[0]);
+    DataCodingScheme codingType = static_cast<DataCodingScheme>(data[0] % TYPE_NUM);
     bool isStatusReport = (size % SLOT_NUM == 1);
     GsmSmsMessage msg;
     std::shared_ptr<struct SmsTpdu> tpdu =

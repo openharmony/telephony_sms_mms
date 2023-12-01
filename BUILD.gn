@@ -26,6 +26,12 @@ config("tel_sms_mms_config") {
 }
 
 ohos_shared_library("tel_sms_mms") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
   sources = [
     "frameworks/native/sms/src/short_message.cpp",
     "services/mms/data_request.cpp",

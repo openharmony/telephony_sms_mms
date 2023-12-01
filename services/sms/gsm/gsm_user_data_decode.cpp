@@ -348,7 +348,8 @@ bool GsmUserDataDecode::DecodeUcs2PduPartData(
     }
 
     buffer.MoveForward(userData->length);
-    userData->data[userData->length] = 0;
+    uint8_t index = userData->length >= sizeof(userData->data) ? sizeof(userData->data) - 1 : userData->length;
+    userData->data[index] = 0;
     return true;
 }
 } // namespace Telephony
