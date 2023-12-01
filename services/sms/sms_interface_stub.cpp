@@ -260,6 +260,9 @@ void SmsInterfaceStub::OnAddSimMessage(MessageParcel &data, MessageParcel &reply
     std::u16string smsc = data.ReadString16();
     std::u16string pdu = data.ReadString16();
     uint32_t status = data.ReadUint32();
+    if (status > SIM_MESSAGE_STATUS_SENT || status < SIM_MESSAGE_STATUS_UNREAD) {
+        return;
+    }
     int32_t result = AddSimMessage(slotId, smsc, pdu, static_cast<SimMessageStatus>(status));
     TELEPHONY_LOGI("AddSimMessage result %{public}d", result);
     reply.WriteInt32(result);
@@ -281,6 +284,9 @@ void SmsInterfaceStub::OnUpdateSimMessage(MessageParcel &data, MessageParcel &re
     uint32_t newStatus = data.ReadUint32();
     std::u16string pdu = data.ReadString16();
     std::u16string smsc = data.ReadString16();
+    if (newStatus > SIM_MESSAGE_STATUS_SENT || newStatus < SIM_MESSAGE_STATUS_UNREAD) {
+        return;
+    }
     int32_t result = UpdateSimMessage(slotId, msgIndex, static_cast<SimMessageStatus>(newStatus), pdu, smsc);
     TELEPHONY_LOGI("UpdateSimMessage result %{public}d", result);
     reply.WriteInt32(result);

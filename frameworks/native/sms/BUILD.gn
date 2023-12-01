@@ -26,6 +26,12 @@ config("sms_native_config") {
 }
 
 ohos_source_set("sms_native_source") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
   sources = [
     "$SUBSYSTEM_DIR/sms_mms/services/sms/ims_service_interaction/src/ims_sms_callback_proxy.cpp",
     "$SUBSYSTEM_DIR/sms_mms/utils/string_utils.cpp",
