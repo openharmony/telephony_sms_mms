@@ -133,10 +133,10 @@ private:
 
 private:
     std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun_;
-    std::unordered_map<int64_t, std::shared_ptr<SmsSendIndexer>> sendCacheMap_;
+    static std::unordered_map<int64_t, std::shared_ptr<SmsSendIndexer>> sendCacheMap_;
     std::mutex sendCacheMapMutex_;
     uint8_t msgRef8bit_ = 0;
-    int64_t msgRef64bit_ = 0;
+    static int64_t msgRef64bit_;
     std::optional<int32_t> networkId_ = std::nullopt;
 };
 } // namespace Telephony
