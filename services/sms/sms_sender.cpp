@@ -29,6 +29,9 @@ namespace OHOS {
 namespace Telephony {
 using namespace std;
 using namespace std::chrono;
+int64_t SmsSender::msgRef64bit_ = 0;
+std::unordered_map<int64_t, std::shared_ptr<SmsSendIndexer>> SmsSender::sendCacheMap_;
+
 SmsSender::SmsSender(const shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId,
     function<void(shared_ptr<SmsSendIndexer>)> &sendRetryFun)
     : AppExecFwk::EventHandler(runner), slotId_(slotId), sendRetryFun_(sendRetryFun)
@@ -232,6 +235,9 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
         TELEPHONY_LOGE("event is nullptr");
         return nullptr;
     }
+    for (auto const &pair : sendCacheMap_) {
+        TELEPHONY_LOGI("Key = %{public}" PRId64 "", pair.first);
+    }
     std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
     std::lock_guard<std::mutex> guard(sendCacheMapMutex_);
     std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
@@ -254,7 +260,7 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
 
     std::shared_ptr<SendSmsResultInfo> info = event->GetSharedObject<SendSmsResultInfo>();
     if (info != nullptr) {
-        TELEPHONY_LOGI("flag = %{public}" PRId64, info->flag);
+        TELEPHONY_LOGI("flag = %{public}" PRId64 "", info->flag);
         auto iter = sendCacheMap_.find(info->flag);
         if (iter != sendCacheMap_.end()) {
             TELEPHONY_LOGI("msgRef = %{public}d", info->msgRef);
@@ -270,7 +276,6 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
             smsIndexer->SetErrorCode(info->errCode);
             smsIndexer->SetMsgRefId64Bit(info->flag);
             UpdateUnSentCellCount(smsIndexer->GetMsgRefId());
-            smsIndexer->SetMsgRefId((uint8_t)info->msgRef);
         }
     }
     return smsIndexer;
