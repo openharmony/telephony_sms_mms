@@ -47,6 +47,9 @@ const std::string RAW_CONTACT_ID = "raw_contact_id";
 const std::string CONTACTED_COUNT = "contacted_count";
 const std::string LASTEST_CONTACTED_TIME = "lastest_contacted_time";
 constexpr static uint8_t TYPE_ID_VALUE = 5;
+constexpr static uint8_t NUMBER_START_SIZE = 3;
+constexpr static uint8_t NUMBER_SIZE = 5;
+const std::string NUMBER_START_STR = "192";
 
 SmsPersistHelper::SmsPersistHelper() {}
 
@@ -274,7 +277,7 @@ int32_t SmsPersistHelper::FormatSmsNumber(const std::string &num, std::string co
     transform(countryCode.begin(), countryCode.end(), countryCode.begin(), ::toupper);
     i18n::phonenumbers::PhoneNumber parseResult;
     phoneUtils->Parse(num, countryCode, &parseResult);
-    if (phoneUtils->IsValidNumber(parseResult)) {
+    if (phoneUtils->IsValidNumber(parseResult) || HasBCPhoneNumber(num)) {
         phoneUtils->Format(parseResult, formatInfo, &formatNum);
     }
     if (formatNum.empty() || formatNum == "0") {
@@ -283,6 +286,19 @@ int32_t SmsPersistHelper::FormatSmsNumber(const std::string &num, std::string co
     }
     TrimSpace(formatNum);
     return TELEPHONY_SUCCESS;
+}
+
+bool SmsPersistHelper::HasBCPhoneNumber(const std::string &phoneNumber)
+{
+    int32_t phoneNumberStart = 0;
+    int32_t phoneNumberStartLength = NUMBER_START_SIZE;
+    int32_t bCNumberLength = NUMBER_SIZE;
+    std::string bCNumberStart = NUMBER_START_STR;
+    if (phoneNumber.length() == bCNumberLength &&
+        phoneNumber.substr(phoneNumberStart, phoneNumberStartLength) == bCNumberStart) {
+        return true;
+    }
+    return false;
 }
 
 void SmsPersistHelper::TrimSpace(std::string &num)
