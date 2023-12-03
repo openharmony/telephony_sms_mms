@@ -370,6 +370,9 @@ std::string GetMmsc(int32_t slotId)
     predicates.In(PdpProfileData::APN_TYPES, apnTypes);
     std::shared_ptr<MmsApnInfo> mmsApnInfo = std::make_shared<MmsApnInfo>(slotId);
     std::shared_ptr<DataShare::DataShareHelper> pdpHelper = mmsApnInfo->CreatePdpProfileHelper();
+    if (pdpHelper == nullptr) {
+        return "";
+    }
     auto resultSet = pdpHelper->Query(pdpUri, predicates, colume);
     if (resultSet == nullptr) {
         pdpHelper->Release();

@@ -107,6 +107,7 @@ private:
     std::list<gsmCBRangeInfo> rangeList_;
     std::condition_variable condVar_;
     std::mutex mutex_;
+    std::mutex cbMutex_;
     std::string smscAddr_;
     std::string codeScheme_ { "0-255" };
     std::list<gsmCBRangeInfo> mdRangeList_;

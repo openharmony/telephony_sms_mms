@@ -15,6 +15,8 @@
 
 #include "cdma_sms_sender.h"
 
+#include <cinttypes>
+
 #include "cdma_sms_message.h"
 #include "core_manager_inner.h"
 #include "radio_event.h"
@@ -147,6 +149,7 @@ void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const stri
 
     std::unique_lock<std::mutex> lock(mutex_);
     uint8_t msgRef8bit = GetMsgRef8Bit();
+    TELEPHONY_LOGI("cdma text msgRef8bit = %{public}d", msgRef8bit);
     for (int i = 0; i < cellsInfosSize; i++) {
         SendSmsForEveryIndexer(i, cellsInfos, desAddr, scAddr, tpdu, gsmSmsMessage, unSentCellCount, hasCellFailed,
             codingType, msgRef8bit, sendCallback, deliveryCallback);
@@ -400,6 +403,7 @@ void CdmaSmsSender::DataBasedSmsDeliveryViaIms(const string &desAddr, const stri
     CharArrayToString(data, dataLen, dataStr);
     gsmSmsMessage.SplitMessage(cellsInfos, dataStr, CheckForce7BitEncodeType(), codingType, true);
     uint8_t msgRef8bit = GetMsgRef8Bit();
+    TELEPHONY_LOGI("cdma data msgRef8bit = %{public}d", msgRef8bit);
     std::shared_ptr<struct SmsTpdu> tpdu = gsmSmsMessage.CreateDataSubmitSmsTpdu(
         desAddr, scAddr, port, data, dataLen, msgRef8bit, codingType, (deliveryCallback == nullptr) ? false : true);
     if (tpdu == nullptr) {
@@ -461,6 +465,7 @@ void CdmaSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         return;
     }
     int64_t refId = GetMsgRef64Bit();
+    TELEPHONY_LOGI("cdma refId = %{public}" PRId64 "", refId);
     if (!SendCacheMapAddItem(refId, smsIndexer)) {
         TELEPHONY_LOGE("SendCacheMapAddItem Error!!");
     }
