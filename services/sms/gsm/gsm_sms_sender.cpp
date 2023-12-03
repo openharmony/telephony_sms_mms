@@ -15,6 +15,8 @@
 
 #include "gsm_sms_sender.h"
 
+#include <cinttypes>
+
 #include "core_manager_inner.h"
 #include "radio_event.h"
 #include "securec.h"
@@ -157,6 +159,7 @@ void GsmSmsSender::DataBasedSmsDelivery(const std::string &desAddr, const std::s
 
     gsmSmsMessage.SplitMessage(cellsInfos, dataStr, CheckForce7BitEncodeType(), codingType, true);
     uint8_t msgRef8bit = GetMsgRef8Bit();
+    TELEPHONY_LOGI("gsm data msgRef8bit = %{public}d", msgRef8bit);
     std::shared_ptr<struct SmsTpdu> tpdu = gsmSmsMessage.CreateDataSubmitSmsTpdu(
         desAddr, scAddr, port, data, dataLen, msgRef8bit, codingType, (deliveryCallback == nullptr) ? false : true);
     if (tpdu == nullptr) {
@@ -182,6 +185,7 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         return;
     }
     int64_t refId = GetMsgRef64Bit();
+    TELEPHONY_LOGI("gsm refId = %{public}" PRId64 "", refId);
     if (!SendCacheMapAddItem(refId, smsIndexer)) {
         TELEPHONY_LOGE("SendCacheMapAddItem Error!!");
         return;
@@ -340,6 +344,7 @@ void GsmSmsSender::SetSendIndexerInfo(const std::shared_ptr<SmsSendIndexer> &ind
     indexer->SetEncodeSmca(std::move(smca));
     indexer->SetEncodePdu(std::move(pdu));
     indexer->SetHasMore(encodeInfo->isMore_);
+    TELEPHONY_LOGI("gsm text msgRef8bit = %{public}d", msgRef8bit);
     indexer->SetMsgRefId(msgRef8bit);
     indexer->SetNetWorkType(NET_TYPE_GSM);
 }
