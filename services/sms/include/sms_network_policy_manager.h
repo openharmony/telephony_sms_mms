@@ -56,6 +56,7 @@ protected:
 private:
     int32_t GetId();
     void GetImsRegState();
+    void HandleFactoryReset();
 
 private:
     int32_t slotId_;

@@ -20,6 +20,7 @@
 #include "ims_reg_info_callback_stub.h"
 #include "radio_event.h"
 #include "sms_service.h"
+#include "sms_persist_helper.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -47,6 +48,7 @@ void SmsNetworkPolicyManager::RegisterHandler()
     coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_NETWORK_STATE, nullptr);
     coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED, nullptr);
     coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED, nullptr);
+    coreInner.RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_FACTORY_RESET, nullptr);
     GetRadioState();
     GetImsRegState();
 }
@@ -63,6 +65,7 @@ void SmsNetworkPolicyManager::UnRegisterHandler()
     coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_NETWORK_STATE);
     coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED);
     coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED);
+    coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_FACTORY_RESET);
     callbackMap_.clear();
 }
 
@@ -90,6 +93,9 @@ void SmsNetworkPolicyManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer
             break;
         case RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED:
             DelayedSingleton<SmsService>::GetInstance()->OnRilAdapterHostDied(slotId_);
+            break;
+        case RadioEvent::RADIO_FACTORY_RESET:
+            HandleFactoryReset();
             break;
         default:
             break;
@@ -182,6 +188,14 @@ void SmsNetworkPolicyManager::NetworkUnregister(int32_t id)
     } else {
         TELEPHONY_LOGE("NetworkUnregister id[%{public}d] is failed", id);
     }
+}
+
+void SmsNetworkPolicyManager::HandleFactoryReset()
+{
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(SmsSubsection::SLOT_ID, std::to_string(slotId_));
+    bool ret = DelayedSingleton<SmsPersistHelper>::GetInstance()->Delete(predicates);
+    TELEPHONY_LOGI("sms factory reset ret:%{public}d", ret);
 }
 } // namespace Telephony
 } // namespace OHOS

@@ -1381,6 +1381,7 @@ HWTEST_F(BranchSmsTest, SmsService_0003, Function | MediumTest | Level1)
     smsNwPolicyManager->ProcessEvent(event);
     event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED);
     smsNwPolicyManager->ProcessEvent(event);
+    smsNwPolicyManager->HandleFactoryReset();
 
     auto smsService = DelayedSingleton<SmsService>::GetInstance();
     EXPECT_EQ(smsService->OnRilAdapterHostDied(INVALID_SLOTID), TELEPHONY_ERR_LOCAL_PTR_NULL);
