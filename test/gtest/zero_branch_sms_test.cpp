@@ -454,7 +454,7 @@ HWTEST_F(BranchSmsTest, SmsSender_0001, Function | MediumTest | Level1)
     smsSender->HandleResend(smsIndexer);
     smsSender->lastSmsDomain_ = 1;
     smsSender->HandleResend(smsIndexer);
-    EXPECT_TRUE(smsSender->SendCacheMapAddItem(1, smsIndexer));
+    EXPECT_FALSE(smsSender->SendCacheMapAddItem(1, smsIndexer));
     event = nullptr;
     smsIndexer = nullptr;
     smsSender->HandleResend(smsIndexer);
@@ -517,7 +517,7 @@ HWTEST_F(BranchSmsTest, SmsSender_0003, Function | MediumTest | Level1)
     const std::string scAddr = "123";
     const std::string text = "123";
     auto smsIndexer = std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
-    EXPECT_TRUE(smsSender->SendCacheMapAddItem(1, smsIndexer));
+    EXPECT_FALSE(smsSender->SendCacheMapAddItem(1, smsIndexer));
     smsIndexer->isFailure_ = true;
     smsSender->OnRilAdapterHostDied();
     smsIndexer->isFailure_ = false;

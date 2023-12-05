@@ -273,6 +273,7 @@ public:
 
 private:
     static inline BrokerDelegator<SmsServiceProxy> delegator_;
+    sptr<IRemoteObject> localObject_;
 };
 
 class SmsServiceDeathRecipient : public IRemoteObject::DeathRecipient {

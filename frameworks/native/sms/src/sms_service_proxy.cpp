@@ -25,7 +25,10 @@
 namespace OHOS {
 namespace Telephony {
 const int32_t MAX_LEN = 10000;
-SmsServiceProxy::SmsServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<ISmsServiceInterface>(impl) {}
+SmsServiceProxy::SmsServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<ISmsServiceInterface>(impl)
+{
+    localObject_ = impl;
+}
 
 int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
     const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
@@ -145,13 +148,12 @@ int32_t SmsServiceProxy::GetSmscAddr(int32_t slotId, std::u16string &smscAddress
         return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     dataParcel.WriteInt32(slotId);
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TELEPHONY_LOGE("GetSmscAddr Remote is null");
+    if (localObject_ == nullptr) {
+        TELEPHONY_LOGE("localObject_ nullptr");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::GET_SMSC_ADDRESS), dataParcel,
-        replyParcel, option);
+    localObject_->SendRequest(
+        static_cast<int32_t>(SmsServiceInterfaceCode::GET_SMSC_ADDRESS), dataParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
     if (result == TELEPHONY_ERR_SUCCESS) {
         smscAddress = replyParcel.ReadString16();
@@ -310,8 +312,8 @@ bool SmsServiceProxy::SetImsSmsConfig(
         TELEPHONY_LOGE("SetImsSmsConfig Remote is null");
         return result;
     }
-    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::SET_IMS_SMS_CONFIG), dataParcel,
-        replyParcel, option);
+    remote->SendRequest(
+        static_cast<int32_t>(SmsServiceInterfaceCode::SET_IMS_SMS_CONFIG), dataParcel, replyParcel, option);
     return replyParcel.ReadBool();
 }
 
@@ -595,11 +597,12 @@ int32_t SmsServiceProxy::CreateMessage(std::string pdu, std::string specificatio
     dataParcel.WriteString(pdu);
     dataParcel.WriteString(specification);
 
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
+    if (localObject_ == nullptr) {
+        TELEPHONY_LOGE("localObject_ nullptr");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::CREATE_MESSAGE), dataParcel, replyParcel, option);
+    localObject_->SendRequest(
+        static_cast<int32_t>(SmsServiceInterfaceCode::CREATE_MESSAGE), dataParcel, replyParcel, option);
 
     int32_t result = replyParcel.ReadInt32();
     TELEPHONY_LOGI("SmsServiceProxy::CreateMessage result:%{public}d", result);
