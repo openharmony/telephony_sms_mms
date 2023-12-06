@@ -294,7 +294,8 @@ int TextCoder::Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int 
     return (err != 0) ? -1 : (maxLength - static_cast<int>(remainedLength));
 }
 
-int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme)
+int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength,
+    DataCodingScheme &scheme, SmsCodingNationalType codingNationalType)
 {
     int maxUcs2Length = srcLength;
     if (maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
@@ -322,7 +323,8 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
         return tempTextLen;
     }
     bool unknown = false;
-    int length = Ucs2ToGsm7bitAuto(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length, unknown);
+    int length = Ucs2ToGsm7bitAuto(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length,
+        unknown, codingNationalType);
     if (unknown) {
         scheme = DATA_CODING_UCS2;
         if (ucs2Length <= 0) {
@@ -561,13 +563,38 @@ int TextCoder::Ucs2ToGsm7bit(uint8_t *dest, int maxLength, const uint8_t *src, i
     return outTextLen;
 }
 
-int TextCoder::Ucs2ToGsm7bitAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, bool &unknown)
+std::map<uint16_t, uint8_t> TextCoder::Get7BitCodingExtMap(SmsCodingNationalType codingNationalType)
+{
+    std::map<uint16_t, uint8_t> extMap = gsm7bitExtMap_;
+    switch (codingNationalType) {
+        case SMS_CODING_NATIONAL_TYPE_DEFAULT:
+            extMap = gsm7bitExtMap_;
+            break;
+        case SMS_CODING_NATIONAL_TYPE_TURKISH:
+            extMap = turkishMap_;
+            break;
+        case SMS_CODING_NATIONAL_TYPE_SPANISH:
+            extMap = spanishMap_;
+            break;
+        case SMS_CODING_NATIONAL_TYPE_PORTUGUESE:
+            extMap = portuMap_;
+            break;
+        default:
+            extMap = gsm7bitExtMap_;
+            break;
+    }
+    return extMap;
+}
+
+int TextCoder::Ucs2ToGsm7bitAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength,
+    bool &unknown, SmsCodingNationalType codingNationalType)
 {
     if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
         TELEPHONY_LOGE("text is null");
         return -1;
     }
 
+    std::map<uint16_t, uint8_t> extMap = Get7BitCodingExtMap(codingNationalType);
     int outTextLen = 0;
     std::map<uint16_t, uint8_t>::iterator itChar;
     std::map<uint16_t, uint8_t>::iterator itExt;
@@ -579,8 +606,8 @@ int TextCoder::Ucs2ToGsm7bitAuto(uint8_t *dest, int maxLength, const uint8_t *sr
         if (itChar != gsm7bitDefMap_.end()) {
             dest[outTextLen++] = static_cast<uint8_t>(itChar->second);
         } else {
-            itExt = gsm7bitExtMap_.find(inText);
-            if (itExt == gsm7bitExtMap_.end()) {
+            itExt = extMap.find(inText);
+            if (itExt == extMap.end()) {
                 TELEPHONY_LOGI("Abnormal character is included. inText : [%{public}04x]", inText);
                 unknown = true;
                 return 0;
