@@ -48,7 +48,7 @@ const std::string CONTACTED_COUNT = "contacted_count";
 const std::string LASTEST_CONTACTED_TIME = "lastest_contacted_time";
 constexpr static uint8_t TYPE_ID_VALUE = 5;
 constexpr static uint8_t NUMBER_START_SIZE = 3;
-constexpr static uint8_t NUMBER_SIZE = 5;
+constexpr static uint8_t NUMBER_SIZE = 11;
 const std::string NUMBER_START_STR = "192";
 
 SmsPersistHelper::SmsPersistHelper() {}
