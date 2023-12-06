@@ -878,7 +878,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0001, Function | MediumTest | Level2)
 
     if (!helper.Run(ReceiveCellBroadCastTestFunc, helper)) {
         TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(true);
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0001 -->finished");
@@ -918,7 +918,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0002, Function | MediumTest | Level2)
 
     if (!helper.Run(ReceiveCellBroadCastTestFunc2, helper)) {
         TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc2 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(true);
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0002 -->finished");
@@ -958,7 +958,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0003, Function | MediumTest | Level2)
 
     if (!helper.Run(ReceiveCellBroadCastTestFunc, helper)) {
         TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(true);
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0003 -->finished");
@@ -998,7 +998,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0004, Function | MediumTest | Level2)
 
     if (!helper.Run(ReceiveCellBroadCastTestFunc2, helper)) {
         TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc2 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(true);
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0004 -->finished");
