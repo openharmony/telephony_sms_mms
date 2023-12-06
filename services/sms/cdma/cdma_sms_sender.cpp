@@ -136,6 +136,7 @@ void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const stri
     DataCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
     std::vector<struct SplitInfo> cellsInfos;
+    gsmSmsMessage.SetSmsCodingNationalType(GetSmsCodingNationalType(slotId_));
     gsmSmsMessage.SplitMessage(cellsInfos, text, CheckForce7BitEncodeType(), codingType, false);
     bool isStatusReport = (deliveryCallback == nullptr) ? false : true;
     std::shared_ptr<struct SmsTpdu> tpdu =
@@ -401,6 +402,7 @@ void CdmaSmsSender::DataBasedSmsDeliveryViaIms(const string &desAddr, const stri
     DataCodingScheme codingType;
     std::string dataStr;
     CharArrayToString(data, dataLen, dataStr);
+    gsmSmsMessage.SetSmsCodingNationalType(GetSmsCodingNationalType(slotId_));
     gsmSmsMessage.SplitMessage(cellsInfos, dataStr, CheckForce7BitEncodeType(), codingType, true);
     uint8_t msgRef8bit = GetMsgRef8Bit();
     TELEPHONY_LOGI("cdma data msgRef8bit = %{public}d", msgRef8bit);
