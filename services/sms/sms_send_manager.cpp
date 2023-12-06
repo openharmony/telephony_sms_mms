@@ -253,6 +253,7 @@ int32_t SmsSendManager::SplitMessage(const std::string &message, std::vector<std
         }
         case NetWorkType::NET_TYPE_GSM: {
             CdmaSmsMessage cdmaSmsMessage;
+            gsmSmsMessage.SetSmsCodingNationalType(SmsSender::GetSmsCodingNationalType(slotId_));
             cdmaSmsMessage.SplitMessage(cellsInfos, message, false, codingType, false);
             break;
         }
