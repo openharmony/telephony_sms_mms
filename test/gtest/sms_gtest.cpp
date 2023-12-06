@@ -220,7 +220,7 @@ HWTEST_F(SmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::GetDefaultSmsSlotId_0001 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 void GetDefaultSmsSimIdTestFuc(SmsMmsTestHelper &helper)

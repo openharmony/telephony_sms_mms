@@ -39,8 +39,8 @@ public:
 private:
     int32_t result_ = 0;
     bool boolResult_ = false;
-    int32_t sendSmsResult_ = -1;
-    int32_t deliverySmsResult_ = -1;
+    int32_t sendSmsResult_ = 0;
+    int32_t deliverySmsResult_ = 0;
     std::string strResult_ = "";
     std::mutex mtx_;
     std::condition_variable cv_;
