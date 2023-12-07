@@ -64,13 +64,14 @@ HWTEST_F(BranchUtilsTest, TextCoder_0001, Function | MediumTest | Level1)
     unsigned short inText = 1;
     const uint8_t *pMsgText = (const uint8_t *)TEXT_SMS_CONTENT.c_str();
     uint8_t *pDestText = encodeData;
+    SmsCodingNationalType codingNational = SMS_CODING_NATIONAL_TYPE_DEFAULT;
     EXPECT_GE(TextCoder::Instance().Utf8ToGsm7bit(pDestText, BUF_SIZE, const_cast<uint8_t *>(pMsgText), 0, langId), 0);
     EXPECT_GE(TextCoder::Instance().CdmaUtf8ToAuto(pDestText, 1, pMsgText, 1, DataCodingScheme), -1);
-    EXPECT_GE(TextCoder::Instance().GsmUtf8ToAuto(pDestText, 1, pMsgText, 1, DataCodingScheme), -1);
+    EXPECT_GE(TextCoder::Instance().GsmUtf8ToAuto(pDestText, 1, pMsgText, 1, DataCodingScheme, codingNational), -1);
     EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(pDestText, 1, pMsgText, -1), -1);
     EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(pDestText, 0, pMsgText, -1), 0);
     EXPECT_EQ(TextCoder::Instance().CdmaUtf8ToAuto(pDestText, 1, pMsgText, 0, DataCodingScheme), 0);
-    EXPECT_EQ(TextCoder::Instance().GsmUtf8ToAuto(pDestText, 1, pMsgText, 0, DataCodingScheme), 0);
+    EXPECT_EQ(TextCoder::Instance().GsmUtf8ToAuto(pDestText, 1, pMsgText, 0, DataCodingScheme, codingNational), 0);
     EXPECT_EQ(TextCoder::Instance().Gsm7bitToUtf8(pDestText, 0, pMsgText, 0, msgLangInfo), 0);
     EXPECT_GE(TextCoder::Instance().ShiftjisToUtf8(pDestText, 1, pMsgText, -1), 0);
     EXPECT_GE(TextCoder::Instance().Ucs2ToUtf8(pDestText, 1, pMsgText, -1), 0);
@@ -80,8 +81,8 @@ HWTEST_F(BranchUtilsTest, TextCoder_0001, Function | MediumTest | Level1)
     EXPECT_FALSE(TextCoder::Instance().ShiftjisToUtf8(pDestText, 0, pMsgText, 1));
     EXPECT_EQ(TextCoder::Instance().Ucs2ToGsm7bit(pDestText, 0, pMsgText, 0, langId), -1);
     EXPECT_GT(TextCoder::Instance().Ucs2ToGsm7bit(pDestText, 1, pMsgText, TEXT_LENGTH, langId), 0);
-    EXPECT_EQ(TextCoder::Instance().Ucs2ToGsm7bitAuto(pDestText, 0, pMsgText, 0, unknown), -1);
-    EXPECT_GE(TextCoder::Instance().Ucs2ToGsm7bitAuto(pDestText, 1, pMsgText, 1, unknown), 0);
+    EXPECT_EQ(TextCoder::Instance().Ucs2ToGsm7bitAuto(pDestText, 0, pMsgText, 0, unknown, codingNational), -1);
+    EXPECT_GE(TextCoder::Instance().Ucs2ToGsm7bitAuto(pDestText, 1, pMsgText, 1, unknown, codingNational), 0);
     EXPECT_EQ(TextCoder::Instance().Ucs2ToAscii(pDestText, 0, pMsgText, 0, unknown), -1);
     EXPECT_GE(TextCoder::Instance().Ucs2ToAscii(pDestText, 1, pMsgText, 1, unknown), 0);
     EXPECT_EQ(TextCoder::Instance().GetLangType(pMsgText, 0), MSG_DEFAULT_CHAR);

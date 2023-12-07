@@ -15,6 +15,7 @@
 
 #include "gsm_sms_message.h"
 
+#include "core_manager_inner.h"
 #include "securec.h"
 #include "telephony_log_wrapper.h"
 #include "text_coder.h"
@@ -675,6 +676,11 @@ bool GsmSmsMessage::IsSpecialMessage() const
     return result;
 }
 
+void GsmSmsMessage::SetSmsCodingNationalType(SmsCodingNationalType smsCodingNationalType)
+{
+    smsCodingNationalType_ = smsCodingNationalType;
+}
+
 int GsmSmsMessage::DecodeMessage(uint8_t *decodeData, unsigned int len, DataCodingScheme &codingType,
     const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId)
 {
@@ -713,7 +719,8 @@ int GsmSmsMessage::DecodeMessage(uint8_t *decodeData, unsigned int len, DataCodi
         case DATA_CODING_AUTO:
         default: {
             DataCodingScheme encodeType = DATA_CODING_AUTO;
-            decodeLen = TextCoder::Instance().GsmUtf8ToAuto(decodeData, maxDecodeLen, pMsgText, dataLen, encodeType);
+            decodeLen = TextCoder::Instance().GsmUtf8ToAuto(decodeData, maxDecodeLen, pMsgText, dataLen,
+                encodeType, smsCodingNationalType_);
             codingType = encodeType;
             break;
         }

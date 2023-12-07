@@ -384,6 +384,17 @@ bool SmsSender::CheckForce7BitEncodeType()
     return helperPtr->QueryParamBoolean(SmsPersistHelper::SMS_ENCODING_PARAM_KEY, false);
 }
 
+SmsCodingNationalType SmsSender::GetSmsCodingNationalType(int slotId)
+{
+    SmsCodingNationalType smsCodingNational = SMS_CODING_NATIONAL_TYPE_DEFAULT;
+    OperatorConfig operatorConfig;
+    CoreManagerInner::GetInstance().GetOperatorConfigs(slotId, operatorConfig);
+    if (operatorConfig.intValue.find(KEY_SMS_CODING_NATIONAL_INT) != operatorConfig.intValue.end()) {
+        smsCodingNational = (SmsCodingNationalType)operatorConfig.intValue[KEY_SMS_CODING_NATIONAL_INT];
+    }
+    return smsCodingNational;
+}
+
 std::optional<int32_t> SmsSender::GetNetworkId()
 {
     return networkId_;
