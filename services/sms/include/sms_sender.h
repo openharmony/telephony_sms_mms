@@ -81,6 +81,7 @@ public:
         const sptr<ISendShortMessageCallback> &sendCallback, std::shared_ptr<SmsSendIndexer> indexer,
         uint8_t msgRef8bit, uint32_t totalPage);
     void SendCallbackExceptionCase(const sptr<ISendShortMessageCallback> &sendCallback, std::string str);
+    static SmsCodingNationalType GetSmsCodingNationalType(int slotId);
 
 public:
     bool resIsSmsReady_ = false;
@@ -122,6 +123,7 @@ private:
     static constexpr uint16_t DELAY_MAX_TIME_MSCE = 2000;
     static constexpr uint8_t MSG_QUEUE_LIMIT = 25;
     static constexpr uint8_t MAX_REPORT_LIST_LIMIT = 25;
+    static constexpr const char *KEY_SMS_CODING_NATIONAL_INT = "sms_coding_national_int";
 
     SmsSender(const SmsSender &) = delete;
     SmsSender(const SmsSender &&) = delete;

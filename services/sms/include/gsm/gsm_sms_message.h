@@ -61,6 +61,7 @@ public:
     bool GetIsSIMDataTypeDownload() const;
     void ConvertMsgTimeStamp(const struct SmsTimeStamp &times);
     bool IsSpecialMessage() const;
+    void SetSmsCodingNationalType(SmsCodingNationalType smsCodingNationalType);
 
 private:
     void AnalysisMsgDeliver(const SmsDeliver &deliver);
@@ -85,6 +86,7 @@ private:
     uint16_t destPort_ = -1;
     bool bSmsText_ = false;
     std::shared_ptr<struct SmsTpdu> smsTpdu_;
+    SmsCodingNationalType smsCodingNationalType_ = SMS_CODING_NATIONAL_TYPE_DEFAULT;
 };
 
 struct EncodeInfo {

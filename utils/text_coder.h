@@ -34,7 +34,8 @@ public:
     int Utf8ToGsm7bit(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, MSG_LANGUAGE_ID_T &langId);
     int Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);
     int CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme);
-    int GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme);
+    int GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme,
+        SmsCodingNationalType codingNationalType);
     int Gsm7bitToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, const MsgLangInfo &langInfo);
     int Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);
     int EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);
@@ -44,7 +45,8 @@ private:
     TextCoder();
     virtual ~TextCoder();
     int Ucs2ToGsm7bit(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, MSG_LANGUAGE_ID_T &langId);
-    int Ucs2ToGsm7bitAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, bool &unknown);
+    int Ucs2ToGsm7bitAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, bool &unknown,
+        SmsCodingNationalType codingNationalType);
     int Ucs2ToAscii(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, bool &unknown);
     uint8_t GetLangType(const uint8_t *src, int srcLength);
     int FindGsm7bitExt(uint8_t *dest, int maxLength, const uint16_t inText);
@@ -52,6 +54,7 @@ private:
     int FindSpanish(uint8_t *dest, int maxLength, const uint16_t inText);
     int FindPortu(uint8_t *dest, int maxLength, const uint16_t inText);
     uint8_t FindReplaceChar(const uint16_t inText);
+    std::map<uint16_t, uint8_t> Get7BitCodingExtMap(SmsCodingNationalType codingNationalType);
 
     int Gsm7bitToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, const MsgLangInfo &langInfo);
     int EscapeTurkishLockingToUcs2(const uint8_t *src, int srcLen, const MsgLangInfo &langInfo, uint16_t &result);

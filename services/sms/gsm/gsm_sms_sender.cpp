@@ -47,6 +47,7 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
     DataCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
     std::vector<struct SplitInfo> cellsInfos;
+    gsmSmsMessage.SetSmsCodingNationalType(GetSmsCodingNationalType(slotId_));
     gsmSmsMessage.SplitMessage(cellsInfos, text, CheckForce7BitEncodeType(), codingType, false);
     bool isStatusReport = (deliveryCallback == nullptr) ? false : true;
     std::shared_ptr<struct SmsTpdu> tpdu =
@@ -156,7 +157,7 @@ void GsmSmsSender::DataBasedSmsDelivery(const std::string &desAddr, const std::s
     DataCodingScheme codingType;
     std::string dataStr;
     CharArrayToString(data, dataLen, dataStr);
-
+    gsmSmsMessage.SetSmsCodingNationalType(GetSmsCodingNationalType(slotId_));
     gsmSmsMessage.SplitMessage(cellsInfos, dataStr, CheckForce7BitEncodeType(), codingType, true);
     uint8_t msgRef8bit = GetMsgRef8Bit();
     TELEPHONY_LOGI("gsm data msgRef8bit = %{public}d", msgRef8bit);
