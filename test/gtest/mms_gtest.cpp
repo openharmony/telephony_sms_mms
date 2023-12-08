@@ -100,10 +100,12 @@ static constexpr uint32_t MAX_PDU_PAGES = 4;
 static constexpr uint8_t HEX_VALUE_0F = 0x0F;
 static constexpr uint8_t HEX_VALUE_F0 = 0xF0;
 static constexpr uint32_t SPLIT_PDU_LENGTH = 195 * 1024;
+static constexpr const char *PDU_CONTENT = "pdu_content";
 const std::string PDP_PROFILE_NET_URI = "datashare:///com.ohos.pdpprofileability/net/pdp_profile";
 const std::string MMS_APN_TYPE = "mms";
 const std::string ALL_APN_TYPE = "*";
 const std::string MMS_FILE_ADDRESS = "/data/app/test.mms";
+const std::string SMS_PROFILE_MMS_PDU_URI = "datashare:///com.ohos.smsmmsability/sms_mms/mms_pdu";
 
 void MmsGtest::SetUpTestCase()
 {
@@ -335,9 +337,7 @@ std::string GetFileToDb()
 {
     std::string mmsPdu;
     GetMmsPduFromFile(MMS_FILE_ADDRESS, mmsPdu);
-    std::string SMS_PROFILE_MMS_PDU_URI = "datashare:///com.ohos.smsmmsability/sms_mms/mms_pdu";
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
-    static constexpr const char *PDU_CONTENT = "pdu_content";
     std::shared_ptr<MmsPersistHelper> mmsPersistHelper = std::make_shared<MmsPersistHelper>();
     std::shared_ptr<DataShare::DataShareHelper> helper = mmsPersistHelper->CreateSmsHelper();
     std::vector<std::string> mmsPdus = SplitPdu(mmsPdu);
