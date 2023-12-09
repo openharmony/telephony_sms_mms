@@ -36,6 +36,7 @@ static constexpr uint8_t MAX_ADD_PARAM_LEN = 12;
 static constexpr uint8_t GSM_BEAR_DATA_LEN = 140;
 static constexpr uint8_t CHARSET_7BIT_BITS = 7;
 static constexpr uint16_t TAPI_TEXT_SIZE_MAX = 520;
+const std::string CT_SMSC = "10659401";
 
 string SmsBaseMessage::GetSmscAddr() const
 {
@@ -395,7 +396,7 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const DataCodingScheme
 }
 
 void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text,
-    bool force7BitCode, DataCodingScheme &codingType, bool bPortNum)
+    bool force7BitCode, DataCodingScheme &codingType, bool bPortNum, const std::string &desAddr)
 {
     std::string msgText(text);
     uint8_t decodeData[(MAX_GSM_7BIT_DATA_LEN * MAX_SEGMENT_NUM) + 1];
@@ -408,6 +409,10 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
     bool bAbnormal = false;
     MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
     codingType = force7BitCode ? DATA_CODING_7BIT : DATA_CODING_AUTO;
+    if (CT_SMSC.compare(desAddr) == 0) {
+        codingType = DATA_CODING_8BIT;
+    }
+
     encodeLen = DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
     if (encodeLen <= 0) {
         TELEPHONY_LOGE("encodeLen Less than or equal to 0");

@@ -70,9 +70,9 @@ void SplitMessage(const uint8_t *data, size_t size)
     DataCodingScheme codingType;
     std::vector<struct SplitInfo> cellsInfos;
     GsmSmsMessage gsmSmsMessage;
-    gsmSmsMessage.SplitMessage(cellsInfos, messageData, false, codingType, false);
+    gsmSmsMessage.SplitMessage(cellsInfos, messageData, false, codingType, false, "");
     CdmaSmsMessage cdmaSmsMessage;
-    cdmaSmsMessage.SplitMessage(cellsInfos, messageData, false, codingType, false);
+    cdmaSmsMessage.SplitMessage(cellsInfos, messageData, false, codingType, false, "");
 }
 
 void GetImsShortMessageFormat(const uint8_t *data, size_t size)
