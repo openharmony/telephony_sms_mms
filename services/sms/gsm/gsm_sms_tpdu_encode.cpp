@@ -23,6 +23,8 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
+const std::string CT_SMSC = "10659401";
+
 GsmSmsTpduEncode::GsmSmsTpduEncode(std::shared_ptr<GsmUserDataPdu> dataCodec,
     std::shared_ptr<GsmSmsParamCodec> paramCodec, std::shared_ptr<GsmSmsTpduCodec> tpdu)
 {
@@ -105,7 +107,8 @@ bool GsmSmsTpduEncode::EncodeSubmitPduPartData(SmsWriteBuffer &buffer, const str
         }
     }
     const struct SmsUDPackage *pUserData = &(pSubmit->userData);
-    bool ret = uDataCodec_->EncodeUserDataPdu(buffer, pUserData, pSubmit->dcs.codingScheme);
+    std::string addr = pSubmit->destAddress.address;
+    bool ret = uDataCodec_->EncodeUserDataPdu(buffer, pUserData, pSubmit->dcs.codingScheme, addr);
     return ret;
 }
 
@@ -188,7 +191,7 @@ void GsmSmsTpduEncode::EncodeSubmitTypeData(SmsWriteBuffer &buffer, const struct
         }
     }
     /* TP-UDHI */
-    if (pSubmit.bHeaderInd) {
+    if (pSubmit.bHeaderInd && CT_SMSC.compare(pSubmit.destAddress.address) != 0) {
         if (!buffer.GetTopValue(oneByte)) {
             TELEPHONY_LOGE("get data error.");
             return;
@@ -343,7 +346,8 @@ bool GsmSmsTpduEncode::EncodeDeliverData(SmsWriteBuffer &buffer, const struct Sm
 
     /* TP-UDL & TP-UD */
     const struct SmsUDPackage *pUserData = &(pDeliver->userData);
-    bool result = uDataCodec_->EncodeUserDataPdu(buffer, pUserData, pDeliver->dcs.codingScheme);
+    std::string addr;
+    bool result = uDataCodec_->EncodeUserDataPdu(buffer, pUserData, pDeliver->dcs.codingScheme, addr);
     return result;
 }
 
@@ -420,7 +424,8 @@ bool GsmSmsTpduEncode::EncodeDeliverReportPartData(SmsWriteBuffer &buffer, const
     /* TP-UDL & TP-UD */
     if (pDeliverRep->paramInd & HEX_VALUE_04) {
         const struct SmsUDPackage *pUserData = &(pDeliverRep->userData);
-        result = uDataCodec_->EncodeUserDataPdu(buffer, pUserData, pDeliverRep->dcs.codingScheme);
+        std::string addr;
+        result = uDataCodec_->EncodeUserDataPdu(buffer, pUserData, pDeliverRep->dcs.codingScheme, addr);
     }
     return result;
 }
@@ -578,7 +583,8 @@ bool GsmSmsTpduEncode::EncodeStatusReportData(
     bool result = false;
     if (pStatusRep->paramInd & HEX_VALUE_04) {
         const struct SmsUDPackage *pUserData = &(pStatusRep->userData);
-        result = uDataCodec_->EncodeUserDataPdu(buffer, pUserData, pStatusRep->dcs.codingScheme);
+        std::string addr;
+        result = uDataCodec_->EncodeUserDataPdu(buffer, pUserData, pStatusRep->dcs.codingScheme, addr);
     }
     return result;
 }

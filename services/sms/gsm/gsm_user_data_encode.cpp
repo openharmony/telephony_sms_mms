@@ -29,6 +29,7 @@ static constexpr uint8_t SLIDE_DATA_STEP = 2;
 static constexpr uint8_t MAX_TPDU_LEN = 255;
 static constexpr uint8_t HEX_07 = 0x07;
 static constexpr uint8_t HEX_08 = 0x08;
+const std::string CT_SMSC = "10659401";
 
 GsmUserDataEncode::GsmUserDataEncode(std::shared_ptr<GsmUserDataPdu> data)
 {
@@ -111,15 +112,17 @@ bool GsmUserDataEncode::EncodeGsmBodyPdu(SmsWriteBuffer &buffer, const struct Sm
     return packResult;
 }
 
-bool GsmUserDataEncode::Encode8bitPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *userData)
+bool GsmUserDataEncode::Encode8bitPdu(
+    SmsWriteBuffer &buffer, const struct SmsUDPackage *userData, std::string &destAddr)
 {
-    if (!Encode8bitHeadPdu(buffer, userData)) {
+    if (!Encode8bitHeadPdu(buffer, userData, destAddr)) {
         return false;
     }
     return Encode8bitBodyPdu(buffer, userData);
 }
 
-bool GsmUserDataEncode::Encode8bitHeadPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *userData)
+bool GsmUserDataEncode::Encode8bitHeadPdu(
+    SmsWriteBuffer &buffer, const struct SmsUDPackage *userData, std::string &destAddr)
 {
     if (userData == nullptr || userData_ == nullptr) {
         TELEPHONY_LOGE("nullptr error.");
@@ -127,7 +130,7 @@ bool GsmUserDataEncode::Encode8bitHeadPdu(SmsWriteBuffer &buffer, const struct S
     }
 
     uint16_t location = buffer.GetIndex();
-    if (userData->headerCnt > 0) {
+    if (userData->headerCnt > 0 && CT_SMSC.compare(destAddr) != 0) {
         buffer.MoveForward(SLIDE_DATA_STEP);
     } else {
         buffer.MoveForward(HEX_VALUE_01);
@@ -135,7 +138,7 @@ bool GsmUserDataEncode::Encode8bitHeadPdu(SmsWriteBuffer &buffer, const struct S
 
     /* Encode User Data Header */
     uint16_t udhl = buffer.GetIndex();
-    for (uint8_t index = 0; index < userData->headerCnt; index++) {
+    for (uint8_t index = 0; index < userData->headerCnt && CT_SMSC.compare(destAddr) != 0; index++) {
         userData_->EncodeHeader(buffer, userData->header[index]);
     }
     if (buffer.GetIndex() > udhl) {

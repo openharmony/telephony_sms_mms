@@ -531,7 +531,7 @@ void CdmaSmsTest::EncodeSubmitMsg(
     CdmaSmsMessage message;
     DataCodingScheme codingType;
     std::vector<struct SplitInfo> splits;
-    message.SplitMessage(splits, text, force7Bit, codingType, false);
+    message.SplitMessage(splits, text, force7Bit, codingType, false, "");
     std::cout << "codingType : " << codingType << std::endl;
     if (splits.size() > MAX_SEGMENT_NUM) {
         std::cout << "message exceed the limit." << std::endl;

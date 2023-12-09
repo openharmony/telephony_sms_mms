@@ -93,7 +93,7 @@ public:
     virtual int GetSegmentSize(
         DataCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
     virtual void SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text, bool force7BitCode,
-        DataCodingScheme &codingType, bool bPortNum);
+        DataCodingScheme &codingType, bool bPortNum, const std::string &desAddr);
     virtual int32_t GetIndexOnSim() const;
     virtual void SetIndexOnSim(int32_t index);
     virtual int32_t GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
