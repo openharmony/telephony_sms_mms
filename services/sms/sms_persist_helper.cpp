@@ -47,8 +47,8 @@ const std::string RAW_CONTACT_ID = "raw_contact_id";
 const std::string CONTACTED_COUNT = "contacted_count";
 const std::string LASTEST_CONTACTED_TIME = "lastest_contacted_time";
 constexpr static uint8_t TYPE_ID_VALUE = 5;
-constexpr static uint8_t NUMBER_START_SIZE = 3;
-constexpr static uint8_t NUMBER_SIZE = 11;
+const std::string PREFIX = "+86";
+std::string NUM_TEMP = "";
 const std::string NUMBER_START_STR = "192";
 
 SmsPersistHelper::SmsPersistHelper() {}
@@ -97,8 +97,8 @@ bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBu
     return ret >= 0 ? true : false;
 }
 
-bool SmsPersistHelper::QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId,
-    uint16_t &messageCount)
+bool SmsPersistHelper::QuerySession(
+    DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
     if (helper == nullptr) {
@@ -273,12 +273,30 @@ int32_t SmsPersistHelper::FormatSmsNumber(const std::string &num, std::string co
         TELEPHONY_LOGE("phoneUtils is nullptr");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-
     transform(countryCode.begin(), countryCode.end(), countryCode.begin(), ::toupper);
     i18n::phonenumbers::PhoneNumber parseResult;
     phoneUtils->Parse(num, countryCode, &parseResult);
-    if (phoneUtils->IsValidNumber(parseResult) || HasBCPhoneNumber(num)) {
+    if (phoneUtils->IsValidNumber(parseResult)) {
         phoneUtils->Format(parseResult, formatInfo, &formatNum);
+    } else {
+        NUM_TEMP.assign(num);
+        if (NUM_TEMP.substr(0, NUMBER_START_STR.size()) == NUMBER_START_STR ||
+            NUM_TEMP.substr(PREFIX.size(), NUMBER_START_STR.size()) == NUMBER_START_STR) {
+            if (formatInfo == i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL) {
+                if (NUM_TEMP.substr(0, PREFIX.size()) == PREFIX) {
+                    NUM_TEMP.erase(0, PREFIX.size());
+                    formatNum.assign(NUM_TEMP);
+                } else {
+                    formatNum.assign(NUM_TEMP);
+                }
+            } else if (formatInfo == i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::INTERNATIONAL) {
+                if (NUM_TEMP.substr(0, PREFIX.size()) == PREFIX) {
+                    formatNum.assign(NUM_TEMP);
+                } else {
+                    formatNum.assign(PREFIX + NUM_TEMP);
+                }
+            }
+        }
     }
     if (formatNum.empty() || formatNum == "0") {
         TELEPHONY_LOGE("FormatSmsNumber failed!");
@@ -286,19 +304,6 @@ int32_t SmsPersistHelper::FormatSmsNumber(const std::string &num, std::string co
     }
     TrimSpace(formatNum);
     return TELEPHONY_SUCCESS;
-}
-
-bool SmsPersistHelper::HasBCPhoneNumber(const std::string &phoneNumber)
-{
-    int32_t phoneNumberStart = 0;
-    int32_t phoneNumberStartLength = NUMBER_START_SIZE;
-    int32_t bCNumberLength = NUMBER_SIZE;
-    std::string bCNumberStart = NUMBER_START_STR;
-    if (phoneNumber.length() == bCNumberLength &&
-        phoneNumber.substr(phoneNumberStart, phoneNumberStartLength) == bCNumberStart) {
-        return true;
-    }
-    return false;
 }
 
 void SmsPersistHelper::TrimSpace(std::string &num)
@@ -436,7 +441,7 @@ bool SmsPersistHelper::QueryRawContactId(const std::string &address, int32_t &ra
 bool SmsPersistHelper::QueryParamBoolean(const std::string key, bool defValue)
 {
     const int PARAM_SIZE = 64;
-    char paramOutBuff[PARAM_SIZE] = {0};
+    char paramOutBuff[PARAM_SIZE] = { 0 };
     std::string defStrValue = defValue ? "1" : "0";
     std::string paramValue(defStrValue);
 
@@ -451,8 +456,8 @@ bool SmsPersistHelper::QueryParamBoolean(const std::string key, bool defValue)
         (paramValue == std::string("on")) || (paramValue == std::string("true"))) {
         return true;
     } else if ((paramValue == std::string("0")) || (paramValue == std::string("n")) ||
-        (paramValue == std::string("no")) || (paramValue == std::string("off")) ||
-        (paramValue == std::string("false"))) {
+               (paramValue == std::string("no")) || (paramValue == std::string("off")) ||
+               (paramValue == std::string("false"))) {
         return false;
     }
     return defValue;
