@@ -29,7 +29,7 @@ static constexpr uint8_t NORMAL_BYTE_BITS = 8;
 static constexpr uint8_t SLIDE_DATA_STEP = 2;
 
 bool GsmUserDataPdu::EncodeUserDataPdu(
-    SmsWriteBuffer &buffer, const struct SmsUDPackage *(&userData), DataCodingScheme scheme)
+    SmsWriteBuffer &buffer, const struct SmsUDPackage *(&userData), DataCodingScheme scheme, std::string &destAddr)
 {
     if (userData == nullptr) {
         TELEPHONY_LOGE("nullptr error.");
@@ -47,7 +47,7 @@ bool GsmUserDataPdu::EncodeUserDataPdu(
             result = encodePdu->EncodeGsmPdu(buffer, userData);
             break;
         case DATA_CODING_8BIT:
-            result = encodePdu->Encode8bitPdu(buffer, userData);
+            result = encodePdu->Encode8bitPdu(buffer, userData, destAddr);
             break;
         case DATA_CODING_UCS2:
             result = encodePdu->EncodeUcs2Pdu(buffer, userData);

@@ -822,10 +822,11 @@ HWTEST_F(BranchSmsTest, GsmSmsUDataCodec_0001, Function | MediumTest | Level1)
     const struct SmsUDPackage *pUserData = &(smsUserData);
     auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
     auto decodeBuffer = std::make_shared<SmsReadBuffer>("00");
-    EXPECT_GT(udPdu->EncodeUserDataPdu(*encodeBuffer, pUserData, DataCodingScheme::DATA_CODING_7BIT), 0);
-    EXPECT_GT(udPdu->EncodeUserDataPdu(*encodeBuffer, pUserData, DataCodingScheme::DATA_CODING_8BIT), 0);
-    EXPECT_GT(udPdu->EncodeUserDataPdu(*encodeBuffer, pUserData, DataCodingScheme::DATA_CODING_UCS2), 0);
-    EXPECT_EQ(udPdu->EncodeUserDataPdu(*encodeBuffer, pUserData, DataCodingScheme::DATA_CODING_ASCII7BIT), 0);
+    std::string str;
+    EXPECT_GT(udPdu->EncodeUserDataPdu(*encodeBuffer, pUserData, DataCodingScheme::DATA_CODING_7BIT, str), 0);
+    EXPECT_GT(udPdu->EncodeUserDataPdu(*encodeBuffer, pUserData, DataCodingScheme::DATA_CODING_8BIT, str), 0);
+    EXPECT_GT(udPdu->EncodeUserDataPdu(*encodeBuffer, pUserData, DataCodingScheme::DATA_CODING_UCS2, str), 0);
+    EXPECT_EQ(udPdu->EncodeUserDataPdu(*encodeBuffer, pUserData, DataCodingScheme::DATA_CODING_ASCII7BIT, str), 0);
     SmsUDPackage *userData = new SmsUDPackage();
     EXPECT_GE(udPdu->DecodeUserDataPdu(*decodeBuffer, true, DataCodingScheme::DATA_CODING_7BIT, userData, pTPUD), 0);
     EXPECT_GE(udPdu->DecodeUserDataPdu(*decodeBuffer, true, DataCodingScheme::DATA_CODING_8BIT, userData, pTPUD), 0);
@@ -839,11 +840,11 @@ HWTEST_F(BranchSmsTest, GsmSmsUDataCodec_0001, Function | MediumTest | Level1)
 
     auto encode = std::make_shared<GsmUserDataEncode>(udPdu);
     auto decode = std::make_shared<GsmUserDataDecode>(udPdu);
-    EXPECT_TRUE(encode->Encode8bitPdu(*encodeBuffer, userData));
+    EXPECT_TRUE(encode->Encode8bitPdu(*encodeBuffer, userData, str));
     EXPECT_TRUE(encode->EncodeUcs2Pdu(*encodeBuffer, userData));
     userData->headerCnt = 1;
     userData->length = BUFFER_SIZE;
-    EXPECT_EQ(encode->Encode8bitPdu(*encodeBuffer, userData), 0);
+    EXPECT_EQ(encode->Encode8bitPdu(*encodeBuffer, userData, str), 0);
     EXPECT_EQ(encode->EncodeUcs2Pdu(*encodeBuffer, userData), 0);
     EXPECT_EQ(decode->DecodeGsmPdu(*decodeBuffer, true, userData, pTPUD), 0);
     EXPECT_FALSE(decode->DecodeGsmPdu(*decodeBuffer, false, userData, pTPUD));
@@ -1509,7 +1510,8 @@ HWTEST_F(BranchSmsTest, GsmUserDataPdu_0001, Function | MediumTest | Level1)
     struct SmsUDPackage *pUserData = nullptr;
     auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
     auto gsmUserDataPdu = DelayedSingleton<GsmUserDataPdu>::GetInstance();
-    gsmUserDataPdu->EncodeUserDataPdu(*encodeBuffer, userData, DataCodingScheme::DATA_CODING_7BIT);
+    std::string str;
+    gsmUserDataPdu->EncodeUserDataPdu(*encodeBuffer, userData, DataCodingScheme::DATA_CODING_7BIT, str);
     auto deBuffer = std::make_shared<SmsReadBuffer>(SMS_READ_PDU);
     gsmUserDataPdu->DecodeUserDataPdu(*deBuffer, true, DataCodingScheme::DATA_CODING_7BIT, pUserData);
     SmsTpud *pTPUD = new SmsTpud();
