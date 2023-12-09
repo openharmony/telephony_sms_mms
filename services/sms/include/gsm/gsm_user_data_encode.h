@@ -25,13 +25,13 @@ public:
     explicit GsmUserDataEncode(std::shared_ptr<GsmUserDataPdu> data);
     ~GsmUserDataEncode();
     bool EncodeGsmPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData);
-    bool Encode8bitPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData);
+    bool Encode8bitPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData, std::string &destAddr);
     bool EncodeUcs2Pdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData);
 
 private:
     bool EncodeGsmHeadPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData, uint8_t &fillBits);
     bool EncodeGsmBodyPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData, uint8_t fillBits);
-    bool Encode8bitHeadPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData);
+    bool Encode8bitHeadPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData, std::string &destAddr);
     bool Encode8bitBodyPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData);
     bool EncodeUcs2HeadPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData);
     bool EncodeUcs2BodyPdu(SmsWriteBuffer &buffer, const struct SmsUDPackage *pUserData);

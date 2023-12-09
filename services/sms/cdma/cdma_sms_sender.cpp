@@ -49,7 +49,8 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
     CdmaSmsMessage message;
     DataCodingScheme codingType;
     std::vector<struct SplitInfo> splits;
-    message.SplitMessage(splits, text, CheckForce7BitEncodeType(), codingType, false);
+    std::string addr;
+    message.SplitMessage(splits, text, CheckForce7BitEncodeType(), codingType, false, addr);
     if (splits.size() > MAX_SEGMENT_NUM) {
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("message exceed the limit.");
@@ -137,7 +138,8 @@ void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const stri
     GsmSmsMessage gsmSmsMessage;
     std::vector<struct SplitInfo> cellsInfos;
     gsmSmsMessage.SetSmsCodingNationalType(GetSmsCodingNationalType(slotId_));
-    gsmSmsMessage.SplitMessage(cellsInfos, text, CheckForce7BitEncodeType(), codingType, false);
+    std::string addr;
+    gsmSmsMessage.SplitMessage(cellsInfos, text, CheckForce7BitEncodeType(), codingType, false, addr);
     bool isStatusReport = (deliveryCallback == nullptr) ? false : true;
     std::shared_ptr<struct SmsTpdu> tpdu =
         gsmSmsMessage.CreateDefaultSubmitSmsTpdu(desAddr, scAddr, text, isStatusReport, codingType);
@@ -319,7 +321,8 @@ void CdmaSmsSender::DataBasedSmsDelivery(const string &desAddr, const string &sc
     DataCodingScheme codingType;
     std::vector<struct SplitInfo> splits;
     std::string text((char *)data, dataLen);
-    message.SplitMessage(splits, text, false, codingType, true);
+    std::string addr;
+    message.SplitMessage(splits, text, false, codingType, true, addr);
     if (splits.size() == 0) {
         TELEPHONY_LOGE("splits fail.");
         return;
@@ -403,7 +406,7 @@ void CdmaSmsSender::DataBasedSmsDeliveryViaIms(const string &desAddr, const stri
     std::string dataStr;
     CharArrayToString(data, dataLen, dataStr);
     gsmSmsMessage.SetSmsCodingNationalType(GetSmsCodingNationalType(slotId_));
-    gsmSmsMessage.SplitMessage(cellsInfos, dataStr, CheckForce7BitEncodeType(), codingType, true);
+    gsmSmsMessage.SplitMessage(cellsInfos, dataStr, CheckForce7BitEncodeType(), codingType, true, desAddr);
     uint8_t msgRef8bit = GetMsgRef8Bit();
     TELEPHONY_LOGI("cdma data msgRef8bit = %{public}d", msgRef8bit);
     std::shared_ptr<struct SmsTpdu> tpdu = gsmSmsMessage.CreateDataSubmitSmsTpdu(

@@ -117,12 +117,12 @@ void SplitMessageAndCreateSubmitTest(const uint8_t *data, size_t size)
     std::string text(reinterpret_cast<const char *>(data), size);
     bool force7BitCode = (size % SLOT_NUM == 1);
     DataCodingScheme codingType = static_cast<DataCodingScheme>(size % CODE_SCHEME_SIZE);
-    msg.SplitMessage(cellsInfos, text, force7BitCode, codingType, false);
+    msg.SplitMessage(cellsInfos, text, force7BitCode, codingType, false, "");
     bool isStatusReport = (size % SLOT_NUM == 0);
     std::string desAddr(reinterpret_cast<const char *>(data), size);
     std::string scAddr(reinterpret_cast<const char *>(data), size);
     msg.CreateDefaultSubmitSmsTpdu(desAddr, scAddr, text, isStatusReport, codingType);
-    msg.SplitMessage(cellsInfos, text, force7BitCode, codingType, true);
+    msg.SplitMessage(cellsInfos, text, force7BitCode, codingType, true, "");
     uint8_t msgRef8bit = size % UINT8_COUNT;
     msg.CreateDataSubmitSmsTpdu(desAddr, scAddr, size, data, size, msgRef8bit, codingType, isStatusReport);
     bool bMore = (size % SLOT_NUM == 1);
