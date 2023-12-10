@@ -30,6 +30,7 @@
 #include "net_handle.h"
 #include "net_link_info.h"
 #include "securec.h"
+#include "sms_constants_utils.h"
 #include "telephony_common_utils.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
@@ -40,7 +41,6 @@ using namespace NetManagerStandard;
 using namespace NetStack::HttpClient;
 std::string METHOD_POST = "POST";
 std::string METHOD_GET = "GET";
-static constexpr uint32_t CODE_BUFFER_MAX_SIZE = 300 * 1024;
 constexpr const char *SIMID_IDENT_PREFIX = "simId";
 const bool STORE_MMS_PDU_TO_FILE = false;
 constexpr static const int32_t WAIT_TIME_SECOND = 30;
@@ -232,7 +232,7 @@ int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, const std::string &sto
 int32_t MmsNetworkClient::UpdateMmsPduToStorage(const std::string &storeDirName)
 {
     uint32_t len = responseData_.size();
-    if (len > CODE_BUFFER_MAX_SIZE || len == 0) {
+    if (len > MMS_PDU_MAX_SIZE || len == 0) {
         TELEPHONY_LOGE("MMS pdu length invalid");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
@@ -280,7 +280,7 @@ bool MmsNetworkClient::GetMmsPduFromFile(const std::string &fileName, std::strin
 
     (void)fseek(pFile, 0, SEEK_END);
     long fileLen = ftell(pFile);
-    if (fileLen <= 0 || fileLen > static_cast<long>(CODE_BUFFER_MAX_SIZE)) {
+    if (fileLen <= 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
         (void)fclose(pFile);
         TELEPHONY_LOGE("Mms Over Long Error");
         return false;
@@ -293,7 +293,7 @@ bool MmsNetworkClient::GetMmsPduFromFile(const std::string &fileName, std::strin
         return false;
     }
     (void)fseek(pFile, 0, SEEK_SET);
-    int32_t totolLength = static_cast<int32_t>(fread(pduBuffer.get(), 1, CODE_BUFFER_MAX_SIZE, pFile));
+    int32_t totolLength = static_cast<int32_t>(fread(pduBuffer.get(), 1, MMS_PDU_MAX_SIZE, pFile));
     TELEPHONY_LOGI("sendMms totolLength:%{public}d", totolLength);
     (void)fclose(pFile);
 

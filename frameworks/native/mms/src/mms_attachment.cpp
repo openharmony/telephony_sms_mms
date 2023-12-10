@@ -15,6 +15,7 @@
 #include "mms_attachment.h"
 
 #include "securec.h"
+#include "sms_constants_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
