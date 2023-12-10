@@ -18,6 +18,7 @@
 #include "napi_base_context.h"
 #include "napi_mms_pdu.h"
 #include "napi_mms_pdu_helper.h"
+#include "sms_constants_utils.h"
 #include "telephony_permission.h"
 
 namespace OHOS {
@@ -27,7 +28,6 @@ const std::string SMS_PROFILE_URI = "datashare:///com.ohos.smsmmsability";
 static constexpr const char *PDU = "pdu";
 static const int32_t DEFAULT_REF_COUNT = 1;
 const bool STORE_MMS_PDU_TO_FILE = false;
-const uint32_t MMS_PDU_MAX_SIZE = 300 * 1024;
 const int32_t ARGS_ONE = 1;
 std::shared_ptr<DataShare::DataShareHelper> g_datashareHelper = nullptr;
 } // namespace

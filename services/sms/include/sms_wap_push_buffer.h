@@ -67,7 +67,6 @@ private:
     uint32_t savePosition_ = 0;
 
 private:
-    const uint32_t CODE_BUFFER_MAX_SIZE = 300 * 1024;
     static constexpr uint8_t EDN_S = 0;
     static constexpr uint8_t NARMAL_TEXT_MIN = 32;
     static constexpr uint8_t NARMAL_TEXT_MAX = 126;
