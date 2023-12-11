@@ -15,6 +15,7 @@
 #include "mms_buffer.h"
 
 #include "securec.h"
+#include "sms_constants_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -24,13 +25,13 @@ static constexpr const char *APP_SAND_RELATIVE_DIR = "/data/storage";
 
 MmsBuffer::MmsBuffer()
 {
-    pduBuffer_ = std::make_unique<char[]>(CODE_BUFFER_MAX_SIZE);
+    pduBuffer_ = std::make_unique<char[]>(MMS_PDU_MAX_SIZE);
     if (pduBuffer_ == nullptr) {
         TELEPHONY_LOGE("MmsBuffer make_unique create pduBuffer error");
         totolLength_ = 0;
         return;
     }
-    totolLength_ = CODE_BUFFER_MAX_SIZE;
+    totolLength_ = MMS_PDU_MAX_SIZE;
 }
 
 MmsBuffer::~MmsBuffer()
@@ -47,7 +48,7 @@ std::unique_ptr<char[]> MmsBuffer::ReadDataBuffer(uint32_t desLen)
 
 std::unique_ptr<char[]> MmsBuffer::ReadDataBuffer(uint32_t offset, uint32_t desLen)
 {
-    if (desLen > CODE_BUFFER_MAX_SIZE) {
+    if (desLen > MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("desLen over size error");
         return nullptr;
     }
@@ -75,7 +76,7 @@ bool MmsBuffer::WriteDataBuffer(std::unique_ptr<char[]> inBuff, uint32_t len)
         TELEPHONY_LOGE("InBuffer nullptr Error .");
         return false;
     }
-    if (len <= 0 || len > CODE_BUFFER_MAX_SIZE) {
+    if (len <= 0 || len > MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("Data Len Over Error .");
         return false;
     }
@@ -122,7 +123,7 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
     }
     (void)fseek(pFile, 0, SEEK_END);
     long fileLen = ftell(pFile);
-    if (fileLen <= 0 || fileLen > static_cast<long>(CODE_BUFFER_MAX_SIZE)) {
+    if (fileLen <= 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
         (void)fclose(pFile);
         TELEPHONY_LOGE("Mms Over Long Error .");
         return false;

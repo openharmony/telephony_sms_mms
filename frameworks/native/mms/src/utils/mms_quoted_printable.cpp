@@ -19,13 +19,13 @@
 
 #include "memory"
 #include "securec.h"
+#include "sms_constants_utils.h"
 #include "string"
 #include "string.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
-static constexpr uint32_t MAX_MMS_ATTACHMENT_LEN = 300 * 1024;
 static constexpr int END_LINE_CHAR_NUM = 3;
 
 std::string MmsQuotedPrintable::Encode(const std::string &input)

@@ -14,11 +14,12 @@
  */
 #include "napi_mms.h"
 
-#include "telephony_permission.h"
 #include "ability.h"
 #include "napi_base_context.h"
 #include "napi_mms_pdu.h"
 #include "napi_mms_pdu_helper.h"
+#include "sms_constants_utils.h"
+#include "telephony_permission.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -26,7 +27,6 @@ namespace {
 const std::string mmsTypeKey = "mmsType";
 const std::string attachmentKey = "attachment";
 static const int32_t DEFAULT_REF_COUNT = 1;
-static const uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
 } // namespace
 
 static void SetPropertyArray(napi_env env, napi_value object, const std::string &name, MmsAttachmentContext &context)
@@ -625,7 +625,7 @@ void ParseDecodeMmsParam(napi_env env, napi_value object, DecodeMmsContext &cont
         int32_t element = 0;
         uint32_t arrayLength = 0;
         napi_get_array_length(env, object, &arrayLength);
-        if (arrayLength > MAX_MMS_MSG_PART_LEN) {
+        if (arrayLength > MMS_PDU_MAX_SIZE) {
             TELEPHONY_LOGE("arrayLength over size error");
             return;
         }
@@ -1050,7 +1050,7 @@ MmsAttachmentContext BuildMmsAttachment(napi_env env, napi_value value)
         uint32_t arrayLength = 0;
         int32_t elementInt = 0;
         napi_get_array_length(env, inBuffValue, &arrayLength);
-        if (arrayLength > MAX_MMS_MSG_PART_LEN) {
+        if (arrayLength > MMS_PDU_MAX_SIZE) {
             TELEPHONY_LOGE("arrayLength over size error");
             return attachmentContext;
         }

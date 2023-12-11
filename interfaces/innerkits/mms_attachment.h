@@ -196,7 +196,6 @@ private:
     uint32_t charset_ = 0;
     uint32_t dataLength_ = 0;
     std::unique_ptr<char[]> pAttachmentBuffer_ = nullptr;
-    static constexpr uint32_t MAX_MMS_ATTACHMENT_LEN = 300 * 1024;
 };
 } // namespace Telephony
 } // namespace OHOS
