@@ -16,6 +16,7 @@
 #include "sms_wap_push_buffer.h"
 
 #include "securec.h"
+#include "sms_constants_utils.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 
@@ -40,7 +41,7 @@ std::unique_ptr<char[]> SmsWapPushBuffer::ReadDataBuffer(uint32_t offset, uint32
     if ((desLen > totolLength_) || ((offset + desLen) > totolLength_)) {
         return nullptr;
     }
-    if (desLen > CODE_BUFFER_MAX_SIZE) {
+    if (desLen > MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("desLen over size error");
         return nullptr;
     }
@@ -57,7 +58,7 @@ std::unique_ptr<char[]> SmsWapPushBuffer::ReadDataBuffer(uint32_t offset, uint32
 bool SmsWapPushBuffer::WriteRawStringBuffer(const std::string &inSrc)
 {
     uint32_t len = inSrc.length();
-    if (len > CODE_BUFFER_MAX_SIZE) {
+    if (len > MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("create wappush input source string over length error.");
         return false;
     }
@@ -85,7 +86,7 @@ bool SmsWapPushBuffer::WriteDataBuffer(std::unique_ptr<char[]> inBuff, uint32_t 
         TELEPHONY_LOGE("wap push inBuff is null.");
         return false;
     }
-    if (len <= 0 || len > CODE_BUFFER_MAX_SIZE) {
+    if (len <= 0 || len > MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("wap push len invalid .");
         return false;
     }

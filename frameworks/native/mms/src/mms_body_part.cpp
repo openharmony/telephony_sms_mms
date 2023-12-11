@@ -17,13 +17,13 @@
 #include <ctime>
 
 #include "securec.h"
+#include "sms_constants_utils.h"
+#include "telephony_log_wrapper.h"
 #include "utils/mms_base64.h"
 #include "utils/mms_quoted_printable.h"
-#include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
-static constexpr uint32_t MAX_MMS_MSG_PART_LEN = 300 * 1024;
 const std::string ENCODE_BINARY = "binary";
 const std::string ENCODE_BASE64 = "base64";
 const std::string ENCODE_QUOTED_PRINTABLE = "quoted-printable";
@@ -64,7 +64,7 @@ MmsBodyPart &MmsBodyPart::operator=(const MmsBodyPart &srcBodyPart)
         return *this;
     }
 
-    if (srcBodyPart.bodyLen_ > MAX_MMS_MSG_PART_LEN) {
+    if (srcBodyPart.bodyLen_ > MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("srcBodyPart.bodyLen_ over size error");
         return *this;
     }
@@ -188,7 +188,7 @@ bool MmsBodyPart::DecodePartHeader(MmsDecodeBuffer &decodeBuffer, uint32_t heade
 bool MmsBodyPart::DecodePartBody(MmsDecodeBuffer &decodeBuffer, uint32_t bodyLength)
 {
     uint32_t offset = decodeBuffer.GetCurPosition();
-    if (offset + bodyLength > decodeBuffer.GetSize() || bodyLength > MAX_MMS_MSG_PART_LEN) {
+    if (offset + bodyLength > decodeBuffer.GetSize() || bodyLength > MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("Decode Body Part buffer size err.");
         return false;
     }
@@ -216,7 +216,7 @@ bool MmsBodyPart::DecodePartBody(MmsDecodeBuffer &decodeBuffer, uint32_t bodyLen
     if (encodebuffer.length()) {
         bodyLen_ = 0;
         uint32_t tempLen = encodebuffer.length();
-        if (tempLen > MAX_MMS_MSG_PART_LEN) {
+        if (tempLen > MMS_PDU_MAX_SIZE) {
             TELEPHONY_LOGE("tempLen over size error");
             return false;
         }
@@ -456,7 +456,7 @@ bool MmsBodyPart::WriteBodyFromFile(std::string path)
     }
     (void)fseek(pFile, 0, SEEK_END);
     long fileLen = ftell(pFile);
-    if (fileLen <= 0 || fileLen > static_cast<long>(MAX_MMS_MSG_PART_LEN)) {
+    if (fileLen <= 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
         (void)fclose(pFile);
         TELEPHONY_LOGE("fileLen is invalid [%{public}ld]", fileLen);
         return false;
@@ -492,7 +492,7 @@ bool MmsBodyPart::WriteBodyFromAttachmentBuffer(MmsAttachment &attachment)
         return false;
     }
 
-    if (dataLen == 0 || dataLen > MAX_MMS_MSG_PART_LEN) {
+    if (dataLen == 0 || dataLen > MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("Attachment DataLen is invalid Error");
         return false;
     }
@@ -537,7 +537,7 @@ MmsBodyPartHeader &MmsBodyPart::GetPartHeader()
 
 std::unique_ptr<char[]> MmsBodyPart::ReadBodyPartBuffer(uint32_t &len)
 {
-    if (bodyLen_ > MAX_MMS_MSG_PART_LEN) {
+    if (bodyLen_ > MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("srcBodyPart.bodyLen_ over size error");
         return nullptr;
     }

@@ -17,6 +17,7 @@
 
 #include "mms_decode_buffer.h"
 #include "securec.h"
+#include "sms_constants_utils.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -57,7 +58,7 @@ bool MmsEncodeBuffer::EncodeUintvar(uint32_t value)
 
 bool MmsEncodeBuffer::WriteByte(uint8_t value)
 {
-    if (curPosition_ >= CODE_BUFFER_MAX_SIZE) {
+    if (curPosition_ >= MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("Encode buffer current position invalid.");
         return false;
     }
@@ -68,7 +69,7 @@ bool MmsEncodeBuffer::WriteByte(uint8_t value)
 bool MmsEncodeBuffer::WriteBuffer(MmsEncodeBuffer &buff)
 {
     uint32_t len = buff.GetCurPosition();
-    if (curPosition_ + len >= CODE_BUFFER_MAX_SIZE) {
+    if (curPosition_ + len >= MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("Encode buffer current position invalid.");
         return false;
     }
@@ -87,7 +88,7 @@ bool MmsEncodeBuffer::WriteBuffer(std::unique_ptr<char[]> input, uint32_t length
         return false;
     }
 
-    if (curPosition_ + length >= CODE_BUFFER_MAX_SIZE) {
+    if (curPosition_ + length >= MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("Encode buffer current position invalid.");
         return false;
     }
