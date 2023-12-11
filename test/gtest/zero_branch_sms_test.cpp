@@ -74,6 +74,9 @@ const int FOUR_BIT = 4;
 const int FIVE_BIT = 5;
 const int SIX_BIT = 6;
 const int TWO_BIT = 2;
+const std::string CBN_NUM = "+86192********";
+const int NUM_LENGTH = 11;
+const std::string PREFIX = "+86";
 } // namespace
 
 class BranchSmsTest : public testing::Test {
@@ -1787,6 +1790,31 @@ HWTEST_F(BranchSmsTest, SmsService_0005, Function | MediumTest | Level1)
     EXPECT_GE(splitRes, TELEPHONY_ERR_ARGUMENT_INVALID);
     EXPECT_GE(smsRes, TELEPHONY_ERR_ARGUMENT_INVALID);
     EXPECT_TRUE(smsService != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsPersistHelper_0002
+ * @tc.name     Test SmsPersistHelper
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsPersistHelper_0002, Function | MediumTest | Level1)
+{
+    std::string formatNum = "";
+    auto smsPersistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
+    std::string num = "";
+    std::string cbnNumTemp = "";
+    cbnNumTemp.assign(CBN_NUM);
+    num = cbnNumTemp.substr(DIGIT_LEN, NUM_LENGTH);
+    smsPersistHelper->CbnFormat(num, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
+    EXPECT_TRUE(formatNum == num);
+    smsPersistHelper->CbnFormat(num, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::INTERNATIONAL, formatNum);
+    EXPECT_TRUE(formatNum == cbnNumTemp);
+    smsPersistHelper->CbnFormat(
+        cbnNumTemp, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::INTERNATIONAL, formatNum);
+    EXPECT_TRUE(formatNum == cbnNumTemp);
+    smsPersistHelper->CbnFormat(
+        cbnNumTemp, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
+    EXPECT_TRUE(formatNum == num);
 }
 } // namespace Telephony
 } // namespace OHOS
