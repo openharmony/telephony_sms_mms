@@ -35,7 +35,7 @@ public:
     int Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);
     int CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme);
     int GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme,
-        SmsCodingNationalType codingNationalType);
+        SmsCodingNationalType codingNationalType, MSG_LANGUAGE_ID_T &langId);
     int Gsm7bitToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, const MsgLangInfo &langInfo);
     int Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);
     int EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);
