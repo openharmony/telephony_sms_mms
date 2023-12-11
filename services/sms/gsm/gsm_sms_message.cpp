@@ -725,6 +725,7 @@ int GsmSmsMessage::DecodeMessage(uint8_t *decodeData, unsigned int len, DataCodi
             break;
         }
     }
+    TELEPHONY_LOGI("DecodeMessage, message coding type is %{public}d", codingType);
     return decodeLen;
 }
 } // namespace Telephony
