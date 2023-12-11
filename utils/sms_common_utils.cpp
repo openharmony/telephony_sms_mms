@@ -106,6 +106,45 @@ uint16_t SmsCommonUtils::Unpack7bitChar(
     return dstIdx;
 }
 
+uint16_t SmsCommonUtils::Unpack7bitCharForCBPdu(
+    const uint8_t *tpdu, uint16_t dataLen, uint8_t fillBits, uint8_t *unpackData, uint16_t unpackDataLen)
+{
+    uint16_t srcIdx = 0;
+    uint16_t dstIdx = 0;
+    auto shift = fillBits;
+    if (unpackData == nullptr || tpdu == nullptr || dataLen == 0 || unpackDataLen == 0 || dataLen > unpackDataLen) {
+        TELEPHONY_LOGE("userData error.");
+        return dstIdx;
+    }
+    if (shift > 0) {
+        srcIdx = 1;
+    }
+    for (; srcIdx < dataLen && dstIdx < unpackDataLen; dstIdx++) {
+        if (shift == 0) {
+            unpackData[dstIdx] = tpdu[srcIdx] & 0x7F;
+            shift = SMS_ENCODE_GSM_BIT;
+            srcIdx++;
+            dstIdx++;
+        }
+        if (shift > 0 && srcIdx < dataLen && dstIdx < unpackDataLen) {
+            unpackData[dstIdx] = ((unsigned int)tpdu[srcIdx - 1] >> shift) + (tpdu[srcIdx] << (SMS_BYTE_BIT - shift));
+            unpackData[dstIdx] &= 0x7F;
+            shift--;
+            if (shift > 0) {
+                srcIdx++;
+            }
+        }
+    }
+    if (shift == 0) {
+        unpackData[dstIdx] = tpdu[srcIdx] >> shift;
+        dstIdx++;
+    } else if (srcIdx > 1) {
+        unpackData[dstIdx] = tpdu[srcIdx - 1] >> shift;
+        dstIdx++;
+    }
+    return dstIdx;
+}
+
 uint8_t SmsCommonUtils::DigitToDtmfChar(const uint8_t c)
 {
     if (c == '0') {
