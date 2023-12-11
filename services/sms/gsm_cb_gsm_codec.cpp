@@ -227,7 +227,7 @@ bool GsmCbGsmCodec::Decode2gCbMsg7bit(uint16_t dataLen)
         TELEPHONY_LOGE("dataPdu empty.");
         return false;
     }
-    uint16_t unpackLen = SmsCommonUtils::Unpack7bitChar(
+    uint16_t unpackLen = SmsCommonUtils::Unpack7bitCharForCBPdu(
         dataPdu.data(), dataLen, 0x00, pageData, MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT);
     uint16_t offset = 0;
     if (cbHeader_->dcs.iso639Lang[0] && unpackLen >= GsmCbCodec::CB_IOS639_LANG_SIZE) {
