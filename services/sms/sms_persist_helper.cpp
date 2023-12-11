@@ -48,7 +48,6 @@ const std::string CONTACTED_COUNT = "contacted_count";
 const std::string LASTEST_CONTACTED_TIME = "lastest_contacted_time";
 constexpr static uint8_t TYPE_ID_VALUE = 5;
 const std::string PREFIX = "+86";
-std::string NUM_TEMP = "";
 const std::string NUMBER_START_STR = "192";
 
 SmsPersistHelper::SmsPersistHelper() {}
@@ -279,24 +278,9 @@ int32_t SmsPersistHelper::FormatSmsNumber(const std::string &num, std::string co
     if (phoneUtils->IsValidNumber(parseResult)) {
         phoneUtils->Format(parseResult, formatInfo, &formatNum);
     } else {
-        NUM_TEMP.assign(num);
-        if (NUM_TEMP.substr(0, NUMBER_START_STR.size()) == NUMBER_START_STR ||
-            NUM_TEMP.substr(PREFIX.size(), NUMBER_START_STR.size()) == NUMBER_START_STR) {
-            if (formatInfo == i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL) {
-                if (NUM_TEMP.substr(0, PREFIX.size()) == PREFIX) {
-                    NUM_TEMP.erase(0, PREFIX.size());
-                    formatNum.assign(NUM_TEMP);
-                } else {
-                    formatNum.assign(NUM_TEMP);
-                }
-            } else if (formatInfo == i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::INTERNATIONAL) {
-                if (NUM_TEMP.substr(0, PREFIX.size()) == PREFIX) {
-                    formatNum.assign(NUM_TEMP);
-                } else {
-                    formatNum.assign(PREFIX + NUM_TEMP);
-                }
-            }
-        }
+        std::string numTemp = "";
+        numTemp.assign(num);
+        CbnFormat(numTemp, formatInfo, formatNum);
     }
     if (formatNum.empty() || formatNum == "0") {
         TELEPHONY_LOGE("FormatSmsNumber failed!");
@@ -304,6 +288,31 @@ int32_t SmsPersistHelper::FormatSmsNumber(const std::string &num, std::string co
     }
     TrimSpace(formatNum);
     return TELEPHONY_SUCCESS;
+}
+
+void SmsPersistHelper::CbnFormat(std::string &numTemp,
+    const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo, std::string &formatNum)
+{
+    TELEPHONY_LOGD("into CbnFormat");
+    if (numTemp.substr(0, NUMBER_START_STR.size()) == NUMBER_START_STR ||
+        numTemp.substr(PREFIX.size(), NUMBER_START_STR.size()) == NUMBER_START_STR) {
+        if (formatInfo == i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL) {
+            if (numTemp.substr(0, PREFIX.size()) == PREFIX) {
+                numTemp.erase(0, PREFIX.size());
+                formatNum.assign(numTemp);
+                return;
+            }
+            formatNum.assign(numTemp);
+            return;
+        }
+        if (formatInfo == i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::INTERNATIONAL) {
+            if (numTemp.substr(0, PREFIX.size()) == PREFIX) {
+                formatNum.assign(numTemp);
+                return;
+            }
+            formatNum.assign(PREFIX + numTemp);
+        }
+    }
 }
 
 void SmsPersistHelper::TrimSpace(std::string &num)
