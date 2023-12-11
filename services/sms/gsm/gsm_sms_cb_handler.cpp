@@ -319,6 +319,7 @@ bool GsmSmsCbHandler::SetWantData(EventFwk::Want &want, const std::shared_ptr<Gs
         rawMsgBody.append(it->second->GetCbMessageRaw());
     }
     GetCbData(cbMessage, sendData);
+    TELEPHONY_LOGI("cbMessage:%{public}s.", cbMessage->ToString().c_str());
     cbMessage->ConvertToUTF8(rawMsgBody, sendData.msgBody);
     want.SetParam(SmsCbData::GEO_SCOPE, static_cast<char>(sendData.geoScope));
     want.SetParam(SmsCbData::CMAS_RESPONSE, static_cast<char>(sendData.cmasRes));
