@@ -720,7 +720,7 @@ int GsmSmsMessage::DecodeMessage(uint8_t *decodeData, unsigned int len, DataCodi
         default: {
             DataCodingScheme encodeType = DATA_CODING_AUTO;
             decodeLen = TextCoder::Instance().GsmUtf8ToAuto(decodeData, maxDecodeLen, pMsgText, dataLen,
-                encodeType, smsCodingNationalType_);
+                encodeType, smsCodingNationalType_, langId);
             codingType = encodeType;
             break;
         }
