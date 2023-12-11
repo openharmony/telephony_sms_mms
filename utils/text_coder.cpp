@@ -295,7 +295,7 @@ int TextCoder::Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int 
 }
 
 int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength,
-    DataCodingScheme &scheme, SmsCodingNationalType codingNationalType)
+    DataCodingScheme &scheme, SmsCodingNationalType codingNationalType, MSG_LANGUAGE_ID_T &langId)
 {
     int maxUcs2Length = srcLength;
     if (maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
@@ -336,6 +336,7 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
         }
         return tempTextLen;
     }
+    langId = (MSG_LANGUAGE_ID_T)codingNationalType;
     scheme = DATA_CODING_7BIT;
     return length;
 }
