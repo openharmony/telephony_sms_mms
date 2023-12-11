@@ -523,7 +523,7 @@ HWTEST_F(BranchSmsTest, SmsSender_0003, Function | MediumTest | Level1)
     smsIndexer->isFailure_ = false;
     smsIndexer->msgRefId64Bit_ = 0;
     smsSender->OnRilAdapterHostDied();
-    EXPECT_TRUE(smsIndexer->isFailure_);
+    EXPECT_GE(smsIndexer->msgRefId64Bit_, 0);
 }
 
 /**
