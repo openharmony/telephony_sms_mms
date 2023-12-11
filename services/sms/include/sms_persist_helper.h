@@ -57,6 +57,8 @@ private:
     void TrimSpace(std::string &num);
     bool QueryContactedCount(const std::string &address, int32_t &rawCountId, int32_t &contactedCount);
     bool QueryRawContactId(const std::string &address, int32_t &rawCountId);
+    void CbnFormat(std::string &numTemp, const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo,
+        std::string &formatNum);
 };
 } // namespace Telephony
 } // namespace OHOS
