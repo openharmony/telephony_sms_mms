@@ -251,7 +251,7 @@ HWTEST_F(BranchCbTest, GsmCbCodec_0005, Function | MediumTest | Level1)
         EXPECT_TRUE(false);
         return;
     }
-
+    EXPECT_FALSE(gsmMsg->Decode2gHeader());
     unsigned char data = 1;
     std::vector<unsigned char> pdu;
     pdu.push_back(data);
