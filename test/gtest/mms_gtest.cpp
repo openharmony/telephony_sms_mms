@@ -83,7 +83,7 @@ void MmsGtest::TearDown() {}
 const int32_t DEFAULT_SIM_SLOT_ID_1 = 1;
 const uint16_t MESSAGE_TYPE = 4;
 const uint16_t WAPPUSH_PDU_LEN = 164;
-const uint32_t MAX_MMS_ATTACHMENT_LEN = 300 * 1024;
+const uint32_t MAX_MMS_ATTACHMENT_LEN = 10 * 1024 * 1024;
 const char PDU_TEST_DATA = 35;
 const char MIN_SHORT_OCTET = 30;
 const char QUOTE_CHAR_LEN = 0X7F - 1;
