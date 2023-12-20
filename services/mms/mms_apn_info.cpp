@@ -67,6 +67,46 @@ std::shared_ptr<DataShare::DataShareHelper> MmsApnInfo::CreateDataAHelper(
     return DataShare::DataShareHelper::Creator(remoteObj, dataAbilityUri);
 }
 
+bool MmsApnInfo::SplitAndMatchApnTypes(std::string apn)
+{
+    std::vector<std::string> apns;
+    size_t pos = 0;
+    size_t found = 0;
+    while ((found = apn.find(',', pos)) != std::string::npos) {
+        apns.push_back(apn.substr(pos, found - pos));
+        pos = found + 1;
+    }
+    apns.push_back(apn.substr(pos));
+
+    for (size_t i = 0; i < apns.size(); i++) {
+        if (apns[i] == MMS_APN_TYPE || (apns[i] == ALL_APN_TYPE && apns.size() == 1)) {
+            TELEPHONY_LOGI("ApnType match success");
+            return true;
+        }
+    }
+    return false;
+}
+
+bool MmsApnInfo::GetMmsApnValue(
+    std::shared_ptr<DataShare::ResultSet> resultSet, int count, std::string &homeUrlVal, std::string &mmsIPAddressVal)
+{
+    int columnIndex;
+    std::string apn;
+    for (int row = 0; row < count; row++) {
+        resultSet->GoToRow(row);
+        resultSet->GetColumnIndex(PdpProfileData::APN_TYPES, columnIndex);
+        resultSet->GetString(columnIndex, apn);
+        if (SplitAndMatchApnTypes(apn)) {
+            resultSet->GetColumnIndex(PdpProfileData::HOME_URL, columnIndex);
+            resultSet->GetString(columnIndex, homeUrlVal);
+            resultSet->GetColumnIndex(PdpProfileData::MMS_IP_ADDRESS, columnIndex);
+            resultSet->GetString(columnIndex, mmsIPAddressVal);
+            return true;
+        }
+    }
+    return false;
+}
+
 void MmsApnInfo::PdpProfileSelect(const std::shared_ptr<DataShare::DataShareHelper> &helper)
 {
     Uri uri(PDP_PROFILE_NET_URI);
@@ -81,10 +121,6 @@ void MmsApnInfo::PdpProfileSelect(const std::shared_ptr<DataShare::DataShareHelp
     }
     TELEPHONY_LOGI("query mms apn data base");
     predicates.EqualTo(PdpProfileData::MCCMNC, mccmnc);
-    std::vector<std::string> apnTypes;
-    apnTypes.push_back(MMS_APN_TYPE);
-    apnTypes.push_back(ALL_APN_TYPE);
-    predicates.In(PdpProfileData::APN_TYPES, apnTypes);
     auto resultSet = helper->Query(uri, predicates, colume);
     if (resultSet == nullptr) {
         TELEPHONY_LOGE("resultSet nullptr");
@@ -99,21 +135,15 @@ void MmsApnInfo::PdpProfileSelect(const std::shared_ptr<DataShare::DataShareHelp
         helper->Release();
         return;
     }
-    int columnIndex;
     std::string homeUrlVal;
     std::string mmsIPAddressVal;
-
-    for (int row = 0; row < count; row++) {
-        resultSet->GoToRow(row);
-        resultSet->GetColumnIndex(PdpProfileData::HOME_URL, columnIndex);
-        resultSet->GetString(columnIndex, homeUrlVal);
-        resultSet->GetColumnIndex(PdpProfileData::MMS_IP_ADDRESS, columnIndex);
-        resultSet->GetString(columnIndex, mmsIPAddressVal);
+    if (GetMmsApnValue(resultSet, count, homeUrlVal, mmsIPAddressVal)) {
+        setMmscUrl(homeUrlVal);
+        setMmsProxyAddressAndProxyPort(mmsIPAddressVal);
     }
+    TELEPHONY_LOGI("homeUrlVal and mmsIPAddressVal not matched");
     resultSet->Close();
     helper->Release();
-    setMmscUrl(homeUrlVal);
-    setMmsProxyAddressAndProxyPort(mmsIPAddressVal);
 }
 
 std::string MmsApnInfo::getMmscUrl()
