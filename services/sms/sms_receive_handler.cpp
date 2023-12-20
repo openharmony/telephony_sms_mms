@@ -28,8 +28,7 @@ constexpr static uint16_t PDU_POS_OFFSET = 1;
 constexpr static uint8_t SMS_TYPE_GSM = 1;
 constexpr static uint8_t SMS_TYPE_CDMA = 2;
 
-SmsReceiveHandler::SmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
-    : AppExecFwk::EventHandler(runner), slotId_(slotId)
+SmsReceiveHandler::SmsReceiveHandler(int32_t slotId) : TelEventHandler("SmsReceiveHandler"), slotId_(slotId)
 {
     smsWapPushHandler_ = std::make_unique<SmsWapPushHandler>(slotId);
     if (smsWapPushHandler_ == nullptr) {

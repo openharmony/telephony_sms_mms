@@ -57,10 +57,7 @@ private:
     int32_t slotId_;
     std::shared_ptr<SmsSender> gsmSmsSender_;
     std::shared_ptr<SmsSender> cdmaSmsSender_;
-    std::shared_ptr<AppExecFwk::EventRunner> gsmSmsSendRunner_;
-    std::shared_ptr<AppExecFwk::EventRunner> cdmaSmsSendRunner_;
     std::shared_ptr<SmsNetworkPolicyManager> networkManager_;
-    std::shared_ptr<AppExecFwk::EventRunner> networkRunner_;
 };
 } // namespace Telephony
 } // namespace OHOS

@@ -35,8 +35,7 @@
 namespace OHOS {
 namespace Telephony {
 using namespace OHOS::EventFwk;
-CdmaSmsReceiveHandler::CdmaSmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
-    : SmsReceiveHandler(runner, slotId)
+CdmaSmsReceiveHandler::CdmaSmsReceiveHandler(int32_t slotId) : SmsReceiveHandler(slotId)
 {
     TELEPHONY_LOGI("%{public}d", slotId_);
 }

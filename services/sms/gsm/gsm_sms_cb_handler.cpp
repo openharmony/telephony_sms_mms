@@ -29,8 +29,7 @@
 namespace OHOS {
 namespace Telephony {
 using namespace OHOS::EventFwk;
-GsmSmsCbHandler::GsmSmsCbHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
-    : AppExecFwk::EventHandler(runner), slotId_(slotId)
+GsmSmsCbHandler::GsmSmsCbHandler(int32_t slotId) : TelEventHandler("GsmSmsCbHandler"), slotId_(slotId)
 {
     TELEPHONY_LOGI("GsmSmsCbHandler Create slotId (%{public}d)", slotId_);
 }

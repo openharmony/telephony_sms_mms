@@ -17,7 +17,6 @@
 
 #include "cdma_sms_receive_handler.h"
 #include "gsm_sms_receive_handler.h"
-#include "runner_pool.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -27,14 +26,6 @@ SmsReceiveManager::SmsReceiveManager(int32_t slotId) : slotId_(slotId) {}
 
 SmsReceiveManager::~SmsReceiveManager()
 {
-    if (gsmSmsReceiveRunner_ != nullptr) {
-        gsmSmsReceiveRunner_->Stop();
-    }
-
-    if (cdmaSmsReceiveRunner_ != nullptr) {
-        cdmaSmsReceiveRunner_->Stop();
-    }
-
     if (gsmSmsReceiveHandler_ != nullptr) {
         gsmSmsReceiveHandler_->UnRegisterHandler();
     }
@@ -46,23 +37,12 @@ SmsReceiveManager::~SmsReceiveManager()
 
 void SmsReceiveManager::Init()
 {
-    gsmSmsReceiveRunner_ = RunnerPool::GetInstance().GetSmsSendReceiveRunnerBySlotId(slotId_);
-    if (gsmSmsReceiveRunner_ == nullptr) {
-        TELEPHONY_LOGE("failed to create GsmEventReceiverRunner");
-        return;
-    }
-    cdmaSmsReceiveRunner_ = RunnerPool::GetInstance().GetSmsSendReceiveRunnerBySlotId(slotId_);
-    if (cdmaSmsReceiveRunner_ == nullptr) {
-        TELEPHONY_LOGE("failed to create CdmaEventReceiverRunner");
-        return;
-    }
-
-    gsmSmsReceiveHandler_ = std::make_shared<GsmSmsReceiveHandler>(gsmSmsReceiveRunner_, slotId_);
+    gsmSmsReceiveHandler_ = std::make_shared<GsmSmsReceiveHandler>(slotId_);
     if (gsmSmsReceiveHandler_ == nullptr) {
         TELEPHONY_LOGE("failed to create GsmSmsReceiveHandler");
         return;
     }
-    cdmaSmsReceiveHandler_ = std::make_shared<CdmaSmsReceiveHandler>(cdmaSmsReceiveRunner_, slotId_);
+    cdmaSmsReceiveHandler_ = std::make_shared<CdmaSmsReceiveHandler>(slotId_);
     if (cdmaSmsReceiveHandler_ == nullptr) {
         TELEPHONY_LOGE("failed to create CdmaSmsReceiveHandler");
         return;

@@ -32,9 +32,8 @@ using namespace std::chrono;
 int64_t SmsSender::msgRef64bit_ = 0;
 std::unordered_map<int64_t, std::shared_ptr<SmsSendIndexer>> SmsSender::sendCacheMap_;
 
-SmsSender::SmsSender(const shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId,
-    function<void(shared_ptr<SmsSendIndexer>)> &sendRetryFun)
-    : AppExecFwk::EventHandler(runner), slotId_(slotId), sendRetryFun_(sendRetryFun)
+SmsSender::SmsSender(int32_t slotId, function<void(shared_ptr<SmsSendIndexer>)> &sendRetryFun)
+    : TelEventHandler("SmsSender"), slotId_(slotId), sendRetryFun_(sendRetryFun)
 {}
 
 SmsSender::~SmsSender() {}

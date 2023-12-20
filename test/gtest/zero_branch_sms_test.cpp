@@ -101,10 +101,8 @@ void BranchSmsTest::TearDown() {}
  */
 HWTEST_F(BranchSmsTest, SmsReceiveHandler_0001, Function | MediumTest | Level1)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_GSM_SMS, 1);
-    std::shared_ptr<SmsReceiveHandler> smsReceiveHandler =
-        std::make_shared<CdmaSmsReceiveHandler>(runner, INVALID_SLOTID);
+    std::shared_ptr<SmsReceiveHandler> smsReceiveHandler = std::make_shared<CdmaSmsReceiveHandler>(INVALID_SLOTID);
     smsReceiveHandler->ProcessEvent(event);
     event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_CDMA_SMS, 1);
     smsReceiveHandler->ProcessEvent(event);
@@ -209,9 +207,8 @@ HWTEST_F(BranchSmsTest, SmsStateHandler_0001, Function | MediumTest | Level1)
  */
 HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
-    auto cdmaSmsSender = std::make_shared<CdmaSmsSender>(runner, INVALID_SLOTID, fun);
+    auto cdmaSmsSender = std::make_shared<CdmaSmsSender>(INVALID_SLOTID, fun);
     cdmaSmsSender->isImsCdmaHandlerRegistered = true;
     cdmaSmsSender->RegisterImsHandler();
     const sptr<ISendShortMessageCallback> sendCallback =
@@ -418,10 +415,9 @@ HWTEST_F(BranchSmsTest, GsmSmsMessage_0002, Function | MediumTest | Level1)
  */
 HWTEST_F(BranchSmsTest, SmsSender_0001, Function | MediumTest | Level1)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_SEND_SMS, 1);
-    std::shared_ptr<SmsSender> smsSender = std::make_shared<CdmaSmsSender>(runner, INVALID_SLOTID, fun);
+    std::shared_ptr<SmsSender> smsSender = std::make_shared<CdmaSmsSender>(INVALID_SLOTID, fun);
     const sptr<ISendShortMessageCallback> sendCallback =
         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
@@ -474,9 +470,8 @@ HWTEST_F(BranchSmsTest, SmsSender_0001, Function | MediumTest | Level1)
  */
 HWTEST_F(BranchSmsTest, SmsSender_0002, Function | MediumTest | Level1)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
-    std::shared_ptr<SmsSender> smsSender = std::make_shared<CdmaSmsSender>(runner, INVALID_SLOTID, fun);
+    std::shared_ptr<SmsSender> smsSender = std::make_shared<CdmaSmsSender>(INVALID_SLOTID, fun);
     const sptr<ISendShortMessageCallback> sendCallback =
         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
@@ -509,9 +504,8 @@ HWTEST_F(BranchSmsTest, SmsSender_0002, Function | MediumTest | Level1)
  */
 HWTEST_F(BranchSmsTest, SmsSender_0003, Function | MediumTest | Level1)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
-    std::shared_ptr<SmsSender> smsSender = std::make_shared<CdmaSmsSender>(runner, INVALID_SLOTID, fun);
+    std::shared_ptr<SmsSender> smsSender = std::make_shared<CdmaSmsSender>(INVALID_SLOTID, fun);
     const sptr<ISendShortMessageCallback> sendCallback =
         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
@@ -537,11 +531,10 @@ HWTEST_F(BranchSmsTest, SmsSender_0003, Function | MediumTest | Level1)
 HWTEST_F(BranchSmsTest, SmsSendManager_0001, Function | MediumTest | Level1)
 {
     auto smsSendManager = std::make_shared<SmsSendManager>(INVALID_SLOTID);
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto smsNetworkPolicyManager = std::make_shared<SmsNetworkPolicyManager>(runner, INVALID_SLOTID);
+    auto smsNetworkPolicyManager = std::make_shared<SmsNetworkPolicyManager>(INVALID_SLOTID);
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
-    auto cdmaSmsSender = std::make_shared<CdmaSmsSender>(runner, INVALID_SLOTID, fun);
-    auto gsmSmsSender = std::make_shared<GsmSmsSender>(runner, INVALID_SLOTID, fun);
+    auto cdmaSmsSender = std::make_shared<CdmaSmsSender>(INVALID_SLOTID, fun);
+    auto gsmSmsSender = std::make_shared<GsmSmsSender>(INVALID_SLOTID, fun);
     std::string desAddr = "";
     std::string scAddr = "123";
     std::string text = "";
@@ -594,7 +587,6 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0001, Function | MediumTest | Level1)
 HWTEST_F(BranchSmsTest, SmsSendManager_0002, Function | MediumTest | Level1)
 {
     auto smsSendManager = std::make_shared<SmsSendManager>(INVALID_SLOTID);
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
     std::string scAddr = "123";
     bool isSupported = true;
@@ -609,13 +601,13 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0002, Function | MediumTest | Level1)
     EXPECT_GT(smsSendManager->GetSmsSegmentsInfo(scAddr, true, lenInfo), TELEPHONY_ERR_SUCCESS);
     EXPECT_GT(smsSendManager->IsImsSmsSupported(INVALID_SLOTID, isSupported), TELEPHONY_ERR_SUCCESS);
     EXPECT_FALSE(smsSendManager->SetImsSmsConfig(INVALID_SLOTID, 1));
-    smsSendManager->networkManager_ = std::make_shared<SmsNetworkPolicyManager>(runner, INVALID_SLOTID);
+    smsSendManager->networkManager_ = std::make_shared<SmsNetworkPolicyManager>(INVALID_SLOTID);
     EXPECT_FALSE(smsSendManager->SetImsSmsConfig(INVALID_SLOTID, 1));
     EXPECT_GT(smsSendManager->IsImsSmsSupported(INVALID_SLOTID, isSupported), TELEPHONY_ERR_SUCCESS);
-    smsSendManager->gsmSmsSender_ = std::make_shared<CdmaSmsSender>(runner, INVALID_SLOTID, fun);
+    smsSendManager->gsmSmsSender_ = std::make_shared<CdmaSmsSender>(INVALID_SLOTID, fun);
     EXPECT_FALSE(smsSendManager->SetImsSmsConfig(INVALID_SLOTID, 1));
     EXPECT_GT(smsSendManager->IsImsSmsSupported(INVALID_SLOTID, isSupported), TELEPHONY_ERR_SUCCESS);
-    smsSendManager->cdmaSmsSender_ = std::make_shared<GsmSmsSender>(runner, INVALID_SLOTID, fun);
+    smsSendManager->cdmaSmsSender_ = std::make_shared<GsmSmsSender>(INVALID_SLOTID, fun);
     smsSendManager->RetriedSmsDelivery(smsIndexer);
     smsIndexer->netWorkType_ = NetWorkType::NET_TYPE_CDMA;
     smsSendManager->networkManager_->netWorkType_ = NetWorkType::NET_TYPE_UNKNOWN;
@@ -650,7 +642,6 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0002, Function | MediumTest | Level1)
 HWTEST_F(BranchSmsTest, SmsInterfaceManager_0001, Function | MediumTest | Level1)
 {
     auto smsSendManager = std::make_shared<SmsSendManager>(INVALID_SLOTID);
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
     std::string scAddr = "123";
     const sptr<ISendShortMessageCallback> sendCallback =
@@ -662,8 +653,8 @@ HWTEST_F(BranchSmsTest, SmsInterfaceManager_0001, Function | MediumTest | Level1
     auto smsInterfaceManager = std::make_shared<SmsInterfaceManager>(INVALID_SLOTID);
     EXPECT_EQ(smsInterfaceManager->OnRilAdapterHostDied(), TELEPHONY_ERR_LOCAL_PTR_NULL);
 
-    smsSendManager->gsmSmsSender_ = std::make_shared<GsmSmsSender>(runner, INVALID_SLOTID, fun);
-    smsSendManager->cdmaSmsSender_ = std::make_shared<CdmaSmsSender>(runner, INVALID_SLOTID, fun);
+    smsSendManager->gsmSmsSender_ = std::make_shared<GsmSmsSender>(INVALID_SLOTID, fun);
+    smsSendManager->cdmaSmsSender_ = std::make_shared<CdmaSmsSender>(INVALID_SLOTID, fun);
     smsInterfaceManager->InitInterfaceManager();
     EXPECT_EQ(smsInterfaceManager->OnRilAdapterHostDied(), TELEPHONY_ERR_SUCCESS);
 }
@@ -1158,8 +1149,7 @@ HWTEST_F(BranchSmsTest, SmsBaseMessage_0001, Function | MediumTest | Level1)
  */
 HWTEST_F(BranchSmsTest, GsmSmsReceiveHandler_0001, Function | MediumTest | Level1)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto gsmSmsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(runner, 1);
+    auto gsmSmsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(1);
     gsmSmsReceiveHandler->UnRegisterHandler();
     EXPECT_NE(gsmSmsReceiveHandler->HandleSmsByType(nullptr), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(gsmSmsReceiveHandler->TransformMessageInfo(nullptr), nullptr);
@@ -1173,8 +1163,7 @@ HWTEST_F(BranchSmsTest, GsmSmsReceiveHandler_0001, Function | MediumTest | Level
 HWTEST_F(BranchSmsTest, GsmSmsSender_0001, Function | MediumTest | Level1)
 {
     std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun = nullptr;
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto gsmSmsSender = std::make_shared<GsmSmsSender>(runner, INVALID_SLOTID, sendRetryFun);
+    auto gsmSmsSender = std::make_shared<GsmSmsSender>(INVALID_SLOTID, sendRetryFun);
     uint8_t *data = (uint8_t *)malloc(VALUE_LENGTH * sizeof(uint8_t));
     std::string dataStr = "123";
     gsmSmsSender->CharArrayToString(data, 1, dataStr);
@@ -1229,8 +1218,7 @@ HWTEST_F(BranchSmsTest, GsmSmsSender_0001, Function | MediumTest | Level1)
  */
 HWTEST_F(BranchSmsTest, SmsMiscManager_0001, Function | MediumTest | Level1)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto smsMiscManager = std::make_shared<SmsMiscManager>(runner, INVALID_SLOTID);
+    auto smsMiscManager = std::make_shared<SmsMiscManager>(INVALID_SLOTID);
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(SmsMiscManager::SET_CB_CONFIG_FINISH, 1);
     smsMiscManager->ProcessEvent(event);
     event = AppExecFwk::InnerEvent::Get(SmsMiscManager::SET_SMSC_ADDR_FINISH, 1);
@@ -1278,8 +1266,7 @@ HWTEST_F(BranchSmsTest, SmsMiscManager_0001, Function | MediumTest | Level1)
  */
 HWTEST_F(BranchSmsTest, SmsMiscManager_0003, Function | MediumTest | Level1)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto smsMiscManager = std::make_shared<SmsMiscManager>(runner, 0);
+    auto smsMiscManager = std::make_shared<SmsMiscManager>(0);
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(SmsMiscManager::GET_CB_CONFIG_FINISH, 1);
     smsMiscManager->ProcessEvent(event);
     std::shared_ptr<CBConfigInfo> res = std::make_shared<CBConfigInfo>();
@@ -1379,8 +1366,7 @@ HWTEST_F(BranchSmsTest, SmsService_0002, Function | MediumTest | Level1)
  */
 HWTEST_F(BranchSmsTest, SmsService_0003, Function | MediumTest | Level1)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto smsNwPolicyManager = std::make_shared<SmsNetworkPolicyManager>(runner, INVALID_SLOTID);
+    auto smsNwPolicyManager = std::make_shared<SmsNetworkPolicyManager>(INVALID_SLOTID);
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_ON);
     smsNwPolicyManager->ProcessEvent(event);
     event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED);
@@ -1622,9 +1608,7 @@ HWTEST_F(BranchSmsTest, GsmUserDataPdu_0002, Function | MediumTest | Level1)
 HWTEST_F(BranchSmsTest, GsmSmsSender_0002, Function | MediumTest | Level1)
 {
     std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun = nullptr;
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(TEXT_SMS_CONTENT);
-    auto gsmSmsSender = std::make_shared<GsmSmsSender>(runner, INVALID_SLOTID, sendRetryFun);
-    EXPECT_TRUE(runner != nullptr);
+    auto gsmSmsSender = std::make_shared<GsmSmsSender>(INVALID_SLOTID, sendRetryFun);
     GsmSimMessageParam smsData;
     smsData.refId = 1;
     smsData.smscPdu = SMS_READ_PDU;
@@ -1681,9 +1665,8 @@ HWTEST_F(BranchSmsTest, GsmSmsParamDecode_0001, Function | MediumTest | Level1)
     SmsDcs *mwiTypeSmsDcs = new SmsDcs();
     gsmSmsParamDecode->GetMwiType(bcdLen, *mwiTypeSmsDcs);
     EXPECT_TRUE(gsmSmsParamDecode != nullptr);
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(TEXT_SMS_CONTENT);
     int32_t slotId = 0;
-    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(runner, slotId);
+    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(slotId);
     std::shared_ptr<GsmCbCodec> cbMessage = nullptr;
     gsmSmsCbHandler->RemoveCbMessageFromList(cbMessage);
     delete pAddress;
@@ -1691,8 +1674,7 @@ HWTEST_F(BranchSmsTest, GsmSmsParamDecode_0001, Function | MediumTest | Level1)
     delete mwiTypeSmsDcs;
     mwiTypeSmsDcs = nullptr;
     EXPECT_TRUE(gsmSmsCbHandler != nullptr);
-    std::shared_ptr<AppExecFwk::EventRunner> receiveRunner = AppExecFwk::EventRunner::Create(TEXT_SMS_CONTENT);
-    auto gsmSmsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(receiveRunner, slotId);
+    auto gsmSmsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(slotId);
     gsmSmsReceiveHandler->CheckSmsSupport();
     std::shared_ptr<SmsBaseMessage> smsBaseMessage = nullptr;
     gsmSmsReceiveHandler->HandleNormalSmsByType(smsBaseMessage);

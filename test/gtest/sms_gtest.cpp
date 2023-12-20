@@ -1126,8 +1126,7 @@ HWTEST_F(SmsGtest, SendTextMessage_0003, Function | MediumTest | Level2)
 
 void ReceiveSmsTestFunc(SmsMmsTestHelper &helper)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(runner, helper.slotId);
+    auto smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(helper.slotId);
     auto message = std::make_shared<SmsMessageInfo>();
     message->indicationType = MESSAGE_TYPE;
     message->size = SMS_PDU_LEN;

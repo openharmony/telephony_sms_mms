@@ -20,7 +20,6 @@
 #include "cdma_sms_message.h"
 #include "core_manager_inner.h"
 #include "ims_sms_client.h"
-#include "runner_pool.h"
 #include "sms_dump_helper.h"
 #include "sms_hisysevent.h"
 #include "string_utils.h"
@@ -52,7 +51,6 @@ void SmsService::OnStart()
         TELEPHONY_LOGE("msService has already started.");
         return;
     }
-    RunnerPool::GetInstance().Init();
     if (!Init()) {
         TELEPHONY_LOGE("failed to init SmsService");
         return;
@@ -117,18 +115,16 @@ int32_t SmsService::Dump(std::int32_t fd, const std::vector<std::u16string> &arg
 
 void SmsService::WaitCoreServiceToInit()
 {
-    std::thread connectTask([&]() {
+    TelFFRTUtils::Submit([&]() {
         while (true) {
             if (CoreManagerInner::GetInstance().IsInitFinished()) {
                 InitModule();
                 TELEPHONY_LOGI("SmsService Connection successful");
                 break;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(CONNECT_SERVICE_WAIT_TIME));
+            TelFFRTUtils::SleepFor(CONNECT_SERVICE_WAIT_TIME);
         }
     });
-    pthread_setname_np(connectTask.native_handle(), "sms_service");
-    connectTask.detach();
 }
 
 std::string SmsService::GetBindTime()

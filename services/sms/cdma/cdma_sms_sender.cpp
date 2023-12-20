@@ -31,9 +31,8 @@ using namespace std;
 static constexpr uint32_t CDMASMS_MESSAGE_ID_MAX = 65536;
 static constexpr uint8_t CDMASMS_SEQ_NUM_MAX = 64;
 
-CdmaSmsSender::CdmaSmsSender(const shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId,
-    function<void(shared_ptr<SmsSendIndexer>)> sendRetryFun)
-    : SmsSender(runner, slotId, sendRetryFun)
+CdmaSmsSender::CdmaSmsSender(int32_t slotId, function<void(shared_ptr<SmsSendIndexer>)> sendRetryFun)
+    : SmsSender(slotId, sendRetryFun)
 {}
 
 CdmaSmsSender::~CdmaSmsSender() {}

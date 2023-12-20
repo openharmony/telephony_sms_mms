@@ -97,12 +97,7 @@ void AddSimMessage(const uint8_t *data, size_t size)
     }
     interfaceManager->AddSimMessage(smsc, pdu, status);
 
-    auto smsMiscRunner = AppExecFwk::EventRunner::Create("SmsMiscRunner");
-    if (smsMiscRunner == nullptr) {
-        TELEPHONY_LOGE("failed to create SmsMiscRunner");
-        return;
-    }
-    std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(smsMiscRunner, slotId);
+    std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(slotId);
     if (smsMiscManager == nullptr) {
         TELEPHONY_LOGE("smsMiscManager nullptr");
         return;
@@ -136,10 +131,9 @@ void HasSmsCapability(const uint8_t *data, size_t size)
 void SendSmsTest(const uint8_t *data, size_t size)
 {
     std::string name(reinterpret_cast<const char *>(data), size);
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create(name);
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
     int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
-    auto sender = std::make_shared<GsmSmsSender>(runner, slotId, fun);
+    auto sender = std::make_shared<GsmSmsSender>(slotId, fun);
     sender->Init();
 
     std::string desAddr(reinterpret_cast<const char *>(data), size);
