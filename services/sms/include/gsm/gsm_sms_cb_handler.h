@@ -20,11 +20,10 @@
 
 #include "common_event.h"
 #include "common_event_manager.h"
-#include "event_handler.h"
-#include "event_runner.h"
 #include "gsm_cb_codec.h"
 #include "hril_sms_parcel.h"
 #include "sms_cb_data.h"
+#include "tel_event_handler.h"
 #include "want.h"
 
 enum SmsCbType {
@@ -62,9 +61,9 @@ using SmsCbInfo = struct CbInfo {
     }
 };
 
-class GsmSmsCbHandler : public AppExecFwk::EventHandler {
+class GsmSmsCbHandler : public TelEventHandler {
 public:
-    GsmSmsCbHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
+    explicit GsmSmsCbHandler(int32_t slotId);
     ~GsmSmsCbHandler() = default;
     void Init();
     void UnRegisterHandler();

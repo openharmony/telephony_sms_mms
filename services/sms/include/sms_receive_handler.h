@@ -18,19 +18,18 @@
 
 #include <vector>
 
-#include "event_handler.h"
-#include "event_runner.h"
 #include "hril_sms_parcel.h"
 #include "sms_base_message.h"
 #include "sms_receive_indexer.h"
 #include "sms_receive_reliability_handler.h"
 #include "sms_wap_push_handler.h"
+#include "tel_event_handler.h"
 
 namespace OHOS {
 namespace Telephony {
-class SmsReceiveHandler : public AppExecFwk::EventHandler {
+class SmsReceiveHandler : public TelEventHandler {
 public:
-    SmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
+    explicit SmsReceiveHandler(int32_t slotId);
     virtual ~SmsReceiveHandler();
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 

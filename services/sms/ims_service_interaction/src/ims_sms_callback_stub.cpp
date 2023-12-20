@@ -121,13 +121,12 @@ int32_t ImsSmsCallbackStub::ImsSendMessageResponse(int32_t slotId, const SendSms
     }
     *sendSmsResultInfo = result;
     uint32_t item = RadioEvent::RADIO_SEND_IMS_GSM_SMS;
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler =
-        DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId);
+    auto eventHandler = DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId);
     if (eventHandler == nullptr) {
         TELEPHONY_LOGE("eventHandler is nullptr");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    eventHandler->SendEvent(item, sendSmsResultInfo);
+    TelEventHandler::SendTelEvent(eventHandler, item, sendSmsResultInfo);
     return TELEPHONY_SUCCESS;
 }
 
@@ -151,13 +150,12 @@ int32_t ImsSmsCallbackStub::ImsGetSmsConfigResponse(int32_t slotId, int32_t imsS
     }
     *imsSmsCfg = imsSmsConfig;
     uint32_t item = RadioEvent::RADIO_GET_IMS_SMS;
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler =
-        DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId);
+    auto eventHandler = DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId);
     if (eventHandler == nullptr) {
         TELEPHONY_LOGE("eventHandler is nullptr");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    eventHandler->SendEvent(item, imsSmsCfg);
+    TelEventHandler::SendTelEvent(eventHandler, item, imsSmsCfg);
     return TELEPHONY_SUCCESS;
 }
 
@@ -176,13 +174,12 @@ int32_t ImsSmsCallbackStub::SendHRilRadioResponseInfo(
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     *hRilRadioResponseInfo = info;
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler =
-        DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId);
+    auto eventHandler = DelayedSingleton<ImsSmsClient>::GetInstance()->GetHandler(slotId);
     if (eventHandler == nullptr) {
         TELEPHONY_LOGE("eventHandler is nullptr");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    eventHandler->SendEvent(eventId, hRilRadioResponseInfo);
+    TelEventHandler::SendTelEvent(eventHandler, eventId, hRilRadioResponseInfo);
     return TELEPHONY_SUCCESS;
 }
 } // namespace Telephony

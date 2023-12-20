@@ -76,7 +76,6 @@ ohos_shared_library("tel_sms_mms") {
     "services/sms/ims_service_interaction/src/ims_sms_proxy.cpp",
     "services/sms/proxy/sms_delivery_short_message_proxy.cpp",
     "services/sms/proxy/sms_send_short_message_proxy.cpp",
-    "services/sms/runner_pool.cpp",
     "services/sms/sms_base_message.cpp",
     "services/sms/sms_broadcast_subscriber_receiver.cpp",
     "services/sms/sms_dump_helper.cpp",

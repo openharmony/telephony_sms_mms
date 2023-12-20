@@ -47,7 +47,7 @@ int32_t ImsRegStateCallbackStub::OnImsRegInfoChanged(int32_t slotId, ImsServiceT
         slotId, imsSrvType, info.imsRegState, info.imsRegTech);
     if (handle_ != nullptr) {
         uint32_t item = NotificationType::NOTIFICATION_TYPE_IMS;
-        handle_->SendEvent(item);
+        TelEventHandler::SendTelEvent(handle_, item);
     }
     return TELEPHONY_SUCCESS;
 }

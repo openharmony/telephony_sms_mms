@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Telephony {
 class GsmSmsReceiveHandler : public SmsReceiveHandler {
 public:
-    GsmSmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
+    explicit GsmSmsReceiveHandler(int32_t slotId);
     ~GsmSmsReceiveHandler() override;
     void Init();
     void UnRegisterHandler();
@@ -40,7 +40,6 @@ private:
 
 private:
     std::shared_ptr<GsmSmsCbHandler> smsCbHandler_;
-    std::shared_ptr<AppExecFwk::EventRunner> smsCbRunner_;
 };
 } // namespace Telephony
 } // namespace OHOS
