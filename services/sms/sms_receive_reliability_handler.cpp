@@ -55,6 +55,8 @@ static constexpr const char *SMS_BROADCAST_SMS_TYPE_KEY = "isCdma";
 static constexpr const char *SMS_BROADCAST_SMS_TEXT_TYPE_KEY = "TEXT_SMS_RECEIVE";
 static constexpr const char *SMS_BROADCAST_SMS_DATA_TYPE_KEY = "DATA_SMS_RECEIVE";
 static constexpr const char *SMS_BROADCAST_SMS_PORT_KEY = "port";
+const std::string CT_SMSC = "10659401";
+const std::string CT_AUTO_REG_SMS_ACTION = "ct_auto_reg_sms_receive_completed";
 
 SmsReceiveReliabilityHandler::SmsReceiveReliabilityHandler(int32_t slotId) : slotId_(slotId)
 {
@@ -328,9 +330,13 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
             newPdus.emplace_back(it);
         }
     }
-
     Want want;
-    want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
+        want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    } else {
+        want.SetAction(CT_AUTO_REG_SMS_ACTION);
+    }
+
     want.SetParam(SMS_BROADCAST_SLOTID_KEY, static_cast<int>(slotId_));
     want.SetParam(SMS_BROADCAST_PDU_KEY, newPdus);
     want.SetParam(SMS_BROADCAST_SMS_TYPE_KEY, indexer->GetIsCdma());
@@ -346,12 +352,18 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     }
     CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(true);
-    std::vector<std::string> smsPermissions;
-    smsPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
-    publishInfo.SetSubscriberPermissions(smsPermissions);
+    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
+        std::vector<std::string> smsPermissions;
+        smsPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
+        publishInfo.SetSubscriberPermissions(smsPermissions);
+    }
 
     MatchingSkills smsSkills;
-    smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
+        smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    } else {
+        smsSkills.AddEvent(CT_AUTO_REG_SMS_ACTION);
+    }
     CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
     smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo, shared_from_this(),
