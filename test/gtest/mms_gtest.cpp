@@ -364,10 +364,6 @@ std::string GetMmsc(int32_t slotId)
     CoreServiceClient::GetInstance().GetSimOperatorNumeric(slotId, operatorNumeric);
     std::string mccmnc = StringUtils::ToUtf8(operatorNumeric);
     predicates.EqualTo(PdpProfileData::MCCMNC, mccmnc);
-    std::vector<std::string> apnTypes;
-    apnTypes.push_back(MMS_APN_TYPE);
-    apnTypes.push_back(ALL_APN_TYPE);
-    predicates.In(PdpProfileData::APN_TYPES, apnTypes);
     std::shared_ptr<MmsApnInfo> mmsApnInfo = std::make_shared<MmsApnInfo>(slotId);
     std::shared_ptr<DataShare::DataShareHelper> pdpHelper = mmsApnInfo->CreatePdpProfileHelper();
     if (pdpHelper == nullptr) {
@@ -385,15 +381,13 @@ std::string GetMmsc(int32_t slotId)
         pdpHelper->Release();
         return "";
     }
-    int columnIndex;
     std::string homeUrlVal;
     std::string mmsIPAddressVal;
-    for (int row = 0; row < count; row++) {
-        resultSet->GoToRow(row);
-        resultSet->GetColumnIndex(PdpProfileData::HOME_URL, columnIndex);
-        resultSet->GetString(columnIndex, homeUrlVal);
-        resultSet->GetColumnIndex(PdpProfileData::MMS_IP_ADDRESS, columnIndex);
-        resultSet->GetString(columnIndex, mmsIPAddressVal);
+    if (!mmsApnInfo->GetMmsApnValue(resultSet, count, homeUrlVal, mmsIPAddressVal)) {
+        TELEPHONY_LOGI("homeUrlVal and mmsIPAddressVal not matched");
+        resultSet->Close();
+        pdpHelper->Release();
+        return "";
     }
     resultSet->Close();
     pdpHelper->Release();

@@ -34,6 +34,9 @@ public:
     void setMmscUrl(std::string mmscUrl);
     std::string getMmsProxyAddressAndProxyPort();
     void setMmsProxyAddressAndProxyPort(std::string mmsProxyAddressAndProxyPort);
+    bool SplitAndMatchApnTypes(std::string apn);
+    bool GetMmsApnValue(std::shared_ptr<DataShare::ResultSet> resultSet, int count, std::string &homeUrlVal,
+        std::string &mmsIPAddressVal);
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataAHelper(
