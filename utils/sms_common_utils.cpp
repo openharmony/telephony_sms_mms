@@ -139,8 +139,11 @@ uint16_t SmsCommonUtils::Unpack7bitCharForCBPdu(
         unpackData[dstIdx] = tpdu[srcIdx] >> shift;
         dstIdx++;
     } else if (srcIdx > 1) {
-        unpackData[dstIdx] = tpdu[srcIdx - 1] >> shift;
-        dstIdx++;
+        auto value = tpdu[srcIdx - 1] >> shift;
+        if (value != 0) {
+            unpackData[dstIdx] = value;
+            dstIdx++;
+        }
     }
     return dstIdx;
 }
