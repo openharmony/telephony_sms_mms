@@ -563,7 +563,7 @@ HWTEST_F(MmsGtest, MmsAttachment_0002, Function | MediumTest | Level1)
     bool retBool;
     std::string retStr;
     uint32_t retU32t;
-    uint32_t len = 300 * 1024;
+    uint32_t len = 10 * 1024 * 1024;
     uint32_t charset = 0;
     retBool = attachment.SetContentTransferEncoding("SetContentTransferEncoding");
     EXPECT_EQ(true, retBool);
