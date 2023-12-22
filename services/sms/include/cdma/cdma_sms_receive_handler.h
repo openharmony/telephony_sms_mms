@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Telephony {
 class CdmaSmsReceiveHandler : public SmsReceiveHandler {
 public:
-    CdmaSmsReceiveHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
+    explicit CdmaSmsReceiveHandler(int32_t slotId);
     virtual ~CdmaSmsReceiveHandler() override = default;
     void SetCdmaSender(const std::weak_ptr<SmsSender> &smsSender);
     void Init();

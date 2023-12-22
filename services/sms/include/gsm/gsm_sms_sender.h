@@ -30,8 +30,7 @@ namespace OHOS {
 namespace Telephony {
 class GsmSmsSender : public SmsSender {
 public:
-    GsmSmsSender(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId,
-        const std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun);
+    GsmSmsSender(int32_t slotId, const std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun);
     ~GsmSmsSender() override;
     void Init() override;
     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,

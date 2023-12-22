@@ -18,9 +18,9 @@
 
 #include <cstdint>
 
-#include "event_handler.h"
 #include "ims_reg_info_callback.h"
 #include "iremote_stub.h"
+#include "tel_event_handler.h"
 
 namespace OHOS {
 namespace Telephony {

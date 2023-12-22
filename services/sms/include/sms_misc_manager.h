@@ -22,14 +22,13 @@
 #include <string>
 #include <vector>
 
-#include "event_handler.h"
-#include "event_runner.h"
 #include "hril_sms_parcel.h"
 #include "i_sms_service_interface.h"
+#include "tel_event_handler.h"
 
 namespace OHOS {
 namespace Telephony {
-class SmsMiscManager : public AppExecFwk::EventHandler {
+class SmsMiscManager : public TelEventHandler {
 public:
     enum {
         SET_CB_CONFIG_FINISH = 0,
@@ -54,7 +53,7 @@ public:
             return fromMsgId == other.fromMsgId && toMsgId == other.toMsgId;
         }
     };
-    SmsMiscManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
+    explicit SmsMiscManager(int32_t slotId);
     virtual ~SmsMiscManager() {};
     int32_t SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType);
     std::list<gsmCBRangeInfo> GetRangeInfo() const;

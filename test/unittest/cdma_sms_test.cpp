@@ -506,9 +506,8 @@ void CdmaSmsTest::EncodeMsg(CdmaTransportMsg &msg) const
 void CdmaSmsTest::TestTextBasedSmsDelivery() const
 {
     std::cout << "CdmaSmsTest::TestTextBasedSmsDelivery" << std::endl;
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
-    auto cdmaSmsSender = std::make_shared<CdmaSmsSender>(runner, 1, fun);
+    auto cdmaSmsSender = std::make_shared<CdmaSmsSender>(1, fun);
     const sptr<ISendShortMessageCallback> sendCallback =
         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
     if (sendCallback == nullptr) {

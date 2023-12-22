@@ -135,8 +135,7 @@ sptr<ISmsServiceInterface> MmsGtest::GetProxy()
 #ifndef TEL_TEST_UNSUPPORT
 void ReceiveWapPushTestFunc(SmsMmsTestHelper &helper)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(runner, helper.slotId);
+    auto smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(helper.slotId);
     auto message = std::make_shared<SmsMessageInfo>();
     message->indicationType = MESSAGE_TYPE;
     message->size = WAPPUSH_PDU_LEN;

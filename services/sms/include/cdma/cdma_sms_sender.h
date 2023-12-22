@@ -27,8 +27,7 @@ namespace OHOS {
 namespace Telephony {
 class CdmaSmsSender : public SmsSender {
 public:
-    CdmaSmsSender(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId,
-        std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun);
+    CdmaSmsSender(int32_t slotId, std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun);
     ~CdmaSmsSender() override;
     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
         const sptr<ISendShortMessageCallback> &sendCallback,

@@ -15,17 +15,14 @@
 
 #include "sms_mms_test_helper.h"
 
-#include <thread>
-
+#include "tel_event_handler.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
 namespace Telephony {
 bool SmsMmsTestHelper::Run(void (*func)(SmsMmsTestHelper &), SmsMmsTestHelper &helper, int32_t waitTime)
 {
-    std::thread t(func, std::ref(helper));
-    pthread_setname_np(t.native_handle(), "sms_mms_test_helper");
-    t.detach();
+    TelFFRTUtils::Submit([&]() { func(helper); });
     TELEPHONY_LOGI("Thread running");
     return WaitForResult(waitTime);
 }

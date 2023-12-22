@@ -25,9 +25,8 @@
 
 namespace OHOS {
 namespace Telephony {
-SmsNetworkPolicyManager::SmsNetworkPolicyManager(
-    const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
-    : AppExecFwk::EventHandler(runner), slotId_(slotId)
+SmsNetworkPolicyManager::SmsNetworkPolicyManager(int32_t slotId)
+    : TelEventHandler("SmsNetworkPolicyManager"), slotId_(slotId)
 {}
 
 void SmsNetworkPolicyManager::Init()

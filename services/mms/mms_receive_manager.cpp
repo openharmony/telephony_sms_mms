@@ -21,9 +21,7 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
-MmsReceiveManager::MmsReceiveManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
-    : AppExecFwk::EventHandler(runner), slotId_(slotId)
-{}
+MmsReceiveManager::MmsReceiveManager(int32_t slotId) : TelEventHandler("MmsReceiveManager"), slotId_(slotId) {}
 
 MmsReceiveManager::~MmsReceiveManager() {}
 

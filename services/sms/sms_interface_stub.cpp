@@ -98,7 +98,7 @@ void SmsInterfaceStub::InitModule()
             }
             slotSmsInterfaceManagerMap_[slotId]->InitInterfaceManager();
 
-            std::thread smsReceiveReliabilityTask([slotId]() {
+            TelFFRTUtils::Submit([slotId]() {
                 auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(slotId);
                 if (reliabilityHandler == nullptr) {
                     TELEPHONY_LOGE("reliabilityHandler nullptr");
@@ -114,8 +114,6 @@ void SmsInterfaceStub::InitModule()
                 }
                 reliabilityHandler->SmsReceiveReliabilityProcessing();
             });
-            pthread_setname_np(smsReceiveReliabilityTask.native_handle(), "sms_receive_reliability");
-            smsReceiveReliabilityTask.detach();
         }
     }
 }

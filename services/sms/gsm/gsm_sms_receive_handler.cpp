@@ -18,7 +18,6 @@
 #include "core_manager_inner.h"
 #include "gsm_sms_message.h"
 #include "radio_event.h"
-#include "runner_pool.h"
 #include "sms_common.h"
 #include "sms_hisysevent.h"
 #include "sms_persist_helper.h"
@@ -28,9 +27,7 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
-GsmSmsReceiveHandler::GsmSmsReceiveHandler(const shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
-    : SmsReceiveHandler(runner, slotId)
-{}
+GsmSmsReceiveHandler::GsmSmsReceiveHandler(int32_t slotId) : SmsReceiveHandler(slotId) {}
 
 GsmSmsReceiveHandler::~GsmSmsReceiveHandler()
 {
@@ -44,12 +41,7 @@ void GsmSmsReceiveHandler::Init()
     if (!RegisterHandler()) {
         TELEPHONY_LOGI("GsmSmsSender::Init Register RADIO_SMS_STATUS fail.");
     }
-    smsCbRunner_ = RunnerPool::GetInstance().GetSmsCommonRunner();
-    if (smsCbRunner_ == nullptr) {
-        TELEPHONY_LOGE("failed to create GsmSmsCbHandler");
-        return;
-    }
-    smsCbHandler_ = std::make_shared<GsmSmsCbHandler>(smsCbRunner_, slotId_);
+    smsCbHandler_ = std::make_shared<GsmSmsCbHandler>(slotId_);
     if (smsCbHandler_ == nullptr) {
         TELEPHONY_LOGE("failed to create GsmSmsCbHandler");
         return;
@@ -69,11 +61,7 @@ bool GsmSmsReceiveHandler::RegisterHandler()
 void GsmSmsReceiveHandler::UnRegisterHandler()
 {
     TELEPHONY_LOGI("SmsReceiveHandler::UnRegisterHandler::slotId= %{public}d", slotId_);
-    CoreManagerInner::GetInstance().UnRegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_GSM_SMS);
-    if (smsCbHandler_ != nullptr) {
-        smsCbRunner_->Stop();
-    }
+    CoreManagerInner::GetInstance().UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_GSM_SMS);
 }
 
 int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> smsBaseMessage)

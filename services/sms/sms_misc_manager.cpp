@@ -30,9 +30,7 @@ static constexpr uint8_t MIN_SMSC_LEN = 2;
 static constexpr uint32_t RANG_MAX = 65535;
 bool SmsMiscManager::hasGotCbRange_ = false;
 
-SmsMiscManager::SmsMiscManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId)
-    : AppExecFwk::EventHandler(runner), slotId_(slotId)
-{}
+SmsMiscManager::SmsMiscManager(int32_t slotId) : TelEventHandler("SmsMiscManager"), slotId_(slotId) {}
 
 int32_t SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
 {
