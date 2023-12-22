@@ -98,6 +98,8 @@ HWTEST_F(BranchUtilsTest, TextCoder_0001, Function | MediumTest | Level1)
     EXPECT_EQ(TextCoder::Instance().FindPortu(pDestText, 0, inText), 0);
     EXPECT_GE(TextCoder::Instance().FindPortu(pDestText, 1, inText), 0);
     EXPECT_GE(TextCoder::Instance().FindReplaceChar(inText), MSG_DEFAULT_CHAR);
+    auto extMap = TextCoder::Instance().Get7BitCodingExtMap(codingNational);
+    EXPECT_GE(extMap.size(), 0);
 }
 
 /**
