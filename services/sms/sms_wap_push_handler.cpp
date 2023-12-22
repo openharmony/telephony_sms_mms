@@ -335,10 +335,9 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast(std::shared_ptr<SmsReceiveIn
         TELEPHONY_LOGE("indexer is nullptr");
         return false;
     }
-
+    TELEPHONY_LOGI("wap push broadcast slotId:%{public}d", slotId_);
     EventFwk::Want want;
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
-
     want.SetParam("slotId", static_cast<int>(slotId_));
     want.SetParam("pushType", static_cast<int>(pushType_));
     want.SetParam("applicationId", strAppId_);

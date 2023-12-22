@@ -43,7 +43,7 @@ std::string METHOD_POST = "POST";
 std::string METHOD_GET = "GET";
 constexpr const char *SIMID_IDENT_PREFIX = "simId";
 const bool STORE_MMS_PDU_TO_FILE = false;
-constexpr static const int32_t WAIT_TIME_SECOND = 30;
+constexpr static const int32_t WAIT_TIME_SECOND = 10 * 60;
 
 MmsNetworkClient::MmsNetworkClient(int32_t slotId)
 {

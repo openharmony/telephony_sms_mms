@@ -564,7 +564,7 @@ int TextCoder::Ucs2ToGsm7bit(uint8_t *dest, int maxLength, const uint8_t *src, i
     return outTextLen;
 }
 
-std::map<uint16_t, uint8_t> TextCoder::Get7BitCodingExtMap(SmsCodingNationalType codingNationalType)
+std::map<uint16_t, uint8_t> TextCoder::Get7BitCodingExtMap(SmsCodingNationalType codingNationalType) const
 {
     std::map<uint16_t, uint8_t> extMap = gsm7bitExtMap_;
     switch (codingNationalType) {
