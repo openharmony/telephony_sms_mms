@@ -808,8 +808,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0012, Function | MediumTest | Level3)
 
 void ReceiveCellBroadCastTestFunc(SmsMmsTestHelper &helper)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(runner, helper.slotId);
+    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(helper.slotId);
     auto message = std::make_shared<CBConfigReportInfo>();
     message->indicationType = MESSAGE_TYPE;
     message->sn = 0;
@@ -829,8 +828,7 @@ void ReceiveCellBroadCastTestFunc(SmsMmsTestHelper &helper)
 
 void ReceiveCellBroadCastTestFunc2(SmsMmsTestHelper &helper)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(runner, helper.slotId);
+    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(helper.slotId);
     auto message = std::make_shared<CBConfigReportInfo>();
     message->indicationType = MESSAGE_TYPE;
     message->sn = 0;

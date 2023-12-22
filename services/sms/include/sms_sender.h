@@ -22,22 +22,20 @@
 #include <queue>
 #include <unordered_map>
 
-#include "event_handler.h"
-#include "event_runner.h"
 #include "gsm_sms_message.h"
 #include "hril_sms_parcel.h"
 #include "i_sms_service_interface.h"
 #include "network_state.h"
 #include "sms_persist_helper.h"
 #include "sms_send_indexer.h"
+#include "tel_event_handler.h"
 
 namespace OHOS {
 namespace Telephony {
-class SmsSender : public AppExecFwk::EventHandler {
+class SmsSender : public TelEventHandler {
 public:
     virtual ~SmsSender();
-    SmsSender(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId,
-        std::function<void(std::shared_ptr<SmsSendIndexer>)> &sendRetryFun);
+    SmsSender(int32_t slotId, std::function<void(std::shared_ptr<SmsSendIndexer>)> &sendRetryFun);
 
     virtual void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr,
         const std::string &text, const sptr<ISendShortMessageCallback> &sendCallback,

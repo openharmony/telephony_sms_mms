@@ -20,11 +20,10 @@
 #include <map>
 #include <optional>
 
-#include "event_handler.h"
-#include "event_runner.h"
 #include "ims_reg_state_callback_stub.h"
 #include "network_state.h"
 #include "sms_common.h"
+#include "tel_event_handler.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -32,9 +31,9 @@ enum NotificationType {
     NOTIFICATION_TYPE_IMS = 600,
 };
 
-class SmsNetworkPolicyManager : public AppExecFwk::EventHandler {
+class SmsNetworkPolicyManager : public TelEventHandler {
 public:
-    SmsNetworkPolicyManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
+    explicit SmsNetworkPolicyManager(int32_t slotId);
     virtual ~SmsNetworkPolicyManager() = default;
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
     void Init();

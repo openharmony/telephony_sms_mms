@@ -15,8 +15,7 @@
 
 #include "napi_mms_pdu_helper.h"
 
-#include <thread>
-
+#include "tel_event_handler.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {
@@ -25,9 +24,7 @@ constexpr static const int32_t WAIT_TIME_SECOND = 30;
 
 bool NapiMmsPduHelper::Run(void (*func)(NapiMmsPduHelper &), NapiMmsPduHelper &helper)
 {
-    std::thread t(func, std::ref(helper));
-    pthread_setname_np(t.native_handle(), "napi_mms_pdu_helper");
-    t.detach();
+    TelFFRTUtils::Submit([&]() { func(helper); });
     TELEPHONY_LOGI("Thread running");
     return WaitForResult(WAIT_TIME_SECOND);
 }

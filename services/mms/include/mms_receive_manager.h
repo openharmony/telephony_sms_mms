@@ -16,15 +16,14 @@
 #ifndef MMS_RECEIVER_MANAGER_H
 #define MMS_RECEIVER_MANAGER_H
 
-#include "event_handler.h"
-#include "event_runner.h"
 #include "mms_receive.h"
+#include "tel_event_handler.h"
 
 namespace OHOS {
 namespace Telephony {
-class MmsReceiveManager : public AppExecFwk::EventHandler {
+class MmsReceiveManager : public TelEventHandler {
 public:
-    explicit MmsReceiveManager(const std::shared_ptr<AppExecFwk::EventRunner> &runner, int32_t slotId);
+    explicit MmsReceiveManager(int32_t slotId);
     virtual ~MmsReceiveManager();
     void Init();
     int32_t DownloadMms(

@@ -591,8 +591,7 @@ HWTEST_F(BranchCbTest, GsmCbGsmCodec_0005, Function | MediumTest | Level1)
  */
 HWTEST_F(BranchCbTest, GsmSmsCbHandler_0001, Function | MediumTest | Level1)
 {
-    std::shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("test");
-    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(runner, INVALID_SLOTID);
+    auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(INVALID_SLOTID);
     auto cbMessage = std::make_shared<GsmCbCodec>();
     auto message = std::make_shared<CBConfigReportInfo>();
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_CELL_BROADCAST, 1);

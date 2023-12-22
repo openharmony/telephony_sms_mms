@@ -162,8 +162,8 @@ int32_t ImsSmsClient::ImsGetSmsConfig(int32_t slotId)
     return imsSmsProxy_->ImsGetSmsConfig(slotId);
 }
 
-int32_t ImsSmsClient::RegisterImsSmsCallbackHandler(int32_t slotId,
-    const std::shared_ptr<AppExecFwk::EventHandler> &handler)
+int32_t ImsSmsClient::RegisterImsSmsCallbackHandler(
+    int32_t slotId, const std::shared_ptr<AppExecFwk::EventHandler> &handler)
 {
     if (handler == nullptr) {
         TELEPHONY_LOGE("RegisterImsSmsCallbackHandler return, handler is null.");

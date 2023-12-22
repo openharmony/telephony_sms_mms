@@ -22,7 +22,6 @@
 #include "gsm_sms_message.h"
 #include "gsm_sms_tpdu_codec.h"
 #include "i_sms_service_interface.h"
-#include "runner_pool.h"
 #include "sms_hisysevent.h"
 #include "sms_receive_manager.h"
 #include "telephony_errors.h"
@@ -56,26 +55,16 @@ SmsSendManager::~SmsSendManager()
 
 void SmsSendManager::Init()
 {
-    gsmSmsSendRunner_ = RunnerPool::GetInstance().GetSmsSendReceiveRunnerBySlotId(slotId_);
-    if (gsmSmsSendRunner_ == nullptr) {
-        TELEPHONY_LOGE("failed to create GsmSenderEventRunner");
-        return;
-    }
-    gsmSmsSender_ = std::make_shared<GsmSmsSender>(
-        gsmSmsSendRunner_, slotId_, bind(&SmsSendManager::RetriedSmsDelivery, this, placeholders::_1));
+    gsmSmsSender_ =
+        std::make_shared<GsmSmsSender>(slotId_, bind(&SmsSendManager::RetriedSmsDelivery, this, placeholders::_1));
     if (gsmSmsSender_ == nullptr) {
         TELEPHONY_LOGE("failed to create GsmSmsSender");
         return;
     }
     gsmSmsSender_->Init();
 
-    cdmaSmsSendRunner_ = RunnerPool::GetInstance().GetSmsSendReceiveRunnerBySlotId(slotId_);
-    if (cdmaSmsSendRunner_ == nullptr) {
-        TELEPHONY_LOGE("failed to create CdmaSenderEventRunner");
-        return;
-    }
-    cdmaSmsSender_ = std::make_shared<CdmaSmsSender>(
-        cdmaSmsSendRunner_, slotId_, bind(&SmsSendManager::RetriedSmsDelivery, this, placeholders::_1));
+    cdmaSmsSender_ =
+        std::make_shared<CdmaSmsSender>(slotId_, bind(&SmsSendManager::RetriedSmsDelivery, this, placeholders::_1));
     if (cdmaSmsSender_ == nullptr) {
         TELEPHONY_LOGE("failed to create CdmaSmsSender");
         return;
@@ -86,12 +75,7 @@ void SmsSendManager::Init()
 
 void SmsSendManager::InitNetworkHandle()
 {
-    networkRunner_ = RunnerPool::GetInstance().GetSmsCommonRunner();
-    if (networkRunner_ == nullptr) {
-        TELEPHONY_LOGE("failed to create networkRunner");
-        return;
-    }
-    networkManager_ = std::make_shared<SmsNetworkPolicyManager>(networkRunner_, slotId_);
+    networkManager_ = std::make_shared<SmsNetworkPolicyManager>(slotId_);
     if (networkManager_ == nullptr) {
         TELEPHONY_LOGE("failed to create networkManager");
         return;
