@@ -224,8 +224,9 @@ void GsmSmsCbHandler::HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &messa
 
     std::string pdu(message->pdu);
     std::shared_ptr<GsmCbCodec> cbMessage = GsmCbCodec::CreateCbMessage(pdu);
+    TELEPHONY_LOGE("cb message pdu:%{public}s", pdu.c_str());
     if (cbMessage == nullptr) {
-        TELEPHONY_LOGE("create Sms CbMessage fail, pdu %{private}s", pdu.c_str());
+        TELEPHONY_LOGE("create Sms CbMessage fail");
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::CELL_BROAD_CAST,
             SmsMmsErrorCode::SMS_ERROR_CELL_BROADCAST_PUD_ANALYSIS_FAIL, "publish cell broadcast event fail");
         return;

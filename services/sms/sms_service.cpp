@@ -755,6 +755,7 @@ int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const st
         TELEPHONY_LOGE("mms pdu file is empty");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
+    TELEPHONY_LOGI("send mms slotId:%{public}d", slotId);
     int32_t ret = interfaceManager->SendMms(mmsc, data, ua, uaprof);
     if (ret == TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGI("send mms successed");
@@ -789,6 +790,7 @@ int32_t SmsService::DownloadMms(int32_t slotId, const std::u16string &mmsc, cons
         TELEPHONY_LOGE("mms Pdu file is empty");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
+    TELEPHONY_LOGI("download mms slotId:%{public}d", slotId);
     int32_t ret = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
     if (ret == TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGI("down mms successed");

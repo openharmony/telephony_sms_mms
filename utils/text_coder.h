@@ -54,7 +54,7 @@ private:
     int FindSpanish(uint8_t *dest, int maxLength, const uint16_t inText);
     int FindPortu(uint8_t *dest, int maxLength, const uint16_t inText);
     uint8_t FindReplaceChar(const uint16_t inText);
-    std::map<uint16_t, uint8_t> Get7BitCodingExtMap(SmsCodingNationalType codingNationalType);
+    std::map<uint16_t, uint8_t> Get7BitCodingExtMap(SmsCodingNationalType codingNationalType) const;
 
     int Gsm7bitToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, const MsgLangInfo &langInfo);
     int EscapeTurkishLockingToUcs2(const uint8_t *src, int srcLen, const MsgLangInfo &langInfo, uint16_t &result);
