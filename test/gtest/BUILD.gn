@@ -39,6 +39,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   include_dirs = [
     "$SMS_MMS_SOURCE_DIR/services/include",
     "$SMS_MMS_SOURCE_DIR/interfaces/innerkits",
+    "$SMS_MMS_SOURCE_DIR/interfaces/innerkits/satellite",
     "$SMS_MMS_SOURCE_DIR/interfaces/kits/native",
     "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/include",
     "$SMS_MMS_SOURCE_DIR/utils",
