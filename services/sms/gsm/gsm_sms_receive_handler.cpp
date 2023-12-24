@@ -19,6 +19,7 @@
 #include "gsm_sms_message.h"
 #include "radio_event.h"
 #include "sms_common.h"
+#include "satellite_sms_client.h"
 #include "sms_hisysevent.h"
 #include "sms_persist_helper.h"
 #include "sms_receive_reliability_handler.h"
@@ -53,8 +54,14 @@ void GsmSmsReceiveHandler::Init()
 bool GsmSmsReceiveHandler::RegisterHandler()
 {
     TELEPHONY_LOGI("GsmSmsReceiveHandler::RegisteHandler Register RADIO_GSM_SMS ok.");
-    CoreManagerInner::GetInstance().RegisterCoreNotify(
-        slotId_, shared_from_this(), RadioEvent::RADIO_GSM_SMS, nullptr);
+    auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
+    bool satelliteSupported = satelliteSmsClient.GetSatelliteSupported();
+    if (satelliteSupported) {
+        TELEPHONY_LOGI("satellite is supported.");
+        satelliteSmsClient.AddReceiveHandler(slotId_, shared_from_this());
+    }
+    CoreManagerInner::GetInstance().RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_GSM_SMS, nullptr);
+
     return true;
 }
 
@@ -62,6 +69,33 @@ void GsmSmsReceiveHandler::UnRegisterHandler()
 {
     TELEPHONY_LOGI("SmsReceiveHandler::UnRegisterHandler::slotId= %{public}d", slotId_);
     CoreManagerInner::GetInstance().UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_GSM_SMS);
+    auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
+    bool satelliteSupported = satelliteSmsClient.GetSatelliteSupported();
+    if (satelliteSupported && satelliteCallback_ != nullptr) {
+        TELEPHONY_LOGI("satellite is supported.");
+        satelliteSmsClient.UnRegisterSmsNotify(slotId_, RadioEvent::RADIO_GSM_SMS);
+        satelliteSmsClient.UnRegisterSmsNotify(slotId_, SMS_EVENT_NEW_SMS_REPLY);
+    }
+}
+
+void GsmSmsReceiveHandler::RegisterSatelliteCallback()
+{
+    auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
+    if (satelliteSmsClient.GetSatelliteSupported()) {
+        TELEPHONY_LOGI("gsm receiver register satellite notify");
+        satelliteCallback_ = std::make_unique<SatelliteSmsCallback>(shared_from_this()).release();
+        satelliteSmsClient.RegisterSmsNotify(slotId_, RadioEvent::RADIO_GSM_SMS, satelliteCallback_);
+        satelliteSmsClient.RegisterSmsNotify(slotId_, SMS_EVENT_NEW_SMS_REPLY, satelliteCallback_);
+    }
+}
+
+void GsmSmsReceiveHandler::UnregisterSatelliteCallback()
+{
+    auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
+    if (satelliteSmsClient.GetSatelliteSupported()) {
+        TELEPHONY_LOGI("gsm receiver unregister satellite notify");
+        satelliteCallback_ = nullptr;
+    }
 }
 
 int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> smsBaseMessage)
@@ -159,6 +193,13 @@ int32_t GsmSmsReceiveHandler::HandleNormalSmsByType(const shared_ptr<SmsBaseMess
 void GsmSmsReceiveHandler::ReplySmsToSmsc(int result, const shared_ptr<SmsBaseMessage> response)
 {
     TELEPHONY_LOGI("GsmSmsReceiveHandler::ReplySmsToSmsc ackResult %{public}d", result);
+    auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
+    if (satelliteSmsClient.GetSatelliteCapability(slotId_) > 0 && satelliteSmsClient.IsSatelliteEnabled()) {
+        TELEPHONY_LOGI("send smsack through satellite");
+        satelliteSmsClient.SendSmsAck(
+            slotId_, SMS_EVENT_NEW_SMS_REPLY, result == AckIncomeCause::SMS_ACK_RESULT_OK, result);
+        return;
+    }
     CoreManagerInner::GetInstance().SendSmsAck(
         slotId_, SMS_EVENT_NEW_SMS_REPLY, result == AckIncomeCause::SMS_ACK_RESULT_OK, result, shared_from_this());
 }
