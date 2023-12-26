@@ -26,6 +26,7 @@
 #include "gsm_user_data_encode.h"
 #include "gtest/gtest.h"
 #include "radio_event.h"
+#include "satellite_sms_client.h"
 #include "send_short_message_callback_stub.h"
 #include "short_message.h"
 #include "sms_common_utils.h"
@@ -47,6 +48,7 @@ using namespace testing::ext;
 
 namespace {
 const std::string TEXT_SMS_CONTENT = "hello world";
+const std::u16string INTERFACE_TOKEN = u"ohos.telephony.ISatelliteSmsCallback";
 const std::string BLOCK_NUMBER = "123";
 const int8_t TEXT_PORT_NUM = -1;
 const int16_t WAP_PUSH_PORT = 2948;
@@ -1209,6 +1211,127 @@ HWTEST_F(BranchSmsTest, GsmSmsSender_0001, Function | MediumTest | Level1)
     EXPECT_TRUE(gsmSmsSender->SetPduInfo(smsIndexer, gsmSmsMessage, isMore));
     smsIndexer->smsConcat_.totalSeg = VALUE_LENGTH;
     EXPECT_TRUE(gsmSmsSender->SetPduInfo(smsIndexer, gsmSmsMessage, isMore));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SatelliteSmsCallback_0001
+ * @tc.name     Test SatelliteSms Callback
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SatelliteSmsCallback_0001, Function | MediumTest | Level1)
+{
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
+    auto gsmSmsSender = std::make_shared<GsmSmsSender>(INVALID_SLOTID, fun);
+    SatelliteSmsCallback callback(gsmSmsSender);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(u"");
+    data.WriteInt32(0);
+    EXPECT_EQ(callback.OnRemoteRequest(0, data, reply, option), TELEPHONY_ERR_DESCRIPTOR_MISMATCH);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SatelliteSmsCallback_0002
+ * @tc.name     Test SatelliteSms Callback
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SatelliteSmsCallback_0002, Function | MediumTest | Level1)
+{
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
+    auto gsmSmsSender = std::make_shared<GsmSmsSender>(INVALID_SLOTID, fun);
+    SatelliteSmsCallback callback(gsmSmsSender);
+    MessageParcel reply;
+    MessageOption option;
+
+    MessageParcel hrilData;
+    hrilData.WriteInterfaceToken(INTERFACE_TOKEN);
+    hrilData.WriteInt32(0);
+    hrilData.WriteInt32(static_cast<int32_t>(SatelliteSmsResultType::HRIL_RADIO_RESPONSE));
+    hrilData.WriteInt32(0);
+    hrilData.WriteInt32(0);
+    hrilData.WriteInt32(0);
+    hrilData.WriteInt32(0);
+    EXPECT_EQ(callback.OnRemoteRequest(0, hrilData, reply, option), TELEPHONY_SUCCESS);
+
+    MessageParcel data;
+    data.WriteInterfaceToken(INTERFACE_TOKEN);
+    data.WriteInt32(0);
+    data.WriteInt32(static_cast<int32_t>(SatelliteSmsResultType::SEND_SMS_RESULT));
+    data.WriteInt32(0);
+    data.WriteString("");
+    data.WriteInt32(0);
+    data.WriteInt64(0);
+    EXPECT_EQ(callback.OnRemoteRequest(0, data, reply, option), TELEPHONY_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SatelliteSmsCallback_0003
+ * @tc.name     Test SatelliteSms Callback
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SatelliteSmsCallback_0003, Function | MediumTest | Level1)
+{
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
+    auto gsmSmsSender = std::make_shared<GsmSmsSender>(INVALID_SLOTID, fun);
+    SatelliteSmsCallback callback(gsmSmsSender);
+    MessageParcel reply;
+    MessageOption option;
+
+    MessageParcel errData;
+    errData.WriteInterfaceToken(INTERFACE_TOKEN);
+    errData.WriteInt32(0);
+    EXPECT_EQ(callback.OnRemoteRequest(1, errData, reply, option), TELEPHONY_ERR_READ_DATA_FAIL);
+
+    MessageParcel data;
+    data.WriteInterfaceToken(INTERFACE_TOKEN);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    std::vector<uint8_t> pdu {};
+    data.WriteUInt8Vector(pdu);
+    EXPECT_EQ(callback.OnRemoteRequest(1, data, reply, option), TELEPHONY_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SatelliteSmsCallback_0004
+ * @tc.name     Test SatelliteSms Callback
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SatelliteSmsCallback_0004, Function | MediumTest | Level1)
+{
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
+    auto gsmSmsSender = std::make_shared<GsmSmsSender>(INVALID_SLOTID, fun);
+    SatelliteSmsCallback callback(gsmSmsSender);
+    MessageParcel reply;
+    MessageOption option;
+
+    MessageParcel errData;
+    errData.WriteInterfaceToken(INTERFACE_TOKEN);
+    errData.WriteInt32(0);
+    EXPECT_EQ(callback.OnRemoteRequest(2, errData, reply, option), TELEPHONY_ERR_READ_DATA_FAIL);
+
+    MessageParcel data;
+    data.WriteInterfaceToken(INTERFACE_TOKEN);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    std::vector<uint8_t> pdu {};
+    data.WriteUInt8Vector(pdu);
+    EXPECT_EQ(callback.OnRemoteRequest(2, data, reply, option), TELEPHONY_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SatelliteSmsClient_0001
+ * @tc.name     Test Satellite Service Client
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SatelliteSmsClient_0001, Function | MediumTest | Level1)
+{
+    TELEPHONY_LOGI("SatelliteSmsClient_0001==========");
+    auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
+    EXPECT_GE(satelliteSmsClient.GetSatelliteSupported(), 0);
+    EXPECT_GE(satelliteSmsClient.IsSatelliteEnabled(), 0);
 }
 
 /**

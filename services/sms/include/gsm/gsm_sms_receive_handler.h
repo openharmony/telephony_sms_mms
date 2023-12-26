@@ -17,6 +17,7 @@
 #define GSM_SMS_RECEIVE_HANDLER_H
 
 #include "gsm_sms_cb_handler.h"
+#include "satellite_sms_callback.h"
 #include "sms_receive_handler.h"
 
 namespace OHOS {
@@ -27,6 +28,8 @@ public:
     ~GsmSmsReceiveHandler() override;
     void Init();
     void UnRegisterHandler();
+    void RegisterSatelliteCallback();
+    void UnregisterSatelliteCallback();
 
 protected:
     virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) override;
@@ -40,6 +43,7 @@ private:
 
 private:
     std::shared_ptr<GsmSmsCbHandler> smsCbHandler_;
+    sptr<ISatelliteSmsCallback> satelliteCallback_ = nullptr;
 };
 } // namespace Telephony
 } // namespace OHOS

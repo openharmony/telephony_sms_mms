@@ -23,6 +23,7 @@
 #include "i_delivery_short_message_callback.h"
 #include "i_send_short_message_callback.h"
 #include "ims_sms_client.h"
+#include "satellite_sms_callback.h"
 #include "sms_sender.h"
 #include "telephony_types.h"
 
@@ -46,6 +47,8 @@ public:
     void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
     void StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
     void RegisterImsHandler() override;
+    void RegisterSatelliteCallback();
+    void UnregisterSatelliteCallback();
 
 protected:
     void StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &event) override;
@@ -57,6 +60,8 @@ private:
     bool SetPduInfo(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSmsMessage &gsmSmsMessage, bool &isMore);
     void SendImsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSimMessageParam smsData);
     void SendCsSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSimMessageParam smsData);
+    void SendSatelliteSms(const std::shared_ptr<SmsSendIndexer> &smsIndexer, GsmSimMessageParam smsData);
+    void OnSatelliteStateChange(bool satelliteSwitch);
     void TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
         std::vector<struct SplitInfo> cellsInfos, DataCodingScheme codingType, bool isStatusReport,
         std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage &gsmSmsMessage,
@@ -66,6 +71,7 @@ private:
 private:
     std::mutex mutex_;
     bool isImsGsmHandlerRegistered = false;
+    sptr<ISatelliteSmsCallback> satelliteCallback_ = nullptr;
 };
 } // namespace Telephony
 } // namespace OHOS
