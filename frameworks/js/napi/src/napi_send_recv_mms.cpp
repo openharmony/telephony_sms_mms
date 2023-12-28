@@ -30,7 +30,12 @@ static const int32_t DEFAULT_REF_COUNT = 1;
 const bool STORE_MMS_PDU_TO_FILE = false;
 const int32_t ARGS_ONE = 1;
 std::shared_ptr<DataShare::DataShareHelper> g_datashareHelper = nullptr;
+constexpr static uint32_t WAIT_PDN_TOGGLE_TIME = 3000;
 } // namespace
+std::mutex NapiSendRecvMms::downloadCtx_;
+std::mutex NapiSendRecvMms::countCtx_;
+int32_t NapiSendRecvMms::reqCount_ = 0;
+bool NapiSendRecvMms::waitFlag = false;
 
 std::shared_ptr<OHOS::DataShare::DataShareHelper> GetDataShareHelper(napi_env env, napi_callback_info info)
 {
@@ -445,6 +450,23 @@ static bool DownloadExceptionCase(
     return true;
 }
 
+void UpdateReqCount()
+{
+    std::unique_lock<std::mutex> lck(NapiSendRecvMms::countCtx_);
+    NapiSendRecvMms::reqCount_++;
+    TELEPHONY_LOGI("reqCount_:%{public}d", NapiSendRecvMms::reqCount_);
+}
+
+void DecreaseReqCount()
+{
+    NapiSendRecvMms::reqCount_--;
+    if (NapiSendRecvMms::reqCount_ > 0) {
+        NapiSendRecvMms::waitFlag = true;
+    } else {
+        NapiSendRecvMms::waitFlag = false;
+    }
+}
+
 void NativeDownloadMms(napi_env env, void *data)
 {
     auto asyncContext = static_cast<MmsContext *>(data);
@@ -455,6 +477,14 @@ void NativeDownloadMms(napi_env env, void *data)
     if (!DownloadExceptionCase(*asyncContext, g_datashareHelper)) {
         TELEPHONY_LOGE("Exception case");
         return;
+    }
+
+    TELEPHONY_LOGI("native download mms");
+    UpdateReqCount();
+    std::unique_lock<std::mutex> lck(NapiSendRecvMms::downloadCtx_);
+    if (NapiSendRecvMms::waitFlag) {
+        TELEPHONY_LOGI("down multiple mms at once wait");
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_PDN_TOGGLE_TIME));
     }
 
     std::string dbUrl;
@@ -485,13 +515,14 @@ void NativeDownloadMms(napi_env env, void *data)
     } else {
         asyncContext->resolved = false;
     }
+    DecreaseReqCount();
     TELEPHONY_LOGI("NativeDownloadMms end resolved = %{public}d", asyncContext->resolved);
 }
 
 void DownloadMmsCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<MmsContext *>(data);
-    if (g_datashareHelper != nullptr) {
+    if (g_datashareHelper != nullptr && !NapiSendRecvMms::waitFlag) {
         g_datashareHelper->Release();
     }
     if (context == nullptr) {
