@@ -157,6 +157,7 @@ bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
     std::vector<std::string> dbUrls = SplitUrl(pduHelper.GetDbUrl());
     std::string mmsPdu;
     for (std::string url : dbUrls) {
+        TELEPHONY_LOGI("url:%{public}s", url.c_str());
         Uri uri(SMS_PROFILE_MMS_PDU_URI);
         std::vector<std::string> colume;
         DataShare::DataSharePredicates predicates;

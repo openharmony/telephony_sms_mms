@@ -140,8 +140,9 @@ void MmsApnInfo::PdpProfileSelect(const std::shared_ptr<DataShare::DataShareHelp
     if (GetMmsApnValue(resultSet, count, homeUrlVal, mmsIPAddressVal)) {
         setMmscUrl(homeUrlVal);
         setMmsProxyAddressAndProxyPort(mmsIPAddressVal);
+    } else {
+        TELEPHONY_LOGI("homeUrlVal and mmsIPAddressVal not matched");
     }
-    TELEPHONY_LOGI("homeUrlVal and mmsIPAddressVal not matched");
     resultSet->Close();
     helper->Release();
 }

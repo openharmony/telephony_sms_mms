@@ -364,7 +364,7 @@ std::string GetMmsc(int32_t slotId)
     std::string mccmnc = StringUtils::ToUtf8(operatorNumeric);
     predicates.EqualTo(PdpProfileData::MCCMNC, mccmnc);
     std::shared_ptr<MmsApnInfo> mmsApnInfo = std::make_shared<MmsApnInfo>(slotId);
-    std::shared_ptr<DataShare::DataShareHelper> pdpHelper = mmsApnInfo->CreatePdpProfileHelper();
+    auto pdpHelper = mmsApnInfo->CreatePdpProfileHelper();
     if (pdpHelper == nullptr) {
         return "";
     }
