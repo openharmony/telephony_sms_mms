@@ -155,6 +155,7 @@ int32_t SmsServiceProxy::GetSmscAddr(int32_t slotId, std::u16string &smscAddress
     localObject_->SendRequest(
         static_cast<int32_t>(SmsServiceInterfaceCode::GET_SMSC_ADDRESS), dataParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
+    TELEPHONY_LOGI("get smsc result:%{public}d", result == TELEPHONY_ERR_SUCCESS);
     if (result == TELEPHONY_ERR_SUCCESS) {
         smscAddress = replyParcel.ReadString16();
     }

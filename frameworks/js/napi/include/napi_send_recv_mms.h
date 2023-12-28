@@ -16,7 +16,6 @@
 #ifndef NAPI_SEND_RECV_H
 #define NAPI_SEND_RECV_H
 #include <codecvt>
-#include <cstring>
 #include <locale>
 
 #include "base_context.h"
@@ -46,6 +45,12 @@ public:
     ~NapiSendRecvMms() = default;
     static napi_value SendMms(napi_env env, napi_callback_info info);
     static napi_value DownloadMms(napi_env env, napi_callback_info info);
+
+public:
+    static std::mutex downloadCtx_;
+    static std::mutex countCtx_;
+    static std::int32_t reqCount_;
+    static bool waitFlag;
 };
 } // namespace Telephony
 } // namespace OHOS
