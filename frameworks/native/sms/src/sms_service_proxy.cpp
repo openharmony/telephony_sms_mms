@@ -647,7 +647,7 @@ bool SmsServiceProxy::GetBase64Encode(std::string src, std::string &dest)
     if (!result) {
         return result;
     }
-    dest = StringUtils::ToUtf8(dataParcel.ReadString16());
+    dest = StringUtils::ToUtf8(replyParcel.ReadString16());
     return result;
 }
 
@@ -679,7 +679,7 @@ bool SmsServiceProxy::GetBase64Decode(std::string src, std::string &dest)
     if (!result) {
         return result;
     }
-    dest = StringUtils::ToUtf8(dataParcel.ReadString16());
+    dest = StringUtils::ToUtf8(replyParcel.ReadString16());
     return result;
 }
 
@@ -714,7 +714,7 @@ bool SmsServiceProxy::GetEncodeStringFunc(
     if (!result) {
         return result;
     }
-    encodeString = StringUtils::ToUtf8(dataParcel.ReadString16());
+    encodeString = StringUtils::ToUtf8(replyParcel.ReadString16());
     return result;
 }
 
