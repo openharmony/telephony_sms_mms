@@ -124,6 +124,9 @@ bool MmsEncodeString::GetEncodeString(std::string &encodeString)
 {
     auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
     bool ret = client->GetEncodeStringFunc(encodeString, charset_, valLength_, strEncodeString_);
+    if (encodeString.empty()) {
+        encodeString = strEncodeString_;
+    }
     return ret;
 }
 
