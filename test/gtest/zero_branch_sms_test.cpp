@@ -16,6 +16,7 @@
 #define private public
 #define protected public
 
+#include "cdma_sms_message.h"
 #include "delivery_short_message_callback_stub.h"
 #include "gsm_sms_message.h"
 #include "gsm_sms_param_decode.h"
@@ -79,6 +80,7 @@ const int TWO_BIT = 2;
 const std::string CBN_NUM = "+86192********";
 const int NUM_LENGTH = 11;
 const std::string PREFIX = "+86";
+const std::vector<uint8_t> PDU = { 0 };
 } // namespace
 
 class BranchSmsTest : public testing::Test {
@@ -1920,6 +1922,99 @@ HWTEST_F(BranchSmsTest, SmsPersistHelper_0002, Function | MediumTest | Level1)
     smsPersistHelper->CbnFormat(
         cbnNumTemp, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
     EXPECT_TRUE(formatNum == num);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsNetworkPolicyManager_0001
+ * @tc.name     Test SmsNetworkPolicyManager
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsNetworkPolicyManager_0001, Function | MediumTest | Level1)
+{
+    auto smsNetworkPolicyManager = std::make_shared<SmsNetworkPolicyManager>(INVALID_SLOTID);
+    smsNetworkPolicyManager->IsImsNetDomain();
+    smsNetworkPolicyManager->GetVoiceServiceState();
+    smsNetworkPolicyManager->NetworkRegister(nullptr);
+    auto smsBaseMessage = std::make_shared<GsmSmsMessage>();
+    smsBaseMessage->GetSmscAddr();
+    smsBaseMessage->GetRawUserData();
+    smsBaseMessage->GetRawWapPushUserData();
+    smsBaseMessage->IsReplaceMessage();
+    smsBaseMessage->IsCphsMwi();
+    smsBaseMessage->IsMwiNotStore();
+    smsBaseMessage->GetStatus();
+    smsBaseMessage->IsSmsStatusReportMessage();
+    smsBaseMessage->HasReplyPath();
+    smsBaseMessage->GetMsgRef();
+    smsBaseMessage->SetIndexOnSim(0);
+    smsBaseMessage->GetIndexOnSim();
+    auto smsInterfaceManager = std::make_shared<SmsInterfaceManager>(INVALID_SLOTID);
+    smsInterfaceManager->DelSimMessage(0);
+    auto smsWapPushBuffer = std::make_shared<SmsWapPushBuffer>();
+    smsWapPushBuffer->DecodeExtensionMedia();
+    smsWapPushBuffer->DecodeConstrainedEncoding();
+    smsWapPushBuffer->MarkPosition();
+    smsWapPushBuffer->UnMarkPosition();
+    std::shared_ptr<CdmaSmsMessage> cdmaSmsMessage = std::make_shared<CdmaSmsMessage>();
+    cdmaSmsMessage->GetCbInfo();
+    cdmaSmsMessage->GetCMASResponseType();
+    cdmaSmsMessage->GetSpecialSmsInd();
+    cdmaSmsMessage->GetProtocolId();
+    cdmaSmsMessage->IsReplaceMessage();
+    cdmaSmsMessage->IsCphsMwi();
+    EXPECT_TRUE(smsNetworkPolicyManager != nullptr);
+    EXPECT_TRUE(smsBaseMessage != nullptr);
+    EXPECT_TRUE(smsInterfaceManager != nullptr);
+    EXPECT_TRUE(cdmaSmsMessage != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsNetworkPolicyManager_0004
+ * @tc.name     Test SmsNetworkPolicyManager
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsNetworkPolicyManager_0004, Function | MediumTest | Level1)
+{
+    auto smsMiscManager = std::make_shared<SmsMiscManager>(INVALID_SLOTID);
+    smsMiscManager->GetRangeInfo();
+    smsMiscManager->IsEmpty();
+    std::shared_ptr<SmsReceiveIndexer> indexer = std::make_shared<SmsReceiveIndexer>();
+    indexer->SetVisibleAddress(CBN_NUM);
+    indexer->SetMsgCount(0);
+    indexer->SetMsgSeqId(0);
+    indexer->SetOriginatingAddress(CBN_NUM);
+    indexer->SetIsCdmaWapPdu(false);
+    indexer->GetIsCdmaWapPdu();
+    indexer->SetIsCdma(false);
+    indexer->SetDestPort(0);
+    indexer->SetTimestamp(0);
+    indexer->SetPdu(PDU);
+    indexer->SetRawWapPushUserData(CBN_NUM);
+    const sptr<ISendShortMessageCallback> sendCallback =
+        iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
+    const sptr<IDeliveryShortMessageCallback> deliveryCallback =
+        iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+    std::shared_ptr<SmsSendIndexer> smsIndexer =
+        std::make_shared<SmsSendIndexer>(CBN_NUM, CBN_NUM, CBN_NUM, sendCallback, deliveryCallback);
+    smsIndexer->SetEncodeSmca(PDU);
+    smsIndexer->SetText(CBN_NUM);
+    smsIndexer->SetDeliveryCallback(deliveryCallback);
+    smsIndexer->SetSendCallback(sendCallback);
+    smsIndexer->SetDestPort(0);
+    smsIndexer->SetDestAddr(CBN_NUM);
+    smsIndexer->SetSmcaAddr(CBN_NUM);
+    smsIndexer->GetIsText();
+    smsIndexer->GetErrorCode();
+    smsIndexer->SetData(PDU);
+    smsIndexer->SetAckPdu(PDU);
+    smsIndexer->GetAckPdu();
+    smsIndexer->SetMsgRefId64Bit(0);
+    smsIndexer->SetIsConcat(true);
+    EXPECT_TRUE(smsMiscManager != nullptr);
+    EXPECT_TRUE(indexer != nullptr);
+    EXPECT_TRUE(sendCallback != nullptr);
+    EXPECT_TRUE(deliveryCallback != nullptr);
+    EXPECT_TRUE(smsIndexer != nullptr);
 }
 } // namespace Telephony
 } // namespace OHOS
