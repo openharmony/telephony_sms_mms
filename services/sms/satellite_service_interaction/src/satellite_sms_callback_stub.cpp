@@ -73,6 +73,10 @@ int32_t SatelliteSmsCallbackStub::OnSendSmsResponse(MessageParcel &data, Message
         int32_t error = data.ReadInt32();
         int32_t type = data.ReadInt32();
         auto info = std::make_shared<HRilRadioResponseInfo>();
+        if (info == nullptr) {
+            TELEPHONY_LOGE("info is null!");
+            return TELEPHONY_ERR_LOCAL_PTR_NULL;
+        }
         info->flag = flag;
         info->serial = serial;
         info->error = static_cast<HRilErrType>(error);
@@ -92,6 +96,10 @@ int32_t SatelliteSmsCallbackStub::OnSendSmsResponse(MessageParcel &data, Message
         int32_t errCode = data.ReadInt32();
         int64_t flag = data.ReadInt64();
         auto info = std::make_shared<SendSmsResultInfo>();
+        if (info == nullptr) {
+            TELEPHONY_LOGE("info is null!");
+            return TELEPHONY_ERR_LOCAL_PTR_NULL;
+        }
         info->msgRef = msgRef;
         info->pdu = pdu;
         info->errCode = errCode;
@@ -114,7 +122,11 @@ int32_t SatelliteSmsCallbackStub::OnSmsStatusReportNotify(MessageParcel &data, M
     int32_t eventCode = data.ReadInt32();
 
     auto info = std::make_shared<SmsMessageInfo>();
-    int type = 0;
+    if (info == nullptr) {
+        TELEPHONY_LOGE("info is null!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    int32_t type = 0;
     if (!data.ReadInt32(type)) {
         TELEPHONY_LOGE("SmsMessageInfo is null!");
         return TELEPHONY_ERR_READ_DATA_FAIL;
@@ -136,7 +148,11 @@ int32_t SatelliteSmsCallbackStub::OnNewSmsNotify(MessageParcel &data, MessagePar
     int32_t eventCode = data.ReadInt32();
 
     auto info = std::make_shared<SmsMessageInfo>();
-    int type = 0;
+    if (info == nullptr) {
+        TELEPHONY_LOGE("info is null!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    int32_t type = 0;
     if (!data.ReadInt32(type)) {
         TELEPHONY_LOGE("SmsMessageInfo is null!");
         return TELEPHONY_ERR_READ_DATA_FAIL;

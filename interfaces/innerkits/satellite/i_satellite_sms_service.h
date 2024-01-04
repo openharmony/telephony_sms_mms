@@ -16,9 +16,9 @@
 #ifndef I_SATELLITE_SMS_SERVICE_H
 #define I_SATELLITE_SMS_SERVICE_H
 
-#include "event_handler.h"
 #include "i_satellite_sms_callback.h"
 #include "iremote_proxy.h"
+#include "tel_event_handler.h"
 #include "telephony_types.h"
 
 namespace OHOS {
