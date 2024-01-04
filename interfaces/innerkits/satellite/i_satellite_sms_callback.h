@@ -16,9 +16,9 @@
 #ifndef I_SATELLITE_SMS_CALLBACK_H
 #define I_SATELLITE_SMS_CALLBACK_H
 
-#include "event_handler.h"
 #include "hril_types.h"
 #include "iremote_proxy.h"
+#include "tel_event_handler.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -32,7 +32,7 @@ public:
     /**
      * @brief SendSmsResponse.
      *
-     * @param event evnet which contains the response data.
+     * @param event event which contains the response data.
      * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
     virtual int32_t SendSmsResponse(InnerEvent::Pointer &event) = 0;
@@ -40,7 +40,7 @@ public:
     /**
      * @brief SmsStatusReportNotify.
      *
-     * @param event evnet which contains the report data.
+     * @param event event which contains the report data.
      * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
     virtual int32_t SmsStatusReportNotify(InnerEvent::Pointer &event) = 0;
@@ -48,7 +48,7 @@ public:
     /**
      * @brief NewSmsNotify.
      *
-     * @param event evnet which contains the sms data.
+     * @param event event which contains the sms data.
      * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
     virtual int32_t NewSmsNotify(InnerEvent::Pointer &event) = 0;

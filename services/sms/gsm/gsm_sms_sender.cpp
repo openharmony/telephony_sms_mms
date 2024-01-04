@@ -241,6 +241,7 @@ void GsmSmsSender::SendSatelliteSms(const shared_ptr<SmsSendIndexer> &smsIndexer
     if (tryCount > 0) {
         smsIndexer->UpdatePduForResend();
     }
+    TELEPHONY_LOGI("satellite SendSms tryCount = %{public}d", tryCount);
     if (tryCount == 0 && smsIndexer->GetHasMore()) {
         TELEPHONY_LOGI("satellite SendSmsMoreMode pdu len = %{public}zu", smsIndexer->GetEncodePdu().size());
         satelliteSmsClient.SendSmsMoreMode(slotId_, RadioEvent::RADIO_SEND_SMS_EXPECT_MORE, smsData);
@@ -386,7 +387,7 @@ bool GsmSmsSender::RegisterHandler()
 {
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
     if (satelliteSmsClient.GetSatelliteSupported()) {
-        satelliteSmsClient.AddSendHandler(slotId_, shared_from_this());
+        satelliteSmsClient.AddSendHandler(slotId_, std::static_pointer_cast<TelEventHandler>(shared_from_this()));
     }
     CoreManagerInner::GetInstance().RegisterCoreNotify(
         slotId_, shared_from_this(), RadioEvent::RADIO_SMS_STATUS, nullptr);
@@ -399,7 +400,9 @@ void GsmSmsSender::RegisterSatelliteCallback()
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
     if (satelliteSmsClient.GetSatelliteSupported()) {
         TELEPHONY_LOGI("gsm sender register satellite notify");
-        satelliteCallback_ = std::make_unique<SatelliteSmsCallback>(shared_from_this()).release();
+        satelliteCallback_ =
+            std::make_unique<SatelliteSmsCallback>(std::static_pointer_cast<TelEventHandler>(shared_from_this()))
+                .release();
         satelliteSmsClient.RegisterSmsNotify(slotId_, RadioEvent::RADIO_SMS_STATUS, satelliteCallback_);
         satelliteSmsClient.RegisterSmsNotify(slotId_, RadioEvent::RADIO_SEND_SMS, satelliteCallback_);
         satelliteSmsClient.RegisterSmsNotify(slotId_, RadioEvent::RADIO_SEND_SMS_EXPECT_MORE, satelliteCallback_);

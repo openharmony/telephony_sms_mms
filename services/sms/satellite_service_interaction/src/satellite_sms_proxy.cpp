@@ -37,6 +37,11 @@ int32_t SatelliteSmsProxy::RegisterSmsNotify(int32_t slotId, int32_t what, const
     MessageParcel reply;
     MessageOption option;
     int32_t ret = TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+
+    if (callback == nullptr) {
+        TELEPHONY_LOGE("RegisterSmsNotify callback is null");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
     if (!WriteInterfaceToken(data)) {
         TELEPHONY_LOGE("RegisterSmsNotify WriteInterfaceToken is false");
         return ret;
