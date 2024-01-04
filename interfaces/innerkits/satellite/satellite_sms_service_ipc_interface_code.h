@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef SATELLITE_SERVICE_INTERFACE_CODE_H
-#define SATELLITE_SERVICE_INTERFACE_CODE_H
+#ifndef SATELLITE_SMS_SERVICE_INTERFACE_CODE_H
+#define SATELLITE_SMS_SERVICE_INTERFACE_CODE_H
 
-/* SAID:4012 */
 namespace OHOS {
 namespace Telephony {
 enum class SatelliteSmsServiceInterfaceCode {
     REGISTER_SMS_NOTIFY,
     UNREGISTER_SMS_NOTIFY,
-
     SEND_SMS,
     SEND_SMS_MORE_MODE,
     SEND_SMS_ACK,
 };
 } // namespace Telephony
 } // namespace OHOS
-#endif // SATELLITE_SERVICE_INTERFACE_CODE_H
+#endif // SATELLITE_SMS_SERVICE_INTERFACE_CODE_H

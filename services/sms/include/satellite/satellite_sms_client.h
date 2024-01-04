@@ -39,8 +39,8 @@ public:
     int32_t GetSatelliteCapability(int32_t slotId);
     int32_t RegisterSmsNotify(int32_t slotId, int32_t what, const sptr<ISatelliteSmsCallback> &callback);
     int32_t UnRegisterSmsNotify(int32_t slotId, int32_t what);
-    int32_t AddSendHandler(int32_t slotId, const std::shared_ptr<AppExecFwk::EventHandler> &sender);
-    int32_t AddReceiveHandler(int32_t slotId, const std::shared_ptr<AppExecFwk::EventHandler> &receiver);
+    int32_t AddSendHandler(int32_t slotId, const std::shared_ptr<TelEventHandler> sender);
+    int32_t AddReceiveHandler(int32_t slotId, const std::shared_ptr<TelEventHandler> receiver);
 
     int32_t SendSms(int32_t slotId, int32_t eventId, SatelliteMessage &message);
     int32_t SendSmsMoreMode(int32_t slotId, int32_t eventId, SatelliteMessage &message);
@@ -77,12 +77,12 @@ private:
 
 private:
     std::mutex mutexProxy_;
-    sptr<ISystemAbilityStatusChange> statusChangeListener_ = nullptr;
+    sptr<ISystemAbilityStatusChange> statusChangeListener_ { nullptr };
     sptr<ISatelliteService> satelliteServiceProxy_ { nullptr };
     sptr<ISatelliteSmsService> proxy_ { nullptr };
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ { nullptr };
-    std::map<int32_t, std::shared_ptr<AppExecFwk::EventHandler>> senderMap_;
-    std::map<int32_t, std::shared_ptr<AppExecFwk::EventHandler>> receiverMap_;
+    std::map<int32_t, std::shared_ptr<TelEventHandler>> senderMap_;
+    std::map<int32_t, std::shared_ptr<TelEventHandler>> receiverMap_;
 };
 } // namespace Telephony
 } // namespace OHOS

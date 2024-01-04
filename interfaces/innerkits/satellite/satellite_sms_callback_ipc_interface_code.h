@@ -16,7 +16,6 @@
 #ifndef SATELLITE_SMS_CALLBACK_INTERFACE_CODE_H
 #define SATELLITE_SMS_CALLBACK_INTERFACE_CODE_H
 
-/* SAID:4012 */
 namespace OHOS {
 namespace Telephony {
 enum class SatelliteSmsCallbackInterfaceCode {

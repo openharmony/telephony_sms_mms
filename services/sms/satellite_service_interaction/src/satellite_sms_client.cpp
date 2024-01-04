@@ -38,7 +38,6 @@ SatelliteSmsClient::SatelliteSmsClient()
     int32_t ret = managerPtr->SubscribeSystemAbility(TELEPHONY_SATELLITE_SERVICE_ABILITY_ID, statusChangeListener_);
     if (ret) {
         TELEPHONY_LOGE("Init, failed to subscribe sa:%{public}d", TELEPHONY_SATELLITE_SERVICE_ABILITY_ID);
-        return;
     }
 }
 
@@ -158,7 +157,7 @@ void SatelliteSmsClient::SystemAbilityListener::OnRemoveSystemAbility(
     satelliteSmsClient.ServiceOff();
 }
 
-int32_t SatelliteSmsClient::AddSendHandler(int32_t slotId, const std::shared_ptr<AppExecFwk::EventHandler> &sender)
+int32_t SatelliteSmsClient::AddSendHandler(int32_t slotId, const std::shared_ptr<TelEventHandler> sender)
 {
     if (sender == nullptr) {
         TELEPHONY_LOGE("AddSendHandler return, sender is null.");
@@ -170,7 +169,7 @@ int32_t SatelliteSmsClient::AddSendHandler(int32_t slotId, const std::shared_ptr
     return TELEPHONY_SUCCESS;
 }
 
-int32_t SatelliteSmsClient::AddReceiveHandler(int32_t slotId, const std::shared_ptr<AppExecFwk::EventHandler> &receiver)
+int32_t SatelliteSmsClient::AddReceiveHandler(int32_t slotId, const std::shared_ptr<TelEventHandler> receiver)
 {
     if (receiver == nullptr) {
         TELEPHONY_LOGE("AddReceiveHandler return, receiver is null.");
@@ -186,10 +185,18 @@ void SatelliteSmsClient::ServiceOn()
 {
     for (auto pair : senderMap_) {
         auto handler = static_cast<GsmSmsSender *>(pair.second.get());
+        if (handler == nullptr) {
+            TELEPHONY_LOGE("SenderHandler is null: %{public}d", pair.first);
+            continue;
+        }
         handler->RegisterSatelliteCallback();
     }
     for (auto pair : receiverMap_) {
         auto handler = static_cast<GsmSmsReceiveHandler *>(pair.second.get());
+        if (handler == nullptr) {
+            TELEPHONY_LOGE("ReceiveHandler is null: %{public}d", pair.first);
+            continue;
+        }
         handler->RegisterSatelliteCallback();
     }
 }
@@ -202,10 +209,18 @@ void SatelliteSmsClient::ServiceOff()
 
     for (auto pair : senderMap_) {
         auto handler = static_cast<GsmSmsSender *>(pair.second.get());
+        if (handler == nullptr) {
+            TELEPHONY_LOGE("SenderHandler is null: %{public}d", pair.first);
+            continue;
+        }
         handler->UnregisterSatelliteCallback();
     }
     for (auto pair : receiverMap_) {
         auto handler = static_cast<GsmSmsReceiveHandler *>(pair.second.get());
+        if (handler == nullptr) {
+            TELEPHONY_LOGE("ReceiveHandler is null: %{public}d", pair.first);
+            continue;
+        }
         handler->UnregisterSatelliteCallback();
     }
 }
