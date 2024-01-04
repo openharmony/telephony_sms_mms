@@ -21,8 +21,7 @@
 
 namespace OHOS {
 namespace Telephony {
-SatelliteSmsCallback::SatelliteSmsCallback(const std::shared_ptr<AppExecFwk::EventHandler> &handler) : handler_(handler)
-{}
+SatelliteSmsCallback::SatelliteSmsCallback(const std::shared_ptr<TelEventHandler> &handler) : handler_(handler) {}
 
 SatelliteSmsCallback::~SatelliteSmsCallback() {}
 

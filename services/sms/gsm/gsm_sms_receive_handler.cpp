@@ -55,10 +55,9 @@ bool GsmSmsReceiveHandler::RegisterHandler()
 {
     TELEPHONY_LOGI("GsmSmsReceiveHandler::RegisteHandler Register RADIO_GSM_SMS ok.");
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
-    bool satelliteSupported = satelliteSmsClient.GetSatelliteSupported();
-    if (satelliteSupported) {
+    if (satelliteSmsClient.GetSatelliteSupported()) {
         TELEPHONY_LOGI("satellite is supported.");
-        satelliteSmsClient.AddReceiveHandler(slotId_, shared_from_this());
+        satelliteSmsClient.AddReceiveHandler(slotId_, std::static_pointer_cast<TelEventHandler>(shared_from_this()));
     }
     CoreManagerInner::GetInstance().RegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_GSM_SMS, nullptr);
 
@@ -70,8 +69,7 @@ void GsmSmsReceiveHandler::UnRegisterHandler()
     TELEPHONY_LOGI("SmsReceiveHandler::UnRegisterHandler::slotId= %{public}d", slotId_);
     CoreManagerInner::GetInstance().UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_GSM_SMS);
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
-    bool satelliteSupported = satelliteSmsClient.GetSatelliteSupported();
-    if (satelliteSupported && satelliteCallback_ != nullptr) {
+    if (satelliteSmsClient.GetSatelliteSupported() && satelliteCallback_ != nullptr) {
         TELEPHONY_LOGI("satellite is supported.");
         satelliteSmsClient.UnRegisterSmsNotify(slotId_, RadioEvent::RADIO_GSM_SMS);
         satelliteSmsClient.UnRegisterSmsNotify(slotId_, SMS_EVENT_NEW_SMS_REPLY);
@@ -83,7 +81,9 @@ void GsmSmsReceiveHandler::RegisterSatelliteCallback()
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
     if (satelliteSmsClient.GetSatelliteSupported()) {
         TELEPHONY_LOGI("gsm receiver register satellite notify");
-        satelliteCallback_ = std::make_unique<SatelliteSmsCallback>(shared_from_this()).release();
+        satelliteCallback_ =
+            std::make_unique<SatelliteSmsCallback>(std::static_pointer_cast<TelEventHandler>(shared_from_this()))
+                .release();
         satelliteSmsClient.RegisterSmsNotify(slotId_, RadioEvent::RADIO_GSM_SMS, satelliteCallback_);
         satelliteSmsClient.RegisterSmsNotify(slotId_, SMS_EVENT_NEW_SMS_REPLY, satelliteCallback_);
     }

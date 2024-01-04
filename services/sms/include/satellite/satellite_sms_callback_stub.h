@@ -18,11 +18,10 @@
 
 #include <map>
 
-#include "event_handler.h"
-#include "event_runner.h"
 #include "iremote_stub.h"
 #include "satellite/i_satellite_sms_callback.h"
 #include "satellite/satellite_sms_callback_ipc_interface_code.h"
+#include "tel_event_handler.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -34,7 +33,6 @@ public:
 
 private:
     void InitFuncMap();
-
     int32_t OnSendSmsResponse(MessageParcel &data, MessageParcel &reply);
     int32_t OnSmsStatusReportNotify(MessageParcel &data, MessageParcel &reply);
     int32_t OnNewSmsNotify(MessageParcel &data, MessageParcel &reply);

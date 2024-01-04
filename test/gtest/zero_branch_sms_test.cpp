@@ -1329,9 +1329,25 @@ HWTEST_F(BranchSmsTest, SatelliteSmsCallback_0004, Function | MediumTest | Level
 HWTEST_F(BranchSmsTest, SatelliteSmsClient_0001, Function | MediumTest | Level1)
 {
     TELEPHONY_LOGI("SatelliteSmsClient_0001==========");
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
+    auto gsmSmsSender = std::make_shared<GsmSmsSender>(INVALID_SLOTID, fun);
+    auto receiveHandler = std::make_shared<GsmSmsReceiveHandler>(INVALID_SLOTID);
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
+    satelliteSmsClient.AddSendHandler(INVALID_SLOTID, std::static_pointer_cast<TelEventHandler>(gsmSmsSender));
+    satelliteSmsClient.AddReceiveHandler(INVALID_SLOTID, std::static_pointer_cast<TelEventHandler>(receiveHandler));
+    satelliteSmsClient.statusChangeListener_->OnAddSystemAbility(INVALID_SLOTID, "");
+    satelliteSmsClient.statusChangeListener_->OnRemoveSystemAbility(INVALID_SLOTID, "");
     EXPECT_GE(satelliteSmsClient.GetSatelliteSupported(), 0);
     EXPECT_GE(satelliteSmsClient.IsSatelliteEnabled(), 0);
+    EXPECT_GE(satelliteSmsClient.GetSatelliteCapability(INVALID_SLOTID), 0);
+    SatelliteMessage message;
+    EXPECT_EQ(satelliteSmsClient.SendSms(INVALID_SLOTID, RadioEvent::RADIO_SEND_SMS, message),
+        TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
+    EXPECT_EQ(satelliteSmsClient.SendSmsMoreMode(INVALID_SLOTID, RadioEvent::RADIO_SEND_SMS_EXPECT_MORE, message),
+        TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
+    EXPECT_EQ(
+        satelliteSmsClient.SendSmsAck(INVALID_SLOTID, SMS_EVENT_NEW_SMS_REPLY, true, AckIncomeCause::SMS_ACK_RESULT_OK),
+        TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
 }
 
 /**
