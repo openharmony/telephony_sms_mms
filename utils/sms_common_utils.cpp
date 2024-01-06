@@ -30,6 +30,8 @@ static constexpr uint8_t MAX_ABS_TIME_LEN = 32;
 static constexpr uint8_t HEX_NUM_A = 0x0A;
 static constexpr uint8_t HEX_NUM_B = 0x0B;
 static constexpr uint8_t HEX_NUM_C = 0x0C;
+static constexpr uint8_t MIN_PRINTABLE_CHAR = 32;
+static constexpr uint8_t MAX_PRINTABLE_CHAR = 127;
 
 uint16_t SmsCommonUtils::Pack7bitChar(
     const uint8_t *userData, uint16_t dataLen, uint8_t fillBits, uint8_t *packData, uint16_t packLen)
@@ -119,7 +121,7 @@ uint16_t SmsCommonUtils::Unpack7bitCharForCBPdu(
     if (shift > 0) {
         srcIdx = 1;
     }
-    for (; srcIdx < dataLen && dstIdx < unpackDataLen; dstIdx++) {
+    for (; srcIdx < dataLen && dstIdx < unpackDataLen;) {
         if (shift == 0) {
             unpackData[dstIdx] = tpdu[srcIdx] & 0x7F;
             shift = SMS_ENCODE_GSM_BIT;
@@ -133,18 +135,24 @@ uint16_t SmsCommonUtils::Unpack7bitCharForCBPdu(
             if (shift > 0) {
                 srcIdx++;
             }
-        }
-    }
-    if (shift == 0) {
-        unpackData[dstIdx] = tpdu[srcIdx] >> shift;
-        dstIdx++;
-    } else if (srcIdx > 1) {
-        auto value = tpdu[srcIdx - 1] >> shift;
-        if (value != 0) {
-            unpackData[dstIdx] = value;
             dstIdx++;
         }
     }
+    if (dstIdx >= unpackDataLen) {
+        TELEPHONY_LOGE("dstIdx:%{public}d", dstIdx);
+        return 0;
+    }
+    uint8_t value = 0;
+    if (shift == 0) {
+        value = tpdu[srcIdx] >> shift;
+    } else if (srcIdx > 1) {
+        value = tpdu[srcIdx - 1] >> shift;
+    }
+    if (value >= MIN_PRINTABLE_CHAR && value <= MAX_PRINTABLE_CHAR) {
+        unpackData[dstIdx] = value;
+        dstIdx++;
+    }
+    TELEPHONY_LOGI("dstIdx:%{public}d", dstIdx);
     return dstIdx;
 }
 

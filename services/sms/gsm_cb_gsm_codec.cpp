@@ -251,7 +251,7 @@ bool GsmCbGsmCodec::DecodeEtwsMsg()
         TELEPHONY_LOGE("CB pdu data error.");
         return false;
     }
-    uint8_t total = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition() + 1;
+    uint8_t total = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition();
     return Decode2gCbMsg7bit(total);
 }
 } // namespace Telephony

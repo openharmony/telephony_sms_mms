@@ -87,7 +87,7 @@ HWTEST_F(BranchCbTest, GsmCbCodec_0001, Function | MediumTest | Level1)
     EXPECT_TRUE(cbCodec->GetMsgType(gs));
     EXPECT_TRUE(cbCodec->GetLangType(gs));
     EXPECT_TRUE(cbCodec->GetDcs(gs));
-    int64_t recvTime = 1;
+    int64_t recvTime = 0;
     EXPECT_TRUE(cbCodec->GetReceiveTime(recvTime));
 }
 
