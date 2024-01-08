@@ -715,6 +715,11 @@ bool GsmCbCodec::GetReceiveTime(int64_t &receiveTime) const
         return false;
     }
     receiveTime = cbHeader_->recvTime;
+    if (receiveTime == 0) {
+        TELEPHONY_LOGI("receiveTime = 0");
+        time_t recvTime = time(NULL);
+        receiveTime = static_cast<int64_t>(recvTime);
+    }
     return true;
 }
 } // namespace Telephony
