@@ -199,7 +199,7 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     smsData.pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
 
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
-    if (satelliteSmsClient.GetSatelliteCapability(slotId_) > 0 && satelliteSmsClient.IsSatelliteEnabled()) {
+    if (satelliteSmsClient.GetSatelliteCapability() > 0 && satelliteSmsClient.IsSatelliteEnabled()) {
         TELEPHONY_LOGI("send sms through satellite");
         SendSatelliteSms(smsIndexer, smsData);
         return;
@@ -323,7 +323,7 @@ void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &e
         }
     }
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
-    if (satelliteSmsClient.GetSatelliteCapability(slotId_) > 0 && satelliteSmsClient.IsSatelliteEnabled()) {
+    if (satelliteSmsClient.GetSatelliteCapability() > 0 && satelliteSmsClient.IsSatelliteEnabled()) {
         TELEPHONY_LOGI("send sms ack through satellite");
         satelliteSmsClient.SendSmsAck(slotId_, 0, AckIncomeCause::SMS_ACK_PROCESSED, true);
     } else {
