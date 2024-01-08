@@ -36,7 +36,7 @@ public:
 
     bool GetSatelliteSupported();
     bool IsSatelliteEnabled();
-    int32_t GetSatelliteCapability(int32_t slotId);
+    int32_t GetSatelliteCapability();
     int32_t RegisterSmsNotify(int32_t slotId, int32_t what, const sptr<ISatelliteSmsCallback> &callback);
     int32_t UnRegisterSmsNotify(int32_t slotId, int32_t what);
     int32_t AddSendHandler(int32_t slotId, const std::shared_ptr<TelEventHandler> sender);
