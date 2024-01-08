@@ -243,14 +243,14 @@ bool SatelliteSmsClient::IsSatelliteEnabled()
     return proxy->IsSatelliteEnabled();
 }
 
-int32_t SatelliteSmsClient::GetSatelliteCapability(int32_t slotId)
+int32_t SatelliteSmsClient::GetSatelliteCapability()
 {
     auto proxy = GetServiceProxy();
     if (proxy == nullptr) {
         TELEPHONY_LOGE("service proxy is null!");
-        return 0;
+        return static_cast<int32_t>(SatelliteCapability::NONE);
     }
-    return proxy->GetSatelliteCapability(slotId);
+    return proxy->GetSatelliteCapability();
 }
 
 int32_t SatelliteSmsClient::RegisterSmsNotify(int32_t slotId, int32_t what, const sptr<ISatelliteSmsCallback> &callback)
