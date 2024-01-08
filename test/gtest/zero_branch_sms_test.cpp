@@ -1341,7 +1341,7 @@ HWTEST_F(BranchSmsTest, SatelliteSmsClient_0001, Function | MediumTest | Level1)
     satelliteSmsClient.statusChangeListener_->OnRemoveSystemAbility(INVALID_SLOTID, "");
     EXPECT_GE(satelliteSmsClient.GetSatelliteSupported(), 0);
     EXPECT_GE(satelliteSmsClient.IsSatelliteEnabled(), 0);
-    EXPECT_GE(satelliteSmsClient.GetSatelliteCapability(INVALID_SLOTID), 0);
+    EXPECT_GE(satelliteSmsClient.GetSatelliteCapability(), 0);
     SatelliteMessage message;
     EXPECT_EQ(satelliteSmsClient.SendSms(INVALID_SLOTID, RadioEvent::RADIO_SEND_SMS, message),
         TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
