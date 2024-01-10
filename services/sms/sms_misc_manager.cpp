@@ -25,6 +25,7 @@
 namespace OHOS {
 namespace Telephony {
 static constexpr int32_t WAIT_TIME_SECOND = 1;
+static constexpr int32_t TIME_OUT_SECOND = 3;
 static constexpr uint8_t GSM_TYPE = 1;
 static constexpr uint8_t MIN_SMSC_LEN = 2;
 static constexpr uint32_t RANG_MAX = 65535;
@@ -465,7 +466,7 @@ int32_t SmsMiscManager::SetSmscAddr(const std::string &scAddr)
     fairList_.push_back(condition);
     CoreManagerInner::GetInstance().SetSmscAddr(
         slotId_, SmsMiscManager::SET_SMSC_ADDR_FINISH, 0, scAddr, shared_from_this());
-    condVar_.wait(lock, [&]() { return fairVar_ == condition; });
+    condVar_.wait_for(lock, std::chrono::seconds(TIME_OUT_SECOND), [&]() { return fairVar_ == condition; });
     if (isSuccess_ == false) {
         return TELEPHONY_ERR_RIL_CMD_FAIL;
     }
@@ -481,7 +482,7 @@ int32_t SmsMiscManager::GetSmscAddr(std::u16string &smscAddress)
     int32_t condition = conditonVar_++;
     fairList_.push_back(condition);
     CoreManagerInner::GetInstance().GetSmscAddr(slotId_, SmsMiscManager::GET_SMSC_ADDR_FINISH, shared_from_this());
-    condVar_.wait(lock, [&]() { return fairVar_ == condition; });
+    condVar_.wait_for(lock, std::chrono::seconds(TIME_OUT_SECOND), [&]() { return fairVar_ == condition; });
     smscAddress = StringUtils::ToUtf16(smscAddr_);
     return TELEPHONY_ERR_SUCCESS;
 }
