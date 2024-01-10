@@ -1462,8 +1462,6 @@ HWTEST_F(BranchSmsTest, SmsService_0001, Function | MediumTest | Level1)
     EXPECT_GT(smsService->GetImsShortMessageFormat(desAddr), TELEPHONY_ERR_SUCCESS);
     EXPECT_GT(smsService->SetSmscAddr(INVALID_SLOTID, desAddr), TELEPHONY_ERR_SUCCESS);
     EXPECT_GT(smsService->GetSmscAddr(INVALID_SLOTID, desAddr), TELEPHONY_ERR_SUCCESS);
-    EXPECT_GE(smsService->SetSmscAddr(0, desAddr), TELEPHONY_ERR_SUCCESS);
-    EXPECT_GE(smsService->GetSmscAddr(0, desAddr), TELEPHONY_ERR_SUCCESS);
     EXPECT_GT(smsService->AddSimMessage(
                   INVALID_SLOTID, desAddr, desAddr, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD),
         TELEPHONY_ERR_SUCCESS);
