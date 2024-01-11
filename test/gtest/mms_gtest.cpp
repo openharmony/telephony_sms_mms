@@ -315,7 +315,10 @@ void GetPduToFile(int32_t slotId)
     const char *source = "mms";
     size_t sourceLen = std::strlen(source);
     std::unique_ptr<char[]> text = std::make_unique<char[]>(sourceLen + 1);
-    snprintf_s(text.get(), sourceLen + 1, sourceLen + 1, "%s", source);
+    if (snprintf_s(text.get(), sourceLen + 1, sourceLen + 1, "%s", source) < 0) {
+        TELEPHONY_LOGE("snprintf_s failed");
+        return;
+    }
     if (!WriteBufferToFile(std::move(text), std::strlen(source) + 1, filePathNameText)) {
         TELEPHONY_LOGE("file error.");
     }
