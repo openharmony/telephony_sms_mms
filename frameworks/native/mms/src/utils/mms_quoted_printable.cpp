@@ -15,13 +15,11 @@
 
 #include "mms_quoted_printable.h"
 
-#include <stdint.h>
+#include <string>
 
 #include "memory"
 #include "securec.h"
 #include "sms_constants_utils.h"
-#include "string"
-#include "string.h"
 #include "telephony_log_wrapper.h"
 
 namespace OHOS {

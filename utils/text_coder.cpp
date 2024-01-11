@@ -336,7 +336,7 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
         }
         return tempTextLen;
     }
-    langId = (MSG_LANGUAGE_ID_T)codingNationalType;
+    langId = static_cast<MSG_LANGUAGE_ID_T>(codingNationalType);
     scheme = DATA_CODING_7BIT;
     return length;
 }

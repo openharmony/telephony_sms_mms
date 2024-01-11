@@ -86,35 +86,35 @@ SmsInterfaceStub::~SmsInterfaceStub()
 void SmsInterfaceStub::InitModule()
 {
     static bool bInitModule = false;
-    if (!bInitModule) {
-        bInitModule = true;
-        std::lock_guard<std::mutex> lock(mutex_);
-        for (int32_t slotId = 0; slotId < SIM_SLOT_COUNT; ++slotId) {
-            slotSmsInterfaceManagerMap_[slotId] = std::make_shared<SmsInterfaceManager>(slotId);
-            if (slotSmsInterfaceManagerMap_[slotId] == nullptr) {
-                TELEPHONY_LOGE(
-                    "SmsInterfaceStub InitModule slotSmsInterfaceManagerMap_[%{public}d] is nullptr", slotId);
+    if (bInitModule) {
+        return;
+    }
+    bInitModule = true;
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (int32_t slotId = 0; slotId < SIM_SLOT_COUNT; ++slotId) {
+        slotSmsInterfaceManagerMap_[slotId] = std::make_shared<SmsInterfaceManager>(slotId);
+        if (slotSmsInterfaceManagerMap_[slotId] == nullptr) {
+            TELEPHONY_LOGE("SmsInterfaceStub InitModule slotSmsInterfaceManagerMap_[%{public}d] is nullptr", slotId);
+            return;
+        }
+        slotSmsInterfaceManagerMap_[slotId]->InitInterfaceManager();
+
+        TelFFRTUtils::Submit([slotId]() {
+            auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(slotId);
+            if (reliabilityHandler == nullptr) {
+                TELEPHONY_LOGE("reliabilityHandler nullptr");
                 return;
             }
-            slotSmsInterfaceManagerMap_[slotId]->InitInterfaceManager();
-
-            TelFFRTUtils::Submit([slotId]() {
-                auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(slotId);
-                if (reliabilityHandler == nullptr) {
-                    TELEPHONY_LOGE("reliabilityHandler nullptr");
-                    return;
-                }
-                if (!reliabilityHandler->DeleteExpireSmsFromDB()) {
-                    TELEPHONY_LOGE("DeleteExpireSmsFromDB fail");
-                    return;
-                }
-                if (!reliabilityHandler->CheckSmsCapable()) {
-                    TELEPHONY_LOGE("sms receive capable unSupport");
-                    return;
-                }
-                reliabilityHandler->SmsReceiveReliabilityProcessing();
-            });
-        }
+            if (!reliabilityHandler->DeleteExpireSmsFromDB()) {
+                TELEPHONY_LOGE("DeleteExpireSmsFromDB fail");
+                return;
+            }
+            if (!reliabilityHandler->CheckSmsCapable()) {
+                TELEPHONY_LOGE("sms receive capable unSupport");
+                return;
+            }
+            reliabilityHandler->SmsReceiveReliabilityProcessing();
+        });
     }
 }
 
