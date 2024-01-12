@@ -264,7 +264,7 @@ bool GsmSmsCbHandler::SendCbMessageBroadcast(const std::shared_ptr<GsmCbCodec> &
     DelayedSingleton<CbStartAbility>::GetInstance()->StartAbility(want);
     data.SetWant(want);
     EventFwk::CommonEventPublishInfo publishInfo;
-    publishInfo.SetOrdered(true);
+    publishInfo.SetOrdered(false);
     std::vector<std::string> gsmCbPermissions;
     gsmCbPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
     publishInfo.SetSubscriberPermissions(gsmCbPermissions);
