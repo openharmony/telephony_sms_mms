@@ -167,6 +167,9 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         // save to db and update state
         sptr<ISendShortMessageCallback> sendCallback = smsIndexer->GetSendCallback();
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGE("send sms result fail from ril response");
+        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_SEND_RESULT_FAIL, "send sms result fail from ril response");
     }
 }
 
