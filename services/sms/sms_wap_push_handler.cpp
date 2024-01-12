@@ -351,7 +351,7 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast(std::shared_ptr<SmsReceiveIn
     data.SetData("Sms WapPush Message");
     data.SetCode(0);
     EventFwk::CommonEventPublishInfo publishInfo;
-    publishInfo.SetOrdered(true);
+    publishInfo.SetOrdered(false);
     std::vector<std::string> wappushPermissions;
     wappushPermissions.emplace_back(Permission::RECEIVE_MMS);
     publishInfo.SetSubscriberPermissions(wappushPermissions);
