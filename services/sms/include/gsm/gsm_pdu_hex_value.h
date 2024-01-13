@@ -54,6 +54,7 @@ static constexpr uint8_t HEX_VALUE_84 = 0x84;
 static constexpr uint8_t HEX_VALUE_C0 = 0xC0;
 static constexpr uint8_t HEX_VALUE_D0 = 0xD0;
 static constexpr uint8_t HEX_VALUE_F0 = 0xF0;
+static constexpr uint8_t HEX_VALUE_FE = 0xFE;
 static constexpr uint16_t HEX_VALUE_00FF = 0x00FF;
 static constexpr uint16_t HEX_VALUE_03FF = 0x03FF;
 static constexpr uint16_t HEX_VALUE_FFF8 = 0xFFF8;
