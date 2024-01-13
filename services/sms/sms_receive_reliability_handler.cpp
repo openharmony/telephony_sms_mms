@@ -351,7 +351,7 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
         want.SetParam(SMS_BROADCAST_SMS_PORT_KEY, static_cast<short>(indexer->GetDestPort()));
     }
     CommonEventPublishInfo publishInfo;
-    publishInfo.SetOrdered(false);
+    publishInfo.SetOrdered(true);
     if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
         std::vector<std::string> smsPermissions;
         smsPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
