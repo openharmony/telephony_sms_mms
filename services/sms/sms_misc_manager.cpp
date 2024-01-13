@@ -327,7 +327,7 @@ std::string SmsMiscManager::RangeListToString(const std::list<gsmCBRangeInfo> &r
     return ret;
 }
 
-bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> &list)
+bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> list)
 {
     TELEPHONY_LOGI("enable CB channel:%{public}d", enable);
     for (auto &item : list) {

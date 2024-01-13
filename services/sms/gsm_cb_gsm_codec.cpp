@@ -105,13 +105,14 @@ bool GsmCbGsmCodec::Decode2gHeaderEtws()
         TELEPHONY_LOGE("get data error.");
         return false;
     }
-
+    cbHeader_->warningType = (oneByte & HEX_VALUE_FE) >> 1;
     if (!cbPduBuffer_->GetOneByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
     }
     cbHeader_->totalPages = 1;
-    cbHeader_->warningType = cbHeader_->msgId - GSM_ETWS_BASE_MASK;
+    bool activatePopup = (oneByte & HEX_VALUE_80) != 0;
+    TELEPHONY_LOGI("activatePopup:%{public}d.", activatePopup);
     return true;
 }
 
