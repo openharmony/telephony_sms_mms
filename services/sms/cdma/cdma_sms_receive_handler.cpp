@@ -194,7 +194,7 @@ bool CdmaSmsReceiveHandler::SendCBBroadcast(const std::shared_ptr<SmsBaseMessage
     SetCBBroadcastParam(want, sendData);
     data.SetWant(want);
     EventFwk::CommonEventPublishInfo publishInfo;
-    publishInfo.SetOrdered(false);
+    publishInfo.SetOrdered(true);
     std::vector<std::string> cdmaCbPermissions;
     cdmaCbPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
     publishInfo.SetSubscriberPermissions(cdmaCbPermissions);
