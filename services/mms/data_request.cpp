@@ -47,13 +47,6 @@ int32_t DataRequest::HttpRequest(int32_t slotId, const std::string &method, std:
 int32_t DataRequest::ExecuteMms(const std::string &method, std::shared_ptr<MmsNetworkManager> mmsNetworkMgr,
     const std::string &contentUrl, const std::string &pduDir)
 {
-    bool attached = CoreManagerInner::GetInstance().GetPsRegState(slotId_) ==
-                    static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE);
-    if (!attached) {
-        TELEPHONY_LOGE("Slot%{public}d: attached is false", slotId_);
-        return TELEPHONY_ERR_MMS_PS_NOT_ATTACHED;
-    }
-
     std::unique_lock<std::mutex> lck(ctx_);
     if (mmsNetworkMgr->AcquireNetwork(slotId_, GetRequestId()) != NETMANAGER_SUCCESS) {
         TELEPHONY_LOGE("acquire network fail");
