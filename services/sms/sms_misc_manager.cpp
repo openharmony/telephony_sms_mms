@@ -154,7 +154,6 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     eventId = event->GetInnerEventId();
     switch (eventId) {
         case SET_CB_CONFIG_FINISH: {
-            std::unique_lock<std::mutex> lock(mutex_);
             isSuccess_ = true;
             std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
             if (res != nullptr) {
@@ -164,12 +163,10 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
             break;
         }
         case GET_CB_CONFIG_FINISH: {
-            std::unique_lock<std::mutex> lock(mutex_);
             GetCBConfigFinish(event);
             break;
         }
         case SET_SMSC_ADDR_FINISH: {
-            std::unique_lock<std::mutex> lock(mutex_);
             isSuccess_ = true;
             std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
             if (res != nullptr) {
@@ -179,7 +176,7 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
             break;
         }
         case GET_SMSC_ADDR_FINISH: {
-            std::unique_lock<std::mutex> lock(mutex_);
+            isSuccess_ = true;
             std::shared_ptr<ServiceCenterAddress> addr = event->GetSharedObject<ServiceCenterAddress>();
             if (addr != nullptr) {
                 smscAddr_ = addr->address;
@@ -358,6 +355,8 @@ void SmsMiscManager::GetModemCBRange()
     std::unique_lock<std::mutex> lock(mutex_);
     if (!hasGotCbRange_) {
         isSuccess_ = false;
+        int32_t condition = conditonVar_++;
+        fairList_.push_back(condition);
         CoreManagerInner::GetInstance().GetCBConfig(slotId_, SmsMiscManager::GET_CB_CONFIG_FINISH, shared_from_this());
         while (!isSuccess_) {
             TELEPHONY_LOGI("GetCBConfig::wait(), isSuccess_ = false");
@@ -466,7 +465,13 @@ int32_t SmsMiscManager::SetSmscAddr(const std::string &scAddr)
     fairList_.push_back(condition);
     CoreManagerInner::GetInstance().SetSmscAddr(
         slotId_, SmsMiscManager::SET_SMSC_ADDR_FINISH, 0, scAddr, shared_from_this());
-    condVar_.wait_for(lock, std::chrono::seconds(TIME_OUT_SECOND), [&]() { return fairVar_ == condition; });
+    while (!isSuccess_) {
+        TELEPHONY_LOGI("SetSmscAddr::wait(), isSuccess_ = false");
+        if (condVar_.wait_for(lock, std::chrono::seconds(TIME_OUT_SECOND)) == std::cv_status::timeout) {
+            break;
+        }
+    }
+
     if (isSuccess_ == false) {
         return TELEPHONY_ERR_RIL_CMD_FAIL;
     }
@@ -482,7 +487,12 @@ int32_t SmsMiscManager::GetSmscAddr(std::u16string &smscAddress)
     int32_t condition = conditonVar_++;
     fairList_.push_back(condition);
     CoreManagerInner::GetInstance().GetSmscAddr(slotId_, SmsMiscManager::GET_SMSC_ADDR_FINISH, shared_from_this());
-    condVar_.wait_for(lock, std::chrono::seconds(TIME_OUT_SECOND), [&]() { return fairVar_ == condition; });
+    while (!isSuccess_) {
+        TELEPHONY_LOGI("GetSmscAddr::wait(), isSuccess_ = false");
+        if (condVar_.wait_for(lock, std::chrono::seconds(TIME_OUT_SECOND)) == std::cv_status::timeout) {
+            break;
+        }
+    }
     smscAddress = StringUtils::ToUtf16(smscAddr_);
     return TELEPHONY_ERR_SUCCESS;
 }
