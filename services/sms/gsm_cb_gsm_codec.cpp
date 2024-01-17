@@ -219,7 +219,7 @@ bool GsmCbGsmCodec::Decode2gCbMsg()
 
 bool GsmCbGsmCodec::Decode2gCbMsg7bit(uint16_t dataLen)
 {
-    uint8_t pageData[MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT] = { 0 };
+    uint8_t pageData[MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT + 1] = { 0 };
     std::vector<uint8_t> dataPdu;
     cbCodec_->GetPduData(dataPdu);
 
@@ -228,13 +228,14 @@ bool GsmCbGsmCodec::Decode2gCbMsg7bit(uint16_t dataLen)
         return false;
     }
     uint16_t unpackLen = SmsCommonUtils::Unpack7bitCharForCBPdu(
-        dataPdu.data(), dataLen, 0x00, pageData, MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT);
+        dataPdu.data(), dataLen, 0x00, pageData, MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT + 1);
+
     uint16_t offset = 0;
     if (cbHeader_->dcs.iso639Lang[0] && unpackLen >= GsmCbCodec::CB_IOS639_LANG_SIZE) {
         unpackLen = unpackLen - GsmCbCodec::CB_IOS639_LANG_SIZE;
         offset = GsmCbCodec::CB_IOS639_LANG_SIZE;
     }
-    if (offset + unpackLen >= (MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT)) {
+    if (offset + unpackLen >= (MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT) + 1) {
         TELEPHONY_LOGE("CB pdu data error.");
         return false;
     }
