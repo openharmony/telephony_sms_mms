@@ -219,7 +219,7 @@ void SmsReceiveIndexer::SetRawUserData(const std::string &rawUserData)
     rawUserData_ = rawUserData;
 }
 
-std::string SmsReceiveIndexer::GetWapPusRawUserData() const
+std::string SmsReceiveIndexer::GetRawWapPushUserData() const
 {
     return rawWapPushUserData_;
 }

@@ -27,6 +27,8 @@ using namespace std;
 constexpr static uint16_t PDU_POS_OFFSET = 1;
 constexpr static uint8_t SMS_TYPE_GSM = 1;
 constexpr static uint8_t SMS_TYPE_CDMA = 2;
+static const std::string WAP_SEQ_NUMBER_TAG = "0003";
+constexpr static size_t WAP_SEQ_NUMBER_LEN = 10;
 
 SmsReceiveHandler::SmsReceiveHandler(int32_t slotId) : TelEventHandler("SmsReceiveHandler"), slotId_(slotId)
 {
@@ -86,26 +88,20 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
         TELEPHONY_LOGE("reliabilityHandler is nullptr");
         return;
     }
-    std::string messagBody;
-    std::string userDataRaw;
     if (indexer->IsSingleMsg()) {
         string pdu = StringUtils::StringToHex(indexer->GetPdu());
-        messagBody.append(indexer->GetVisibleMessageBody());
-        userDataRaw.append(indexer->GetRawUserData());
         pdus->push_back(pdu);
     } else {
-        if (!CombineMultiPageMessage(indexer, pdus, reliabilityHandler, messagBody, userDataRaw)) {
+        if (!CombineMultiPageMessage(indexer, pdus, reliabilityHandler)) {
             TELEPHONY_LOGI("The multi-page text didn't all arrive");
             return;
         }
     }
 
-    indexer->SetVisibleMessageBody(messagBody);
-    indexer->SetRawUserData(userDataRaw);
     if (indexer->GetIsWapPushMsg()) {
         if (smsWapPushHandler_ != nullptr) {
-            userDataRaw = indexer->GetWapPusRawUserData();
-            if (!smsWapPushHandler_->DecodeWapPushPdu(indexer, userDataRaw)) {
+            auto rawWapPushUserData = indexer->GetRawWapPushUserData();
+            if (!smsWapPushHandler_->DecodeWapPushPdu(indexer, rawWapPushUserData)) {
                 SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::WAP_PUSH,
                     SmsMmsErrorCode::SMS_ERROR_PDU_DECODE_FAIL, "Wap push decode wap push fail");
             }
@@ -116,8 +112,7 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
 }
 
 bool SmsReceiveHandler::CombineMultiPageMessage(const std::shared_ptr<SmsReceiveIndexer> &indexer,
-    std::shared_ptr<std::vector<std::string>> pdus, std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler,
-    std::string &messagBody, std::string &userDataRaw)
+    std::shared_ptr<std::vector<std::string>> pdus, std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler)
 {
     pdus->assign(MAX_SEGMENT_NUM, "");
     int msgSeg = static_cast<int>(indexer->GetMsgCount());
@@ -142,16 +137,50 @@ bool SmsReceiveHandler::CombineMultiPageMessage(const std::shared_ptr<SmsReceive
         if (v.GetPdu().size() == 0) {
             --notNullPart;
         }
-        std::shared_ptr<SmsBaseMessage> baseMessage = GsmSmsMessage::CreateMessage(pdu);
-        if (baseMessage != nullptr) {
-            messagBody.append(baseMessage->GetVisibleMessageBody());
-            userDataRaw.append(baseMessage->GetRawUserData());
-        }
     }
     if ((count != msgSeg) || (pdus->empty()) || (notNullPart != msgSeg)) {
         return false;
     }
+    UpdateMultiPageMessage(indexer, pdus);
     return true;
+}
+
+void SmsReceiveHandler::UpdateMultiPageMessage(
+    const std::shared_ptr<SmsReceiveIndexer> &indexer, std::shared_ptr<std::vector<std::string>> pdus)
+{
+    if ((indexer == nullptr) || (pdus == nullptr) || (pdus->empty())) {
+        TELEPHONY_LOGE("indexer or pdus is null");
+        return;
+    }
+    std::string messagBody;
+    std::string userDataRaw;
+    std::string rawWapPushUserData;
+    for (const auto &pdu : *pdus) {
+        if (pdu.empty()) {
+            continue;
+        }
+        std::shared_ptr<SmsBaseMessage> baseMessage = GsmSmsMessage::CreateMessage(pdu);
+        if (baseMessage == nullptr) {
+            continue;
+        }
+        messagBody.append(baseMessage->GetVisibleMessageBody());
+        userDataRaw.append(baseMessage->GetRawUserData());
+        if (!indexer->GetIsWapPushMsg()) {
+            continue;
+        }
+        auto wapDataHex = StringUtils::StringToHex(baseMessage->GetRawWapPushUserData());
+        if (wapDataHex.substr(0, WAP_SEQ_NUMBER_TAG.size()) == WAP_SEQ_NUMBER_TAG) {
+            rawWapPushUserData.append(StringUtils::HexToString(wapDataHex.substr(WAP_SEQ_NUMBER_LEN)));
+        } else {
+            rawWapPushUserData.append(StringUtils::HexToString(wapDataHex));
+        }
+    }
+
+    indexer->SetVisibleMessageBody(messagBody);
+    indexer->SetRawUserData(userDataRaw);
+    if (indexer->GetIsWapPushMsg()) {
+        indexer->SetRawWapPushUserData(rawWapPushUserData);
+    }
 }
 
 bool SmsReceiveHandler::IsRepeatedMessagePart(const shared_ptr<SmsReceiveIndexer> &smsIndexer)
