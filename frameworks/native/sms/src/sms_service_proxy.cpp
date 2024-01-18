@@ -152,8 +152,12 @@ int32_t SmsServiceProxy::GetSmscAddr(int32_t slotId, std::u16string &smscAddress
         TELEPHONY_LOGE("localObject_ nullptr");
         return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    localObject_->SendRequest(
+    int32_t error = localObject_->SendRequest(
         static_cast<int32_t>(SmsServiceInterfaceCode::GET_SMSC_ADDRESS), dataParcel, replyParcel, option);
+    if (error != ERR_NONE) {
+        TELEPHONY_LOGE("GetSmscAddr failed, error code is: %{public}d", error);
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+    }
     int32_t result = replyParcel.ReadInt32();
     TELEPHONY_LOGI("get smsc result:%{public}d", result == TELEPHONY_ERR_SUCCESS);
     if (result == TELEPHONY_ERR_SUCCESS) {
