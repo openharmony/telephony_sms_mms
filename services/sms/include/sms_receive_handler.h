@@ -49,8 +49,9 @@ private:
     void HandleReceivedSms(const std::shared_ptr<SmsBaseMessage> smsBaseMessage);
     bool CombineMultiPageMessage(const std::shared_ptr<SmsReceiveIndexer> &indexer,
         std::shared_ptr<std::vector<std::string>> pdus,
-        std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler, std::string &messagBody,
-        std::string &userDataRaw);
+        std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler);
+    void UpdateMultiPageMessage(
+        const std::shared_ptr<SmsReceiveIndexer> &indexer, std::shared_ptr<std::vector<std::string>> pdus);
 
 protected:
     int32_t slotId_ = -1;
