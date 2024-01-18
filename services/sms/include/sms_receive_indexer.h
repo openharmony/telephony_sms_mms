@@ -62,7 +62,7 @@ public:
     void SetPdu(const std::vector<uint8_t> &&pdu);
     bool IsSingleMsg() const;
     std::string GetRawUserData() const;
-    std::string GetWapPusRawUserData() const;
+    std::string GetRawWapPushUserData() const;
     void SetRawUserData(const std::string &rawUserData);
     void SetRawWapPushUserData(const std::string &rawWapPushUserData);
 

@@ -134,7 +134,8 @@ HWTEST_F(BranchSmsTest, SmsReceiveHandler_0001, Function | MediumTest | Level1)
     string pud = "qwe";
     pdus->push_back(pud);
     reliabilityHandler->SendBroadcast(indexer, pdus);
-    smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler, pud, pud);
+    smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler);
+    smsReceiveHandler->UpdateMultiPageMessage(indexer, pdus);
     indexer->destPort_ = TEXT_PORT_NUM;
     reliabilityHandler->SendBroadcast(indexer, pdus);
     smsReceiveHandler->AddMsgToDB(indexer);
