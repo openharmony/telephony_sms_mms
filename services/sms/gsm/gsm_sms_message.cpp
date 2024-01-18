@@ -569,8 +569,11 @@ void GsmSmsMessage::ConvertUserPartData()
     uint8_t buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
     if (codingScheme_ == DATA_CODING_7BIT) {
         MsgLangInfo langInfo;
-        langInfo.bSingleShift = false;
-        langInfo.bLockingShift = false;
+        auto langId = smsUserData_.header[0].udh.singleShift.langId;
+        if (langId != 0) {
+            langInfo.bSingleShift = true;
+            langInfo.singleLang = langId;
+        }
         int dataSize = TextCoder::Instance().Gsm7bitToUtf8(
             buff, MAX_MSG_TEXT_LEN, reinterpret_cast<uint8_t *>(smsUserData_.data), smsUserData_.length, langInfo);
         visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
