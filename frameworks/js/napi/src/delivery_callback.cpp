@@ -70,6 +70,8 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     std::unique_ptr<DeliveryCallbackContext> pContext(static_cast<DeliveryCallbackContext *>(work->data));
     if (pContext == nullptr) {
         TELEPHONY_LOGE("CompleteSmsDeliveryWork pContext is nullptr!");
+        delete work;
+        work = nullptr;
         return;
     }
     napi_env env_ = pContext->env;
@@ -80,7 +82,8 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     napi_open_handle_scope(env_, &scope);
     if (scope == nullptr) {
         TELEPHONY_LOGE("scope is nullptr");
-        napi_close_handle_scope(env_, scope);
+        delete work;
+        work = nullptr;
         return;
     }
     napi_value callbackFunc = nullptr;
@@ -104,13 +107,13 @@ void DeliveryCallback::OnSmsDeliveryResult(const std::u16string &pdu)
 {
     TELEPHONY_LOGI("OnSmsDeliveryResult start");
     if (hasCallback_) {
-        uv_loop_s *loop = nullptr;
-        napi_get_uv_event_loop(env_, &loop);
         uv_work_t *work = new uv_work_t;
         if (work == nullptr) {
             TELEPHONY_LOGE("OnSmsDeliveryResult work is nullptr!");
             return;
         }
+        uv_loop_s *loop = nullptr;
+        napi_get_uv_event_loop(env_, &loop);
         DeliveryCallbackContext *pContext = std::make_unique<DeliveryCallbackContext>().release();
         if (pContext == nullptr) {
             TELEPHONY_LOGE("OnSmsDeliveryResult pContext is nullptr!");
@@ -126,6 +129,14 @@ void DeliveryCallback::OnSmsDeliveryResult(const std::u16string &pdu)
         uv_queue_work_with_qos(
             loop, work, [](uv_work_t *work) {},
             [](uv_work_t *work, int status) { CompleteSmsDeliveryWork(work, status); }, uv_qos_default);
+        if (pContext != nullptr) {
+            delete pContext;
+            pContext = nullptr;
+        }
+        if (work != nullptr) {
+            delete work;
+            work = nullptr;
+        }
     }
 }
 } // namespace Telephony
