@@ -84,6 +84,7 @@ private:
     bool SetWantData(EventFwk::Want &want, const std::shared_ptr<GsmCbCodec> &cbMessage);
     bool InitLocation(SmsCbInfo &info);
     void GetCbData(const std::shared_ptr<GsmCbCodec> &cbMessage, SmsCbData::CbData &SendData);
+    void PackageWantData(SmsCbData::CbData &sendData, EventFwk::Want &want);
 
 private:
     int32_t slotId_;
