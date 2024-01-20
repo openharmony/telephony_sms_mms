@@ -315,38 +315,15 @@ bool GsmSmsCbHandler::SetWantData(EventFwk::Want &want, const std::shared_ptr<Gs
         return false;
     }
     std::string rawMsgBody;
+    TELEPHONY_LOGI("cbMsgs size:%{public}zu.", info->cbMsgs.size());
     for (auto it = info->cbMsgs.begin(); it != info->cbMsgs.end(); it++) {
         rawMsgBody.append(it->second->GetCbMessageRaw());
     }
     GetCbData(cbMessage, sendData);
     TELEPHONY_LOGI("cbMessage:%{public}s.", cbMessage->ToString().c_str());
     cbMessage->ConvertToUTF8(rawMsgBody, sendData.msgBody);
-    want.SetParam(SmsCbData::GEO_SCOPE, static_cast<char>(sendData.geoScope));
-    want.SetParam(SmsCbData::CMAS_RESPONSE, static_cast<char>(sendData.cmasRes));
-    want.SetParam(SmsCbData::SLOT_ID, static_cast<int>(slotId_));
-    want.SetParam(SmsCbData::FORMAT, static_cast<char>(sendData.format));
-    want.SetParam(SmsCbData::CB_MSG_TYPE, static_cast<char>(sendData.msgType));
-    want.SetParam(SmsCbData::MSG_ID, static_cast<int>(sendData.msgId));
-    want.SetParam(SmsCbData::SERVICE_CATEGORY, static_cast<int>(sendData.category));
-    want.SetParam(SmsCbData::LANG_TYPE, static_cast<char>(sendData.langType));
-    want.SetParam(SmsCbData::PRIORITY, static_cast<char>(sendData.priority));
-    want.SetParam(SmsCbData::MSG_BODY, sendData.msgBody);
-    want.SetParam(SmsCbData::CMAS_CLASS, static_cast<char>(sendData.cmasClass));
-    want.SetParam(SmsCbData::CMAS_CATEGORY, static_cast<char>(sendData.cmasCate));
-    want.SetParam(SmsCbData::SEVERITY, static_cast<char>(sendData.severity));
-    want.SetParam(SmsCbData::URGENCY, static_cast<char>(sendData.urgency));
-    want.SetParam(SmsCbData::CERTAINTY, static_cast<char>(sendData.certainty));
-    want.SetParam(SmsCbData::IS_CMAS_MESSAGE, sendData.isCmas);
-    want.SetParam(SmsCbData::SERIAL_NUM, static_cast<int>(sendData.serial));
-    want.SetParam(SmsCbData::RECV_TIME, std::to_string(sendData.recvTime));
-    want.SetParam(SmsCbData::DCS, static_cast<char>(sendData.dcs));
-
-    want.SetParam(SmsCbData::IS_ETWS_PRIMARY, sendData.isPrimary);
-    want.SetParam(SmsCbData::IS_ETWS_MESSAGE, sendData.isEtws);
-    want.SetParam(SmsCbData::PLMN, StringUtils::ToUtf8(plmn_));
-    want.SetParam(SmsCbData::LAC, static_cast<int>(lac_));
-    want.SetParam(SmsCbData::CID, static_cast<int>(cid_));
-    want.SetParam(SmsCbData::WARNING_TYPE, static_cast<int>(sendData.warnType));
+    TELEPHONY_LOGI("msgBody:%{public}s.", sendData.msgBody.c_str());
+    PackageWantData(sendData, want);
     if (sendData.isPrimary) {
         want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
     } else {
@@ -381,6 +358,35 @@ void GsmSmsCbHandler::GetCbData(const std::shared_ptr<GsmCbCodec> &cbMessage, Sm
     cbMessage->IsEtwsPrimary(sendData.isPrimary);
     cbMessage->GetGeoScope(sendData.geoScope);
     cbMessage->GetCmasCategory(sendData.cmasCate);
+}
+
+void GsmSmsCbHandler::PackageWantData(SmsCbData::CbData &sendData, EventFwk::Want &want)
+{
+    want.SetParam(SmsCbData::GEO_SCOPE, static_cast<char>(sendData.geoScope));
+    want.SetParam(SmsCbData::CMAS_RESPONSE, static_cast<char>(sendData.cmasRes));
+    want.SetParam(SmsCbData::SLOT_ID, static_cast<int>(slotId_));
+    want.SetParam(SmsCbData::FORMAT, static_cast<char>(sendData.format));
+    want.SetParam(SmsCbData::CB_MSG_TYPE, static_cast<char>(sendData.msgType));
+    want.SetParam(SmsCbData::MSG_ID, static_cast<int>(sendData.msgId));
+    want.SetParam(SmsCbData::SERVICE_CATEGORY, static_cast<int>(sendData.category));
+    want.SetParam(SmsCbData::LANG_TYPE, static_cast<char>(sendData.langType));
+    want.SetParam(SmsCbData::PRIORITY, static_cast<char>(sendData.priority));
+    want.SetParam(SmsCbData::MSG_BODY, sendData.msgBody);
+    want.SetParam(SmsCbData::CMAS_CLASS, static_cast<char>(sendData.cmasClass));
+    want.SetParam(SmsCbData::CMAS_CATEGORY, static_cast<char>(sendData.cmasCate));
+    want.SetParam(SmsCbData::SEVERITY, static_cast<char>(sendData.severity));
+    want.SetParam(SmsCbData::URGENCY, static_cast<char>(sendData.urgency));
+    want.SetParam(SmsCbData::CERTAINTY, static_cast<char>(sendData.certainty));
+    want.SetParam(SmsCbData::IS_CMAS_MESSAGE, sendData.isCmas);
+    want.SetParam(SmsCbData::SERIAL_NUM, static_cast<int>(sendData.serial));
+    want.SetParam(SmsCbData::RECV_TIME, std::to_string(sendData.recvTime));
+    want.SetParam(SmsCbData::DCS, static_cast<char>(sendData.dcs));
+    want.SetParam(SmsCbData::IS_ETWS_PRIMARY, sendData.isPrimary);
+    want.SetParam(SmsCbData::IS_ETWS_MESSAGE, sendData.isEtws);
+    want.SetParam(SmsCbData::PLMN, StringUtils::ToUtf8(plmn_));
+    want.SetParam(SmsCbData::LAC, static_cast<int>(lac_));
+    want.SetParam(SmsCbData::CID, static_cast<int>(cid_));
+    want.SetParam(SmsCbData::WARNING_TYPE, static_cast<int>(sendData.warnType));
 }
 } // namespace Telephony
 } // namespace OHOS
