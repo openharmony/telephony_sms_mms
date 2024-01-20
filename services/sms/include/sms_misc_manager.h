@@ -87,7 +87,7 @@ private:
     bool CloseCBRange(uint32_t fromMsgId, uint32_t toMsgId);
     void NotifyHasResponse();
     bool IsEmpty() const;
-    std::string RangeListToString(const std::list<gsmCBRangeInfo> &rangeList);
+    std::string RangeListToString(const std::list<gsmCBRangeInfo> rangeList);
     bool SendDataToRil(bool enable, std::list<gsmCBRangeInfo> list);
     void SplitMsgId(uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter);
     void UpdateCbRangList(std::shared_ptr<CBConfigInfo> res);
