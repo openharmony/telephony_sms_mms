@@ -617,6 +617,8 @@ HWTEST_F(BranchCbTest, GsmSmsCbHandler_0001, Function | MediumTest | Level1)
     gsmSmsCbHandler->ProcessEvent(event);
     SmsCbData::CbData sendData;
     gsmSmsCbHandler->GetCbData(cbMessage, sendData);
+    EventFwk::Want want;
+    gsmSmsCbHandler->PackageWantData(sendData, want);
     gsmSmsCbHandler->HandleCbMessage(message);
     EXPECT_FALSE(gsmSmsCbHandler->CheckCbActive(cbMessage));
     EXPECT_FALSE(gsmSmsCbHandler->AddCbMessageToList(cbMessage));

@@ -305,7 +305,7 @@ bool SmsMiscManager::SplitMidValue(std::string value, std::string &start, std::s
     return true;
 }
 
-std::string SmsMiscManager::RangeListToString(const std::list<gsmCBRangeInfo> &rangeList)
+std::string SmsMiscManager::RangeListToString(const std::list<gsmCBRangeInfo> rangeList)
 {
     std::string ret;
     bool isFirst = true;
@@ -327,7 +327,7 @@ std::string SmsMiscManager::RangeListToString(const std::list<gsmCBRangeInfo> &r
 bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> list)
 {
     TELEPHONY_LOGI("enable CB channel:%{public}d", enable);
-    for (auto &item : list) {
+    for (auto item : list) {
         TELEPHONY_LOGI("[%{public}d-%{public}d]", item.fromMsgId, item.toMsgId);
     }
     std::unique_lock<std::mutex> lock(mutex_);
@@ -335,7 +335,10 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> list)
         isSuccess_ = false;
         int32_t condition = conditonVar_++;
         fairList_.push_back(condition);
-        CBConfigParam cbData { .mode = enable ? 1 : 0, .idList = RangeListToString(list), .dcsList = codeScheme_ };
+        CBConfigParam cbData;
+        cbData.mode = enable ? 1 : 0;
+        cbData.idList = RangeListToString(list);
+        cbData.dcsList = codeScheme_;
         CoreManagerInner::GetInstance().SetCBConfig(
             slotId_, SmsMiscManager::SET_CB_CONFIG_FINISH, cbData, shared_from_this());
         while (!isSuccess_) {
