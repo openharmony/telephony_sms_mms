@@ -106,13 +106,14 @@ bool GsmCbGsmCodec::Decode2gHeaderEtws()
         TELEPHONY_LOGE("get data error.");
         return false;
     }
-    uint8_t temp = oneByte;
-
+    cbHeader_->warningType = (oneByte & HEX_VALUE_FE) >> 1;
     if (!cbPduBuffer_->GetOneByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
     }
-    cbHeader_->warningType = (temp << HEX_VALUE_08) | oneByte;
+    cbHeader_->totalPages = 1;
+    bool activatePopup = (oneByte & HEX_VALUE_80) != 0;
+    TELEPHONY_LOGI("activatePopup:%{public}d.", activatePopup);
     return true;
 }
 
