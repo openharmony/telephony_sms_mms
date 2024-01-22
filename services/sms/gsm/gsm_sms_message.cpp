@@ -407,12 +407,11 @@ bool GsmSmsMessage::PduAnalysis(const string &pdu)
     }
     GsmSmsParamCodec codec;
     uint8_t smscLen = codec.DecodeSmscPdu(reinterpret_cast<const uint8_t *>(pdu.c_str()), pdu.length(), smsc);
-    if (smscLen > 0) {
-        scAddress_ = smsc.address;
-    }
     if (smscLen >= pdu.length()) {
         TELEPHONY_LOGE("PduAnalysis pdu is invalid!");
         return false;
+    } else if (smscLen > 0) {
+        scAddress_ = smsc.address;
     }
 
     uint8_t tempPdu[TAPI_TEXT_SIZE_MAX + 1] = { 0 };
@@ -541,7 +540,9 @@ void GsmSmsMessage::ConvertUserData()
         case SMS_TPDU_DELIVER:
             headerDataLen_ = smsTpdu_->data.deliver.userData.length;
             ret = memcpy_s(&smsUserData_, udLen, &(smsTpdu_->data.deliver.userData), udLen);
-            ret = ret && memcpy_s(&smsWapPushUserData_, tpduLen, &(smsTpdu_->data.deliver.udData), tpduLen);
+            if (ret == EOK) {
+                ret = memcpy_s(&smsWapPushUserData_, tpduLen, &(smsTpdu_->data.deliver.udData), tpduLen);
+            }
             break;
         case SMS_TPDU_STATUS_REP:
             headerDataLen_ = smsTpdu_->data.statusRep.userData.length;
@@ -558,25 +559,35 @@ void GsmSmsMessage::ConvertUserData()
         TELEPHONY_LOGE("memset_s error.");
         return;
     }
-    if (smsUserData_.length > 0) {
-        uint8_t buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
-        if (codingScheme_ == DATA_CODING_7BIT) {
-            MsgLangInfo langInfo;
-            langInfo.bSingleShift = false;
-            langInfo.bLockingShift = false;
-            int dataSize = TextCoder::Instance().Gsm7bitToUtf8(
-                buff, MAX_MSG_TEXT_LEN, reinterpret_cast<uint8_t *>(smsUserData_.data), smsUserData_.length, langInfo);
-            visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
-        } else if (codingScheme_ == DATA_CODING_UCS2) {
-            int dataSize = TextCoder::Instance().Ucs2ToUtf8(
-                buff, MAX_MSG_TEXT_LEN, reinterpret_cast<uint8_t *>(smsUserData_.data), smsUserData_.length);
-            visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
-        } else if (codingScheme_ == DATA_CODING_8BIT) {
-            visibleMessageBody_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
-        }
-        rawUserData_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
-        rawWapPushUserData_.insert(0, smsWapPushUserData_.ud, smsWapPushUserData_.udl);
+    ConvertUserPartData();
+}
+
+void GsmSmsMessage::ConvertUserPartData()
+{
+    if (smsUserData_.length == 0) {
+        TELEPHONY_LOGE("user data length error.");
+        return;
     }
+    uint8_t buff[MAX_MSG_TEXT_LEN + 1] = { 0 };
+    if (codingScheme_ == DATA_CODING_7BIT) {
+        MsgLangInfo langInfo;
+        auto langId = smsUserData_.header[0].udh.singleShift.langId;
+        if (langId != 0) {
+            langInfo.bSingleShift = true;
+            langInfo.singleLang = langId;
+        }
+        int dataSize = TextCoder::Instance().Gsm7bitToUtf8(
+            buff, MAX_MSG_TEXT_LEN, reinterpret_cast<uint8_t *>(smsUserData_.data), smsUserData_.length, langInfo);
+        visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
+    } else if (codingScheme_ == DATA_CODING_UCS2) {
+        int dataSize = TextCoder::Instance().Ucs2ToUtf8(
+            buff, MAX_MSG_TEXT_LEN, reinterpret_cast<uint8_t *>(smsUserData_.data), smsUserData_.length);
+        visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
+    } else if (codingScheme_ == DATA_CODING_8BIT) {
+        visibleMessageBody_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
+    }
+    rawUserData_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
+    rawWapPushUserData_.insert(0, smsWapPushUserData_.ud, smsWapPushUserData_.udl);
 }
 
 void GsmSmsMessage::SetFullText(const std::string &text)

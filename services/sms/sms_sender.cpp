@@ -229,10 +229,14 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
         TELEPHONY_LOGE("event is nullptr");
         return nullptr;
     }
+    for (auto const &pair : sendCacheMap_) {
+        TELEPHONY_LOGI("Key = %{public}" PRId64 "", pair.first);
+    }
     std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
     std::lock_guard<std::mutex> guard(sendCacheMapMutex_);
     std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
     if (res != nullptr) {
+        TELEPHONY_LOGI("flag = %{public}d", res->flag);
         auto iter = sendCacheMap_.find(res->flag);
         if (iter != sendCacheMap_.end()) {
             smsIndexer = iter->second;
@@ -250,6 +254,7 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
 
     std::shared_ptr<SendSmsResultInfo> info = event->GetSharedObject<SendSmsResultInfo>();
     if (info != nullptr) {
+        TELEPHONY_LOGI("flag = %{public}" PRId64 "", info->flag);
         auto iter = sendCacheMap_.find(info->flag);
         if (iter != sendCacheMap_.end()) {
             TELEPHONY_LOGI("msgRef = %{public}d", info->msgRef);
@@ -258,7 +263,6 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
                 TELEPHONY_LOGE("smsIndexer is nullptr");
                 return nullptr;
             }
-            smsIndexer->SetMsgRefId((uint8_t)info->msgRef);
             smsIndexer->SetAckPdu(std::move(StringUtils::HexToByteVector(info->pdu)));
             if (info->errCode != 0) {
                 smsIndexer->SetIsFailure(true);

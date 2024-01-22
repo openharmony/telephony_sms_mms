@@ -103,7 +103,7 @@ uint8_t GsmSmsParamEncode::EncodeSmscPdu(const char *num, uint8_t *resultNum)
         TELEPHONY_LOGE("digit to bcd error!");
         return 0;
     }
-    if (encodeLen < 0 || encodeLen >= MAX_SMSC_LEN) {
+    if (encodeLen == 0 || encodeLen >= MAX_SMSC_LEN) {
         TELEPHONY_LOGE("encodeLen error!");
         return 0;
     }
@@ -128,7 +128,7 @@ uint8_t GsmSmsParamEncode::EncodeSmscPdu(const struct AddressNumber *num, uint8_
     if (num->address[0] == '+') {
         ret = memcpy_s(newNum, sizeof(newNum), num->address + 1, strlen(num->address) - 1);
     } else {
-        ret = memcpy_s(newNum, sizeof(newNum), num->address, strlen(num->address));
+        ret = memcpy_s(newNum, sizeof(newNum), num->address, sizeof(newNum));
     }
     if (ret != EOK) {
         TELEPHONY_LOGE("memory copy error!");
@@ -189,7 +189,9 @@ void GsmSmsParamEncode::EncodeDCS(const struct SmsDcs *dcsData, std::string &ret
     }
 
     char value = returnValue.front();
-    returnValue.pop_back();
+    if (!returnValue.empty()) {
+        returnValue.pop_back();
+    }
     switch (dcsData->codingScheme) {
         case DATA_CODING_7BIT:
             break;
