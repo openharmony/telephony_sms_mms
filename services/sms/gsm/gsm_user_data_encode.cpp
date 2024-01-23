@@ -80,7 +80,7 @@ bool GsmUserDataEncode::EncodeGsmHeadPdu(SmsWriteBuffer &buffer, const struct Sm
 
     /* Set UDL, UDHL */
     if (udhl > 0) {
-        uint8_t value = ((udhl + 1) * HEX_08) + fillBits + (userData->length * HEX_07);
+        uint16_t value = ((udhl + 1) * HEX_08) + fillBits + (userData->length * HEX_07);
         if (!buffer.InsertByte((value / HEX_07), location)) {
             TELEPHONY_LOGE("write data error.");
             return false;
@@ -209,8 +209,8 @@ bool GsmUserDataEncode::EncodeUcs2HeadPdu(SmsWriteBuffer &buffer, const struct S
 
     /* Encode User Data Header */
     uint16_t udhl = buffer.GetIndex();
-    for (uint8_t i = 0; i < userData->headerCnt; i++) {
-        userData_->EncodeHeader(buffer, userData->header[i]);
+    for (uint8_t j = 0; j < userData->headerCnt; j++) {
+        userData_->EncodeHeader(buffer, userData->header[j]);
     }
     if (buffer.GetIndex() > udhl) {
         udhl = buffer.GetIndex() - udhl;

@@ -25,7 +25,7 @@ static constexpr uint16_t MAX_CB_MSG_LEN = 4200;
 
 GsmCbPduDecodeBuffer::GsmCbPduDecodeBuffer(uint32_t len)
 {
-    if (len == 0 && len > MAX_CB_MSG_LEN) {
+    if (len == 0 || len > MAX_CB_MSG_LEN) {
         TELEPHONY_LOGE("pdu data error.");
         return;
     }

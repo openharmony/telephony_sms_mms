@@ -28,6 +28,7 @@ namespace Telephony {
 static constexpr uint8_t SMS_BYTE_BIT = 8;
 static constexpr uint8_t GSM_CODE_BIT = 7;
 static constexpr uint8_t MAX_PAGE_PDU_LEN = 82;
+static constexpr uint16_t GSM_ETWS_BASE_MASK = 0x1100;
 
 GsmCbUmtsCodec::GsmCbUmtsCodec(std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> header,
     std::shared_ptr<GsmCbPduDecodeBuffer> buffer, std::shared_ptr<GsmCbCodec> cbCodec)
@@ -48,6 +49,9 @@ bool GsmCbUmtsCodec::Decode3gHeader()
     if (cbPduBuffer_ == nullptr || cbHeader_ == nullptr || cbPduBuffer_->GetSize() == 0) {
         TELEPHONY_LOGE("CB pdu data error.");
         return false;
+    }
+    if ((cbHeader_->msgId & HEX_VALUE_FFF8) == GSM_ETWS_BASE_MASK) {
+        cbHeader_->cbMsgType = GsmCbCodec::GSM_ETWS;
     }
     cbPduBuffer_->IncreasePointer(1);
     uint8_t oneByte = 0;
@@ -113,7 +117,9 @@ bool GsmCbUmtsCodec::Decode3gHeaderPartData(uint8_t dcs)
     cbCodec_->DecodeCbMsgDCS(dcs, iosTemp, cbHeader_->dcs);
     cbHeader_->langType = cbHeader_->dcs.langType;
     cbHeader_->recvTime = static_cast<time_t>(cbCodec_->GetRecvTime());
-    cbPduBuffer_->SetPointer(cbPduBuffer_->GetCurPosition() - HEX_VALUE_02);
+    if (cbPduBuffer_->GetCurPosition() >= HEX_VALUE_02) {
+        cbPduBuffer_->SetPointer(cbPduBuffer_->GetCurPosition() - HEX_VALUE_02);
+    }
     return true;
 }
 
@@ -158,33 +164,29 @@ bool GsmCbUmtsCodec::Decode3g7Bit()
         TELEPHONY_LOGE("dataPdu empty.");
         return false;
     }
-
-    uint16_t offset = 0;
-    uint16_t dataLen = 0;
     uint16_t pduLen = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition();
 
     const uint8_t *tpdu = dataPdu.data();
     for (uint8_t i = 0; i < cbHeader_->totalPages; ++i) {
-        uint8_t pageLenOffset = (i + 1) * MAX_PAGE_PDU_LEN + i;
+        uint16_t pageLenOffset = (i + 1) * MAX_PAGE_PDU_LEN + i;
         if (pduLen <= pageLenOffset) {
             TELEPHONY_LOGE("CB Msg Size err [%{pulbic}d]", pduLen);
             messageRaw_.clear();
             return false;
         }
-        dataLen = tpdu[pageLenOffset];
-        offset = (i * MAX_PAGE_PDU_LEN) + i;
+        uint16_t dataLen = tpdu[pageLenOffset];
+        uint16_t offset = (i * MAX_PAGE_PDU_LEN) + i;
         if (dataLen > MAX_PAGE_PDU_LEN) {
             TELEPHONY_LOGE("CB Msg Size is over MAX [%{pulbic}d]", dataLen);
             messageRaw_.clear();
             return false;
         }
         uint16_t unpackLen = 0;
-        dataLen = (dataLen * SMS_BYTE_BIT) / GSM_CODE_BIT;
         uint8_t pageData[MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT] = { 0 };
         unpackLen = SmsCommonUtils::Unpack7bitChar(
             &tpdu[offset], dataLen, 0x00, pageData, MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT);
-        for (uint16_t i = 0; i < unpackLen; i++) {
-            messageRaw_.push_back(pageData[i]);
+        for (uint16_t position = 0; position < unpackLen; position++) {
+            messageRaw_.push_back(pageData[position]);
         }
     }
     cbCodec_->SetCbMessageRaw(messageRaw_);
@@ -204,31 +206,32 @@ bool GsmCbUmtsCodec::Decode3gUCS2()
         TELEPHONY_LOGE("dataPdu empty.");
         return false;
     }
-
-    uint16_t dataLen = 0;
-    uint16_t offset = 0;
     uint16_t pduLen = cbPduBuffer_->GetSize() - cbPduBuffer_->GetCurPosition();
 
     uint8_t *tpdu = dataPdu.data();
     uint16_t tpduLen = dataPdu.size();
     for (uint8_t i = 0; i < cbHeader_->totalPages; ++i) {
         TELEPHONY_LOGI("cbHeader_->totalPages:%{public}d", cbHeader_->totalPages);
-        uint8_t pageLenOffset = static_cast<uint8_t>((i + 1) * MAX_PAGE_PDU_LEN + i);
+        uint16_t pageLenOffset = static_cast<uint8_t>((i + 1) * MAX_PAGE_PDU_LEN + i);
         if (pduLen <= pageLenOffset) {
             TELEPHONY_LOGE("pageLenOffset invalid.");
             messageRaw_.clear();
             return false;
         }
+        uint16_t dataLen = 0;
+        uint16_t offset = 0;
         if (cbHeader_->dcs.iso639Lang[0]) {
-            dataLen = tpdu[pageLenOffset] - HEX_VALUE_02;
+            if (tpdu[pageLenOffset] >= HEX_VALUE_02) {
+                dataLen = tpdu[pageLenOffset] - HEX_VALUE_02;
+            }
             offset = (i * MAX_PAGE_PDU_LEN) + i + HEX_VALUE_02;
         } else {
             dataLen = tpdu[pageLenOffset];
             offset = (i * MAX_PAGE_PDU_LEN) + i;
         }
         if (dataLen > 0 && dataLen <= MAX_PAGE_PDU_LEN && dataLen < tpduLen) {
-            for (uint8_t i = offset; i < offset + dataLen; i++) {
-                messageRaw_.push_back(static_cast<char>(tpdu[i]));
+            for (uint8_t position = offset; position < offset + dataLen; position++) {
+                messageRaw_.push_back(static_cast<char>(tpdu[position]));
             }
         }
     }

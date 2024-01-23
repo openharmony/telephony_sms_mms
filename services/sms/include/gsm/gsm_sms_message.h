@@ -89,6 +89,7 @@ private:
     uint8_t CalcReplyEncodeAddress(const std::string &replyAddress);
     virtual int DecodeMessage(uint8_t *decodeData, unsigned int length, DataCodingScheme &codingType,
         const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
+    void ConvertUserPartData();
 };
 
 struct EncodeInfo {
