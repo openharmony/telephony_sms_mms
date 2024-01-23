@@ -385,7 +385,7 @@ bool GsmSmsParamDecode::DecodeTimePdu(SmsReadBuffer &buffer, struct SmsTimeStamp
     }
 
     timeStamp->time.absolute.year =
-        (pickByte & HEX_VALUE_0F) * HEX_VALUE_10 + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
+        (pickByte & HEX_VALUE_0F) * HEX_VALUE_0A + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
 
     if (!buffer.PickOneByte(pickByte)) {
         TELEPHONY_LOGE("get data error.");
@@ -396,7 +396,7 @@ bool GsmSmsParamDecode::DecodeTimePdu(SmsReadBuffer &buffer, struct SmsTimeStamp
         return false;
     }
     timeStamp->time.absolute.month =
-        (pickByte & HEX_VALUE_0F) * HEX_VALUE_10 + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
+        (pickByte & HEX_VALUE_0F) * HEX_VALUE_0A + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
     return DecodeTimePduPartData(buffer, timeStamp);
 }
 
@@ -414,7 +414,7 @@ bool GsmSmsParamDecode::DecodeTimePduPartData(SmsReadBuffer &buffer, struct SmsT
         return false;
     }
     timeStamp->time.absolute.day =
-        (pickByte & HEX_VALUE_0F) * HEX_VALUE_10 + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
+        (pickByte & HEX_VALUE_0F) * HEX_VALUE_0A + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
 
     if (!buffer.PickOneByte(pickByte)) {
         TELEPHONY_LOGE("get data error.");
@@ -425,7 +425,7 @@ bool GsmSmsParamDecode::DecodeTimePduPartData(SmsReadBuffer &buffer, struct SmsT
         return false;
     }
     timeStamp->time.absolute.hour =
-        (pickByte & HEX_VALUE_0F) * HEX_VALUE_10 + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
+        (pickByte & HEX_VALUE_0F) * HEX_VALUE_0A + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
 
     if (!buffer.PickOneByte(pickByte)) {
         TELEPHONY_LOGE("get data error.");
@@ -436,7 +436,7 @@ bool GsmSmsParamDecode::DecodeTimePduPartData(SmsReadBuffer &buffer, struct SmsT
         return false;
     }
     timeStamp->time.absolute.minute =
-        (pickByte & HEX_VALUE_0F) * HEX_VALUE_10 + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
+        (pickByte & HEX_VALUE_0F) * HEX_VALUE_0A + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
     return DecodeTimePduData(buffer, timeStamp);
 }
 

@@ -90,6 +90,7 @@ uint16_t SmsCommonUtils::Unpack7bitChar(
             srcIdx++;
             dstIdx++;
             if (dstIdx >= dataLen) {
+                dstIdx--;
                 break;
             }
         }

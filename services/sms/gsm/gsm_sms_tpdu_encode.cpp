@@ -332,7 +332,7 @@ bool GsmSmsTpduEncode::EncodeDeliverData(SmsWriteBuffer &buffer, const struct Sm
     std::string scts;
     paramCodec_->EncodeTimePdu(&pDeliver->timeStamp, scts);
     uint8_t length = scts.size();
-    if (buffer.data_ == nullptr || (buffer.GetIndex() + HEX_VALUE_01) > buffer.GetSize()) {
+    if (buffer.data_ == nullptr || (buffer.GetIndex() + length) > buffer.GetSize()) {
         TELEPHONY_LOGE("buffer error.");
         return false;
     }
