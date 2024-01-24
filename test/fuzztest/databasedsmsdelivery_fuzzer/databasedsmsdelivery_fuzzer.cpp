@@ -75,6 +75,8 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
         smsSendManager->cdmaSmsSender_->DataBasedSmsDelivery(
             desAddr, scAddr, port, data, size, sendCallback, deliveryCallback);
     }
+    DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
+    smsInterfaceManager = nullptr;
     return;
 }
 } // namespace OHOS
