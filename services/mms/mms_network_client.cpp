@@ -44,6 +44,7 @@ std::string METHOD_GET = "GET";
 constexpr const char *SIMID_IDENT_PREFIX = "simId";
 const bool STORE_MMS_PDU_TO_FILE = false;
 constexpr static const int32_t WAIT_TIME_SECOND = 10 * 60;
+constexpr static const unsigned int HTTP_TIME_MICRO_SECOND = WAIT_TIME_SECOND * 1000;
 
 MmsNetworkClient::MmsNetworkClient(int32_t slotId)
 {
@@ -180,6 +181,7 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
         return ret;
     }
     httpReq.SetHttpProxy(httpProxy);
+    httpReq.SetConnectTimeout(HTTP_TIME_MICRO_SECOND);
     if (method.compare(METHOD_POST) == 0) {
         httpReq.SetBody(data.c_str(), data.size());
         httpReq.SetMethod(HttpConstant::HTTP_METHOD_POST);
@@ -426,9 +428,8 @@ void MmsNetworkClient::HttpCallBack(std::shared_ptr<HttpClientTask> task)
         }
         responseData_.insert(responseData_.size(), reinterpret_cast<const char *>(data), length);
     });
-    task->OnProgress([](const HttpClientRequest &request, u_long dltotal, u_long dlnow, u_long ultotal, u_long ulnow) {
-        TELEPHONY_LOGD("OnProgress");
-    });
+    task->OnProgress(
+        [](const HttpClientRequest &request, u_long dltotal, u_long dlnow, u_long ultotal, u_long ulnow) {});
 }
 } // namespace Telephony
 } // namespace OHOS
