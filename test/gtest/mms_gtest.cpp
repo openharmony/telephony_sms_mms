@@ -341,7 +341,13 @@ std::string GetFileToDb()
     GetMmsPduFromFile(MMS_FILE_ADDRESS, mmsPdu);
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
     std::shared_ptr<MmsPersistHelper> mmsPersistHelper = std::make_shared<MmsPersistHelper>();
+    if (mmsPersistHelper == nullptr) {
+        return "";
+    }
     std::shared_ptr<DataShare::DataShareHelper> helper = mmsPersistHelper->CreateSmsHelper();
+    if (helper == nullptr) {
+        return "";
+    }
     std::vector<std::string> mmsPdus = SplitPdu(mmsPdu);
     std::string dbUrl;
     for (std::string mmsPdu : mmsPdus) {
