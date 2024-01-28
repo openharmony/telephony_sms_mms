@@ -1202,6 +1202,10 @@ HWTEST_F(BranchMmsTest, MmsNetworkClient_0001, Function | MediumTest | Level1)
     client.HttpRequest(METHOD_POST, "", TEST_DATA);
     client.DeleteMmsPdu("");
 
+    MmsNetworkClient clientSlot1(1);
+    clientSlot1.Execute(METHOD_POST, "", TEST_DATA);
+    clientSlot1.HttpRequest(METHOD_POST, "", TEST_DATA);
+
     EXPECT_NE(client.UpdateMmsPduToStorage(""), TELEPHONY_ERR_SUCCESS);
     client.responseData_ = TEST_DATA;
     EXPECT_NE(client.UpdateMmsPduToStorage(""), TELEPHONY_ERR_SUCCESS);

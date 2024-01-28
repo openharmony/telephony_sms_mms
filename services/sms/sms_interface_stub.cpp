@@ -311,6 +311,7 @@ void SmsInterfaceStub::OnGetAllSimMessages(MessageParcel &data, MessageParcel &r
 void SmsInterfaceStub::OnSetCBConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     int32_t slotId = data.ReadInt32();
+    TELEPHONY_LOGI("set cb config slotId:%{public}d", slotId);
     bool enable = data.ReadBool();
     uint32_t fromMsgId = data.ReadUint32();
     uint32_t toMsgId = data.ReadUint32();
@@ -504,6 +505,7 @@ void SmsInterfaceStub::OnGetEncodeStringFunc(MessageParcel &data, MessageParcel 
 void SmsInterfaceStub::OnSendMms(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     int32_t slotId = data.ReadInt32();
+    TELEPHONY_LOGI("send mms slotId:%{public}d", slotId);
     u16string mmsc = data.ReadString16();
     u16string mmsData = data.ReadString16();
     u16string ua = data.ReadString16();
@@ -518,6 +520,7 @@ void SmsInterfaceStub::OnSendMms(MessageParcel &data, MessageParcel &reply, Mess
 void SmsInterfaceStub::OnDownloadMms(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     int32_t slotId = data.ReadInt32();
+    TELEPHONY_LOGI("download mms slotId:%{public}d", slotId);
     u16string mmsc = data.ReadString16();
     u16string mmsData = data.ReadString16();
     u16string ua = data.ReadString16();
