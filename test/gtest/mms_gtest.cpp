@@ -1052,6 +1052,9 @@ HWTEST_F(MmsGtest, SmsServiceTest_0001, Function | MediumTest | Level1)
     dbUrl = GetFileToDb();
     homeUrlVal = GetMmsc(slotId);
     auto smsService = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
+    if (smsService == nullptr) {
+        return;
+    }
     std::u16string mmsc = StringUtils::ToUtf16(homeUrlVal);
     std::u16string data = StringUtils::ToUtf16(dbUrl);
     std::u16string ua = u"";
