@@ -106,6 +106,9 @@ bool GsmCbGsmCodec::Decode2gHeaderEtws()
         return false;
     }
     cbHeader_->warningType = (oneByte & HEX_VALUE_FE) >> 1;
+    if (cbHeader_->warningType == 0 && cbHeader_->msgId >= GSM_ETWS_BASE_MASK) {
+        cbHeader_->warningType = cbHeader_->msgId - GSM_ETWS_BASE_MASK;
+    }
     if (!cbPduBuffer_->GetOneByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
