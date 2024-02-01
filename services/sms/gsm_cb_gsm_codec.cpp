@@ -31,6 +31,7 @@ static constexpr uint8_t MAX_PAGE_PDU_LEN = 82;
 static constexpr uint8_t MAX_ETWS_PDU_LEN = 56;
 static constexpr uint8_t MAX_PAGE_NUM = 15;
 static constexpr uint16_t GSM_ETWS_BASE_MASK = 0x1100;
+static constexpr uint8_t GSM_CB_HEADER_LEN = 6;
 
 GsmCbGsmCodec::GsmCbGsmCodec(std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> header,
     std::shared_ptr<GsmCbPduDecodeBuffer> buffer, std::shared_ptr<GsmCbCodec> cbCodec)
@@ -106,7 +107,7 @@ bool GsmCbGsmCodec::Decode2gHeaderEtws()
         return false;
     }
     cbHeader_->warningType = (oneByte & HEX_VALUE_FE) >> 1;
-    if (cbHeader_->warningType == 0 && cbHeader_->msgId >= GSM_ETWS_BASE_MASK) {
+    if (cbPduBuffer_->GetSize() > GSM_CB_HEADER_LEN && cbHeader_->msgId >= GSM_ETWS_BASE_MASK) {
         cbHeader_->warningType = cbHeader_->msgId - GSM_ETWS_BASE_MASK;
     }
     if (!cbPduBuffer_->GetOneByte(oneByte)) {
