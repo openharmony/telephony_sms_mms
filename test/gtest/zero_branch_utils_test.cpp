@@ -18,6 +18,7 @@
 
 #include "gsm_sms_common_utils.h"
 #include "gtest/gtest.h"
+#include "ims_sms_client.h"
 #include "sms_common_utils.h"
 #include "text_coder.h"
 
@@ -43,7 +44,10 @@ public:
 };
 void BranchUtilsTest::SetUpTestCase() {}
 
-void BranchUtilsTest::TearDownTestCase() {}
+void BranchUtilsTest::TearDownTestCase()
+{
+    DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
+}
 
 void BranchUtilsTest::SetUp() {}
 
