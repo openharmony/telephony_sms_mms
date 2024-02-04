@@ -16,7 +16,6 @@
 #include "sms_receive_reliability_handler.h"
 
 #include "common_event.h"
-#include "common_event_manager.h"
 #include "common_event_support.h"
 #include "gsm_sms_message.h"
 #include "parameter.h"
@@ -27,7 +26,6 @@
 #include "telephony_common_utils.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
-#include "want.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -233,7 +231,6 @@ void SmsReceiveReliabilityHandler::SmsReceiveReliabilityProcessing()
 {
     std::vector<SmsReceiveIndexer> dbIndexers;
     RemoveBlockedSms(dbIndexers);
-
     CheckUnReceiveWapPush(dbIndexers);
 
     for (auto position = dbIndexers.begin(); position != dbIndexers.end();) {
@@ -297,6 +294,7 @@ void SmsReceiveReliabilityHandler::ReadySendSmsBroadcast(
         indexerObj.GetVisibleAddress(), indexerObj.GetMsgRefId(), indexerObj.GetMsgSeqId(), indexerObj.GetMsgCount(),
         false, StringUtils::StringToHex(indexerObj.GetPdu()));
     indexer->SetDataBaseId(indexerObj.GetDataBaseId());
+    TELEPHONY_LOGI("send sms from db for reliability");
     SendBroadcast(indexer, pdus);
 }
 
@@ -331,37 +329,17 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
         }
     }
     Want want;
-    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
-        want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
-    } else {
-        want.SetAction(CT_AUTO_REG_SMS_ACTION);
-    }
-
-    want.SetParam(SMS_BROADCAST_SLOTID_KEY, static_cast<int>(slotId_));
-    want.SetParam(SMS_BROADCAST_PDU_KEY, newPdus);
-    want.SetParam(SMS_BROADCAST_SMS_TYPE_KEY, indexer->GetIsCdma());
     CommonEventData data;
-    data.SetWant(want);
-    if (indexer->GetIsText() || indexer->GetDestPort() == SMS_TEXT_PORT) {
-        data.SetData(SMS_BROADCAST_SMS_TEXT_TYPE_KEY);
-        data.SetCode(TEXT_MSG_RECEIVE_CODE);
-    } else {
-        data.SetData(SMS_BROADCAST_SMS_DATA_TYPE_KEY);
-        data.SetCode(DATA_MSG_RECEIVE_CODE);
-        want.SetParam(SMS_BROADCAST_SMS_PORT_KEY, static_cast<short>(indexer->GetDestPort()));
-    }
     CommonEventPublishInfo publishInfo;
-    publishInfo.SetOrdered(true);
-    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
-        std::vector<std::string> smsPermissions;
-        smsPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
-        publishInfo.SetSubscriberPermissions(smsPermissions);
-    }
+    PacketSmsData(want, indexer, data, publishInfo);
+    want.SetParam(SMS_BROADCAST_PDU_KEY, newPdus);
 
     MatchingSkills smsSkills;
     if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
+        TELEPHONY_LOGI("Sms Broadcast");
         smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
     } else {
+        TELEPHONY_LOGI("CT AutoReg Broadcast");
         smsSkills.AddEvent(CT_AUTO_REG_SMS_ACTION);
     }
     CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
@@ -372,6 +350,36 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     HiSysEventCBResult(cbResult);
 }
 
+void SmsReceiveReliabilityHandler::PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsReceiveIndexer> indexer,
+    EventFwk::CommonEventData &data, EventFwk::CommonEventPublishInfo &publishInfo)
+{
+    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
+        want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    } else {
+        want.SetAction(CT_AUTO_REG_SMS_ACTION);
+    }
+    TELEPHONY_LOGI("Sms slotId_:%{public}d", slotId_);
+    want.SetParam(SMS_BROADCAST_SLOTID_KEY, static_cast<int>(slotId_));
+    want.SetParam(SMS_BROADCAST_SMS_TYPE_KEY, indexer->GetIsCdma());
+
+    data.SetWant(want);
+    if (indexer->GetIsText() || indexer->GetDestPort() == SMS_TEXT_PORT) {
+        data.SetData(SMS_BROADCAST_SMS_TEXT_TYPE_KEY);
+        data.SetCode(TEXT_MSG_RECEIVE_CODE);
+    } else {
+        data.SetData(SMS_BROADCAST_SMS_DATA_TYPE_KEY);
+        data.SetCode(DATA_MSG_RECEIVE_CODE);
+        want.SetParam(SMS_BROADCAST_SMS_PORT_KEY, static_cast<short>(indexer->GetDestPort()));
+    }
+
+    publishInfo.SetOrdered(true);
+    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
+        std::vector<std::string> smsPermissions;
+        smsPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
+        publishInfo.SetSubscriberPermissions(smsPermissions);
+    }
+}
+
 void SmsReceiveReliabilityHandler::HiSysEventCBResult(bool publishResult)
 {
     if (!publishResult) {
@@ -380,6 +388,7 @@ void SmsReceiveReliabilityHandler::HiSysEventCBResult(bool publishResult)
             SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish short message broadcast event fail");
         return;
     }
+    TELEPHONY_LOGI("Send Sms Broadcast success");
     DelayedSingleton<SmsHiSysEvent>::GetInstance()->SetSmsBroadcastStartTime();
 }
 
