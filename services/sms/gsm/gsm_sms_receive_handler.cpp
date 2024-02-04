@@ -28,6 +28,8 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
+static constexpr int16_t INVALID_SMS_PORT = 0x157b;
+
 GsmSmsReceiveHandler::GsmSmsReceiveHandler(int32_t slotId) : SmsReceiveHandler(slotId) {}
 
 GsmSmsReceiveHandler::~GsmSmsReceiveHandler()
@@ -181,6 +183,11 @@ int32_t GsmSmsReceiveHandler::HandleNormalSmsByType(const shared_ptr<SmsBaseMess
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_REPEATED_ERROR, "gsm message repeated error");
         return AckIncomeCause::SMS_ACK_REPEATED_ERROR;
+    }
+    auto destPort = indexer->GetDestPort();
+    if (destPort == INVALID_SMS_PORT) {
+        TELEPHONY_LOGI("[invalid sms port] =%{public}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
+        return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
     if (!AddMsgToDB(indexer)) {
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
