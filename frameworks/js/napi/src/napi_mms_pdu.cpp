@@ -30,7 +30,7 @@ static constexpr uint8_t SLIDE_STEP = 2;
 static constexpr uint8_t HEX_VALUE_F0 = 0xF0;
 static constexpr uint8_t HEX_VALUE_0F = 0x0F;
 static constexpr uint32_t SPLIT_PDU_LENGTH = 195 * 1024;
-static constexpr uint32_t MAX_PDU_PAGES = 4;
+static constexpr uint32_t MAX_PDU_PAGES = 20;
 
 void NAPIMmsPdu::DeleteMmsPdu(NapiMmsPduHelper &pduHelper)
 {
@@ -156,8 +156,9 @@ bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
     }
     std::vector<std::string> dbUrls = SplitUrl(pduHelper.GetDbUrl());
     std::string mmsPdu;
+    std::string urlData;
     for (std::string url : dbUrls) {
-        TELEPHONY_LOGI("url:%{public}s", url.c_str());
+        urlData.append(url + ',');
         Uri uri(SMS_PROFILE_MMS_PDU_URI);
         std::vector<std::string> colume;
         DataShare::DataSharePredicates predicates;
@@ -188,6 +189,7 @@ bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
             mmsPdu += static_cast<char>(pduChar);
         }
     }
+    TELEPHONY_LOGI("urlData:%{public}s", urlData.c_str());
     TELEPHONY_LOGI("mmsPdu size:%{public}d", static_cast<uint32_t>(mmsPdu.size()));
     SetMmsPdu(mmsPdu);
     return true;

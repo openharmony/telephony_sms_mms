@@ -182,6 +182,7 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
     }
     httpReq.SetHttpProxy(httpProxy);
     httpReq.SetConnectTimeout(HTTP_TIME_MICRO_SECOND);
+    httpReq.SetTimeout(HTTP_TIME_MICRO_SECOND);
     if (method.compare(METHOD_POST) == 0) {
         httpReq.SetBody(data.c_str(), data.size());
         httpReq.SetMethod(HttpConstant::HTTP_METHOD_POST);
