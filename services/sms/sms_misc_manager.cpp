@@ -40,16 +40,12 @@ int32_t SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t to
         TELEPHONY_LOGI("cb channel invalid");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    bool disableCBSuccess = false;
     std::unique_lock<std::mutex> lock(cbMutex_);
     if (!hasGotCbRange_) {
         GetModemCBRange();
         if (mdRangeList_.size() != 0) {
             if (!SendDataToRil(false, mdRangeList_)) {
-                hasGotCbRange_ = false;
                 return TELEPHONY_ERR_RIL_CMD_FAIL;
-            } else {
-                disableCBSuccess = true;
             }
             mdRangeList_.clear();
         }
@@ -61,7 +57,7 @@ int32_t SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t to
         ret = CloseCBRange(fromMsgId, toMsgId);
     }
     if (ret) {
-        if (!disableCBSuccess && !SendDataToRil(false, oldRangeList)) {
+        if (!SendDataToRil(false, oldRangeList)) {
             rangeList_ = oldRangeList;
             return TELEPHONY_ERR_RIL_CMD_FAIL;
         }
