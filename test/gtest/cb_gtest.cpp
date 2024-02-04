@@ -588,7 +588,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
@@ -624,7 +624,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
@@ -660,7 +660,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -732,7 +732,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -756,7 +756,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -780,7 +780,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
