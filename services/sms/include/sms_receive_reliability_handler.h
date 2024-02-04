@@ -16,7 +16,9 @@
 #ifndef SMS_RECEIVE_RELIABILITY_HANDLER_H
 #define SMS_RECEIVE_RELIABILITY_HANDLER_H
 
+#include "common_event_manager.h"
 #include "sms_wap_push_handler.h"
+#include "want.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -45,6 +47,8 @@ private:
     void GetSmsUserDataMultipage(int32_t &smsPagesCount, std::vector<SmsReceiveIndexer> &dbIndexers, int32_t position,
         std::shared_ptr<std::vector<std::string>> pdus);
     void ReadySendSmsBroadcast(SmsReceiveIndexer &indexerObj, std::shared_ptr<std::vector<std::string>> pdus);
+    void PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsReceiveIndexer> indexer,
+        EventFwk::CommonEventData &data, EventFwk::CommonEventPublishInfo &publishInfo);
 
 private:
     std::unique_ptr<SmsWapPushHandler> smsWapPushHandler_;
