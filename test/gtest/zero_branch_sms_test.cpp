@@ -1375,6 +1375,7 @@ HWTEST_F(BranchSmsTest, SmsMiscManager_0001, Function | MediumTest | Level1)
     EXPECT_EQ(smsMiscManager->SetCBConfig(true, CODE_BUFFER_MAX_SIZE, 1, 1), TELEPHONY_ERR_ARGUMENT_INVALID);
     EXPECT_EQ(smsMiscManager->SetCBConfig(true, 1, 0, 1), TELEPHONY_ERR_ARGUMENT_INVALID);
     EXPECT_EQ(smsMiscManager->SetCBConfig(true, 1, 1, 0), TELEPHONY_ERR_ARGUMENT_INVALID);
+    EXPECT_EQ(smsMiscManager->SetCBConfig(true, 1, 0, 0), TELEPHONY_ERR_ARGUMENT_INVALID);
     EXPECT_EQ(smsMiscManager->SetCBConfig(false, 1, 1, 1), TELEPHONY_ERR_SUCCESS);
     EXPECT_GE(smsMiscManager->SetCBConfig(true, 1, 1, 1), TELEPHONY_ERR_SUCCESS);
     EXPECT_TRUE(smsMiscManager->OpenCBRange(1, 1));
