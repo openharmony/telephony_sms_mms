@@ -126,14 +126,16 @@ void DeliveryCallback::OnSmsDeliveryResult(const std::u16string &pdu)
         pContext->callbackRef = callbackRef_;
         pContext->pduStr = NapiUtil::ToUtf8(pdu);
         work->data = static_cast<void *>(pContext);
-        uv_queue_work_with_qos(
+        int32_t errCode = uv_queue_work_with_qos(
             loop, work, [](uv_work_t *work) {},
             [](uv_work_t *work, int status) { CompleteSmsDeliveryWork(work, status); }, uv_qos_default);
-        if (pContext != nullptr) {
+        if (errCode != 0) {
+            TELEPHONY_LOGE("failed to uv_queue_work_with_qos, errCode: %{public}d", errCode);
+            pContext->env = nullptr;
+            pContext->thisVarRef = nullptr;
+            pContext->callbackRef = nullptr;
             delete pContext;
             pContext = nullptr;
-        }
-        if (work != nullptr) {
             delete work;
             work = nullptr;
         }
