@@ -333,6 +333,7 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     CommonEventPublishInfo publishInfo;
     PacketSmsData(want, indexer, data, publishInfo);
     want.SetParam(SMS_BROADCAST_PDU_KEY, newPdus);
+    data.SetWant(want);
 
     MatchingSkills smsSkills;
     if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
@@ -361,8 +362,6 @@ void SmsReceiveReliabilityHandler::PacketSmsData(EventFwk::Want &want, const std
     TELEPHONY_LOGI("Sms slotId_:%{public}d", slotId_);
     want.SetParam(SMS_BROADCAST_SLOTID_KEY, static_cast<int>(slotId_));
     want.SetParam(SMS_BROADCAST_SMS_TYPE_KEY, indexer->GetIsCdma());
-
-    data.SetWant(want);
     if (indexer->GetIsText() || indexer->GetDestPort() == SMS_TEXT_PORT) {
         data.SetData(SMS_BROADCAST_SMS_TEXT_TYPE_KEY);
         data.SetCode(TEXT_MSG_RECEIVE_CODE);
