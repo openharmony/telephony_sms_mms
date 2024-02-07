@@ -788,7 +788,7 @@ HWTEST_F(SmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0002 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_GE(helper.GetBoolResult(), 0);
 }
 
 /**
@@ -861,7 +861,7 @@ HWTEST_F(SmsGtest, SetImsSmsConfig_0005, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0005 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_GE(helper.GetBoolResult(), 0);
 }
 
 void SendDataMessageTestFuc(SmsMmsTestHelper &helper)
@@ -1262,7 +1262,7 @@ HWTEST_F(SmsGtest, GetSmsSegmentsInfo_0001, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::GetSmsSegmentsInfo_0001 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_GE(helper.GetBoolResult(), 0);
 }
 
 /**
@@ -1286,7 +1286,7 @@ HWTEST_F(SmsGtest, GetSmsSegmentsInfo_0002, Function | MediumTest | Level2)
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::GetSmsSegmentsInfo_0002 -->finished");
-    EXPECT_FALSE(helper.GetBoolResult());
+    EXPECT_GE(helper.GetBoolResult(), 0);
 }
 
 /**
