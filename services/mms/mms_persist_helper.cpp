@@ -77,33 +77,29 @@ void MmsPersistHelper::DeleteMmsPdu(const std::string &dbUrl)
     TELEPHONY_LOGI("result:%{public}d", result);
 }
 
-bool MmsPersistHelper::UpdateMmsPdu(const std::string &mmsPdu, const std::string &dbUrl)
+bool MmsPersistHelper::InsertMmsPdu(const std::string &mmsPdu, std::string &dbUrl)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateSmsHelper();
     if (helper == nullptr) {
         TELEPHONY_LOGE("helper is nullptr");
         return false;
     }
-
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
 
     std::vector<std::string> mmsPdus = SplitPdu(mmsPdu);
-    std::vector<std::string> dbUrls = SplitUrl(dbUrl);
-    int32_t result = -1;
-    for (uint32_t locate = 0; locate < mmsPdus.size() && locate < dbUrls.size(); locate++) {
+    for (std::string mmsPdu : mmsPdus) {
         DataShare::DataShareValuesBucket bucket;
-        bucket.Put(PDU_CONTENT, mmsPdus[locate]);
-        DataShare::DataSharePredicates predicates;
-        predicates.EqualTo(ID, dbUrls[locate]);
-        result = helper->Update(uri, predicates, bucket);
+        bucket.Put(PDU_CONTENT, mmsPdu);
+        int32_t result = helper->Insert(uri, bucket);
         if (result < 0) {
-            TELEPHONY_LOGE("update db fail");
+            TELEPHONY_LOGE("mms pdu insert fail");
             return false;
         }
+        dbUrl += std::to_string(result) + ',';
     }
     helper->Release();
-    TELEPHONY_LOGI("result:%{public}d", result);
-    return result >= 0 ? true : false;
+    TELEPHONY_LOGI("download mms insert db, dbUrl:%{public}s", dbUrl.c_str());
+    return dbUrl.empty() ? false : true;
 }
 
 std::vector<std::string> MmsPersistHelper::SplitPdu(const std::string &mmsPdu)
