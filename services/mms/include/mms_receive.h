@@ -28,7 +28,7 @@ public:
     explicit MmsReceive(int32_t slotId);
     virtual ~MmsReceive();
     int32_t ExecuteDownloadMms(
-        const std::string &mmsc, const std::string &data, const std::string &ua, const std::string &uaprof);
+        const std::string &mmsc, std::string &data, const std::string &ua, const std::string &uaprof);
 
 private:
     std::mutex downloadMmsMutex_;

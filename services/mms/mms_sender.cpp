@@ -30,7 +30,7 @@ MmsSender::MmsSender(int32_t slotId) : DataRequest(slotId)
 MmsSender::~MmsSender() {}
 
 int32_t MmsSender::ExecuteSendMms(
-    const std::string &contentUrl, const std::string &pduDir, const std::string &ua, const std::string &uaprof)
+    const std::string &contentUrl, std::string pduDir, const std::string &ua, const std::string &uaprof)
 {
     auto mmsNetworkMgr = std::make_shared<MmsNetworkManager>();
     if (mmsNetworkMgr == nullptr) {
