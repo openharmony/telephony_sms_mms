@@ -53,7 +53,7 @@ MmsNetworkClient::MmsNetworkClient(int32_t slotId)
 
 MmsNetworkClient::~MmsNetworkClient() {}
 
-int32_t MmsNetworkClient::Execute(const std::string &method, const std::string &mmsc, const std::string &data)
+int32_t MmsNetworkClient::Execute(const std::string &method, const std::string &mmsc, std::string &data)
 {
     int32_t ret = TELEPHONY_ERR_FAIL;
     if (METHOD_POST.compare(method) == 0) {
@@ -213,7 +213,7 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
     return TELEPHONY_ERR_SUCCESS;
 }
 
-int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, const std::string &storeDirName)
+int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, std::string &storeDirName)
 {
     std::unique_lock<std::mutex> lck(clientCts_);
     std::string strData = "";
@@ -232,7 +232,7 @@ int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, const std::string &sto
     return UpdateMmsPduToStorage(storeDirName);
 }
 
-int32_t MmsNetworkClient::UpdateMmsPduToStorage(const std::string &storeDirName)
+int32_t MmsNetworkClient::UpdateMmsPduToStorage(std::string &storeDirName)
 {
     uint32_t len = responseData_.size();
     if (len > MMS_PDU_MAX_SIZE || len == 0) {
@@ -260,7 +260,7 @@ int32_t MmsNetworkClient::UpdateMmsPduToStorage(const std::string &storeDirName)
             TELEPHONY_LOGE("mmsPduObj nullptr");
             return TELEPHONY_ERR_LOCAL_PTR_NULL;
         }
-        bool ret = mmsPduObj->UpdateMmsPdu(responseData_, storeDirName);
+        bool ret = mmsPduObj->InsertMmsPdu(responseData_, storeDirName);
         TELEPHONY_LOGI("ret:%{public}d, length:%{public}d", ret, len);
         return ret ? TELEPHONY_ERR_SUCCESS : TELEPHONY_ERR_FAIL;
     }
@@ -377,7 +377,7 @@ std::string MmsNetworkClient::GetIfaceName()
 }
 
 bool MmsNetworkClient::WriteBufferToFile(
-    const std::unique_ptr<char[]> &buff, uint32_t len, const std::string &strPathName) const
+    const std::unique_ptr<char[]> &buff, uint32_t len, std::string &strPathName) const
 {
     if (buff == nullptr) {
         TELEPHONY_LOGE("buff nullptr");

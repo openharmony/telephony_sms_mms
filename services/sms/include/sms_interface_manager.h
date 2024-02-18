@@ -63,7 +63,7 @@ public:
     int32_t SendMms(
         const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof);
     int32_t DownloadMms(
-        const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof);
+        const std::u16string &mmsc, std::u16string &data, const std::u16string &ua, const std::u16string &uaprof);
     int32_t OnRilAdapterHostDied();
 
 private:

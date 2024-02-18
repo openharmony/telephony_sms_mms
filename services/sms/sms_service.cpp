@@ -766,7 +766,7 @@ int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const st
     }
 }
 
-int32_t SmsService::DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+int32_t SmsService::DownloadMms(int32_t slotId, const std::u16string &mmsc, std::u16string &data,
     const std::u16string &ua, const std::u16string &uaprof)
 {
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
@@ -784,10 +784,6 @@ int32_t SmsService::DownloadMms(int32_t slotId, const std::u16string &mmsc, cons
     }
     if (mmsc.empty()) {
         TELEPHONY_LOGE("mmsc URL is empty");
-        return TELEPHONY_ERR_ARGUMENT_INVALID;
-    }
-    if (data.empty()) {
-        TELEPHONY_LOGE("mms Pdu file is empty");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
     TELEPHONY_LOGI("download mms slotId:%{public}d", slotId);
