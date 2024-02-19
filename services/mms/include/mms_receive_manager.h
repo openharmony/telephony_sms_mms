@@ -27,7 +27,7 @@ public:
     virtual ~MmsReceiveManager();
     void Init();
     int32_t DownloadMms(
-        const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof);
+        const std::u16string &mmsc, std::u16string &data, const std::u16string &ua, const std::u16string &uaprof);
 
 private:
     std::shared_ptr<MmsReceive> mmsReceiver_;
