@@ -530,6 +530,8 @@ void SmsInterfaceStub::OnDownloadMms(MessageParcel &data, MessageParcel &reply, 
         TELEPHONY_LOGE("SmsInterfaceStub::OnDownloadMms write reply failed");
         return;
     }
+    reply.WriteString16(mmsData);
+    TELEPHONY_LOGI("SmsInterfaceStub::OnDownloadMms dbUrls:%{public}s", StringUtils::ToUtf8(mmsData).c_str());
 }
 
 int SmsInterfaceStub::OnRemoteRequest(

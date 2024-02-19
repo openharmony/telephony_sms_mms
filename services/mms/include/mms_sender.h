@@ -28,7 +28,7 @@ public:
     explicit MmsSender(int32_t slotId);
     virtual ~MmsSender();
     int32_t ExecuteSendMms(
-        const std::string &mmsc, const std::string &data, const std::string &ua, const std::string &uaprof);
+        const std::string &mmsc, std::string pduDir, const std::string &ua, const std::string &uaprof);
 
 private:
     std::mutex sendMmsMutex_;

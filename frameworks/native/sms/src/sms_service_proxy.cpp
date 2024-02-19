@@ -557,7 +557,7 @@ int32_t SmsServiceProxy::SendMms(int32_t slotId, const std::u16string &mmsc, con
     return replyParcel.ReadInt32();
 }
 
-int32_t SmsServiceProxy::DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+int32_t SmsServiceProxy::DownloadMms(int32_t slotId, const std::u16string &mmsc, std::u16string &data,
     const std::u16string &ua, const std::u16string &uaprof)
 {
     MessageParcel dataParcel;
@@ -581,7 +581,9 @@ int32_t SmsServiceProxy::DownloadMms(int32_t slotId, const std::u16string &mmsc,
     int32_t result = replyParcel.ReadInt32();
     if (result != TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGE("DownloadMms result fail");
+        return result;
     }
+    data = replyParcel.ReadString16();
     return result;
 }
 
