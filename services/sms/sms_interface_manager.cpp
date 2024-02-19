@@ -264,7 +264,7 @@ int32_t SmsInterfaceManager::SendMms(
 }
 
 int32_t SmsInterfaceManager::DownloadMms(
-    const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof)
+    const std::u16string &mmsc, std::u16string &data, const std::u16string &ua, const std::u16string &uaprof)
 {
     if (mmsReceiverManager_ == nullptr) {
         TELEPHONY_LOGE("mmsReceiverManager_ nullptr error");

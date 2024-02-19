@@ -29,7 +29,7 @@ public:
     ~MmsPersistHelper() = default;
     std::string GetMmsPdu(const std::string &dbUrl);
     void DeleteMmsPdu(const std::string &dbUrl);
-    bool UpdateMmsPdu(const std::string &mmsPdu, const std::string &dbUrl);
+    bool InsertMmsPdu(const std::string &mmsPdu, std::string &dbUrl);
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateSmsHelper();

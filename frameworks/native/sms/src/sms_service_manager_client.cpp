@@ -188,7 +188,7 @@ int32_t SmsServiceManagerClient::SendMms(int32_t slotId, const std::u16string &m
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 
-int32_t SmsServiceManagerClient::DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+int32_t SmsServiceManagerClient::DownloadMms(int32_t slotId, const std::u16string &mmsc, std::u16string &data,
     const std::u16string &ua, const std::u16string &uaprof)
 {
     if (InitSmsServiceProxy()) {

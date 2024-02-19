@@ -299,8 +299,8 @@ public:
      * @param uaprof Indicates mms user agent profile
      * @return Returns {@code 0} if download mms success; returns {@code false} otherwise
      */
-    int32_t DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
-        const std::u16string &ua, const std::u16string &uaprof);
+    int32_t DownloadMms(int32_t slotId, const std::u16string &mmsc, std::u16string &data, const std::u16string &ua,
+        const std::u16string &uaprof);
 
 private:
     std::mutex mutex_;

@@ -25,7 +25,6 @@ namespace OHOS {
 namespace Telephony {
 namespace {
 const std::string SMS_PROFILE_URI = "datashare:///com.ohos.smsmmsability";
-static constexpr const char *PDU = "pdu";
 static const int32_t DEFAULT_REF_COUNT = 1;
 const bool STORE_MMS_PDU_TO_FILE = false;
 const int32_t ARGS_ONE = 1;
@@ -125,18 +124,6 @@ void StoreSendMmsPduToDataBase(NapiMmsPduHelper &helper)
         helper.NotifyAll();
         return;
     }
-    mmsPduObj->InsertMmsPdu(helper, mmsPdu);
-}
-
-void StoreTempDataToDataBase(NapiMmsPduHelper &helper)
-{
-    std::shared_ptr<NAPIMmsPdu> mmsPduObj = std::make_shared<NAPIMmsPdu>();
-    if (mmsPduObj == nullptr) {
-        TELEPHONY_LOGE("mmsPduObj nullptr");
-        helper.NotifyAll();
-        return;
-    }
-    std::string mmsPdu = PDU;
     mmsPduObj->InsertMmsPdu(helper, mmsPdu);
 }
 
@@ -392,30 +379,6 @@ void GetMmsPduFromDataBase(NapiMmsPduHelper &helper)
     helper.NotifyAll();
 }
 
-static bool StoreDownloadMmsPduToDataBase(MmsContext &context, std::string &dbUrl, std::string &storeFileName)
-{
-    if (!STORE_MMS_PDU_TO_FILE) {
-        storeFileName = NapiUtil::ToUtf8(context.data);
-        if (storeFileName.empty()) {
-            TELEPHONY_LOGE("storeFileName empty");
-            context.errorCode = TELEPHONY_ERR_ARGUMENT_INVALID;
-            context.resolved = false;
-            return false;
-        }
-        NapiMmsPduHelper helper;
-        helper.SetDataShareHelper(g_datashareHelper);
-        if (!helper.Run(StoreTempDataToDataBase, helper)) {
-            TELEPHONY_LOGE("StoreMmsPdu fail");
-            context.errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
-            context.resolved = false;
-            return false;
-        }
-        dbUrl = helper.GetDbUrl();
-        context.data = NapiUtil::ToUtf16(dbUrl);
-    }
-    return true;
-}
-
 static bool DownloadExceptionCase(
     MmsContext &context, std::shared_ptr<OHOS::DataShare::DataShareHelper> g_datashareHelper)
 {
@@ -486,25 +449,18 @@ void NativeDownloadMms(napi_env env, void *data)
         TELEPHONY_LOGI("down multiple mms at once wait");
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_PDN_TOGGLE_TIME));
     }
-
-    std::string dbUrl;
-    std::string storeFileName;
-    if (!StoreDownloadMmsPduToDataBase(*asyncContext, dbUrl, storeFileName)) {
-        TELEPHONY_LOGE("store mms pdu fail");
-        asyncContext->errorCode = TELEPHONY_ERR_FAIL;
-        asyncContext->resolved = false;
-        return;
-    }
+    std::u16string dbUrls;
     asyncContext->errorCode =
         DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DownloadMms(asyncContext->slotId, asyncContext->mmsc,
-            asyncContext->data, asyncContext->mmsConfig.userAgent, asyncContext->mmsConfig.userAgentProfile);
+            dbUrls, asyncContext->mmsConfig.userAgent, asyncContext->mmsConfig.userAgentProfile);
+    TELEPHONY_LOGI("NativeDownloadMms dbUrls:%{public}s", NapiUtil::ToUtf8(dbUrls).c_str());
     if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
         asyncContext->resolved = true;
         if (!STORE_MMS_PDU_TO_FILE) {
             NapiMmsPduHelper helper;
             helper.SetDataShareHelper(g_datashareHelper);
-            helper.SetDbUrl(dbUrl);
-            helper.SetStoreFileName(storeFileName);
+            helper.SetDbUrl(NapiUtil::ToUtf8(dbUrls));
+            helper.SetStoreFileName(NapiUtil::ToUtf8(asyncContext->data));
             if (!helper.Run(GetMmsPduFromDataBase, helper)) {
                 TELEPHONY_LOGE("StoreMmsPdu fail");
                 asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;

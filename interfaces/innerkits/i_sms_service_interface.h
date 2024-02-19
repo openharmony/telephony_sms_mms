@@ -379,7 +379,7 @@ public:
      * @param uaprof Indicates mms user agent profile
      * @return Returns {@code 0} if download mms success
      */
-    virtual int32_t DownloadMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
+    virtual int32_t DownloadMms(int32_t slotId, const std::u16string &mmsc, std::u16string &data,
         const std::u16string &ua, const std::u16string &uaprof) = 0;
 
 public:

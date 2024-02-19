@@ -25,12 +25,10 @@ namespace Telephony {
 const std::string SMS_PROFILE_MMS_PDU_URI = "datashare:///com.ohos.smsmmsability/sms_mms/mms_pdu";
 static constexpr const char *PDU_CONTENT = "pdu_content";
 static constexpr const char *ID = "id";
-static constexpr const char *PDU = "pdu";
 static constexpr uint8_t SLIDE_STEP = 2;
 static constexpr uint8_t HEX_VALUE_F0 = 0xF0;
 static constexpr uint8_t HEX_VALUE_0F = 0x0F;
 static constexpr uint32_t SPLIT_PDU_LENGTH = 195 * 1024;
-static constexpr uint32_t MAX_PDU_PAGES = 20;
 
 void NAPIMmsPdu::DeleteMmsPdu(NapiMmsPduHelper &pduHelper)
 {
@@ -94,12 +92,6 @@ bool NAPIMmsPdu::InsertMmsPdu(NapiMmsPduHelper &pduHelper, const std::string &mm
 std::vector<std::string> NAPIMmsPdu::SplitPdu(const std::string &mmsPdu)
 {
     std::vector<std::string> mmsPdus;
-    if (mmsPdu.compare(PDU) == 0) {
-        for (uint32_t locate = 0; locate < MAX_PDU_PAGES; locate++) {
-            mmsPdus.push_back(PDU);
-        }
-        return mmsPdus;
-    }
     std::string targetMmsPdu;
     for (size_t i = 0; i < mmsPdu.size(); i++) {
         targetMmsPdu += static_cast<char>((mmsPdu[i] & HEX_VALUE_0F) | HEX_VALUE_F0);
@@ -189,8 +181,7 @@ bool NAPIMmsPdu::QueryMmsPdu(NapiMmsPduHelper &pduHelper)
             mmsPdu += static_cast<char>(pduChar);
         }
     }
-    TELEPHONY_LOGI("urlData:%{public}s", urlData.c_str());
-    TELEPHONY_LOGI("mmsPdu size:%{public}d", static_cast<uint32_t>(mmsPdu.size()));
+    TELEPHONY_LOGI("mmsPdu size:%{public}zu, urlData:%{public}s", mmsPdu.size(), urlData.c_str());
     SetMmsPdu(mmsPdu);
     return true;
 }
