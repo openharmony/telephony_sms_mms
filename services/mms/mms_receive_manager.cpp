@@ -35,16 +35,17 @@ void MmsReceiveManager::Init()
 }
 
 int32_t MmsReceiveManager::DownloadMms(
-    const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof)
+    const std::u16string &mmsc, std::u16string &data, const std::u16string &ua, const std::u16string &uaprof)
 {
     if (mmsReceiver_ == nullptr) {
         TELEPHONY_LOGE("mmsReceiver_ is nullptr");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-
+    std::string dataPdu;
     int32_t downloadResult = mmsReceiver_->ExecuteDownloadMms(
-        StringUtils::ToUtf8(mmsc), StringUtils::ToUtf8(data), StringUtils::ToUtf8(ua), StringUtils::ToUtf8(uaprof));
+        StringUtils::ToUtf8(mmsc), dataPdu, StringUtils::ToUtf8(ua), StringUtils::ToUtf8(uaprof));
     if (downloadResult == TELEPHONY_ERR_SUCCESS) {
+        data = StringUtils::ToUtf16(dataPdu);
         TELEPHONY_LOGI("download mms successed");
         return TELEPHONY_ERR_SUCCESS;
     } else {

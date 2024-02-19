@@ -1197,28 +1197,29 @@ HWTEST_F(BranchMmsTest, MmsNetworkClient_0001, Function | MediumTest | Level1)
     AccessMmsToken token;
     MmsNetworkClient client(0);
     client.GetIfaceName();
-    client.Execute(METHOD_POST, "", TEST_DATA);
-    client.Execute(METHOD_GET, "", TEST_DATA);
+    std::string storeDirName;
+    client.Execute(METHOD_POST, "", storeDirName);
+    client.Execute(METHOD_GET, "", storeDirName);
     client.HttpRequest(METHOD_POST, "", TEST_DATA);
     client.DeleteMmsPdu("");
 
     MmsNetworkClient clientSlot1(1);
-    clientSlot1.Execute(METHOD_POST, "", TEST_DATA);
-    clientSlot1.HttpRequest(METHOD_POST, "", TEST_DATA);
+    clientSlot1.Execute(METHOD_POST, "", storeDirName);
+    clientSlot1.HttpRequest(METHOD_POST, "", storeDirName);
 
-    EXPECT_NE(client.UpdateMmsPduToStorage(""), TELEPHONY_ERR_SUCCESS);
+    EXPECT_NE(client.UpdateMmsPduToStorage(storeDirName), TELEPHONY_ERR_SUCCESS);
     client.responseData_ = TEST_DATA;
-    EXPECT_NE(client.UpdateMmsPduToStorage(""), TELEPHONY_ERR_SUCCESS);
+    EXPECT_NE(client.UpdateMmsPduToStorage(storeDirName), TELEPHONY_ERR_SUCCESS);
     client.responseData_ = "";
 
     std::string strBuf = TEST_DATA;
-    EXPECT_EQ(client.GetMmsPduFromFile("", strBuf), false);
+    EXPECT_EQ(client.GetMmsPduFromFile(storeDirName, strBuf), false);
     EXPECT_EQ(client.GetMmsPduFromFile(TEST_PATH, strBuf), false);
 
     std::unique_ptr<char[]> bufp = std::make_unique<char[]>(BUF_LEN);
-    EXPECT_EQ(client.WriteBufferToFile(nullptr, BUF_LEN, ""), false);
-    EXPECT_EQ(client.WriteBufferToFile(bufp, BUF_LEN, ""), false);
-    EXPECT_EQ(client.WriteBufferToFile(bufp, BUF_LEN, TEST_PATH), false);
+    EXPECT_EQ(client.WriteBufferToFile(nullptr, BUF_LEN, storeDirName), false);
+    EXPECT_EQ(client.WriteBufferToFile(bufp, BUF_LEN, storeDirName), false);
+    EXPECT_EQ(client.WriteBufferToFile(bufp, BUF_LEN, storeDirName), false);
 }
 
 /**
@@ -1243,7 +1244,8 @@ HWTEST_F(BranchMmsTest, MmsPersistHelper_0001, Function | MediumTest | Level1)
     persistHelper.SetMmsPdu(TEST_DATA);
     persistHelper.GetMmsPdu(TEST_PATH);
     persistHelper.DeleteMmsPdu(TEST_PATH);
-    EXPECT_FALSE(persistHelper.UpdateMmsPdu(TEST_DATA, TEST_PATH));
+    std::string dbUrl;
+    EXPECT_FALSE(persistHelper.InsertMmsPdu(TEST_DATA, dbUrl));
 }
 
 /**
@@ -1260,7 +1262,8 @@ HWTEST_F(BranchMmsTest, MmsPersistHelper_0002, Function | MediumTest | Level1)
     persistHelper.SetMmsPdu(TEST_DATA);
     persistHelper.GetMmsPdu(TEST_PATH);
     persistHelper.DeleteMmsPdu(TEST_PATH);
-    EXPECT_FALSE(persistHelper.UpdateMmsPdu(TEST_DATA, TEST_PATH));
+    std::string dbUrl;
+    EXPECT_FALSE(persistHelper.InsertMmsPdu(TEST_DATA, dbUrl));
 }
 
 /**
@@ -1275,7 +1278,7 @@ HWTEST_F(BranchMmsTest, MmsPersistHelper_0003, Function | MediumTest | Level1)
     std::string dbUrl = "1,";
     mmsPersistHelper->DeleteMmsPdu(dbUrl);
     std::string mmsPdu = "text";
-    mmsPersistHelper->UpdateMmsPdu(mmsPdu, dbUrl);
+    mmsPersistHelper->InsertMmsPdu(mmsPdu, dbUrl);
     mmsPersistHelper->GetMmsPdu(dbUrl);
     EXPECT_TRUE(mmsPersistHelper != nullptr);
 }
