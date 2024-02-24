@@ -122,6 +122,7 @@ HWTEST_F(BranchSmsTest, SmsReceiveHandler_0001, Function | MediumTest | Level1)
     smsReceiveHandler->CombineMessagePart(indexer);
 
     reliabilityHandler->CheckBlockedPhoneNumber(BLOCK_NUMBER);
+    reliabilityHandler->DeleteAutoSmsFromDB(reliabilityHandler, 0, 0);
     reliabilityHandler->SendBroadcast(indexer, pdus);
     smsReceiveHandler->HandleReceivedSms(smsBaseMessage);
     indexer = std::make_shared<SmsReceiveIndexer>();

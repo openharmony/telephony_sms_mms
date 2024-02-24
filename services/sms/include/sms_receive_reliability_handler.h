@@ -49,6 +49,8 @@ private:
     void ReadySendSmsBroadcast(SmsReceiveIndexer &indexerObj, std::shared_ptr<std::vector<std::string>> pdus);
     void PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsReceiveIndexer> indexer,
         EventFwk::CommonEventData &data, EventFwk::CommonEventPublishInfo &publishInfo);
+    void DeleteAutoSmsFromDB(
+        std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, uint16_t dataBaseId);
 
 private:
     std::unique_ptr<SmsWapPushHandler> smsWapPushHandler_;

@@ -336,7 +336,8 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     data.SetWant(want);
 
     MatchingSkills smsSkills;
-    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
+    std::string addr = indexer->GetOriginatingAddress();
+    if (CT_SMSC.compare(addr) != 0) {
         TELEPHONY_LOGI("Sms Broadcast");
         smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
     } else {
@@ -345,10 +346,19 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     }
     CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
     smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
-    auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo, shared_from_this(),
-        indexer->GetMsgRefId(), indexer->GetDataBaseId(), indexer->GetOriginatingAddress());
-    bool cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, smsReceiver);
+    bool cbResult = false;
+    if (CT_SMSC.compare(addr) != 0) {
+        auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(
+            smsSubscriberInfo, shared_from_this(), indexer->GetMsgRefId(), indexer->GetDataBaseId(), addr);
+        cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, smsReceiver);
+    } else {
+        cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
+    }
     HiSysEventCBResult(cbResult);
+    if (CT_SMSC.compare(addr) == 0) {
+        TELEPHONY_LOGI("del ct auto sms from db");
+        DeleteAutoSmsFromDB(shared_from_this(), indexer->GetMsgRefId(), indexer->GetDataBaseId());
+    }
 }
 
 void SmsReceiveReliabilityHandler::PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsReceiveIndexer> indexer,
@@ -389,6 +399,12 @@ void SmsReceiveReliabilityHandler::HiSysEventCBResult(bool publishResult)
     }
     TELEPHONY_LOGI("Send Sms Broadcast success");
     DelayedSingleton<SmsHiSysEvent>::GetInstance()->SetSmsBroadcastStartTime();
+}
+
+void SmsReceiveReliabilityHandler::DeleteAutoSmsFromDB(
+    std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, uint16_t dataBaseId)
+{
+    handler->DeleteMessageFormDb(refId, dataBaseId);
 }
 
 bool SmsReceiveReliabilityHandler::CheckBlockedPhoneNumber(std::string originatingAddress)
