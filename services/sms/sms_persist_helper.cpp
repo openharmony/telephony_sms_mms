@@ -169,7 +169,6 @@ bool SmsPersistHelper::Query(DataShare::DataSharePredicates &predicates, std::ve
     }
     resultSet->Close();
     helper->Release();
-    helper = nullptr;
     return true;
 }
 
@@ -198,7 +197,6 @@ bool SmsPersistHelper::QueryMaxGroupId(DataShare::DataSharePredicates &predicate
     }
     resultSet->Close();
     helper->Release();
-    helper = nullptr;
     return true;
 }
 
@@ -256,7 +254,6 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
     }
     resultSet->Close();
     helper->Release();
-    helper = nullptr;
     return result;
 }
 
@@ -357,7 +354,6 @@ bool SmsPersistHelper::UpdateContact(const std::string &address)
     auto updateValue = helper->Update(uri, predicates, bucket);
     TELEPHONY_LOGI("updateValue:%{public}d", updateValue);
     helper->Release();
-    helper = nullptr;
     return updateValue >= 0 ? true : false;
 }
 
@@ -395,7 +391,6 @@ bool SmsPersistHelper::QueryContactedCount(const std::string &address, int32_t &
     }
     resultSet->Close();
     helper->Release();
-    helper = nullptr;
     return result;
 }
 
@@ -443,7 +438,6 @@ bool SmsPersistHelper::QueryRawContactId(const std::string &address, int32_t &ra
     }
     resultSet->Close();
     helper->Release();
-    helper = nullptr;
     return result;
 }
 
