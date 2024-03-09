@@ -18,6 +18,7 @@
 #define private public
 #include "addsmstoken_fuzzer.h"
 #include "cdma_sms_message.h"
+#include "core_manager_inner.h"
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;
@@ -28,6 +29,9 @@ static int32_t SLOT_NUM = 2;
 bool IsServiceInited()
 {
     if (!g_isInited) {
+        CoreManagerInner::GetInstance().isInitAllObj_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->registerToService_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->WaitCoreServiceToInit();
         DelayedSingleton<SmsService>::GetInstance()->OnStart();
         if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
             static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
@@ -114,6 +118,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 
     SplitMessage(data, size);
     GetImsShortMessageFormat(data, size);
+    DelayedSingleton<SmsService>::DestroyInstance();
 }
 }  // namespace OHOS
 
