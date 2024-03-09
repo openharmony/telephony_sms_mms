@@ -17,6 +17,7 @@
 
 #define private public
 #include "addsmstoken_fuzzer.h"
+#include "core_manager_inner.h"
 #include "i_sms_service_interface.h"
 #include "sms_service.h"
 
@@ -29,6 +30,9 @@ static int32_t STATUS_COUNT = 4;
 bool IsServiceInited()
 {
     if (!g_isInited) {
+        CoreManagerInner::GetInstance().isInitAllObj_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->registerToService_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->WaitCoreServiceToInit();
         DelayedSingleton<SmsService>::GetInstance()->OnStart();
         if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
             static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
@@ -59,6 +63,37 @@ void OnRemoteRequest(const uint8_t *data, size_t size)
 
     DelayedSingleton<SmsService>::GetInstance()->OnRemoteRequest(code, dataParcel, replyParcel, option);
     return;
+}
+
+void GetAllSimMessages(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteBuffer(data, size);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetAllSimMessages(dataParcel, replyParcel, option);
+
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr");
+        return;
+    }
+    std::vector<ShortMessage> message;
+    interfaceManager->GetAllSimMessages(message);
+
+    std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(slotId);
+    if (smsMiscManager == nullptr) {
+        TELEPHONY_LOGE("smsMiscManager nullptr");
+        return;
+    }
+    smsMiscManager->GetAllSimMessages(message);
 }
 
 void AddSimMessage(const uint8_t *data, size_t size)
@@ -100,6 +135,37 @@ void AddSimMessage(const uint8_t *data, size_t size)
     smsMiscManager->AddSimMessage(smsc, pdu, status);
 }
 
+void DelSimMessage(const uint8_t *data, size_t size)
+{
+    if (!IsServiceInited()) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    uint32_t index = static_cast<uint32_t>(size);
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteUint32(index);
+    dataParcel.RewindRead(0);
+    DelayedSingleton<SmsService>::GetInstance()->OnDelSimMessage(dataParcel, replyParcel, option);
+
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr");
+        return;
+    }
+    interfaceManager->DelSimMessage(index);
+
+    std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(slotId);
+    if (smsMiscManager == nullptr) {
+        TELEPHONY_LOGE("smsMiscManager nullptr");
+        return;
+    }
+    smsMiscManager->DelSimMessage(index);
+}
+
 void HasSmsCapability(const uint8_t *data, size_t size)
 {
     if (!IsServiceInited()) {
@@ -130,8 +196,11 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     }
 
     OnRemoteRequest(data, size);
+    GetAllSimMessages(data, size);
     AddSimMessage(data, size);
+    DelSimMessage(data, size);
     HasSmsCapability(data, size);
+    DelayedSingleton<SmsService>::DestroyInstance();
 }
 } // namespace OHOS
 
