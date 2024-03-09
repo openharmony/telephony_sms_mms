@@ -175,6 +175,39 @@ void SendSmsTest(const uint8_t *data, size_t size)
     sender->SetPduInfo(smsIndexer, msg, isMore);
 }
 
+void SendSmsTest2(const uint8_t *data, size_t size)
+{
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    auto sender = std::make_shared<GsmSmsSender>(slotId, fun);
+    sender->Init();
+    sender->RegisterSatelliteCallback();
+    sender->UnregisterSatelliteCallback();
+    std::string desAddr(reinterpret_cast<const char *>(data), size);
+    std::string scAddr(reinterpret_cast<const char *>(data), size);
+    std::string text(reinterpret_cast<const char *>(data), size);
+    const sptr<ISendShortMessageCallback> sendCallback =
+        iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
+    const sptr<IDeliveryShortMessageCallback> deliveryCallback =
+        iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+    GsmSimMessageParam smsData;
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    smsData.refId = static_cast<int64_t>(size);
+    smsData.smscPdu = pdu;
+    smsData.pdu = pdu;
+    std::shared_ptr<SmsSendIndexer> smsIndexer =
+        std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    sender->SendCsSms(smsIndexer, smsData);
+    sender->SendSatelliteSms(smsIndexer, smsData);
+    sender->SendImsSms(smsIndexer, smsData);
+    bool isSupported;
+    sender->IsImsSmsSupported(slotId, isSupported);
+    InnerEvent::Pointer event = InnerEvent::Get(static_cast<int32_t>(size));
+    sender->StatusReportAnalysis(event);
+    event = InnerEvent::Get(static_cast<int32_t>(size));
+    sender->StatusReportGetImsSms(event);
+}
+
 void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size == 0) {
@@ -185,6 +218,9 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     AddSimMessage(data, size);
     HasSmsCapability(data, size);
     SendSmsTest(data, size);
+    SendSmsTest2(data, size);
+    DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
+    DelayedSingleton<ImsSmsClient>::DestroyInstance();
 }
 } // namespace OHOS
 
