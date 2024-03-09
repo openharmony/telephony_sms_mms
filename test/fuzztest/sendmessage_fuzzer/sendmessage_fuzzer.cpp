@@ -18,6 +18,7 @@
 #define private public
 
 #include "addsmstoken_fuzzer.h"
+#include "core_manager_inner.h"
 #include "delivery_short_message_callback_stub.h"
 #include "send_short_message_callback_stub.h"
 #include "sms_service.h"
@@ -26,10 +27,14 @@ using namespace OHOS::Telephony;
 namespace OHOS {
 static bool g_isInited = false;
 constexpr int32_t SLOT_NUM = 2;
+constexpr int32_t SLEEP_TIME_SECONDS = 2;
 
 bool IsServiceInited()
 {
     if (!g_isInited) {
+        CoreManagerInner::GetInstance().isInitAllObj_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->registerToService_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->WaitCoreServiceToInit();
         DelayedSingleton<SmsService>::GetInstance()->OnStart();
         if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
             static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
@@ -50,11 +55,9 @@ void SendSmsTextRequest(const uint8_t *data, size_t size)
     MessageOption option(MessageOption::TF_SYNC);
 
     int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
-    std::string desAddr(reinterpret_cast<const char *>(data), size);
-    std::string scAddr(reinterpret_cast<const char *>(data), size);
     std::string text(reinterpret_cast<const char *>(data), size);
-    auto desAddrU16 = Str8ToStr16(desAddr);
-    auto scAddrU16 = Str8ToStr16(scAddr);
+    auto desAddrU16 = Str8ToStr16("123456");
+    auto scAddrU16 = Str8ToStr16("123456");
     auto textU16 = Str8ToStr16(text);
 
     std::unique_ptr<SendShortMessageCallbackStub> sendCallback = std::make_unique<SendShortMessageCallbackStub>();
@@ -148,6 +151,10 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     SendSmsTextRequest(data, size);
     GetDefaultSmsSlotId(data, size);
     SmsServiceInterfaceTest(data, size);
+    DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
+    DelayedSingleton<ImsSmsClient>::DestroyInstance();
+    sleep(SLEEP_TIME_SECONDS);
+    DelayedSingleton<SmsService>::DestroyInstance();
 }
 } // namespace OHOS
 

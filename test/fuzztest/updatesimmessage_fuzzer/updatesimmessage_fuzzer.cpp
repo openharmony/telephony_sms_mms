@@ -17,6 +17,7 @@
 
 #define private public
 #include "addsmstoken_fuzzer.h"
+#include "core_manager_inner.h"
 #include "i_sms_service_interface.h"
 #include "sms_service.h"
 
@@ -29,6 +30,9 @@ constexpr int32_t SIM_MESSAGE_STATUE = 4;
 bool IsServiceInited()
 {
     if (!g_isInited) {
+        CoreManagerInner::GetInstance().isInitAllObj_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->registerToService_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->WaitCoreServiceToInit();
         DelayedSingleton<SmsService>::GetInstance()->OnStart();
         if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
             static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
@@ -87,6 +91,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     }
 
     UpdateSimMessage(data, size);
+    DelayedSingleton<SmsService>::DestroyInstance();
 }
 }  // namespace OHOS
 

@@ -18,6 +18,7 @@
 #define private public
 
 #include "addsmstoken_fuzzer.h"
+#include "core_manager_inner.h"
 #include "gsm_cb_gsm_codec.h"
 #include "gsm_cb_umts_codec.h"
 #include "sms_service.h"
@@ -29,10 +30,14 @@ static bool g_isInited = false;
 static int32_t SIM_COUNT = 2;
 static int32_t CB_CHANNEL_DIVISOR = 2;
 static int32_t NET_COUNT = 3;
+constexpr int32_t SLEEP_TIME_SECONDS = 3;
 
 bool IsServiceInited()
 {
     if (!g_isInited) {
+        CoreManagerInner::GetInstance().isInitAllObj_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->registerToService_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->WaitCoreServiceToInit();
         DelayedSingleton<SmsService>::GetInstance()->OnStart();
         if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
             static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
@@ -118,11 +123,26 @@ void SetImsSmsConfigFuzz(const uint8_t *data, size_t size)
 void UpdataCBMessage(const uint8_t *data, size_t size)
 {
     std::string pdu(reinterpret_cast<const char *>(data), size);
-    auto cbMessage = GsmCbCodec::CreateCbMessage(pdu);
+    std::string gsmData("C00000324811006800610072006D006F006E00790020006F00730020005500"
+                        "630073003200200065006E0063006F0064006500200064006100740061");
+    auto cbMessage = GsmCbCodec::CreateCbMessage(gsmData);
     if (cbMessage == nullptr) {
         return;
     }
     cbMessage->GetCbHeader();
+    cbMessage->PduAnalysis(StringUtils::HexToByteVector(pdu));
+    std::string umtsData("01a41f51101102ea3030a830ea30a230e130fc30eb914d4fe130c630b930c8000"
+                         "d000a3053308c306f8a669a137528306e30e130c330bb30fc30b8306730593002"
+                         "000d000aff080032003000310033002f00310031002f003252ea3000370020003"
+                         "10035003a00340034ff09000d000aff0830a830ea30a25e02ff09000000000000"
+                         "00000000000000000000000000000000000000000000000000000000000000000"
+                         "000000000000000000022");
+    auto umtsCbMessage = GsmCbCodec::CreateCbMessage(umtsData);
+    if (umtsCbMessage == nullptr) {
+        return;
+    }
+    umtsCbMessage->GetCbHeader();
+    umtsCbMessage->PduAnalysis(StringUtils::HexToByteVector(pdu));
     auto cbMessageByVectorInit = GsmCbCodec::CreateCbMessage(StringUtils::HexToByteVector(pdu));
     if (cbMessageByVectorInit == nullptr) {
         return;
@@ -130,10 +150,9 @@ void UpdataCBMessage(const uint8_t *data, size_t size)
     cbMessageByVectorInit->GetCbMessageRaw();
     cbMessageByVectorInit->IsSinglePageMsg();
 
-    cbMessage->PduAnalysis(StringUtils::HexToByteVector(pdu));
-
     auto gsmCodec = std::make_shared<GsmCbGsmCodec>(cbMessage->cbHeader_, cbMessage->cbPduBuffer_, cbMessage);
-    auto umtsCodec = std::make_shared<GsmCbUmtsCodec>(cbMessage->cbHeader_, cbMessage->cbPduBuffer_, cbMessage);
+    auto umtsCodec =
+        std::make_shared<GsmCbUmtsCodec>(umtsCbMessage->cbHeader_, umtsCbMessage->cbPduBuffer_, umtsCbMessage);
     if (gsmCodec == nullptr || umtsCodec == nullptr) {
         return;
     }
@@ -159,6 +178,8 @@ void DoCBConfigWithMyAPI(const uint8_t *data, size_t size)
     SetCBConfigFuzz(data, size);
     SetImsSmsConfigFuzz(data, size);
     UpdataCBMessage(data, size);
+    DelayedSingleton<SmsService>::DestroyInstance();
+    sleep(SLEEP_TIME_SECONDS);
 }
 } // namespace OHOS
 
