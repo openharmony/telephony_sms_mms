@@ -101,7 +101,7 @@ static constexpr uint8_t HEX_VALUE_0F = 0x0F;
 static constexpr uint8_t HEX_VALUE_F0 = 0xF0;
 static constexpr uint32_t SPLIT_PDU_LENGTH = 195 * 1024;
 static constexpr const char *PDU_CONTENT = "pdu_content";
-const std::string PDP_PROFILE_NET_URI = "datashare:///com.ohos.pdpprofileability/net/pdp_profile";
+const std::string PDP_PROFILE_NET_URI = "datashare:///com.ohos.pdpprofileability/net/pdp_profile?simId=";
 const std::string MMS_APN_TYPE = "mms";
 const std::string ALL_APN_TYPE = "*";
 const std::string MMS_FILE_ADDRESS = "/data/app/test.mms";
@@ -365,7 +365,8 @@ std::string GetFileToDb()
 
 std::string GetMmsc(int32_t slotId)
 {
-    Uri pdpUri(PDP_PROFILE_NET_URI);
+    int32_t simId = CoreManagerInner::GetInstance().GetSimId(slotId);
+    Uri pdpUri(static_cast<std::string>(PDP_PROFILE_NET_URI) + std::to_string(simId));
     std::vector<std::string> colume;
     DataShare::DataSharePredicates predicates;
     std::u16string operatorNumeric;
