@@ -90,6 +90,7 @@ sptr<ISmsServiceInterface> CbGtest::GetProxy()
 #ifndef TEL_TEST_UNSUPPORT
 void OpenCellBroadcastTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool enable = true;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
@@ -107,7 +108,6 @@ void OpenCellBroadcastTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_0001, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -126,6 +126,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0001, Function | MediumTest | Level3)
 
 void OpenCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool enable = true;
     uint32_t fromMsgId = 20;
     uint32_t toMsgId = 10;
@@ -143,7 +144,6 @@ void OpenCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_0002, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -162,6 +162,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0002, Function | MediumTest | Level3)
 
 void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool enable = true;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
@@ -179,7 +180,6 @@ void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -198,6 +198,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
 
 void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool enable = true;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
@@ -215,7 +216,6 @@ void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -234,6 +234,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
 
 void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool enable = true;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 1000;
@@ -251,7 +252,6 @@ void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -280,6 +280,12 @@ void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
     helper.NotifyAll();
 }
 
+void OpenCellBroadcastTestFuc6WithToken(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    OpenCellBroadcastTestFuc6(helper);
+}
+
 /**
  * @tc.number   Telephony_SmsMmsGtest_OpenCellBroadcast_0006
  * @tc.name     Open cellBroadcast parameter is valid
@@ -287,7 +293,6 @@ void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -296,8 +301,8 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
-    if (!helper.Run(OpenCellBroadcastTestFuc6, std::ref(helper))) {
-        TELEPHONY_LOGI("OpenCellBroadcastTestFuc6 out of time");
+    if (!helper.Run(OpenCellBroadcastTestFuc6WithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("OpenCellBroadcastTestFuc6WithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->finished");
@@ -311,7 +316,6 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_0007, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -335,7 +339,6 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0007, Function | MediumTest | Level3)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0008 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -359,7 +362,6 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -383,7 +385,6 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -407,7 +408,6 @@ HWTEST_F(CbGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
  */
 HWTEST_F(CbGtest, OpenCellBroadcast_0011, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -416,8 +416,8 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0011, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!helper.Run(OpenCellBroadcastTestFuc6, std::ref(helper))) {
-        TELEPHONY_LOGI("OpenCellBroadcastTestFuc6 out of time");
+    if (!helper.Run(OpenCellBroadcastTestFuc6WithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("OpenCellBroadcastTestFuc6WithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->finished");
@@ -449,6 +449,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0012, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool enable = false;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
@@ -466,7 +467,6 @@ void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_0001, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -485,6 +485,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0001, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool enable = false;
     uint32_t fromMsgId = 20;
     uint32_t toMsgId = 10;
@@ -502,7 +503,6 @@ void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_0002, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -521,6 +521,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0002, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool enable = false;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
@@ -538,7 +539,6 @@ void CloseCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -557,6 +557,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool enable = false;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
@@ -574,7 +575,6 @@ void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -593,6 +593,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
 
 void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool enable = false;
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 1000;
@@ -610,7 +611,6 @@ void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -639,6 +639,12 @@ void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
     helper.NotifyAll();
 }
 
+void CloseCellBroadcastTestFuc6WithToken(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    CloseCellBroadcastTestFuc6(helper);
+}
+
 /**
  * @tc.number   Telephony_SmsMmsGtest_CloseCellBroadcast_0006
  * @tc.name     Close cellBroadcast parameter is valid
@@ -646,7 +652,6 @@ void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -655,8 +660,8 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
-    if (!helper.Run(CloseCellBroadcastTestFuc6, std::ref(helper))) {
-        TELEPHONY_LOGI("CloseCellBroadcastTestFuc6 out of time");
+    if (!helper.Run(CloseCellBroadcastTestFuc6WithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("CloseCellBroadcastTestFuc6WithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->finished");
@@ -670,7 +675,6 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_0007, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -694,7 +698,6 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0007, Function | MediumTest | Level3)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0008 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -718,7 +721,6 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -742,7 +744,6 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -766,7 +767,6 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
  */
 HWTEST_F(CbGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -775,8 +775,8 @@ HWTEST_F(CbGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!helper.Run(CloseCellBroadcastTestFuc6, std::ref(helper))) {
-        TELEPHONY_LOGI("CloseCellBroadcastTestFuc11 out of time");
+    if (!helper.Run(CloseCellBroadcastTestFuc6WithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("CloseCellBroadcastTestFuc6WithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->finished");
@@ -799,7 +799,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0012, Function | MediumTest | Level3)
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc6, std::ref(helper))) {
-        TELEPHONY_LOGI("CloseCellBroadcastTestFuc12 out of time");
+        TELEPHONY_LOGI("CloseCellBroadcastTestFuc6 out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0012 -->finished");
@@ -808,6 +808,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0012, Function | MediumTest | Level3)
 
 void ReceiveCellBroadCastTestFunc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(helper.slotId);
     auto message = std::make_shared<CBConfigReportInfo>();
     message->indicationType = MESSAGE_TYPE;
@@ -828,6 +829,7 @@ void ReceiveCellBroadCastTestFunc(SmsMmsTestHelper &helper)
 
 void ReceiveCellBroadCastTestFunc2(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     auto gsmSmsCbHandler = std::make_shared<GsmSmsCbHandler>(helper.slotId);
     auto message = std::make_shared<CBConfigReportInfo>();
     message->indicationType = MESSAGE_TYPE;
@@ -850,7 +852,6 @@ void ReceiveCellBroadCastTestFunc2(SmsMmsTestHelper &helper)
  */
 HWTEST_F(CbGtest, Receive_Cell_BroadCast_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0001 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(CbGtest::HasSimCard(slotId))) {
@@ -890,7 +891,6 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(CbGtest, Receive_Cell_BroadCast_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0002 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(CbGtest::HasSimCard(slotId))) {
@@ -930,7 +930,6 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0002, Function | MediumTest | Level2)
  */
 HWTEST_F(CbGtest, Receive_Cell_BroadCast_0003, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0003 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!(CbGtest::HasSimCard(slotId))) {
@@ -970,7 +969,6 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0003, Function | MediumTest | Level2)
  */
 HWTEST_F(CbGtest, Receive_Cell_BroadCast_0004, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0004 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!(CbGtest::HasSimCard(slotId))) {

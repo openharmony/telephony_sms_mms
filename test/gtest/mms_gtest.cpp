@@ -135,6 +135,7 @@ sptr<ISmsServiceInterface> MmsGtest::GetProxy()
 #ifndef TEL_TEST_UNSUPPORT
 void ReceiveWapPushTestFunc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     auto smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(helper.slotId);
     auto message = std::make_shared<SmsMessageInfo>();
     message->indicationType = MESSAGE_TYPE;
@@ -409,7 +410,6 @@ std::string GetMmsc(int32_t slotId)
  */
 HWTEST_F(MmsGtest, Receive_Wap_Push_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0001 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(MmsGtest::HasSimCard(slotId))) {
@@ -448,7 +448,6 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(MmsGtest, Receive_Wap_Push_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0002 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!(MmsGtest::HasSimCard(slotId))) {
