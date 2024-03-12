@@ -366,7 +366,7 @@ std::string GetFileToDb()
 std::string GetMmsc(int32_t slotId)
 {
     int32_t simId = CoreManagerInner::GetInstance().GetSimId(slotId);
-    Uri pdpUri(static_cast<std::string>(PDP_PROFILE_NET_URI) + std::to_string(simId));
+    Uri pdpUri(PDP_PROFILE_NET_URI + std::to_string(simId));
     std::vector<std::string> colume;
     DataShare::DataSharePredicates predicates;
     std::u16string operatorNumeric;
