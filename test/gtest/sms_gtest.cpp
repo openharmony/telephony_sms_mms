@@ -123,6 +123,12 @@ void SetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
     helper.NotifyAll();
 }
 
+void SetDefaultSmsSlotIdTestFucWithToken(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    SetDefaultSmsSlotIdTestFuc(helper);
+}
+
 /**
  * @tc.number   Telephony_SmsMmsGtest_SetDefaultSmsSlotId_0001
  * @tc.name     Set Default Sms SlotId slotId is valid
@@ -130,7 +136,6 @@ void SetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -139,8 +144,8 @@ HWTEST_F(SmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
-    if (!helper.Run(SetDefaultSmsSlotIdTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("SetDefaultSmsSlotIdTestFuc out of time");
+    if (!helper.Run(SetDefaultSmsSlotIdTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("SetDefaultSmsSlotIdTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0001 -->finished");
@@ -154,7 +159,6 @@ HWTEST_F(SmsGtest, SetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -163,8 +167,8 @@ HWTEST_F(SmsGtest, SetDefaultSmsSlotId_0002, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!helper.Run(SetDefaultSmsSlotIdTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("SetDefaultSmsSlotIdTestFuc2 out of time");
+    if (!helper.Run(SetDefaultSmsSlotIdTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("SetDefaultSmsSlotIdTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetDefaultSmsSlotId_0002 -->finished");
@@ -285,6 +289,12 @@ void SetSmscAddrTestFuc(SmsMmsTestHelper &helper)
     helper.NotifyAll();
 }
 
+void SetSmscAddrTestFucWithToken(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    SetSmscAddrTestFuc(helper);
+}
+
 /**
  * @tc.number   Telephony_SmsMmsGtest_SetSmscAddr_0001
  * @tc.name     Set smsc addr slotId is invalid
@@ -293,7 +303,6 @@ void SetSmscAddrTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, SetSmscAddr_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -302,8 +311,8 @@ HWTEST_F(SmsGtest, SetSmscAddr_0001, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_REMOVE;
-    if (!helper.Run(SetSmscAddrTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("SetSmscAddrTestFuc out of time");
+    if (!helper.Run(SetSmscAddrTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("SetSmscAddrTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetSmscAddr_0001 -->finished");
@@ -336,6 +345,7 @@ HWTEST_F(SmsGtest, SetSmscAddr_0002, Function | MediumTest | Level2)
 
 void DelAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     std::vector<ShortMessage> message;
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetAllSimMessages(helper.slotId, message);
     for (auto msg : message) {
@@ -353,7 +363,6 @@ void DelAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, DelAllSimMessages_0001, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::DelAllSimMessages_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -377,7 +386,6 @@ HWTEST_F(SmsGtest, DelAllSimMessages_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsGtest, DelAllSimMessages_0002, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::DelAllSimMessages_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -405,6 +413,12 @@ void AddSimMessageTestFuc(SmsMmsTestHelper &helper)
     helper.NotifyAll();
 }
 
+void AddSimMessageTestFucWithToken(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    AddSimMessageTestFuc(helper);
+}
+
 /**
  * @tc.number   Telephony_SmsMmsGtest_AddSimMessage_0001
  * @tc.name     Add Sim Message
@@ -412,7 +426,6 @@ void AddSimMessageTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -422,8 +435,8 @@ HWTEST_F(SmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
 
-    if (!helper.Run(AddSimMessageTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("AddSimMessageTestFuc out of time");
+    if (!helper.Run(AddSimMessageTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("AddSimMessageTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0001 -->finished");
@@ -437,7 +450,6 @@ HWTEST_F(SmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -447,8 +459,8 @@ HWTEST_F(SmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
 
-    if (!helper.Run(AddSimMessageTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("AddSimMessageTestFuc2 out of time");
+    if (!helper.Run(AddSimMessageTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("AddSimMessageTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0002 -->finished");
@@ -488,6 +500,12 @@ void GetAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
     helper.NotifyAll();
 }
 
+void GetAllSimMessagesTestFucWithToken(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    GetAllSimMessagesTestFuc(helper);
+}
+
 /**
  * @tc.number   Telephony_SmsMmsGtest_GetAllSimMessages_0001
  * @tc.name     Get All Sim Messages
@@ -495,7 +513,6 @@ void GetAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -504,8 +521,8 @@ HWTEST_F(SmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
-    if (!helper.Run(GetAllSimMessagesTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("GetAllSimMessagesTestFuc out of time");
+    if (!helper.Run(GetAllSimMessagesTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("GetAllSimMessagesTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0001 -->finished");
@@ -519,7 +536,6 @@ HWTEST_F(SmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsGtest, GetAllSimMessages_0002, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -528,8 +544,8 @@ HWTEST_F(SmsGtest, GetAllSimMessages_0002, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!helper.Run(GetAllSimMessagesTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("GetAllSimMessagesTestFuc2 out of time");
+    if (!helper.Run(GetAllSimMessagesTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("GetAllSimMessagesTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0002 -->finished");
@@ -572,6 +588,12 @@ void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
     helper.NotifyAll();
 }
 
+void UpdateSimMessageTestFucWithToken(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    UpdateSimMessageTestFuc(helper);
+}
+
 /**
  * @tc.number   Telephony_SmsMmsGtest_UpdateSimMessage_0001
  * @tc.name     Update Sim Message
@@ -579,7 +601,6 @@ void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -588,8 +609,8 @@ HWTEST_F(SmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
-    if (!helper.Run(UpdateSimMessageTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("UpdateSimMessageTestFuc out of time");
+    if (!helper.Run(UpdateSimMessageTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("UpdateSimMessageTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->finished");
@@ -604,7 +625,6 @@ HWTEST_F(SmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -613,8 +633,8 @@ HWTEST_F(SmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!helper.Run(UpdateSimMessageTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("UpdateSimMessageTestFuc2 out of time");
+    if (!helper.Run(UpdateSimMessageTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("UpdateSimMessageTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->finished");
@@ -652,6 +672,12 @@ void DelSimMessageTestFuc(SmsMmsTestHelper &helper)
     helper.NotifyAll();
 }
 
+void DelSimMessageTestFucWithToken(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    DelSimMessageTestFuc(helper);
+}
+
 /**
  * @tc.number   Telephony_SmsMmsGtest_DelSimMessage_0001
  * @tc.name     Del Sim Message
@@ -659,7 +685,6 @@ void DelSimMessageTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -668,8 +693,8 @@ HWTEST_F(SmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
-    if (!helper.Run(DelSimMessageTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("DelSimMessageTestFuc out of time");
+    if (!helper.Run(DelSimMessageTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("DelSimMessageTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0001 -->finished");
@@ -683,7 +708,6 @@ HWTEST_F(SmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
  */
 HWTEST_F(SmsGtest, DelSimMessage_0002, Function | MediumTest | Level3)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -692,8 +716,8 @@ HWTEST_F(SmsGtest, DelSimMessage_0002, Function | MediumTest | Level3)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!helper.Run(DelSimMessageTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("DelSimMessageTestFuc2 out of time");
+    if (!helper.Run(DelSimMessageTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("DelSimMessageTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0002 -->finished");
@@ -732,6 +756,12 @@ void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
     helper.NotifyAll();
 }
 
+void SetImsSmsConfigTestFucWithToken(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    SetImsSmsConfigTestFuc(helper);
+}
+
 /**
  * @tc.number   Telephony_SmsMmsGtest_SetImsSmsConfig_0001
  * @tc.name     Enable IMS SMS
@@ -740,7 +770,6 @@ void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -749,8 +778,8 @@ HWTEST_F(SmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
-    if (!helper.Run(SetImsSmsConfigTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("SetImsSmsConfigTestFuc out of time");
+    if (!helper.Run(SetImsSmsConfigTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("SetImsSmsConfigTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0001 -->finished");
@@ -759,6 +788,7 @@ HWTEST_F(SmsGtest, SetImsSmsConfig_0001, Function | MediumTest | Level2)
 
 void SetImsSmsConfigTestFuc2(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     bool isSupported = false;
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetImsSmsConfig(helper.slotId, 0);
     DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId, isSupported);
@@ -774,7 +804,6 @@ void SetImsSmsConfigTestFuc2(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -799,7 +828,6 @@ HWTEST_F(SmsGtest, SetImsSmsConfig_0002, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, SetImsSmsConfig_0003, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0003 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -808,8 +836,8 @@ HWTEST_F(SmsGtest, SetImsSmsConfig_0003, Function | MediumTest | Level2)
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!helper.Run(SetImsSmsConfigTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("SetImsSmsConfigTestFuc3 out of time");
+    if (!helper.Run(SetImsSmsConfigTestFucWithToken, std::ref(helper))) {
+        TELEPHONY_LOGI("SetImsSmsConfigTestFucWithToken out of time");
         ASSERT_TRUE(false);
     }
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0003 -->finished");
@@ -823,7 +851,6 @@ HWTEST_F(SmsGtest, SetImsSmsConfig_0003, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, SetImsSmsConfig_0004, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SetImsSmsConfig_0004 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -866,6 +893,7 @@ HWTEST_F(SmsGtest, SetImsSmsConfig_0005, Function | MediumTest | Level2)
 
 void SendDataMessageTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     std::string dest = DES_ADDR;
     std::u16string simcardNumber;
     if (!CoreServiceClient::GetInstance().GetSimTelephoneNumber(helper.slotId, simcardNumber) &&
@@ -927,7 +955,6 @@ void SendDataMessageTestFuc2(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, SendDataMessage_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0001 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(SmsGtest::HasSimCard(slotId))) {
@@ -951,7 +978,6 @@ HWTEST_F(SmsGtest, SendDataMessage_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, SendDataMessage_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SendDataMessage_0002 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!(SmsGtest::HasSimCard(slotId))) {
@@ -995,6 +1021,7 @@ HWTEST_F(SmsGtest, SendDataMessage_0003, Function | MediumTest | Level2)
 
 void SendTextMessageTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     std::string dest = DES_ADDR;
     std::u16string simcardNumber;
     if (!CoreServiceClient::GetInstance().GetSimTelephoneNumber(helper.slotId, simcardNumber) &&
@@ -1058,7 +1085,6 @@ void SendTextMessageTestFuc2(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, SendTextMessage_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0001 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(SmsGtest::HasSimCard(slotId))) {
@@ -1082,7 +1108,6 @@ HWTEST_F(SmsGtest, SendTextMessage_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, SendTextMessage_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::SendTextMessage_0002 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!(SmsGtest::HasSimCard(slotId))) {
@@ -1126,6 +1151,7 @@ HWTEST_F(SmsGtest, SendTextMessage_0003, Function | MediumTest | Level2)
 
 void ReceiveSmsTestFunc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     auto smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(helper.slotId);
     auto message = std::make_shared<SmsMessageInfo>();
     message->indicationType = MESSAGE_TYPE;
@@ -1144,7 +1170,6 @@ void ReceiveSmsTestFunc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, Receive_SMS_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_SMS_0001 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(SmsGtest::HasSimCard(slotId))) {
@@ -1183,7 +1208,6 @@ HWTEST_F(SmsGtest, Receive_SMS_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, Receive_SMS_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_SMS_0002 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!(SmsGtest::HasSimCard(slotId))) {
@@ -1315,6 +1339,7 @@ HWTEST_F(SmsGtest, GetSmsSegmentsInfo_0003, Function | MediumTest | Level2)
 
 void Create7bitSubmitSmsTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector("21010B818176251308F4000002C130");
     ShortMessage *message = new ShortMessage();
     if (message == nullptr) {
@@ -1334,7 +1359,6 @@ void Create7bitSubmitSmsTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, Create7bitSubmitSms_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Create7bitSubmitSms_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1359,7 +1383,6 @@ HWTEST_F(SmsGtest, Create7bitSubmitSms_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, Create7bitSubmitSms_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Create7bitSubmitSms_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1379,6 +1402,7 @@ HWTEST_F(SmsGtest, Create7bitSubmitSms_0002, Function | MediumTest | Level2)
 
 void CreateUcs2SubmitSmsTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector("21020B818176251308F40008046D4B8BD5");
     ShortMessage *message = new ShortMessage();
     if (message == nullptr) {
@@ -1398,7 +1422,6 @@ void CreateUcs2SubmitSmsTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, CreateUcs2SubmitSms_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CreateUcs2SubmitSms_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1423,7 +1446,6 @@ HWTEST_F(SmsGtest, CreateUcs2SubmitSms_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, CreateUcs2SubmitSms_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CreateUcs2SubmitSms_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1443,6 +1465,7 @@ HWTEST_F(SmsGtest, CreateUcs2SubmitSms_0002, Function | MediumTest | Level2)
 
 void Create7bitDeliverySmsTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     std::vector<unsigned char> pdu =
         StringUtils::HexToByteVector("0891683108200075F4240D91688129562983F600001240800102142302C130");
     ShortMessage *message = new ShortMessage();
@@ -1463,7 +1486,6 @@ void Create7bitDeliverySmsTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, Create7bitDeliverySms_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Create7bitDeliverySms_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1488,7 +1510,6 @@ HWTEST_F(SmsGtest, Create7bitDeliverySms_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, Create7bitDeliverySms_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::Create7bitDeliverySms_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1508,6 +1529,7 @@ HWTEST_F(SmsGtest, Create7bitDeliverySms_0002, Function | MediumTest | Level2)
 
 void CreateUcs2DeliverySmsTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     std::vector<unsigned char> pdu =
         StringUtils::HexToByteVector("0891683110206005F0240DA1688176251308F4000832500381459323044F60597D");
     ShortMessage *message = new ShortMessage();
@@ -1528,7 +1550,6 @@ void CreateUcs2DeliverySmsTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, CreateUcs2DeliverySms_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CreateUcs2DeliverySms_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1553,7 +1574,6 @@ HWTEST_F(SmsGtest, CreateUcs2DeliverySms_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, CreateUcs2DeliverySms_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CreateUcs2DeliverySms_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1573,6 +1593,7 @@ HWTEST_F(SmsGtest, CreateUcs2DeliverySms_0002, Function | MediumTest | Level2)
 
 void CreateStatusReportSmsTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     std::vector<unsigned char> pdu =
         StringUtils::HexToByteVector("0891683110808805F006510B818176251308F4325013113382233250131143802300");
     ShortMessage *message = new ShortMessage();
@@ -1593,7 +1614,6 @@ void CreateStatusReportSmsTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, CreateStatusReportSms_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CreateStatusReportSms_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1618,7 +1638,6 @@ HWTEST_F(SmsGtest, CreateStatusReportSms_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, CreateStatusReportSms_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CreateStatusReportSms_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1638,6 +1657,7 @@ HWTEST_F(SmsGtest, CreateStatusReportSms_0002, Function | MediumTest | Level2)
 
 void CreateMultiPageSmsTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector(
         "0891683110205005F06005A00110F00008325052214182238C050003D3030200310030002E0063006E002F007100410053004B00380020"
         "FF0C4EE5514D6B216708521D6263966476F851738D397528540E5F7154CD60A876846B635E384F7F752830024E2D56FD8054901A004100"
@@ -1662,7 +1682,6 @@ void CreateMultiPageSmsTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, CreateMultiPageSms_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CreateMultiPageSms_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1687,7 +1706,6 @@ HWTEST_F(SmsGtest, CreateMultiPageSms_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, CreateMultiPageSms_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CreateMultiPageSms_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1707,6 +1725,7 @@ HWTEST_F(SmsGtest, CreateMultiPageSms_0002, Function | MediumTest | Level2)
 
 void CreateWapPushSmsTestFuc(SmsMmsTestHelper &helper)
 {
+    AccessMmsToken token;
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector("21010B818176251308F4000002C130");
     ShortMessage *message = new ShortMessage();
     if (message == nullptr) {
@@ -1726,7 +1745,6 @@ void CreateWapPushSmsTestFuc(SmsMmsTestHelper &helper)
  */
 HWTEST_F(SmsGtest, CreateWapPushSms_0001, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CreateWapPushSms_0001 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
@@ -1751,7 +1769,6 @@ HWTEST_F(SmsGtest, CreateWapPushSms_0001, Function | MediumTest | Level2)
  */
 HWTEST_F(SmsGtest, CreateWapPushSms_0002, Function | MediumTest | Level2)
 {
-    AccessMmsToken token;
     TELEPHONY_LOGI("TelSMSMMSTest::CreateWapPushSms_0002 -->");
     if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
