@@ -17,6 +17,7 @@
 
 #define private public
 #include "addsmstoken_fuzzer.h"
+#include "core_manager_inner.h"
 #include "i_sms_service_interface.h"
 #include "sms_service.h"
 
@@ -26,10 +27,14 @@ static bool g_isInited = false;
 static constexpr int32_t UINT8_COUNT = 256;
 static constexpr int32_t CODE_SCHEME_SIZE = 6;
 static constexpr int32_t TIME_FORMAT_SIZE = 3;
+constexpr int32_t SLEEP_TIME_SECONDS = 1;
 
 bool IsServiceInited()
 {
     if (!g_isInited) {
+        CoreManagerInner::GetInstance().isInitAllObj_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->registerToService_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->WaitCoreServiceToInit();
         DelayedSingleton<SmsService>::GetInstance()->OnStart();
         if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
             static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
@@ -261,6 +266,8 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 
     EncodePduItemsTest(data, size);
     DecodePduItemsTest(data, size);
+    sleep(SLEEP_TIME_SECONDS);
+    DelayedSingleton<SmsService>::DestroyInstance();
 }
 } // namespace OHOS
 
