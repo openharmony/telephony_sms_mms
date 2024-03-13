@@ -19,6 +19,7 @@
 #define protected public
 
 #include "addsmstoken_fuzzer.h"
+#include "core_manager_inner.h"
 #include "delivery_short_message_callback_stub.h"
 #include "i_sms_service_interface.h"
 #include "send_short_message_callback_stub.h"
@@ -30,10 +31,14 @@ static bool g_isInited = false;
 constexpr int32_t SLOT_NUM = 2;
 static int32_t STATUS_COUNT = 4;
 constexpr int32_t TYPE_NUM = 6;
+constexpr int32_t SLEEP_TIME_SECONDS = 2;
 
 bool IsServiceInited()
 {
     if (!g_isInited) {
+        CoreManagerInner::GetInstance().isInitAllObj_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->registerToService_ = true;
+        DelayedSingleton<SmsService>::GetInstance()->WaitCoreServiceToInit();
         DelayedSingleton<SmsService>::GetInstance()->OnStart();
         if (DelayedSingleton<SmsService>::GetInstance()->GetServiceRunningState() ==
             static_cast<int32_t>(Telephony::ServiceRunningState::STATE_RUNNING)) {
@@ -221,6 +226,8 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     SendSmsTest2(data, size);
     DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
     DelayedSingleton<ImsSmsClient>::DestroyInstance();
+    sleep(SLEEP_TIME_SECONDS);
+    DelayedSingleton<SmsService>::DestroyInstance();
 }
 } // namespace OHOS
 
