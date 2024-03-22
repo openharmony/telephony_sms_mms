@@ -132,7 +132,9 @@ bool GsmUserDataPdu::DecodeUserDataPdu(SmsReadBuffer &buffer, bool bHeaderInd, D
         default:
             break;
     }
-    TELEPHONY_LOGI("userData decode result:%{public}d", result);
+    if (!result) {
+        TELEPHONY_LOGE("userData decode fail.");
+    }
     return result;
 }
 

@@ -238,7 +238,9 @@ bool GsmSmsTpduDecode::DecodeDeliverPartData(SmsReadBuffer &buffer, struct SmsDe
     /* TP-UD */
     bool result = uDataCodec_->DecodeUserDataPdu(
         buffer, deliver->bHeaderInd, deliver->dcs.codingScheme, &(deliver->userData), &(deliver->udData));
-    TELEPHONY_LOGI("decode delivery result : =%{public}d", result);
+    if (!result) {
+        TELEPHONY_LOGE("decode delivery fail.");
+    }
     return result;
 }
 
