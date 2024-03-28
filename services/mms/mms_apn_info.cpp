@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Telephony {
-const std::string PDP_PROFILE_NET_URI = "datashare:///com.ohos.pdpprofileability/net/pdp_profile";
+const std::string PDP_PROFILE_NET_URI = "datashare:///com.ohos.pdpprofileability/net/pdp_profile?simId=";
 const std::string MMS_APN_TYPE = "mms";
 const std::string ALL_APN_TYPE = "*";
 
@@ -109,7 +109,8 @@ bool MmsApnInfo::GetMmsApnValue(
 
 void MmsApnInfo::PdpProfileSelect(const std::shared_ptr<DataShare::DataShareHelper> &helper)
 {
-    Uri uri(PDP_PROFILE_NET_URI);
+    int32_t simId = CoreManagerInner::GetInstance().GetSimId(slotId_);
+    Uri uri(static_cast<std::string>(PDP_PROFILE_NET_URI) + std::to_string(simId));
     std::vector<std::string> colume;
     DataShare::DataSharePredicates predicates;
     std::u16string operatorNumeric;
