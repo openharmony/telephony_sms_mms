@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@ namespace Telephony {
 constexpr static const int32_t WAIT_TIME_SECOND = 30;
 
 bool NapiMmsPduHelper::Run(void (*func)(NapiMmsPduHelper &), NapiMmsPduHelper &helper)
+    __attribute__((no_sanitize("cfi")))
 {
     TelFFRTUtils::Submit([&]() { func(helper); });
     TELEPHONY_LOGI("Thread running");
@@ -36,7 +37,7 @@ void NapiMmsPduHelper::NotifyAll()
     TELEPHONY_LOGI("Thread NotifyAll");
 }
 
-bool NapiMmsPduHelper::WaitForResult(int32_t timeoutSecond)
+bool NapiMmsPduHelper::WaitForResult(int32_t timeoutSecond) __attribute__((no_sanitize("cfi")))
 {
     std::unique_lock<std::mutex> lock(mtx_);
     if (cv_.wait_for(lock, std::chrono::seconds(timeoutSecond)) == std::cv_status::timeout) {
