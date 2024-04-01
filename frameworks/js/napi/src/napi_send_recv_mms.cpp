@@ -110,7 +110,7 @@ bool GetMmsPduFromFile(const std::string &fileName, std::string &mmsPdu)
     return true;
 }
 
-void StoreSendMmsPduToDataBase(NapiMmsPduHelper &helper)
+void StoreSendMmsPduToDataBase(NapiMmsPduHelper &helper) __attribute__((no_sanitize("cfi")))
 {
     std::shared_ptr<NAPIMmsPdu> mmsPduObj = std::make_shared<NAPIMmsPdu>();
     if (mmsPduObj == nullptr) {
@@ -363,7 +363,7 @@ bool StoreMmsPduToFile(const std::string &fileName, const std::string &mmsPdu)
     return true;
 }
 
-void GetMmsPduFromDataBase(NapiMmsPduHelper &helper)
+void GetMmsPduFromDataBase(NapiMmsPduHelper &helper) __attribute__((no_sanitize("cfi")))
 {
     NAPIMmsPdu mmsPduObj;
     std::string mmsPdu = mmsPduObj.GetMmsPdu(helper);
