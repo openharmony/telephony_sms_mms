@@ -276,7 +276,7 @@ int32_t SmsServiceProxy::GetAllSimMessages(int32_t slotId, std::vector<ShortMess
 int32_t SmsServiceProxy::SetCBConfig(
     int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType)
 {
-    TELEPHONY_LOGI("SmsServiceProxy::SetCBConfig slotId : %{public}d", slotId);
+    TELEPHONY_LOGD("SmsServiceProxy::SetCBConfig slotId : %{public}d", slotId);
     MessageParcel dataParcel;
     MessageParcel replyParcel;
     MessageOption option(MessageOption::TF_SYNC);

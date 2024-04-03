@@ -1349,7 +1349,7 @@ static void NativeSetCBConfig(napi_env env, void *data)
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
     }
-    TELEPHONY_LOGI("NativeSetCBConfig end resolved = %{public}d", context->resolved);
+    TELEPHONY_LOGD("NativeSetCBConfig end resolved = %{public}d", context->resolved);
 }
 
 static void SetCBConfigCallback(napi_env env, napi_status status, void *data)

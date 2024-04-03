@@ -311,13 +311,15 @@ void SmsInterfaceStub::OnGetAllSimMessages(MessageParcel &data, MessageParcel &r
 void SmsInterfaceStub::OnSetCBConfig(MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     int32_t slotId = data.ReadInt32();
-    TELEPHONY_LOGI("set cb config slotId:%{public}d", slotId);
+    TELEPHONY_LOGD("set cb config slotId:%{public}d", slotId);
     bool enable = data.ReadBool();
     uint32_t fromMsgId = data.ReadUint32();
     uint32_t toMsgId = data.ReadUint32();
     uint8_t ranType = data.ReadUint8();
     int32_t result = SetCBConfig(slotId, enable, fromMsgId, toMsgId, ranType);
-    TELEPHONY_LOGI("OnSetCBConfig result %{public}d", result);
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("OnSetCBConfig fail, result:%{public}d, slotId:%{public}d", result, slotId);
+    }
     reply.WriteInt32(result);
 }
 
@@ -537,7 +539,7 @@ void SmsInterfaceStub::OnDownloadMms(MessageParcel &data, MessageParcel &reply, 
 int SmsInterfaceStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    TELEPHONY_LOGI("SmsInterfaceStub::OnRemoteRequest code:%{public}d", code);
+    TELEPHONY_LOGD("SmsInterfaceStub::OnRemoteRequest code:%{public}d", code);
     std::u16string myDescripter = SmsInterfaceStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (myDescripter != remoteDescripter) {

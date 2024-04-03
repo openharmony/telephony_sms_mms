@@ -146,10 +146,10 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     }
 
     uint32_t eventId = 0;
-    TELEPHONY_LOGI("SmsMiscManager::ProcessEvent");
     eventId = event->GetInnerEventId();
     switch (eventId) {
         case SET_CB_CONFIG_FINISH: {
+            TELEPHONY_LOGI("SmsMiscManager::ProcessEvent Set cb config finish");
             isSuccess_ = true;
             std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
             if (res != nullptr) {
@@ -159,10 +159,12 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
             break;
         }
         case GET_CB_CONFIG_FINISH: {
+            TELEPHONY_LOGI("SmsMiscManager::ProcessEvent Get cb config finish");
             GetCBConfigFinish(event);
             break;
         }
         case SET_SMSC_ADDR_FINISH: {
+            TELEPHONY_LOGI("SmsMiscManager::ProcessEvent Set smsc addr finish");
             isSuccess_ = true;
             std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
             if (res != nullptr) {
@@ -172,6 +174,7 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
             break;
         }
         case GET_SMSC_ADDR_FINISH: {
+            TELEPHONY_LOGI("SmsMiscManager::ProcessEvent Get smsc addr finish");
             isSuccess_ = true;
             std::shared_ptr<ServiceCenterAddress> addr = event->GetSharedObject<ServiceCenterAddress>();
             if (addr != nullptr) {
@@ -324,7 +327,7 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> list)
 {
     TELEPHONY_LOGI("enable CB channel:%{public}d", enable);
     for (auto item : list) {
-        TELEPHONY_LOGI("[%{public}d-%{public}d]", item.fromMsgId, item.toMsgId);
+        TELEPHONY_LOGD("[%{public}d-%{public}d]", item.fromMsgId, item.toMsgId);
     }
     std::unique_lock<std::mutex> lock(mutex_);
     if (!list.empty()) {
@@ -338,7 +341,7 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> list)
         CoreManagerInner::GetInstance().SetCBConfig(
             slotId_, SmsMiscManager::SET_CB_CONFIG_FINISH, cbData, shared_from_this());
         while (!isSuccess_) {
-            TELEPHONY_LOGI("SendDataToRil::wait(), isSuccess_ = false");
+            TELEPHONY_LOGD("SendDataToRil::wait(), isSuccess_ = false");
             if (condVar_.wait_for(lock, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
                 break;
             }
