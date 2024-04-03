@@ -127,9 +127,9 @@ bool GsmSmsTpduCodec::DecodeSmsPdu(const uint8_t *pTpdu, uint16_t TpduLen, struc
         default:
             break;
     }
-    TELEPHONY_LOGI("buffer index:%{public}d", buffer.GetIndex());
+    TELEPHONY_LOGD("buffer index:%{public}d", buffer.GetIndex());
     if (decodeResult && buffer.GetIndex() <= (TpduLen + 1)) {
-        TELEPHONY_LOGI("decode sms success");
+        TELEPHONY_LOGD("decode sms success");
         return true;
     }
     TELEPHONY_LOGE("decode sms fail");
