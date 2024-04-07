@@ -189,6 +189,7 @@ int32_t GsmSmsReceiveHandler::HandleNormalSmsByType(const shared_ptr<SmsBaseMess
         TELEPHONY_LOGI("[invalid sms port] =%{public}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
+    TELEPHONY_LOGI("received a gsm sms,[sms port] =%{public}d", destPort);
     if (!AddMsgToDB(indexer)) {
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
