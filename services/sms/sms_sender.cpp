@@ -242,7 +242,7 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
     }
     std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
     std::lock_guard<std::mutex> guard(sendCacheMapMutex_);
-    std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
+    std::shared_ptr<RadioResponseInfo> res = event->GetSharedObject<RadioResponseInfo>();
     if (res != nullptr) {
         TELEPHONY_LOGI("flag = %{public}d", res->flag);
         auto iter = sendCacheMap_.find(res->flag);

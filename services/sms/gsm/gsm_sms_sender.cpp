@@ -341,7 +341,7 @@ void GsmSmsSender::StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &
         TELEPHONY_LOGE("GsmSmsSender: StatusReportSetImsSms event nullptr error.");
         return;
     }
-    std::shared_ptr<HRilRadioResponseInfo> imsResponseInfo = event->GetSharedObject<HRilRadioResponseInfo>();
+    std::shared_ptr<RadioResponseInfo> imsResponseInfo = event->GetSharedObject<RadioResponseInfo>();
 
     if (imsResponseInfo->error != ErrType::NONE) {
         imsSmsCfg_ = IMS_SMS_DISABLE;
