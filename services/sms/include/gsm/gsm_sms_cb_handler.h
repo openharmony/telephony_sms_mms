@@ -21,7 +21,7 @@
 #include "common_event.h"
 #include "common_event_manager.h"
 #include "gsm_cb_codec.h"
-#include "hril_sms_parcel.h"
+#include "tel_ril_sms_parcel.h"
 #include "sms_cb_data.h"
 #include "tel_event_handler.h"
 #include "want.h"

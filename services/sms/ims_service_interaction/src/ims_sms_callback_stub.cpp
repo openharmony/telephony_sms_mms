@@ -77,7 +77,7 @@ int32_t ImsSmsCallbackStub::OnImsSendMessageResponseInner(MessageParcel &data, M
     if (data.GetRawDataSize() == sizeof(HRilRadioResponseInfo)) {
         hRilRadioResponseInfo.flag = data.ReadInt32();
         hRilRadioResponseInfo.serial = data.ReadInt32();
-        hRilRadioResponseInfo.error = static_cast<const HRilErrType>(data.ReadInt32());
+        hRilRadioResponseInfo.error = static_cast<const ErrType>(data.ReadInt32());
         hRilRadioResponseInfo.type = static_cast<const HRilResponseTypes>(data.ReadInt32());
         reply.WriteInt32(ImsSendMessageResponse(slotId, hRilRadioResponseInfo));
         return TELEPHONY_SUCCESS;
@@ -97,7 +97,7 @@ int32_t ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner(MessageParcel &data, 
     HRilRadioResponseInfo hRilRadioResponseInfo;
     hRilRadioResponseInfo.flag = data.ReadInt32();
     hRilRadioResponseInfo.serial = data.ReadInt32();
-    hRilRadioResponseInfo.error = static_cast<const HRilErrType>(data.ReadInt32());
+    hRilRadioResponseInfo.error = static_cast<const ErrType>(data.ReadInt32());
     hRilRadioResponseInfo.type = static_cast<const HRilResponseTypes>(data.ReadInt32());
     reply.WriteInt32(ImsSetSmsConfigResponse(slotId, hRilRadioResponseInfo));
     return TELEPHONY_SUCCESS;

@@ -15,7 +15,7 @@
 
 #include "satellite_sms_callback_stub.h"
 
-#include "hril_sms_parcel.h"
+#include "tel_ril_sms_parcel.h"
 #include "radio_event.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
@@ -79,7 +79,7 @@ int32_t SatelliteSmsCallbackStub::OnSendSmsResponse(MessageParcel &data, Message
         }
         info->flag = flag;
         info->serial = serial;
-        info->error = static_cast<HRilErrType>(error);
+        info->error = static_cast<ErrType>(error);
         info->type = static_cast<HRilResponseTypes>(type);
         AppExecFwk::InnerEvent::Pointer response = AppExecFwk::InnerEvent::Get(eventCode, info);
         if (response == nullptr) {
