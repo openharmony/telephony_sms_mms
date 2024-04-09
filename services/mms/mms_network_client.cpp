@@ -44,7 +44,7 @@ std::string METHOD_GET = "GET";
 constexpr const char *SIMID_IDENT_PREFIX = "simId";
 const bool STORE_MMS_PDU_TO_FILE = false;
 constexpr static const int32_t WAIT_TIME_SECOND = 10 * 60;
-constexpr static const unsigned int HTTP_TIME_MICRO_SECOND = WAIT_TIME_SECOND * 1000;
+constexpr static const unsigned int HTTP_TIME_MICRO_SECOND = WAIT_TIME_SECOND * 100;
 
 MmsNetworkClient::MmsNetworkClient(int32_t slotId)
 {
@@ -209,7 +209,9 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
         return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
     }
     HttpCallBack(task);
+    TELEPHONY_LOGI("before call [task->Start]");
     task->Start();
+    TELEPHONY_LOGI("after call [task->Start]");
     return TELEPHONY_ERR_SUCCESS;
 }
 
