@@ -153,7 +153,7 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
             isSuccess_ = true;
             std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
             if (res != nullptr) {
-                isSuccess_ = (res->error == HRilErrType::NONE);
+                isSuccess_ = (res->error == ErrType::NONE);
             }
             NotifyHasResponse();
             break;
@@ -168,7 +168,7 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
             isSuccess_ = true;
             std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
             if (res != nullptr) {
-                isSuccess_ = (res->error == HRilErrType::NONE);
+                isSuccess_ = (res->error == ErrType::NONE);
             }
             NotifyHasResponse();
             break;

@@ -149,7 +149,7 @@ void ImsSendMessageResponseInner(const uint8_t *data, size_t size)
     HRilRadioResponseInfo responseInfo;
     responseInfo.flag = static_cast<uint32_t>(size);
     responseInfo.serial = static_cast<uint32_t>(size);
-    responseInfo.error = static_cast<HRilErrType>(size);
+    responseInfo.error = static_cast<ErrType>(size);
     responseInfo.type = static_cast<HRilResponseTypes>(size % TYPE_NUM);
     dataParcel.WriteRawData((const void *)&responseInfo, sizeof(HRilRadioResponseInfo));
     SendSmsResultInfo resultInfo;
@@ -177,7 +177,7 @@ void ImsSetSmsConfigResponseInner(const uint8_t *data, size_t size)
     HRilRadioResponseInfo responseInfo;
     responseInfo.flag = static_cast<uint32_t>(size);
     responseInfo.serial = static_cast<uint32_t>(size);
-    responseInfo.error = static_cast<HRilErrType>(size);
+    responseInfo.error = static_cast<ErrType>(size);
     responseInfo.type = static_cast<HRilResponseTypes>(size % TYPE_NUM);
     dataParcel.WriteRawData((const void *)&responseInfo, sizeof(HRilRadioResponseInfo));
     dataParcel.RewindRead(0);
