@@ -34,10 +34,10 @@ public:
 
     /****************** sms basic ******************/
     int32_t ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result) override;
-    int32_t ImsSendMessageResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
-    int32_t ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
+    int32_t ImsSendMessageResponse(int32_t slotId, const RadioResponseInfo &info) override;
+    int32_t ImsSetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info) override;
     int32_t ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig) override;
-    int32_t ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
+    int32_t ImsGetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info) override;
 
 private:
     void InitFuncMap();
@@ -48,7 +48,7 @@ private:
     int32_t OnImsSetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnImsGetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply);
 
-    int32_t SendHRilRadioResponseInfo(int32_t slotId, uint32_t eventId, const HRilRadioResponseInfo &info);
+    int32_t SendHRilRadioResponseInfo(int32_t slotId, uint32_t eventId, const RadioResponseInfo &info);
 
 private:
     using RequestFuncType = int32_t (ImsSmsCallbackStub::*)(MessageParcel &data, MessageParcel &reply);
