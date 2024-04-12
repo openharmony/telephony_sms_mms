@@ -181,9 +181,15 @@ static int32_t ActuallySendMessage(napi_env env, SendMessageContext &parameter)
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     if (parameter.messageType == TEXT_MESSAGE_PARAMETER_MATCH) {
-        return ActuallySendTextMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
+        if (hasDeliveryCallback) {
+            return ActuallySendTextMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
+        }
+        return ActuallySendTextMessage(parameter, std::move(sendCallback), nullptr);
     } else if (parameter.messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
-        return ActuallySendDataMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
+        if (hasDeliveryCallback) {
+            return ActuallySendDataMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
+        }
+        return ActuallySendDataMessage(parameter, std::move(sendCallback), nullptr);
     }
     return TELEPHONY_ERR_ARGUMENT_INVALID;
 }
