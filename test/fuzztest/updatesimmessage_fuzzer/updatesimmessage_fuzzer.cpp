@@ -91,7 +91,6 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     }
 
     UpdateSimMessage(data, size);
-    DelayedSingleton<SmsService>::DestroyInstance();
 }
 }  // namespace OHOS
 
