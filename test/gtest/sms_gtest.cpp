@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1784,6 +1784,13 @@ HWTEST_F(SmsGtest, CreateWapPushSms_0002, Function | MediumTest | Level2)
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CreateWapPushSms_0002 -->finished");
     ASSERT_EQ(helper.GetIntResult(), 0);
+}
+
+HWTEST_F(SmsGtest, Sms_TestDump_0002, Function | MediumTest | Level3)
+{
+    std::string originatingAddress = "";
+    bool result = DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryBlockPhoneNumber(originatingAddress);
+    ASSERT_FALSE(result);
 }
 
 /**
