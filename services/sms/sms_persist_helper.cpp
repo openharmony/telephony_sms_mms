@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -219,41 +219,6 @@ bool SmsPersistHelper::QueryBlockPhoneNumber(const std::string &phoneNum)
     if (phoneNum.empty()) {
         return result;
     }
-    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(CONTACT_URI);
-    if (helper == nullptr) {
-        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
-        return false;
-    }
-    Uri uri(CONTACT_BLOCK);
-    std::vector<std::string> columns;
-    DataShare::DataSharePredicates predicates;
-    std::string nationalNum;
-    std::string internationalNum;
-    int32_t ret = FormatSmsNumber(
-        phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, nationalNum);
-    if (ret != TELEPHONY_SUCCESS) {
-        TELEPHONY_LOGE("Phone Number format Failed.");
-        nationalNum = phoneNum;
-    }
-    ret = FormatSmsNumber(phoneNum, ISO_COUNTRY_CODE,
-        i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::INTERNATIONAL, internationalNum);
-    if (ret != TELEPHONY_SUCCESS) {
-        TELEPHONY_LOGE("Phone Number format Failed.");
-        internationalNum = phoneNum;
-    }
-    predicates.EqualTo(PHONE_NUMBER, nationalNum)->Or()->EqualTo(PHONE_NUMBER, internationalNum);
-    auto resultSet = helper->Query(uri, predicates, columns);
-    if (resultSet == nullptr) {
-        TELEPHONY_LOGE("Query Result Set nullptr Failed.");
-        helper->Release();
-        return result;
-    }
-    int count = 0;
-    if (resultSet->GetRowCount(count) == 0 && count != 0) {
-        result = true;
-    }
-    resultSet->Close();
-    helper->Release();
     return result;
 }
 
