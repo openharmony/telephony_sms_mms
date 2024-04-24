@@ -451,11 +451,11 @@ HWTEST_F(BranchSmsTest, SmsSender_0001, Function | MediumTest | Level1)
     smsSender->ProcessEvent(event);
     event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_DIAL, 1);
     smsSender->ProcessEvent(event);
-    event->GetSharedObject<HRilRadioResponseInfo>() = std::make_shared<HRilRadioResponseInfo>();
+    event->GetSharedObject<RadioResponseInfo>() = std::make_shared<RadioResponseInfo>();
     smsSender->HandleResend(smsIndexer);
-    smsIndexer->errorCode_ = HRIL_ERR_CMD_SEND_FAILURE;
+    smsIndexer->errorCode_ = static_cast<int32_t>(ErrType::ERR_CMD_SEND_FAILURE);
     smsSender->HandleResend(smsIndexer);
-    smsIndexer->errorCode_ = HRIL_ERR_GENERIC_FAILURE;
+    smsIndexer->errorCode_ = static_cast<int32_t>(ErrType::ERR_GENERIC_FAILURE);
     smsSender->HandleResend(smsIndexer);
     smsSender->lastSmsDomain_ = 1;
     smsSender->HandleResend(smsIndexer);

@@ -146,12 +146,12 @@ void ImsSendMessageResponseInner(const uint8_t *data, size_t size)
 
     int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
     dataParcel.WriteInt32(slotId);
-    HRilRadioResponseInfo responseInfo;
+    RadioResponseInfo responseInfo;
     responseInfo.flag = static_cast<uint32_t>(size);
     responseInfo.serial = static_cast<uint32_t>(size);
-    responseInfo.error = static_cast<HRilErrType>(size);
-    responseInfo.type = static_cast<HRilResponseTypes>(size % TYPE_NUM);
-    dataParcel.WriteRawData((const void *)&responseInfo, sizeof(HRilRadioResponseInfo));
+    responseInfo.error = static_cast<ErrType>(size);
+    responseInfo.type = static_cast<ResponseTypes>(size % TYPE_NUM);
+    dataParcel.WriteRawData((const void *)&responseInfo, sizeof(RadioResponseInfo));
     SendSmsResultInfo resultInfo;
     resultInfo.msgRef = static_cast<uint32_t>(size);
     std::string pdu(reinterpret_cast<const char *>(data), size);
@@ -174,12 +174,12 @@ void ImsSetSmsConfigResponseInner(const uint8_t *data, size_t size)
 
     int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
     dataParcel.WriteInt32(slotId);
-    HRilRadioResponseInfo responseInfo;
+    RadioResponseInfo responseInfo;
     responseInfo.flag = static_cast<uint32_t>(size);
     responseInfo.serial = static_cast<uint32_t>(size);
-    responseInfo.error = static_cast<HRilErrType>(size);
-    responseInfo.type = static_cast<HRilResponseTypes>(size % TYPE_NUM);
-    dataParcel.WriteRawData((const void *)&responseInfo, sizeof(HRilRadioResponseInfo));
+    responseInfo.error = static_cast<ErrType>(size);
+    responseInfo.type = static_cast<ResponseTypes>(size % TYPE_NUM);
+    dataParcel.WriteRawData((const void *)&responseInfo, sizeof(RadioResponseInfo));
     dataParcel.RewindRead(0);
     DelayedSingleton<ImsSmsCallbackStub>::GetInstance()->OnImsSetSmsConfigResponseInner(dataParcel, replyParcel);
 }

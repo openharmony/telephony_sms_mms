@@ -19,7 +19,7 @@
 #include "iremote_broker.h"
 
 #include "ims_sms_types.h"
-#include "hril_types.h"
+#include "tel_ril_types.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -45,7 +45,7 @@ public:
      * @param info Indicates details of failure.
      * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
-    virtual int32_t ImsSendMessageResponse(int32_t slotId, const HRilRadioResponseInfo &info) = 0;
+    virtual int32_t ImsSendMessageResponse(int32_t slotId, const RadioResponseInfo &info) = 0;
 
     /**
      * @brief ImsSetSmsConfigResponse the result for enable or disable IMS SMS.
@@ -55,7 +55,7 @@ public:
      * @param info Indicates set action was success or failure.
      * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
-    virtual int32_t ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) = 0;
+    virtual int32_t ImsSetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info) = 0;
 
     /**
      * @brief ImsGetSmsConfigResponse the result for get IMS SMS config.
@@ -76,7 +76,7 @@ public:
      * @param info Indicates details of failure.
      * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
-    virtual int32_t ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) = 0;
+    virtual int32_t ImsGetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info) = 0;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.Telephony.ImsSmsCallback");

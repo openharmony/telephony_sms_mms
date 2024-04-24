@@ -242,7 +242,7 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
     }
     std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
     std::lock_guard<std::mutex> guard(sendCacheMapMutex_);
-    std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
+    std::shared_ptr<RadioResponseInfo> res = event->GetSharedObject<RadioResponseInfo>();
     if (res != nullptr) {
         TELEPHONY_LOGI("flag = %{public}d", res->flag);
         auto iter = sendCacheMap_.find(res->flag);
@@ -329,8 +329,8 @@ void SmsSender::HandleResend(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
     }
     // resending mechanism
     bool errorCode = false;
-    if ((smsIndexer->GetErrorCode() == HRIL_ERR_GENERIC_FAILURE) ||
-        (smsIndexer->GetErrorCode() == HRIL_ERR_CMD_SEND_FAILURE)) {
+    if ((smsIndexer->GetErrorCode() == static_cast<int32_t>(ErrType::ERR_GENERIC_FAILURE)) ||
+        (smsIndexer->GetErrorCode() == static_cast<int32_t>(ErrType::ERR_CMD_SEND_FAILURE))) {
         errorCode = true;
     }
     bool csResend = false;
