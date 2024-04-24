@@ -151,9 +151,9 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
         case SET_CB_CONFIG_FINISH: {
             TELEPHONY_LOGI("SmsMiscManager::ProcessEvent Set cb config finish");
             isSuccess_ = true;
-            std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
+            std::shared_ptr<RadioResponseInfo> res = event->GetSharedObject<RadioResponseInfo>();
             if (res != nullptr) {
-                isSuccess_ = (res->error == HRilErrType::NONE);
+                isSuccess_ = (res->error == ErrType::NONE);
             }
             NotifyHasResponse();
             break;
@@ -166,9 +166,9 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
         case SET_SMSC_ADDR_FINISH: {
             TELEPHONY_LOGI("SmsMiscManager::ProcessEvent Set smsc addr finish");
             isSuccess_ = true;
-            std::shared_ptr<HRilRadioResponseInfo> res = event->GetSharedObject<HRilRadioResponseInfo>();
+            std::shared_ptr<RadioResponseInfo> res = event->GetSharedObject<RadioResponseInfo>();
             if (res != nullptr) {
-                isSuccess_ = (res->error == HRilErrType::NONE);
+                isSuccess_ = (res->error == ErrType::NONE);
             }
             NotifyHasResponse();
             break;

@@ -18,7 +18,7 @@
 
 #include <vector>
 
-#include "hril_sms_parcel.h"
+#include "tel_ril_sms_parcel.h"
 #include "sms_base_message.h"
 #include "sms_receive_indexer.h"
 #include "sms_receive_reliability_handler.h"

@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-#include "hril_sms_parcel.h"
+#include "tel_ril_sms_parcel.h"
 #include "i_sms_service_interface.h"
 #include "tel_event_handler.h"
 

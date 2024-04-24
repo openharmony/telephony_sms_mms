@@ -48,7 +48,7 @@ public:
      * @param info Indicates details of failure.
      * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
-    int32_t ImsSendMessageResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
+    int32_t ImsSendMessageResponse(int32_t slotId, const RadioResponseInfo &info) override;
 
     /**
      * @brief ImsSetSmsConfigResponse the result for enable or disable IMS SMS.
@@ -58,7 +58,7 @@ public:
      * @param info Indicates set action was success or failure.
      * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
-    int32_t ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
+    int32_t ImsSetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info) override;
 
     /**
      * @brief ImsGetSmsConfigResponse the result for get IMS SMS config.
@@ -79,12 +79,12 @@ public:
      * @param info Indicates details of failure.
      * @return Returns {@code TELEPHONY_SUCCESS} on success, others on failure.
      */
-    int32_t ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info) override;
+    int32_t ImsGetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info) override;
 
 private:
     int32_t WriteCommonInfo(std::string funcName, MessageParcel &in, int32_t slotId);
     int32_t SendHRilRadioResponseInfo(
-        std::string funcName, int32_t slotId, int32_t eventId, const HRilRadioResponseInfo &info);
+        std::string funcName, int32_t slotId, int32_t eventId, const RadioResponseInfo &info);
     int32_t SendRequest(MessageParcel &in, int32_t slotId, int32_t eventId);
 
 private:

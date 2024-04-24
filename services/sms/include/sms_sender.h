@@ -23,7 +23,7 @@
 #include <unordered_map>
 
 #include "gsm_sms_message.h"
-#include "hril_sms_parcel.h"
+#include "tel_ril_sms_parcel.h"
 #include "i_sms_service_interface.h"
 #include "network_state.h"
 #include "sms_persist_helper.h"

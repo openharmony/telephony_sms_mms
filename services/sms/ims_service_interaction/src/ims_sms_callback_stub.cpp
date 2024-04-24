@@ -72,13 +72,13 @@ int32_t ImsSmsCallbackStub::OnRemoteRequest(
 int32_t ImsSmsCallbackStub::OnImsSendMessageResponseInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t slotId = data.ReadInt32();
-    HRilRadioResponseInfo hRilRadioResponseInfo;
+    RadioResponseInfo hRilRadioResponseInfo;
     SendSmsResultInfo sendSmsResultInfo;
-    if (data.GetRawDataSize() == sizeof(HRilRadioResponseInfo)) {
+    if (data.GetRawDataSize() == sizeof(RadioResponseInfo)) {
         hRilRadioResponseInfo.flag = data.ReadInt32();
         hRilRadioResponseInfo.serial = data.ReadInt32();
-        hRilRadioResponseInfo.error = static_cast<const HRilErrType>(data.ReadInt32());
-        hRilRadioResponseInfo.type = static_cast<const HRilResponseTypes>(data.ReadInt32());
+        hRilRadioResponseInfo.error = static_cast<const ErrType>(data.ReadInt32());
+        hRilRadioResponseInfo.type = static_cast<const ResponseTypes>(data.ReadInt32());
         reply.WriteInt32(ImsSendMessageResponse(slotId, hRilRadioResponseInfo));
         return TELEPHONY_SUCCESS;
     } else {
@@ -94,11 +94,11 @@ int32_t ImsSmsCallbackStub::OnImsSendMessageResponseInner(MessageParcel &data, M
 int32_t ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t slotId = data.ReadInt32();
-    HRilRadioResponseInfo hRilRadioResponseInfo;
+    RadioResponseInfo hRilRadioResponseInfo;
     hRilRadioResponseInfo.flag = data.ReadInt32();
     hRilRadioResponseInfo.serial = data.ReadInt32();
-    hRilRadioResponseInfo.error = static_cast<const HRilErrType>(data.ReadInt32());
-    hRilRadioResponseInfo.type = static_cast<const HRilResponseTypes>(data.ReadInt32());
+    hRilRadioResponseInfo.error = static_cast<const ErrType>(data.ReadInt32());
+    hRilRadioResponseInfo.type = static_cast<const ResponseTypes>(data.ReadInt32());
     reply.WriteInt32(ImsSetSmsConfigResponse(slotId, hRilRadioResponseInfo));
     return TELEPHONY_SUCCESS;
 }
@@ -130,12 +130,12 @@ int32_t ImsSmsCallbackStub::ImsSendMessageResponse(int32_t slotId, const SendSms
     return TELEPHONY_SUCCESS;
 }
 
-int32_t ImsSmsCallbackStub::ImsSendMessageResponse(int32_t slotId, const HRilRadioResponseInfo &info)
+int32_t ImsSmsCallbackStub::ImsSendMessageResponse(int32_t slotId, const RadioResponseInfo &info)
 {
     return SendHRilRadioResponseInfo(slotId, static_cast<uint32_t>(RadioEvent::RADIO_SEND_IMS_GSM_SMS), info);
 }
 
-int32_t ImsSmsCallbackStub::ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info)
+int32_t ImsSmsCallbackStub::ImsSetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info)
 {
     return SendHRilRadioResponseInfo(slotId, static_cast<uint32_t>(RadioEvent::RADIO_SET_IMS_SMS), info);
 }
@@ -159,18 +159,18 @@ int32_t ImsSmsCallbackStub::ImsGetSmsConfigResponse(int32_t slotId, int32_t imsS
     return TELEPHONY_SUCCESS;
 }
 
-int32_t ImsSmsCallbackStub::ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info)
+int32_t ImsSmsCallbackStub::ImsGetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info)
 {
     return SendHRilRadioResponseInfo(slotId, static_cast<uint32_t>(RadioEvent::RADIO_GET_IMS_SMS), info);
 }
 
 int32_t ImsSmsCallbackStub::SendHRilRadioResponseInfo(
-    int32_t slotId, uint32_t eventId, const HRilRadioResponseInfo &info)
+    int32_t slotId, uint32_t eventId, const RadioResponseInfo &info)
 {
     TELEPHONY_LOGI("[slot%{public}d]eventId=%{public}d response error:%{public}d", slotId, eventId, info.error);
-    std::shared_ptr<HRilRadioResponseInfo> hRilRadioResponseInfo = std::make_shared<HRilRadioResponseInfo>();
+    std::shared_ptr<RadioResponseInfo> hRilRadioResponseInfo = std::make_shared<RadioResponseInfo>();
     if (hRilRadioResponseInfo == nullptr) {
-        TELEPHONY_LOGE("[slot%{public}d]make_shared HRilRadioResponseInfo failed", slotId);
+        TELEPHONY_LOGE("[slot%{public}d]make_shared RadioResponseInfo failed", slotId);
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     *hRilRadioResponseInfo = info;

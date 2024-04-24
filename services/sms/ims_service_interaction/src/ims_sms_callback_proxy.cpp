@@ -37,13 +37,13 @@ int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(int32_t slotId, const SendSm
     return SendRequest(in, slotId, static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_SEND_MESSAGE));
 }
 
-int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(int32_t slotId, const HRilRadioResponseInfo &info)
+int32_t ImsSmsCallbackProxy::ImsSendMessageResponse(int32_t slotId, const RadioResponseInfo &info)
 {
     return SendHRilRadioResponseInfo(__FUNCTION__, slotId,
         static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_SEND_MESSAGE), info);
 }
 
-int32_t ImsSmsCallbackProxy::ImsSetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info)
+int32_t ImsSmsCallbackProxy::ImsSetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info)
 {
     return SendHRilRadioResponseInfo(__FUNCTION__, slotId,
         static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_SET_SMS_CONFIG), info);
@@ -63,7 +63,7 @@ int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(int32_t slotId, int32_t ims
     return SendRequest(in, slotId, static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_GET_SMS_CONFIG));
 }
 
-int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(int32_t slotId, const HRilRadioResponseInfo &info)
+int32_t ImsSmsCallbackProxy::ImsGetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info)
 {
     return SendHRilRadioResponseInfo(__FUNCTION__, slotId,
         static_cast<int32_t>(ImsSmsCallbackInterfaceCode::IMS_GET_SMS_CONFIG), info);
@@ -83,16 +83,16 @@ int32_t ImsSmsCallbackProxy::WriteCommonInfo(std::string funcName, MessageParcel
 }
 
 int32_t ImsSmsCallbackProxy::SendHRilRadioResponseInfo(
-    std::string funcName, int32_t slotId, int32_t eventId, const HRilRadioResponseInfo &info)
+    std::string funcName, int32_t slotId, int32_t eventId, const RadioResponseInfo &info)
 {
-    TELEPHONY_LOGI("[slot%{public}d]Send HRilRadioResponseInfo for eventId:%{public}d", slotId, eventId);
+    TELEPHONY_LOGI("[slot%{public}d]Send RadioResponseInfo for eventId:%{public}d", slotId, eventId);
     MessageParcel in;
     int32_t ret = WriteCommonInfo(funcName, in, slotId);
     if (ret != TELEPHONY_SUCCESS) {
         return ret;
     }
-    if (!in.WriteRawData((const void *)&info, sizeof(HRilRadioResponseInfo))) {
-        TELEPHONY_LOGE("[slot%{public}d]Write HRilRadioResponseInfo fail! eventId:%{public}d", slotId, eventId);
+    if (!in.WriteRawData((const void *)&info, sizeof(RadioResponseInfo))) {
+        TELEPHONY_LOGE("[slot%{public}d]Write RadioResponseInfo fail! eventId:%{public}d", slotId, eventId);
         return TELEPHONY_ERR_WRITE_DATA_FAIL;
     }
     return SendRequest(in, slotId, eventId);

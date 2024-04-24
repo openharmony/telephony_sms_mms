@@ -16,7 +16,7 @@
 #ifndef I_SATELLITE_SMS_CALLBACK_H
 #define I_SATELLITE_SMS_CALLBACK_H
 
-#include "hril_types.h"
+#include "tel_ril_types.h"
 #include "iremote_proxy.h"
 #include "tel_event_handler.h"
 
