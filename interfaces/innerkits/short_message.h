@@ -171,6 +171,13 @@ public:
     std::vector<unsigned char> GetPdu() const;
 
     /**
+     * @brief Get the user data part.
+     *
+     * @return returns the user data of pdu
+     */
+    std::string GetRawUserData() const;
+
+    /**
      * @brief Create a Message object
      * Creates an SMS message instance based on the
      * protocol data unit (PDU) and the specified SMS protocol.
@@ -221,6 +228,7 @@ public:
     bool hasReplyPath_ = false;
     int32_t protocolId_ = -1;
     std::vector<unsigned char> pdu_;
+    std::string rawUserData_;
     int32_t indexOnSim_ = 0;
 };
 } // namespace Telephony

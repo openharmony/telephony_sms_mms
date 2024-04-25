@@ -709,6 +709,7 @@ int32_t SmsService::CreateMessage(std::string pdu, std::string specification, Sh
     message.hasReplyPath_ = baseMessage->HasReplyPath();
     message.protocolId_ = baseMessage->GetProtocolId();
     message.pdu_ = baseMessage->GetRawPdu();
+    message.rawUserData_ = baseMessage->GetRawUserData();
     return TELEPHONY_ERR_SUCCESS;
 }
 
