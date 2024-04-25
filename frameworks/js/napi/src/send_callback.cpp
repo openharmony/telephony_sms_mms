@@ -130,7 +130,7 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
             pContext = nullptr;
             delete work;
             work = nullptr;
-            TELEPHONY_LOGE("already free the memory cause of failure of uv_queue_work_with_qos");
+            TELEPHONY_LOGE("already free the memory cause of failure of uv_queue_work_with_qos.");
         }
     }
 }
