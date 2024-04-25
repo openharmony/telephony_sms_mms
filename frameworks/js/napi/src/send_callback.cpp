@@ -118,9 +118,20 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
         pContext->callbackRef = callbackRef_;
         pContext->result = WrapSmsSendResult(result);
         work->data = static_cast<void *>(pContext);
-        uv_queue_work_with_qos(
+        int32_t errCode = uv_queue_work_with_qos(
             loop, work, [](uv_work_t *work) {},
             [](uv_work_t *work, int status) { CompleteSmsSendWork(work, status); }, uv_qos_default);
+        if (errCode != 0) {
+            TELEPHONY_LOGE("failed to uv_queue_work_with_qos, errCode: %{public}d", errCode);
+            pContext->env = nullptr;
+            pContext->thisVarRef = nullptr;
+            pContext->callbackRef = nullptr;
+            delete pContext;
+            pContext = nullptr;
+            delete work;
+            work = nullptr;
+            TELEPHONY_LOGE("already free the memory cause of failure of uv_queue_work_with_qos");
+        }
     }
 }
 } // namespace Telephony
