@@ -67,6 +67,9 @@ bool ShortMessage::ReadFromParcel(Parcel &parcel)
     if (!parcel.ReadUInt8Vector(&pdu_)) {
         return false;
     }
+    if (!parcel.ReadString(rawUserData_)) {
+        return false;
+    }
     if (!parcel.ReadInt32(indexOnSim_)) {
         return false;
     }
@@ -109,6 +112,9 @@ bool ShortMessage::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteUInt8Vector(pdu_)) {
+        return false;
+    }
+    if (!parcel.WriteString(rawUserData_)) {
         return false;
     }
     if (!parcel.WriteInt32(indexOnSim_)) {
@@ -183,6 +189,11 @@ int32_t ShortMessage::GetProtocolId() const
 std::vector<unsigned char> ShortMessage::GetPdu() const
 {
     return pdu_;
+}
+
+std::string ShortMessage::GetRawUserData() const
+{
+    return rawUserData_;
 }
 
 int32_t ShortMessage::CreateMessage(
