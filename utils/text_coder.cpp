@@ -14,7 +14,6 @@
  */
 
 #include "text_coder.h"
-
 #include "glib.h"
 #include "mms_charset.h"
 #include "securec.h"
@@ -423,6 +422,7 @@ int TextCoder::Gsm7bitToUtf8(
 int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength)
 {
     if (srcLength == -1 && src) {
+        TELEPHONY_LOGE("stcLength == -1 && src branch");
         // null terminated string
         srcLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(src)));
     }
@@ -444,7 +444,9 @@ int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int 
         TELEPHONY_LOGE("g_iconv result is %{public}u", err);
     }
     int length = maxLength - static_cast<int>(remainedLength);
-    if (length < 0 || length >= maxLength) {
+    int destLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(dest)));
+    if (length < 0 || length >= destLength) {
+        TELEPHONY_LOGE("Error! the position: %{public}d is over the length of dest: %{public}d", length, destLength);
         return 0;
     }
     dest[length] = 0x00;
