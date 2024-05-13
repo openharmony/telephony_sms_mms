@@ -205,7 +205,6 @@ bool SmsWapPushHandler::DeocdeCheckIsBlock(std::string &hexData)
         } else {
             return helper->QueryBlockPhoneNumber(address.substr(0, pos));
         }
-        DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateContact(address);
     }
     TELEPHONY_LOGI("wap push is not blocked.");
     return false;
