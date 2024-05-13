@@ -114,7 +114,6 @@ ohos_shared_library("tel_sms_mms") {
     "interfaces/innerkits/",
     "frameworks/native/sms/include",
     "interfaces/innerkits/ims",
-    "//third_party/curl/include",
     "//third_party/glib/glib",
     "//third_party/glib",
     "//third_party/libphonenumber/cpp/src",
@@ -125,7 +124,6 @@ ohos_shared_library("tel_sms_mms") {
   deps = [
     "frameworks/native:tel_sms_mms_api",
     "frameworks/native/mms:mms_native_source",
-    "//third_party/curl:curl",
     "//third_party/glib:glib_packages",
     "//third_party/libphonenumber/cpp:phonenumber_standard",
   ]
@@ -138,6 +136,7 @@ ohos_shared_library("tel_sms_mms") {
     "common_event_service:cesfwk_innerkits",
     "core_service:libtel_common",
     "core_service:tel_core_service_api",
+    "curl:curl_shared",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
