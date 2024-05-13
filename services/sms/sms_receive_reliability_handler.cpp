@@ -382,11 +382,9 @@ void SmsReceiveReliabilityHandler::PacketSmsData(EventFwk::Want &want, const std
     }
 
     publishInfo.SetOrdered(true);
-    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
-        std::vector<std::string> smsPermissions;
-        smsPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
-        publishInfo.SetSubscriberPermissions(smsPermissions);
-    }
+    std::vector<std::string> smsPermissions;
+    smsPermissions.emplace_back(Permission::RECEIVE_MESSAGES);
+    publishInfo.SetSubscriberPermissions(smsPermissions);
 }
 
 void SmsReceiveReliabilityHandler::HiSysEventCBResult(bool publishResult)
