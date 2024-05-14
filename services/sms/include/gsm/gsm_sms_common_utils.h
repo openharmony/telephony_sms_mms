@@ -30,6 +30,7 @@ public:
     bool Pack7bitChar(SmsWriteBuffer &buffer, const uint8_t *userData, uint8_t dataLen, uint8_t fillBits);
     bool Unpack7bitChar(SmsReadBuffer &buffer, uint8_t dataLen, uint8_t fillBits, uint8_t *unpackData,
         uint8_t unpackDataLen, uint8_t &dstIdx);
+    bool Unpack7bitCharForMiddlePart(const uint8_t *buffer, uint8_t dataLen, uint8_t *unpackData);
     bool DigitToBcd(const char *digit, uint8_t digitLen, uint8_t *bcd, uint8_t bcdLen, uint8_t &len);
     bool BcdToDigit(const uint8_t *bcd, uint8_t bcdLen, std::string &digit, uint8_t maxDigitLen);
 
