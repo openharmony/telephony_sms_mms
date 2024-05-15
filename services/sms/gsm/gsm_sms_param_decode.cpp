@@ -40,7 +40,7 @@ bool GsmSmsParamDecode::DecodeAddressPdu(SmsReadBuffer &buffer, struct AddressNu
 
     uint8_t oneByte = 0;
     if (!buffer.ReadByte(oneByte) || oneByte >= BCD_TO_DIGITAL * (MAX_ADDRESS_LEN + 1)) {
-        TELEPHONY_LOGE("get data error.");
+        TELEPHONY_LOGE("get data error. %{public}d", oneByte);
         return false;
     }
     uint8_t addrLen = oneByte;
@@ -70,10 +70,25 @@ bool GsmSmsParamDecode::DecodeAddressAlphaNum(
     SmsReadBuffer &buffer, struct AddressNumber *resultNum, uint8_t bcdLen, uint8_t addrLen)
 {
     uint8_t tmresultNum[MAX_ADDRESS_LEN] = { 0 };
-    uint8_t tmplength = 0;
-    GsmSmsCommonUtils utils;
     uint8_t dataLen = (addrLen * HEX_VALUE_04) / HEX_VALUE_07;
-    if (!utils.Unpack7bitChar(buffer, dataLen, 0x00, tmresultNum, MAX_ADDRESS_LEN, tmplength)) {
+    TELEPHONY_LOGI("DecodeAddressAlphaNum, addrLen:%{public}d, dataLen: %{public}d", addrLen, dataLen);
+    uint8_t addressPduArr[MAX_ADDRESS_LEN + 1] = { 0 };
+    uint8_t oneByte = 0;
+    if (!buffer.ReadByte(oneByte)) {
+        TELEPHONY_LOGE("get data error.");
+        return false;
+    }
+    uint32_t encodeLen = (addrLen % HEX_VALUE_02 == 0) ? (addrLen / HEX_VALUE_02) :
+        (addrLen / HEX_VALUE_02 + HEX_VALUE_01);
+    TELEPHONY_LOGI("DecodeAddressAlphaNum, encodeLen %{public}d", encodeLen);
+    for (int i = 0; i < encodeLen; i++) {
+        if (!buffer.ReadByte(oneByte)) {
+            TELEPHONY_LOGE("get data error.");
+            return false;
+        }
+        addressPduArr[i] = oneByte;
+    }
+    if (!GsmSmsCommonUtils::Unpack7bitCharForMiddlePart(addressPduArr, dataLen, tmresultNum)) {
         TELEPHONY_LOGE("unpack 7bit char error!");
         return false;
     }
@@ -81,7 +96,7 @@ bool GsmSmsParamDecode::DecodeAddressAlphaNum(
     langInfo.bSingleShift = false;
     langInfo.bLockingShift = false;
     TextCoder::Instance().Gsm7bitToUtf8(
-        reinterpret_cast<uint8_t *>(resultNum->address), MAX_ADDRESS_LEN, tmresultNum, tmplength, langInfo);
+        reinterpret_cast<uint8_t *>(resultNum->address), MAX_ADDRESS_LEN, tmresultNum, dataLen, langInfo);
     return true;
 }
 

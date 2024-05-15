@@ -408,13 +408,20 @@ int TextCoder::Gsm7bitToUtf8(
         TELEPHONY_LOGE("Gsm7bitToUtf8 memset_s error");
         return 0;
     }
-    TELEPHONY_LOGI("max dest Length = %{public}d", maxLength);
-    TELEPHONY_LOGI("srcLength = %{public}d", srcLength);
+    TELEPHONY_LOGI("max dest Length = %{public}d, srcLength = %{public}d", maxLength, srcLength);
     int ucs2Length =
         Gsm7bitToUcs2(reinterpret_cast<uint8_t *>(pUcs2Text), maxUcs2Length * sizeof(WCHAR), src, srcLength, langInfo);
     if (ucs2Length > maxLength) {
-        TELEPHONY_LOGE("src over size");
-        return 0;
+        // Usually, maxLength is a large number, like 1530, 4200. But when you decode the address, maxLength is only 21.
+        // (according to section 9/1/2/5 in 3gpp 23040). When the code is converted to UCS2, the length is doubled,
+        // that is, the length is greater than maxUcs2Length * sizeof(WCHAR) should be considered a failure.
+        // If the value of maxLength is large(1530 4200), and the first condition is met, this condition is also met,
+        // and there is no impact.
+        if (ucs2Length > static_cast<int>(maxUcs2Length * sizeof(WCHAR))) {
+            TELEPHONY_LOGI("src over size, ucs2Length = %{public}d, maxLength = %{public}d", ucs2Length,
+                static_cast<int>(maxUcs2Length * sizeof(WCHAR)));
+            return 0;
+        }
     }
     return Ucs2ToUtf8(dest, maxLength, reinterpret_cast<uint8_t *>(pUcs2Text), ucs2Length);
 }
@@ -934,6 +941,14 @@ uint16_t TextCoder::EscapeToUcs2(const uint8_t srcText, const MsgLangInfo &langI
         GetGsm7BitExtToUcs2(srcText, result);
     }
     return result;
+}
+
+WCHAR TextCoder::GetUCS2Value(uint32_t charset)
+{
+    if (charset < 0 || charset >= GSM7_DEFLIST_LEN) {
+        return 0;
+    }
+    return GSM7_BIT_TO_UC_S2[charset];
 }
 
 void TextCoder::GetTurkishSingleToUcs2(const uint8_t &srcText, uint16_t &result)

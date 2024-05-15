@@ -20,6 +20,7 @@
 #include "gsm_pdu_hex_value.h"
 #include "securec.h"
 #include "telephony_log_wrapper.h"
+#include "text_coder.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -147,6 +148,39 @@ bool GsmSmsCommonUtils::Unpack7bitChar(SmsReadBuffer &buffer, uint8_t dataLen, u
         shift--;
         if (shift > 0) {
             buffer.MoveForward(1);
+        }
+    }
+    return true;
+}
+
+bool GsmSmsCommonUtils::Unpack7bitCharForMiddlePart(const uint8_t *buffer, uint8_t dataLen, uint8_t *unpackData)
+{
+    if (buffer == nullptr || unpackData == nullptr || dataLen <= 0) {
+        TELEPHONY_LOGE("data error.");
+        return false;
+    }
+
+    bool flag = false;
+    for (int i = 0; i < dataLen; i++) {
+        uint8_t bitOffsetNumber = HEX_VALUE_07 * i;
+        uint8_t shiftNumber = bitOffsetNumber % HEX_VALUE_08;
+        uint8_t byteOffsetNumber = bitOffsetNumber / HEX_VALUE_08;
+        uint8_t currentValue = (HEX_VALUE_7F) & (buffer[byteOffsetNumber] >> shiftNumber);
+        if (shiftNumber > 1) {
+            currentValue &= HEX_VALUE_7F >> (shiftNumber - 1);
+            currentValue |= HEX_VALUE_7F & (buffer[byteOffsetNumber + 1] << (HEX_VALUE_08 - shiftNumber));
+        }
+        if (flag) {
+            if (currentValue == HEX_VALUE_1B) {
+                unpackData[i] = ' ';
+            } else {
+                unpackData[i] = TextCoder::Instance().GetUCS2Value(currentValue);
+            }
+            flag = false;
+        } else if (currentValue == HEX_VALUE_1B) {
+            flag = true;
+        } else {
+            unpackData[i] = TextCoder::Instance().GetUCS2Value(currentValue);
         }
     }
     return true;
