@@ -70,9 +70,8 @@ bool GsmSmsParamDecode::DecodeAddressAlphaNum(
     SmsReadBuffer &buffer, struct AddressNumber *resultNum, uint8_t bcdLen, uint8_t addrLen)
 {
     uint8_t tmresultNum[MAX_ADDRESS_LEN] = { 0 };
-    GsmSmsCommonUtils utils;
     uint8_t dataLen = (addrLen * HEX_VALUE_04) / HEX_VALUE_07;
-    TELEPHONY_LOGE("DecodeAddressAlphaNum, addrLen:%{public}d, dataLen: %{public}d", addrLen, dataLen);
+    TELEPHONY_LOGI("DecodeAddressAlphaNum, addrLen:%{public}d, dataLen: %{public}d", addrLen, dataLen);
     uint8_t addressPduArr[MAX_ADDRESS_LEN + 1] = { 0 };
     uint8_t oneByte = 0;
     if (!buffer.ReadByte(oneByte)) {
@@ -81,7 +80,7 @@ bool GsmSmsParamDecode::DecodeAddressAlphaNum(
     }
     uint32_t encodeLen = (addrLen % HEX_VALUE_02 == 0) ? (addrLen / HEX_VALUE_02) :
         (addrLen / HEX_VALUE_02 + HEX_VALUE_01);
-    TELEPHONY_LOGE("DecodeAddressAlphaNum, encodeLen %{public}d", encodeLen);
+    TELEPHONY_LOGI("DecodeAddressAlphaNum, encodeLen %{public}d", encodeLen);
     for (int i = 0; i < encodeLen; i++) {
         if (!buffer.ReadByte(oneByte)) {
             TELEPHONY_LOGE("get data error.");
@@ -89,7 +88,7 @@ bool GsmSmsParamDecode::DecodeAddressAlphaNum(
         }
         addressPduArr[i] = oneByte;
     }
-    if (!utils.Unpack7bitCharForMiddlePart(addressPduArr, dataLen, tmresultNum)) {
+    if (!GsmSmsCommonUtils::Unpack7bitCharForMiddlePart(addressPduArr, dataLen, tmresultNum)) {
         TELEPHONY_LOGE("unpack 7bit char error!");
         return false;
     }
