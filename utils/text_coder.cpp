@@ -417,9 +417,9 @@ int TextCoder::Gsm7bitToUtf8(
         // that is, the length is greater than maxUcs2Length * sizeof(WCHAR) should be considered a failure.
         // If the value of maxLength is large(1530 4200), and the first condition is met, this condition is also met,
         // and there is no impact.
-        if (ucs2Length > (int) (maxUcs2Length * sizeof(WCHAR))) {
-            TELEPHONY_LOGE("src over size, ucs2Length = %{public}d, maxLength = %{public}d", ucs2Length,
-                (int) (maxUcs2Length * sizeof(WCHAR)));
+        if (ucs2Length > static_cast<int> (maxUcs2Length * sizeof(WCHAR))) {
+            TELEPHONY_LOGI("src over size, ucs2Length = %{public}d, maxLength = %{public}d", ucs2Length,
+                static_cast<int>(maxUcs2Length * sizeof(WCHAR)));
             return 0;
         }
     }

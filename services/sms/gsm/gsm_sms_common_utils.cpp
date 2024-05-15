@@ -155,7 +155,7 @@ bool GsmSmsCommonUtils::Unpack7bitChar(SmsReadBuffer &buffer, uint8_t dataLen, u
 
 bool GsmSmsCommonUtils::Unpack7bitCharForMiddlePart(const uint8_t *buffer, uint8_t dataLen, uint8_t *unpackData)
 {
-    if (unpackData == nullptr || dataLen <= 0) {
+    if (buffer == nullptr || unpackData == nullptr || dataLen <= 0) {
         TELEPHONY_LOGE("data error.");
         return false;
     }
