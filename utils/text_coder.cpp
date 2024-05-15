@@ -417,9 +417,9 @@ int TextCoder::Gsm7bitToUtf8(
         // that is, the length is greater than maxUcs2Length * sizeof(WCHAR) should be considered a failure.
         // If the value of maxLength is large(1530 4200), and the first condition is met, this condition is also met,
         // and there is no impact.
-        if ((size_t) ucs2Length > maxUcs2Length * sizeof(WCHAR)) {
-            TELEPHONY_LOGE("src over size, ucs2Length = %{public}d, maxLength = %{public}lu", ucs2Length,
-                maxUcs2Length * sizeof(WCHAR));
+        if (ucs2Length > (int) maxUcs2Length * sizeof(WCHAR)) {
+            TELEPHONY_LOGE("src over size, ucs2Length = %{public}d, maxLength = %{public}d", ucs2Length,
+                (int) maxUcs2Length * sizeof(WCHAR));
             return 0;
         }
     }
@@ -943,7 +943,8 @@ uint16_t TextCoder::EscapeToUcs2(const uint8_t srcText, const MsgLangInfo &langI
     return result;
 }
 
-WCHAR TextCoder::GetUCS2Value(uint32_t charset) {
+WCHAR TextCoder::GetUCS2Value(uint32_t charset)
+{
     if (charset < 0 || charset >= GSM7_DEFLIST_LEN) {
         return 0;
     }
