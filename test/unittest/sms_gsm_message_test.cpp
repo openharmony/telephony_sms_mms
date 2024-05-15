@@ -63,6 +63,15 @@ void SmsGsmMessageTest::ProcessInput(int inputCMD, bool &loopFlag) const
         case 0x0a:
             Test7BitOtherSubmitSms();
             break;
+        case 0x0b:
+            Test7BitDeliverySms2();
+            break;
+        case 0x0c:
+            Test7BitDeliverySms3();
+            break;
+        case 0x0d:
+            Test7BitDeliverySms4();
+            break;
         default:
             loopFlag = false;
             break;
@@ -85,6 +94,9 @@ void SmsGsmMessageTest::ProcessTest() const
                      "8:TestSmsc00DeliverySms\r\n"
                      "9:TestMultiPage7bitSms\r\n"
                      "10:Test7BitOtherSubmitSms\r\n"
+                     "11:Test7BitDeliverySms2\r\n"
+                     "12:Test7BitDeliverySms3\r\n"
+                     "13:Test7BitDeliverySms4\r\n"
                      "Other key:exit \n\n";
 
         int inputCMD = 0;
@@ -315,6 +327,54 @@ void SmsGsmMessageTest::Test7BitOtherSubmitSms() const
         std::cout << "Test7BitOtherSubmitSms fail!!!" << std::endl;
     } else {
         std::cout << "Test7BitOtherSubmitSms success!!!" << std::endl;
+    }
+}
+
+void SmsGsmMessageTest::Test7BitDeliverySms2() const
+{
+    AccessMmsToken token;
+    std::vector<unsigned char> pdu = StringUtils::HexToByteVector("07915892208800F0040ED0A3F19CDD7A52A100084"
+       "24011119582235C4F60768400630073006C00200041007000704E006B2160275BC678BC70BA00340038003700330032003730025"
+       "98267097591554FFF0C8ACB806F7D6100630073006C670D52D971B17DDA003200350031003200330031003200333002");
+    ShortMessage *message = new ShortMessage();
+    ShortMessage::CreateMessage(pdu, u"3gpp", *message);
+    gsmMessage_ = std::unique_ptr<ShortMessage>(message);
+    if (gsmMessage_ == nullptr) {
+        std::cout << "Test7BitDeliverySms2 fail!!!" << std::endl;
+    } else {
+        std::cout << "Test7BitDeliverySms2 success!!!" << std::endl;
+    }
+}
+
+void SmsGsmMessageTest::Test7BitDeliverySms3() const
+{
+    AccessMmsToken token;
+    std::vector<unsigned char> pdu = StringUtils::HexToByteVector("07915892208800F00410D0A3F19CDD7A52A13400084"
+        "24011119582235C4F60768400630073006C00200041007000704E006B2160275BC678BC70BA003400380037003300320037300259"
+        "8267097591554FFF0C8ACB806F7D6100630073006C670D52D971B17DDA003200350031003200330031003200333002");
+    ShortMessage *message = new ShortMessage();
+    ShortMessage::CreateMessage(pdu, u"3gpp", *message);
+    gsmMessage_ = std::unique_ptr<ShortMessage>(message);
+    if (gsmMessage_ == nullptr) {
+        std::cout << "Test7BitDeliverySms3 fail!!!" << std::endl;
+    } else {
+        std::cout << "Test7BitDeliverySms3 success!!!" << std::endl;
+    }
+}
+
+void SmsGsmMessageTest::Test7BitDeliverySms4() const
+{
+    AccessMmsToken token;
+    std::vector<unsigned char> pdu = StringUtils::HexToByteVector("07915892208800F0040DD0A3F19CDD7A520100084"
+        "24011119582235C4F60768400630073006C00200041007000704E006B2160275BC678BC70BA0034003800370033003200373002"
+        "598267097591554FFF0C8ACB806F7D6100630073006C670D52D971B17DDA003200350031003200330031003200333002");
+    ShortMessage *message = new ShortMessage();
+    ShortMessage::CreateMessage(pdu, u"3gpp", *message);
+    gsmMessage_ = std::unique_ptr<ShortMessage>(message);
+    if (gsmMessage_ == nullptr) {
+        std::cout << "Test7BitDeliverySms4 fail!!!" << std::endl;
+    } else {
+        std::cout << "Test7BitDeliverySms4 success!!!" << std::endl;
     }
 }
 } // namespace Telephony

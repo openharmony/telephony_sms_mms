@@ -35,6 +35,9 @@ public:
     void TestSmsc00DeliverySms() const;
     void TestMultiPage7bitSms() const;
     void Test7BitOtherSubmitSms() const;
+    void Test7BitDeliverySms2() const;
+    void Test7BitDeliverySms3() const;
+    void Test7BitDeliverySms4() const;
 
 public:
     static std::unique_ptr<ShortMessage> gsmMessage_;

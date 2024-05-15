@@ -40,6 +40,7 @@ public:
     int Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);
     int EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength);
     int ShiftjisToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength) const;
+    WCHAR GetUCS2Value(uint32_t charset);
 
 private:
     TextCoder();

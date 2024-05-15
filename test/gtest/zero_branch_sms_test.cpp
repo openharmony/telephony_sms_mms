@@ -810,6 +810,45 @@ HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0003, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0004
+ * @tc.name     Test GsmSmsParamCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0004, Function | MediumTest | Level1) {
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    AddressNumber *pAddress = new AddressNumber();
+    std::string pdu = StringUtils::HexToString("16D131D98C56B3DD7039584C36A3D56C375C0E169301"); // D1, ton = 5
+    auto decodeBuffer = std::make_shared<SmsReadBuffer>(pdu);
+    EXPECT_TRUE(gsmSmsParamCodec->DecodeAddressPdu(*decodeBuffer, pAddress));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0005
+ * @tc.name     Test GsmSmsParamCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0005, Function | MediumTest | Level1) {
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    AddressNumber *pAddress = new AddressNumber();
+    std::string pdu = StringUtils::HexToString("16D131D98C56B3DD7039584A01"); // D1, ton = 5
+    auto decodeBuffer = std::make_shared<SmsReadBuffer>(pdu);
+    EXPECT_TRUE(gsmSmsParamCodec->DecodeAddressPdu(*decodeBuffer, pAddress));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0006
+ * @tc.name     Test GsmSmsParamCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0006, Function | MediumTest | Level1) {
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    AddressNumber *pAddress = new AddressNumber();
+    std::string pdu = StringUtils::HexToString("0ED0A3F19CDD7A52A1"); // D0, ton = 5
+    auto decodeBuffer = std::make_shared<SmsReadBuffer>(pdu);
+    EXPECT_TRUE(gsmSmsParamCodec->DecodeAddressPdu(*decodeBuffer, pAddress));
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_GsmSmsUDataCodec_0001
  * @tc.name     Test GsmUserDataPdu
  * @tc.desc     Function test
