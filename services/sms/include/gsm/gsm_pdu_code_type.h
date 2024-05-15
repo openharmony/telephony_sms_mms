@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Telephony {
-// According to 3GPP 23040 9.1.2.5, the maximum address length (including AddressLength, TypeofAddress, AddressValue)
+// According to 3GPP 23040 9/1/2/5, the maximum address length (including AddressLength, TypeofAddress, AddressValue)
 // is 12 octets. The maximum length of AddressLength and TypeofAddress is 1 byte, so the maximum length of AddressValue
 // is 10 bytes (including '\0'). The total length is 21 bytes.
 static constexpr uint8_t MAX_ADDRESS_LEN = 21;
