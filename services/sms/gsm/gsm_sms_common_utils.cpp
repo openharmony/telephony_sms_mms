@@ -174,13 +174,13 @@ bool GsmSmsCommonUtils::Unpack7bitCharForMiddlePart(const uint8_t *buffer, uint8
             if (currentValue == HEX_VALUE_1B) {
                 unpackData[i] = ' ';
             } else {
-                unpackData[i] = TextCoder::Instance().getUCS2Value(currentValue);
+                unpackData[i] = TextCoder::Instance().GetUCS2Value(currentValue);
             }
             flag = false;
         } else if (currentValue == HEX_VALUE_1B) {
             flag = true;
         } else {
-            unpackData[i] = TextCoder::Instance().getUCS2Value(currentValue);
+            unpackData[i] = TextCoder::Instance().GetUCS2Value(currentValue);
         }
     }
     return true;
