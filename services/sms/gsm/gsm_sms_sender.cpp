@@ -199,7 +199,7 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     smsData.pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
 
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
-    if (satelliteSmsClient.GetSatelliteCapability() > 0 && satelliteSmsClient.IsSatelliteEnabled()) {
+    if (satelliteSmsClient.IsSatelliteEnabled()) {
         TELEPHONY_LOGI("send sms through satellite");
         SendSatelliteSms(smsIndexer, smsData);
         return;
