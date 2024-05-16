@@ -183,7 +183,7 @@ bool GsmUserDataDecode::Decode8bitPdu(
     /* Setting for Wap Push */
     if (pTPUD != nullptr && udl > WAP_PUSH_UDHL) {
         pTPUD->udl = udl - WAP_PUSH_UDHL;
-        if (pTPUD->udl > sizeof(pTPUD->ud)) {
+        if (pTPUD->udl >= sizeof(pTPUD->ud)) {
             TELEPHONY_LOGE("udl length error");
             return false;
         }
