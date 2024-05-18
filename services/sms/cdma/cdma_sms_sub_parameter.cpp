@@ -615,7 +615,7 @@ uint8_t CdmaSmsUserData::DecodeHeader7Bit(SmsReadBuffer &pdu)
         uint8_t index = 0;
         GsmUserDataPdu gsmUdPdu;
         for (uint8_t i = 0; index < udhBytes; i++) {
-            if (static_cast<unsigned long>(i) > (sizeof(data_.userData.header) / sizeof(data_.userData.header[0]))) {
+            if (static_cast<unsigned long>(i) >= (sizeof(data_.userData.header) / sizeof(data_.userData.header[0]))) {
                 TELEPHONY_LOGE("user data header length error");
                 return 0;
             }
@@ -1422,7 +1422,7 @@ bool CdmaSmsEnhancedVmn::DecodeCallingPartyNumber(SmsReadBuffer &pdu)
             TELEPHONY_LOGE("number plan or num field read error");
             return false;
         }
-        if (static_cast<unsigned long>(vmn_.cliNumField) > (sizeof(vmn_.cliChar) / sizeof(vmn_.cliChar[0]))) {
+        if (static_cast<unsigned long>(vmn_.cliNumField) >= (sizeof(vmn_.cliChar) / sizeof(vmn_.cliChar[0]))) {
             TELEPHONY_LOGE("enhancedVmn data length invalid.");
             return false;
         }
@@ -1439,7 +1439,7 @@ bool CdmaSmsEnhancedVmn::DecodeCallingPartyNumber(SmsReadBuffer &pdu)
             TELEPHONY_LOGE("num field read error");
             return false;
         }
-        if (static_cast<unsigned long>(vmn_.cliNumField) > (sizeof(vmn_.cliChar) / sizeof(vmn_.cliChar[0]))) {
+        if (static_cast<unsigned long>(vmn_.cliNumField) >= (sizeof(vmn_.cliChar) / sizeof(vmn_.cliChar[0]))) {
             TELEPHONY_LOGE("enhancedVmn data length invalid.");
             return false;
         }
