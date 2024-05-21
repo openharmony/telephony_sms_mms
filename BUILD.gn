@@ -131,6 +131,7 @@ ohos_shared_library("tel_sms_mms") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "//third_party/curl:curl_share",
     "ability_runtime:ability_manager",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
