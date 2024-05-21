@@ -99,6 +99,8 @@ public:
     virtual int32_t GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &lenInfo);
     virtual int GetMaxSegmentSize(
         DataCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
+    virtual void SplitMessageUcs2(std::vector<struct SplitInfo> &splitResult, const uint8_t* decodeData,
+        int32_t encodeLen, int32_t segSize, DataCodingScheme &codingType);
 
 protected:
     constexpr static int16_t MAX_MSG_TEXT_LEN = 1530;

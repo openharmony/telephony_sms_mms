@@ -21,6 +21,10 @@
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 #include "text_coder.h"
+#include "unicode/brkiter.h"
+#include "unicode/rbbi.h"
+#include "unicode/unistr.h"
+#include "unicode/ucnv.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -394,6 +398,74 @@ void SmsBaseMessage::ConvertSpiltToUtf8(SplitInfo &split, const DataCodingScheme
     split.text.insert(0, reinterpret_cast<char *>(buff), dataSize);
     TELEPHONY_LOGI("split text");
 }
+void SmsBaseMessage::SplitMessageUcs2(std::vector<struct SplitInfo> &splitResult, const uint8_t* decodeData,
+    int32_t encodeLen, int32_t segSize, DataCodingScheme &codingType)
+{
+    // this 3 para divide 2 because breakiterator class is init by a uint16_t pointer.
+    int32_t utf16Multiples = 2;
+    int32_t dataSize = encodeLen / utf16Multiples;
+    int32_t segSizeHalf = segSize / utf16Multiples;
+    int32_t index = 0;
+    int32_t oneByte = 1;
+    int32_t bits = 8;
+    MSG_LANGUAGE_ID_T langId = MSG_ID_RESERVED_LANG;
+    /*
+     * decodeData is uint8_t array, in order to init breakiterator class, need a uint16_t array. sample:[0xa0,0xa1,
+     * 0xa2,0xa3] become [0xa1a2,0xa3a4]
+     */
+    uint16_t decodeData16Bit[dataSize];
+    for (int i = 0; i < dataSize; i++) {
+        decodeData16Bit[i] = (decodeData[i * utf16Multiples] << bits) | decodeData[i * utf16Multiples + oneByte];
+    }
+    /*
+     * init breakiterator class. attention: createCharacterInstance is a factory method, in fact breakiterator is
+     * a pure abstract class, this fuction creat a object of subclass rulebasedbreakiterator.
+     */
+    icu::UnicodeString fullData(decodeData16Bit, dataSize);
+    UErrorCode status = U_ZERO_ERROR;
+    icu::BreakIterator* fullDataIter = icu::BreakIterator::createCharacterInstance(NULL, status);
+    if (U_FAILURE(status)) {
+        TELEPHONY_LOGE("Failed to create break iterator");
+        return;
+    }
+    // let breakiterator object point data need to operate
+    fullDataIter->setText(fullData);
+    // let iterator point zero element
+    fullDataIter->first();
+    // operation of segment except the last one, such as a pdu is devide to 3 segment, 1 and 2 are operated under.
+    while ((dataSize - index) > segSizeHalf) {
+        // init struct to store data
+        struct SplitInfo splitInfo;
+        splitInfo.langId = langId;
+        splitInfo.encodeType = codingType;
+        /*
+         * judge if the end of this segment is boundary, if it is boundary, store number of segsize data in struct
+         * and move the index agter this boundary to be the head of next segment
+         * if it is not boundary, use previous function or next function(set the para to -1)to find the previous
+         * boundary before end of segment
+         */
+        if (fullDataIter->isBoundary(index + segSizeHalf)) {
+            splitInfo.encodeData = std::vector<uint8_t>(&decodeData[index * utf16Multiples],
+                &decodeData[index * utf16Multiples] + segSize);
+            index += segSizeHalf;
+        } else {
+            splitInfo.encodeData = std::vector<uint8_t>(&decodeData[index * utf16Multiples],
+                &decodeData[index * utf16Multiples] + (fullDataIter->previous() - index) * utf16Multiples);
+            index = fullDataIter->current();
+        }
+        ConvertSpiltToUtf8(splitInfo, codingType);
+        splitResult.push_back(splitInfo);
+        fullDataIter->first();
+    }
+    // operation of last segment
+    struct SplitInfo splitInfo;
+    splitInfo.langId = langId;
+    splitInfo.encodeType = codingType;
+    splitInfo.encodeData = std::vector<uint8_t>(&decodeData[index * utf16Multiples],
+        &decodeData[index * utf16Multiples] + (dataSize - index) * utf16Multiples);
+    ConvertSpiltToUtf8(splitInfo, codingType);
+    splitResult.push_back(splitInfo);
+}
 
 void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text,
     bool force7BitCode, DataCodingScheme &codingType, bool bPortNum, const std::string &desAddr)
@@ -412,10 +484,12 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
     if (CT_SMSC.compare(desAddr) == 0) {
         codingType = DATA_CODING_8BIT;
     }
-    // src is utf-8 code, DecodeMessage function aim to trans the src to dest unicode method depend on above operation
-    // encodeLen means the data length agter trans(although the dest unicode method is ucs2 or utf16, the length is the
-    // count of uint8_t) such as utf8 is 0x41, trans utf16 is 0x00,0x41, the length is 2
-    // after DecodeMessage function, the codingType will become DATA_CODING_UCS2 although before is DATA_CODING_AUTO
+    /*
+     * src is utf-8 code, DecodeMessage function aim to trans the src to dest unicode method depend on above operation
+     * encodeLen means the data length agter trans(although the dest unicode method is ucs2 or utf16, the length is the
+     * count of uint8_t) such as utf8 is 0x41, trans utf16 is 0x00,0x41, the length is 2
+     * after DecodeMessage function, the codingType will become DATA_CODING_UCS2 although before is DATA_CODING_AUTO
+     */
     encodeLen = DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
     if (encodeLen <= 0) {
         TELEPHONY_LOGE("encodeLen Less than or equal to 0");
@@ -428,65 +502,13 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
     if (segSize > 0) {
         segCount = ceil((double)encodeLen / (double)segSize);
     }
-    // under code is a special condition: the length of pdu data is over segSize conculated above and codingType is utf16(
-    // although the codingType displayed is ucs2). because in this condition a emoji(takeover 4 bytes in utf16) may be cut
-    // in 2 parts(first 2 byte in segment1 and end 2 byte in segment 2), under code will avoid this situation.
+    /*
+     * under code is a special condition: the length of pdu data is over segSize conculated above and codingType is
+     * utf16(although the codingType displayed is ucs2). because in this condition a emoji(takeover 4 bytes in utf16)
+     * may be cut in 2 parts(first 2 byte in segment1 and last 2 in segment 2), under code will avoid this situation.
+     */
     if (codingType == DATA_CODING_UCS2 && segCount > 1) {
-        // this 3 para divide 2 because breakiterator class is init by a uint16_t pointer.
-        int32_t utf16Multiples = 2;
-        int32_t dataSize = encodeLen / utf16Multiples;
-        int32_t segSizeHalf = segSize / utf16Multiples;
-        int32_t index = 0;
-        // decodeData is uint8_t array, in order to init breakiterator class, need a uint16_t array. sample:[0xa0,0xa1,
-        // 0xa2,0xa3] become [0xa1a2,0xa3a4]
-        uint16_t decodeData16[dataSize];
-        for (int i = 0; i < dataSize; i++) {
-            decodeData16[i] = (decodeData[i * utf16Multiples] << 8) | decodeData[i * utf16Multiples + 1];
-        }
-        // init breakiterator class. attention: createCharacterInstance is the factory method, in fact breakiterator is 
-        // a pure abstract class, this fuction creat a object of subclass rulebasedbreakiterator.
-        icu::UnicodeString fullData(decodeData16, dataSize);
-        UErrorCode status = U_ZERO_ERROR;
-        icu::BreakIterator* fullDataIter = icu::BreakIterator::createCharacterInstance(NULL, status);
-        if (U_FAILURE(status)) {
-            TELEPHONY_LOGE("Failed to create break iterator");
-            return;
-        }
-        // let breakiterator object point data need to operate
-        fullDataIter->setText(fullData);
-        // let iterator point zero element
-        fullDataIter->first();
-        // operation of segment except the last one, such as a pdu is devide to 3 segment, 1 and 2 are operated under.
-        while ((dataSize - index) > segSizeHalf) {
-            // init struct to store data
-            struct SplitInfo splitInfo;
-            splitInfo.langId = langId;
-            splitInfo.encodeType = codingType;
-            // judge if the end of this segment is boundary, if it is boundary, store number of segsize data in struct and
-            // move the index agter this boundary to be the head of next segment
-            // if it is not boundary, use previous function or next function(set the para to -1)to find the previous
-            // boundary before end of segment
-            if (fullDataIter->isBoundary(index + segSizeHalf)) {
-                splitInfo.encodeData = std::vector<uint8_t>(&decodeData[index * utf16Multiples],
-                    &decodeData[index * utf16Multiples] + segsize);
-                index += segSizeHalf;
-            } else {
-                splitInfo.encodeData = std::vector<uint8_t>(&decodeData[index * utf16Multiples],
-                    &decodeData[index * utf16Multiples] + (fullDataIter->previous() - index) * utf16Multiples);
-                index = fullDataIter->current();
-            }
-            ConvertSpiltToUtf8(splitInfo, codingType);
-            splitResult.push_back(splitInfo);
-            fullDataIter->first();
-        }
-        // operation of last segment
-        struct SplitInfo splitInfo;
-        splitInfo.langId = langId;
-        splitInfo.encodeType = codingType;
-        splitInfo.encodeData = std::vector<uint8_t>(&decodeData[index * utf16Multiples],
-            &decodeData[index * utf16Multiples] + (dataSize - index) * utf16Multiples);
-        ConvertSpiltToUtf8(splitInfo, codingType);
-        splitResult.push_back(splitInfo);
+        SplitMessageUcs2(splitResult, decodeData, encodeLen, segSize, codingType);
     } else {
         int32_t index = 0;
         for (int i = 0; i < segCount; i++) {

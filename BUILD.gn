@@ -119,8 +119,6 @@ ohos_shared_library("tel_sms_mms") {
     "//third_party/libphonenumber/cpp/src",
     "//third_party/libphonenumber/cpp/src/phonenumbers",
     "//third_party/protobuf/src",
-    "//third_party/icu/icu4c/source/common",
-    "//third_party/icu/icu4c/source/common/unicode",
   ]
 
   deps = [
@@ -143,6 +141,8 @@ ohos_shared_library("tel_sms_mms") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "icu:shared_icui18n",
+    "icu:shared_icuuc",
     "ipc:ipc_single",
     "netmanager_base:net_conn_manager_if",
     "netstack:http_client",
