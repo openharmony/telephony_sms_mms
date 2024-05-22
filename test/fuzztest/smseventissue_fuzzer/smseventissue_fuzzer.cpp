@@ -128,6 +128,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
         return;
     }
     smsSendManager->Init();
+    smsSendManager->InitNetworkHandle();
     if (smsSendManager->gsmSmsSender_ == nullptr || smsSendManager->cdmaSmsSender_ == nullptr) {
         return;
     }
