@@ -78,6 +78,7 @@ void SetCBConfigFuzz(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
+    interfaceManager->InitInterfaceManager();
     interfaceManager->SetCBConfig(enable, fromMsgId, toMsgId, netType);
 
     std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(slotId);
@@ -111,12 +112,14 @@ void SetImsSmsConfigFuzz(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
+    interfaceManager->InitInterfaceManager();
     interfaceManager->SetImsSmsConfig(slotId, enable);
 
     auto smsSendManager = std::make_shared<SmsSendManager>(slotId);
     if (smsSendManager == nullptr) {
         return;
     }
+    smsSendManager->Init();
     smsSendManager->SetImsSmsConfig(slotId, enable);
 }
 
