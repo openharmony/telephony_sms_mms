@@ -67,6 +67,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
         return;
     }
     smsSendManager->Init();
+    smsSendManager->InitNetworkHandle();
     smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
 
     if (smsSendManager->gsmSmsSender_ != nullptr) {

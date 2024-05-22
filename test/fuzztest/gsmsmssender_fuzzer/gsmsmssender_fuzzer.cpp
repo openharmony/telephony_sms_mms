@@ -100,6 +100,7 @@ void AddSimMessage(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr");
         return;
     }
+    interfaceManager->InitInterfaceManager();
     interfaceManager->AddSimMessage(smsc, pdu, status);
 
     std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(slotId);
@@ -130,6 +131,7 @@ void HasSmsCapability(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
+    interfaceManager->InitInterfaceManager();
     interfaceManager->HasSmsCapability();
 }
 
@@ -224,6 +226,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     HasSmsCapability(data, size);
     SendSmsTest(data, size);
     SendSmsTest2(data, size);
+    DelayedSingleton<ImsSmsClient>::GetInstance()->Init();
     DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
     DelayedSingleton<ImsSmsClient>::DestroyInstance();
     sleep(SLEEP_TIME_SECONDS);

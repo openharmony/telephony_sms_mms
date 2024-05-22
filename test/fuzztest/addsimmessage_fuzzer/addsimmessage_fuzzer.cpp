@@ -85,6 +85,8 @@ void GetAllSimMessages(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr");
         return;
     }
+
+    interfaceManager->InitInterfaceManager();
     std::vector<ShortMessage> message;
     interfaceManager->GetAllSimMessages(message);
 
@@ -125,6 +127,7 @@ void AddSimMessage(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr");
         return;
     }
+    interfaceManager->InitInterfaceManager();
     interfaceManager->AddSimMessage(smsc, pdu, status);
 
     std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(slotId);
@@ -156,6 +159,7 @@ void DelSimMessage(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr");
         return;
     }
+    interfaceManager->InitInterfaceManager();
     interfaceManager->DelSimMessage(index);
 
     std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(slotId);
@@ -186,6 +190,7 @@ void HasSmsCapability(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
+    interfaceManager->InitInterfaceManager();
     interfaceManager->HasSmsCapability();
 }
 

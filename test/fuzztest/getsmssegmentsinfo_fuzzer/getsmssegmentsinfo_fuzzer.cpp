@@ -70,6 +70,7 @@ void GetSmsSegmentsInfo(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
+    interfaceManager->InitInterfaceManager();
     LengthInfo lenInfo;
     interfaceManager->GetSmsSegmentsInfo(message, force7BitCode, lenInfo);
 
@@ -78,6 +79,8 @@ void GetSmsSegmentsInfo(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("failed to create SmsSendManager");
         return;
     }
+    smsSendManager->Init();
+    smsSendManager->InitNetworkHandle();
     smsSendManager->GetSmsSegmentsInfo(message, force7BitCode, lenInfo);
     CdmaSmsMessage cdmaSmsMessage;
     cdmaSmsMessage.GetSmsSegmentsInfo(message, force7BitCode, lenInfo);
@@ -105,13 +108,17 @@ void IsImsSmsSupported(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
+    interfaceManager->InitInterfaceManager();
     bool isSupported = false;
     interfaceManager->IsImsSmsSupported(slotId, isSupported);
+    
     auto smsSendManager = std::make_unique<SmsSendManager>(slotId);
     if (smsSendManager == nullptr) {
         TELEPHONY_LOGE("failed to create SmsSendManager");
         return;
     }
+    smsSendManager->Init();
+    smsSendManager->InitNetworkHandle();
     smsSendManager->IsImsSmsSupported(slotId, isSupported);
 }
 
@@ -257,6 +264,28 @@ void GetEncodeStringFunc(const uint8_t *data, size_t size)
     DelayedSingleton<SmsService>::GetInstance()->OnGetEncodeStringFunc(dataParcel, replyParcel, option);
 }
 
+void SendMMSAndDownloadMMS(const uint8_t* data, size_t size)
+{
+    int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
+    std::string message(reinterpret_cast<const char *>(data), size);
+
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager nullptr error");
+        return;
+    }
+
+    interfaceManager->InitInterfaceManager();
+    
+    std::u16string mmsc = Str8ToStr16(message);
+    std::u16string msg = Str8ToStr16(message);
+    std::u16string ua = Str8ToStr16(message);
+    std::u16string uaprof = Str8ToStr16(message);
+
+    interfaceManager->SendMms(mmsc, msg, ua, uaprof);
+    interfaceManager->DownloadMms(mmsc, msg, ua, uaprof);
+}
+
 void HighRiskInterface(const uint8_t *data, size_t size)
 {
     if (!IsServiceInited()) {
@@ -304,6 +333,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     GetBase64Decode(data, size);
     GetEncodeStringFunc(data, size);
     HighRiskInterface(data, size);
+    SendMMSAndDownloadMMS(data, size);
     DelayedSingleton<SmsService>::DestroyInstance();
 }
 }  // namespace OHOS
