@@ -74,6 +74,7 @@ void UpdateSimMessage(const uint8_t *data, size_t size)
         TELEPHONY_LOGE("interfaceManager nullptr error");
         return;
     }
+    interfaceManager->InitInterfaceManager();
     interfaceManager->UpdateSimMessage(size, status, pdu, smsc);
 
     std::shared_ptr<SmsMiscManager> smsMiscManager = std::make_shared<SmsMiscManager>(slotId);
