@@ -141,6 +141,8 @@ ohos_shared_library("tel_sms_mms") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "icu:shared_icui18n",
+    "icu:shared_icuuc",
     "ipc:ipc_single",
     "netmanager_base:net_conn_manager_if",
     "netstack:http_client",
