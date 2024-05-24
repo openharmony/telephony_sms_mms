@@ -41,7 +41,7 @@ ohos_fuzztest("SendMessageFuzzTest") {
   ]
 
   external_deps = [
-    "//third_party/curl:curl_shared",
+    "curl:curl_shared",
     "ability_runtime:ability_manager",
     "ability_runtime:data_ability_helper",
     "access_token:libaccesstoken_sdk",

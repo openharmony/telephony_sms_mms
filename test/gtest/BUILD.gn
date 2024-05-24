@@ -58,7 +58,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
-    "//third_party/curl:curl_shared",
+    "curl:curl_shared",
     "ability_runtime:ability_manager",
     "ability_runtime:data_ability_helper",
     "access_token:libaccesstoken_sdk",
