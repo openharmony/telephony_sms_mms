@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 
-import {AsyncCallback} from "./basic";
+/**
+ * @file
+ * @kit TelephonyKit
+ */
+
+import type { AsyncCallback } from './@ohos.base';
 import type Context from './application/BaseContext';
 
 /**
@@ -34,7 +39,7 @@ declare namespace sms {
    * @param { string } content - Indicates the short message content, which cannot be {@code null}.
    * @param { AsyncCallback<Array<string>> } callback - Indicates the callback for getting a list of split segments,
    * which can be combined into a complete SMS message;
-   * returns an empty string if no permission is granted or the short message content is {@code null}.
+   * Returns an empty string if no permission is granted or the short message content is {@code null}.
    * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
    * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
@@ -58,7 +63,7 @@ declare namespace sms {
    * @permission ohos.permission.SEND_MESSAGES
    * @param { string } content - Indicates the short message content, which cannot be {@code null}.
    * @returns { Promise<Array<string>> } Returns a list of split segments, which can be combined into a complete SMS
-   * message; returns an empty string if no permission is granted or the short message content is {@code null}.
+   * message; Returns an empty string if no permission is granted or the short message content is {@code null}.
    * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
    * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
@@ -233,7 +238,7 @@ declare namespace sms {
    * @param { AsyncCallback<number> } callback - Indicates the callback for getting the default SIM card for sending SMS
    * messages.
    * Returns {@code 0} if the default SIM card for sending SMS messages is in card slot 1;
-   * returns {@code 1} if the default SIM card for sending SMS messages is in card slot 2.
+   * Returns {@code 1} if the default SIM card for sending SMS messages is in card slot 2.
    * @syscap SystemCapability.Telephony.SmsMms
    * @since 7
    */
@@ -243,7 +248,7 @@ declare namespace sms {
    * Obtains the default SIM card for sending SMS messages.
    *
    * @returns { Promise<number> } Returns {@code 0} if the default SIM card for sending SMS messages is in card slot 1;
-   * returns {@code 1} if the default SIM card for sending SMS messages is in card slot 2.
+   * Returns {@code 1} if the default SIM card for sending SMS messages is in card slot 2.
    * @syscap SystemCapability.Telephony.SmsMms
    * @since 7
    */
@@ -335,7 +340,7 @@ declare namespace sms {
    * Returns whether a device is capable of sending and receiving SMS messages.
    *
    * @returns { boolean } Returns {@code true} if the device is capable of sending and receiving SMS messages;
-   * returns {@code false} otherwise.
+   * Returns {@code false} otherwise.
    * @syscap SystemCapability.Telephony.SmsMms
    * @since 7
    */
@@ -442,7 +447,6 @@ declare namespace sms {
    * @syscap SystemCapability.Telephony.SmsMms
    * @systemapi Hide this for inner system use.
    * @since 7
-   * @deprecated since 11
    */
   function updateSimMessage(options: UpdateSimMessageOptions, callback: AsyncCallback<void>): void;
 
@@ -463,7 +467,6 @@ declare namespace sms {
    * @syscap SystemCapability.Telephony.SmsMms
    * @systemapi Hide this for inner system use.
    * @since 7
-   * @deprecated since 11
    */
   function updateSimMessage(options: UpdateSimMessageOptions): Promise<void>;
 
@@ -553,14 +556,12 @@ declare namespace sms {
   /**
    * Get an SMS segment encode relation information.
    *
-   * @permission ohos.permission.GET_TELEPHONY_STATE
    * @param { number } slotId - Indicates the card slot index number, ranging from 0 to the maximum card slot index
    * number supported by the device.
    * @param { string } message - Indicates short message.
    * @param { boolean } force7bit - Indicates whether to use 7 bit encoding.
    * @param { AsyncCallback<SmsSegmentsInfo> } callback - Indicates the callback for getting a {@code SmsSegmentsInfo}
    * object.
-   * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
    * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
    * Incorrect parameter types. 3. Parameter verification failed.
@@ -577,13 +578,11 @@ declare namespace sms {
   /**
    * Get an SMS segment encode relation information.
    *
-   * @permission ohos.permission.GET_TELEPHONY_STATE
    * @param { number } slotId - Indicates the card slot index number, ranging from 0 to the maximum card slot index
    * number supported by the device.
    * @param { string } message - Indicates short message.
    * @param { boolean } force7bit - Indicates whether to use 7 bit encoding.
    * @returns { Promise<SmsSegmentsInfo> } Returns a {@code SmsSegmentsInfo} object.
-   * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
    * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
    * Incorrect parameter types. 3. Parameter verification failed.
@@ -639,9 +638,7 @@ declare namespace sms {
   /**
    * Gets SMS format supported on IMS. SMS over IMS format is either 3GPP or 3GPP2.
    *
-   * @permission ohos.permission.GET_TELEPHONY_STATE
    * @param { AsyncCallback<string> } callback - Indicates the callback for getting format, 3gpp, 3gpp2 or unknown.
-   * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
    * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
    * Incorrect parameter types.
@@ -658,9 +655,7 @@ declare namespace sms {
   /**
    * Gets SMS format supported on IMS. SMS over IMS format is either 3GPP or 3GPP2.
    *
-   * @permission ohos.permission.GET_TELEPHONY_STATE
    * @returns { Promise<string> } Returns format, 3gpp, 3gpp2 or unknown.
-   * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
    * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
    * @throws { BusinessError } 8300003 - System internal error.
@@ -1975,87 +1970,6 @@ declare namespace sms {
   }
 
   /**
-   * Enumerates MMS fail code.
-   *
-   * @enum { number }
-   * @syscap SystemCapability.Telephony.SmsMms
-   * @since 9
-   */
-  export enum MmsFailCode {
-    /**
-     * Indicates that no error occurred during send or download MMS.
-     *
-     * @syscap SystemCapability.Telephony.SmsMms
-     * @since 9
-     */
-    MMS_FAIL_NONE_ERROR = 0,
-
-    /**
-     * Indicates an unknown error occurred during send or download MMS.
-     *
-     * @syscap SystemCapability.Telephony.SmsMms
-     * @since 9
-     */
-    MMS_FAIL_UNKNOWN_ERROR,
-
-    /**
-     * Indicates an apn invalid error occurred during the MMS network setup.
-     *
-     * @syscap SystemCapability.Telephony.SmsMms
-     * @since 9
-     */
-    MMS_FAIL_APN_INVALID,
-
-    /**
-     * Indicates an error occurred during the MMS connection setup.
-     *
-     * @syscap SystemCapability.Telephony.SmsMms
-     * @since 9
-     */
-    MMS_FAIL_CONNECT_MMS_ERROR,
-
-    /**
-     * Indicates an error occurred during the HTTP client setup.
-     *
-     * @syscap SystemCapability.Telephony.SmsMms
-     * @since 9
-     */
-    MMS_FAIL_HTTP_ERROR,
-
-    /**
-     * Indicates an I/O error occurred during reading the PDU.
-     *
-     * @syscap SystemCapability.Telephony.SmsMms
-     * @since 9
-     */
-    MMS_FAIL_IO_ERROR,
-
-    /**
-     * Indicates an error occurred while retrying sending or downloading the MMS.
-     *
-     * @syscap SystemCapability.Telephony.SmsMms
-     * @since 9
-     */
-    MMS_FAIL_RETRY_ERROR,
-
-    /**
-     * Indicates that the MMS configuration values could not be loaded.
-     *
-     * @syscap SystemCapability.Telephony.SmsMms
-     * @since 9
-     */
-    MMS_FAIL_CONFIGURATION_ERROR,
-
-    /**
-     * Indicates that there is no data network for MMS.
-     *
-     * @syscap SystemCapability.Telephony.SmsMms
-     * @since 9
-     */
-    MMS_FAIL_DATA_NETWORK_ERROR,
-  }
-
-  /**
    * Enumerates MMS message priorities.
    *
    * @enum { number }
@@ -2456,7 +2370,6 @@ declare namespace sms {
    * @syscap SystemCapability.Telephony.SmsMms
    * @systemapi Hide this for inner system use.
    * @since 7
-   * @deprecated since 11
    */
   export interface UpdateSimMessageOptions {
     /**
@@ -2466,7 +2379,6 @@ declare namespace sms {
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
-     * @deprecated since 11
      */
     slotId: number;
 
@@ -2477,7 +2389,6 @@ declare namespace sms {
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
-     * @deprecated since 11
      */
     msgIndex: number;
 
@@ -2488,7 +2399,6 @@ declare namespace sms {
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
-     * @deprecated since 11
      */
     newStatus: SimMessageStatus;
 
@@ -2499,7 +2409,6 @@ declare namespace sms {
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
-     * @deprecated since 11
      */
     pdu: string;
 
@@ -2510,7 +2419,6 @@ declare namespace sms {
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7
-     * @deprecated since 11
      */
     smsc: string;
   }
