@@ -20,8 +20,8 @@
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "string_utils.h"
-#include "telephony_log_wrapper.h"
 #include "telephony_ext_wrapper.h"
+#include "telephony_log_wrapper.h"
 #include "text_coder.h"
 
 namespace OHOS {
