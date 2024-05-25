@@ -21,6 +21,7 @@
 #include "sms_common_utils.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
+#include "telephony_ext_wrapper.h"
 #include "text_coder.h"
 
 namespace OHOS {
@@ -30,6 +31,7 @@ static constexpr uint8_t GSM_CB_HEADER_LEN = 6;
 static constexpr uint16_t MAX_CB_MSG_LEN = 4200;
 static constexpr uint8_t MAX_PAGE_PDU_LEN = 82;
 static constexpr uint8_t CB_FORMAT_3GPP = 1;
+static constexpr uint16_t OTHER_TYPE = -2;
 static constexpr uint16_t ETWS_TYPE = 0x1100;
 static constexpr uint16_t ETWS_TYPE_MASK = 0xFFF8;
 static constexpr uint16_t CMAS_FIRST_ID = 0x1112;

@@ -32,6 +32,7 @@ public:
     static std::u16string ToUtf16(const std::string &str);
     static std::string StringToHex(const std::vector<uint8_t> &data);
     static std::vector<uint8_t> HexToByteVector(const std::string &str);
+    static bool IsEmpty(const std::string &str);
 
 private:
     StringUtils();

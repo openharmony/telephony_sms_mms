@@ -23,6 +23,7 @@ config("tel_sms_mms_config") {
     "services/sms/include/gsm",
     "services/sms/include/satellite",
     "services/mms/include",
+    "services/telephony_ext_wrapper/include",
   ]
 }
 
@@ -103,6 +104,7 @@ ohos_shared_library("tel_sms_mms") {
     "services/sms/sms_wap_push_buffer.cpp",
     "services/sms/sms_wap_push_content_type.cpp",
     "services/sms/sms_wap_push_handler.cpp",
+    "services/telephony_ext_wrapper/src/telephony_ext_wrapper.cpp",
     "utils/sms_common_utils.cpp",
     "utils/sms_hisysevent.cpp",
     "utils/string_utils.cpp",
@@ -160,6 +162,14 @@ ohos_shared_library("tel_sms_mms") {
 
   if (is_standard_system) {
     external_deps += [ "init:libbegetutil" ]
+  }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.telephony_telephony_enhanced) &&
+      global_parts_info.telephony_telephony_enhanced) {
+    print(
+        "telephony_telephony_enhanced = ${global_parts_info.telephony_telephony_enhanced}")
+    defines += [ "OHOS_BUILD_ENABLE_TELEPHONY_EXT" ]
   }
 
   part_name = "sms_mms"

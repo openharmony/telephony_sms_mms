@@ -132,5 +132,14 @@ std::u16string StringUtils::ToUtf16(const std::string &str)
     }
     return Str8ToStr16(str);
 }
+
+bool StringUtils::IsEmpty(const std::string &str)
+{
+    if (str.empty()) {
+        return true;
+    }
+    std::string strTemp = TrimStr(str);
+    return strTemp.empty() || strlen(strTemp.c_str()) == 0;
+}
 } // namespace Telephony
 } // namespace OHOS
