@@ -324,7 +324,7 @@ bool GsmSmsCbHandler::SetWantData(EventFwk::Want &want, const std::shared_ptr<Gs
     cbMessage->ConvertToUTF8(rawMsgBody, sendData.msgBody);
     TELEPHONY_LOGI("msgBody:%{public}s.", sendData.msgBody.c_str());
     PackageWantData(sendData, want);
-    if (sendData.isPrimary && !sendData.msgBody.empty()) {
+    if (sendData.isPrimary && !StringUtils::IsEmpty(sendData.msgBody)) {
         TELEPHONY_LOGI("secondary cb msg");
         sendData.isPrimary = false;
         want.SetParam(SmsCbData::IS_ETWS_PRIMARY, sendData.isPrimary);

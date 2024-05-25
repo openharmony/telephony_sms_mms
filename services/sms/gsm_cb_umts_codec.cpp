@@ -28,7 +28,6 @@ namespace Telephony {
 static constexpr uint8_t SMS_BYTE_BIT = 8;
 static constexpr uint8_t GSM_CODE_BIT = 7;
 static constexpr uint8_t MAX_PAGE_PDU_LEN = 82;
-static constexpr uint16_t GSM_ETWS_BASE_MASK = 0x1100;
 
 GsmCbUmtsCodec::GsmCbUmtsCodec(std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> header,
     std::shared_ptr<GsmCbPduDecodeBuffer> buffer, std::shared_ptr<GsmCbCodec> cbCodec)
@@ -50,9 +49,7 @@ bool GsmCbUmtsCodec::Decode3gHeader()
         TELEPHONY_LOGE("CB pdu data error.");
         return false;
     }
-    if ((cbHeader_->msgId & HEX_VALUE_FFF8) == GSM_ETWS_BASE_MASK) {
-        cbHeader_->cbMsgType = GsmCbCodec::GSM_ETWS;
-    }
+
     cbPduBuffer_->IncreasePointer(1);
     uint8_t oneByte = 0;
     if (!cbPduBuffer_->GetOneByte(oneByte)) {
@@ -65,7 +62,11 @@ bool GsmCbUmtsCodec::Decode3gHeader()
         return false;
     }
     cbHeader_->msgId = (temp << HEX_VALUE_08) | oneByte;
-
+    bool isEtws;
+    cbCodec_->IsEtwsMessage(isEtws);
+    if (isEtws) {
+        cbHeader_->cbMsgType = GsmCbCodec::GSM_ETWS;
+    }
     if (!cbPduBuffer_->GetOneByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
