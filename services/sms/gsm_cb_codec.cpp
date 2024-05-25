@@ -486,7 +486,15 @@ bool GsmCbCodec::GetWarningType(uint16_t &type) const
         TELEPHONY_LOGE("cbHeader_ is nullptr");
         return false;
     }
-    type = cbHeader_->warningType;
+    if (TELEPHONY_EXT_WRAPPER.getCustEtwsType_  != nullptr) {
+        TELEPHONY_LOGI("GetWarningType getCustEtwsType_  not null");
+        TELEPHONY_EXT_WRAPPER.getCustEtwsType_(cbHeader_->msgId, type);
+        if (type != OTHER_TYPE) {
+            TELEPHONY_LOGI("getCustEtwsType_ type not OTHER_TYPE.");
+            return true;
+        }
+    }
+    type = cbHeader_->msgId - ETWS_TYPE;
     return true;
 }
 
@@ -507,6 +515,13 @@ bool GsmCbCodec::IsEtwsMessage(bool &etws) const
         return false;
     }
     etws = ((cbHeader_->msgId & ETWS_TYPE_MASK) == ETWS_TYPE);
+    if (!etws && TELEPHONY_EXT_WRAPPER.isCustEtwsMessage_  != nullptr) {
+        TELEPHONY_LOGI("IsEtwsMessage isCustEtwsMessage_  not null");
+        if (TELEPHONY_EXT_WRAPPER.isCustEtwsMessage_(cbHeader_->msgId)) {
+            TELEPHONY_LOGI("isCustEtwsMessage_ is true.");
+            etws = true;
+        }
+    }
     return true;
 }
 
