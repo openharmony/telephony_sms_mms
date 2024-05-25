@@ -24,6 +24,7 @@
 #include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_common_utils.h"
+#include "telephony_ext_wrapper.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
 #include "text_coder.h"
@@ -64,6 +65,9 @@ void SmsService::OnStart()
 
 bool SmsService::Init()
 {
+#ifdef OHOS_BUILD_ENABLE_TELEPHONY_EXT
+    TELEPHONY_EXT_WRAPPER.InitTelephonyExtWrapper();
+#endif
     DelayedSingleton<ImsSmsClient>::GetInstance()->Init();
     if (!registerToService_) {
         bool ret = Publish(DelayedSingleton<SmsService>::GetInstance().get());
