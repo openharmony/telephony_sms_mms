@@ -88,7 +88,7 @@ declare namespace sms {
    * @param { string } specification - Indicates the SMS protocol type. The value {@code 3gpp} indicates GSM/UMTS/LTE
    * SMS, and the value {@code 3gpp2} indicates CDMA/LTE SMS.
    * @param { AsyncCallback<ShortMessage> } callback - Indicates the callback for getting an SMS message instance;
-   * returns {@code null} if {@code pdu} is empty or {@code specification} is not supported.
+   * Returns {@code null} if {@code pdu} is empty or {@code specification} is not supported.
    * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
    * Incorrect parameter types.
    * @throws { BusinessError } 8300001 - Invalid parameter value.
@@ -110,7 +110,7 @@ declare namespace sms {
    * @param { string } specification - Indicates the SMS protocol type. The value {@code 3gpp} indicates GSM/UMTS/LTE
    * SMS, and the value {@code 3gpp2} indicates CDMA/LTE SMS.
    * @returns { Promise<ShortMessage> } Returns an SMS message instance;
-   * returns {@code null} if {@code pdu} is empty or {@code specification} is not supported.
+   * Returns {@code null} if {@code pdu} is empty or {@code specification} is not supported.
    * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
    * Incorrect parameter types.
    * @throws { BusinessError } 8300001 - Invalid parameter value.
