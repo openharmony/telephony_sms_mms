@@ -44,7 +44,6 @@ ohos_unittest("tel_sms_mms_gtest") {
     "$SMS_MMS_SOURCE_DIR/interfaces/kits/native",
     "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/include",
     "$SMS_MMS_SOURCE_DIR/utils",
-    "//third_party/curl/include",
     "//third_party/libphonenumber/cpp/src",
     "//third_party/libphonenumber/cpp/src/phonenumbers",
     "//third_party/protobuf/src",
@@ -53,7 +52,6 @@ ohos_unittest("tel_sms_mms_gtest") {
   deps = [
     "$SMS_MMS_SOURCE_DIR:tel_sms_mms",
     "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
-    "//third_party/curl:curl",
     "//third_party/libphonenumber/cpp:phonenumber_standard",
   ]
 
@@ -65,6 +63,7 @@ ohos_unittest("tel_sms_mms_gtest") {
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
+    "curl:curl_shared",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "core_service:libtel_common",
