@@ -82,7 +82,9 @@ bool GsmCbGsmCodec::Decode2gHeader()
         return false;
     }
     cbHeader_->msgId = (temp << HEX_VALUE_08) | oneByte;
-    if ((cbHeader_->msgId & HEX_VALUE_FFF8) == GSM_ETWS_BASE_MASK && cbPduBuffer_->GetSize() <= MAX_ETWS_PDU_LEN) {
+    bool isEtws;
+    cbCodec_->IsEtwsMessage(isEtws);
+    if (isEtws && cbPduBuffer_->GetSize() <= MAX_ETWS_PDU_LEN) {
         if (!Decode2gHeaderEtws()) {
             TELEPHONY_LOGE("etws head error.");
             return false;
@@ -107,7 +109,7 @@ bool GsmCbGsmCodec::Decode2gHeaderEtws()
     }
     cbHeader_->warningType = (oneByte & HEX_VALUE_FE) >> 1;
     if (cbHeader_->msgId >= GSM_ETWS_BASE_MASK) {
-        cbHeader_->warningType = cbHeader_->msgId - GSM_ETWS_BASE_MASK;
+        cbCodec_->GetWarningType(cbHeader_->warningType);
     }
     if (!cbPduBuffer_->GetOneByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
@@ -158,11 +160,13 @@ bool GsmCbGsmCodec::Decode2gHeaderCommonCb()
         TELEPHONY_LOGE("CB Page Count is over MAX[%{public}d]", cbHeader_->totalPages);
         cbPduBuffer_->SetPointer(0);
     }
-    if ((cbHeader_->msgId & HEX_VALUE_FFF8) == GSM_ETWS_BASE_MASK) {
+    bool isEtws;
+    cbCodec_->IsEtwsMessage(isEtws);
+    if (isEtws) {
         cbHeader_->bEtwsMessage = true;
         cbHeader_->cbEtwsType = GsmCbCodec::ETWS_GSM;
         if (cbHeader_->msgId >= GSM_ETWS_BASE_MASK) {
-            cbHeader_->warningType = cbHeader_->msgId - GSM_ETWS_BASE_MASK;
+            cbCodec_->GetWarningType(cbHeader_->warningType);
         }
     }
     if (cbPduBuffer_->GetCurPosition() >= HEX_VALUE_02) {
