@@ -20,6 +20,7 @@
 #include "securec.h"
 #include "sms_common_utils.h"
 #include "string_utils.h"
+#include "telephony_ext_wrapper.h"
 #include "telephony_log_wrapper.h"
 #include "text_coder.h"
 
@@ -30,6 +31,7 @@ static constexpr uint8_t GSM_CB_HEADER_LEN = 6;
 static constexpr uint16_t MAX_CB_MSG_LEN = 4200;
 static constexpr uint8_t MAX_PAGE_PDU_LEN = 82;
 static constexpr uint8_t CB_FORMAT_3GPP = 1;
+static constexpr uint16_t OTHER_TYPE = -2;
 static constexpr uint16_t ETWS_TYPE = 0x1100;
 static constexpr uint16_t ETWS_TYPE_MASK = 0xFFF8;
 static constexpr uint16_t CMAS_FIRST_ID = 0x1112;
@@ -484,7 +486,15 @@ bool GsmCbCodec::GetWarningType(uint16_t &type) const
         TELEPHONY_LOGE("cbHeader_ is nullptr");
         return false;
     }
-    type = cbHeader_->warningType;
+    if (TELEPHONY_EXT_WRAPPER.getCustEtwsType_  != nullptr) {
+        TELEPHONY_LOGI("GetWarningType getCustEtwsType_  not null");
+        TELEPHONY_EXT_WRAPPER.getCustEtwsType_(cbHeader_->msgId, type);
+        if (type != OTHER_TYPE) {
+            TELEPHONY_LOGI("getCustEtwsType_ type not OTHER_TYPE.");
+            return true;
+        }
+    }
+    type = cbHeader_->msgId - ETWS_TYPE;
     return true;
 }
 
@@ -505,6 +515,13 @@ bool GsmCbCodec::IsEtwsMessage(bool &etws) const
         return false;
     }
     etws = ((cbHeader_->msgId & ETWS_TYPE_MASK) == ETWS_TYPE);
+    if (!etws && TELEPHONY_EXT_WRAPPER.isCustEtwsMessage_  != nullptr) {
+        TELEPHONY_LOGI("IsEtwsMessage isCustEtwsMessage_  not null");
+        if (TELEPHONY_EXT_WRAPPER.isCustEtwsMessage_(cbHeader_->msgId)) {
+            TELEPHONY_LOGI("isCustEtwsMessage_ is true.");
+            etws = true;
+        }
+    }
     return true;
 }
 
