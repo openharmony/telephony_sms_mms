@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  */
 
 #include "satellite_sms_callback_stub.h"
-
+#include "satellite_sms_callback.h"
 #include "tel_ril_sms_parcel.h"
 #include "radio_event.h"
 #include "telephony_errors.h"
@@ -43,8 +43,8 @@ SatelliteSmsCallbackStub::~SatelliteSmsCallbackStub()
     requestFuncMap_.clear();
 }
 
-int32_t SatelliteSmsCallbackStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int32_t SatelliteSmsCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
 {
     std::u16string myDescriptor = SatelliteSmsCallbackStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
@@ -63,54 +63,70 @@ int32_t SatelliteSmsCallbackStub::OnRemoteRequest(
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
+int32_t SatelliteSmsCallbackStub::OnSendSmsResponseResponse(MessageParcel &data, MessageParcel &reply,
+    int32_t &eventCode)
+{
+    int32_t flag = data.ReadInt32();
+    int32_t serial = data.ReadInt32();
+    int32_t error = data.ReadInt32();
+    int32_t type = data.ReadInt32();
+    auto info = std::make_shared<RadioResponseInfo>();
+    if (info == nullptr) {
+        TELEPHONY_LOGE("info is null!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    info->flag = flag;
+    info->serial = serial;
+    info->error = static_cast<ErrType>(error);
+    info->type = static_cast<ResponseTypes>(type);
+    AppExecFwk::InnerEvent::Pointer response = AppExecFwk::InnerEvent::Get(eventCode, info);
+    if (response == nullptr) {
+        TELEPHONY_LOGE("response is null!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    if (!reply.WriteInt32(SendSmsResponse(response))) {
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    return TELEPHONY_SUCCESS;
+}
+
+int32_t SatelliteSmsCallbackStub::OnSendSmsResponseResult(MessageParcel &data, MessageParcel &reply,
+    int32_t &eventCode)
+{
+    int32_t msgRef = data.ReadInt32();
+    std::string pdu = data.ReadString();
+    int32_t errCode = data.ReadInt32();
+    int64_t flag = data.ReadInt64();
+    auto info = std::make_shared<SendSmsResultInfo>();
+    if (info == nullptr) {
+        TELEPHONY_LOGE("info is null!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    info->msgRef = msgRef;
+    info->pdu = pdu;
+    info->errCode = errCode;
+    info->flag = flag;
+    AppExecFwk::InnerEvent::Pointer response = AppExecFwk::InnerEvent::Get(eventCode, info);
+    if (response == nullptr) {
+        TELEPHONY_LOGE("response is null!");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    if (!reply.WriteInt32(SendSmsResponse(response))) {
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
+    return TELEPHONY_SUCCESS;
+}
+
 int32_t SatelliteSmsCallbackStub::OnSendSmsResponse(MessageParcel &data, MessageParcel &reply)
 {
     int32_t eventCode = data.ReadInt32();
     int32_t smsCallbackType = data.ReadInt32();
     if (smsCallbackType == static_cast<int32_t>(SatelliteSmsResultType::HRIL_RADIO_RESPONSE)) {
-        int32_t flag = data.ReadInt32();
-        int32_t serial = data.ReadInt32();
-        int32_t error = data.ReadInt32();
-        int32_t type = data.ReadInt32();
-        auto info = std::make_shared<RadioResponseInfo>();
-        if (info == nullptr) {
-            TELEPHONY_LOGE("info is null!");
-            return TELEPHONY_ERR_LOCAL_PTR_NULL;
-        }
-        info->flag = flag;
-        info->serial = serial;
-        info->error = static_cast<ErrType>(error);
-        info->type = static_cast<ResponseTypes>(type);
-        AppExecFwk::InnerEvent::Pointer response = AppExecFwk::InnerEvent::Get(eventCode, info);
-        if (response == nullptr) {
-            TELEPHONY_LOGE("response is null!");
-            return TELEPHONY_ERR_LOCAL_PTR_NULL;
-        }
-        reply.WriteInt32(SendSmsResponse(response));
-        return TELEPHONY_SUCCESS;
+        return OnSendSmsResponseResponse(data, reply, eventCode);
     }
 
     if (smsCallbackType == static_cast<int32_t>(SatelliteSmsResultType::SEND_SMS_RESULT)) {
-        int32_t msgRef = data.ReadInt32();
-        std::string pdu = data.ReadString();
-        int32_t errCode = data.ReadInt32();
-        int64_t flag = data.ReadInt64();
-        auto info = std::make_shared<SendSmsResultInfo>();
-        if (info == nullptr) {
-            TELEPHONY_LOGE("info is null!");
-            return TELEPHONY_ERR_LOCAL_PTR_NULL;
-        }
-        info->msgRef = msgRef;
-        info->pdu = pdu;
-        info->errCode = errCode;
-        info->flag = flag;
-        AppExecFwk::InnerEvent::Pointer response = AppExecFwk::InnerEvent::Get(eventCode, info);
-        if (response == nullptr) {
-            TELEPHONY_LOGE("response is null!");
-            return TELEPHONY_ERR_LOCAL_PTR_NULL;
-        }
-        reply.WriteInt32(SendSmsResponse(response));
-        return TELEPHONY_SUCCESS;
+        return OnSendSmsResponseResult(data, reply, eventCode);
     }
 
     TELEPHONY_LOGE("SatelliteSmsCallbackStub: sms response is null!");
@@ -139,7 +155,11 @@ int32_t SatelliteSmsCallbackStub::OnSmsStatusReportNotify(MessageParcel &data, M
         TELEPHONY_LOGE("response is null!");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    reply.WriteInt32(SmsStatusReportNotify(response));
+    int32_t result = reply.WriteInt32(SmsStatusReportNotify(response));
+    if (result != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("Failed to write response!");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
     return TELEPHONY_SUCCESS;
 }
 
@@ -165,7 +185,11 @@ int32_t SatelliteSmsCallbackStub::OnNewSmsNotify(MessageParcel &data, MessagePar
         TELEPHONY_LOGE("response is null!");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    reply.WriteInt32(NewSmsNotify(response));
+    int32_t result = reply.WriteInt32(NewSmsNotify(response));
+    if (result != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("Failed to write response!");
+        return TELEPHONY_ERR_WRITE_DATA_FAIL;
+    }
     return TELEPHONY_SUCCESS;
 }
 } // namespace Telephony

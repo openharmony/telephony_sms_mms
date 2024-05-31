@@ -45,7 +45,7 @@ bool GsmSmsParamEncode::EncodeAddressPdu(const struct AddressNumber *num, std::s
         return false;
     }
     unsigned char ton = 0;
-    if (temp[0] == '+') {
+    if (temp[0] == '+' && tempLen > 1) {
         resultNum.push_back(tempLen - 1);
         temp++;
         tempLen--;
@@ -125,7 +125,7 @@ uint8_t GsmSmsParamEncode::EncodeSmscPdu(const struct AddressNumber *num, uint8_
     }
 
     int32_t ret = 0;
-    if (num->address[0] == '+') {
+    if (num->address[0] == '+' && strlen(num->address) > 1) {
         ret = memcpy_s(newNum, sizeof(newNum), num->address + 1, strlen(num->address) - 1);
     } else {
         ret = memcpy_s(newNum, sizeof(newNum), num->address, sizeof(newNum));
