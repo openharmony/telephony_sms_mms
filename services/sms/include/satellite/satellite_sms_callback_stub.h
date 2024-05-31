@@ -34,6 +34,8 @@ public:
 private:
     void InitFuncMap();
     int32_t OnSendSmsResponse(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSendSmsResponseResponse(MessageParcel &data, MessageParcel &reply, int32_t &eventCode);
+    int32_t OnSendSmsResponseResult(MessageParcel &data, MessageParcel &reply, int32_t &eventCode);
     int32_t OnSmsStatusReportNotify(MessageParcel &data, MessageParcel &reply);
     int32_t OnNewSmsNotify(MessageParcel &data, MessageParcel &reply);
 
