@@ -196,6 +196,9 @@ void SmsInterfaceStub::OnSendSmsDataRequest(MessageParcel &data, MessageParcel &
     }
     int16_t dataLen = data.ReadInt16();
     const uint8_t *buffer = reinterpret_cast<const uint8_t *>(data.ReadRawData(dataLen));
+    if (buffer == nullptr) {
+        return;
+    }
     RemoveSpacesInDesAddr(desAddr);
     int32_t result = SendMessage(slotId, desAddr, scAddr, port, buffer, dataLen, sendCallback, deliveryCallback);
     reply.WriteInt32(result);
