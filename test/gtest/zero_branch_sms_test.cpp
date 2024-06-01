@@ -1475,6 +1475,7 @@ HWTEST_F(BranchSmsTest, SmsMiscManager_0001, Function | MediumTest | Level1)
     rangeList.push_back(rangeInfoTwo);
     EXPECT_NE(smsMiscManager->RangeListToString(rangeList), "");
     EXPECT_FALSE(smsMiscManager->SendDataToRil(true, rangeList));
+    EXPECT_FALSE(smsMiscManager->CloseCBRange(0, 0));
 }
 
 /**

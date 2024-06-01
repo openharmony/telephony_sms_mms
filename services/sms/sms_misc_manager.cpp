@@ -89,6 +89,9 @@ void SmsMiscManager::SplitMsgId(
     uint32_t fromMsgId, uint32_t toMsgId, const std::list<gsmCBRangeInfo>::iterator &oldIter)
 {
     auto &info = *oldIter;
+    if (fromMsgId == UINT32_MAX || fromMsgId < 1) {
+        return;
+    }
     rangeList_.emplace_back(info.fromMsgId, fromMsgId - 1);
     rangeList_.emplace_back(toMsgId + 1, info.toMsgId);
     rangeList_.erase(oldIter);
@@ -97,6 +100,10 @@ void SmsMiscManager::SplitMsgId(
 // from 3GPP TS 27.005 3.3.4 Select Cell Broadcast Message Types
 bool SmsMiscManager::CloseCBRange(uint32_t fromMsgId, uint32_t toMsgId)
 {
+    if (fromMsgId == UINT32_MAX || fromMsgId < 1) {
+        return false;
+    }
+
     auto iter = rangeList_.begin();
     while (iter != rangeList_.end()) {
         auto oldIter = iter++;
@@ -292,6 +299,9 @@ bool SmsMiscManager::SplitMidValue(std::string value, std::string &start, std::s
         return false;
     }
     size_t pos = value.find(delimiter);
+    if (value.size() == 0) {
+        return false;
+    }
     if (pos == 0 || pos == value.size() - 1) {
         return false;
     } else if (pos == std::string::npos) {
