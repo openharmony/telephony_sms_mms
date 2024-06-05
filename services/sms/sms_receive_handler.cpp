@@ -36,6 +36,7 @@ SmsReceiveHandler::SmsReceiveHandler(int32_t slotId) : TelEventHandler("SmsRecei
     if (smsWapPushHandler_ == nullptr) {
         TELEPHONY_LOGE("make sms wapPush Hander error.");
     }
+    CreateRunningLockInner();
 }
 
 SmsReceiveHandler::~SmsReceiveHandler() {}
@@ -53,18 +54,100 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
     switch (eventId) {
         case RadioEvent::RADIO_GSM_SMS:
         case RadioEvent::RADIO_CDMA_SMS: {
+            ApplyRunningLock();
             std::shared_ptr<SmsBaseMessage> message = nullptr;
             message = TransformMessageInfo(event->GetSharedObject<SmsMessageInfo>());
             if (message != nullptr) {
                 TELEPHONY_LOGI("[raw pdu] =%{private}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
             }
             HandleReceivedSms(message);
+            ReduceRunningLock();
             break;
         }
+        case RUNNING_LOCK_TIMEOUT_EVENT_ID:
+            HandleRunningLockTimeoutEvent(event);
+            break;
         default:
             TELEPHONY_LOGE("SmsReceiveHandler::ProcessEvent Unknown eventId %{public}d", eventId);
             break;
     }
+}
+
+void SmsReceiveHandler::ApplyRunningLock()
+{
+#ifdef ABILITY_POWER_SUPPORT
+    if (smsRunningLock_ == nullptr) {
+        CreateRunningLockInner();
+    }
+    std::lock_guard<std::mutex> lockGuard(mutexRunningLock_);
+    if (smsRunningLock_ != nullptr) {
+        smsRunningLockCount_++;
+        smsLockSerialNum_++;
+        TELEPHONY_LOGI("ApplyRunningLock, try to lock. count: %{public}d, serial: %{public}d",
+            static_cast<int>(smsRunningLockCount_), static_cast<int>(smsLockSerialNum_));
+        smsRunningLock_->Lock(RUNNING_LOCK_DEFAULT_TIMEOUT_MS); // Automatic release after the 60s.
+        this->SendEvent(RUNNING_LOCK_TIMEOUT_EVENT_ID, smsLockSerialNum_, RUNNING_LOCK_DEFAULT_TIMEOUT_MS);
+    }
+#endif
+}
+
+void SmsReceiveHandler::ReduceRunningLock()
+{
+#ifdef ABILITY_POWER_SUPPORT
+    std::lock_guard<std::mutex> lockRequest(mutexRunningLock_);
+    TELEPHONY_LOGI("ReduceRunningLock, count:%{public}d", static_cast<int>(smsRunningLockCount_));
+    if (smsRunningLock_ != nullptr) {
+        if (smsRunningLockCount_ > 1) {
+            smsRunningLockCount_--;
+        } else {
+            smsRunningLockCount_ = 0;
+            ReleaseRunningLock();
+        }
+    }
+#endif
+}
+
+void SmsReceiveHandler::ReleaseRunningLock()
+{
+#ifdef ABILITY_POWER_SUPPORT
+    if (smsRunningLock_ == nullptr) {
+        TELEPHONY_LOGE("ReleaseRunningLock, smsRunningLock_ is nullptr");
+        return;
+    }
+    TELEPHONY_LOGI("ReleaseRunningLock, try to unlock.");
+    smsRunningLockCount_ = 0;
+    int ret = smsRunningLock_->UnLock();
+    if (ret != PowerMgr::E_GET_POWER_SERVICE_FAILED) {
+        // Call UnLock success, remove event.
+        this->RemoveEvent(RUNNING_LOCK_TIMEOUT_EVENT_ID);
+        return;
+    }
+    TELEPHONY_LOGI("ReleaseRunningLock, no found power service, retry.");
+    this->SendEvent(RUNNING_LOCK_TIMEOUT_EVENT_ID, smsLockSerialNum_, DELAY_RELEASE_RUNNING_LOCK_TIMEOUT_MS);
+#endif
+}
+
+void SmsReceiveHandler::CreateRunningLockInner()
+{
+#ifdef ABILITY_POWER_SUPPORT
+    auto &powerMgrClient = PowerMgr::PowerMgrClient::GetInstance();
+    smsRunningLock_ = powerMgrClient.CreateRunningLock("telSmsRunningLock",
+        PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
+    smsRunningLockCount_ = 0;
+    smsLockSerialNum_ = 0;
+#endif
+}
+
+void SmsReceiveHandler::HandleRunningLockTimeoutEvent(const AppExecFwk::InnerEvent::Pointer &event)
+{
+#ifdef ABILITY_POWER_SUPPORT
+    auto serial = event->GetParam();
+    if (serial == smsLockSerialNum_) {
+        TELEPHONY_LOGE("HandleRunningLockTimeoutEvent, serial:%{public}d, smsLockSerialNum_:%{public}d",
+            static_cast<int>(serial), static_cast<int>(smsLockSerialNum_));
+        ReleaseRunningLock();
+    }
+#endif
 }
 
 void SmsReceiveHandler::HandleReceivedSms(const std::shared_ptr<SmsBaseMessage> smsBaseMessage)
