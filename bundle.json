@@ -47,6 +47,7 @@
                 "napi",
                 "netmanager_base",
                 "netstack",
+                "power_manager",
                 "resource_management",
                 "safwk",
                 "samgr",
