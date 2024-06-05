@@ -25,6 +25,11 @@
 #include "sms_wap_push_handler.h"
 #include "tel_event_handler.h"
 
+#ifdef ABILITY_POWER_SUPPORT
+#include "power_mgr_client.h"
+#include "power_mgr_errors.h"
+#endif
+
 namespace OHOS {
 namespace Telephony {
 class SmsReceiveHandler : public TelEventHandler {
@@ -32,6 +37,9 @@ public:
     explicit SmsReceiveHandler(int32_t slotId);
     virtual ~SmsReceiveHandler();
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
+    void ApplyRunningLock();
+    void ReduceRunningLock();
+    void ReleaseRunningLock();
 
 protected:
     virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) = 0;
@@ -52,12 +60,25 @@ private:
         std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler);
     void UpdateMultiPageMessage(
         const std::shared_ptr<SmsReceiveIndexer> &indexer, std::shared_ptr<std::vector<std::string>> pdus);
+    void CreateRunningLockInner();
+    void HandleRunningLockTimeoutEvent(const AppExecFwk::InnerEvent::Pointer &event);
 
 protected:
     int32_t slotId_ = -1;
 
 private:
+    static const uint32_t RUNNING_LOCK_TIMEOUT_EVENT_ID = 100000;
+
+    static const int64_t RUNNING_LOCK_DEFAULT_TIMEOUT_MS = 60 * 1000; // 60s
+    static const int64_t DELAY_RELEASE_RUNNING_LOCK_TIMEOUT_MS = 5 * 1000; // 5s
+
     std::unique_ptr<SmsWapPushHandler> smsWapPushHandler_;
+#ifdef ABILITY_POWER_SUPPORT
+    std::shared_ptr<PowerMgr::RunningLock> smsRunningLock_;
+#endif
+    std::atomic_uint smsRunningLockCount_;
+    std::atomic_int smsLockSerialNum_;
+    std::mutex mutexRunningLock_;
 };
 } // namespace Telephony
 } // namespace OHOS
