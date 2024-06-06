@@ -30,7 +30,6 @@ void MmsContentParam::DumpContentParam()
         charSetString = "UTF-8";
     }
     TELEPHONY_LOGI("Param Charset: %{public}s", charSetString.c_str());
-    TELEPHONY_LOGI("Param Type: %{public}s", type_.c_str());
     for (auto it = textMap_.begin(); it != textMap_.end(); it++) {
         TELEPHONY_LOGI("Param textMap : %{public}s", it->second.c_str());
     }
