@@ -116,18 +116,11 @@ ohos_shared_library("tel_sms_mms") {
     "interfaces/innerkits/",
     "frameworks/native/sms/include",
     "interfaces/innerkits/ims",
-    "//third_party/glib/glib",
-    "//third_party/glib",
-    "//third_party/libphonenumber/cpp/src",
-    "//third_party/libphonenumber/cpp/src/phonenumbers",
-    "//third_party/protobuf/src",
   ]
 
   deps = [
     "frameworks/native:tel_sms_mms_api",
     "frameworks/native/mms:mms_native_source",
-    "//third_party/glib:glib_packages",
-    "//third_party/libphonenumber/cpp:phonenumber_standard",
   ]
 
   external_deps = [
@@ -141,13 +134,17 @@ ohos_shared_library("tel_sms_mms") {
     "curl:curl_shared",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "glib:glib",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "icu:shared_icui18n",
     "icu:shared_icuuc",
     "ipc:ipc_single",
+    "libphonenumber:geocoding",
+    "libphonenumber:phonenumber_standard",
     "netmanager_base:net_conn_manager_if",
     "netstack:http_client",
+    "protobuf:protobuf",
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "telephony_data:tel_telephony_data",
