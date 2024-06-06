@@ -39,23 +39,25 @@
                 "curl",
                 "data_share",
                 "eventhandler",
+                "glib",
                 "hilog",
                 "hisysevent",
                 "icu",
                 "init",
                 "ipc",
+                "libphonenumber",
                 "napi",
                 "netmanager_base",
                 "netstack",
+                "node",
                 "power_manager",
                 "resource_management",
                 "safwk",
                 "samgr",
+                "protobuf",
                 "telephony_data"
             ],
             "third_party": [
-                "glib",
-                "libphonenumber"
             ]
         },
         "build": {

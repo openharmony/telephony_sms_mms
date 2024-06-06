@@ -18,7 +18,7 @@
 
 #include "datashare_helper.h"
 #include "datashare_predicates.h"
-#include "phonenumberutil.h"
+#include "phonenumbers/phonenumberutil.h"
 #include "singleton.h"
 #include "sms_mms_data.h"
 #include "sms_receive_indexer.h"
