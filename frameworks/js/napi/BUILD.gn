@@ -20,7 +20,6 @@ ohos_shared_library("sms") {
   }
   branch_protector_ret = "pac_ret"
   include_dirs = [
-    "//third_party/node/src",
     "include",
     "$SUBSYSTEM_DIR/sms_mms/frameworks/js/napi/include",
   ]
@@ -55,6 +54,7 @@ ohos_shared_library("sms") {
     "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
     "telephony_data:tel_telephony_data",
   ]
 
