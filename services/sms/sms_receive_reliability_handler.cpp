@@ -395,7 +395,6 @@ void SmsReceiveReliabilityHandler::HiSysEventCBResult(bool publishResult)
             SmsMmsErrorCode::SMS_ERROR_PUBLISH_COMMON_EVENT_FAIL, "publish short message broadcast event fail");
         return;
     }
-    TELEPHONY_LOGI("Send Sms Broadcast success");
     DelayedSingleton<SmsHiSysEvent>::GetInstance()->SetSmsBroadcastStartTime();
 }
 

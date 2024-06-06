@@ -99,8 +99,6 @@ bool GsmSmsTpduCodec::DecodeSmsPdu(const uint8_t *pTpdu, uint16_t TpduLen, struc
     for (int locate = 0; locate < TpduLen; locate++) {
         pduData[locate] = static_cast<char>(pTpdu[locate]);
     }
-    TELEPHONY_LOGI("TpduLen:%{public}d", TpduLen);
-
     SmsReadBuffer buffer(pduData);
     std::shared_ptr<GsmSmsTpduDecode> tpduDecode =
         std::make_shared<GsmSmsTpduDecode>(uDataCodec_, paramCodec_, shared_from_this());
