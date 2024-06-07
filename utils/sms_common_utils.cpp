@@ -226,7 +226,6 @@ void SmsCommonUtils::GetDisplayTime(const time_t &rawtime)
         TELEPHONY_LOGE("strftime error.");
         return;
     }
-    TELEPHONY_LOGI("displayTime [%{public}s]", displayTime);
 }
 } // namespace Telephony
 } // namespace OHOS

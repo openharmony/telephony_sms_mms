@@ -439,7 +439,6 @@ static void NativeCreateMessage(napi_env env, void *data)
         asyncContext->errorCode = TELEPHONY_ERR_ARGUMENT_INVALID;
         return;
     }
-    TELEPHONY_LOGI("NativeCreateMessage before CreateMessage");
     std::u16string specification16 = NapiUtil::ToUtf16(asyncContext->specification);
     auto shortMessageObj = new ShortMessage();
     asyncContext->errorCode = ShortMessage::CreateMessage(asyncContext->pdu, specification16, *shortMessageObj);
@@ -449,7 +448,6 @@ static void NativeCreateMessage(napi_env env, void *data)
     } else {
         TELEPHONY_LOGI("NativeCreateMessage CreateMessage faied");
     }
-    TELEPHONY_LOGI("NativeCreateMessage end");
 }
 
 static napi_value CreateShortMessageValue(napi_env env, const ShortMessage &shortMessage)
@@ -555,7 +553,7 @@ static napi_value CreateMessage(napi_env env, napi_callback_info info)
         napi_get_value_int32(env, elementValue, &element);
         asyncContext->pdu.push_back((unsigned char)element);
     }
-    TELEPHONY_LOGI("CreateMessage pdu size = %{private}zu", asyncContext->pdu.size());
+    TELEPHONY_LOGI("CreateMessage pdu size = %{public}zu", asyncContext->pdu.size());
     if (parameterCount == THREE_PARAMETERS) {
         napi_create_reference(env, parameters[2], DEFAULT_REF_COUNT, &(asyncContext->callbackRef));
     }
@@ -870,9 +868,7 @@ static void NativeGetSmscAddr(napi_env env, void *data)
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->smscAddr = NapiUtil::ToUtf8(smscAddress);
         context->resolved = true;
-        TELEPHONY_LOGI("NativeGetSmscAddr smscAddr = %{private}s", context->smscAddr.data());
     }
-    TELEPHONY_LOGI("NativeGetSmscAddr resolved = %{public}d", context->resolved);
 }
 
 static void GetSmscAddrCallback(napi_env env, napi_status status, void *data)

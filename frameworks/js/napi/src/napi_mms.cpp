@@ -183,7 +183,6 @@ void GetMmsNotificationInd(MmsMsg mmsMsg, MmsNotificationIndContext &asyncContex
     asyncContext.deliveryReport = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_DELIVERY_REPORT);
     asyncContext.contentLocation = mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_CONTENT_LOCATION);
     asyncContext.contentClass = mmsMsg.GetHeaderOctetValue(MmsFieldCode::MMS_CONTENT_CLASS);
-    TELEPHONY_LOGI("napi_mms GetMmsNotificationInd end");
 }
 
 void GetMmsRespInd(MmsMsg mmsMsg, MmsRespIndContext &asyncContext)
@@ -360,7 +359,6 @@ napi_value CreateAttachmentValue(napi_env env, MmsAttachmentContext &context)
     NapiUtil::SetPropertyBoolean(env, attachment, "isSmil", context.isSmil);
     NapiUtil::SetPropertyInt32(env, attachment, "charset", context.charset);
     SetPropertyArray(env, attachment, "inBuff", context);
-    TELEPHONY_LOGI("napi_mms CreateAttachmentValue  end");
     return attachment;
 }
 
@@ -444,7 +442,6 @@ void ParseNotificationIndValue(napi_env env, napi_value object, MmsNotificationI
     NapiUtil::SetPropertyInt32(
         env, notificationObj, "contentClass", static_cast<int32_t>(notificationContext.contentClass));
     napi_set_named_property(env, object, mmsTypeKey.c_str(), notificationObj);
-    TELEPHONY_LOGI("napi_mms  ParseNotificationIndValue end");
 }
 
 void ParseRespIndValue(napi_env env, napi_value object, MmsRespIndContext &respIndContext)
@@ -581,7 +578,6 @@ napi_value CreateDecodeMmsValue(napi_env env, DecodeMmsContext &asyncContext)
     } else if (messageType == MessageType::TYPE_MMS_READ_REC_IND) {
         ParseReadRecIndValue(env, object, asyncContext.readRecInd);
     }
-    TELEPHONY_LOGI("napi_mms  CreateDecodeMmsValue end");
     return object;
 }
 
@@ -607,7 +603,6 @@ void DecodeMmsCallback(napi_env env, napi_status status, void *data)
             NapiUtil::CreateErrorMessage(env, "decode mms error,cause napi_status = " + std::to_string(status));
     }
     NapiUtil::Handle2ValueCallback(env, decodeMmsContext, callbackValue);
-    TELEPHONY_LOGI("napi_mms DecodeMmsCallback end");
 }
 
 void ParseDecodeMmsParam(napi_env env, napi_value object, DecodeMmsContext &context)
@@ -642,7 +637,6 @@ void ParseDecodeMmsParam(napi_env env, napi_value object, DecodeMmsContext &cont
             context.inBuffer[i] = (char)element;
         }
     }
-    TELEPHONY_LOGI("napi_mms ParseDecodeMmsParam end");
 }
 
 int32_t GetMatchDecodeMmsResult(napi_env env, const napi_value parameters[], size_t parameterCount)
@@ -707,7 +701,6 @@ napi_value NapiMms::DecodeMms(napi_env env, napi_callback_info info)
         napi_create_reference(env, parameters[1], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     result = NapiUtil::HandleAsyncWork(env, context, "DecodeMms", NativeDecodeMms, DecodeMmsCallback);
-    TELEPHONY_LOGI("napi_mms DecodeMms end");
     return result;
 }
 

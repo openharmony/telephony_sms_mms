@@ -106,7 +106,6 @@ void SmsInterfaceStub::InitModule()
                 return;
             }
             if (!reliabilityHandler->DeleteExpireSmsFromDB()) {
-                TELEPHONY_LOGE("DeleteExpireSmsFromDB fail");
                 return;
             }
             if (!reliabilityHandler->CheckSmsCapable()) {

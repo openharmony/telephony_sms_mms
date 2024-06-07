@@ -81,7 +81,6 @@ void SmsSendManager::InitNetworkHandle()
         return;
     }
     networkManager_->Init();
-    TELEPHONY_LOGI("Init SmsSendManager successfully.");
     if (auto ret = networkManager_->NetworkRegister(
         std::bind(&SmsSender::SetNetworkState, gsmSmsSender_, std::placeholders::_1, std::placeholders::_2));
         ret.has_value()) {
