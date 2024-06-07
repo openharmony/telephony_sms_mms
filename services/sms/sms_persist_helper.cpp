@@ -245,7 +245,6 @@ int32_t SmsPersistHelper::FormatSmsNumber(const std::string &num, std::string co
         CbnFormat(numTemp, formatInfo, formatNum);
     }
     if (formatNum.empty() || formatNum == "0") {
-        TELEPHONY_LOGE("FormatSmsNumber failed!");
         return TELEPHONY_ERROR;
     }
     TrimSpace(formatNum);

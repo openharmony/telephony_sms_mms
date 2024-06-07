@@ -612,7 +612,6 @@ int32_t SmsServiceProxy::CreateMessage(std::string pdu, std::string specificatio
         static_cast<int32_t>(SmsServiceInterfaceCode::CREATE_MESSAGE), dataParcel, replyParcel, option);
 
     int32_t result = replyParcel.ReadInt32();
-    TELEPHONY_LOGI("SmsServiceProxy::CreateMessage result:%{public}d", result);
     if (result != TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGE("CreateMessage result fail");
         return result;

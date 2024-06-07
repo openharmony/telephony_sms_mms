@@ -22,10 +22,8 @@ namespace OHOS {
 namespace Telephony {
 void MmsContentType::DumpMmsContentType()
 {
-    TELEPHONY_LOGI("******** Start DumpMmsContentType **********");
     TELEPHONY_LOGI("contentType : %{public}s", contentType_.c_str());
     msgContentParm_.DumpContentParam();
-    TELEPHONY_LOGI("******** End DumpMmsContentType ************");
 }
 
 MmsContentType::MmsContentType(const MmsContentType &srcContentType)

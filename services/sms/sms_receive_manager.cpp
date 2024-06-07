@@ -50,7 +50,6 @@ void SmsReceiveManager::Init()
 
     gsmSmsReceiveHandler_->Init();
     cdmaSmsReceiveHandler_->Init();
-    TELEPHONY_LOGI("SmsReceiveManager init ok.");
 }
 
 void SmsReceiveManager::SetCdmaSender(const weak_ptr<SmsSender> &smsSender)
