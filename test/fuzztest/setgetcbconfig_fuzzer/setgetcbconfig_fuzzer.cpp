@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include "setgetcbconfig_fuzzer.h"
 
+#ifdef GTEST_API_
 #define private public
+#endif
 
 #include "addsmstoken_fuzzer.h"
 #include "core_manager_inner.h"
