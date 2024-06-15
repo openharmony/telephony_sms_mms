@@ -21,6 +21,10 @@
 #include "send_callback.h"
 #include "sms_mms_errors.h"
 
+#define PARAMETER_COUNT_3 3
+#define PARAMETERS_INDEX_2 2
+#define PARAMETERS_INDEX_3 3
+
 namespace OHOS {
 namespace Telephony {
 namespace {
@@ -555,7 +559,7 @@ static napi_value CreateMessage(napi_env env, napi_callback_info info)
     }
     TELEPHONY_LOGI("CreateMessage pdu size = %{public}zu", asyncContext->pdu.size());
     if (parameterCount == THREE_PARAMETERS) {
-        napi_create_reference(env, parameters[2], DEFAULT_REF_COUNT, &(asyncContext->callbackRef));
+        napi_create_reference(env, parameters[PARAMETERS_INDEX_2], DEFAULT_REF_COUNT, &(asyncContext->callbackRef));
     }
     return NapiUtil ::HandleAsyncWork(
         env, asyncContext, "CreateMessage", NativeCreateMessage, CreateMessageCallback);
@@ -833,7 +837,7 @@ static napi_value SetSmscAddr(napi_env env, napi_callback_info info)
     context->smscAddr = Get64StringFromValue(env, parameters[1]);
     TELEPHONY_LOGI("SetSmscAddr smscAddr = %{private}s", context->smscAddr.data());
     if (parameterCount == THREE_PARAMETERS) {
-        napi_create_reference(env, parameters[2], DEFAULT_REF_COUNT, &context->callbackRef);
+        napi_create_reference(env, parameters[PARAMETERS_INDEX_2], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     TELEPHONY_LOGI("SetSmscAddr before end");
     return NapiUtil::HandleAsyncWork(env, context, "SetSmscAddr", NativeSetSmscAddr, SetSmscAddrCallback);
@@ -1089,8 +1093,8 @@ static napi_value DelSimMessage(napi_env env, napi_callback_info info)
     }
     napi_get_value_int32(env, parameters[0], &context->slotId);
     napi_get_value_int32(env, parameters[1], &context->msgIndex);
-    if (parameterCount == 3) {
-        napi_create_reference(env, parameters[2], DEFAULT_REF_COUNT, &context->callbackRef);
+    if (parameterCount == PARAMETER_COUNT_3) {
+        napi_create_reference(env, parameters[PARAMETERS_INDEX_2], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     return NapiUtil::HandleAsyncWork(env, context, "DelSimMessage", NativeDelSimMessage, DelSimMessageCallback);
 }
@@ -1580,9 +1584,9 @@ static napi_value GetSmsSegmentsInfo(napi_env env, napi_callback_info info)
     }
     napi_get_value_int32(env, parameters[0], &context->slotId);
     context->content = NapiUtil::GetStringFromValue(env, parameters[1]);
-    napi_get_value_bool(env, parameters[2], &context->force7BitCode);
+    napi_get_value_bool(env, parameters[PARAMETERS_INDEX_2], &context->force7BitCode);
     if (parameterCount == FOUR_PARAMETERS) {
-        napi_create_reference(env, parameters[3], DEFAULT_REF_COUNT, &context->callbackRef);
+        napi_create_reference(env, parameters[PARAMETERS_INDEX_3], DEFAULT_REF_COUNT, &context->callbackRef);
     }
     napi_value result = NapiUtil::HandleAsyncWork(
         env, context, "GetSmsSegmentsInfo", NativeGetSmsSegmentsInfo, GetSmsSegmentsInfoCallback);
