@@ -1229,10 +1229,13 @@ HWTEST_F(BranchSmsTest, SmsBaseMessage_0002, Function | MediumTest | Level1)
  */
 HWTEST_F(BranchSmsTest, GsmSmsReceiveHandler_0001, Function | MediumTest | Level1)
 {
-    auto gsmSmsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(1);
-    gsmSmsReceiveHandler->UnRegisterHandler();
-    EXPECT_NE(gsmSmsReceiveHandler->HandleSmsByType(nullptr), TELEPHONY_ERR_SUCCESS);
-    EXPECT_EQ(gsmSmsReceiveHandler->TransformMessageInfo(nullptr), nullptr);
+    auto smsReceiveManager = std::make_shared<SmsReceiveManager>(1);
+    EXPECT_TRUE(smsReceiveManager != nullptr);
+    smsReceiveManager->Init();
+    EXPECT_TRUE(smsReceiveManager->gsmSmsReceiveHandler_ != nullptr);
+    smsReceiveManager->gsmSmsReceiveHandler_->UnRegisterHandler();
+    EXPECT_NE(smsReceiveManager->gsmSmsReceiveHandler_->HandleSmsByType(nullptr), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsReceiveManager->gsmSmsReceiveHandler_->TransformMessageInfo(nullptr), nullptr);
 }
 
 /**
@@ -1409,10 +1412,14 @@ HWTEST_F(BranchSmsTest, SatelliteSmsClient_0001, Function | MediumTest | Level1)
     TELEPHONY_LOGI("SatelliteSmsClient_0001==========");
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
     auto gsmSmsSender = std::make_shared<GsmSmsSender>(INVALID_SLOTID, fun);
-    auto receiveHandler = std::make_shared<GsmSmsReceiveHandler>(INVALID_SLOTID);
+    auto smsReceiveManager = std::make_shared<SmsReceiveManager>(INVALID_SLOTID);
+    EXPECT_TRUE(smsReceiveManager != nullptr);
+    smsReceiveManager->Init();
+    EXPECT_TRUE(smsReceiveManager->gsmSmsReceiveHandler_ != nullptr);
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
     satelliteSmsClient.AddSendHandler(INVALID_SLOTID, std::static_pointer_cast<TelEventHandler>(gsmSmsSender));
-    satelliteSmsClient.AddReceiveHandler(INVALID_SLOTID, std::static_pointer_cast<TelEventHandler>(receiveHandler));
+    satelliteSmsClient.AddReceiveHandler(INVALID_SLOTID, std::static_pointer_cast<TelEventHandler>
+        (smsReceiveManager->gsmSmsReceiveHandler_));
     satelliteSmsClient.statusChangeListener_->OnAddSystemAbility(INVALID_SLOTID, "");
     satelliteSmsClient.statusChangeListener_->OnRemoveSystemAbility(INVALID_SLOTID, "");
     EXPECT_GE(satelliteSmsClient.GetSatelliteSupported(), 0);
@@ -1893,11 +1900,14 @@ HWTEST_F(BranchSmsTest, GsmSmsParamDecode_0001, Function | MediumTest | Level1)
     delete mwiTypeSmsDcs;
     mwiTypeSmsDcs = nullptr;
     EXPECT_TRUE(gsmSmsCbHandler != nullptr);
-    auto gsmSmsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(slotId);
-    gsmSmsReceiveHandler->CheckSmsSupport();
+    auto smsReceiveManager = std::make_shared<SmsReceiveManager>(slotId);
+    EXPECT_TRUE(smsReceiveManager != nullptr);
+    smsReceiveManager->Init();
+    EXPECT_TRUE(smsReceiveManager->gsmSmsReceiveHandler_ != nullptr);
+    smsReceiveManager->gsmSmsReceiveHandler_->CheckSmsSupport();
     std::shared_ptr<SmsBaseMessage> smsBaseMessage = nullptr;
-    gsmSmsReceiveHandler->HandleNormalSmsByType(smsBaseMessage);
-    EXPECT_TRUE(gsmSmsReceiveHandler != nullptr);
+    smsReceiveManager->gsmSmsReceiveHandler_->HandleNormalSmsByType(smsBaseMessage);
+    EXPECT_TRUE(smsReceiveManager->gsmSmsReceiveHandler_ != nullptr);
 }
 
 /**

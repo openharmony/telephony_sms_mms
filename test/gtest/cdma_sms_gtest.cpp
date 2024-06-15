@@ -134,8 +134,11 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsMessage_0001, Function | MediumTest | Level1)
 HWTEST_F(CdmaSmsGtest, CdmaSmsReceiveHandler_0001, Function | MediumTest | Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CdmaSmsReceiveHandler_0001 -->");
-    CdmaSmsReceiveHandler cdmaSmsReceiveHandler(DEFAULT_SIM_SLOT_ID);
-    int32_t retInt = cdmaSmsReceiveHandler.HandleSmsByType(nullptr);
+    auto smsReceiveManager = std::make_shared<SmsReceiveManager>(DEFAULT_SIM_SLOT_ID);
+    EXPECT_TRUE(smsReceiveManager != nullptr);
+    smsReceiveManager->Init();
+    EXPECT_TRUE(smsReceiveManager->cdmaSmsReceiveHandler_ != nullptr);
+    int32_t retInt = smsReceiveManager->cdmaSmsReceiveHandler_->HandleSmsByType(nullptr);
     EXPECT_EQ(AckIncomeCause::SMS_ACK_UNKNOWN_ERROR, retInt);
 }
 
@@ -147,24 +150,26 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsReceiveHandler_0001, Function | MediumTest | Level
 HWTEST_F(CdmaSmsGtest, CdmaSmsReceiveHandler_0002, Function | MediumTest | Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CdmaSmsReceiveHandler_0002 -->");
-    auto cdmaSmsReceiveHandler = std::make_shared<CdmaSmsReceiveHandler>(DEFAULT_SIM_SLOT_ID);
-    cdmaSmsReceiveHandler->Init();
+    auto smsReceiveManager = std::make_shared<SmsReceiveManager>(DEFAULT_SIM_SLOT_ID);
+    EXPECT_TRUE(smsReceiveManager != nullptr);
+    smsReceiveManager->Init();
+    EXPECT_TRUE(smsReceiveManager->cdmaSmsReceiveHandler_ != nullptr);
     auto retMsg = std::make_shared<CdmaSmsMessage>();
     retMsg = CdmaSmsMessage::CreateMessage(CDMA_PDU);
     EXPECT_EQ(retMsg, nullptr);
     auto cdmaMsg = std::make_shared<CdmaSmsMessage>();
     cdmaMsg->transMsg_ = std::make_unique<struct CdmaTransportMsg>();
     cdmaMsg->transMsg_->type = CdmaTransportMsgType::BROADCAST;
-    int32_t retInt = cdmaSmsReceiveHandler->HandleSmsByType(cdmaMsg);
+    int32_t retInt = smsReceiveManager->cdmaSmsReceiveHandler_->HandleSmsByType(cdmaMsg);
     EXPECT_EQ(AckIncomeCause::SMS_ACK_RESULT_OK, retInt);
     cdmaMsg->transMsg_->type = CdmaTransportMsgType::P2P;
-    retInt = cdmaSmsReceiveHandler->HandleSmsByType(cdmaMsg);
+    retInt = smsReceiveManager->cdmaSmsReceiveHandler_->HandleSmsByType(cdmaMsg);
     EXPECT_EQ(AckIncomeCause::SMS_ACK_RESULT_OK, retInt);
     cdmaMsg->transMsg_->type = CdmaTransportMsgType::ACK;
-    retInt = cdmaSmsReceiveHandler->HandleSmsByType(cdmaMsg);
+    retInt = smsReceiveManager->cdmaSmsReceiveHandler_->HandleSmsByType(cdmaMsg);
     EXPECT_EQ(AckIncomeCause::SMS_ACK_RESULT_OK, retInt);
     cdmaMsg->transMsg_->type = CdmaTransportMsgType::RESERVED;
-    retInt = cdmaSmsReceiveHandler->HandleSmsByType(cdmaMsg);
+    retInt = smsReceiveManager->cdmaSmsReceiveHandler_->HandleSmsByType(cdmaMsg);
     EXPECT_EQ(AckIncomeCause::SMS_ACK_RESULT_OK, retInt);
 }
 
@@ -176,22 +181,25 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsReceiveHandler_0002, Function | MediumTest | Level
 HWTEST_F(CdmaSmsGtest, CdmaSmsReceiveHandler_0003, Function | MediumTest | Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CdmaSmsReceiveHandler_0003 -->");
-    auto cdmaSmsReceiveHandler = std::make_shared<CdmaSmsReceiveHandler>(DEFAULT_SIM_SLOT_ID);
-    int32_t retInt = cdmaSmsReceiveHandler->HandleSmsOtherSvcid(nullptr);
+    auto smsReceiveManager = std::make_shared<SmsReceiveManager>(DEFAULT_SIM_SLOT_ID);
+    EXPECT_TRUE(smsReceiveManager != nullptr);
+    smsReceiveManager->Init();
+    EXPECT_TRUE(smsReceiveManager->cdmaSmsReceiveHandler_ != nullptr);
+    int32_t retInt = smsReceiveManager->cdmaSmsReceiveHandler_->HandleSmsOtherSvcid(nullptr);
     EXPECT_NE(AckIncomeCause::SMS_ACK_RESULT_OK, retInt);
     auto retMsg = CdmaSmsMessage::CreateMessage(OTHER_CDMA_PDU);
     EXPECT_EQ(retMsg, nullptr);
 
     auto cdmaMsg = std::make_shared<CdmaSmsMessage>();
-    cdmaSmsReceiveHandler->ReplySmsToSmsc(1, cdmaMsg);
-    retInt = cdmaSmsReceiveHandler->HandleSmsOtherSvcid(cdmaMsg);
+    smsReceiveManager->cdmaSmsReceiveHandler_->ReplySmsToSmsc(1, cdmaMsg);
+    retInt = smsReceiveManager->cdmaSmsReceiveHandler_->HandleSmsOtherSvcid(cdmaMsg);
     EXPECT_NE(AckIncomeCause::SMS_ACK_RESULT_OK, retInt);
     cdmaMsg->smsConcat_ = std::make_shared<SmsConcat>();
     cdmaMsg->smsConcat_->is8Bits = true;
     cdmaMsg->smsConcat_->msgRef = 1;
     cdmaMsg->smsConcat_->seqNum = 1;
     cdmaMsg->smsConcat_->totalSeg = 1;
-    retInt = cdmaSmsReceiveHandler->HandleSmsOtherSvcid(cdmaMsg);
+    retInt = smsReceiveManager->cdmaSmsReceiveHandler_->HandleSmsOtherSvcid(cdmaMsg);
     EXPECT_NE(AckIncomeCause::SMS_ACK_RESULT_OK, retInt);
 }
 
@@ -203,16 +211,19 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsReceiveHandler_0003, Function | MediumTest | Level
 HWTEST_F(CdmaSmsGtest, CdmaSmsReceiveHandler_0004, Function | MediumTest | Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CdmaSmsReceiveHandler_0004 -->");
-    CdmaSmsReceiveHandler cdmaSmsReceiveHandler(DEFAULT_SIM_SLOT_ID);
+    auto smsReceiveManager = std::make_shared<SmsReceiveManager>(DEFAULT_SIM_SLOT_ID);
+    EXPECT_TRUE(smsReceiveManager != nullptr);
+    smsReceiveManager->Init();
+    EXPECT_TRUE(smsReceiveManager->cdmaSmsReceiveHandler_ != nullptr);
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
     auto smsSender = std::make_shared<CdmaSmsSender>(DEFAULT_SIM_SLOT_ID, fun);
-    cdmaSmsReceiveHandler.SetCdmaSender(smsSender);
+    smsReceiveManager->cdmaSmsReceiveHandler_->SetCdmaSender(smsSender);
     auto info = std::make_shared<SmsMessageInfo>();
-    auto ret = cdmaSmsReceiveHandler.TransformMessageInfo(info);
+    auto ret = smsReceiveManager->cdmaSmsReceiveHandler_->TransformMessageInfo(info);
     EXPECT_EQ(ret, nullptr);
-    cdmaSmsReceiveHandler.SendCBBroadcast(nullptr);
+    smsReceiveManager->cdmaSmsReceiveHandler_->SendCBBroadcast(nullptr);
     auto cdmaMsg = std::make_shared<CdmaSmsMessage>();
-    EXPECT_EQ(cdmaSmsReceiveHandler.SendCBBroadcast(cdmaMsg), true);
+    EXPECT_EQ(smsReceiveManager->cdmaSmsReceiveHandler_->SendCBBroadcast(cdmaMsg), true);
 }
 
 /**
