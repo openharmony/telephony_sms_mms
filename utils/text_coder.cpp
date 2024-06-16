@@ -444,12 +444,9 @@ int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int 
         TELEPHONY_LOGE("g_iconv result is %{public}u", err);
     }
     int length = maxLength - static_cast<int>(remainedLength);
-    int destLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(dest)));
-    if (length < 0 || length >= destLength) {
-        TELEPHONY_LOGE("Error! the position: %{public}d is over the length of dest: %{public}d", length, destLength);
+    if (length < 0 || length >= maxLength) {
         return 0;
     }
-    dest[length] = 0x00;
     return length;
 }
 
