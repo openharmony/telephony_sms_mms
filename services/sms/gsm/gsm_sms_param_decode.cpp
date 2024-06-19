@@ -81,7 +81,7 @@ bool GsmSmsParamDecode::DecodeAddressAlphaNum(
     uint32_t encodeLen = (addrLen % HEX_VALUE_02 == 0) ? (addrLen / HEX_VALUE_02) :
         (addrLen / HEX_VALUE_02 + HEX_VALUE_01);
     TELEPHONY_LOGI("DecodeAddressAlphaNum, encodeLen %{public}d", encodeLen);
-    for (int i = 0; i < encodeLen; i++) {
+    for (uint8_t i = 0; i < encodeLen; i++) {
         if (!buffer.ReadByte(oneByte)) {
             TELEPHONY_LOGE("get data error.");
             return false;
