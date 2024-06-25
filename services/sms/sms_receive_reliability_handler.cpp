@@ -351,6 +351,7 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
         auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(
             smsSubscriberInfo, shared_from_this(), indexer->GetMsgRefId(), indexer->GetDataBaseId(), addr);
         cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, smsReceiver);
+        sptrQueue.push(smsReceiver);
     } else {
         cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     }
