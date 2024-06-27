@@ -179,13 +179,17 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         TELEPHONY_LOGE("gsm_sms_sender: SendSms smsIndexer nullptr");
         return;
     }
-    if (!isImsNetDomain_ && (voiceServiceState_ != static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE))) {
-        SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
-        TELEPHONY_LOGE("gsm_sms_sender: SendSms not in service");
-        SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
-            SmsMmsErrorCode::SMS_ERROR_SENDSMS_NOT_IN_SERVICE, "gsm send sms not in service");
-        return;
+    auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
+    if (!satelliteSmsClient.IsSatelliteEnabled()) {
+        if (!isImsNetDomain_ && (voiceServiceState_ != static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE))) {
+            SendResultCallBack(smsIndexer, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
+            TELEPHONY_LOGE("gsm_sms_sender: SendSms not in service");
+            SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+                SmsMmsErrorCode::SMS_ERROR_SENDSMS_NOT_IN_SERVICE, "gsm send sms not in service");
+            return;
+        }
     }
+
     int64_t refId = GetMsgRef64Bit();
     TELEPHONY_LOGI("gsm refId = %{public}" PRId64 "", refId);
     if (!SendCacheMapAddItem(refId, smsIndexer)) {
@@ -198,7 +202,6 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     smsData.smscPdu = StringUtils::StringToHex(smsIndexer->GetEncodeSmca());
     smsData.pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
 
-    auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
     if (satelliteSmsClient.IsSatelliteEnabled()) {
         TELEPHONY_LOGI("send sms through satellite");
         SendSatelliteSms(smsIndexer, smsData);
