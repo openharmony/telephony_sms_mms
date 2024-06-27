@@ -31,11 +31,11 @@ SatelliteSmsCallbackStub::SatelliteSmsCallbackStub()
 void SatelliteSmsCallbackStub::InitFuncMap()
 {
     requestFuncMap_[static_cast<uint32_t>(SatelliteSmsCallbackInterfaceCode::SEND_SMS_RESPONSE)] =
-        &SatelliteSmsCallbackStub::OnSendSmsResponse;
+        [this](MessageParcel &data, MessageParcel &reply) { return OnSendSmsResponse(data, reply); };
     requestFuncMap_[static_cast<uint32_t>(SatelliteSmsCallbackInterfaceCode::SMS_STATUS_REPORT_NOTIFY)] =
-        &SatelliteSmsCallbackStub::OnSmsStatusReportNotify;
+        [this](MessageParcel &data, MessageParcel &reply) { return OnSmsStatusReportNotify(data, reply); };
     requestFuncMap_[static_cast<uint32_t>(SatelliteSmsCallbackInterfaceCode::NEW_SMS_NOTIFY)] =
-        &SatelliteSmsCallbackStub::OnNewSmsNotify;
+        [this](MessageParcel &data, MessageParcel &reply) { return OnNewSmsNotify(data, reply); };
 }
 
 SatelliteSmsCallbackStub::~SatelliteSmsCallbackStub()
@@ -56,7 +56,7 @@ int32_t SatelliteSmsCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &
     if (itFunc != requestFuncMap_.end()) {
         auto requestFunc = itFunc->second;
         if (requestFunc != nullptr) {
-            return (this->*requestFunc)(data, reply);
+            return requestFunc(data, reply);
         }
     }
     TELEPHONY_LOGD("Do not found the requestFunc of code=%{public}d, need to check", code);

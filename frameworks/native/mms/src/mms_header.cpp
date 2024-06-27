@@ -37,85 +37,135 @@ MmsHeader::MmsHeader()
 
 void MmsHeader::InitOctetHandleFun()
 {
-    memberFuncMap_[MMS_DELIVERY_REPORT] = &MmsHeader::DecodeFieldOctetValue; // MmsBoolType
-    memberFuncMap_[MMS_READ_REPORT] = &MmsHeader::DecodeFieldOctetValue;
-    memberFuncMap_[MMS_REPORT_ALLOWED] = &MmsHeader::DecodeFieldOctetValue;
-    memberFuncMap_[MMS_STORE] = &MmsHeader::DecodeFieldOctetValue;
-    memberFuncMap_[MMS_STORED] = &MmsHeader::DecodeFieldOctetValue;
-    memberFuncMap_[MMS_TOTALS] = &MmsHeader::DecodeFieldOctetValue;
-    memberFuncMap_[MMS_QUOTAS] = &MmsHeader::DecodeFieldOctetValue;
-    memberFuncMap_[MMS_DISTRIBUTION_INDICATOR] = &MmsHeader::DecodeFieldOctetValue;
-    memberFuncMap_[MMS_ADAPTATION_ALLOWED] = &MmsHeader::DecodeFieldOctetValue;
-    memberFuncMap_[MMS_MESSAGE_CLASS] = &MmsHeader::DecodeFieldOctetValue;
-    memberFuncMap_[MMS_PRIORITY] = &MmsHeader::DecodeFieldOctetValue; // MmsPriority
-    memberFuncMap_[MMS_RESPONSE_STATUS] = &MmsHeader::DecodeFieldOctetValue; // MmsResponseStatus
-    memberFuncMap_[MMS_SENDER_VISIBILITY] = &MmsHeader::DecodeFieldOctetValue; // MmsSenderVisibilityType
-    memberFuncMap_[MMS_STATUS] = &MmsHeader::DecodeFieldOctetValue; // MmsStatus
-    memberFuncMap_[MMS_RETRIEVE_STATUS] = &MmsHeader::DecodeFieldOctetValue; // MmsRetrieveStatus
-    memberFuncMap_[MMS_READ_STATUS] = &MmsHeader::DecodeFieldOctetValue; // MmsReadStatus
-    memberFuncMap_[MMS_REPLY_CHARGING] = &MmsHeader::DecodeFieldOctetValue; // MmsReplyCharging
-    memberFuncMap_[MMS_MM_STATE] = &MmsHeader::DecodeFieldOctetValue; // MmsMmState
-    memberFuncMap_[MMS_MM_FLAGS] = &MmsHeader::DecodeFieldMMFlag; // MmsMmFlags
-    memberFuncMap_[MMS_STORE_STATUS] = &MmsHeader::DecodeFieldOctetValue; // MmsStoreStatus
-    memberFuncMap_[MMS_MBOX_TOTALS] = &MmsHeader::DecodeFieldMBox; // MmsMboxTotals
-    memberFuncMap_[MMS_MBOX_QUOTAS] = &MmsHeader::DecodeFieldMBox; // MmsMboxQuotas
-    memberFuncMap_[MMS_RECOMMENDED_RETRIEVAL_MODE] =
-        &MmsHeader::DecodeFieldOctetValue; // MmsRecommendedRetrievalMode
-    memberFuncMap_[MMS_CONTENT_CLASS] = &MmsHeader::DecodeFieldOctetValue; // MmsContentClass
-    memberFuncMap_[MMS_CANCEL_STATUS] = &MmsHeader::DecodeFieldOctetValue; // MmsCancelStatus
-    memberFuncMap_[MMS_MESSAGE_TYPE] = &MmsHeader::DecodeMmsMsgType;
-    memberFuncMap_[MMS_ATTRIBUTES] = &MmsHeader::DecodeFieldOctetValue;
-    memberFuncMap_[MMS_DRM_CONTENT] = &MmsHeader::DecodeFieldOctetValue;
+    auto func = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldOctetValue(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_DELIVERY_REPORT] = func; // MmsBoolType
+    memberFuncMap_[MMS_READ_REPORT] = func;
+    memberFuncMap_[MMS_REPORT_ALLOWED] = func;
+    memberFuncMap_[MMS_STORE] = func;
+    memberFuncMap_[MMS_STORED] = func;
+    memberFuncMap_[MMS_TOTALS] = func;
+    memberFuncMap_[MMS_QUOTAS] = func;
+    memberFuncMap_[MMS_DISTRIBUTION_INDICATOR] = func;
+    memberFuncMap_[MMS_ADAPTATION_ALLOWED] = func;
+    memberFuncMap_[MMS_MESSAGE_CLASS] = func;
+    memberFuncMap_[MMS_PRIORITY] = func; // MmsPriority
+    memberFuncMap_[MMS_RESPONSE_STATUS] = func; // MmsResponseStatus
+    memberFuncMap_[MMS_SENDER_VISIBILITY] = func; // MmsSenderVisibilityType
+    memberFuncMap_[MMS_STATUS] = func; // MmsStatus
+    memberFuncMap_[MMS_RETRIEVE_STATUS] = func; // MmsRetrieveStatus
+    memberFuncMap_[MMS_READ_STATUS] = func; // MmsReadStatus
+    memberFuncMap_[MMS_REPLY_CHARGING] = func; // MmsReplyCharging
+    memberFuncMap_[MMS_MM_STATE] = func; // MmsMmState
+    memberFuncMap_[MMS_MM_FLAGS] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldMMFlag(fieldId, buff, len);
+    }; // MmsMmFlags
+    memberFuncMap_[MMS_STORE_STATUS] = func; // MmsStoreStatus
+    memberFuncMap_[MMS_MBOX_TOTALS] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldMBox(fieldId, buff, len);
+    }; // MmsMboxTotals
+    memberFuncMap_[MMS_MBOX_QUOTAS] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldMBox(fieldId, buff, len);
+    }; // MmsMboxQuotas
+    memberFuncMap_[MMS_RECOMMENDED_RETRIEVAL_MODE] = func; // MmsRecommendedRetrievalMode
+    memberFuncMap_[MMS_CONTENT_CLASS] = func; // MmsContentClass
+    memberFuncMap_[MMS_CANCEL_STATUS] = func; // MmsCancelStatus
+    memberFuncMap_[MMS_MESSAGE_TYPE] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeMmsMsgType(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_ATTRIBUTES] = func;
+    memberFuncMap_[MMS_DRM_CONTENT] = func;
 }
 
 void MmsHeader::InitLongHandleFun()
 {
-    memberFuncMap_[MMS_CONTENT_TYPE] = &MmsHeader::DecodeMmsContentType;
-    memberFuncMap_[MMS_ELEMENT_DESCRIPTOR] = &MmsHeader::DecodeMmsContentType;
-    memberFuncMap_[MMS_DATE] = &MmsHeader::DecodeFieldLongValue;
-    memberFuncMap_[MMS_REPLY_CHARGING_SIZE] = &MmsHeader::DecodeFieldLongValue;
-    memberFuncMap_[MMS_MESSAGE_SIZE] = &MmsHeader::DecodeFieldLongValue;
+    memberFuncMap_[MMS_CONTENT_TYPE] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeMmsContentType(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_ELEMENT_DESCRIPTOR] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeMmsContentType(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_DATE] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldLongValue(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_REPLY_CHARGING_SIZE] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldLongValue(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_MESSAGE_SIZE] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldLongValue(fieldId, buff, len);
+    };
 
-    memberFuncMap_[MMS_MESSAGE_COUNT] = &MmsHeader::DecodeFieldIntegerValue;
-    memberFuncMap_[MMS_START] = &MmsHeader::DecodeFieldIntegerValue;
-    memberFuncMap_[MMS_LIMIT] = &MmsHeader::DecodeFieldIntegerValue;
-    memberFuncMap_[MMS_MMS_VERSION] = &MmsHeader::DecodeFieldIntegerValue;
+    memberFuncMap_[MMS_MESSAGE_COUNT] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldIntegerValue(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_START] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldIntegerValue(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_LIMIT] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldIntegerValue(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_MMS_VERSION] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldIntegerValue(fieldId, buff, len);
+    };
 
-    memberFuncMap_[MMS_DELIVERY_TIME] = &MmsHeader::DecodeFieldDate;
-    memberFuncMap_[MMS_EXPIRY] = &MmsHeader::DecodeFieldDate;
-    memberFuncMap_[MMS_REPLY_CHARGING_DEADLINE] = &MmsHeader::DecodeFieldDate; // MmsReplyChargingDeadline
-    memberFuncMap_[MMS_PREVIOUSLY_SENT_DATE] = &MmsHeader::DecodeFieldPreviouslySentDate;
+    memberFuncMap_[MMS_DELIVERY_TIME] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldDate(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_EXPIRY] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldDate(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_REPLY_CHARGING_DEADLINE] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldDate(fieldId, buff, len);
+    }; // MmsReplyChargingDeadline
+    memberFuncMap_[MMS_PREVIOUSLY_SENT_DATE] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldPreviouslySentDate(fieldId, buff, len);
+    };
 }
 
 void MmsHeader::InitStringHandleFun()
 {
-    memberFuncMap_[MMS_RESPONSE_TEXT] = &MmsHeader::DecodeFieldEncodedStringValue;
-    memberFuncMap_[MMS_SUBJECT] = &MmsHeader::DecodeFieldEncodedStringValue;
-    memberFuncMap_[MMS_RETRIEVE_TEXT] = &MmsHeader::DecodeFieldEncodedStringValue;
-    memberFuncMap_[MMS_PREVIOUSLY_SENT_BY] = &MmsHeader::DecodeFieldEncodedStringValue;
+    auto func = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldEncodedStringValue(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_RESPONSE_TEXT] = func;
+    memberFuncMap_[MMS_SUBJECT] = func;
+    memberFuncMap_[MMS_RETRIEVE_TEXT] = func;
+    memberFuncMap_[MMS_PREVIOUSLY_SENT_BY] = func;
 
-    memberFuncMap_[MMS_STORE_STATUS_TEXT] = &MmsHeader::DecodeFieldEncodedStringValue;
-    memberFuncMap_[MMS_RECOMMENDED_RETRIEVAL_MODE_TEXT] = &MmsHeader::DecodeFieldEncodedStringValue;
-    memberFuncMap_[MMS_STATUS_TEXT] = &MmsHeader::DecodeFieldEncodedStringValue;
+    memberFuncMap_[MMS_STORE_STATUS_TEXT] = func;
+    memberFuncMap_[MMS_RECOMMENDED_RETRIEVAL_MODE_TEXT] = func;
+    memberFuncMap_[MMS_STATUS_TEXT] = func;
 
-    memberFuncMap_[MMS_BCC] = &MmsHeader::DecodeFieldAddressModelValue;
-    memberFuncMap_[MMS_CC] = &MmsHeader::DecodeFieldAddressModelValue;
-    memberFuncMap_[MMS_TO] = &MmsHeader::DecodeFieldAddressModelValue;
+    memberFuncMap_[MMS_BCC] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldAddressModelValue(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_CC] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldAddressModelValue(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_TO] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldAddressModelValue(fieldId, buff, len);
+    };
 
-    memberFuncMap_[MMS_FROM] = &MmsHeader::DecodeFromValue;
+    memberFuncMap_[MMS_FROM] = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFromValue(fieldId, buff, len);
+    };
 }
 
 void MmsHeader::InitTextStringHandleFun()
 {
-    memberFuncMap_[MMS_CONTENT_LOCATION] = &MmsHeader::DecodeFieldTextStringValue;
-    memberFuncMap_[MMS_TRANSACTION_ID] = &MmsHeader::DecodeFieldTextStringValue;
-    memberFuncMap_[MMS_MESSAGE_ID] = &MmsHeader::DecodeFieldTextStringValue;
-    memberFuncMap_[MMS_REPLACE_ID] = &MmsHeader::DecodeFieldTextStringValue;
-    memberFuncMap_[MMS_CANCEL_ID] = &MmsHeader::DecodeFieldTextStringValue;
-    memberFuncMap_[MMS_APPLIC_ID] = &MmsHeader::DecodeFieldTextStringValue;
-    memberFuncMap_[MMS_REPLY_APPLIC_ID] = &MmsHeader::DecodeFieldTextStringValue;
-    memberFuncMap_[MMS_REPLY_CHARGING_ID] = &MmsHeader::DecodeFieldTextStringValue;
-    memberFuncMap_[MMS_AUX_APPLIC_INFO] = &MmsHeader::DecodeFieldTextStringValue;
+    auto func = [this](uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len) {
+        return DecodeFieldTextStringValue(fieldId, buff, len);
+    };
+    memberFuncMap_[MMS_CONTENT_LOCATION] = func;
+    memberFuncMap_[MMS_TRANSACTION_ID] = func;
+    memberFuncMap_[MMS_MESSAGE_ID] = func;
+    memberFuncMap_[MMS_REPLACE_ID] = func;
+    memberFuncMap_[MMS_CANCEL_ID] = func;
+    memberFuncMap_[MMS_APPLIC_ID] = func;
+    memberFuncMap_[MMS_REPLY_APPLIC_ID] = func;
+    memberFuncMap_[MMS_REPLY_CHARGING_ID] = func;
+    memberFuncMap_[MMS_AUX_APPLIC_INFO] = func;
 }
 
 void MmsHeader::DumpMmsHeader()
@@ -167,7 +217,7 @@ bool MmsHeader::DecodeMmsHeader(MmsDecodeBuffer &decodeBuffer)
         auto decodeFunc = memberFuncMap_.find(fieldCode);
         if (decodeFunc != memberFuncMap_.end()) {
             auto fun = decodeFunc->second;
-            if (fun != nullptr && !(this->*fun)(fieldCode, decodeBuffer, len)) {
+            if (fun != nullptr && !fun(fieldCode, decodeBuffer, len)) {
                 TELEPHONY_LOGE("The fieldId[%{public}d] decode header fail.", fieldCode);
                 return false;
             }

@@ -40,7 +40,7 @@ private:
     int32_t OnNewSmsNotify(MessageParcel &data, MessageParcel &reply);
 
 private:
-    using RequestFuncType = int32_t (SatelliteSmsCallbackStub::*)(MessageParcel &data, MessageParcel &reply);
+    using RequestFuncType = std::function<int32_t(MessageParcel &data, MessageParcel &reply)>;
     std::map<uint32_t, RequestFuncType> requestFuncMap_;
 };
 } // namespace Telephony

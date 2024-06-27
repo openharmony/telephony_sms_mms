@@ -73,8 +73,8 @@ private:
     void OnDownloadMms(MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
     std::map<uint32_t, std::shared_ptr<SmsInterfaceManager>> slotSmsInterfaceManagerMap_;
-    using SmsServiceFunc = void (SmsInterfaceStub::*)(MessageParcel &data, MessageParcel &reply, MessageOption &option);
-    std::map<uint32_t, SmsServiceFunc> memberFuncMap_;
+    using SmsServiceFunc = std::function<void(MessageParcel &data, MessageParcel &reply, MessageOption &option)>;
+    std::map<SmsServiceInterfaceCode, SmsServiceFunc> memberFuncMap_;
     std::mutex mutex_;
     const std::string MMS_APP = "com.ohos.mms";
 };

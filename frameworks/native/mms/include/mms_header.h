@@ -111,7 +111,7 @@ private:
     bool CheckStoreStatus(uint8_t value);
     bool CheckBooleanValue(uint8_t fieldId, uint8_t value);
 
-    using Func = bool (MmsHeader::*)(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len);
+    using Func = std::function<bool(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len)>;
     std::map<uint8_t, Func> memberFuncMap_;
 
 private:
