@@ -51,7 +51,7 @@ private:
     int32_t SendHRilRadioResponseInfo(int32_t slotId, uint32_t eventId, const RadioResponseInfo &info);
 
 private:
-    using RequestFuncType = int32_t (ImsSmsCallbackStub::*)(MessageParcel &data, MessageParcel &reply);
+    using RequestFuncType = std::function<int32_t(MessageParcel &data, MessageParcel &reply)>;
     std::map<uint32_t, RequestFuncType> requestFuncMap_;
     std::shared_ptr<TelEventHandler> handler_[2];
 };
