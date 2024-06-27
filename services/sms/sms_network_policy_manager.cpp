@@ -19,6 +19,7 @@
 #include "core_service_client.h"
 #include "ims_reg_info_callback_stub.h"
 #include "radio_event.h"
+#include "satellite_sms_client.h"
 #include "sms_service.h"
 #include "sms_persist_helper.h"
 #include "telephony_log_wrapper.h"
@@ -116,6 +117,11 @@ void SmsNetworkPolicyManager::GetRadioState()
         netWorkType_ = NET_TYPE_GSM;
     }
 
+    auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
+    if (satelliteSmsClient.IsSatelliteEnabled()) {
+        TELEPHONY_LOGI("Satellite mode on");
+        netWorkType_ = NET_TYPE_GSM;
+    }
     ImsRegInfo info;
     CoreManagerInner::GetInstance().GetImsRegStatus(slotId_, ImsServiceType::TYPE_SMS, info);
     isImsNetDomain_ = info.imsRegState == ImsRegState::IMS_REGISTERED;
