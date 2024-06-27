@@ -363,6 +363,7 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast(std::shared_ptr<SmsReceiveIn
     auto wapPushReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(
         smsSubscriberInfo, handler, indexer->GetMsgRefId(), indexer->GetDataBaseId(), indexer->GetOriginatingAddress());
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, wapPushReceiver);
+    sptrQueue.push(wapPushReceiver);
     HiSysEventWapPushResult(publishResult);
     return true;
 }
