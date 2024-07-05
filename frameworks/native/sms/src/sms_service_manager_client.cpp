@@ -70,6 +70,7 @@ void SmsServiceManagerClient::ResetSmsServiceProxy()
 int32_t SmsServiceManagerClient::SetDefaultSmsSlotId(int32_t slotId)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->SetDefaultSmsSlotId(slotId);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -78,6 +79,7 @@ int32_t SmsServiceManagerClient::SetDefaultSmsSlotId(int32_t slotId)
 int32_t SmsServiceManagerClient::GetDefaultSmsSimId(int32_t &simId)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->GetDefaultSmsSimId(simId);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -86,6 +88,7 @@ int32_t SmsServiceManagerClient::GetDefaultSmsSimId(int32_t &simId)
 int32_t SmsServiceManagerClient::GetDefaultSmsSlotId()
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->GetDefaultSmsSlotId();
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -96,6 +99,7 @@ int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16strin
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->SendMessage(slotId, desAddr, scAddr, text, callback, deliveryCallback);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -106,6 +110,7 @@ int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16strin
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->SendMessage(
             slotId, desAddr, scAddr, port, data, dataLen, callback, deliveryCallback);
     }
@@ -115,6 +120,7 @@ int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16strin
 int32_t SmsServiceManagerClient::SetScAddress(int32_t slotId, const std::u16string &scAddr)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->SetSmscAddr(slotId, scAddr);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -123,6 +129,7 @@ int32_t SmsServiceManagerClient::SetScAddress(int32_t slotId, const std::u16stri
 int32_t SmsServiceManagerClient::GetScAddress(int32_t slotId, std::u16string &smscAddress)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->GetSmscAddr(slotId, smscAddress);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -132,6 +139,7 @@ int32_t SmsServiceManagerClient::AddSimMessage(int32_t slotId, const std::u16str
     ISmsServiceInterface::SimMessageStatus status)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->AddSimMessage(slotId, smsc, pdu, status);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -140,6 +148,7 @@ int32_t SmsServiceManagerClient::AddSimMessage(int32_t slotId, const std::u16str
 int32_t SmsServiceManagerClient::DelSimMessage(int32_t slotId, uint32_t msgIndex)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->DelSimMessage(slotId, msgIndex);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -149,6 +158,7 @@ int32_t SmsServiceManagerClient::UpdateSimMessage(int32_t slotId, uint32_t msgIn
     ISmsServiceInterface::SimMessageStatus newStatus, const std::u16string &pdu, const std::u16string &smsc)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->UpdateSimMessage(slotId, msgIndex, newStatus, pdu, smsc);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -157,6 +167,7 @@ int32_t SmsServiceManagerClient::UpdateSimMessage(int32_t slotId, uint32_t msgIn
 int32_t SmsServiceManagerClient::GetAllSimMessages(int32_t slotId, std::vector<ShortMessage> &message)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->GetAllSimMessages(slotId, message);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -166,6 +177,7 @@ int32_t SmsServiceManagerClient::SetCBConfig(
     int32_t slotId, bool enable, uint32_t startMessageId, uint32_t endMessageId, uint8_t ranType)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->SetCBConfig(slotId, enable, startMessageId, endMessageId, ranType);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -174,6 +186,7 @@ int32_t SmsServiceManagerClient::SetCBConfig(
 bool SmsServiceManagerClient::SetImsSmsConfig(int32_t slotId, int32_t enable)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->SetImsSmsConfig(slotId, enable);
     }
     return false;
@@ -183,6 +196,7 @@ int32_t SmsServiceManagerClient::SendMms(int32_t slotId, const std::u16string &m
     const std::u16string &ua, const std::u16string &uaprof)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->SendMms(slotId, mmsc, data, ua, uaprof);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -192,6 +206,7 @@ int32_t SmsServiceManagerClient::DownloadMms(int32_t slotId, const std::u16strin
     const std::u16string &ua, const std::u16string &uaprof)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->DownloadMms(slotId, mmsc, data, ua, uaprof);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -200,6 +215,7 @@ int32_t SmsServiceManagerClient::DownloadMms(int32_t slotId, const std::u16strin
 int32_t SmsServiceManagerClient::SplitMessage(const std::u16string &message, std::vector<std::u16string> &splitMessage)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->SplitMessage(message, splitMessage);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -209,6 +225,7 @@ int32_t SmsServiceManagerClient::GetSmsSegmentsInfo(
     int32_t slotId, const std::u16string &message, bool force7BitCode, ISmsServiceInterface::SmsSegmentsInfo &segInfo)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->GetSmsSegmentsInfo(slotId, message, force7BitCode, segInfo);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -217,6 +234,7 @@ int32_t SmsServiceManagerClient::GetSmsSegmentsInfo(
 int32_t SmsServiceManagerClient::IsImsSmsSupported(int32_t slotId, bool &isSupported)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->IsImsSmsSupported(slotId, isSupported);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -225,6 +243,7 @@ int32_t SmsServiceManagerClient::IsImsSmsSupported(int32_t slotId, bool &isSuppo
 int32_t SmsServiceManagerClient::GetImsShortMessageFormat(std::u16string &format)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->GetImsShortMessageFormat(format);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -233,6 +252,7 @@ int32_t SmsServiceManagerClient::GetImsShortMessageFormat(std::u16string &format
 bool SmsServiceManagerClient::HasSmsCapability()
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->HasSmsCapability();
     }
     return false;
@@ -241,6 +261,7 @@ bool SmsServiceManagerClient::HasSmsCapability()
 int32_t SmsServiceManagerClient::CreateMessage(std::string pdu, std::string specification, ShortMessage &message)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->CreateMessage(pdu, specification, message);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -249,6 +270,7 @@ int32_t SmsServiceManagerClient::CreateMessage(std::string pdu, std::string spec
 bool SmsServiceManagerClient::GetBase64Encode(std::string src, std::string &dest)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->GetBase64Encode(src, dest);
     }
     return false;
@@ -257,6 +279,7 @@ bool SmsServiceManagerClient::GetBase64Encode(std::string src, std::string &dest
 bool SmsServiceManagerClient::GetBase64Decode(std::string src, std::string &dest)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->GetBase64Decode(src, dest);
     }
     return false;
@@ -266,6 +289,7 @@ bool SmsServiceManagerClient::GetEncodeStringFunc(
     std::string &encodeString, uint32_t charset, uint32_t valLength, std::string strEncodeString)
 {
     if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
         return smsServiceInterface_->GetEncodeStringFunc(encodeString, charset, valLength, strEncodeString);
     }
     return false;
