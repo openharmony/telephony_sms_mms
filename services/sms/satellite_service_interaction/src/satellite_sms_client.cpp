@@ -60,7 +60,6 @@ sptr<ISatelliteService> SatelliteSmsClient::GetServiceProxy()
     }
     sptr<IRemoteObject> obj = sam->CheckSystemAbility(TELEPHONY_SATELLITE_SERVICE_ABILITY_ID);
     if (obj == nullptr) {
-        TELEPHONY_LOGE("Failed to get satellite service");
         return nullptr;
     }
     std::unique_ptr<SatelliteServiceDeathRecipient> recipient = std::make_unique<SatelliteServiceDeathRecipient>(*this);
@@ -236,7 +235,6 @@ bool SatelliteSmsClient::IsSatelliteEnabled()
 {
     auto proxy = GetServiceProxy();
     if (proxy == nullptr) {
-        TELEPHONY_LOGE("service proxy is null!");
         return false;
     }
     return proxy->IsSatelliteEnabled();
