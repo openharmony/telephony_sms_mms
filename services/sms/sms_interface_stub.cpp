@@ -34,47 +34,54 @@ static inline bool IsValidSlotId(int32_t slotId)
 
 SmsInterfaceStub::SmsInterfaceStub()
 {
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::TEXT_BASED_SMS_DELIVERY)] =
-        &SmsInterfaceStub::OnSendSmsTextRequest;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::DATA_BASED_SMS_DELIVERY)] =
-        &SmsInterfaceStub::OnSendSmsDataRequest;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SET_SMSC_ADDRESS)] = &SmsInterfaceStub::OnSetSmscAddr;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_SMSC_ADDRESS)] = &SmsInterfaceStub::OnGetSmscAddr;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::ADD_SIM_MESSAGE)] =
-        &SmsInterfaceStub::OnAddSimMessage;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::DEL_SIM_MESSAGE)] =
-        &SmsInterfaceStub::OnDelSimMessage;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::UPDATE_SIM_MESSAGE)] =
-        &SmsInterfaceStub::OnUpdateSimMessage;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_ALL_SIM_MESSAGE)] =
-        &SmsInterfaceStub::OnGetAllSimMessages;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SET_CB_CONFIG)] = &SmsInterfaceStub::OnSetCBConfig;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SET_IMS_SMS_CONFIG)] =
-        &SmsInterfaceStub::OnSetImsSmsConfig;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SET_DEFAULT_SMS_SLOT_ID)] =
-        &SmsInterfaceStub::OnSetDefaultSmsSlotId;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_DEFAULT_SMS_SLOT_ID)] =
-        &SmsInterfaceStub::OnGetDefaultSmsSlotId;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_DEFAULT_SMS_SIM_ID)] =
-        &SmsInterfaceStub::OnGetDefaultSmsSimId;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SPLIT_MESSAGE)] = &SmsInterfaceStub::OnSplitMessage;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_SMS_SEGMENTS_INFO)] =
-        &SmsInterfaceStub::OnGetSmsSegmentsInfo;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_IMS_SHORT_MESSAGE_FORMAT)] =
-        &SmsInterfaceStub::OnGetImsShortMessageFormat;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::IS_IMS_SMS_SUPPORTED)] =
-        &SmsInterfaceStub::OnIsImsSmsSupported;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::HAS_SMS_CAPABILITY)] =
-        &SmsInterfaceStub::OnHasSmsCapability;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::CREATE_MESSAGE)] = &SmsInterfaceStub::OnCreateMessage;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::MMS_BASE64_ENCODE)] =
-        &SmsInterfaceStub::OnGetBase64Encode;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::MMS_BASE64_DECODE)] =
-        &SmsInterfaceStub::OnGetBase64Decode;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::GET_ENCODE_STRING)] =
-        &SmsInterfaceStub::OnGetEncodeStringFunc;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::SEND_MMS)] = &SmsInterfaceStub::OnSendMms;
-    memberFuncMap_[static_cast<uint32_t>(SmsServiceInterfaceCode::DOWNLOAD_MMS)] = &SmsInterfaceStub::OnDownloadMms;
+    memberFuncMap_[SmsServiceInterfaceCode::TEXT_BASED_SMS_DELIVERY] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnSendSmsTextRequest(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::DATA_BASED_SMS_DELIVERY] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnSendSmsDataRequest(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::SET_SMSC_ADDRESS] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnSetSmscAddr(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::GET_SMSC_ADDRESS] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnGetSmscAddr(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::ADD_SIM_MESSAGE] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnAddSimMessage(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::DEL_SIM_MESSAGE] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnDelSimMessage(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::UPDATE_SIM_MESSAGE] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnUpdateSimMessage(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::GET_ALL_SIM_MESSAGE] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnGetAllSimMessages(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::SET_CB_CONFIG] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnSetCBConfig(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::SET_IMS_SMS_CONFIG] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnSetImsSmsConfig(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::SET_DEFAULT_SMS_SLOT_ID] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnSetDefaultSmsSlotId(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::GET_DEFAULT_SMS_SLOT_ID] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnGetDefaultSmsSlotId(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::GET_DEFAULT_SMS_SIM_ID] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnGetDefaultSmsSimId(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::SPLIT_MESSAGE] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnSplitMessage(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::GET_SMS_SEGMENTS_INFO] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnGetSmsSegmentsInfo(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::GET_IMS_SHORT_MESSAGE_FORMAT] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnGetImsShortMessageFormat(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::IS_IMS_SMS_SUPPORTED] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnIsImsSmsSupported(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::HAS_SMS_CAPABILITY] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnHasSmsCapability(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::CREATE_MESSAGE] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnCreateMessage(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::MMS_BASE64_ENCODE] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnGetBase64Encode(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::MMS_BASE64_DECODE] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnGetBase64Decode(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::GET_ENCODE_STRING] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnGetEncodeStringFunc(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::SEND_MMS] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnSendMms(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::DOWNLOAD_MMS] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnDownloadMms(data, reply, option); };
 }
 
 SmsInterfaceStub::~SmsInterfaceStub()
@@ -549,11 +556,11 @@ int SmsInterfaceStub::OnRemoteRequest(
         return TELEPHONY_ERR_DESCRIPTOR_MISMATCH;
     }
 
-    auto itFunc = memberFuncMap_.find(code);
+    auto itFunc = memberFuncMap_.find(static_cast<SmsServiceInterfaceCode>(code));
     if (itFunc != memberFuncMap_.end()) {
         auto memberFunc = itFunc->second;
         if (memberFunc != nullptr) {
-            (this->*memberFunc)(data, reply, option);
+            memberFunc(data, reply, option);
             return TELEPHONY_ERR_SUCCESS;
         }
     }
