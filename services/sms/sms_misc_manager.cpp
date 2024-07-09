@@ -156,7 +156,7 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     eventId = event->GetInnerEventId();
     switch (eventId) {
         case SET_CB_CONFIG_FINISH: {
-            TELEPHONY_LOGI("SmsMiscManager::ProcessEvent Set cb config finish");
+            TELEPHONY_LOGD("SmsMiscManager::ProcessEvent Set cb config finish");
             isSuccess_ = true;
             std::shared_ptr<RadioResponseInfo> res = event->GetSharedObject<RadioResponseInfo>();
             if (res != nullptr) {
