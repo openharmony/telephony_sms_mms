@@ -226,6 +226,7 @@ bool MmsHeader::DecodeMmsHeader(MmsDecodeBuffer &decodeBuffer)
             }
         } else {
             TELEPHONY_LOGI("DecodeMmsMsgUnKnownField:%{public}02X", fieldCode);
+            decodeBuffer.GetPdu();
             DecodeMmsMsgUnKnownField(decodeBuffer);
         }
     }
