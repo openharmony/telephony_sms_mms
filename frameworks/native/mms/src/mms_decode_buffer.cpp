@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+#include <sstream>
+
 #include "mms_decode_buffer.h"
-
 #include "telephony_log_wrapper.h"
-
 #include "securec.h"
 
 namespace OHOS {
@@ -516,6 +516,32 @@ void MmsDecodeBuffer::MarkPosition()
 void MmsDecodeBuffer::UnMarkPosition()
 {
     curPosition_ = savePosition_;
+}
+
+void MmsDecodeBuffer::GetPdu()
+{
+    uint8_t hexOffset = 4;
+    uint32_t maxDisplayLength = 500;
+    char hexTable[] = "0123456789ABCDEF";
+    uint32_t size = GetSize();
+    if (size > maxDisplayLength) {
+        TELEPHONY_LOGE("size is too long");
+        return;
+    }
+    uint32_t pos = GetCurPosition();
+    TELEPHONY_LOGE("The pdu size is %{public}d and current pos is %{public}d.", size, pos);
+    uint32_t length = size - pos;
+    length--;
+    std::stringstream result;
+    for (uint8_t i = 0; i <= pos; i++) {
+        unsigned char temp = static_cast<unsigned char>(pduBuffer_[i]) >> hexOffset;
+        result << hexTable[temp] << hexTable[static_cast<unsigned char>(pduBuffer_[i]) & 0xf];
+    }
+    std::string resultCover = result.str();
+    for (uint8_t i = 0; i < length; i++) {
+        resultCover += '*';
+    }
+    TELEPHONY_LOGE("Decode fail pdu part is: %{public}s", resultCover.c_str());
 }
 } // namespace Telephony
 } // namespace OHOS
