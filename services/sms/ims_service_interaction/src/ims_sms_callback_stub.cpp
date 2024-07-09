@@ -37,11 +37,11 @@ void ImsSmsCallbackStub::InitSmsBasicFuncMap()
 {
     /****************** sms basic ******************/
     requestFuncMap_[static_cast<uint32_t>(ImsSmsCallbackInterfaceCode::IMS_SEND_MESSAGE)] =
-        &ImsSmsCallbackStub::OnImsSendMessageResponseInner;
+        [this](MessageParcel &data, MessageParcel &reply) { return OnImsSendMessageResponseInner(data, reply); };
     requestFuncMap_[static_cast<uint32_t>(ImsSmsCallbackInterfaceCode::IMS_SET_SMS_CONFIG)] =
-        &ImsSmsCallbackStub::OnImsSetSmsConfigResponseInner;
+        [this](MessageParcel &data, MessageParcel &reply) { return OnImsSetSmsConfigResponseInner(data, reply); };
     requestFuncMap_[static_cast<uint32_t>(ImsSmsCallbackInterfaceCode::IMS_GET_SMS_CONFIG)] =
-        &ImsSmsCallbackStub::OnImsGetSmsConfigResponseInner;
+        [this](MessageParcel &data, MessageParcel &reply) { return OnImsGetSmsConfigResponseInner(data, reply); };
 }
 
 ImsSmsCallbackStub::~ImsSmsCallbackStub()
@@ -62,7 +62,7 @@ int32_t ImsSmsCallbackStub::OnRemoteRequest(
     if (itFunc != requestFuncMap_.end()) {
         auto requestFunc = itFunc->second;
         if (requestFunc != nullptr) {
-            return (this->*requestFunc)(data, reply);
+            return requestFunc(data, reply);
         }
     }
     TELEPHONY_LOGE("Do not found the requestFunc of code=%{public}d, need to check", code);
