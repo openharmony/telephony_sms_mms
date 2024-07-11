@@ -200,7 +200,7 @@ void GsmSmsReceiveHandler::ReplySmsToSmsc(int result, const shared_ptr<SmsBaseMe
 {
     TELEPHONY_LOGI("GsmSmsReceiveHandler::ReplySmsToSmsc ackResult %{public}d", result);
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
-    if (satelliteSmsClient.GetSatelliteCapability() > 0 && satelliteSmsClient.IsSatelliteEnabled()) {
+    if (satelliteSmsClient.IsSatelliteEnabled()) {
         TELEPHONY_LOGI("send smsack through satellite");
         satelliteSmsClient.SendSmsAck(
             slotId_, SMS_EVENT_NEW_SMS_REPLY, result == AckIncomeCause::SMS_ACK_RESULT_OK, result);
