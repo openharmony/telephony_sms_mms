@@ -169,7 +169,7 @@ int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fi
     }
 }
 
-void MmsNetworkClient::GetUrl(std::string str)
+void MmsNetworkClient::GetCoverUrl(std::string str)
 {
     if (str.size() == 0) {
         TELEPHONY_LOGI("url is empty");
@@ -244,6 +244,9 @@ int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, std::string &storeDirN
         }
     }
     TELEPHONY_LOGI("responseData_ len: %{public}d", static_cast<uint32_t>(responseData_.size()));
+    if (responseData_.size() == 0) {
+        GetCoverUrl(mmsc);
+    }
     return UpdateMmsPduToStorage(storeDirName);
 }
 
