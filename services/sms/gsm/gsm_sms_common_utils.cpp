@@ -159,9 +159,9 @@ bool GsmSmsCommonUtils::Unpack7bitCharForMiddlePart(const uint8_t *buffer, uint8
         TELEPHONY_LOGE("data error.");
         return false;
     }
-
+    uint8_t maxAddressArrayIndex = 19;
     bool flag = false;
-    for (int i = 0; i < dataLen; i++) {
+    for (uint8_t i = 0; i < dataLen; i++) {
         uint8_t bitOffsetNumber = HEX_VALUE_07 * i;
         uint8_t shiftNumber = bitOffsetNumber % HEX_VALUE_08;
         uint8_t byteOffsetNumber = bitOffsetNumber / HEX_VALUE_08;
@@ -169,6 +169,10 @@ bool GsmSmsCommonUtils::Unpack7bitCharForMiddlePart(const uint8_t *buffer, uint8
         if (shiftNumber > 1) {
             currentValue &= HEX_VALUE_7F >> (shiftNumber - 1);
             currentValue |= HEX_VALUE_7F & (buffer[byteOffsetNumber + 1] << (HEX_VALUE_08 - shiftNumber));
+        }
+        if (i > maxAddressArrayIndex) {
+            TELEPHONY_LOGE("Index is over the unpackData length");
+            return false;
         }
         if (flag) {
             if (currentValue == HEX_VALUE_1B) {
