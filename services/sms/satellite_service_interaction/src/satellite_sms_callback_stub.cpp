@@ -185,11 +185,7 @@ int32_t SatelliteSmsCallbackStub::OnNewSmsNotify(MessageParcel &data, MessagePar
         TELEPHONY_LOGE("response is null!");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    int32_t result = reply.WriteInt32(NewSmsNotify(response));
-    if (result != TELEPHONY_SUCCESS) {
-        TELEPHONY_LOGE("Failed to write response!");
-        return TELEPHONY_ERR_WRITE_DATA_FAIL;
-    }
+    reply.WriteInt32(NewSmsNotify(response));
     return TELEPHONY_SUCCESS;
 }
 } // namespace Telephony
