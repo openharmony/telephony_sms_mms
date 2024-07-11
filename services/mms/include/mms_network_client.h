@@ -45,6 +45,7 @@ private:
     bool GetMmsPduFromDataBase(const std::string &dbUrl, std::string &strBuf);
     void HttpCallBack(std::shared_ptr<NetStack::HttpClient::HttpClientTask> task);
     int32_t UpdateMmsPduToStorage(std::string &storeDirName);
+    void GetUrl(std::string str);
 
 public:
     bool httpFinish_ = false;

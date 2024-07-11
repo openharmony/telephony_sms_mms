@@ -169,6 +169,19 @@ int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fi
     }
 }
 
+void MmsNetworkClient::GetUrl(std::string str)
+{
+    if (str.size() == 0) {
+        TELEPHONY_LOGI("url is empty");
+        return;
+    }
+    int32_t stride = 2;
+    for (uint8_t i = 0; i < str.size(); i = i + stride) {
+        str[i] = '*';
+    }
+    TELEPHONY_LOGI("decode result is: %s", str.c_str());
+}
+
 int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::string &url, const std::string &data)
 {
     HttpClientRequest httpReq;
