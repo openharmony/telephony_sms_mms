@@ -77,6 +77,7 @@ private:
 
 private:
     std::mutex mutexProxy_;
+    std::mutex mutexMap_;
     sptr<ISystemAbilityStatusChange> statusChangeListener_ { nullptr };
     sptr<ISatelliteService> satelliteServiceProxy_ { nullptr };
     sptr<ISatelliteSmsService> proxy_ { nullptr };

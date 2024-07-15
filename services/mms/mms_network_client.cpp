@@ -58,10 +58,12 @@ int32_t MmsNetworkClient::Execute(const std::string &method, const std::string &
     int32_t ret = TELEPHONY_ERR_FAIL;
     if (METHOD_POST.compare(method) == 0) {
         ret = PostUrl(mmsc, data);
+        std::unique_lock<std::mutex> lck(clientCts_);
         responseData_ = "";
         return ret;
     } else if (METHOD_GET.compare(method) == 0) {
         ret = GetUrl(mmsc, data);
+        std::unique_lock<std::mutex> lck(clientCts_);
         responseData_ = "";
         return ret;
     }

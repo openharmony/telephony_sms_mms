@@ -131,6 +131,7 @@ void SmsReceiveHandler::CreateRunningLockInner()
 {
 #ifdef ABILITY_POWER_SUPPORT
     auto &powerMgrClient = PowerMgr::PowerMgrClient::GetInstance();
+    std::lock_guard<std::mutex> lockGuard(mutexRunningLock_);
     smsRunningLock_ = powerMgrClient.CreateRunningLock("telSmsRunningLock",
         PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_PHONE);
     smsRunningLockCount_ = 0;
