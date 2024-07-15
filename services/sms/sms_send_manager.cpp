@@ -81,15 +81,17 @@ void SmsSendManager::InitNetworkHandle()
         return;
     }
     networkManager_->Init();
-    if (auto ret = networkManager_->NetworkRegister(
-        std::bind(&SmsSender::SetNetworkState, gsmSmsSender_, std::placeholders::_1, std::placeholders::_2));
+    if (auto ret = networkManager_->NetworkRegister([this](bool isImsNetDomain, int32_t voiceServiceState) {
+        this->gsmSmsSender_->SetNetworkState(isImsNetDomain, voiceServiceState);
+    });
         ret.has_value()) {
         gsmSmsSender_->SetNetworkId(ret);
     } else {
         TELEPHONY_LOGE("gsm failed to register networkManager");
     }
-    if (auto ret = networkManager_->NetworkRegister(
-        std::bind(&SmsSender::SetNetworkState, cdmaSmsSender_, std::placeholders::_1, std::placeholders::_2));
+    if (auto ret = networkManager_->NetworkRegister([this](bool isImsNetDomain, int32_t voiceServiceState) {
+        this->cdmaSmsSender_->SetNetworkState(isImsNetDomain, voiceServiceState);
+    });
         ret.has_value()) {
         cdmaSmsSender_->SetNetworkId(ret);
     } else {
