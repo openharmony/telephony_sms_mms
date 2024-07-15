@@ -69,6 +69,7 @@ void ImsSmsClient::UnInit()
         statusChangeListener_.clear();
         statusChangeListener_ = nullptr;
     }
+    std::lock_guard<std::mutex> lock(mutex_);
     handlerMap_.clear();
 }
 
@@ -120,6 +121,7 @@ int32_t ImsSmsClient::RegisterImsSmsCallback()
         TELEPHONY_LOGE("imsSmsProxy_ is null!");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
+    std::lock_guard<std::mutex> lock(mutexCallback_);
     imsSmsCallback_ = (std::make_unique<ImsSmsCallbackStub>()).release();
     if (imsSmsCallback_ == nullptr) {
         TELEPHONY_LOGE("RegisterImsSmsCallback return, make unique error.");
@@ -211,6 +213,7 @@ void ImsSmsClient::Clean()
         imsSmsProxy_.clear();
         imsSmsProxy_ = nullptr;
     }
+    std::lock_guard<std::mutex> lock(mutexCallback_);
     if (imsSmsCallback_ != nullptr) {
         imsSmsCallback_.clear();
         imsSmsCallback_ = nullptr;

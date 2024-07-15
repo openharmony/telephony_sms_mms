@@ -215,6 +215,7 @@ bool SmsMiscManager::IsEmpty() const
 
 void SmsMiscManager::NotifyHasResponse()
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     if (fairList_.size() > 0) {
         fairVar_ = fairList_.front();
         fairList_.pop_front();
