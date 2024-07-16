@@ -162,7 +162,7 @@ int32_t SatelliteSmsClient::AddSendHandler(int32_t slotId, const std::shared_ptr
         TELEPHONY_LOGE("AddSendHandler return, sender is null.");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-
+    std::lock_guard<std::mutex> lock(mutexMap_);
     senderMap_.insert(std::make_pair(slotId, sender));
     TELEPHONY_LOGI("AddSendHandler success: %{public}d", slotId);
     return TELEPHONY_SUCCESS;
@@ -174,7 +174,7 @@ int32_t SatelliteSmsClient::AddReceiveHandler(int32_t slotId, const std::shared_
         TELEPHONY_LOGE("AddReceiveHandler return, receiver is null.");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-
+    std::lock_guard<std::mutex> lock(mutexMap_);
     receiverMap_.insert(std::make_pair(slotId, receiver));
     TELEPHONY_LOGI("AddReceiveHandler success: %{public}d", slotId);
     return TELEPHONY_SUCCESS;
@@ -182,6 +182,7 @@ int32_t SatelliteSmsClient::AddReceiveHandler(int32_t slotId, const std::shared_
 
 void SatelliteSmsClient::ServiceOn()
 {
+    std::lock_guard<std::mutex> lock(mutexMap_);
     for (auto pair : senderMap_) {
         auto handler = static_cast<GsmSmsSender *>(pair.second.get());
         if (handler == nullptr) {
@@ -202,10 +203,10 @@ void SatelliteSmsClient::ServiceOn()
 
 void SatelliteSmsClient::ServiceOff()
 {
-    std::lock_guard<std::mutex> lock(mutexProxy_);
+    std::lock(mutexProxy_, mutexMap_);
     satelliteServiceProxy_ = nullptr;
     proxy_ = nullptr;
-
+    mutexProxy_.unlock();
     for (auto pair : senderMap_) {
         auto handler = static_cast<GsmSmsSender *>(pair.second.get());
         if (handler == nullptr) {
@@ -222,6 +223,7 @@ void SatelliteSmsClient::ServiceOff()
         }
         handler->UnregisterSatelliteCallback();
     }
+    mutexMap_.unlock();
 }
 
 bool SatelliteSmsClient::GetSatelliteSupported()
