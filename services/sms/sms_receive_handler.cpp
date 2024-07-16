@@ -61,11 +61,14 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
                 TELEPHONY_LOGI("[raw pdu] =%{private}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
             }
             HandleReceivedSms(message);
-            ReduceRunningLock();
+            this->SendEvent(DELAY_RELEASE_RUNNING_LOCK_EVENT_ID, DELAY_REDUCE_RUNNING_LOCK_TIMEOUT_MS);
             break;
         }
         case RUNNING_LOCK_TIMEOUT_EVENT_ID:
             HandleRunningLockTimeoutEvent(event);
+            break;
+        case DELAY_RELEASE_RUNNING_LOCK_EVENT_ID:
+            ReduceRunningLock();
             break;
         default:
             TELEPHONY_LOGE("SmsReceiveHandler::ProcessEvent Unknown eventId %{public}d", eventId);
