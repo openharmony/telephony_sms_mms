@@ -68,9 +68,11 @@ protected:
 
 private:
     static const uint32_t RUNNING_LOCK_TIMEOUT_EVENT_ID = 100000;
+    static const uint32_t DELAY_RELEASE_RUNNING_LOCK_EVENT_ID = 100001;
 
     static const int64_t RUNNING_LOCK_DEFAULT_TIMEOUT_MS = 60 * 1000; // 60s
     static const int64_t DELAY_RELEASE_RUNNING_LOCK_TIMEOUT_MS = 5 * 1000; // 5s
+    static const int64_t DELAY_REDUCE_RUNNING_LOCK_TIMEOUT_MS = 8 * 1000; // 8s
 
     std::unique_ptr<SmsWapPushHandler> smsWapPushHandler_;
 #ifdef ABILITY_POWER_SUPPORT
