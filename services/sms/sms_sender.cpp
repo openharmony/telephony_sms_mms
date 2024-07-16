@@ -368,10 +368,6 @@ void SmsSender::SetNetworkState(bool isImsNetDomain, int32_t voiceServiceState)
 {
     isImsNetDomain_ = isImsNetDomain;
     voiceServiceState_ = voiceServiceState;
-    if (enableImsSmsOnceWhenImsReg_ && isImsNetDomain) {
-        SetImsSmsConfig(slotId_, IMS_SMS_ENABLE);
-        enableImsSmsOnceWhenImsReg_ = false;
-    }
     TELEPHONY_LOGD("isImsNetDomain = %{public}s voiceServiceState = %{public}d",
         isImsNetDomain_ ? "true" : "false", voiceServiceState_);
 }
