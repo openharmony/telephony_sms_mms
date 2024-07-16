@@ -141,6 +141,7 @@ private:
     std::map<int32_t, std::shared_ptr<AppExecFwk::EventHandler>> handlerMap_;
     Utils::RWLock rwClientLock_;
     std::mutex mutex_;
+    std::mutex mutexCallback_;
     sptr<ISystemAbilityStatusChange> statusChangeListener_ = nullptr;
 };
 } // namespace Telephony
