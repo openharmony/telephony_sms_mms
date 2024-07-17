@@ -161,11 +161,13 @@ bool SmsPersistHelper::Query(DataShare::DataSharePredicates &predicates, std::ve
     }
 
     int resultSetNum = resultSet->GoToFirstRow();
+    TELEPHONY_LOGE("resultSetNum is %{public}d before cycle", resultSetNum);
     while (resultSetNum == 0) {
         SmsReceiveIndexer indexer;
         ResultSetConvertToIndexer(indexer, resultSet);
         indexers.push_back(indexer);
         resultSetNum = resultSet->GoToNextRow();
+        TELEPHONY_LOGE("resultSetNum is %{public}d in cycle", resultSetNum);
     }
     resultSet->Close();
     helper->Release();
@@ -255,6 +257,11 @@ void SmsPersistHelper::CbnFormat(std::string &numTemp,
     const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo, std::string &formatNum)
 {
     TELEPHONY_LOGD("into CbnFormat");
+    uint8_t minLength = 3;
+    if (numTemp.size() < minLength) {
+        TELEPHONY_LOGD("Phonenumber is too short");
+        return;
+    }
     if (numTemp.substr(0, NUMBER_START_STR.size()) == NUMBER_START_STR ||
         numTemp.substr(PREFIX.size(), NUMBER_START_STR.size()) == NUMBER_START_STR) {
         if (formatInfo == i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL) {
