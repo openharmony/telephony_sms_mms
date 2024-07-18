@@ -144,6 +144,7 @@ ohos_shared_library("tel_sms_mms") {
     "libphonenumber:phonenumber_standard",
     "netmanager_base:net_conn_manager_if",
     "netstack:http_client",
+    "os_account:os_account_innerkits",
     "protobuf:protobuf",
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
@@ -163,6 +164,12 @@ ohos_shared_library("tel_sms_mms") {
   }
 
   public_configs = [ ":tel_sms_mms_config" ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
 
   if (is_standard_system) {
     external_deps += [ "init:libbegetutil" ]
