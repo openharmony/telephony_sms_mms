@@ -346,6 +346,10 @@ void GsmSmsSender::StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &
     }
     std::shared_ptr<RadioResponseInfo> imsResponseInfo = event->GetSharedObject<RadioResponseInfo>();
 
+    if (imsResponseInfo == nullptr) {
+        return;
+    }
+
     if (imsResponseInfo->error != ErrType::NONE) {
         imsSmsCfg_ = IMS_SMS_DISABLE;
     }
