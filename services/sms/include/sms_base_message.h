@@ -91,7 +91,7 @@ public:
     virtual void ConvertMessageClass(enum SmsMessageClass msgClass);
     virtual int GetMsgRef();
     virtual int GetSegmentSize(
-        DataCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const;
+        DataCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId) const;
     virtual void SplitMessage(std::vector<struct SplitInfo> &splitResult, const std::string &text, bool force7BitCode,
         DataCodingScheme &codingType, bool bPortNum, const std::string &desAddr);
     virtual int32_t GetIndexOnSim() const;

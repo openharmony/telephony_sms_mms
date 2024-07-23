@@ -58,6 +58,12 @@ ohos_shared_library("sms") {
     "telephony_data:tel_telephony_data",
   ]
 
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
   relative_install_dir = "module/telephony"
   part_name = "sms_mms"
   subsystem_name = "telephony"
