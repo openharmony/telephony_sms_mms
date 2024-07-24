@@ -265,13 +265,12 @@ int SmsBaseMessage::GetMsgRef()
 }
 
 int SmsBaseMessage::GetSegmentSize(
-    DataCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId, int replyAddrLen) const
+    DataCodingScheme &codingScheme, int dataLen, bool bPortNum, MSG_LANGUAGE_ID_T &langId) const
 {
-    const int headerLen = 1;
-    const int concat = 5;
+    const int multiSegSms7BitLength = 153;
+    const int multiSegSmsUcs2Length = 134;
     const int port = 6;
     const int lang = 3;
-    const int reply = 2;
     int headerSize = 0;
     int segSize = 0;
     int maxSize = 0;
@@ -289,21 +288,15 @@ int SmsBaseMessage::GetSegmentSize(
         headerSize += lang;
     }
 
-    if (replyAddrLen > 0) {
-        headerSize += reply;
-        headerSize += replyAddrLen;
-    }
-
     if (codingScheme == DATA_CODING_7BIT || codingScheme == DATA_CODING_ASCII7BIT) {
         if ((dataLen + headerSize) > maxSize) {
-            segSize =
-                ((GSM_BEAR_DATA_LEN * BYTE_BITS) - ((headerLen + concat + headerSize) * BYTE_BITS)) / CHARSET_7BIT_BITS;
+            segSize = multiSegSms7BitLength;
         } else {
             segSize = dataLen;
         }
     } else if (codingScheme == DATA_CODING_8BIT || codingScheme == DATA_CODING_UCS2) {
         if ((dataLen + headerSize) > maxSize) {
-            segSize = GSM_BEAR_DATA_LEN - (headerLen + concat + headerSize);
+            segSize = multiSegSmsUcs2Length;
         } else {
             segSize = dataLen;
         }
@@ -498,7 +491,7 @@ void SmsBaseMessage::SplitMessage(std::vector<struct SplitInfo> &splitResult, co
     int segSize = 0;
     int segCount = 0;
     // get segment length mainly according to codingType.
-    segSize = GetSegmentSize(codingType, encodeLen, bPortNum, langId, MAX_ADD_PARAM_LEN);
+    segSize = GetSegmentSize(codingType, encodeLen, bPortNum, langId);
     if (segSize > 0) {
         segCount = ceil((double)encodeLen / (double)segSize);
     }
