@@ -14,12 +14,13 @@
  */
 
 #include "sms_receive_handler.h"
-
 #include "gsm_sms_message.h"
 #include "radio_event.h"
 #include "sms_hisysevent.h"
 #include "sms_persist_helper.h"
 #include "telephony_log_wrapper.h"
+#include "iservice_registry.h"
+#include <queue>
 
 namespace OHOS {
 namespace Telephony {
@@ -29,6 +30,12 @@ constexpr static uint8_t SMS_TYPE_GSM = 1;
 constexpr static uint8_t SMS_TYPE_CDMA = 2;
 static const std::string WAP_SEQ_NUMBER_TAG = "0003";
 constexpr static size_t WAP_SEQ_NUMBER_LEN = 10;
+const std::string STR_URI = "datashare:///com.ohos.smsmmsability/sms_mms/sms_subsection";
+const std::string EXT_URI = "datashare:///com.ohos.smsmmsability";
+
+std::queue<std::shared_ptr<SmsBaseMessage>> g_smsBaseMessageQueue;
+uint8_t g_reconnectDataShareCount = 0;
+bool g_alreadySendEvent = false;
 
 SmsReceiveHandler::SmsReceiveHandler(int32_t slotId) : TelEventHandler("SmsReceiveHandler"), slotId_(slotId)
 {
@@ -40,6 +47,73 @@ SmsReceiveHandler::SmsReceiveHandler(int32_t slotId) : TelEventHandler("SmsRecei
 }
 
 SmsReceiveHandler::~SmsReceiveHandler() {}
+// Function is used to judge if datashare interface is ready
+bool SmsReceiveHandler::IsDataShareReady()
+{
+    auto saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        TELEPHONY_LOGE("Get system ability mgr failed.");
+        return false;
+    }
+    auto remoteObj = saManager->GetSystemAbility(TELEPHONY_SMS_MMS_SYS_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        TELEPHONY_LOGE("Getsystemability service failed.");
+        return false;
+    }
+    std::lock_guard<std::mutex> lock(datashareMutex_);
+    std::pair<int, std::shared_ptr<DataShare::DataShareHelper>> ret =
+        DataShare::DataShareHelper::Create(remoteObj, STR_URI, EXT_URI);
+    TELEPHONY_LOGI("create data_share helper, ret=%{public}d", ret.first);
+    if (ret.first == E_OK) {
+        ret.second->Release();
+        return true;
+    }
+    return false;
+}
+
+void SmsReceiveHandler::HandleMessageQueue()
+{
+    uint8_t queueLength = g_smsBaseMessageQueue.size();
+    // send un-operate message to the remain receive procedure.
+    for (uint8_t i = 0; i < queueLength; i++) {
+        HandleRemainDataShare(g_smsBaseMessageQueue.front());
+        g_smsBaseMessageQueue.pop();
+        TELEPHONY_LOGI("operated a sms and there are %{public}u sms wait to be operated",
+            g_smsBaseMessageQueue.size());
+    }
+    // give app 20s power lock time to handle receive.
+    this->SendEvent(DELAY_RELEASE_RUNNING_LOCK_EVENT_ID, DELAY_REDUCE_RUNNING_LOCK_SMS_QUEUE_TIMEOUT_MS);
+    g_reconnectDataShareCount = 0;
+    // set the flag of datashare is not ready to false.
+    g_alreadySendEvent = false;
+}
+
+void SmsReceiveHandler::HandleReconnectEvent()
+{
+    std::lock_guard<std::mutex> lock(queueMutex_);
+    if (IsDataShareReady()) {
+        HandleMessageQueue();
+    } else {
+        g_reconnectDataShareCount++;
+        // if retry times over 20(the datashare is not ready in 100s), stop try.
+        if (g_reconnectDataShareCount >= RECONNECT_MAX_COUNT) {
+            TELEPHONY_LOGI("Over the max reconnect count:20 and there are %{public}u sms have not been operated",
+                g_smsBaseMessageQueue.size());
+            g_reconnectDataShareCount = 0;
+            g_alreadySendEvent = false;
+            ReleaseRunningLock();
+        } else {
+            TELEPHONY_LOGI("Send event %{public}u times", g_reconnectDataShareCount);
+            /*
+             *applylock can only hold power lock 60s, so reapply lock every 5s to ensure have entire 60s to
+             *operate sms when datashare is ready('reduce' to release and 'apply' to rehold)
+             */
+            ReduceRunningLock();
+            ApplyRunningLock();
+            this->SendEvent(RETRY_CONNECT_DATASHARE_EVENT_ID, DELAY_RETRY_CONNECT_DATASHARE_MS);
+        }
+    }
+}
 
 void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
 {
@@ -60,8 +134,18 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
             if (message != nullptr) {
                 TELEPHONY_LOGI("[raw pdu] =%{private}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
             }
-            HandleReceivedSms(message);
-            this->SendEvent(DELAY_RELEASE_RUNNING_LOCK_EVENT_ID, DELAY_REDUCE_RUNNING_LOCK_TIMEOUT_MS);
+            if (!g_alreadySendEvent) {
+                if (IsDataShareReady()) {
+                    HandleReceivedSms(message);
+                    this->SendEvent(DELAY_RELEASE_RUNNING_LOCK_EVENT_ID, DELAY_REDUCE_RUNNING_LOCK_TIMEOUT_MS);
+                } else {
+                    HandleReceivedSmsWithoutDataShare(message);
+                    this->SendEvent(RETRY_CONNECT_DATASHARE_EVENT_ID, DELAY_RETRY_CONNECT_DATASHARE_MS);
+                    g_alreadySendEvent = true;
+                }
+            } else {
+                HandleReceivedSmsWithoutDataShare(message);
+            }
             break;
         }
         case RUNNING_LOCK_TIMEOUT_EVENT_ID:
@@ -70,6 +154,10 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
         case DELAY_RELEASE_RUNNING_LOCK_EVENT_ID:
             ReduceRunningLock();
             break;
+        case RETRY_CONNECT_DATASHARE_EVENT_ID: {
+            HandleReconnectEvent();
+            break;
+        }
         default:
             TELEPHONY_LOGE("SmsReceiveHandler::ProcessEvent Unknown eventId %{public}d", eventId);
             break;
@@ -160,7 +248,21 @@ void SmsReceiveHandler::HandleReceivedSms(const std::shared_ptr<SmsBaseMessage> 
         TELEPHONY_LOGE("smsBaseMessage is nullptr");
         return;
     }
-    ReplySmsToSmsc(HandleSmsByType(smsBaseMessage), nullptr);
+    ReplySmsToSmsc(HandleSmsByType(smsBaseMessage));
+}
+
+void SmsReceiveHandler::HandleReceivedSmsWithoutDataShare(const std::shared_ptr<SmsBaseMessage> smsBaseMessage)
+{
+    if (smsBaseMessage == nullptr) {
+        TELEPHONY_LOGE("smsBaseMessage is nullptr");
+        return;
+    }
+    int32_t result = ReplySmsToSmsc(HandleAck(smsBaseMessage));
+    if (result) {
+        std::lock_guard lock(queueMutex_);
+        g_smsBaseMessageQueue.push(smsBaseMessage);
+        TELEPHONY_LOGI("Received a new message and pushed it in queue");
+    }
 }
 
 void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndexer> &indexer)
