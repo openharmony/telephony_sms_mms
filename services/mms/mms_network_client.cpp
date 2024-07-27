@@ -181,7 +181,7 @@ void MmsNetworkClient::GetCoverUrl(std::string str)
     for (uint8_t i = 0; i < str.size(); i = i + stride) {
         str[i] = '*';
     }
-    TELEPHONY_LOGI("decode result is: %s", str.c_str());
+    TELEPHONY_LOGI("decode result is: %{public}s", str.c_str());
 }
 
 int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::string &url, const std::string &data)

@@ -48,8 +48,8 @@ void DoRecvItemsTest(const uint8_t *data, size_t size, std::shared_ptr<SmsReceiv
     smsReceiveManager->cdmaSmsReceiveHandler_->HandleSmsByType(smsCdmaMessage);
 
     std::int32_t result = static_cast<int32_t>(size);
-    smsReceiveManager->gsmSmsReceiveHandler_->ReplySmsToSmsc(result, smsGsmMessage);
-    smsReceiveManager->cdmaSmsReceiveHandler_->ReplySmsToSmsc(result, smsCdmaMessage);
+    smsReceiveManager->gsmSmsReceiveHandler_->ReplySmsToSmsc(result);
+    smsReceiveManager->cdmaSmsReceiveHandler_->ReplySmsToSmsc(result);
 
     const std::shared_ptr<SmsReceiveIndexer> smsReceiveIndexer = std::make_shared<SmsReceiveIndexer>();
     smsReceiveManager->gsmSmsReceiveHandler_->CombineMessagePart(smsReceiveIndexer);

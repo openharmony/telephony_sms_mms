@@ -33,7 +33,9 @@ public:
 
 protected:
     virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) override;
-    virtual void ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> response) override;
+    virtual int32_t HandleAck(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) override;
+    virtual void HandleRemainDataShare(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) override;
+    virtual bool ReplySmsToSmsc(int result) override;
     virtual std::shared_ptr<SmsBaseMessage> TransformMessageInfo(const std::shared_ptr<SmsMessageInfo> info) override;
 
 private:
