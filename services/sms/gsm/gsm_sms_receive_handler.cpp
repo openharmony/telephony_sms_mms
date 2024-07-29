@@ -115,15 +115,91 @@ int32_t GsmSmsReceiveHandler::HandleSmsByType(const shared_ptr<SmsBaseMessage> s
     if (ret != AckIncomeCause::SMS_ACK_RESULT_OK) {
         return ret;
     }
-    bool block = DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryBlockPhoneNumber(
-        smsBaseMessage->GetOriginatingAddress());
-    if (block) {
-        TELEPHONY_LOGE("sms address is blocked");
-        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
-            SmsMmsErrorCode::SMS_ERROR_ADDRESS_BLOCKED, "The SMS address is blocked");
+    return HandleNormalSmsByType(smsBaseMessage);
+}
+
+int32_t GsmSmsReceiveHandler::HandleAck(const std::shared_ptr<SmsBaseMessage> smsBaseMessage)
+{
+    if (smsBaseMessage == nullptr) {
+        TELEPHONY_LOGE("BaseMessage is null");
+        return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+    }
+    GsmSmsMessage *message = (GsmSmsMessage *)smsBaseMessage.get();
+    if (message->IsSpecialMessage()) {
+        TELEPHONY_LOGI("GsmSmsReceiveHandler:: IsSpecialMessage");
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
-    return HandleNormalSmsByType(smsBaseMessage);
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(slotId_);
+    if (reliabilityHandler == nullptr) {
+        TELEPHONY_LOGE("reliabilityHandler nullptr");
+        return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+    }
+    if (!(reliabilityHandler->CheckSmsCapable())) {
+        TELEPHONY_LOGE("sms receive capable unSupport");
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_EMPTY_INPUT_PARAMETER, "sms receive capable unsupported");
+        return AckIncomeCause::SMS_ACK_PROCESSED;
+    }
+    if (message->IsConcatMsg()) {
+        std::shared_ptr<SmsConcat> smsConcat = message->GetConcatMsg();
+        if (smsConcat == nullptr) {
+            TELEPHONY_LOGE("Concat is null.");
+            return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+        }
+    }
+    return AckIncomeCause::SMS_ACK_RESULT_OK;
+}
+
+void GsmSmsReceiveHandler::HandleRemainDataShare(const std::shared_ptr<SmsBaseMessage> smsBaseMessage)
+{
+    if (smsBaseMessage == nullptr) {
+        TELEPHONY_LOGE("BaseMessage is null");
+        return;
+    }
+    GsmSmsMessage *message = (GsmSmsMessage *)smsBaseMessage.get();
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(slotId_);
+    if (reliabilityHandler != nullptr) {
+        if (!reliabilityHandler->DeleteExpireSmsFromDB()) {
+            TELEPHONY_LOGE("DeleteExpireSmsFromDB fail");
+        }
+    }
+    shared_ptr<SmsReceiveIndexer> indexer;
+    if (!message->IsConcatMsg()) {
+        indexer = make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
+            message->GetDestPort(), !message->GetGsm(), false, message->GetOriginatingAddress(),
+            message->GetVisibleOriginatingAddress(), message->GetVisibleMessageBody());
+    } else {
+        std::shared_ptr<SmsConcat> smsConcat = message->GetConcatMsg();
+        if (smsConcat == nullptr) {
+            TELEPHONY_LOGE("Concat is null.");
+            return;
+        }
+        indexer = make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
+            message->GetDestPort(), !message->GetGsm(), message->GetOriginatingAddress(),
+            message->GetVisibleOriginatingAddress(), smsConcat->msgRef, smsConcat->seqNum, smsConcat->totalSeg,
+            false, message->GetVisibleMessageBody());
+    }
+    if (indexer == nullptr) {
+        return;
+    }
+    indexer->SetRawUserData(message->GetRawUserData());
+    indexer->SetRawWapPushUserData(message->GetRawWapPushUserData());
+    TELEPHONY_LOGI("received a gsm sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
+        indexer->GetMsgRefId(), indexer->GetMsgSeqId(), indexer->GetMsgCount());
+    if (indexer->GetIsText() && message->IsConcatMsg() && IsRepeatedMessagePart(indexer)) {
+        TELEPHONY_LOGE("Ack repeated error.");
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_REPEATED_ERROR, "gsm message repeated error");
+        return;
+    }
+    auto destPort = indexer->GetDestPort();
+    if (destPort == INVALID_SMS_PORT) {
+        TELEPHONY_LOGI("[invalid sms port] =%{public}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
+    }
+    if (!AddMsgToDB(indexer)) {
+        return;
+    }
+    CombineMessagePart(indexer);
 }
 
 int32_t GsmSmsReceiveHandler::CheckSmsSupport()
@@ -176,13 +252,13 @@ int32_t GsmSmsReceiveHandler::HandleNormalSmsByType(const shared_ptr<SmsBaseMess
     indexer->SetRawUserData(message->GetRawUserData());
     indexer->SetRawWapPushUserData(message->GetRawWapPushUserData());
 
-    TELEPHONY_LOGI("received a gsm sms, this is %{public}d, a total of %{public}d", indexer->GetMsgSeqId(),
-        indexer->GetMsgCount());
+    TELEPHONY_LOGI("received a gsm sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
+        indexer->GetMsgRefId(), indexer->GetMsgSeqId(), indexer->GetMsgCount());
     if (indexer->GetIsText() && message->IsConcatMsg() && IsRepeatedMessagePart(indexer)) {
         TELEPHONY_LOGE("Ack repeated error.");
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_REPEATED_ERROR, "gsm message repeated error");
-        return AckIncomeCause::SMS_ACK_REPEATED_ERROR;
+        return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
     auto destPort = indexer->GetDestPort();
     if (destPort == INVALID_SMS_PORT) {
@@ -196,7 +272,7 @@ int32_t GsmSmsReceiveHandler::HandleNormalSmsByType(const shared_ptr<SmsBaseMess
     return AckIncomeCause::SMS_ACK_RESULT_OK;
 }
 
-void GsmSmsReceiveHandler::ReplySmsToSmsc(int result, const shared_ptr<SmsBaseMessage> response)
+bool GsmSmsReceiveHandler::ReplySmsToSmsc(int result)
 {
     TELEPHONY_LOGI("GsmSmsReceiveHandler::ReplySmsToSmsc ackResult %{public}d", result);
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
@@ -204,10 +280,11 @@ void GsmSmsReceiveHandler::ReplySmsToSmsc(int result, const shared_ptr<SmsBaseMe
         TELEPHONY_LOGI("send smsack through satellite");
         satelliteSmsClient.SendSmsAck(
             slotId_, SMS_EVENT_NEW_SMS_REPLY, result == AckIncomeCause::SMS_ACK_RESULT_OK, result);
-        return;
+        return result == AckIncomeCause::SMS_ACK_RESULT_OK;
     }
     CoreManagerInner::GetInstance().SendSmsAck(
         slotId_, SMS_EVENT_NEW_SMS_REPLY, result == AckIncomeCause::SMS_ACK_RESULT_OK, result, shared_from_this());
+    return result == AckIncomeCause::SMS_ACK_RESULT_OK;
 }
 
 shared_ptr<SmsBaseMessage> GsmSmsReceiveHandler::TransformMessageInfo(const shared_ptr<SmsMessageInfo> info)

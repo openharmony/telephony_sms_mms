@@ -24,6 +24,8 @@
 #include "sms_receive_reliability_handler.h"
 #include "sms_wap_push_handler.h"
 #include "tel_event_handler.h"
+#include "datashare_helper.h"
+#include "system_ability_definition.h"
 
 #ifdef ABILITY_POWER_SUPPORT
 #include "power_mgr_client.h"
@@ -37,13 +39,18 @@ public:
     explicit SmsReceiveHandler(int32_t slotId);
     virtual ~SmsReceiveHandler();
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
+    bool IsDataShareReady();
     void ApplyRunningLock();
     void ReduceRunningLock();
     void ReleaseRunningLock();
 
 protected:
     virtual int32_t HandleSmsByType(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) = 0;
-    virtual void ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> response) = 0;
+    virtual int32_t HandleAck(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) = 0;
+    virtual void HandleRemainDataShare(const std::shared_ptr<SmsBaseMessage> smsBaseMessage) = 0;
+    virtual bool ReplySmsToSmsc(int result) = 0;
+    virtual void HandleMessageQueue();
+    virtual void HandleReconnectEvent();
     virtual std::shared_ptr<SmsBaseMessage> TransformMessageInfo(const std::shared_ptr<SmsMessageInfo> info) = 0;
     void CombineMessagePart(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
     bool IsRepeatedMessagePart(const std::shared_ptr<SmsReceiveIndexer> &smsIndexer);
@@ -55,6 +62,7 @@ private:
     SmsReceiveHandler &operator=(const SmsReceiveHandler &) = delete;
     SmsReceiveHandler &operator=(const SmsReceiveHandler &&) = delete;
     void HandleReceivedSms(const std::shared_ptr<SmsBaseMessage> smsBaseMessage);
+    void HandleReceivedSmsWithoutDataShare(const std::shared_ptr<SmsBaseMessage> smsBaseMessage);
     bool CombineMultiPageMessage(const std::shared_ptr<SmsReceiveIndexer> &indexer,
         std::shared_ptr<std::vector<std::string>> pdus,
         std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler);
@@ -69,11 +77,18 @@ protected:
 private:
     static const uint32_t RUNNING_LOCK_TIMEOUT_EVENT_ID = 100000;
     static const uint32_t DELAY_RELEASE_RUNNING_LOCK_EVENT_ID = 100001;
+    static const uint32_t RETRY_CONNECT_DATASHARE_EVENT_ID = 100002;
 
     static const int64_t RUNNING_LOCK_DEFAULT_TIMEOUT_MS = 60 * 1000; // 60s
     static const int64_t DELAY_RELEASE_RUNNING_LOCK_TIMEOUT_MS = 5 * 1000; // 5s
     static const int64_t DELAY_REDUCE_RUNNING_LOCK_TIMEOUT_MS = 8 * 1000; // 8s
-
+    static const int64_t DELAY_REDUCE_RUNNING_LOCK_SMS_QUEUE_TIMEOUT_MS = 20 * 1000; // 20s
+    static const int64_t DELAY_RETRY_CONNECT_DATASHARE_MS = 5 * 1000; // 5s
+    static const uint8_t RECONNECT_MAX_COUNT = 20;
+    static const int32_t E_OK = 0;
+    
+    std::mutex queueMutex_;
+    std::mutex datashareMutex_;
     std::unique_ptr<SmsWapPushHandler> smsWapPushHandler_;
 #ifdef ABILITY_POWER_SUPPORT
     std::shared_ptr<PowerMgr::RunningLock> smsRunningLock_;
