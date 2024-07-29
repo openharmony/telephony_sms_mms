@@ -191,7 +191,7 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsReceiveHandler_0003, Function | MediumTest | Level
     EXPECT_EQ(retMsg, nullptr);
 
     auto cdmaMsg = std::make_shared<CdmaSmsMessage>();
-    smsReceiveManager->cdmaSmsReceiveHandler_->ReplySmsToSmsc(1, cdmaMsg);
+    smsReceiveManager->cdmaSmsReceiveHandler_->ReplySmsToSmsc(1);
     retInt = smsReceiveManager->cdmaSmsReceiveHandler_->HandleSmsOtherSvcid(cdmaMsg);
     EXPECT_NE(AckIncomeCause::SMS_ACK_RESULT_OK, retInt);
     cdmaMsg->smsConcat_ = std::make_shared<SmsConcat>();

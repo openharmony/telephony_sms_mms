@@ -46,14 +46,6 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
         TELEPHONY_LOGE("SmsBaseMessage is null!");
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
-    bool block = DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryBlockPhoneNumber(
-        smsBaseMessage->GetOriginatingAddress());
-    if (block) {
-        TELEPHONY_LOGE("sms address is blocked");
-        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
-            SmsMmsErrorCode::SMS_ERROR_ADDRESS_BLOCKED, "The SMS address is blocked");
-        return AckIncomeCause::SMS_ACK_RESULT_OK;
-    }
     CdmaSmsMessage *message = static_cast<CdmaSmsMessage *>(smsBaseMessage.get());
     if (message->IsBroadcastMsg()) {
         SendCBBroadcast(smsBaseMessage);
@@ -77,6 +69,92 @@ int32_t CdmaSmsReceiveHandler::HandleSmsByType(const std::shared_ptr<SmsBaseMess
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
     return HandleSmsOtherSvcid(smsBaseMessage);
+}
+
+int32_t CdmaSmsReceiveHandler::HandleAck(const std::shared_ptr<SmsBaseMessage> smsBaseMessage)
+{
+    if (smsBaseMessage == nullptr) {
+        TELEPHONY_LOGE("SmsBaseMessage is null!");
+        return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+    }
+    CdmaSmsMessage *message = static_cast<CdmaSmsMessage *>(smsBaseMessage.get());
+    if (message->IsBroadcastMsg()) {
+        SendCBBroadcast(smsBaseMessage);
+        return AckIncomeCause::SMS_ACK_RESULT_OK;
+    }
+    int service = message->GetTransTeleService();
+    if (static_cast<int>(SmsTransTelsvcId::WEMT) != service && static_cast<int>(SmsTransTelsvcId::CMT_95) != service) {
+        return AckIncomeCause::SMS_ACK_RESULT_OK;
+    }
+    if (message->IsStatusReport() && !cdmaSmsSender_.expired()) {
+        std::shared_ptr<SmsSender> smsSender = cdmaSmsSender_.lock();
+        CdmaSmsSender *cdmaSend = static_cast<CdmaSmsSender *>(smsSender.get());
+        std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
+        if (statusInfo == nullptr) {
+            TELEPHONY_LOGE("statusInfo is null!");
+            return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+        }
+        statusInfo->SetMsgRefId(message->GetMsgRef());
+        statusInfo->SetPdu(message->GetRawPdu());
+        cdmaSend->ReceiveStatusReport(statusInfo);
+        return AckIncomeCause::SMS_ACK_RESULT_OK;
+    }
+    if (message->IsConcatMsg()) {
+        std::shared_ptr<SmsConcat> smsConcat = message->GetConcatMsg();
+        if (smsConcat == nullptr) {
+            TELEPHONY_LOGE("Concat is null.");
+            return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
+        }
+    }
+    return AckIncomeCause::SMS_ACK_RESULT_OK;
+}
+
+void CdmaSmsReceiveHandler::HandleRemainDataShare(const std::shared_ptr<SmsBaseMessage> smsBaseMessage)
+{
+    if (smsBaseMessage == nullptr) {
+        TELEPHONY_LOGE("SmsBaseMessage is null!");
+        return;
+    }
+    CdmaSmsMessage *message = static_cast<CdmaSmsMessage *>(smsBaseMessage.get());
+    std::shared_ptr<SmsReceiveIndexer> indexer;
+    if (!message->IsConcatMsg()) {
+        indexer = std::make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
+            message->GetDestPort(), true, false, message->GetOriginatingAddress(),
+            message->GetVisibleOriginatingAddress(), message->GetVisibleMessageBody());
+    } else {
+        std::shared_ptr<SmsConcat> smsConcat = message->GetConcatMsg();
+        if (smsConcat == nullptr) {
+            return;
+        }
+        indexer = std::make_shared<SmsReceiveIndexer>(message->GetRawPdu(), message->GetScTimestamp(),
+            message->GetDestPort(), true, message->GetOriginatingAddress(), message->GetVisibleOriginatingAddress(),
+            smsConcat->msgRef, smsConcat->seqNum, smsConcat->totalSeg, false, message->GetVisibleMessageBody());
+    }
+    if (indexer == nullptr) {
+        TELEPHONY_LOGE("indexer is nullptr.");
+        return;
+    }
+    TELEPHONY_LOGI("received a cdma sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
+        indexer->GetMsgRefId(), indexer->GetMsgSeqId(), indexer->GetMsgCount());
+    if (indexer->GetIsText() && message->IsConcatMsg() && IsRepeatedMessagePart(indexer)) {
+        SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+            SmsMmsErrorCode::SMS_ERROR_REPEATED_ERROR, "cdma message repeated error");
+        return;
+    }
+    if (!AddMsgToDB(indexer)) {
+        TELEPHONY_LOGE("AddMsgToDB failed");
+        return;
+    }
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(slotId_);
+    if (reliabilityHandler == nullptr) {
+        TELEPHONY_LOGE("reliabilityHandler nullptr");
+        return;
+    }
+    if (!reliabilityHandler->DeleteExpireSmsFromDB()) {
+        TELEPHONY_LOGE("DeleteExpireSmsFromDB fail");
+        return;
+    }
+    CombineMessagePart(indexer);
 }
 
 int32_t CdmaSmsReceiveHandler::HandleSmsOtherSvcid(const std::shared_ptr<SmsBaseMessage> smsBaseMessage)
@@ -106,12 +184,12 @@ int32_t CdmaSmsReceiveHandler::HandleSmsOtherSvcid(const std::shared_ptr<SmsBase
         TELEPHONY_LOGE("indexer is nullptr.");
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
-    TELEPHONY_LOGI("receive a cdma sms, this is %{public}d, a total of %{public}d", indexer->GetMsgSeqId(),
-        indexer->GetMsgCount());
+    TELEPHONY_LOGI("received a cdma sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
+        indexer->GetMsgRefId(), indexer->GetMsgSeqId(), indexer->GetMsgCount());
     if (indexer->GetIsText() && message->IsConcatMsg() && IsRepeatedMessagePart(indexer)) {
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_REPEATED_ERROR, "cdma message repeated error");
-        return AckIncomeCause::SMS_ACK_REPEATED_ERROR;
+        return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
     if (!AddMsgToDB(indexer)) {
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
@@ -129,11 +207,12 @@ int32_t CdmaSmsReceiveHandler::HandleSmsOtherSvcid(const std::shared_ptr<SmsBase
     return AckIncomeCause::SMS_ACK_RESULT_OK;
 }
 
-void CdmaSmsReceiveHandler::ReplySmsToSmsc(int result, const std::shared_ptr<SmsBaseMessage> response)
+bool CdmaSmsReceiveHandler::ReplySmsToSmsc(int result)
 {
     TELEPHONY_LOGI("Reply To Smsc ackResult %{public}d", result);
     CoreManagerInner::GetInstance().SendSmsAck(
         slotId_, SMS_EVENT_NEW_SMS_REPLY, result == AckIncomeCause::SMS_ACK_RESULT_OK, result, shared_from_this());
+    return result == AckIncomeCause::SMS_ACK_RESULT_OK;
 }
 
 void CdmaSmsReceiveHandler::SetCdmaSender(const std::weak_ptr<SmsSender> &smsSender)

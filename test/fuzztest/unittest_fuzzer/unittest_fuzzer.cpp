@@ -463,8 +463,7 @@ protected:
     void TestReplySmsToSmsc()
     {
         int nResult = AckIncomeCause::SMS_ACK_RESULT_OK;
-        std::shared_ptr<SmsBaseMessage> response;
-        m_pCdmaSmsReceiveHandler->ReplySmsToSmsc(nResult, response);
+        m_pCdmaSmsReceiveHandler->ReplySmsToSmsc(nResult);
     }
     void TestTransformMessageInfo()
     {
