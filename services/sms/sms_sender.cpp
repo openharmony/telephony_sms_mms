@@ -259,7 +259,6 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
         }
         return smsIndexer;
     }
-
     std::shared_ptr<SendSmsResultInfo> info = event->GetSharedObject<SendSmsResultInfo>();
     if (info != nullptr) {
         TELEPHONY_LOGI("flag = %{public}" PRId64 "", info->flag);
@@ -272,9 +271,7 @@ std::shared_ptr<SmsSendIndexer> SmsSender::FindCacheMapAndTransform(const AppExe
                 return nullptr;
             }
             smsIndexer->SetAckPdu(std::move(StringUtils::HexToByteVector(info->pdu)));
-            if (info->errCode != 0) {
-                smsIndexer->SetIsFailure(true);
-            }
+            info->errCode != 0? smsIndexer->SetIsFailure(true) : smsIndexer->SetIsFailure(false);
             smsIndexer->SetErrorCode(info->errCode);
             smsIndexer->SetMsgRefId64Bit(info->flag);
             UpdateUnSentCellCount(smsIndexer->GetMsgRefId());
