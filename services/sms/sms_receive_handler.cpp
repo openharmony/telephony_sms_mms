@@ -78,7 +78,7 @@ void SmsReceiveHandler::HandleMessageQueue()
     for (uint8_t i = 0; i < queueLength; i++) {
         HandleRemainDataShare(g_smsBaseMessageQueue.front());
         g_smsBaseMessageQueue.pop();
-        TELEPHONY_LOGI("operated a sms and there are %{public}u sms wait to be operated",
+        TELEPHONY_LOGI("operated a sms and there are %{public}zu sms wait to be operated",
             g_smsBaseMessageQueue.size());
     }
     // give app 20s power lock time to handle receive.
@@ -97,7 +97,7 @@ void SmsReceiveHandler::HandleReconnectEvent()
         g_reconnectDataShareCount++;
         // if retry times over 20(the datashare is not ready in 100s), stop try.
         if (g_reconnectDataShareCount >= RECONNECT_MAX_COUNT) {
-            TELEPHONY_LOGI("Over the max reconnect count:20 and there are %{public}u sms have not been operated",
+            TELEPHONY_LOGI("Over the max reconnect count:20 and there are %{public}zu sms have not been operated",
                 g_smsBaseMessageQueue.size());
             g_reconnectDataShareCount = 0;
             g_alreadySendEvent = false;
