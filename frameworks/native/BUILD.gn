@@ -31,6 +31,12 @@ ohos_shared_library("tel_sms_mms_api") {
     "samgr:samgr_proxy",
   ]
 
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
   defines = [
     "TELEPHONY_LOG_TAG = \"SmsMmsApi\"",
     "LOG_DOMAIN = 0xD001F06",
