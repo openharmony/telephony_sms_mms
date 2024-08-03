@@ -528,9 +528,17 @@ void MmsDecodeBuffer::GetPdu()
         TELEPHONY_LOGE("size is too long");
         return;
     }
+    if (size == 0) {
+        TELEPHONY_LOGE("buffer size is zero");
+        return;
+    }
     uint32_t pos = GetCurPosition();
+    if (pos >= size) {
+        TELEPHONY_LOGE("current pos is over pdu length");
+        return;
+    }
     TELEPHONY_LOGE("The pdu size is %{public}d and current pos is %{public}d.", size, pos);
-    uint32_t length = size - pos;
+    int32_t length = size - pos;
     length--;
     std::stringstream result;
     for (uint8_t i = 0; i <= pos; i++) {
@@ -538,7 +546,7 @@ void MmsDecodeBuffer::GetPdu()
         result << hexTable[temp] << hexTable[static_cast<unsigned char>(pduBuffer_[i]) & 0xf];
     }
     std::string resultCover = result.str();
-    for (uint8_t i = 0; i < length; i++) {
+    for (int32_t i = 0; i < length; i++) {
         resultCover += '*';
     }
     TELEPHONY_LOGE("Decode fail pdu part is: %{public}s", resultCover.c_str());
