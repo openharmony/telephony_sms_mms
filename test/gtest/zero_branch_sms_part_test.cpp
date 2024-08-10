@@ -72,6 +72,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0001, Function | MediumTest | Level
     MessageOption option(MessageOption::TF_SYNC);
     DelayedSingleton<SmsService>::GetInstance()->OnRemoteRequest(code, dataParcel, replyParcel, option);
     DelayedSingleton<SmsService>::GetInstance()->OnSendSmsTextRequest(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnSendSmsTextWithoutSaveRequest(dataParcel, replyParcel, option);
     DelayedSingleton<SmsService>::GetInstance()->OnSendSmsDataRequest(dataParcel, replyParcel, option);
     DelayedSingleton<SmsService>::GetInstance()->OnGetSmscAddr(dataParcel, replyParcel, option);
     DelayedSingleton<SmsService>::GetInstance()->OnAddSimMessage(dataParcel, replyParcel, option);
