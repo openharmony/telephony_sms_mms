@@ -117,6 +117,17 @@ int32_t SmsServiceManagerClient::SendMessage(int32_t slotId, const std::u16strin
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 
+int32_t SmsServiceManagerClient::SendMessageWithoutSave(int32_t slotId, const std::u16string desAddr,
+    const std::u16string scAddr, const std::u16string text, const sptr<ISendShortMessageCallback> &callback,
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+{
+    if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return smsServiceInterface_->SendMessageWithoutSave(slotId, desAddr, scAddr, text, callback, deliveryCallback);
+    }
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+}
+
 int32_t SmsServiceManagerClient::SetScAddress(int32_t slotId, const std::u16string &scAddr)
 {
     if (InitSmsServiceProxy()) {

@@ -136,6 +136,22 @@ public:
         const sptr<IDeliveryShortMessageCallback> &deliverCallback) = 0;
 
     /**
+     * @brief Sends a text type SMS message without saving to database.
+     *
+     * @param slotId [in], indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param desAddr [in], indicates the destination address.
+     * @param scAddr [in], indicates the sms center address.
+     * @param text [in], indicates sms content.
+     * @param sendCallback [in], indicates callback for send out.
+     * @param deliverCallback [in], indicates callback for delivery to destination user.
+     * @return int32_t, returns {@code 0} if success.
+     */
+    virtual int32_t SendMessageWithoutSave(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+        const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
+        const sptr<IDeliveryShortMessageCallback> &deliverCallback) = 0;
+
+    /**
      * @brief Sends a data type SMS message.
      *
      * @param slotId [in], indicates the card slot index number,

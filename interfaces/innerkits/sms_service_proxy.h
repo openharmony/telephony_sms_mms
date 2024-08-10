@@ -45,6 +45,21 @@ public:
         const sptr<IDeliveryShortMessageCallback> &deliverCallback) override;
 
     /**
+     * @brief SendMessageWithoutSave
+     * Sends a text or data SMS message without save to database.
+     * @param slotId [in]
+     * @param desAddr [in]
+     * @param scAddr [in]
+     * @param text [in]
+     * @param sendCallback [in]
+     * @param deliverCallback [in]
+     * @return int32_t
+     */
+    int32_t SendMessageWithoutSave(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+        const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
+        const sptr<IDeliveryShortMessageCallback> &deliverCallback) override;
+
+    /**
      * @brief SendMessage
      * Sends a text or data SMS message.
      * @param slotId [in]

@@ -36,6 +36,8 @@ SmsInterfaceStub::SmsInterfaceStub()
 {
     memberFuncMap_[SmsServiceInterfaceCode::TEXT_BASED_SMS_DELIVERY] = [this](MessageParcel &data,
         MessageParcel &reply, MessageOption &option) { OnSendSmsTextRequest(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::SEND_SMS_TEXT_WITHOUT_SAVE] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnSendSmsTextWithoutSaveRequest(data, reply, option); };
     memberFuncMap_[SmsServiceInterfaceCode::DATA_BASED_SMS_DELIVERY] = [this](MessageParcel &data,
         MessageParcel &reply, MessageOption &option) { OnSendSmsDataRequest(data, reply, option); };
     memberFuncMap_[SmsServiceInterfaceCode::SET_SMSC_ADDRESS] = [this](MessageParcel &data,
@@ -70,6 +72,11 @@ SmsInterfaceStub::SmsInterfaceStub()
         MessageParcel &reply, MessageOption &option) { OnIsImsSmsSupported(data, reply, option); };
     memberFuncMap_[SmsServiceInterfaceCode::HAS_SMS_CAPABILITY] = [this](MessageParcel &data,
         MessageParcel &reply, MessageOption &option) { OnHasSmsCapability(data, reply, option); };
+    RegisterServiceCode();
+}
+
+void SmsInterfaceStub::RegisterServiceCode()
+{
     memberFuncMap_[SmsServiceInterfaceCode::CREATE_MESSAGE] = [this](MessageParcel &data,
         MessageParcel &reply, MessageOption &option) { OnCreateMessage(data, reply, option); };
     memberFuncMap_[SmsServiceInterfaceCode::MMS_BASE64_ENCODE] = [this](MessageParcel &data,
@@ -176,6 +183,36 @@ void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &
         DelayedSingleton<SmsService>::GetInstance()->InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr),
             StringUtils::ToUtf8(text));
     }
+    reply.WriteInt32(result);
+}
+
+void SmsInterfaceStub::OnSendSmsTextWithoutSaveRequest(MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
+{
+    sptr<ISendShortMessageCallback> sendCallback = nullptr;
+    sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
+    int32_t slotId = data.ReadInt32();
+    u16string desAddr = data.ReadString16();
+    u16string scAddr = data.ReadString16();
+    u16string text = data.ReadString16();
+    if (!IsValidSlotId(slotId)) {
+        TELEPHONY_LOGE("invalid slotId: %{public}d", slotId);
+        return;
+    }
+
+    sptr<IRemoteObject> remoteSendCallback = data.ReadRemoteObject();
+    sptr<IRemoteObject> remoteDeliveryCallback = data.ReadRemoteObject();
+    if (remoteSendCallback != nullptr) {
+        sendCallback = iface_cast<ISendShortMessageCallback>(remoteSendCallback);
+    }
+    if (remoteDeliveryCallback != nullptr) {
+        deliveryCallback = iface_cast<IDeliveryShortMessageCallback>(remoteDeliveryCallback);
+    }
+    TELEPHONY_LOGI("MessageID::SEND_SMS_TEXT_WITHOUT_SAVE %{public}d", slotId);
+    RemoveSpacesInDesAddr(desAddr);
+    std::string bundleName = data.ReadString();
+    TELEPHONY_LOGI("bundleName = %{public}s", bundleName.c_str());
+    int32_t result = SendMessageWithoutSave(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback);
     reply.WriteInt32(result);
 }
 

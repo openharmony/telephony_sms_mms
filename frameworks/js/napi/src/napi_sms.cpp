@@ -35,6 +35,7 @@ const std::string g_contentStr = "content";
 const std::string g_destinationPortStr = "destinationPort";
 const std::string g_sendCallbackStr = "sendCallback";
 const std::string g_deliveryCallbackStr = "deliveryCallback";
+const std::string g_isPersistStr = "isPersist";
 static const int32_t DEFAULT_REF_COUNT = 1;
 static bool g_validPort = false;
 } // namespace
@@ -150,6 +151,20 @@ static int32_t ActuallySendTextMessage(SendMessageContext &parameter, std::uniqu
         deliveryCallback.release());
 }
 
+static int32_t ActuallySendTextMessageWithoutSave(SendMessageContext &parameter,
+    std::unique_ptr<SendCallback> sendCallback, std::unique_ptr<DeliveryCallback> deliveryCallback)
+{
+    if (!IsValidSlotId(parameter.slotId) || parameter.isPersist) {
+        auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
+        sendCallback.release()->OnSmsSendResult(result);
+        deliveryCallback.release()->OnSmsDeliveryResult(u"");
+        return TELEPHONY_ERR_SLOTID_INVALID;
+    }
+    return DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessageWithoutSave(parameter.slotId,
+        parameter.destinationHost, parameter.serviceCenter, parameter.textContent, sendCallback.release(),
+        deliveryCallback.release());
+}
+
 static int32_t ActuallySendDataMessage(SendMessageContext &parameter, std::unique_ptr<SendCallback> sendCallback,
     std::unique_ptr<DeliveryCallback> deliveryCallback)
 {
@@ -184,11 +199,16 @@ static int32_t ActuallySendMessage(napi_env env, SendMessageContext &parameter)
         TELEPHONY_LOGE("ActuallySendMessage deliveryCallback == nullptr");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    if (parameter.messageType == TEXT_MESSAGE_PARAMETER_MATCH) {
+    if (parameter.messageType == TEXT_MESSAGE_PARAMETER_MATCH && parameter.isPersist) {
         if (hasDeliveryCallback) {
             return ActuallySendTextMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
         }
         return ActuallySendTextMessage(parameter, std::move(sendCallback), nullptr);
+    } else if (parameter.messageType == TEXT_MESSAGE_PARAMETER_MATCH && !parameter.isPersist) {
+        if (hasDeliveryCallback) {
+            return ActuallySendTextMessageWithoutSave(parameter, std::move(sendCallback), std::move(deliveryCallback));
+        }
+        return ActuallySendTextMessageWithoutSave(parameter, std::move(sendCallback), nullptr);
     } else if (parameter.messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
         if (hasDeliveryCallback) {
             return ActuallySendDataMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
@@ -274,16 +294,8 @@ static int32_t MatchSendMessageParameters(napi_env env, napi_value parameters[],
     return MESSAGE_PARAMETER_NOT_MATCH;
 }
 
-static void ParseMessageParameter(
-    int32_t messageMatchResult, napi_env env, napi_value object, SendMessageContext &context)
+static void GetOptionalProperty(napi_env env, napi_value object, SendMessageContext &context)
 {
-    context.messageType = messageMatchResult;
-    context.slotId = GetDefaultSmsSlotId();
-    napi_value slotIdValue = nullptr;
-    napi_get_named_property(env, object, g_slotIdStr.data(), &slotIdValue);
-    napi_get_value_int32(env, slotIdValue, &context.slotId);
-    napi_value destinationHostValue = NapiUtil::GetNamedProperty(env, object, g_destinationHostStr);
-    context.destinationHost = GetU16StrFromNapiValue(env, destinationHostValue);
     if (NapiUtil::HasNamedProperty(env, object, g_serviceCenterStr)) {
         napi_value serviceCenterValue = NapiUtil::GetNamedProperty(env, object, g_serviceCenterStr);
         context.serviceCenter = GetU16StrFromNapiValue(env, serviceCenterValue);
@@ -296,6 +308,24 @@ static void ParseMessageParameter(
         napi_value deliveryCallbackValue = NapiUtil::GetNamedProperty(env, object, g_deliveryCallbackStr);
         napi_create_reference(env, deliveryCallbackValue, DEFAULT_REF_COUNT, &context.deliveryCallbackRef);
     }
+    if (NapiUtil::HasNamedProperty(env, object, g_isPersistStr)) {
+        napi_value isPersistValue = nullptr;
+        napi_get_named_property(env, object, g_isPersistStr.data(), &isPersistValue);
+        napi_get_value_bool(env, isPersistValue, &context.isPersist);
+    }
+}
+
+static void ParseMessageParameter(
+    int32_t messageMatchResult, napi_env env, napi_value object, SendMessageContext &context)
+{
+    context.messageType = messageMatchResult;
+    context.slotId = GetDefaultSmsSlotId();
+    napi_value slotIdValue = nullptr;
+    napi_get_named_property(env, object, g_slotIdStr.data(), &slotIdValue);
+    napi_get_value_int32(env, slotIdValue, &context.slotId);
+    napi_value destinationHostValue = NapiUtil::GetNamedProperty(env, object, g_destinationHostStr);
+    context.destinationHost = GetU16StrFromNapiValue(env, destinationHostValue);
+    GetOptionalProperty(env, object, context);
     napi_value contentValue = NapiUtil::GetNamedProperty(env, object, g_contentStr);
     if (messageMatchResult == TEXT_MESSAGE_PARAMETER_MATCH) {
         char contentChars[MAX_TEXT_SHORT_MESSAGE_LENGTH] = {0};
