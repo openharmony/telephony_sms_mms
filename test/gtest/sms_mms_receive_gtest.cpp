@@ -37,7 +37,7 @@ public:
 };
 void MmsReceiveGtest::SetUpTestCase() {}
 
-void MmsReceiveGtest::TearDownTestCase(){}
+void MmsReceiveGtest::TearDownTestCase() {}
 
 void MmsReceiveGtest::SetUp() {}
 
