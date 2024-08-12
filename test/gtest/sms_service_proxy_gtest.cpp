@@ -19,6 +19,7 @@
 #define protected public
 #include "sms_send_short_message_proxy.h"
 #include "sms_delivery_short_message_proxy.h"
+#include "mock/mock_remote_object.h"
 namespace OHOS {
 namespace Telephony {
 using namespace testing::ext;
@@ -37,39 +38,6 @@ void SmsServiceProxyTest::TearDownTestCase() {}
 void SmsServiceProxyTest::SetUp() {}
 
 void SmsServiceProxyTest::TearDown() {}
-
-class MockRemoteObject final : public IRemoteObject {
-public:
-    MockRemoteObject() : IRemoteObject(u"")
-    {
-    }
-    int32_t GetObjectRefCount() override
-    {
-        return retGetObjectRefCount;
-    }
-    int SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
-    {
-        return retSendRequest;
-    }
-    bool AddDeathRecipient(const sptr<DeathRecipient> &recipient) override
-    {
-        return retAddDeathRecipient;
-    }
-    bool RemoveDeathRecipient(const sptr<DeathRecipient> &recipient) override
-    {
-        return retRemoveDeathRecipient;
-    }
-    int Dump(int fd, const std::vector<std::u16string> &args) override
-    {
-        return retDump;
-    }
-public:
-    int32_t retGetObjectRefCount;
-    int     retSendRequest;
-    bool    retAddDeathRecipient;
-    bool    retRemoveDeathRecipient;
-    int     retDump;
-};
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_smsServiceProxyTest_001

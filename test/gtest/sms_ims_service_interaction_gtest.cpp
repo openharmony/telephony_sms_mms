@@ -19,6 +19,10 @@
 #include "ims_sms_client.h"
 #include "ims_sms_proxy.h"
 #include "ims_sms_callback_stub.h"
+#include "mock/mock_ims_core_service_interface.h"
+#include "mock/mock_ims_sms_callback_interface.h"
+#include "mock/mock_ims_sms_interface.h"
+#include "mock/mock_remote_object.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -36,103 +40,8 @@ void SmsImsServiceInteractionTest::TearDownTestCase() {}
 void SmsImsServiceInteractionTest::SetUp() {}
 void SmsImsServiceInteractionTest::TearDown() {}
 
-class MockImsSms : public ImsSmsInterface {
-public:
-    int32_t ImsSendMessage(int32_t slotId, const ImsMessageInfo &imsMessageInfo) override
-    {
-        return retImsSendMessage;
-    }
-    int32_t ImsSetSmsConfig(int32_t slotId, int32_t imsSmsConfig) override
-    {
-        return retImsSetSmsConfig;
-    }
-    int32_t ImsGetSmsConfig(int32_t slotId) override
-    {
-        return retImsGetSmsConfig;
-    }
-    int32_t RegisterImsSmsCallback(const sptr<ImsSmsCallbackInterface> &callback) override
-    {
-        return retRegisterImsSmsCallback;
-    }
-    sptr<IRemoteObject> AsObject() override
-    {
-        return retRemoteObject;
-    }
-public:
-    int32_t retImsSendMessage;
-    int32_t retImsSetSmsConfig;
-    int32_t retImsGetSmsConfig;
-    int32_t retRegisterImsSmsCallback;
-    IRemoteObject* retRemoteObject;
-};
-
-class MockImsCoreService : public ImsCoreServiceInterface {
-public:
-    int32_t GetImsRegistrationStatus(int32_t slotId) override
-    {
-        return retGetImsRegistrationStatus;
-    }
-    int32_t RegisterImsCoreServiceCallback(const sptr<ImsCoreServiceCallbackInterface> &callback) override
-    {
-        return retRegisterImsCoreServiceCallback;
-    }
-    sptr<IRemoteObject> GetProxyObjectPtr(ImsServiceProxyType proxyType) override
-    {
-        return retGetProxyObjectPtr;
-    }
-    int32_t GetPhoneNumberFromIMPU(int32_t slotId, std::string &phoneNumber) override
-    {
-        return retGetPhoneNumberFromIMPU;
-    }
-    sptr<IRemoteObject> AsObject() override
-    {
-        return retRemoteObject;
-    }
-public:
-    int32_t retGetImsRegistrationStatus;
-    int32_t retRegisterImsCoreServiceCallback;
-    IRemoteObject* retGetProxyObjectPtr;
-    int32_t retGetPhoneNumberFromIMPU;
-    IRemoteObject* retRemoteObject;
-};
-
-class MockImsSmsCallback : public ImsSmsCallbackInterface {
-public:
-    int32_t ImsSendMessageResponse(int32_t slotId, const SendSmsResultInfo &result) override
-    {
-        return retImsSendMessageResponse1;
-    }
-    int32_t ImsSendMessageResponse(int32_t slotId, const RadioResponseInfo &info) override
-    {
-        return retImsSendMessageResponse2;
-    }
-    int32_t ImsSetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info) override
-    {
-        return retImsSetSmsConfigResponse;
-    }
-    int32_t ImsGetSmsConfigResponse(int32_t slotId, int32_t imsSmsConfig) override
-    {
-        return retImsGetSmsConfigResponse1;
-    }
-    int32_t ImsGetSmsConfigResponse(int32_t slotId, const RadioResponseInfo &info) override
-    {
-        return retImsGetSmsConfigResponse2;
-    }
-    sptr<IRemoteObject> AsObject() override
-    {
-        return retRemoteObject;
-    }
-public:
-    int32_t retImsSendMessageResponse1;
-    int32_t retImsSendMessageResponse2;
-    int32_t retImsSetSmsConfigResponse;
-    int32_t retImsGetSmsConfigResponse1;
-    int32_t retImsGetSmsConfigResponse2;
-    IRemoteObject* retRemoteObject;
-};
-
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_001
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_001
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -147,7 +56,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_001, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_002
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_002
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -158,7 +67,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_002, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_003
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_003
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -172,7 +81,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_003, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_004
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_004
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -189,7 +98,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_004, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_005
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_005
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -205,7 +114,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_005, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_006
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_006
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -220,7 +129,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_006, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_007
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_007
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -235,7 +144,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_007, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_008
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_008
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -250,7 +159,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_008, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_009
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_009
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -271,7 +180,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_009, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_010
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_010
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -301,7 +210,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_010, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_011
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_011
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -317,7 +226,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_011, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_012
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_012
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -334,7 +243,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_012, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_013
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_013
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -354,7 +263,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_013, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_014
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_014
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -376,7 +285,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_014, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_015
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_015
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -398,7 +307,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_015, Functio
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_smsImsServiceInteractionTest_016
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_016
  * @tc.name     smsServiceProxyTest_001
  * @tc.desc     Function test
  */
@@ -417,6 +326,155 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_016, Functio
     data.WriteRawData(&radioResponseInfo, sizeof(RadioResponseInfo));
     EXPECT_EQ(imsSmsCallbackStub->OnRemoteRequest(code, data, reply, option), TELEPHONY_SUCCESS);
     DelayedSingleton<ImsSmsClient>::DestroyInstance();
+}
+
+/**
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_017
+ * @tc.name     smsServiceProxyTest_001
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_017, Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> sptrRemoteObject = nullptr;
+    std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
+    
+    int32_t slotId = 0;
+    ImsMessageInfo imsMessageInfo;
+    EXPECT_EQ(imsSmsProxy->ImsSendMessage(slotId, imsMessageInfo), TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
+}
+
+/**
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_018
+ * @tc.name     smsServiceProxyTest_001
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_018, Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
+    sptrRemoteObject->retSendRequest = 0;
+    std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
+    
+    int32_t slotId = 0;
+    ImsMessageInfo imsMessageInfo;
+    EXPECT_EQ(imsSmsProxy->ImsSendMessage(slotId, imsMessageInfo), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_019
+ * @tc.name     smsServiceProxyTest_001
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_019, Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
+    sptrRemoteObject->retSendRequest = -1;
+    std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
+    
+    int32_t slotId = 0;
+    ImsMessageInfo imsMessageInfo;
+    EXPECT_EQ(imsSmsProxy->ImsSendMessage(slotId, imsMessageInfo), TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
+}
+
+/**
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_020
+ * @tc.name     smsServiceProxyTest_001
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_020, Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
+    sptrRemoteObject->retSendRequest = 0;
+    std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
+    
+    int32_t slotId = 0;
+    int32_t imsSmsConfig = 0;
+    EXPECT_EQ(imsSmsProxy->ImsSetSmsConfig(slotId, imsSmsConfig), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_021
+ * @tc.name     smsServiceProxyTest_001
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_021, Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
+    sptrRemoteObject->retSendRequest = 0;
+    std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
+    
+    int32_t slotId = 0;
+    EXPECT_EQ(imsSmsProxy->ImsGetSmsConfig(slotId), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_022
+ * @tc.name     smsServiceProxyTest_001
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_022, Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> sptrRemoteObject = nullptr;
+    std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
+    EXPECT_EQ(imsSmsProxy->RegisterImsSmsCallback(nullptr), TELEPHONY_ERR_ARGUMENT_INVALID);
+}
+
+/**
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_023
+ * @tc.name     smsServiceProxyTest_001
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_023, Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> sptrRemoteObject = nullptr;
+    std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
+    sptr<MockImsSmsCallback> pImsSmsCallback = new MockImsSmsCallback();
+    EXPECT_EQ(imsSmsProxy->RegisterImsSmsCallback(pImsSmsCallback), TELEPHONY_ERR_WRITE_DATA_FAIL);
+}
+
+/**
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_024
+ * @tc.name     smsServiceProxyTest_001
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_024, Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
+    std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(nullptr);
+    sptr<MockImsSmsCallback> pImsSmsCallback = new MockImsSmsCallback();
+    pImsSmsCallback->retRemoteObject = sptrRemoteObject;
+    EXPECT_EQ(imsSmsProxy->RegisterImsSmsCallback(pImsSmsCallback), TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
+}
+
+/**
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_025
+ * @tc.name     smsServiceProxyTest_001
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_025, Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
+    sptrRemoteObject->retSendRequest = 0;
+    std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
+
+    sptr<MockImsSmsCallback> pImsSmsCallback = new MockImsSmsCallback();
+    pImsSmsCallback->retRemoteObject = sptrRemoteObject;
+    EXPECT_EQ(imsSmsProxy->RegisterImsSmsCallback(pImsSmsCallback), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsImsServiceInteractionTest_smsImsServiceInteractionTest_026
+ * @tc.name     smsServiceProxyTest_001
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_026, Function | MediumTest | Level1)
+{
+    sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
+    sptrRemoteObject->retSendRequest = -1;
+    std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
+
+    sptr<MockImsSmsCallback> pImsSmsCallback = new MockImsSmsCallback();
+    pImsSmsCallback->retRemoteObject = sptrRemoteObject;
+    EXPECT_EQ(imsSmsProxy->RegisterImsSmsCallback(pImsSmsCallback), TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
 }
 }
 }
