@@ -1,0 +1,872 @@
+ diff --git a/frameworks/native/sms/src/sms_service_proxy.cpp b/frameworks/native/sms/src/sms_service_proxy.cpp
+index fe5e4b8..149f9f5 100755
+--- a/frameworks/native/sms/src/sms_service_proxy.cpp
++++ b/frameworks/native/sms/src/sms_service_proxy.cpp
+@@ -32,7 +32,7 @@ SmsServiceProxy::SmsServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy
+ 
+ int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+     const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
+-    const sptr<IDeliveryShortMessageCallback> &deliverCallback)
++    const sptr<IDeliveryShortMessageCallback> &deliverCallback, bool isMmsApp)
+ {
+     TELEPHONY_LOGI("SmsServiceProxy::SendMessage with text slotId : %{public}d", slotId);
+     MessageParcel dataParcel;
+diff --git a/interfaces/innerkits/i_sms_service_interface.h b/interfaces/innerkits/i_sms_service_interface.h
+index 040aa0e..a7b84f5 100755
+--- a/interfaces/innerkits/i_sms_service_interface.h
++++ b/interfaces/innerkits/i_sms_service_interface.h
+@@ -133,7 +133,7 @@ public:
+      */
+     virtual int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+         const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliverCallback) = 0;
++        const sptr<IDeliveryShortMessageCallback> &deliverCallback, bool isMmsApp = true) = 0;
+ 
+     /**
+      * @brief Sends a data type SMS message.
+diff --git a/interfaces/innerkits/sms_service_proxy.h b/interfaces/innerkits/sms_service_proxy.h
+index c247b69..1038878 100755
+--- a/interfaces/innerkits/sms_service_proxy.h
++++ b/interfaces/innerkits/sms_service_proxy.h
+@@ -42,7 +42,7 @@ public:
+      */
+     int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+         const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliverCallback) override;
++        const sptr<IDeliveryShortMessageCallback> &deliverCallback, bool isMmsApp = true) override;
+ 
+     /**
+      * @brief SendMessage
+diff --git a/services/sms/cdma/cdma_sms_sender.cpp b/services/sms/cdma/cdma_sms_sender.cpp
+index b168592..2af310c 100755
+--- a/services/sms/cdma/cdma_sms_sender.cpp
++++ b/services/sms/cdma/cdma_sms_sender.cpp
+@@ -39,10 +39,11 @@ CdmaSmsSender::~CdmaSmsSender() {}
+ 
+ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
+     const sptr<ISendShortMessageCallback> &sendCallback,
+-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
++    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
+ {
+      if (isImsNetDomain_ && imsSmsCfg_) {
+-        TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback);
++        TELEPHONY_LOGI("TextBasedSmsDeliveryViaIms");
++        TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
+         return;
+     }
+     CdmaSmsMessage message;
+@@ -73,14 +74,14 @@ void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const string &scAddr, const string &text,
+     transMsg->data.p2p.telesvcMsg.data.submit.msgId.msgId = msgId;
+     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
+     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
+-    TextBasedSmsSplitDelivery(
+-        desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp, sendCallback, deliveryCallback);
++    TextBasedSmsSplitDelivery(desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp,
++        sendCallback, deliveryCallback, dataBaseId, isMmsApp);
+ }
+ 
+ void CdmaSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
+     std::vector<struct SplitInfo> splits, std::unique_ptr<CdmaTransportMsg> transMsg, uint8_t msgRef8bit,
+     uint16_t msgId, long timeStamp, const sptr<ISendShortMessageCallback> &sendCallback,
+-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
++    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
+ {
+     shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
+     if (hasCellFailed == nullptr) {
+@@ -126,12 +127,17 @@ void CdmaSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const
+         indexer->SetHasCellFailed(hasCellFailed);
+         indexer->SetTimeStamp(timeStamp);
+         indexer->SetMsgId(msgId);
++        indexer->SetIsMmsApp(isMmsApp);
++        indexer->SetDataBaseId(dataBaseId);
++        TELEPHONY_LOGI("CdmaSmsSender::TextBasedSmsSplitDelivery isMmsApp:%{}d;databaseId:%{}d;",
++            indexer->GetIsMmsApp(), indexer->GetDataBaseId());
+         SendSmsToRil(indexer);
+     }
+ }
+  void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const string &scAddr, const string &text,
+-    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
++    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
++    uint16_t dataBaseId, bool isMmsApp)
+ {
+     DataCodingScheme codingType;
+     GsmSmsMessage gsmSmsMessage;
+@@ -154,7 +160,7 @@ void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const string &scAddr, const string &text,
+     TELEPHONY_LOGI("cdma text msgRef8bit = %{public}d", msgRef8bit);
+     for (int i = 0; i < cellsInfosSize; i++) {
+         SendSmsForEveryIndexer(i, cellsInfos, desAddr, scAddr, tpdu, gsmSmsMessage, unSentCellCount, hasCellFailed,
+-            codingType, msgRef8bit, sendCallback, deliveryCallback);
++            codingType, msgRef8bit, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
+     }
+     return;
+ }
+ @@ -163,7 +169,7 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
+     const string &scAddr, std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage gsmSmsMessage,
+     shared_ptr<uint8_t> unSentCellCount, shared_ptr<bool> hasCellFailed, DataCodingScheme codingType,
+     uint8_t msgRef8bit, const sptr<ISendShortMessageCallback> &sendCallback,
+-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
++    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
+ {
+     std::string segmentText;
+     segmentText.append((char *)(cellsInfos[i].encodeData.data()), cellsInfos[i].encodeData.size());
+@@ -174,6 +180,9 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
+         return;
+     }
+     indexer->SetDcs(cellsInfos[i].encodeType);
++    indexer->SetIsMmsApp(isMmsApp);
++    indexer->SetDataBaseId(dataBaseId);
++    TELEPHONY_LOGI("SetIsMmsApp: %{public}d ; SetDataBaseId:%{public}d", isMmsApp, dataBaseId);
+     (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
+ 
+     if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1) {
+@@ -470,6 +479,8 @@ void CdmaSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
+     }
+     int64_t refId = GetMsgRef64Bit();
+     TELEPHONY_LOGI("cdma refId = %{public}" PRId64 "", refId);
++    TELEPHONY_LOGI("isMmsApp:%{public}d, dataBaseId:%{public}d",
++        smsIndexer->GetIsMmsApp(), smsIndexer->GetDataBaseId());
+     if (!SendCacheMapAddItem(refId, smsIndexer)) {
+         TELEPHONY_LOGE("SendCacheMapAddItem Error!!");
+     }
+diff --git a/services/sms/gsm/gsm_sms_sender.cpp b/services/sms/gsm/gsm_sms_sender.cpp
+index 9e61343..5440f6e 100755
+--- a/services/sms/gsm/gsm_sms_sender.cpp
++++ b/services/sms/gsm/gsm_sms_sender.cpp
+@@ -42,7 +42,7 @@ void GsmSmsSender::Init()
+ 
+ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
+     const sptr<ISendShortMessageCallback> &sendCallback,
+-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
++    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
+ {
+     DataCodingScheme codingType;
+     GsmSmsMessage gsmSmsMessage;
+@@ -66,17 +66,18 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
+         return;
+     }
+     isStatusReport = tpdu->data.submit.bStatusReport;
+-
++    TELEPHONY_LOGE("GsmSmsSender::TextBasedSmsDelivery cdma   id : %{public}d", dataBaseId);
+     TELEPHONY_LOGI("TextBasedSmsDelivery isStatusReport= %{public}d", isStatusReport);
+     std::unique_lock<std::mutex> lock(mutex_);
+     TextBasedSmsSplitDelivery(
+-        desAddr, scAddr, cellsInfos, codingType, isStatusReport, tpdu, gsmSmsMessage, sendCallback, deliveryCallback);
++        desAddr, scAddr, cellsInfos, codingType, isStatusReport, tpdu, gsmSmsMessage, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
+ }
+ 
+ void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
+     std::vector<struct SplitInfo> cellsInfos, DataCodingScheme codingType, bool isStatusReport,
+     std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage &gsmSmsMessage,
+-    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
++    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
++    uint16_t dataBaseId, bool isMmsApp)
+ {
+     int cellsInfosSize = static_cast<int>(cellsInfos.size());
+     unsigned char msgRef8bit = GetMsgRef8Bit();
+@@ -95,6 +96,8 @@ void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const s
+             return;
+         }
+         indexer->SetDcs(cellsInfos[i].encodeType);
++        indexer->SetDataBaseId(dataBaseId);
++        indexer->SetIsMmsApp(isMmsApp);
+         (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
+         if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1) {
+             return;
+diff --git a/services/sms/include/cdma/cdma_sms_sender.h b/services/sms/include/cdma/cdma_sms_sender.h
+index 490acc9..e2a596f 100755
+--- a/services/sms/include/cdma/cdma_sms_sender.h
++++ b/services/sms/include/cdma/cdma_sms_sender.h
+@@ -31,10 +31,11 @@ public:
+     ~CdmaSmsSender() override;
+     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
+         const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
++        const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
++        uint16_t dataBaseId, bool isMmsApp = true) override;
+     void TextBasedSmsDeliveryViaIms(const std::string &desAddr, const std::string &scAddr, const std::string &text,
+         const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
++        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp = true);
+     bool TpduNullOrSmsPageOverNormalOrSmsEncodeFail(std::vector<struct SplitInfo> cellsInfos,
+         std::shared_ptr<struct SmsTpdu> tpdu, std::shared_ptr<uint8_t> unSentCellCount,
+         std::shared_ptr<bool> hasCellFailed, const sptr<ISendShortMessageCallback> &sendCallback);
+@@ -42,7 +43,8 @@ public:
+         const std::string &scAddr, std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage gsmSmsMessage,
+         std::shared_ptr<uint8_t> unSentCellCount, std::shared_ptr<bool> hasCellFailed, DataCodingScheme codingType,
+         uint8_t msgRef8bit, const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
++        const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
++        uint16_t dataBaseId, bool isMmsApp = true);
+     void ReadySendSms(GsmSmsMessage gsmSmsMessage, const std::string &scAddr, bool isMore,
+         std::shared_ptr<SmsSendIndexer> indexer, uint8_t msgRef8bit, std::shared_ptr<uint8_t> unSentCellCount,
+         std::shared_ptr<bool> hasCellFailed);
+@@ -86,7 +88,8 @@ private:
+     void TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
+         std::vector<struct SplitInfo> splits, std::unique_ptr<CdmaTransportMsg> transMsg, uint8_t msgRef8bit,
+         uint16_t msgId, long timeStamp, const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
++        const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
++        uint16_t dataBaseId, bool isMmsApp = true);
+ 
+ private:
+     uint8_t msgSeqNum_ = 0;
+
+diff --git a/services/sms/include/gsm/gsm_sms_sender.h b/services/sms/include/gsm/gsm_sms_sender.h
+index ff27f6b..a4cb646 100755
+--- a/services/sms/include/gsm/gsm_sms_sender.h
++++ b/services/sms/include/gsm/gsm_sms_sender.h
+@@ -36,7 +36,8 @@ public:
+     void Init() override;
+     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
+         const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
++        const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
++        uint16_t dataBaseId, bool isMmsApp = true) override;
+     void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, int32_t port, const uint8_t *data,
+         uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
+         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
+@@ -66,7 +67,8 @@ private:
+         std::vector<struct SplitInfo> cellsInfos, DataCodingScheme codingType, bool isStatusReport,
+         std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage &gsmSmsMessage,
+         const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
++        const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
++        uint16_t dataBaseId, bool isMmsApp = true);
+     void UpdateUserData(std::shared_ptr<struct SmsTpdu> tpdu, std::vector<struct SplitInfo> cellsInfos, int i,
+         unsigned char msgRef8bit);
+     void UpdateSmsContact(std::shared_ptr<SmsSendIndexer> indexer, SmsConcat &concat, unsigned char msgRef8bit,
+diff --git a/services/sms/include/sms_interface_manager.h b/services/sms/include/sms_interface_manager.h
+index d2254dd..a026113 100755
+--- a/services/sms/include/sms_interface_manager.h
++++ b/services/sms/include/sms_interface_manager.h
+@@ -38,7 +38,7 @@ public:
+     void InitInterfaceManager();
+     int32_t TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
+         const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
++        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t id, bool isMmsApp = true);
+     int32_t DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const uint16_t port,
+         const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
+         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
+diff --git a/services/sms/include/sms_persist_helper.h b/services/sms/include/sms_persist_helper.h
+index 236319d..663bb20 100644
+--- a/services/sms/include/sms_persist_helper.h
++++ b/services/sms/include/sms_persist_helper.h
+@@ -30,14 +30,17 @@ class SmsPersistHelper {
+ public:
+    bool Insert(DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId);
+     bool Insert(std::string tableUri, DataShare::DataShareValuesBucket &values);
++    bool Insert(std::string tableUri, DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId);
+     bool Query(DataShare::DataSharePredicates &predicates, std::vector<SmsReceiveIndexer> &indexers);
+     bool Delete(DataShare::DataSharePredicates &predicates);
+     bool Update(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values);
++    bool UpdateSms(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values);
+     bool QueryBlockPhoneNumber(const std::string &phoneNum);
+     bool QueryParamBoolean(const std::string key, bool defValue);
+     bool QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId);
+     bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount);
+     bool UpdateContact(const std::string &address);
++    bool QuerySmsInfoById(uint16_t dataBaseId, std::string &data);
+ 
+     inline static const std::string SMS_CAPABLE_KEY = "sms_config_capable";
+     inline static const std::string SMS_ENCODING_KEY = "sms_config_force_7bit_encoding";
+diff --git a/services/sms/include/sms_send_indexer.h b/services/sms/include/sms_send_indexer.h
+index 716fd19..1949ff1 100755
+--- a/services/sms/include/sms_send_indexer.h
++++ b/services/sms/include/sms_send_indexer.h
+@@ -94,6 +94,10 @@ public:
+     void SetLangId(uint8_t langId);
+     uint16_t GetMsgId() const;
+     void SetMsgId(uint16_t msgId);
++    uint16_t GetDataBaseId() const;
++    void SetDataBaseId(uint16_t msgId);
++    bool  GetIsMmsApp() const;
++    void  SetIsMmsApp(bool isMmsApp);
+ 
+ private:
+     std::vector<uint8_t> pdu_;
+@@ -124,6 +128,8 @@ private:
+     uint8_t langId_ = 0;
+     bool isText_ = false;
+     uint16_t msgId_ = 0;
++    bool isMmsApp_ = true;
++    uint16_t dataBaseId_ = 0;
+ };
+ } // namespace Telephony
+ } // namespace OHOS
+
+ diff --git a/services/sms/include/sms_send_manager.h b/services/sms/include/sms_send_manager.h
+index 6106adc..bb2896b 100755
+--- a/services/sms/include/sms_send_manager.h
++++ b/services/sms/include/sms_send_manager.h
+@@ -33,7 +33,7 @@ public:
+     virtual ~SmsSendManager();
+     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
+         const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
++        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t id, bool isMmsApp = true);
+     void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const uint16_t port,
+         const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
+         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
+diff --git a/services/sms/include/sms_sender.h b/services/sms/include/sms_sender.h
+index 101d86b..cab6957 100755
+--- a/services/sms/include/sms_sender.h
++++ b/services/sms/include/sms_sender.h
+@@ -39,7 +39,7 @@ public:
+ 
+     virtual void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr,
+         const std::string &text, const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) = 0;
++        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t id, bool isMmsApp = true) = 0;
+ 
+     virtual void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, int32_t port,
+         const uint8_t *data, uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
+diff --git a/services/sms/include/sms_service.h b/services/sms/include/sms_service.h
+index d4d0fce..f50d32f 100755
+--- a/services/sms/include/sms_service.h
++++ b/services/sms/include/sms_service.h
+@@ -35,7 +35,8 @@ public:
+     void OnStop() override;
+     int32_t Dump(std::int32_t fd, const std::vector<std::u16string> &args) override;
+     std::string GetBindTime();
+-    void InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text);
++    void InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text,
++        uint16_t &dataBaseId);
+ 
+     /**
+      * Sends a text Type SMS message.
+@@ -51,7 +52,7 @@ public:
+      */
+     int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+         const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
+-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
++        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, bool isMmsApp = true) override;
+ 
+     /**
+      * Sends a data Type SMS message.
+@@ -323,7 +324,8 @@ private:
+     bool ValidDestinationAddress(std::string desAddr);
+     void TrimSmscAddr(std::string &sca);
+     bool CheckSimMessageIndexValid(int32_t slotId, uint32_t msgIndex);
+-    void InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text);
++    void InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number,
++            const std::string &text, uint16_t &id);
+     bool InsertSession(bool isNewSession, uint16_t messageCount, const std::string &number, const std::string &text);
+     bool QuerySessionByTelephone(const std::string &telephone, uint16_t &sessionId, uint16_t &messageCount);
+     void UpdateSmsContact(const std::string &address);
+diff --git a/services/sms/sms_interface_manager.cpp b/services/sms/sms_interface_manager.cpp
+index 9cdada5..3141f2c 100755
+--- a/services/sms/sms_interface_manager.cpp
++++ b/services/sms/sms_interface_manager.cpp
+@@ -64,7 +64,8 @@ void SmsInterfaceManager::InitInterfaceManager()
+ }
+ 
+ int32_t SmsInterfaceManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
+-    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
++    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
++    uint16_t dataBaseId, bool isMmsApp)
+ {
+     if (desAddr.empty() || text.empty()) {
+         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+@@ -80,7 +81,8 @@ int32_t SmsInterfaceManager::TextBasedSmsDelivery(const string &desAddr, const s
+             SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "text sms smsSendManager_ is nullptr");
+         return TELEPHONY_ERR_LOCAL_PTR_NULL;
+     }
+-    smsSendManager_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    TELEPHONY_LOGE("SmsInterfaceManager::TextBasedSmsDelivery   id : %{public}d", dataBaseId);
++    smsSendManager_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
+     return TELEPHONY_ERR_SUCCESS;
+ }
+  
+diff --git a/services/sms/sms_interface_stub.cpp b/services/sms/sms_interface_stub.cpp
+index 7fcefa2..f1601a6 100755
+--- a/services/sms/sms_interface_stub.cpp
++++ b/services/sms/sms_interface_stub.cpp
+@@ -170,12 +170,10 @@ void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &
+     TELEPHONY_LOGI("MessageID::TEXT_BASED_SMS_DELIVERY %{public}d", slotId);
+     RemoveSpacesInDesAddr(desAddr);
+     std::string bundleName = data.ReadString();
+-    TELEPHONY_LOGI("bundleName = %{public}s", bundleName.c_str());
+-    int32_t result = SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback);
+-    if (bundleName != MMS_APP && result == TELEPHONY_ERR_SUCCESS) {
+-        DelayedSingleton<SmsService>::GetInstance()->InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr),
+-            StringUtils::ToUtf8(text));
+-    }
++    bool isMmsApp = (bundleName == MMS_APP);
++    TELEPHONY_LOGI("bundleName = %{public}s; noresult:%{public}d;isMmsApp:%{public}d", bundleName.c_str(), 0, isMmsApp);
++    int32_t result = SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback, isMmsApp);
++    TELEPHONY_LOGI("bundleName = %{public}s; sendResult:%{public}d", bundleName.c_str(), result);
+     reply.WriteInt32(result);
+ }
+ 
+diff --git a/services/sms/sms_persist_helper.cpp b/services/sms/sms_persist_helper.cpp
+index 0152d45..06e2667 100644
+--- a/services/sms/sms_persist_helper.cpp
++++ b/services/sms/sms_persist_helper.cpp
+@@ -96,6 +96,66 @@ bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBu
+     return ret >= 0 ? true : false;
+ }
+ 
++bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBucket &values, uint16_t &id)
++{
++    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
++    if (helper == nullptr) {
++        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
++        return false;
++    }
++    Uri uri(tableUri);
++    int ret = helper->Insert(uri, values);
++    helper->Release();
++    id = ret;
++    return ret >= 0 ? true : false;
++}
+
++
++bool SmsPersistHelper::UpdateSms(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values)
++{
++    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
++    if (helper == nullptr) {
++        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
++        return false;
++    }
++    Uri uri(SMS_MMS_INFO);
++    int ret = helper->Update(uri, predicates, values);
++    helper->Release();
++    return ret >= 0 ? true : false;
++}
++
++bool SmsPersistHelper::QuerySmsInfoById(uint16_t id, std::string &data)
++{
++    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
++    if (helper == nullptr) {
++        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
++        return false;
++    }
++    Uri uri(SMS_MMS_INFO);
++    std::vector<std::string> columns;
++    DataShare::DataSharePredicates predicates;
++    predicates.EqualTo(SmsMmsInfo::MSG_ID, id);
++    
++    auto resultSet = helper->Query(uri, predicates, columns);
++	if (resultSet == nullptr) {
++        TELEPHONY_LOGE("Query Result Set nullptr Failed.");
++        helper->Release();
++        return false;
++    }
++	resultSet->GoToFirstRow();
++    std::string status;
++    int columnIndex;
++    int data1;
++    resultSet->GetColumnIndex(SmsMmsInfo::MSG_STATE, columnIndex);
++    if (resultSet->GetInt(columnIndex, data1) == 0) {
++        data = data + "; status:" + std::to_string(data1);
++    } else {
++        TELEPHONY_LOGE("resultSet->GetString(columnIndex, status) != 0;columnIndex:%{public}d", columnIndex);
++    }
++    resultSet->Close();
++    helper->Release();
++    return false;;
++}
++
+ bool SmsPersistHelper::QuerySession(
+     DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount)
+ {
+diff --git a/services/sms/sms_send_indexer.cpp b/services/sms/sms_send_indexer.cpp
+index d08aaeb..6665d3e 100755
+--- a/services/sms/sms_send_indexer.cpp
++++ b/services/sms/sms_send_indexer.cpp
+@@ -339,5 +339,25 @@ void SmsSendIndexer::SetMsgId(uint16_t msgId)
+ {
+     msgId_ = msgId;
+ }
++
++uint16_t SmsSendIndexer::GetDataBaseId() const
++{
++    return dataBaseId_;
++}
++
++void SmsSendIndexer::SetDataBaseId(uint16_t databaseId)
++{
++    dataBaseId_ = databaseId;
++}
++
++bool SmsSendIndexer::GetIsMmsApp() const
++{
++    return isMmsApp_;
++}
++
++void SmsSendIndexer::SetIsMmsApp(bool isMmsApp)
++{
++    isMmsApp_ = isMmsApp;
++}
+ } // namespace Telephony
+ } // namespace OHOS
+\ No newline at end of file
+diff --git a/services/sms/sms_send_manager.cpp b/services/sms/sms_send_manager.cpp
+index 99bd9fd..352e56e 100755
+--- a/services/sms/sms_send_manager.cpp
++++ b/services/sms/sms_send_manager.cpp
+@@ -101,7 +101,7 @@ void SmsSendManager::InitNetworkHandle()
+ 
+ void SmsSendManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
+     const sptr<ISendShortMessageCallback> &sendCallback,
+-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
++    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
+ {
+     if (desAddr.empty() || text.empty()) {
+         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+@@ -123,10 +123,12 @@ void SmsSendManager::TextBasedSmsDelivery(const string &desAddr, const string &s
+     TELEPHONY_LOGI("netWorkType = %{public}d.", netWorkType);
+     if (netWorkType == NetWorkType::NET_TYPE_GSM) {
+         gsmSmsSender_->RegisterImsHandler();
+-        gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++        TELEPHONY_LOGE("SmsSendManager::TextBasedSmsDelivery gsm   id : %{public}d", dataBaseId);
++        gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
+     } else if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
+         cdmaSmsSender_->RegisterImsHandler();
+-        cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++        TELEPHONY_LOGE("SmsSendManager::TextBasedSmsDelivery cdma   id : %{public}d", dataBaseId);
++        cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
+     } else {
+         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
+         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+diff --git a/services/sms/sms_sender.cpp b/services/sms/sms_sender.cpp
+index f9fa4f1..7f4b4e8 100755
+--- a/services/sms/sms_sender.cpp
++++ b/services/sms/sms_sender.cpp
+@@ -100,6 +100,10 @@ void SmsSender::HandleMessageResponse(const shared_ptr<SmsSendIndexer> &smsIndex
+     if (!SendCacheMapEraseItem(smsIndexer->GetMsgRefId64Bit())) {
+         TELEPHONY_LOGE("SendCacheMapEraseItem fail !!!!!");
+     }
++    
++    TELEPHONY_LOGE("smsIndexer->GetIsMmsApp():%{public}d; HandleMessageResponse id:%{public}d;",
++        smsIndexer->GetIsMmsApp(), smsIndexer->GetDataBaseId());
++    
+     SendCacheMapTimeoutCheck();
+     if (!smsIndexer->GetIsFailure()) {
+         if (smsIndexer->GetDeliveryCallback() != nullptr) {
+@@ -111,6 +115,7 @@ void SmsSender::HandleMessageResponse(const shared_ptr<SmsSendIndexer> &smsIndex
+         }
+         SendMessageSucceed(smsIndexer);
+     } else {
++        TELEPHONY_LOGI("SmsSender::HandleMessageResponse(");
+         HandleResend(smsIndexer);
+     }
+ }
+@@ -122,6 +127,8 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
+         return;
+     }
+ 
++    TELEPHONY_LOGI("HandleMessageResponse------------------;GetDataBaseId:%{public}d;GetIsMmsApp:%{public}d;GetMsgId:%{public}d",
++        smsIndexer->GetDataBaseId(), smsIndexer->GetIsMmsApp(), smsIndexer->GetMsgId());
+     bool isLastPart = false;
+     uint8_t unSentCellCount = smsIndexer->GetUnSentCellCount();
+     if (unSentCellCount == 0) {
+@@ -137,6 +144,28 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
+                 messageType = ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN;
+             }
+         }
++        
++        TELEPHONY_LOGE("smsIndexer->GetIsMmsApp():%{public}d; SendMessageSucceed id:%{public}d;",
++            smsIndexer->GetIsMmsApp(), smsIndexer->GetDataBaseId());
++        
++        if (!smsIndexer->GetIsMmsApp()) {
++            DataShare::DataShareValuesBucket sessionBucket;
++            sessionBucket.Put(SmsMmsInfo::MSG_STATE, "0");
++            DataShare::DataSharePredicates predicates;
++            predicates.EqualTo(SmsMmsInfo::MSG_ID, smsIndexer->GetDataBaseId());
++            if(DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
++                TELEPHONY_LOGE("modify db succeed SendMessageSucceed id:%{public}d;", smsIndexer->GetDataBaseId());
++            }
++            std::string status = "";
++            DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySmsInfoById(smsIndexer->GetDataBaseId(),
++            status);
++            TELEPHONY_LOGE("false = smsIndexer->GetIsMmsApp() SendMessageSucceed id:%{public}d;status:%{public}s",
++                smsIndexer->GetDataBaseId(), status.c_str());
++        } else {
++            TELEPHONY_LOGE("true = smsIndexer->GetIsMmsApp(). SendMessageSucceed id:%{public}d;",
++                smsIndexer->GetDataBaseId());
++        }
++        
+         SendResultCallBack(smsIndexer->GetSendCallback(), messageType);
+         if (messageType == ISendShortMessageCallback::SEND_SMS_SUCCESS) {
+             SmsHiSysEvent::WriteSmsSendBehaviorEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE);
+@@ -168,6 +197,23 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
+         sptr<ISendShortMessageCallback> sendCallback = smsIndexer->GetSendCallback();
+         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+         TELEPHONY_LOGE("send sms result fail from ril response");
++        if (!smsIndexer->GetIsMmsApp()) {
++            DataShare::DataShareValuesBucket sessionBucket;
++            sessionBucket.Put(SmsMmsInfo::MSG_STATE, "2");
++            DataShare::DataSharePredicates predicates;
++            predicates.EqualTo(SmsMmsInfo::MSG_ID, smsIndexer->GetDataBaseId());
++            if(DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
++                TELEPHONY_LOGE("modify succeed while send fail ");
++            }
++            std::string status = "";
++            DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySmsInfoById(smsIndexer->GetDataBaseId(),
++            status);
++            TELEPHONY_LOGE("false = smsIndexer->GetIsMmsApp(). SendMessageFailed id:%{public}d;status:%{public}s",
++                smsIndexer->GetDataBaseId(), status.c_str());
++        } else {
++            TELEPHONY_LOGE("true = smsIndexer->GetIsMmsApp(). SendMessageFailed id:%{public}d;",
++                smsIndexer->GetDataBaseId());
++        }
+         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+             SmsMmsErrorCode::SMS_ERROR_SEND_RESULT_FAIL, "send sms result fail from ril response");
+     }
+@@ -341,6 +387,8 @@ void SmsSender::HandleResend(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
+     if (lastSmsDomain_ && smsIndexer->GetPsResendCount() <= MAX_SEND_RETRIES) {
+         psResend = true;
+     }
++    
++        TELEPHONY_LOGI("SmsSender::HandleResend(");
+     if (errorCode && (csResend || psResend)) {
+         if (lastSmsDomain_ && psResend) {
+             smsIndexer->SetPsResendCount(smsIndexer->GetPsResendCount() + 1);
+diff --git a/services/sms/sms_service.cpp b/services/sms/sms_service.cpp
+index 75713ea..9dc79fd 100755
+--- a/services/sms/sms_service.cpp
++++ b/services/sms/sms_service.cpp
+@@ -137,7 +137,8 @@ std::string SmsService::GetBindTime()
+ }
+  
+ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u16string scAddr, const u16string text,
+-    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
++    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
++    bool isMmsApp)
+ {
+     if (!CheckSmsPermission(sendCallback)) {
+         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
+@@ -162,26 +163,35 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
+         TELEPHONY_LOGE("SmsService::SendMessage desAddr not conform to the regular specification");
+         return TELEPHONY_ERR_ARGUMENT_INVALID;
+     }
++    uint16_t dataId = -1;
++    if (!isMmsApp) {
++        TELEPHONY_LOGE("SmsService::SendMessage ready to write message to db");
++        InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(text), dataId);
++        TELEPHONY_LOGE("SmsService::SendMessage while finish wirte the id : %{public}d", dataId);
++    } else {
++        TELEPHONY_LOGE("SmsService::SendMessage while finish wirte the id : %{public}d", dataId);
++    }
+     bool ret = interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
+-        StringUtils::ToUtf8(text), sendCallback, deliveryCallback);
++        StringUtils::ToUtf8(text), sendCallback, deliveryCallback, dataId, isMmsApp);
+     DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateContact(StringUtils::ToUtf8(desAddr));
+     return ret;
+ }
+ 
+-void SmsService::InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text)
++void SmsService::InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text,
++    uint16_t &dataBaseId)
+ {
+     uint16_t sessionId = 0;
+     uint16_t messageCount = 0;
+     bool ret = QuerySessionByTelephone(telephone, sessionId, messageCount);
+     if (ret) {
+-        InsertSmsMmsInfo(slotId, sessionId, telephone, text);
++        InsertSmsMmsInfo(slotId, sessionId, telephone, text, dataBaseId);
+         messageCount++;
+         InsertSession(false, messageCount, telephone, text);
+     } else {
+         ret = InsertSession(true, 0, telephone, text);
+         if (ret) {
+             QuerySessionByTelephone(telephone, sessionId, messageCount);
+-            InsertSmsMmsInfo(slotId, sessionId, telephone, text);
++            InsertSmsMmsInfo(slotId, sessionId, telephone, text, dataBaseId);
+         }
+     }
+ }
+ @@ -193,8 +203,8 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t
+     return DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySession(predicates, sessionId, messageCount);
+ }
+ 
+-void SmsService::InsertSmsMmsInfo(
+-    int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text)
++void SmsService::InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number,
++    const std::string &text, uint16_t &dataBaseId)
+ {
+     DataShare::DataSharePredicates predicates;
+     uint16_t maxGroupId = 0;
+@@ -212,7 +222,7 @@ void SmsService::InsertSmsMmsInfo(
+     smsMmsInfoBucket.Put(SmsMmsInfo::SMS_TYPE, "0");
+     smsMmsInfoBucket.Put(SmsMmsInfo::MSG_TITLE, text);
+     smsMmsInfoBucket.Put(SmsMmsInfo::MSG_CONTENT, text);
+-    smsMmsInfoBucket.Put(SmsMmsInfo::MSG_STATE, "0");
++    smsMmsInfoBucket.Put(SmsMmsInfo::MSG_STATE, "1");
+     smsMmsInfoBucket.Put(SmsMmsInfo::MSG_CODE, "");
+     smsMmsInfoBucket.Put(SmsMmsInfo::IS_LOCK, "0");
+     smsMmsInfoBucket.Put(SmsMmsInfo::IS_READ, "1");
+@@ -222,7 +232,7 @@ void SmsService::InsertSmsMmsInfo(
+     smsMmsInfoBucket.Put(SmsMmsInfo::GROUP_ID, std::to_string(maxGroupId + 1));
+     smsMmsInfoBucket.Put(SmsMmsInfo::IS_SUBSECTION, "0");
+     smsMmsInfoBucket.Put(SmsMmsInfo::IS_SEND_REPORT, "0");
+-    DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(SMS_MMS_INFO, smsMmsInfoBucket);
++    DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(SMS_MMS_INFO, smsMmsInfoBucket, dataBaseId);
+ }
+ 
+ bool SmsService::InsertSession(
+diff --git a/test/fuzztest/gsmsmssender_fuzzer/gsmsmssender_fuzzer.cpp b/test/fuzztest/gsmsmssender_fuzzer/gsmsmssender_fuzzer.cpp
+index 1abfcad..bf5b67a 100644
+--- a/test/fuzztest/gsmsmssender_fuzzer/gsmsmssender_fuzzer.cpp
++++ b/test/fuzztest/gsmsmssender_fuzzer/gsmsmssender_fuzzer.cpp
+@@ -149,7 +149,8 @@ void SendSmsTest(const uint8_t *data, size_t size)
+         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
+     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
+         iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+-    sender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    uint16_t dataBaseId = 1;
++    sender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     sender->DataBasedSmsDelivery(desAddr, scAddr, size, data, size, sendCallback, deliveryCallback);
+ 
+     std::vector<struct SplitInfo> cellsInfos;
+diff --git a/test/fuzztest/textbasedsmsdelivery_fuzzer/textbasedsmsdelivery_fuzzer.cpp b/test/fuzztest/textbasedsmsdelivery_fuzzer/textbasedsmsdelivery_fuzzer.cpp
+index 63a31d7..3489ac8 100644
+--- a/test/fuzztest/textbasedsmsdelivery_fuzzer/textbasedsmsdelivery_fuzzer.cpp
++++ b/test/fuzztest/textbasedsmsdelivery_fuzzer/textbasedsmsdelivery_fuzzer.cpp
+@@ -70,13 +70,14 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+     }
+     smsSendManager->Init();
+     smsSendManager->InitNetworkHandle();
+-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    uint16_t dataBaseId = 0;
++    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+ 
+     if (smsSendManager->gsmSmsSender_ != nullptr) {
+-        smsSendManager->gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++        smsSendManager->gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     }
+     if (smsSendManager->cdmaSmsSender_ != nullptr) {
+-        smsSendManager->cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++        smsSendManager->cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     }
+     DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
+     smsInterfaceManager = nullptr;
+diff --git a/test/gtest/zero_branch_sms_part_test.cpp b/test/gtest/zero_branch_sms_part_test.cpp
+index 67a3e5b..310ccc2 100644
+--- a/test/gtest/zero_branch_sms_part_test.cpp
++++ b/test/gtest/zero_branch_sms_part_test.cpp
+@@ -238,11 +238,11 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0001, Function | MediumTest | Le
+     auto callStub = iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
+     auto deliveryStub = iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+     std::string emptyStr = "";
+-
+-    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, dataStr, callStub, deliveryStub);
+-    interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, dataStr, callStub, deliveryStub);
+-    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, emptyStr, callStub, deliveryStub);
+-    int32_t result = interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, emptyStr, callStub, deliveryStub);
++    uint16_t dataBaseId = 0;
++    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, dataStr, callStub, deliveryStub, dataBaseId);
++    interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, dataStr, callStub, deliveryStub, dataBaseId);
++    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, emptyStr, callStub, deliveryStub, dataBaseId);
++    int32_t result = interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, emptyStr, callStub, deliveryStub, dataBaseId);
+     EXPECT_GE(result, 0);
+ 
+     const uint8_t *data = reinterpret_cast<const uint8_t *>(dataStr.c_str());
+@@ -250,7 +250,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0001, Function | MediumTest | Le
+     interfaceManager->DataBasedSmsDelivery(dataStr, emptyStr, 0, data, dataStr.size(), callStub, deliveryStub);
+     interfaceManager->DataBasedSmsDelivery(dataStr, dataStr, 0, nullptr, 0, callStub, deliveryStub);
+     interfaceManager->smsSendManager_ = nullptr;
+-    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, dataStr, callStub, deliveryStub);
++    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, dataStr, callStub, deliveryStub, dataBaseId);
+     result = interfaceManager->DataBasedSmsDelivery(dataStr, dataStr, 0, data, dataStr.size(), callStub, deliveryStub);
+     EXPECT_GE(result, 0);
+ 
+diff --git a/test/gtest/zero_branch_sms_test.cpp b/test/gtest/zero_branch_sms_test.cpp
+index 3773e47..52dfbff 100644
+--- a/test/gtest/zero_branch_sms_test.cpp
++++ b/test/gtest/zero_branch_sms_test.cpp
+@@ -231,7 +231,8 @@ HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
+     const std::string desAddr = "qwe";
+     const std::string scAddr = "123";
+     cdmaSmsSender->isImsNetDomain_ = true;
+-    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    uint16_t dataBaseId = 0;
++    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     std::vector<struct SplitInfo> splits;
+     std::unique_ptr<CdmaTransportMsg> transMsg;
+     uint8_t msgRef8bit = 0;
+@@ -239,7 +240,7 @@ HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
+     long timeStamp = 0;
+     cdmaSmsSender->TextBasedSmsSplitDelivery(
+         desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp, sendCallback, deliveryCallback);
+-    cdmaSmsSender->TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    cdmaSmsSender->TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
+     cdmaSmsSender->SendSmsToRil(smsIndexer);
+     cdmaSmsSender->ResendTextDelivery(smsIndexer);
+@@ -544,6 +545,7 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0001, Function | MediumTest | Level1)
+     std::string desAddr = "";
+     std::string scAddr = "123";
+     std::string text = "";
++    uint16_t dataBaseId = 0;
+     std::u16string format = u"";
+     uint8_t *data = nullptr;
+     const sptr<ISendShortMessageCallback> sendCallback =
+@@ -551,35 +553,35 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0001, Function | MediumTest | Level1)
+     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
+         iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+     auto smsIndexer = std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
+-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
+     desAddr = "qwe";
+     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
+-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     text = "123";
+     data = new uint8_t(1);
+     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
+-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     smsSendManager->networkManager_ = smsNetworkPolicyManager;
+     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
+-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     smsSendManager->RetriedSmsDelivery(smsIndexer);
+     smsSendManager->gsmSmsSender_ = gsmSmsSender;
+     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
+-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     smsSendManager->RetriedSmsDelivery(smsIndexer);
+     smsSendManager->cdmaSmsSender_ = cdmaSmsSender;
+     smsSendManager->networkManager_->netWorkType_ = NetWorkType::NET_TYPE_GSM;
+     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
+-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     EXPECT_EQ(smsSendManager->GetImsShortMessageFormat(format), TELEPHONY_ERR_SUCCESS);
+     smsSendManager->networkManager_->netWorkType_ = NetWorkType::NET_TYPE_CDMA;
+     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
+-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     EXPECT_EQ(smsSendManager->GetImsShortMessageFormat(format), TELEPHONY_ERR_SUCCESS);
+     smsSendManager->networkManager_->netWorkType_ = NetWorkType::NET_TYPE_UNKNOWN;
+     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
+-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+     smsIndexer = nullptr;
+     smsSendManager->RetriedSmsDelivery(smsIndexer);
+     EXPECT_EQ(smsSendManager->GetImsShortMessageFormat(format), TELEPHONY_ERR_SUCCESS);
+diff --git a/test/unittest/cdma_sms_test.cpp b/test/unittest/cdma_sms_test.cpp
+index e9d3180..2f67893 100644
+--- a/test/unittest/cdma_sms_test.cpp
++++ b/test/unittest/cdma_sms_test.cpp
+@@ -505,6 +505,7 @@ void CdmaSmsTest::EncodeMsg(CdmaTransportMsg &msg) const
+ 
+ void CdmaSmsTest::TestTextBasedSmsDelivery() const
+ {
++    uint16_t dataBaseId = 0;
+     std::cout << "CdmaSmsTest::TestTextBasedSmsDelivery" << std::endl;
+     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
+     auto cdmaSmsSender = std::make_shared<CdmaSmsSender>(1, fun);
+@@ -521,7 +522,7 @@ void CdmaSmsTest::TestTextBasedSmsDelivery() const
+     const std::string desAddr = "qwe";
+     const std::string scAddr = "123";
+     const std::string text = "123";
+-    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
++    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+ }
+ 
+ void CdmaSmsTest::EncodeSubmitMsg(
+ 

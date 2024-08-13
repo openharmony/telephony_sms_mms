@@ -39,7 +39,7 @@ public:
 
     virtual void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr,
         const std::string &text, const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) = 0;
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp = true) = 0;
 
     virtual void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, int32_t port,
         const uint8_t *data, uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,

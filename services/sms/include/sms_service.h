@@ -35,7 +35,7 @@ public:
     void OnStop() override;
     int32_t Dump(std::int32_t fd, const std::vector<std::u16string> &args) override;
     std::string GetBindTime();
-    void InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text);
+    void InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text, uint16_t &dataBaseId);
 
     /**
      * Sends a text Type SMS message.
@@ -51,7 +51,7 @@ public:
      */
     int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
         const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, bool isMmsApp = true) override;
 
     /**
      * Sends a data Type SMS message.
@@ -323,7 +323,8 @@ private:
     bool ValidDestinationAddress(std::string desAddr);
     void TrimSmscAddr(std::string &sca);
     bool CheckSimMessageIndexValid(int32_t slotId, uint32_t msgIndex);
-    void InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text);
+    void InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number,
+            const std::string &text, uint16_t &dataBaseId);
     bool InsertSession(bool isNewSession, uint16_t messageCount, const std::string &number, const std::string &text);
     bool QuerySessionByTelephone(const std::string &telephone, uint16_t &sessionId, uint16_t &messageCount);
     void UpdateSmsContact(const std::string &address);

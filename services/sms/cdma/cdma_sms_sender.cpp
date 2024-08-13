@@ -39,10 +39,10 @@ CdmaSmsSender::~CdmaSmsSender() {}
 
 void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
 {
     if (isImsNetDomain_ && imsSmsCfg_) {
-        TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback);
+        TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
         return;
     }
     CdmaSmsMessage message;
@@ -73,14 +73,14 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
     transMsg->data.p2p.telesvcMsg.data.submit.msgId.msgId = msgId;
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
-    TextBasedSmsSplitDelivery(
-        desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp, sendCallback, deliveryCallback);
+    TextBasedSmsSplitDelivery(desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp,
+            sendCallback, deliveryCallback, dataBaseId, isMmsApp);
 }
 
 void CdmaSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
     std::vector<struct SplitInfo> splits, std::unique_ptr<CdmaTransportMsg> transMsg, uint8_t msgRef8bit,
     uint16_t msgId, long timeStamp, const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
 {
     shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
     if (hasCellFailed == nullptr) {
@@ -126,12 +126,17 @@ void CdmaSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const 
         indexer->SetHasCellFailed(hasCellFailed);
         indexer->SetTimeStamp(timeStamp);
         indexer->SetMsgId(msgId);
+        indexer->SetIsMmsApp(isMmsApp);
+        indexer->SetDataBaseId(dataBaseId);
+        TELEPHONY_LOGI("CdmaSmsSender::TextBasedSmsSplitDelivery isMmsApp:%{}d;databaseId:%{}d;",
+        indexer->GetIsMmsApp(), indexer->GetDataBaseId());
         SendSmsToRil(indexer);
     }
 }
 
 void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const string &scAddr, const string &text,
-    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
+    uint16_t dataBaseId, bool isMmsApp)
 {
     DataCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
@@ -154,7 +159,7 @@ void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const stri
     TELEPHONY_LOGI("cdma text msgRef8bit = %{public}d", msgRef8bit);
     for (int i = 0; i < cellsInfosSize; i++) {
         SendSmsForEveryIndexer(i, cellsInfos, desAddr, scAddr, tpdu, gsmSmsMessage, unSentCellCount, hasCellFailed,
-            codingType, msgRef8bit, sendCallback, deliveryCallback);
+            codingType, msgRef8bit, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
     }
     return;
 }
@@ -163,7 +168,7 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
     const string &scAddr, std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage gsmSmsMessage,
     shared_ptr<uint8_t> unSentCellCount, shared_ptr<bool> hasCellFailed, DataCodingScheme codingType,
     uint8_t msgRef8bit, const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
 {
     std::string segmentText;
     segmentText.append((char *)(cellsInfos[i].encodeData.data()), cellsInfos[i].encodeData.size());
@@ -174,6 +179,9 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
         return;
     }
     indexer->SetDcs(cellsInfos[i].encodeType);
+    indexer->SetIsMmsApp(isMmsApp);
+    indexer->SetDataBaseId(dataBaseId);
+    TELEPHONY_LOGI("SetIsMmsApp: %{public}d ; SetDataBaseId:%{public}d", isMmsApp, dataBaseId);
     (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
 
     if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1) {

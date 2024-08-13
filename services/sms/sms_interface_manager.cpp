@@ -64,7 +64,8 @@ void SmsInterfaceManager::InitInterfaceManager()
 }
 
 int32_t SmsInterfaceManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
-    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
+    uint16_t dataBaseId, bool isMmsApp)
 {
     if (desAddr.empty() || text.empty()) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -80,7 +81,7 @@ int32_t SmsInterfaceManager::TextBasedSmsDelivery(const string &desAddr, const s
             SmsMmsErrorCode::SMS_ERROR_NULL_POINTER, "text sms smsSendManager_ is nullptr");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    smsSendManager_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    smsSendManager_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
     return TELEPHONY_ERR_SUCCESS;
 }
 

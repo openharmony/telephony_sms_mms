@@ -94,6 +94,10 @@ public:
     void SetLangId(uint8_t langId);
     uint16_t GetMsgId() const;
     void SetMsgId(uint16_t msgId);
+    uint16_t GetDataBaseId() const;
+    void SetDataBaseId(uint16_t msgId);
+    bool  GetIsMmsApp() const;
+    void  SetIsMmsApp(bool isMmsApp);
 
 private:
     std::vector<uint8_t> pdu_;
@@ -123,7 +127,9 @@ private:
     SmsConcat smsConcat_ = {0, 0, 0, false};
     uint8_t langId_ = 0;
     bool isText_ = false;
+    bool isMmsApp_ = true;
     uint16_t msgId_ = 0;
+    uint16_t dataBaseId_ = 0;
 };
 } // namespace Telephony
 } // namespace OHOS
