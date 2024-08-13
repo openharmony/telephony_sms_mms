@@ -61,8 +61,8 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     if (deliveryCallback == nullptr) {
         return;
     }
-    uint16_t dataBaseId = 0;
-    smsInterfaceManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+    uint16_t dId = 0;
+    smsInterfaceManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dId);
 
     auto smsSendManager = std::make_shared<SmsSendManager>(slotId);
     if (smsSendManager == nullptr) {
@@ -70,13 +70,13 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     }
     smsSendManager->Init();
     smsSendManager->InitNetworkHandle();
-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dId);
 
     if (smsSendManager->gsmSmsSender_ != nullptr) {
-        smsSendManager->gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+        smsSendManager->gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dId);
     }
     if (smsSendManager->cdmaSmsSender_ != nullptr) {
-        smsSendManager->cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+        smsSendManager->cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dId);
     }
     DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
     smsInterfaceManager = nullptr;
