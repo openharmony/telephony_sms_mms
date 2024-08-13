@@ -35,7 +35,8 @@ public:
     void OnStop() override;
     int32_t Dump(std::int32_t fd, const std::vector<std::u16string> &args) override;
     std::string GetBindTime();
-    void InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text, uint16_t &dataBaseId);
+    void InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text,
+        uint16_t &dataBaseId);
 
     /**
      * Sends a text Type SMS message.
