@@ -169,7 +169,8 @@ void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &
     }
     std::string bundleName = data.ReadString();
     bool isMmsApp = (bundleName == MMS_APP);
-    TELEPHONY_LOGI("MessageID::TEXT_BASED_SMS_DELIVERY %{public}d;isMmsApp:%{public}d;bundleName = %{public}s", slotId, isMmsApp, bundleName.c_str());
+    TELEPHONY_LOGI("MessageID::TEXT_BASED_SMS_DELIVERY %{public}d;isMmsApp:%{public}d;bundleName = %{public}s",
+        slotId, isMmsApp, bundleName.c_str());
     RemoveSpacesInDesAddr(desAddr);
     int32_t result = SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback, isMmsApp);
     reply.WriteInt32(result);
