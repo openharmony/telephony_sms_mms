@@ -76,7 +76,8 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
         smsSendManager->gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dId);
     }
     if (smsSendManager->cdmaSmsSender_ != nullptr) {
-        smsSendManager->cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dId);
+        smsSendManager->cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback,
+            dId);
     }
     DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
     smsInterfaceManager = nullptr;
