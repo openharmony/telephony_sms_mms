@@ -54,6 +54,22 @@ public:
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
 
     /**
+     * Sends a text Type SMS message withot save to database.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param desAddr Indicates the destination address
+     * @param scAddr Indicates the sms center address
+     * @param text Indicates sms content
+     * @param sendCallback Indicates callback for send out
+     * @param deliverCallback Indicates callback for delivery to destination user
+     * @return Returns {@code 0} if send message success.
+     */
+    int32_t SendMessageWithoutSave(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+        const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
+
+    /**
      * Sends a data Type SMS message.
      * @param slotId Indicates the card slot index number,
      * ranging from {@code 0} to the maximum card slot index number supported by
