@@ -141,7 +141,7 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         if (messageType == ISendShortMessageCallback::SEND_SMS_SUCCESS) {
             SmsHiSysEvent::WriteSmsSendBehaviorEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE);
         }
-        TELEPHONY_LOGE("smsIndexer->GetIsMmsApp():%{public}d; SendMessageSucceed id:%{public}d;",
+        TELEPHONY_LOGE("smsIndexer->GetIsMmsApp():%{public}d; SendMessageSucceed id:%{public}d; ",
             smsIndexer->GetIsMmsApp(), smsIndexer->GetDataBaseId());
         if (!smsIndexer->GetIsMmsApp()) {
             DataShare::DataShareValuesBucket sessionBucket;
