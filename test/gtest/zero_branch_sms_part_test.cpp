@@ -242,7 +242,8 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0001, Function | MediumTest | Le
     interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, dataStr, callStub, deliveryStub, dataBaseId);
     interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, dataStr, callStub, deliveryStub, dataBaseId);
     interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, emptyStr, callStub, deliveryStub, dataBaseId);
-    int32_t result = interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, emptyStr, callStub, deliveryStub, dataBaseId);
+    int32_t result = interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, emptyStr,
+        callStub, deliveryStub, dataBaseId);
     EXPECT_GE(result, 0);
 
     const uint8_t *data = reinterpret_cast<const uint8_t *>(dataStr.c_str());
