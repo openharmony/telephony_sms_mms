@@ -22,6 +22,8 @@
 #include <string>
 
 #include "http_client_task.h"
+#include "mms_header.h"
+#include "mms_decode_buffer.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -45,6 +47,7 @@ private:
     bool GetMmsPduFromDataBase(const std::string &dbUrl, std::string &strBuf);
     void HttpCallBack(std::shared_ptr<NetStack::HttpClient::HttpClientTask> task);
     int32_t UpdateMmsPduToStorage(std::string &storeDirName);
+    bool CheckSendConf();
     void GetCoverUrl(std::string str);
 
 public:
@@ -56,6 +59,7 @@ public:
 
 private:
     int32_t slotId_ = -1;
+    MmsHeader mmsHeader_;
 };
 } // namespace Telephony
 } // namespace OHOS
