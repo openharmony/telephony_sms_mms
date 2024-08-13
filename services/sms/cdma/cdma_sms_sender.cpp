@@ -74,7 +74,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
     chrono::system_clock::duration timePoint = chrono::system_clock::now().time_since_epoch();
     long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
     TextBasedSmsSplitDelivery(desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp,
-            sendCallback, deliveryCallback, dataBaseId, isMmsApp);
+        sendCallback, deliveryCallback, dataBaseId, isMmsApp);
 }
 
 void CdmaSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
