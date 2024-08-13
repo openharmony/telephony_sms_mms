@@ -148,7 +148,7 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
             sessionBucket.Put(SmsMmsInfo::MSG_STATE, "0");
             DataShare::DataSharePredicates predicates;
             predicates.EqualTo(SmsMmsInfo::MSG_ID, smsIndexer->GetDataBaseId());
-            if(!DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
+            if (!DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
                 TELEPHONY_LOGE("modify db fail while SendMessageSucceed. id:%{public}d;", smsIndexer->GetDataBaseId());
             }
         }
@@ -185,7 +185,7 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
             sessionBucket.Put(SmsMmsInfo::MSG_STATE, "2");
             DataShare::DataSharePredicates predicates;
             predicates.EqualTo(SmsMmsInfo::MSG_ID, smsIndexer->GetDataBaseId());
-            if(!DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
+            if (!DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
                 TELEPHONY_LOGE("modify fail while SendMessageFailed. id:%{public}d;", smsIndexer->GetDataBaseId());
             }
         }
