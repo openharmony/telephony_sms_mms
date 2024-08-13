@@ -100,6 +100,7 @@ void SmsServiceInterfaceTest(const uint8_t *data, size_t size)
     if (!IsServiceInited()) {
         return;
     }
+    uint16_t &id;
     int32_t fd = static_cast<int32_t>(data[0]);
     auto service = DelayedSingleton<SmsService>::GetInstance();
     std::vector<std::u16string> args;
@@ -112,10 +113,10 @@ void SmsServiceInterfaceTest(const uint8_t *data, size_t size)
     service->GetBindTime();
 
     int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
-    service->InsertSessionAndDetail(slotId, argsStr, argsStr);
+    service->InsertSessionAndDetail(slotId, argsStr, argsStr, id);
     uint16_t num = static_cast<uint16_t>(size);
     service->QuerySessionByTelephone(argsStr, num, num);
-    service->InsertSmsMmsInfo(slotId, num, argsStr, argsStr);
+    service->InsertSmsMmsInfo(slotId, num, argsStr, argsStr, id);
     bool value = slotId == 0 ? true : false;
     service->InsertSession(value, num, argsStr, argsStr);
     service->IsImsSmsSupported(slotId, value);

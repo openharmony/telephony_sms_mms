@@ -42,7 +42,7 @@ public:
      */
     int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
         const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliverCallback) override;
+        const sptr<IDeliveryShortMessageCallback> &deliverCallback, bool isMmsApp = true) override;
 
     /**
      * @brief SendMessage

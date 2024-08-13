@@ -30,9 +30,11 @@ class SmsPersistHelper {
 public:
     bool Insert(DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId);
     bool Insert(std::string tableUri, DataShare::DataShareValuesBucket &values);
+    bool Insert(std::string tableUri, DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId);
     bool Query(DataShare::DataSharePredicates &predicates, std::vector<SmsReceiveIndexer> &indexers);
     bool Delete(DataShare::DataSharePredicates &predicates);
     bool Update(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values);
+    bool UpdateSms(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values);
     bool QueryBlockPhoneNumber(const std::string &phoneNum);
     bool QueryParamBoolean(const std::string key, bool defValue);
     bool QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId);

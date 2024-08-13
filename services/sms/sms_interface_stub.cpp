@@ -167,15 +167,11 @@ void SmsInterfaceStub::OnSendSmsTextRequest(MessageParcel &data, MessageParcel &
     if (remoteDeliveryCallback != nullptr) {
         deliveryCallback = iface_cast<IDeliveryShortMessageCallback>(remoteDeliveryCallback);
     }
-    TELEPHONY_LOGI("MessageID::TEXT_BASED_SMS_DELIVERY %{public}d", slotId);
-    RemoveSpacesInDesAddr(desAddr);
     std::string bundleName = data.ReadString();
-    TELEPHONY_LOGI("bundleName = %{public}s", bundleName.c_str());
-    int32_t result = SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback);
-    if (bundleName != MMS_APP && result == TELEPHONY_ERR_SUCCESS) {
-        DelayedSingleton<SmsService>::GetInstance()->InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr),
-            StringUtils::ToUtf8(text));
-    }
+    bool isMmsApp = (bundleName == MMS_APP);
+    TELEPHONY_LOGI("MessageID::TEXT_BASED_SMS_DELIVERY %{public}d;isMmsApp:%{public}d;bundleName = %{public}s", slotId, isMmsApp, bundleName.c_str());
+    RemoveSpacesInDesAddr(desAddr);
+    int32_t result = SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback, isMmsApp);
     reply.WriteInt32(result);
 }
 

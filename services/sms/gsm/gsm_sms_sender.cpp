@@ -42,7 +42,7 @@ void GsmSmsSender::Init()
 
 void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
 {
     DataCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
@@ -69,14 +69,15 @@ void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scA
 
     TELEPHONY_LOGI("TextBasedSmsDelivery isStatusReport= %{public}d", isStatusReport);
     std::unique_lock<std::mutex> lock(mutex_);
-    TextBasedSmsSplitDelivery(
-        desAddr, scAddr, cellsInfos, codingType, isStatusReport, tpdu, gsmSmsMessage, sendCallback, deliveryCallback);
+    TextBasedSmsSplitDelivery(desAddr, scAddr, cellsInfos, codingType, isStatusReport, tpdu,
+        gsmSmsMessage, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
 }
 
 void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
     std::vector<struct SplitInfo> cellsInfos, DataCodingScheme codingType, bool isStatusReport,
     std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage &gsmSmsMessage,
-    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+    const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
+    uint16_t dataBaseId, bool isMmsApp)
 {
     int cellsInfosSize = static_cast<int>(cellsInfos.size());
     unsigned char msgRef8bit = GetMsgRef8Bit();
@@ -96,6 +97,8 @@ void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const s
             return;
         }
         indexer->SetDcs(cellsInfos[i].encodeType);
+        indexer->SetDataBaseId(dataBaseId);
+        indexer->SetIsMmsApp(isMmsApp);
         (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
         if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1) {
             TELEPHONY_LOGE("TextBasedSmsDelivery data length invalid.");

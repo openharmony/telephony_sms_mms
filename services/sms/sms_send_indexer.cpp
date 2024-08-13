@@ -339,5 +339,25 @@ void SmsSendIndexer::SetMsgId(uint16_t msgId)
 {
     msgId_ = msgId;
 }
+
+uint16_t SmsSendIndexer::GetDataBaseId() const
+{
+    return dataBaseId_;
+}
+
+void SmsSendIndexer::SetDataBaseId(uint16_t databaseId)
+{
+    dataBaseId_ = databaseId;
+}
+
+bool SmsSendIndexer::GetIsMmsApp() const
+{
+    return isMmsApp_;
+}
+
+void SmsSendIndexer::SetIsMmsApp(bool isMmsApp)
+{
+    isMmsApp_ = isMmsApp;
+}
 } // namespace Telephony
 } // namespace OHOS
