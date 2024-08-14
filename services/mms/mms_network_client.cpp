@@ -46,7 +46,7 @@ std::string METHOD_GET = "GET";
 constexpr const char *SIMID_IDENT_PREFIX = "simId";
 const bool STORE_MMS_PDU_TO_FILE = false;
 constexpr static const int32_t WAIT_TIME_SECOND = 10 * 60;
-constexpr static const unsigned int HTTP_TIME_MICRO_SECOND = WAIT_TIME_SECOND * 100;
+constexpr static const unsigned int HTTP_TIME_MICRO_SECOND = WAIT_TIME_SECOND * 1000;
 constexpr static const uint8_t SEND_CONF_RESPONSE_STATUS_OK = 0x80;
 constexpr static const uint32_t SEND_CONF_MAX_SIZE = 500;
 
