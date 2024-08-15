@@ -175,6 +175,13 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
     return ret;
 }
 
+int32_t SmsService::SendMessageWithoutSave(int32_t slotId, const u16string desAddr, const u16string scAddr,
+    const u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+{
+    return SendMessage(slotId, desAddr, scAddr, text, sendCallback, deliveryCallback);
+}
+
 void SmsService::InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text,
     uint16_t &dataBaseId)
 {

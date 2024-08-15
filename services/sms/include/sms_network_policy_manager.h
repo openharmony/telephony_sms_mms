@@ -64,6 +64,7 @@ private:
     int32_t voiceServiceState_ = static_cast<int32_t>(RegServiceState::REG_STATE_UNKNOWN);
     std::map<int32_t, const std::function<void(bool isImsNetDomain, int32_t serviceState)>> callbackMap_;
     int32_t id_ = 0;
+    std::mutex callbackMapMutex_;
 };
 } // namespace Telephony
 } // namespace OHOS

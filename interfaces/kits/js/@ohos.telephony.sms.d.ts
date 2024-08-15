@@ -2746,6 +2746,15 @@ declare namespace sms {
      * @since 6
      */
     deliveryCallback?: AsyncCallback<IDeliveryShortMessageCallback>;
+
+    /**
+     * Indicates whether the message is saved to database.
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.Telephony.SmsMms
+     * @since 12
+     */
+    isPersist?: boolean;
   }
 
   /**
