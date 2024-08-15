@@ -143,7 +143,7 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         }
         TELEPHONY_LOGE("smsIndexer->GetIsMmsApp():%{public}d; SendMessageSucceed id:%{public}d;",
             smsIndexer->GetIsMmsApp(), smsIndexer->GetDataBaseId());
-        if (!smsIndexer->GetIsMmsApp()) {
+        if (!smsIndexer->GetIsMmsApp() && smsIndexer->GetIsText()) {
             DataShare::DataShareValuesBucket sessionBucket;
             sessionBucket.Put(SmsMmsInfo::MSG_STATE, "0");
             DataShare::DataSharePredicates predicates;
@@ -180,7 +180,7 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
         TELEPHONY_LOGE("send sms result fail from ril response. IsMmsApp:%{public}d;dataBaseId:%{public}d;",
             smsIndexer->GetIsMmsApp(), smsIndexer->GetDataBaseId());
-        if (!smsIndexer->GetIsMmsApp()) {
+        if (!smsIndexer->GetIsMmsApp() && smsIndexer->GetIsText()) {
             DataShare::DataShareValuesBucket sessionBucket;
             sessionBucket.Put(SmsMmsInfo::MSG_STATE, "2");
             DataShare::DataSharePredicates predicates;
