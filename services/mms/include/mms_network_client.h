@@ -53,6 +53,8 @@ private:
 public:
     bool httpFinish_ = false;
     bool httpSuccess_ = false;
+    int32_t responseCode_ = 0;
+    uint8_t retryTimes_ = 0;
     std::mutex clientCts_;
     std::condition_variable clientCv_;
     std::string responseData_;
