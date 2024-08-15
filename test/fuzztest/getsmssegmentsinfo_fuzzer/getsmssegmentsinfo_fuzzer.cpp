@@ -304,6 +304,7 @@ void HighRiskInterface(const uint8_t *data, size_t size)
 
     DelayedSingleton<SmsService>::GetInstance()->OnRemoteRequest(code, dataParcel, replyParcel, option);
     DelayedSingleton<SmsService>::GetInstance()->OnSendSmsTextRequest(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnSendSmsTextWithoutSaveRequest(dataParcel, replyParcel, option);
     DelayedSingleton<SmsService>::GetInstance()->OnSendSmsDataRequest(dataParcel, replyParcel, option);
     DelayedSingleton<SmsService>::GetInstance()->OnGetSmscAddr(dataParcel, replyParcel, option);
     DelayedSingleton<SmsService>::GetInstance()->OnAddSimMessage(dataParcel, replyParcel, option);

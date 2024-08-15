@@ -71,6 +71,48 @@ int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAdd
     return replyParcel.ReadInt32();
 };
 
+int32_t SmsServiceProxy::SendMessageWithoutSave(int32_t slotId, const std::u16string desAddr,
+    const std::u16string scAddr, const std::u16string text,
+    const sptr<ISendShortMessageCallback> &sendCallback,
+    const sptr<IDeliveryShortMessageCallback> &deliverCallback)
+{
+    TELEPHONY_LOGI("SmsServiceProxy::SendMessageWithoutSave with text slotId : %{public}d", slotId);
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("SendMessageWithoutSave with text WriteInterfaceToken is false");
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteString16(desAddr);
+    dataParcel.WriteString16(scAddr);
+    dataParcel.WriteString16(text);
+    if (sendCallback != nullptr) {
+        dataParcel.WriteRemoteObject(sendCallback->AsObject().GetRefPtr());
+    }
+
+    if (deliverCallback != nullptr) {
+        dataParcel.WriteRemoteObject(deliverCallback->AsObject().GetRefPtr());
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TELEPHONY_LOGE("SendMessageWithoutSave with text Remote is null");
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    std::string bundleName = GetBundleName();
+    dataParcel.WriteString(bundleName);
+    int32_t errCode = remote->SendRequest(
+        static_cast<int32_t>(SmsServiceInterfaceCode::SEND_SMS_TEXT_WITHOUT_SAVE), dataParcel, replyParcel, option);
+    if (errCode != TELEPHONY_SUCCESS) {
+        TELEPHONY_LOGE("SendMessageWithoutSave failed, errcode:%{public}d", errCode);
+        return errCode;
+    }
+    return replyParcel.ReadInt32();
+};
+
 int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
     uint16_t port, const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliverCallback)

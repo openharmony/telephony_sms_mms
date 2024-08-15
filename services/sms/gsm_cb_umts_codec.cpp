@@ -171,14 +171,14 @@ bool GsmCbUmtsCodec::Decode3g7Bit()
     for (uint8_t i = 0; i < cbHeader_->totalPages; ++i) {
         uint16_t pageLenOffset = (i + 1) * MAX_PAGE_PDU_LEN + i;
         if (pduLen <= pageLenOffset) {
-            TELEPHONY_LOGE("CB Msg Size err [%{pulbic}d]", pduLen);
+            TELEPHONY_LOGE("CB Msg Size err [%{public}d]", pduLen);
             messageRaw_.clear();
             return false;
         }
         uint16_t dataLen = tpdu[pageLenOffset];
         uint16_t offset = (i * MAX_PAGE_PDU_LEN) + i;
         if (dataLen > MAX_PAGE_PDU_LEN) {
-            TELEPHONY_LOGE("CB Msg Size is over MAX [%{pulbic}d]", dataLen);
+            TELEPHONY_LOGE("CB Msg Size is over MAX [%{public}d]", dataLen);
             messageRaw_.clear();
             return false;
         }

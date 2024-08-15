@@ -1531,5 +1531,82 @@ HWTEST_F(BranchCdmaSmsTest, CdmaSmsSubParameter_0018, Function | MediumTest | Le
     rBuffer.SetIndex(1);
     EXPECT_FALSE(message1->Decode(rBuffer));
 }
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CdmaSmsSubParameter_0019
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCdmaSmsTest, CdmaSmsSubParameter_0019, Function | MediumTest | Level1)
+{
+    auto testValue = static_cast<uint8_t>(5);
+    uint8_t v1 = testValue;
+    auto message1 = std::make_shared<CdmaSmsBaseParameter>(CdmaSmsSubParameter::USER_RESPONSE_CODE, v1);
+    SmsWriteBuffer wBuffer;
+    wBuffer.data_ = nullptr;
+    EXPECT_FALSE(message1->Encode(wBuffer));
+
+    auto message2 = std::make_shared<CdmaSmsReservedParameter>(CdmaSmsSubParameter::USER_RESPONSE_CODE);
+    EXPECT_FALSE(message2->Encode(wBuffer));
+
+    SmsTeleSvcMsgId v3;
+    uint8_t type = static_cast<uint8_t>(TeleserviceMsgType::SUBMIT);
+    auto message3 = std::make_shared<CdmaSmsMessageId>(v3, type);
+    EXPECT_FALSE(message3->Encode(wBuffer));
+
+    SmsTimeAbs v4;
+    auto message4 = std::make_shared<CdmaSmsAbsoluteTime>(CdmaSmsSubParameter::VALIDITY_PERIOD_ABSOLUTE, v4);
+    EXPECT_FALSE(message4->Encode(wBuffer));
+
+    SmsPriorityIndicator v5 = SmsPriorityIndicator::NORMAL;;
+    auto message5 = std::make_shared<CdmaSmsPriorityInd>(v5);
+    EXPECT_FALSE(message5->Encode(wBuffer));
+
+    SmsPrivacyIndicator v6 = SmsPrivacyIndicator::RESTRICTED;
+    auto message6 = std::make_shared<CdmaSmsPrivacyInd>(v6);
+    EXPECT_FALSE(message6->Encode(wBuffer));
+
+    SmsReplyOption v7;
+    auto message7 = std::make_shared<CdmaSmsReplyOption>(v7);
+    EXPECT_FALSE(message7->Encode(wBuffer));
+
+    SmsTeleSvcUserData userData;
+    memset_s(&userData, sizeof(SmsTeleSvcUserData), 0x00, sizeof(SmsTeleSvcUserData));
+    userData.encodeType = SmsEncodingType::ASCII_7BIT;
+    bool headerInd = false;
+    auto message8 = std::make_shared<CdmaSmsUserData>(userData, headerInd);
+    EXPECT_FALSE(message8->Encode(wBuffer));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CdmaSmsSubParameter_0020
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCdmaSmsTest, CdmaSmsSubParameter_0020, Function | MediumTest | Level1)
+{
+    SmsAlertPriority v1 = SmsAlertPriority::HIGH;
+
+    auto message1 = std::make_shared<CdmaSmsAlertPriority>(v1);
+    SmsWriteBuffer wBuffer;
+    wBuffer.data_ = nullptr;
+    EXPECT_FALSE(message1->Encode(wBuffer));
+
+    SmsLanguageType v2 = SmsLanguageType::CHINESE;
+    auto message2 = std::make_shared<CdmaSmsLanguageInd>(v2);
+    EXPECT_FALSE(message2->Encode(wBuffer));
+
+    SmsTeleSvcAddr v3;
+    auto message3 = std::make_shared<CdmaSmsCallbackNumber>(v3);
+    EXPECT_FALSE(message3->Encode(wBuffer));
+
+    uint16_t v4 = 1;
+    auto message4 = std::make_shared<CdmaSmsDepositIndex>(v4);
+    EXPECT_FALSE(message4->Encode(wBuffer));
+
+    SmsDisplayMode v5 = SmsDisplayMode::DEFAULT_SETTING;
+    auto message5 = std::make_shared<CdmaSmsDisplayMode>(v5);
+    EXPECT_FALSE(message5->Encode(wBuffer));
+}
 } // namespace Telephony
 } // namespace OHOS

@@ -15,6 +15,7 @@
 
 #include "sms_persist_helper.h"
 
+#include <sstream>
 #include "ability_manager_interface.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -26,6 +27,7 @@
 #include "system_ability_definition.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
+
 
 namespace OHOS {
 namespace Telephony {
@@ -513,16 +515,20 @@ void SmsPersistHelper::ConvertStringToIndexer(
     if (resultSet->GetString(columnIndex, columnValue) == 0) {
         info.SetOriginatingAddress(columnValue);
     }
-
     resultSet->GetColumnIndex(SmsSubsection::START_TIME, columnIndex);
     if (resultSet->GetString(columnIndex, columnValue) == 0) {
-        info.SetTimestamp(std::stol(columnValue));
+        std::istringstream str(columnValue);
+        int64_t columnValueInt64 = 0;
+        str >> columnValueInt64;
+        info.SetTimestamp(columnValueInt64);
     }
     resultSet->GetColumnIndex(SmsSubsection::END_TIME, columnIndex);
     if (resultSet->GetString(columnIndex, columnValue) == 0) {
-        info.SetTimestamp(std::stol(columnValue));
+        std::istringstream str(columnValue);
+        int64_t columnValueInt64 = 0;
+        str >> columnValueInt64;
+        info.SetTimestamp(columnValueInt64);
     }
-
     resultSet->GetColumnIndex(SmsSubsection::REW_PUD, columnIndex);
     if (resultSet->GetString(columnIndex, columnValue) == 0) {
         info.SetPdu(StringUtils::HexToByteVector(columnValue));

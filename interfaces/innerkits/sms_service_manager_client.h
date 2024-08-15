@@ -96,6 +96,23 @@ public:
     int32_t SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
         uint16_t port, const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &callback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
+
+    /**
+     * @brief Sends a text type SMS message without saving database.
+     *
+     * @param slotId [in], indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param desAddr [in], indicates the destination address.
+     * @param scAddr [in], indicates the sms center address.
+     * @param text [in], indicates sms content.
+     * @param callback [in], indicates callback for send out.
+     * @param deliveryCallback [in], indicates callback for delivery to destination user.
+     * @return int32_t, returns {@code 0} if success.
+     */
+    int32_t SendMessageWithoutSave(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
+        const std::u16string text, const sptr<ISendShortMessageCallback> &callback,
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
+
     /**
      * @brief Sets the address for the Short Message Service Center (SMSC) based on a specified slot ID.
      *

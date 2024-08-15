@@ -45,6 +45,7 @@ protected:
 
 private:
     void OnSendSmsTextRequest(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnSendSmsTextWithoutSaveRequest(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSendSmsDataRequest(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnSetSmscAddr(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetSmscAddr(MessageParcel &data, MessageParcel &reply, MessageOption &option);
@@ -72,6 +73,7 @@ private:
     void OnSendMms(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnDownloadMms(MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
+    void RegisterServiceCode();
     std::map<uint32_t, std::shared_ptr<SmsInterfaceManager>> slotSmsInterfaceManagerMap_;
     using SmsServiceFunc = std::function<void(MessageParcel &data, MessageParcel &reply, MessageOption &option)>;
     std::map<SmsServiceInterfaceCode, SmsServiceFunc> memberFuncMap_;
