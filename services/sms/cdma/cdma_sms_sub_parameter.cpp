@@ -1378,7 +1378,7 @@ bool CdmaSmsEnhancedVmn::DecodeAccessNumber(SmsReadBuffer &pdu)
             TELEPHONY_LOGE("number plan or num field read error");
             return false;
         }
-        if (static_cast<unsigned long>(vmn_.anNumField) > (sizeof(vmn_.anChar) / sizeof(vmn_.anChar[0]))) {
+        if (static_cast<unsigned long>(vmn_.anNumField) >= (sizeof(vmn_.anChar) / sizeof(vmn_.anChar[0]))) {
             TELEPHONY_LOGE("enhancedVmn data length invalid.");
             return false;
         }
@@ -1395,7 +1395,7 @@ bool CdmaSmsEnhancedVmn::DecodeAccessNumber(SmsReadBuffer &pdu)
             TELEPHONY_LOGE("num field read error");
             return false;
         }
-        if (static_cast<unsigned long>(vmn_.anNumField) > (sizeof(vmn_.anChar) / sizeof(vmn_.anChar[0]))) {
+        if (static_cast<unsigned long>(vmn_.anNumField) >= (sizeof(vmn_.anChar) / sizeof(vmn_.anChar[0]))) {
             TELEPHONY_LOGE("enhancedVmn data length invalid.");
             return false;
         }
