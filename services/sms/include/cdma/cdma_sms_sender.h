@@ -62,6 +62,9 @@ public:
     void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
     void StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
     void RegisterImsHandler() override;
+    void UpdateIndexerInfo(std::shared_ptr<SmsSendIndexer> &smsIndexer, std::vector<uint8_t> &pdu,
+        uint8_t msgRef8bit, const uint8_t unSentCellCount, std::shared_ptr<bool> hasCellFailed,
+        long timeStamp, uint16_t msgId, uint16_t dataBaseId, bool isMmsApp);
     void SetSendIndexerInfo(const std::shared_ptr<SmsSendIndexer> &indexer,
         const std::shared_ptr<struct EncodeInfo> &encodeInfo, unsigned char msgRef8bit);
 

@@ -119,19 +119,34 @@ void CdmaSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const 
             SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
             return;
         }
-        indexer->SetEncodePdu(*pdu);
-        indexer->SetMsgRefId(msgRef8bit);
-        indexer->SetNetWorkType(NET_TYPE_CDMA);
-        indexer->SetUnSentCellCount(splits.size());
-        indexer->SetHasCellFailed(hasCellFailed);
-        indexer->SetTimeStamp(timeStamp);
-        indexer->SetMsgId(msgId);
-        indexer->SetIsMmsApp(isMmsApp);
-        indexer->SetDataBaseId(dataBaseId);
-        TELEPHONY_LOGI("CdmaSmsSender::TextBasedSmsSplitDelivery isMmsApp:%{}d;databaseId:%{}d;",
-        indexer->GetIsMmsApp(), indexer->GetDataBaseId());
+        UpdateIndexerInfo(indexer, *pdu, msgRef8bit, splits.size(), hasCellFailed,
+            timeStamp, msgId, isMmsApp, dataBaseId);
         SendSmsToRil(indexer);
     }
+}
+
+void CdmaSmsSender::UpdateIndexerInfo(
+    shared_ptr<SmsSendIndexer> &indexer,
+    std::vector<uint8_t> &pdu,
+    uint8_t msgRef8bit,
+    const uint8_t unSentCellCount,
+    shared_ptr<bool> hasCellFailed,
+    long timeStamp,
+    uint16_t msgId,
+    uint16_t dataBaseId,
+    bool isMmsApp)
+{
+    indexer->SetEncodePdu(pdu);
+    indexer->SetMsgRefId(msgRef8bit);
+    indexer->SetNetWorkType(NET_TYPE_CDMA);
+    indexer->SetUnSentCellCount(unSentCellCount);
+    indexer->SetHasCellFailed(hasCellFailed);
+    indexer->SetTimeStamp(timeStamp);
+    indexer->SetMsgId(msgId);
+    indexer->SetDataBaseId(dataBaseId);
+    indexer->SetIsMmsApp(isMmsApp);
+    TELEPHONY_LOGI("CdmaSmsSender::UpdateIndexerInfo isMmsApp:%{}d;databaseId:%{}d;",
+        indexer->GetIsMmsApp(), indexer->GetDataBaseId());
 }
 
 void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const string &scAddr, const string &text,

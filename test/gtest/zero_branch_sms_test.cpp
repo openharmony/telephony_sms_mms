@@ -239,7 +239,8 @@ HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
     uint16_t msgId = 0;
     long timeStamp = 0;
     cdmaSmsSender->TextBasedSmsSplitDelivery(
-        desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp, sendCallback, deliveryCallback);
+        desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp, sendCallback, deliveryCallback,
+        dataBaseId);
     cdmaSmsSender->TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
     cdmaSmsSender->SendSmsToRil(smsIndexer);
@@ -1935,7 +1936,8 @@ HWTEST_F(BranchSmsTest, SmsService_0004, Function | MediumTest | Level1)
     smsService->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
     slotId = 0;
     std::string telephone = "13888888888";
-    smsService->InsertSessionAndDetail(slotId, telephone, telephone);
+    uint16_t dataBaseId = 0;
+    smsService->InsertSessionAndDetail(slotId, telephone, telephone, dataBaseId);
     bool isSupported = false;
     slotId = -1;
     smsService->IsImsSmsSupported(slotId, isSupported);
