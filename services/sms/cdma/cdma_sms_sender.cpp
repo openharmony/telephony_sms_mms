@@ -119,7 +119,8 @@ void CdmaSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const 
             SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
             return;
         }
-        UpdateIndexerInfo(indexer, *pdu, msgRef8bit, splits.size(), hasCellFailed,
+        indexer->SetEncodePdu(*pdu);
+        UpdateIndexerInfo(indexer, msgRef8bit, splits.size(), hasCellFailed,
             timeStamp, msgId, isMmsApp, dataBaseId);
         SendSmsToRil(indexer);
     }
@@ -127,7 +128,6 @@ void CdmaSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const 
 
 void CdmaSmsSender::UpdateIndexerInfo(
     shared_ptr<SmsSendIndexer> &indexer,
-    std::vector<uint8_t> &pdu,
     uint8_t msgRef8bit,
     const uint8_t unSentCellCount,
     shared_ptr<bool> hasCellFailed,
@@ -136,7 +136,6 @@ void CdmaSmsSender::UpdateIndexerInfo(
     uint16_t dataBaseId,
     bool isMmsApp)
 {
-    indexer->SetEncodePdu(pdu);
     indexer->SetMsgRefId(msgRef8bit);
     indexer->SetNetWorkType(NET_TYPE_CDMA);
     indexer->SetUnSentCellCount(unSentCellCount);
@@ -194,9 +193,6 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
         return;
     }
     indexer->SetDcs(cellsInfos[i].encodeType);
-    indexer->SetIsMmsApp(isMmsApp);
-    indexer->SetDataBaseId(dataBaseId);
-    TELEPHONY_LOGI("SetIsMmsApp: %{public}d ; SetDataBaseId:%{public}d", isMmsApp, dataBaseId);
     (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
 
     if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1) {
@@ -217,6 +213,7 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
     isStatusReport = (deliveryCallback == nullptr) ? false : true;
 
     int cellsInfosSize = static_cast<int>(cellsInfos.size());
+    
     if (cellsInfosSize > 1) {
         indexer->SetIsConcat(true);
         SmsConcat concat;
@@ -233,6 +230,8 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
     /* Set User Data Header for National Language Single Shift */
     headerCnt += gsmSmsMessage.SetHeaderLang(headerCnt, codingType, cellsInfos[i].langId);
     indexer->SetLangId(cellsInfos[i].langId);
+    indexer->SetIsMmsApp(isMmsApp);
+    indexer->SetDataBaseId(dataBaseId);
     tpdu->data.submit.userData.headerCnt = headerCnt;
     tpdu->data.submit.bHeaderInd = (headerCnt > 0) ? true : false;
 
