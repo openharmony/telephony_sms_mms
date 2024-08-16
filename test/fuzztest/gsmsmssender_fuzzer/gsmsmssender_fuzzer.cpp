@@ -162,7 +162,6 @@ void SendSmsTest(const uint8_t *data, size_t size)
     DataCodingScheme codingType = static_cast<DataCodingScheme>(data[0] % TYPE_NUM);
     bool isStatusReport = (size % SLOT_NUM == 1);
     GsmSmsMessage msg;
-    uint16_t dataBaseId = 0;
     std::shared_ptr<struct SmsTpdu> tpdu =
         msg.CreateDefaultSubmitSmsTpdu(desAddr, scAddr, text, isStatusReport, codingType);
     sender->TextBasedSmsSplitDelivery(
