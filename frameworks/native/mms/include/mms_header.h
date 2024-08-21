@@ -55,7 +55,6 @@ private:
     void InitTextStringHandleFun();
     std::string MakeTransactionId(uint32_t len);
     bool FindHeaderFieldName(const uint8_t fieldId, std::string &fieldName);
-
     bool DecodeMmsMsgType(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len);
     bool DecodeFieldAddressModelValue(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len);
     bool DecodeFieldOctetValue(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t &len);
@@ -81,7 +80,6 @@ private:
 
     bool EncodeCommontFieldValue(MmsEncodeBuffer &buff);
     bool EncodeMultipleAddressValue(MmsEncodeBuffer &buff, uint8_t fieldId, std::vector<MmsAddress> &addrs);
-
     bool EncodeMmsSendReq(MmsEncodeBuffer &buff);
     bool EncodeMmsSendConf(MmsEncodeBuffer &buff);
     bool EncodeMmsNotificationInd(MmsEncodeBuffer &buff);
@@ -91,20 +89,15 @@ private:
     bool EnocdeMmsDeliveryInd(MmsEncodeBuffer &buff);
     bool EncodeMmsReadRecInd(MmsEncodeBuffer &buff);
     bool EncodeMmsReadOrigInd(MmsEncodeBuffer &buff);
-
-    void TrimString(std::string &str);  // trim string two side <>
     bool EncodeOctetValue(MmsEncodeBuffer &buff, uint8_t fieldId, uint8_t value);
     bool EncodeTextStringValue(MmsEncodeBuffer &buff, uint8_t fieldId, std::string value);
     bool EncodeEncodeStringValue(MmsEncodeBuffer &buff, uint8_t fieldId, MmsEncodeString value);
     bool EncodeShortIntegerValue(MmsEncodeBuffer &buff, uint8_t fieldId, int64_t value);
     bool EncodeLongIntergerValue(MmsEncodeBuffer &buff, uint8_t fieldId, int64_t value);
-
     bool EncodeOctetValueFromMap(MmsEncodeBuffer &buff, uint8_t fieldId);
     bool EncodeTextStringValueFromMap(MmsEncodeBuffer &buff, uint8_t fieldId);
     bool EnocdeEncodeStringValueFromMap(MmsEncodeBuffer &buff, uint8_t fieldId);
-    bool EnocdeShortIntegerValueFromMap(MmsEncodeBuffer &buff, uint8_t fieldId);
     bool EncodeLongIntergerValueFromMap(MmsEncodeBuffer &buff, uint8_t fieldId);
-
     bool IsHaveTransactionId(uint8_t messageType);
     bool CheckResponseStatus(uint8_t value);
     bool CheckRetrieveStatus(uint8_t value);

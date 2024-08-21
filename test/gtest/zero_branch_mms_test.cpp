@@ -316,12 +316,6 @@ HWTEST_F(BranchMmsTest, MmsHeader_0005, Function | MediumTest | Level1)
     auto mmsHeader = std::make_shared<MmsHeader>();
     MmsEncodeBuffer buff;
     MmsEncodeString value;
-    std::string str = "q";
-    mmsHeader->TrimString(str);
-    str = "qwer";
-    mmsHeader->TrimString(str);
-    str = "<wer";
-    mmsHeader->TrimString(str);
     EXPECT_FALSE(mmsHeader->EncodeTextStringValue(buff, 1, ""));
     EXPECT_FALSE(mmsHeader->EncodeEncodeStringValue(buff, 1, value));
     EXPECT_TRUE(mmsHeader->IsHaveTransactionId(MMS_MSGTYPE_SEND_REQ));
