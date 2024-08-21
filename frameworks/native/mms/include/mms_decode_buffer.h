@@ -43,7 +43,6 @@ public:
     bool DecodeLongInteger(uint64_t &lInteger);
     bool DecodeInteger(uint64_t &iInteger);
     bool DecodeIsValueLength();
-    void GetPdu();
 
 private:
     static constexpr uint8_t EDN_S = 0;
