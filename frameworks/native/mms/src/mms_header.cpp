@@ -226,7 +226,6 @@ bool MmsHeader::DecodeMmsHeader(MmsDecodeBuffer &decodeBuffer)
             }
         } else {
             TELEPHONY_LOGI("DecodeMmsMsgUnKnownField:%{public}02X", fieldCode);
-            decodeBuffer.GetPdu();
             DecodeMmsMsgUnKnownField(decodeBuffer);
         }
     }
@@ -807,20 +806,6 @@ bool MmsHeader::DecodeFromValue(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t 
     return false;
 }
 
-void MmsHeader::TrimString(std::string &str)
-{
-    const unsigned char minStringLen = 2;
-    if (str.length() < minStringLen) {
-        return;
-    }
-    if (str.at(0) != '<' || str.at(str.length() - 1) != '>') {
-        return;
-    }
-    str.erase(0, 1);
-    str.erase(str.length() - 1, str.length());
-    return;
-}
-
 bool MmsHeader::GetSmilFileName(std::string &smileFileName)
 {
     smileFileName = "";
@@ -1179,20 +1164,6 @@ bool MmsHeader::EnocdeEncodeStringValueFromMap(MmsEncodeBuffer &buff, uint8_t fi
     }
     if (!EncodeEncodeStringValue(buff, fieldId, value)) {
         TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeEncodeStringValue fail.", fieldId);
-        return false;
-    }
-    return true;
-}
-
-bool MmsHeader::EnocdeShortIntegerValueFromMap(MmsEncodeBuffer &buff, uint8_t fieldId)
-{
-    int64_t value = 0;
-    if (!GetLongValue(fieldId, value)) {
-        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader GetLongValue fail.", fieldId);
-        return false;
-    }
-    if (!EncodeShortIntegerValue(buff, fieldId, value)) {
-        TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader EncodeShortIntegerValue fail.", fieldId);
         return false;
     }
     return true;
