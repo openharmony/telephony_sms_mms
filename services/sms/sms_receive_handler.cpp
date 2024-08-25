@@ -90,8 +90,8 @@ void SmsReceiveHandler::HandleMessageQueue()
 
 void SmsReceiveHandler::HandleReconnectEvent()
 {
-    std::lock_guard<std::mutex> lock(queueMutex_);
     if (IsDataShareReady()) {
+        std::lock_guard<std::mutex> lock(queueMutex_);
         HandleMessageQueue();
     } else {
         g_reconnectDataShareCount++;
