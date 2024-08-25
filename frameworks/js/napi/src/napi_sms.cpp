@@ -511,9 +511,9 @@ static void CreateMessageCallback(napi_env env, napi_status status, void *data)
     auto asyncContext = static_cast<CreateMessageContext *>(data);
     napi_value callbackValue = nullptr;
     if (status == napi_ok) {
-        if (asyncContext->resolved) {
-            callbackValue = CreateShortMessageValue(env, *(asyncContext->shortMessage));
+        if (asyncContext != nullptr && asyncContext->resolved) {
             if (asyncContext->shortMessage != nullptr) {
+                callbackValue = CreateShortMessageValue(env, *(asyncContext->shortMessage));
                 delete asyncContext->shortMessage;
                 asyncContext->shortMessage = nullptr;
             }
