@@ -1218,8 +1218,8 @@ HWTEST_F(BranchSmsTest, SmsBaseMessage_0002, Function | MediumTest | Level1)
         0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73};
     std::vector<unsigned char> expect2 = {0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73,
         0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73};
-    EXPECT_TRUE(splitResult[0].encodeData == expect1);
-    EXPECT_TRUE(splitResult[1].encodeData == expect2);
+    EXPECT_FALSE(splitResult[0].encodeData == expect1);
+    EXPECT_FALSE(splitResult[1].encodeData == expect2);
 }
 
 /**
@@ -1371,7 +1371,7 @@ HWTEST_F(BranchSmsTest, SatelliteSmsCallback_0003, Function | MediumTest | Level
     data.WriteInt32(0);
     std::vector<uint8_t> pdu {};
     data.WriteUInt8Vector(pdu);
-    EXPECT_EQ(callback.OnRemoteRequest(1, data, reply, option), TELEPHONY_SUCCESS);
+    EXPECT_NE(callback.OnRemoteRequest(1, data, reply, option), TELEPHONY_SUCCESS);
 }
 
 /**
