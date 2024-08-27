@@ -30,8 +30,10 @@ TelephonyExtWrapper::TelephonyExtWrapper()
 TelephonyExtWrapper::~TelephonyExtWrapper()
 {
     TELEPHONY_LOGD("TelephonyExtWrapper::~TelephonyExtWrapper() start");
-    dlclose(telephonyExtWrapperHandle_);
-    telephonyExtWrapperHandle_ = nullptr;
+    if (telephonyExtWrapperHandle_ != nullptr) {
+        dlclose(telephonyExtWrapperHandle_);
+        telephonyExtWrapperHandle_ = nullptr;
+    }
 }
 void TelephonyExtWrapper::InitTelephonyExtWrapper()
 {
