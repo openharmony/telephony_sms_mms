@@ -192,7 +192,6 @@ int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fi
 
 bool MmsNetworkClient::CheckSendConf()
 {
-    TELEPHONY_LOGI("the http response of send mms is:%{public}s", StringUtils::StringToHex(responseData_).c_str());
     uint32_t length = responseData_.size();
     if (length > SEND_CONF_MAX_SIZE || length == 0) {
         TELEPHONY_LOGE("send mms response length invalid");
