@@ -45,7 +45,7 @@ GsmCbUmtsCodec::~GsmCbUmtsCodec() {}
  */
 bool GsmCbUmtsCodec::Decode3gHeader()
 {
-    if (cbPduBuffer_ == nullptr || cbHeader_ == nullptr || cbPduBuffer_->GetSize() == 0) {
+    if (cbPduBuffer_ == nullptr || cbHeader_ == nullptr || cbCodec_ == nullptr || cbPduBuffer_->GetSize() == 0) {
         TELEPHONY_LOGE("CB pdu data error.");
         return false;
     }
