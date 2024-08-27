@@ -509,9 +509,13 @@ static napi_value CreateShortMessageValue(napi_env env, const ShortMessage &shor
 static void CreateMessageCallback(napi_env env, napi_status status, void *data)
 {
     auto asyncContext = static_cast<CreateMessageContext *>(data);
+    if (asyncContext == nullptr) {
+        TELEPHONY_LOGE("asyncContext is nullptr!");
+        return;
+    }
     napi_value callbackValue = nullptr;
     if (status == napi_ok) {
-        if (asyncContext != nullptr && asyncContext->resolved) {
+        if (asyncContext->resolved) {
             if (asyncContext->shortMessage != nullptr) {
                 callbackValue = CreateShortMessageValue(env, *(asyncContext->shortMessage));
                 delete asyncContext->shortMessage;
