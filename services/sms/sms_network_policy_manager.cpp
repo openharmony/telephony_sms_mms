@@ -66,6 +66,7 @@ void SmsNetworkPolicyManager::UnRegisterHandler()
     coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_IMS_NETWORK_STATE_CHANGED);
     coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_RIL_ADAPTER_HOST_DIED);
     coreInner.UnRegisterCoreNotify(slotId_, shared_from_this(), RadioEvent::RADIO_FACTORY_RESET);
+    std::lock_guard<std::mutex> lock(callbackMapMutex_);
     callbackMap_.clear();
 }
 
@@ -128,6 +129,7 @@ void SmsNetworkPolicyManager::GetRadioState()
     voiceServiceState_ = CoreManagerInner::GetInstance().GetCsRegState(slotId_);
     TELEPHONY_LOGD("netWorkType_ = %{public}d isImsNetDomain_ = %{public}s GetCsRegStatus = %{public}d", netWorkType_,
         isImsNetDomain_ ? "true" : "false", voiceServiceState_);
+    std::lock_guard<std::mutex> lock(callbackMapMutex_);
     for (const auto &item : callbackMap_) {
         if (item.second == nullptr) {
             TELEPHONY_LOGE("callbackList's item is nullptr");
@@ -189,6 +191,7 @@ void SmsNetworkPolicyManager::NetworkUnregister(int32_t id)
 {
     auto iter = callbackMap_.find(id);
     if (iter != callbackMap_.end()) {
+        std::lock_guard<std::mutex> lock(callbackMapMutex_);
         callbackMap_.erase(iter);
     } else {
         TELEPHONY_LOGE("NetworkUnregister id[%{public}d] is failed", id);

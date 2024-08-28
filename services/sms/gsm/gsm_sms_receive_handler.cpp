@@ -194,7 +194,7 @@ void GsmSmsReceiveHandler::HandleRemainDataShare(const std::shared_ptr<SmsBaseMe
     }
     auto destPort = indexer->GetDestPort();
     if (destPort == INVALID_SMS_PORT) {
-        TELEPHONY_LOGI("[invalid sms port] =%{public}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
+        TELEPHONY_LOGI("[invalid sms port]");
     }
     if (!AddMsgToDB(indexer)) {
         return;
@@ -262,7 +262,7 @@ int32_t GsmSmsReceiveHandler::HandleNormalSmsByType(const shared_ptr<SmsBaseMess
     }
     auto destPort = indexer->GetDestPort();
     if (destPort == INVALID_SMS_PORT) {
-        TELEPHONY_LOGI("[invalid sms port] =%{public}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
+        TELEPHONY_LOGI("[invalid sms port]");
         return AckIncomeCause::SMS_ACK_RESULT_OK;
     }
     if (!AddMsgToDB(indexer)) {

@@ -141,8 +141,8 @@ static int32_t ActuallySendTextMessage(SendMessageContext &parameter, std::uniqu
 {
     if (!IsValidSlotId(parameter.slotId)) {
         auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
-        sendCallback.release()->OnSmsSendResult(result);
-        deliveryCallback.release()->OnSmsDeliveryResult(u"");
+        sendCallback->OnSmsSendResult(result);
+        deliveryCallback->OnSmsDeliveryResult(u"");
         return TELEPHONY_ERR_SLOTID_INVALID;
     }
     return DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(parameter.slotId,
@@ -155,8 +155,8 @@ static int32_t ActuallySendDataMessage(SendMessageContext &parameter, std::uniqu
 {
     if (InValidSlotIdOrInValidPort(parameter.slotId, parameter.destinationPort)) {
         auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
-        sendCallback.release()->OnSmsSendResult(result);
-        deliveryCallback.release()->OnSmsDeliveryResult(u"");
+        sendCallback->OnSmsSendResult(result);
+        deliveryCallback->OnSmsDeliveryResult(u"");
         return TELEPHONY_ERR_SLOTID_INVALID;
     }
     if (parameter.rawDataContent.size() > 0) {
@@ -479,11 +479,15 @@ static napi_value CreateShortMessageValue(napi_env env, const ShortMessage &shor
 static void CreateMessageCallback(napi_env env, napi_status status, void *data)
 {
     auto asyncContext = static_cast<CreateMessageContext *>(data);
+    if (asyncContext == nullptr) {
+        TELEPHONY_LOGE("asyncContext is nullptr!");
+        return;
+    }
     napi_value callbackValue = nullptr;
     if (status == napi_ok) {
         if (asyncContext->resolved) {
-            callbackValue = CreateShortMessageValue(env, *(asyncContext->shortMessage));
             if (asyncContext->shortMessage != nullptr) {
+                callbackValue = CreateShortMessageValue(env, *(asyncContext->shortMessage));
                 delete asyncContext->shortMessage;
                 asyncContext->shortMessage = nullptr;
             }
