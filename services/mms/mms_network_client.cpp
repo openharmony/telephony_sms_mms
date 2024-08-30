@@ -168,9 +168,10 @@ int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fi
                 return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
             }
         }
-        if (!httpSuccess_) {
-            TELEPHONY_LOGE("http post task is not success");
+        if (!httpSuccess_ || responseCode_ / ONE_HUNDRED != VALID_RESPONSECODE_FIRST_NUM) {
+            TELEPHONY_LOGE("http post task is not success, task responseCode is %{public}d", responseCode_);
             responseData_ = "";
+            responseCode_ = 0;
             continue;
         }
         if (!CheckSendConf()) {
@@ -195,30 +196,30 @@ bool MmsNetworkClient::CheckSendConf()
     uint32_t length = responseData_.size();
     if (length > SEND_CONF_MAX_SIZE || length == 0) {
         TELEPHONY_LOGE("send mms response length invalid");
-        return false;
+        return true;
     }
     std::unique_ptr<char[]> sendMmsResponse = std::make_unique<char[]>(length);
     if (memset_s(sendMmsResponse.get(), length, 0x00, length) != EOK) {
         TELEPHONY_LOGE("memset_s error");
-        return false;
+        return true;
     }
     if (memcpy_s(sendMmsResponse.get(), length, &responseData_[0], length) != EOK) {
         TELEPHONY_LOGE("memcpy_s error");
-        return false;
+        return true;
     }
     MmsDecodeBuffer sendMmsResponseBuffer;
     if (!sendMmsResponseBuffer.WriteDataBuffer(std::move(sendMmsResponse), length)) {
         TELEPHONY_LOGE("write buffer error");
-        return false;
+        return true;
     }
     if (!mmsHeader_.DecodeMmsHeader(sendMmsResponseBuffer)) {
         TELEPHONY_LOGE("decode send mms response error");
-        return false;
+        return true;
     }
     uint8_t value = 0;
     if (!mmsHeader_.GetOctetValue(MmsFieldCode::MMS_RESPONSE_STATUS, value)) {
         TELEPHONY_LOGE("get response status error");
-        return false;
+        return true;
     }
     if (value != SEND_CONF_RESPONSE_STATUS_OK) {
         TELEPHONY_LOGE("sendconf response status is not OK, the value is %{public}02X", value);
