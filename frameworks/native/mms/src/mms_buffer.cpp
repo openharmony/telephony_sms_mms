@@ -118,7 +118,7 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
 
     pFile = fopen(realPath, "rb");
     if (pFile == nullptr) {
-        TELEPHONY_LOGE("Open File Error :%{public}s", strPathName.c_str());
+        TELEPHONY_LOGE("Open File Error");
         return false;
     }
     (void)fseek(pFile, 0, SEEK_END);
