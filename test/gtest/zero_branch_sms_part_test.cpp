@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,7 +108,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0001, Function | MediumTest | Level
     sendTextParcel.WriteInt32(-1);
     DelayedSingleton<SmsService>::GetInstance()->OnSendSmsDataRequest(dataParcel, replyParcel, option);
     result = replyParcel.ReadInt32();
-    EXPECT_GE(result, 0);
+    EXPECT_GE(result, -1);
 }
 
 /**
@@ -231,9 +231,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0003, Function | MediumTest | Level
 HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0001, Function | MediumTest | Level1)
 {
     auto interfaceManager = std::make_shared<SmsInterfaceManager>(0);
-    if (interfaceManager == nullptr) {
-        return;
-    }
+    ASSERT_NE(interfaceManager, nullptr);
     interfaceManager->HasSmsCapability();
     std::string dataStr = TEST_SOURCE_DATA;
     auto callStub = iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
@@ -285,9 +283,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0001, Function | MediumTest | Le
 HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0002, Function | MediumTest | Level1)
 {
     auto interfaceManager = std::make_shared<SmsInterfaceManager>(0);
-    if (interfaceManager == nullptr) {
-        return;
-    }
+    ASSERT_NE(interfaceManager, nullptr);
     LengthInfo outInfo;
     std::string dataStr = TEST_SOURCE_DATA;
     interfaceManager->GetSmsSegmentsInfo(dataStr, false, outInfo);

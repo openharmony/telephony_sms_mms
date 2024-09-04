@@ -41,7 +41,6 @@ public:
     {}
 };
 
-
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_001
  * @tc.name     SmsGsmTest_001

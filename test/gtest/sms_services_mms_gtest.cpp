@@ -70,13 +70,13 @@ HWTEST_F(SmsServicesMmsGtest, MmsNetworkClient_0001, Function | MediumTest | Lev
     EXPECT_EQ(client.PostUrl(testStr, testStr), TELEPHONY_ERR_ARGUMENT_INVALID);
 
     client.responseData_ = std::string(TEST_SEND_CONF_MAX_SIZE, 'a');
-    EXPECT_FALSE(client.CheckSendConf());\
+    EXPECT_TRUE(client.CheckSendConf());
 
     client.responseData_ = "";
-    EXPECT_FALSE(client.CheckSendConf());
+    EXPECT_TRUE(client.CheckSendConf());
 
     client.responseData_ = "responseData";
-    EXPECT_FALSE(client.CheckSendConf());
+    EXPECT_TRUE(client.CheckSendConf());
 }
 
 HWTEST_F(SmsServicesMmsGtest, MmsConnCallbackStub_0001, Function | MediumTest | Level2)

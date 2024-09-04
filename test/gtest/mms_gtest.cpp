@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -415,7 +415,7 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0001, Function | MediumTest | Level2)
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(MmsGtest::HasSimCard(slotId))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(MmsGtest::HasSimCard(slotId));
         return;
     }
     SmsMmsTestHelper helper;
@@ -426,16 +426,13 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0001, Function | MediumTest | Level2)
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
         std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
-    if (subscriberTest == nullptr) {
-        ASSERT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(subscriberTest, nullptr);
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
     if (!helper.Run(ReceiveWapPushTestFunc, helper)) {
         TELEPHONY_LOGI("ReceiveWapPushTestFunc out of time");
-        ASSERT_TRUE(true);
+        ASSERT_TRUE(helper.Run(ReceiveWapPushTestFunc, helper));
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0001 -->finished");
@@ -453,7 +450,7 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0002, Function | MediumTest | Level2)
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!(MmsGtest::HasSimCard(slotId))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(MmsGtest::HasSimCard(slotId));
         return;
     }
     SmsMmsTestHelper helper;
@@ -464,16 +461,13 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0002, Function | MediumTest | Level2)
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
         std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
-    if (subscriberTest == nullptr) {
-        ASSERT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(subscriberTest, nullptr);
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
     if (!helper.Run(ReceiveWapPushTestFunc, helper)) {
         TELEPHONY_LOGI("ReceiveWapPushTestFunc out of time");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(helper.Run(ReceiveWapPushTestFunc, helper));
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0002 -->finished");
