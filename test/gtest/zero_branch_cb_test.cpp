@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,10 +247,9 @@ HWTEST_F(BranchCbTest, GsmCbCodec_0005, Function | MediumTest | Level1)
     auto cbMsg = std::make_shared<GsmCbCodec>();
     auto gsmMsg = std::make_shared<GsmCbGsmCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
     auto umtsMsg = std::make_shared<GsmCbUmtsCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
-    if (cbMsg == nullptr || gsmMsg == nullptr || umtsMsg == nullptr) {
-        EXPECT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(cbMsg, nullptr);
+    ASSERT_NE(gsmMsg, nullptr);
+    ASSERT_NE(umtsMsg, nullptr);
     EXPECT_FALSE(gsmMsg->Decode2gHeader());
     unsigned char data = 1;
     std::vector<unsigned char> pdu;
@@ -321,11 +320,7 @@ HWTEST_F(BranchCbTest, GsmCbCodec_0006, Function | MediumTest | Level1)
 HWTEST_F(BranchCbTest, GsmCbGsmCodec_0001, Function | MediumTest | Level1)
 {
     auto cbMsg = std::make_shared<GsmCbCodec>();
-    if (cbMsg == nullptr) {
-        TELEPHONY_LOGI("cbMsg nullptr");
-        EXPECT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(cbMsg, nullptr);
     cbMsg->CreateCbMessage(ETWS_PDU);
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector(ETWS_PDU);
     cbMsg->cbPduBuffer_ = std::make_shared<GsmCbPduDecodeBuffer>(pdu.size());
@@ -379,11 +374,7 @@ HWTEST_F(BranchCbTest, GsmCbGsmCodec_0001, Function | MediumTest | Level1)
 HWTEST_F(BranchCbTest, GsmCbGsmCodec_0002, Function | MediumTest | Level1)
 {
     auto cbMsg = std::make_shared<GsmCbCodec>();
-    if (cbMsg == nullptr) {
-        TELEPHONY_LOGI("cbMsg nullptr");
-        EXPECT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(cbMsg, nullptr);
     cbMsg->CreateCbMessage(CMAS_PDU);
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector(CMAS_PDU);
     cbMsg->cbPduBuffer_ = std::make_shared<GsmCbPduDecodeBuffer>(pdu.size());
@@ -437,11 +428,7 @@ HWTEST_F(BranchCbTest, GsmCbGsmCodec_0002, Function | MediumTest | Level1)
 HWTEST_F(BranchCbTest, GsmCbGsmCodec_0003, Function | MediumTest | Level1)
 {
     auto cbMsg = std::make_shared<GsmCbCodec>();
-    if (cbMsg == nullptr) {
-        TELEPHONY_LOGI("cbMsg nullptr");
-        EXPECT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(cbMsg, nullptr);
     cbMsg->CreateCbMessage(CBS_PDU);
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector(CBS_PDU);
     cbMsg->cbPduBuffer_ = std::make_shared<GsmCbPduDecodeBuffer>(pdu.size());
@@ -495,11 +482,7 @@ HWTEST_F(BranchCbTest, GsmCbGsmCodec_0003, Function | MediumTest | Level1)
 HWTEST_F(BranchCbTest, GsmCbGsmCodec_0004, Function | MediumTest | Level1)
 {
     auto cbMsg = std::make_shared<GsmCbCodec>();
-    if (cbMsg == nullptr) {
-        TELEPHONY_LOGI("cbMsg nullptr");
-        EXPECT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(cbMsg, nullptr);
     cbMsg->CreateCbMessage(CMAS_JP_PDU);
     std::vector<unsigned char> pdu = StringUtils::HexToByteVector(CMAS_JP_PDU);
     cbMsg->cbPduBuffer_ = std::make_shared<GsmCbPduDecodeBuffer>(pdu.size());
@@ -553,17 +536,15 @@ HWTEST_F(BranchCbTest, GsmCbGsmCodec_0004, Function | MediumTest | Level1)
 HWTEST_F(BranchCbTest, GsmCbGsmCodec_0005, Function | MediumTest | Level1)
 {
     auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
     unsigned char data = 1;
     std::vector<unsigned char> pdu;
     pdu.push_back(data);
     cbMsg->PduAnalysis(pdu);
     auto gsmMsg = std::make_shared<GsmCbGsmCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
     auto umtsMsg = std::make_shared<GsmCbUmtsCodec>(cbMsg->cbHeader_, cbMsg->cbPduBuffer_, cbMsg);
-    if (cbMsg == nullptr || gsmMsg == nullptr || umtsMsg == nullptr) {
-        EXPECT_TRUE(false);
-        return;
-    }
-
+    ASSERT_NE(gsmMsg, nullptr);
+    ASSERT_NE(umtsMsg, nullptr);
     gsmMsg->Decode2gCbMsg();
     EXPECT_FALSE(umtsMsg->Decode3gCbMsg());
     cbMsg->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();

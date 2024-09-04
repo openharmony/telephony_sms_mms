@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,14 +111,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0001, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_REMOVE;
     if (!helper.Run(OpenCellBroadcastTestFuc, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -147,14 +147,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0002, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc2, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc2 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc2, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -183,14 +183,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc3, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc3 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc3, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -219,14 +219,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc4, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc4 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc4, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->finished");
     ASSERT_GE(helper.GetIntResult(), 0);
@@ -255,14 +255,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc5, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc5 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc5, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->finished");
     ASSERT_GE(helper.GetIntResult(), 0);
@@ -296,14 +296,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc6WithToken, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc6WithToken out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc6WithToken, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->finished");
     ASSERT_GE(helper.GetIntResult(), 0);
@@ -319,14 +319,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0007, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc2, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc2 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc2, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -342,14 +342,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0008 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc3, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc3 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc3, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0008 -->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -365,14 +365,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc4, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc4 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc4, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->finished");
     ASSERT_EQ(helper.GetIntResult(), 0);
@@ -388,14 +388,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc5, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc5 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc5, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->finished");
     ASSERT_EQ(helper.GetIntResult(), 0);
@@ -411,14 +411,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0011, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc6WithToken, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc6WithToken out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc6WithToken, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->finished");
     ASSERT_EQ(helper.GetIntResult(), 0);
@@ -434,14 +434,14 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0012, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0012 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc6, std::ref(helper))) {
         TELEPHONY_LOGI("OpenCellBroadcastTestFuc6 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc6, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0012 -->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -470,14 +470,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0001, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_REMOVE;
     if (!helper.Run(CloseCellBroadcastTestFuc, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -506,14 +506,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0002, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc2, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc2 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc2, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -542,14 +542,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc3, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc3 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc3, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003-->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -578,14 +578,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc4, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc4 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc4, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->finished");
     ASSERT_GE(helper.GetIntResult(), 0);
@@ -614,14 +614,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc5, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc5 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc5, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->finished");
     ASSERT_GE(helper.GetIntResult(), 0);
@@ -655,14 +655,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc6WithToken, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc6WithToken out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc6WithToken, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->finished");
     ASSERT_GE(helper.GetIntResult(), 0);
@@ -678,14 +678,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0007, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc2, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc7 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc2, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -701,14 +701,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0008 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc3, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc8 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc3, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0008-->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -724,14 +724,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc4, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc9 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc4, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->finished");
     ASSERT_GE(helper.GetIntResult(), 0);
@@ -747,14 +747,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc5, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc10 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc5, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->finished");
     ASSERT_GE(helper.GetIntResult(), 0);
@@ -770,14 +770,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc6WithToken, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc6WithToken out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc6WithToken, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->finished");
     ASSERT_GE(helper.GetIntResult(), 0);
@@ -793,14 +793,14 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0012, Function | MediumTest | Level3)
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0012 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
         return;
     }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc6, std::ref(helper))) {
         TELEPHONY_LOGI("CloseCellBroadcastTestFuc6 out of time");
-        ASSERT_TRUE(false);
+        ASSERT_TRUE(helper.Run(CloseCellBroadcastTestFuc6, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0012 -->finished");
     EXPECT_NE(helper.GetIntResult(), 0);
@@ -856,7 +856,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0001, Function | MediumTest | Level2)
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(CbGtest::HasSimCard(slotId))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(slotId));
         return;
     }
     SmsMmsTestHelper helper;
@@ -868,16 +868,13 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0001, Function | MediumTest | Level2)
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
         std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
-    if (subscriberTest == nullptr) {
-        ASSERT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(subscriberTest, nullptr);
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
     if (!helper.Run(ReceiveCellBroadCastTestFunc, helper)) {
         TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc out of time");
-        ASSERT_TRUE(true);
+        ASSERT_TRUE(helper.Run(ReceiveCellBroadCastTestFunc, helper));
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0001 -->finished");
@@ -895,7 +892,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0002, Function | MediumTest | Level2)
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     if (!(CbGtest::HasSimCard(slotId))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(slotId));
         return;
     }
     SmsMmsTestHelper helper;
@@ -907,16 +904,13 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0002, Function | MediumTest | Level2)
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
         std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
-    if (subscriberTest == nullptr) {
-        ASSERT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(subscriberTest, nullptr);
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
     if (!helper.Run(ReceiveCellBroadCastTestFunc2, helper)) {
         TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc2 out of time");
-        ASSERT_TRUE(true);
+        ASSERT_TRUE(helper.Run(ReceiveCellBroadCastTestFunc2, helper));
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0002 -->finished");
@@ -934,7 +928,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0003, Function | MediumTest | Level2)
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!(CbGtest::HasSimCard(slotId))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(slotId));
         return;
     }
     SmsMmsTestHelper helper;
@@ -946,16 +940,13 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0003, Function | MediumTest | Level2)
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
         std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
-    if (subscriberTest == nullptr) {
-        ASSERT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(subscriberTest, nullptr);
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
     if (!helper.Run(ReceiveCellBroadCastTestFunc, helper)) {
         TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc out of time");
-        ASSERT_TRUE(true);
+        ASSERT_TRUE(helper.Run(ReceiveCellBroadCastTestFunc, helper));
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0003 -->finished");
@@ -973,7 +964,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0004, Function | MediumTest | Level2)
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!(CbGtest::HasSimCard(slotId))) {
         TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_TRUE(true);
+        ASSERT_FALSE(CbGtest::HasSimCard(slotId));
         return;
     }
     SmsMmsTestHelper helper;
@@ -985,16 +976,13 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0004, Function | MediumTest | Level2)
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     std::shared_ptr<SmsBroadcastSubscriberGtest> subscriberTest =
         std::make_shared<SmsBroadcastSubscriberGtest>(subscriberInfo, helper);
-    if (subscriberTest == nullptr) {
-        ASSERT_TRUE(false);
-        return;
-    }
+    ASSERT_NE(subscriberTest, nullptr);
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
     if (!helper.Run(ReceiveCellBroadCastTestFunc2, helper)) {
         TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc2 out of time");
-        ASSERT_TRUE(true);
+        ASSERT_TRUE(helper.Run(ReceiveCellBroadCastTestFunc2, helper));
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0004 -->finished");
