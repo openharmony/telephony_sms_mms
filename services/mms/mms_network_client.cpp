@@ -34,6 +34,8 @@
 #include "telephony_common_utils.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
+#include "string_utils.h"
+#include "mms_codec_type.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -44,7 +46,13 @@ std::string METHOD_GET = "GET";
 constexpr const char *SIMID_IDENT_PREFIX = "simId";
 const bool STORE_MMS_PDU_TO_FILE = false;
 constexpr static const int32_t WAIT_TIME_SECOND = 10 * 60;
-constexpr static const unsigned int HTTP_TIME_MICRO_SECOND = WAIT_TIME_SECOND * 100;
+constexpr static const unsigned int HTTP_TIME_MICRO_SECOND = WAIT_TIME_SECOND * 1000;
+constexpr static const uint8_t SEND_CONF_RESPONSE_STATUS_OK = 0x80;
+constexpr static const uint32_t SEND_CONF_MAX_SIZE = 500;
+constexpr static const uint8_t MAX_RETRY_TIMES = 3;
+constexpr static const int32_t ONE_HUNDRED = 100;
+constexpr static const int32_t VALID_RESPONSECODE_FIRST_NUM = 2;
+
 
 MmsNetworkClient::MmsNetworkClient(int32_t slotId)
 {
@@ -138,7 +146,6 @@ int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fi
         TELEPHONY_LOGE("post request fail");
         return ret;
     }
-
     std::unique_lock<std::mutex> lck(clientCts_);
     std::string strBuf;
     ret = GetMmsDataBuf(strBuf, fileName);
@@ -146,29 +153,79 @@ int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fi
         TELEPHONY_LOGE("post request fail");
         return ret;
     }
-    ret = HttpRequest(METHOD_POST, mmsc, strBuf);
-    if (ret != TELEPHONY_ERR_SUCCESS) {
-        TELEPHONY_LOGE("http fail error");
-        return ret;
-    }
-
-    httpFinish_ = false;
-    while (!httpFinish_) {
-        TELEPHONY_LOGI("wait(), networkReady = false");
-        if (clientCv_.wait_for(lck, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
-            break;
+    for (retryTimes_ = 0; retryTimes_ <= MAX_RETRY_TIMES; retryTimes_++) {
+        ret = HttpRequest(METHOD_POST, mmsc, strBuf);
+        if (ret != TELEPHONY_ERR_SUCCESS) {
+            TELEPHONY_LOGE("http fail error");
+            return ret;
         }
+        httpFinish_ = false;
+        httpSuccess_ = false;
+        while (!httpFinish_) {
+            TELEPHONY_LOGI("wait(), networkReady = false");
+            if (clientCv_.wait_for(lck, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
+                TELEPHONY_LOGE("wait networkready timeout");
+                return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
+            }
+        }
+        if (!httpSuccess_ || responseCode_ / ONE_HUNDRED != VALID_RESPONSECODE_FIRST_NUM) {
+            TELEPHONY_LOGE("http post task is not success, task responseCode is %{public}d", responseCode_);
+            responseData_ = "";
+            responseCode_ = 0;
+            continue;
+        }
+        if (!CheckSendConf()) {
+            TELEPHONY_LOGE("send mms failed due to send-conf decode fail");
+            responseData_ = "";
+            continue;
+        }
+        break;
     }
     if (!STORE_MMS_PDU_TO_FILE) {
         DeleteMmsPdu(fileName);
     }
-    if (!httpSuccess_) {
-        TELEPHONY_LOGI("send mms failed");
+    if (retryTimes_ > MAX_RETRY_TIMES) {
+        TELEPHONY_LOGE("send mms retry times over 3, send mms failed");
         return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
-    } else {
-        TELEPHONY_LOGI("send mms successed");
-        return TELEPHONY_ERR_SUCCESS;
     }
+    return TELEPHONY_ERR_SUCCESS;
+}
+
+bool MmsNetworkClient::CheckSendConf()
+{
+    uint32_t length = responseData_.size();
+    if (length > SEND_CONF_MAX_SIZE || length == 0) {
+        TELEPHONY_LOGE("send mms response length invalid");
+        return true;
+    }
+    std::unique_ptr<char[]> sendMmsResponse = std::make_unique<char[]>(length);
+    if (memset_s(sendMmsResponse.get(), length, 0x00, length) != EOK) {
+        TELEPHONY_LOGE("memset_s error");
+        return true;
+    }
+    if (memcpy_s(sendMmsResponse.get(), length, &responseData_[0], length) != EOK) {
+        TELEPHONY_LOGE("memcpy_s error");
+        return true;
+    }
+    MmsDecodeBuffer sendMmsResponseBuffer;
+    if (!sendMmsResponseBuffer.WriteDataBuffer(std::move(sendMmsResponse), length)) {
+        TELEPHONY_LOGE("write buffer error");
+        return true;
+    }
+    if (!mmsHeader_.DecodeMmsHeader(sendMmsResponseBuffer)) {
+        TELEPHONY_LOGE("decode send mms response error");
+        return true;
+    }
+    uint8_t value = 0;
+    if (!mmsHeader_.GetOctetValue(MmsFieldCode::MMS_RESPONSE_STATUS, value)) {
+        TELEPHONY_LOGE("get response status error");
+        return true;
+    }
+    if (value != SEND_CONF_RESPONSE_STATUS_OK) {
+        TELEPHONY_LOGE("sendconf response status is not OK, the value is %{public}02X", value);
+        return false;
+    }
+    return true;
 }
 
 void MmsNetworkClient::GetCoverUrl(std::string str)
@@ -188,14 +245,14 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
 {
     HttpClientRequest httpReq;
     httpReq.SetURL(url);
-    httpReq.SetHttpProxyType(HttpProxyType::USE_SPECIFIED);
     NetStack::HttpClient::HttpProxy httpProxy;
     int32_t ret = GetMmsApnPorxy(httpProxy);
-    if (ret != TELEPHONY_SUCCESS) {
+    if (ret == TELEPHONY_SUCCESS) {
+        httpReq.SetHttpProxyType(HttpProxyType::USE_SPECIFIED);
+        httpReq.SetHttpProxy(httpProxy);
+    } else {
         TELEPHONY_LOGE("get mms apn error");
-        return ret;
     }
-    httpReq.SetHttpProxy(httpProxy);
     httpReq.SetConnectTimeout(HTTP_TIME_MICRO_SECOND);
     httpReq.SetTimeout(HTTP_TIME_MICRO_SECOND);
     if (method.compare(METHOD_POST) == 0) {
@@ -224,26 +281,45 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
         return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
     }
     HttpCallBack(task);
-    TELEPHONY_LOGI("before call [task->Start]");
     task->Start();
-    TELEPHONY_LOGI("after call [task->Start]");
     return TELEPHONY_ERR_SUCCESS;
 }
 
 int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, std::string &storeDirName)
 {
     std::unique_lock<std::mutex> lck(clientCts_);
-    std::string strData = "";
-    if (HttpRequest(METHOD_GET, mmsc, strData) != TELEPHONY_ERR_SUCCESS) {
-        TELEPHONY_LOGE("http fail error");
-        return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
-    }
-    httpFinish_ = false;
-    while (!httpFinish_) {
-        TELEPHONY_LOGI("wait(), networkReady = false");
-        if (clientCv_.wait_for(lck, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
-            break;
+    for (retryTimes_ = 0; retryTimes_ <= MAX_RETRY_TIMES; retryTimes_++) {
+        std::string strData = "";
+        if (HttpRequest(METHOD_GET, mmsc, strData) != TELEPHONY_ERR_SUCCESS) {
+            TELEPHONY_LOGE("http fail error");
+            return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
         }
+        httpFinish_ = false;
+        httpSuccess_ = false;
+        while (!httpFinish_) {
+            TELEPHONY_LOGI("wait(), networkReady = false");
+            if (clientCv_.wait_for(lck, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
+                TELEPHONY_LOGE("wait networkready timeout");
+                return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
+            }
+        }
+        if (!httpSuccess_) {
+            TELEPHONY_LOGE("http get task is not success");
+            responseData_ = "";
+            responseCode_ = 0;
+            continue;
+        }
+        if (responseCode_ / ONE_HUNDRED != VALID_RESPONSECODE_FIRST_NUM) {
+            TELEPHONY_LOGE("get task responseCode is not success:%{public}d", responseCode_);
+            responseData_ = "";
+            responseCode_ = 0;
+            continue;
+        }
+        break;
+    }
+    if (retryTimes_ > MAX_RETRY_TIMES) {
+        TELEPHONY_LOGE("download mms retry times over 3, download mms failed");
+        return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
     }
     TELEPHONY_LOGI("responseData_ len: %{public}d", static_cast<uint32_t>(responseData_.size()));
     if (responseData_.size() == 0) {
@@ -430,16 +506,17 @@ void MmsNetworkClient::HttpCallBack(std::shared_ptr<HttpClientTask> task)
         TELEPHONY_LOGI("OnSuccess");
         httpFinish_ = true;
         httpSuccess_ = true;
+        responseCode_ = response.GetResponseCode();
         clientCv_.notify_one();
     });
     task->OnCancel([this](const HttpClientRequest &request, const HttpClientResponse &response) {
-        TELEPHONY_LOGI("OnCancel");
+        TELEPHONY_LOGI("OnCancel, responseCode:%{public}d", response.GetResponseCode());
         httpFinish_ = true;
         clientCv_.notify_one();
     });
     task->OnFail(
         [this](const HttpClientRequest &request, const HttpClientResponse &response, const HttpClientError &error) {
-            TELEPHONY_LOGE("OnFailed, responseCode:%{public}d", response.GetResponseCode());
+            TELEPHONY_LOGE("OnFailed, errorCode:%{public}d", error.GetErrorCode());
             httpFinish_ = true;
             clientCv_.notify_one();
         });
