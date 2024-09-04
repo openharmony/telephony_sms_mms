@@ -542,7 +542,10 @@ void CdmaSmsSender::StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer 
         return;
     }
     std::shared_ptr<RadioResponseInfo> imsResponseInfo = event->GetSharedObject<RadioResponseInfo>();
-
+    if (imsResponseInfo == nullptr) {
+        TELEPHONY_LOGE("imsResponseInfo is nullptr error.");
+        return;
+    }
     if (imsResponseInfo->error != ErrType::NONE) {
         imsSmsCfg_ = IMS_SMS_DISABLE;
     }

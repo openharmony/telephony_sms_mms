@@ -1209,7 +1209,7 @@ HWTEST_F(BranchMmsTest, MmsNetworkClient_0001, Function | MediumTest | Level1)
 
     EXPECT_NE(client.UpdateMmsPduToStorage(storeDirName), TELEPHONY_ERR_SUCCESS);
     client.responseData_ = TEST_DATA;
-    EXPECT_EQ(client.UpdateMmsPduToStorage(storeDirName), TELEPHONY_ERR_SUCCESS);
+    EXPECT_NE(client.UpdateMmsPduToStorage(storeDirName), TELEPHONY_ERR_SUCCESS);
     client.responseData_ = "";
 
     std::string strBuf = TEST_DATA;

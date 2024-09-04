@@ -224,7 +224,6 @@ void GsmSmsCbHandler::HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &messa
 
     std::string pdu(message->pdu);
     std::shared_ptr<GsmCbCodec> cbMessage = GsmCbCodec::CreateCbMessage(pdu);
-    TELEPHONY_LOGE("cb message pdu:%{public}s", pdu.c_str());
     if (cbMessage == nullptr) {
         TELEPHONY_LOGE("create Sms CbMessage fail");
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::CELL_BROAD_CAST,
@@ -320,9 +319,7 @@ bool GsmSmsCbHandler::SetWantData(EventFwk::Want &want, const std::shared_ptr<Gs
         rawMsgBody.append(it->second->GetCbMessageRaw());
     }
     GetCbData(cbMessage, sendData);
-    TELEPHONY_LOGI("cbMessage:%{public}s.", cbMessage->ToString().c_str());
     cbMessage->ConvertToUTF8(rawMsgBody, sendData.msgBody);
-    TELEPHONY_LOGI("msgBody:%{public}s.", sendData.msgBody.c_str());
     PackageWantData(sendData, want);
     if (sendData.isPrimary && !StringUtils::IsEmpty(sendData.msgBody)) {
         TELEPHONY_LOGI("secondary cb msg");

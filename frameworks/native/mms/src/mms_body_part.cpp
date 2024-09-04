@@ -176,7 +176,7 @@ bool MmsBodyPart::DecodePartHeader(MmsDecodeBuffer &decodeBuffer, uint32_t heade
                 return false;
             }
         } else {
-            TELEPHONY_LOGE("Header Field[%{pulbic}02X] is not support.", oneByte);
+            TELEPHONY_LOGE("Header Field[%{public}02X] is not support.", oneByte);
             return false;
         }
     }
