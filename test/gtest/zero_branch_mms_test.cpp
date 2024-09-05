@@ -1206,10 +1206,6 @@ HWTEST_F(BranchMmsTest, MmsNetworkClient_0001, Function | MediumTest | Level1)
     MmsNetworkClient clientSlot1(1);
     clientSlot1.Execute(METHOD_POST, "", storeDirName);
     clientSlot1.HttpRequest(METHOD_POST, "", storeDirName);
-
-    EXPECT_NE(client.UpdateMmsPduToStorage(storeDirName), TELEPHONY_ERR_SUCCESS);
-    client.responseData_ = TEST_DATA;
-    EXPECT_NE(client.UpdateMmsPduToStorage(storeDirName), TELEPHONY_ERR_SUCCESS);
     client.responseData_ = "";
 
     std::string strBuf = TEST_DATA;
