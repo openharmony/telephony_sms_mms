@@ -40,7 +40,7 @@ int32_t MmsReceive::ExecuteDownloadMms(
     }
 
     std::unique_lock<std::mutex> lock(downloadMmsMutex_);
-    return ExecuteMms(DOWNLOAD_METHOD, mmsNetworkMgr, contentUrl, pduDir);
+    return ExecuteMms(DOWNLOAD_METHOD, mmsNetworkMgr, contentUrl, pduDir, ua, uaprof);
 }
 } // namespace Telephony
 } // namespace OHOS
