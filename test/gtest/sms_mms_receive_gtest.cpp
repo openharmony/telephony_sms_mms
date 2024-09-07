@@ -98,7 +98,7 @@ HWTEST_F(MmsReceiveGtest, DataRequestTest_0001, Function | MediumTest | Level1)
     ASSERT_NE(nullptr, netMgr);
     std::string contentUrl;
     std::string pduDir;
-    int32_t stata = dataRequest->HttpRequest(slotId, method, netMgr, contentUrl, pduDir);
+    int32_t stata = dataRequest->HttpRequest(slotId, method, netMgr, contentUrl, pduDir, "ua", "uaprof");
     EXPECT_NE(stata, TELEPHONY_ERR_MMS_FAIL_DATA_NETWORK_ERROR);
 }
 
