@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,6 +199,5 @@ HWTEST_F(SmsSatelliteGtest, SendSmsAck_0001, Function | MediumTest | Level2)
     ASSERT_EQ(remote->requestCode_, ToCode(SatelliteSmsServiceInterfaceCode::SEND_SMS_ACK));
     ASSERT_EQ(ret, TELEPHONY_SUCCESS);
 }
-
 } // namespace Telephony
 } // namespace OHOS
