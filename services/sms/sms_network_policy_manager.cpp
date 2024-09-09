@@ -114,7 +114,12 @@ void SmsNetworkPolicyManager::GetRadioState()
     CoreManagerInner::GetInstance().IsCTSimCard(slotId_, isCTSimCard);
     sptr<NetworkState> networkState = nullptr;
     CoreManagerInner::GetInstance().GetNetworkStatus(slotId_, networkState);
-    bool isRoaming = networkState->IsRoaming();
+    if (networkState == nullptr) {
+        TELEPHONY_LOGE("networkState get failed, slotId: %{public}d", slotId);
+        bool isRoaming = false;
+    } else {
+        bool isRoaming = networkState->IsRoaming();
+    }
     if (isCTSimCard && !isRoaming) {
         netWorkType_ = NET_TYPE_CDMA;
     } else {
