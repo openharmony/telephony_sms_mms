@@ -115,7 +115,7 @@ void SmsNetworkPolicyManager::GetRadioState()
     sptr<NetworkState> networkState = nullptr;
     CoreManagerInner::GetInstance().GetNetworkStatus(slotId_, networkState);
     if (networkState == nullptr) {
-        TELEPHONY_LOGE("networkState get failed, slotId: %{public}d", slotId);
+        TELEPHONY_LOGE("networkState get failed, slotId_: %{public}d", slotId_);
         bool isRoaming = false;
     } else {
         bool isRoaming = networkState->IsRoaming();
