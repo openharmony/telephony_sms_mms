@@ -57,7 +57,8 @@ HWTEST_F(SmsServicesMmsGtest, DataRequest_0001, Function | MediumTest | Level2)
     int32_t slotId = 0;
     auto dataRequest = std::make_shared<DataRequest>(slotId);
     std::string testStr = "";
-    EXPECT_EQ(dataRequest->HttpRequest(slotId, testStr, nullptr, testStr, testStr), TELEPHONY_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(dataRequest->HttpRequest(slotId, testStr, nullptr, testStr, testStr, "ua", "uaprof"),
+        TELEPHONY_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(SmsServicesMmsGtest, MmsNetworkClient_0001, Function | MediumTest | Level2)
@@ -67,7 +68,7 @@ HWTEST_F(SmsServicesMmsGtest, MmsNetworkClient_0001, Function | MediumTest | Lev
     std::string testStr = "testStr";
     auto mmsApnInfo = std::make_shared<MmsApnInfo>(slotId);
     mmsApnInfo->setMmscUrl("");
-    EXPECT_EQ(client.PostUrl(testStr, testStr), TELEPHONY_ERR_ARGUMENT_INVALID);
+    EXPECT_EQ(client.PostUrl(testStr, testStr, "ua", "uaprof"), TELEPHONY_ERR_ARGUMENT_INVALID);
 
     client.responseData_ = std::string(TEST_SEND_CONF_MAX_SIZE, 'a');
     EXPECT_FALSE(client.CheckSendConf());\
