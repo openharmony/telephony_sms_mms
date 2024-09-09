@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -219,14 +219,10 @@ HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
     cdmaSmsSender->RegisterImsHandler();
     const sptr<ISendShortMessageCallback> sendCallback =
         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
-    if (sendCallback == nullptr) {
-        return;
-    }
+    ASSERT_NE(sendCallback, nullptr);
     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
         iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
-    if (deliveryCallback == nullptr) {
-        return;
-    }
+    ASSERT_NE(deliveryCallback, nullptr);
     const std::string text = "123";
     const std::string desAddr = "qwe";
     const std::string scAddr = "123";

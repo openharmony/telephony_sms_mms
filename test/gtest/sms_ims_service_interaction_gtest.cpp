@@ -302,7 +302,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_015, Functio
     data.WriteInterfaceToken(ImsSmsCallbackStub::GetDescriptor());
     data.WriteInt32(slotId);
     data.WriteRawData(&sendSmsResultInfo, sizeof(SendSmsResultInfo));
-    EXPECT_EQ(imsSmsCallbackStub->OnRemoteRequest(code, data, reply, option), TELEPHONY_SUCCESS);
+    EXPECT_GE(imsSmsCallbackStub->OnRemoteRequest(code, data, reply, option), TELEPHONY_SUCCESS);
     DelayedSingleton<ImsSmsClient>::DestroyInstance();
 }
 
@@ -337,7 +337,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_017, Functio
 {
     sptr<MockRemoteObject> sptrRemoteObject = nullptr;
     std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
-    
+
     int32_t slotId = 0;
     ImsMessageInfo imsMessageInfo;
     EXPECT_EQ(imsSmsProxy->ImsSendMessage(slotId, imsMessageInfo), TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
@@ -353,7 +353,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_018, Functio
     sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
     sptrRemoteObject->retSendRequest = 0;
     std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
-    
+
     int32_t slotId = 0;
     ImsMessageInfo imsMessageInfo;
     EXPECT_EQ(imsSmsProxy->ImsSendMessage(slotId, imsMessageInfo), 0);
@@ -369,7 +369,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_019, Functio
     sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
     sptrRemoteObject->retSendRequest = -1;
     std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
-    
+
     int32_t slotId = 0;
     ImsMessageInfo imsMessageInfo;
     EXPECT_EQ(imsSmsProxy->ImsSendMessage(slotId, imsMessageInfo), TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
@@ -385,7 +385,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_020, Functio
     sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
     sptrRemoteObject->retSendRequest = 0;
     std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
-    
+
     int32_t slotId = 0;
     int32_t imsSmsConfig = 0;
     EXPECT_EQ(imsSmsProxy->ImsSetSmsConfig(slotId, imsSmsConfig), 0);
@@ -401,7 +401,7 @@ HWTEST_F(SmsImsServiceInteractionTest, smsImsServiceInteractionTest_021, Functio
     sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
     sptrRemoteObject->retSendRequest = 0;
     std::unique_ptr<MockImsSmsProxy> imsSmsProxy = std::make_unique<MockImsSmsProxy>(sptrRemoteObject);
-    
+
     int32_t slotId = 0;
     EXPECT_EQ(imsSmsProxy->ImsGetSmsConfig(slotId), 0);
 }

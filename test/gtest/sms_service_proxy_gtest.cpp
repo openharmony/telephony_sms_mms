@@ -64,7 +64,7 @@ HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_002, Function | MediumTest | L
     sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
     sptrRemoteObject->retGetObjectRefCount = 1;
     sptrRemoteObject->retSendRequest = 0;
-    
+
     ISendShortMessageCallback::SmsSendResult sendResult =
         ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
     SmsSendShortMessageProxy sendShortMessageProxy(sptrRemoteObject);
