@@ -112,7 +112,10 @@ void SmsNetworkPolicyManager::GetRadioState()
 {
     bool isCTSimCard = false;
     CoreManagerInner::GetInstance().IsCTSimCard(slotId_, isCTSimCard);
-    if (isCTSimCard) {
+    sptr<NetworkState> networkState = nullptr;
+    CoreManagerInner::GetInstance().GetNetworkStatus(slotId_, networkState);
+    bool isRoaming = networkState->IsRoaming();
+    if (isCTSimCard && !isRoaming) {
         netWorkType_ = NET_TYPE_CDMA;
     } else {
         netWorkType_ = NET_TYPE_GSM;
