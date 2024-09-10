@@ -209,8 +209,6 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
     tpdu->data.submit.msgRef = msgRef8bit;
     int headerCnt = 0;
     bool isMore = false;
-    bool isStatusReport = false;
-    isStatusReport = (deliveryCallback == nullptr) ? false : true;
 
     int cellsInfosSize = static_cast<int>(cellsInfos.size());
     if (cellsInfosSize > 1) {
@@ -238,7 +236,7 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
         tpdu->data.submit.bStatusReport = false;
         isMore = true;
     } else {
-        tpdu->data.submit.bStatusReport = isStatusReport;
+        tpdu->data.submit.bStatusReport = (deliveryCallback == nullptr) ? false : true;
     }
     ReadySendSms(gsmSmsMessage, scAddr, isMore, indexer, msgRef8bit, unSentCellCount, hasCellFailed);
 }
