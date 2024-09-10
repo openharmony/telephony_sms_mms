@@ -54,8 +54,11 @@ void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &sm
     OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
     uint16_t port = 100;
     uint8_t data[] = "hello world";
+	bool isMmsApp = false;
     smsService->SendMessage(slotIdTesta, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
-        (sizeof(data) / sizeof(data[0]) - 1), sendCallBackPtr, deliveryCallBackPtr);
+        (sizeof(data) / sizeof(data[0]) - 1), sendCallBackPtr, deliveryCallBackPtr, false);
+    smsService->SendMessage(slotIdTesta, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
+        (sizeof(data) / sizeof(data[0]) - 1), sendCallBackPtr, deliveryCallBackPtr, true);
     std::cout << "TestGsmSendShortData" << std::endl;
 }
 
@@ -87,7 +90,9 @@ void GsmSmsSenderTest::TestGsmSendLongData(const sptr<ISmsServiceInterface> &sms
     uint16_t port = 100;
 
     smsService->SendMessage(slotIdTestb, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
-        sizeof(data) / sizeof(data[0]), sendCallBackPtr, deliveryCallBackPtr);
+        sizeof(data) / sizeof(data[0]), sendCallBackPtr, deliveryCallBackPtr, true);
+    smsService->SendMessage(slotIdTestb, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
+        sizeof(data) / sizeof(data[0]), sendCallBackPtr, deliveryCallBackPtr, false);
     std::cout << "TestGsmSendLongData" << std::endl;
 }
 
@@ -114,7 +119,9 @@ void GsmSmsSenderTest::TestSendShortText(const sptr<ISmsServiceInterface> &smsSe
     OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
     OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
     smsService->SendMessage(slotIdTestc, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
-        StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
+        StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr, true);
+    smsService->SendMessage(slotIdTestc, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
+        StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr, false);
     std::cout << "TestGsmSendShortText" << std::endl;
 }
 
@@ -169,7 +176,9 @@ void GsmSmsSenderTest::TestSendLongText(const sptr<ISmsServiceInterface> &smsSer
     OHOS::sptr<SmsSendCallbackTest> sendCallBackPtr(new SmsSendCallbackTest());
     OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
     smsService->SendMessage(slotIdTestd, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
-        StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
+        StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr, true);
+    smsService->SendMessage(slotIdTestd, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca),
+        StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr, false);
     std::cout << "TestGsmSendLongText" << std::endl;
 }
 

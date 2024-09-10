@@ -1538,7 +1538,9 @@ HWTEST_F(BranchSmsTest, SmsService_0001, Function | MediumTest | Level1)
     sptr<ISendShortMessageCallback> sendCallback = nullptr;
     sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
     EXPECT_GT(
-        smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback, deliveryCallback), TELEPHONY_ERR_SUCCESS);
+        smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, true), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(
+        smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, false), TELEPHONY_ERR_SUCCESS);
     EXPECT_GT(smsService->SendMessage(0, desAddr, desAddr, 1, data, 1, sendCallback, deliveryCallback),
         TELEPHONY_ERR_SUCCESS);
     bool isSupported = true;
@@ -1926,13 +1928,15 @@ HWTEST_F(BranchSmsTest, SmsService_0004, Function | MediumTest | Level1)
     sptr<IDeliveryShortMessageCallback> deliveryCallback;
     auto smsService = DelayedSingleton<SmsService>::GetInstance();
     AccessMmsToken token;
-    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback);
+    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, true);
+    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, false);
     uint16_t port = 1;
     uint8_t *data = nullptr;
     smsService->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
     slotId = -1;
     desAddr = u"test";
-    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback);
+    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, true);
+    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, false);
     smsService->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
     slotId = 0;
     std::string telephone = "13888888888";
