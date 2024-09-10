@@ -1537,10 +1537,10 @@ HWTEST_F(BranchSmsTest, SmsService_0001, Function | MediumTest | Level1)
     uint8_t *data = nullptr;
     sptr<ISendShortMessageCallback> sendCallback = nullptr;
     sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
-    EXPECT_GT(
-        smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, true), TELEPHONY_ERR_SUCCESS);
-    EXPECT_GT(
-        smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, false), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback,
+        deliveryCallback, true), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback,
+        deliveryCallback, false), TELEPHONY_ERR_SUCCESS);
     EXPECT_GT(smsService->SendMessage(0, desAddr, desAddr, 1, data, 1, sendCallback, deliveryCallback),
         TELEPHONY_ERR_SUCCESS);
     bool isSupported = true;

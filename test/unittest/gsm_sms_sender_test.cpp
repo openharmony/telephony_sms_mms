@@ -54,7 +54,7 @@ void GsmSmsSenderTest::TestGsmSendShortData(const sptr<ISmsServiceInterface> &sm
     OHOS::sptr<SmsDeliveryCallbackTest> deliveryCallBackPtr(new SmsDeliveryCallbackTest());
     uint16_t port = 100;
     uint8_t data[] = "hello world";
-	bool isMmsApp = false;
+    bool isMmsApp = false;
     smsService->SendMessage(slotIdTesta, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
         (sizeof(data) / sizeof(data[0]) - 1), sendCallBackPtr, deliveryCallBackPtr, false);
     smsService->SendMessage(slotIdTesta, StringUtils::ToUtf16(dest), StringUtils::ToUtf16(sca), port, data,
