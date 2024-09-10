@@ -522,7 +522,8 @@ void CdmaSmsTest::TestTextBasedSmsDelivery() const
     const std::string desAddr = "qwe";
     const std::string scAddr = "123";
     const std::string text = "123";
-    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId, true);
+    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId, false);
 }
 
 void CdmaSmsTest::EncodeSubmitMsg(
