@@ -113,7 +113,6 @@ void SmsNetworkPolicyManager::GetRadioState()
     bool isCTSimCard = false;
     bool isRoaming = false;
     CoreManagerInner::GetInstance().IsCTSimCard(slotId_, isCTSimCard);
-    if (isCTSimCard) {
     sptr<NetworkState> networkState = nullptr;
     CoreManagerInner::GetInstance().GetNetworkStatus(slotId_, networkState);
     if (networkState != nullptr) {
