@@ -213,7 +213,6 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
     isStatusReport = (deliveryCallback == nullptr) ? false : true;
 
     int cellsInfosSize = static_cast<int>(cellsInfos.size());
-    
     if (cellsInfosSize > 1) {
         indexer->SetIsConcat(true);
         SmsConcat concat;
