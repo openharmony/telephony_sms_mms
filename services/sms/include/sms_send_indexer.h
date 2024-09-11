@@ -96,8 +96,8 @@ public:
     void SetMsgId(uint16_t msgId);
     uint16_t GetDataBaseId() const;
     void SetDataBaseId(uint16_t msgId);
-    bool  GetIsMmsApp() const;
-    void  SetIsMmsApp(bool isMmsApp);
+    bool GetIsMmsApp() const;
+    void SetIsMmsApp(bool isMmsApp);
 
 private:
     std::vector<uint8_t> pdu_;

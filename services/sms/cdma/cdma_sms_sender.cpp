@@ -144,8 +144,6 @@ void CdmaSmsSender::UpdateIndexerInfo(
     indexer->SetMsgId(msgId);
     indexer->SetDataBaseId(dataBaseId);
     indexer->SetIsMmsApp(isMmsApp);
-    TELEPHONY_LOGI("CdmaSmsSender::UpdateIndexerInfo isMmsApp:%{}d;databaseId:%{}d;",
-        indexer->GetIsMmsApp(), indexer->GetDataBaseId());
 }
 
 void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const string &scAddr, const string &text,

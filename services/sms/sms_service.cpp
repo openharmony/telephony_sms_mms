@@ -167,7 +167,7 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
     uint16_t dataId = -1;
     if (!isMmsApp) {
         InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(text), dataId);
-        TELEPHONY_LOGE("InsertSessionAndDetail wirte data to db. the id:%{public}d", dataId);
+        TELEPHONY_LOGI("InsertSessionAndDetail write data to db. the id:%{public}d", dataId);
     }
     bool ret = interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
         StringUtils::ToUtf8(text), sendCallback, deliveryCallback, dataId, isMmsApp);
@@ -227,7 +227,7 @@ void SmsService::InsertSmsMmsInfo(
     smsMmsInfoBucket.Put(SmsMmsInfo::SMS_TYPE, "0");
     smsMmsInfoBucket.Put(SmsMmsInfo::MSG_TITLE, text);
     smsMmsInfoBucket.Put(SmsMmsInfo::MSG_CONTENT, text);
-    smsMmsInfoBucket.Put(SmsMmsInfo::MSG_STATE, "1");
+    smsMmsInfoBucket.Put(SmsMmsInfo::MSG_STATE, SMS_MMS_INFO_MSG_STATE_SENDING);
     smsMmsInfoBucket.Put(SmsMmsInfo::MSG_CODE, "");
     smsMmsInfoBucket.Put(SmsMmsInfo::IS_LOCK, "0");
     smsMmsInfoBucket.Put(SmsMmsInfo::IS_READ, "1");
