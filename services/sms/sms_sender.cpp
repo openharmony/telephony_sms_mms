@@ -141,11 +141,9 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         if (messageType == ISendShortMessageCallback::SEND_SMS_SUCCESS) {
             SmsHiSysEvent::WriteSmsSendBehaviorEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE);
         }
-        TELEPHONY_LOGE("smsIndexer->GetIsMmsApp():%{public}d; SendMessageSucceed id:%{public}d;",
-            smsIndexer->GetIsMmsApp(), smsIndexer->GetDataBaseId());
         if (!smsIndexer->GetIsMmsApp() && smsIndexer->GetIsText()) {
             DataShare::DataShareValuesBucket sessionBucket;
-            sessionBucket.Put(SmsMmsInfo::MSG_STATE, "0");
+            sessionBucket.Put(SmsMmsInfo::MSG_STATE, SMS_MMS_INFO_MSG_STATE_SUCCEED);
             DataShare::DataSharePredicates predicates;
             predicates.EqualTo(SmsMmsInfo::MSG_ID, smsIndexer->GetDataBaseId());
             if (!DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
@@ -182,7 +180,7 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
             smsIndexer->GetIsMmsApp(), smsIndexer->GetDataBaseId());
         if (!smsIndexer->GetIsMmsApp() && smsIndexer->GetIsText()) {
             DataShare::DataShareValuesBucket sessionBucket;
-            sessionBucket.Put(SmsMmsInfo::MSG_STATE, "2");
+            sessionBucket.Put(SmsMmsInfo::MSG_STATE, SMS_MMS_INFO_MSG_STATE_FAILED);
             DataShare::DataSharePredicates predicates;
             predicates.EqualTo(SmsMmsInfo::MSG_ID, smsIndexer->GetDataBaseId());
             if (!DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {

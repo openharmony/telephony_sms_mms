@@ -109,7 +109,7 @@ bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBu
     int ret = helper->Insert(uri, values);
     helper->Release();
     id = ret;
-    return ret >= 0 ? true : false;
+    return ret >= 0;
 }
 
 bool SmsPersistHelper::QuerySession(
@@ -157,7 +157,7 @@ bool SmsPersistHelper::UpdateSms(DataShare::DataSharePredicates &predicates, Dat
     Uri uri(SMS_MMS_INFO);
     int ret = helper->Update(uri, predicates, values);
     helper->Release();
-    return ret >= 0 ? true : false;
+    return ret >= 0;
 }
 
 bool SmsPersistHelper::Update(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values)

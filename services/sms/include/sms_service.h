@@ -341,7 +341,7 @@ private:
     void TrimSmscAddr(std::string &sca);
     bool CheckSimMessageIndexValid(int32_t slotId, uint32_t msgIndex);
     void InsertSmsMmsInfo(int32_t slotId, uint16_t sessionId, const std::string &number,
-            const std::string &text, uint16_t &dataBaseId);
+        const std::string &text, uint16_t &dataBaseId);
     bool InsertSession(bool isNewSession, uint16_t messageCount, const std::string &number, const std::string &text);
     bool QuerySessionByTelephone(const std::string &telephone, uint16_t &sessionId, uint16_t &messageCount);
     void UpdateSmsContact(const std::string &address);
@@ -351,6 +351,7 @@ private:
     int64_t endTime_ = 0;
     int64_t spendTime_ = 0;
     bool registerToService_ = false;
+    static constexpr const char *SMS_MMS_INFO_MSG_STATE_SENDING = "1";
     ServiceRunningState state_ = ServiceRunningState::STATE_NOT_START;
     std::shared_ptr<SmsStateHandler> smsStateHandler_;
     const std::string SMS_MMS_INFO = "datashare:///com.ohos.smsmmsability/sms_mms/sms_mms_info";
