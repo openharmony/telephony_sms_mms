@@ -111,6 +111,7 @@ bool GsmSmsTpduCodec::DecodeSmsPdu(const uint8_t *pTpdu, uint16_t TpduLen, struc
     bool decodeResult = false;
     switch (mti) {
         case TYPE_INDICATOR_DELIVER:
+        case TYPE_INDICATOR_RESERVED:
             pSmsTpdu->tpduType = SMS_TPDU_DELIVER;
             decodeResult = tpduDecode->DecodeDeliver(buffer, &(pSmsTpdu->data.deliver));
             break;

@@ -190,24 +190,38 @@ bool GsmSmsCommonUtils::Unpack7bitCharForMiddlePart(const uint8_t *buffer, uint8
     return true;
 }
 
+uint8_t GsmSmsCommonUtils::charToBcd(const char c)
+{
+    if (c == '*') {
+        return HEX_VALUE_0A;
+    } else if (c == '#') {
+        return HEX_VALUE_0B;
+    } else if (c == '+') {
+        return HEX_VALUE_FE;
+    } else {
+        return static_cast<uint8_t>(c - '0');
+    }
+}
+
 bool GsmSmsCommonUtils::DigitToBcd(const char *digit, uint8_t digitLen, uint8_t *bcd, uint8_t bcdLen, uint8_t &len)
 {
     if (digit == nullptr || bcd == nullptr || len >= bcdLen) {
         TELEPHONY_LOGE("data error.");
         return false;
     }
-
     len = 0;
     for (uint8_t i = 0; i < digitLen; i++) {
-        uint8_t temp = static_cast<uint8_t>(digit[i] - '0');
-        if (len >= bcdLen) {
-            TELEPHONY_LOGE("len invalid.");
-            return false;
-        }
-        if ((i % DIGITAL_STEP) == 0) {
-            bcd[len] = temp & HEX_VALUE_0F;
-        } else {
-            bcd[len++] |= ((temp & HEX_VALUE_0F) << HEX_VALUE_04);
+        uint8_t temp = charToBcd(digit[i]);
+        if (temp != HEX_VALUE_FE) {
+            if (len >= bcdLen) {
+                TELEPHONY_LOGE("len invalid.");
+                return false;
+            }
+            if ((i % DIGITAL_STEP) == 0) {
+                bcd[len] = temp & HEX_VALUE_0F;
+            } else {
+                bcd[len++] |= ((temp & HEX_VALUE_0F) << HEX_VALUE_04);
+            }
         }
     }
 
@@ -243,10 +257,14 @@ bool GsmSmsCommonUtils::BcdToDigit(const uint8_t *bcd, uint8_t bcdLen, std::stri
     return true;
 }
 
-char GsmSmsCommonUtils::BcdToChar(const uint8_t c)
+char GsmSmsCommonUtils::BcdToChar(const uint8_t b)
 {
-    char temp = static_cast<char>(c + '0');
-    return temp;
+    if (b == HEX_VALUE_0A) {
+        return '*';
+    } else if (b == HEX_VALUE_0B) {
+        return '#';
+    }
+    return static_cast<char>('0' + b);
 }
 } // namespace Telephony
 } // namespace OHOS

@@ -24,6 +24,7 @@ enum MessageTypeIndicator {
     TYPE_INDICATOR_DELIVER = 0,
     TYPE_INDICATOR_SUBMIT,
     TYPE_INDICATOR_STATUS_REP,
+    TYPE_INDICATOR_RESERVED,
 };
 
 enum SmsParseType {
