@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <regex>
+#include <sstream>
+
 #include "gsm_sms_param_decode.h"
 
 #include "gsm_pdu_hex_value.h"
@@ -26,6 +29,11 @@ namespace OHOS {
 namespace Telephony {
 static constexpr uint8_t SLIDE_DATA_STEP = 2;
 static constexpr uint8_t BCD_TO_DIGITAL = 2;
+static constexpr uint8_t MATCH_INDEX_ONE = 1;
+static constexpr uint8_t MATCH_INDEX_TWO = 2;
+static constexpr uint8_t MATCH_INDEX_THREE = 3;
+static constexpr uint8_t MATCH_INDEX_FOUR = 4;
+static constexpr uint8_t MATCH_INDEX_FIVE = 5;
 
 bool GsmSmsParamDecode::DecodeAddressPdu(SmsReadBuffer &buffer, struct AddressNumber *resultNum)
 {
@@ -121,12 +129,9 @@ bool GsmSmsParamDecode::DecodeAddressInternationalNum(
         TELEPHONY_LOGE("BcdToDigit fail!");
         return false;
     }
-    for (uint8_t i = 0; i < addrNum.size() && i < MAX_ADDRESS_LEN; i++) {
-        resultNum->address[i + 1] = addrNum[i];
-    }
-
-    if (resultNum->address[1] != '\0') {
-        resultNum->address[0] = '+';
+    std::string newStrAddress = regProcessSmsAddrs(addrNum);
+    for (uint8_t i = 0; i < newStrAddress.size() && i < MAX_ADDRESS_LEN; i++) {
+        resultNum->address[i] = newStrAddress[i];
     }
     return true;
 }
@@ -156,6 +161,32 @@ bool GsmSmsParamDecode::DecodeAddressDefaultNum(SmsReadBuffer &buffer, struct Ad
     return true;
 }
 
+
+std::string GsmSmsParamDecode::regProcessSmsAddrs(std::string &smsAddrs)
+{
+    std::regex pattern(R"((^[#*])(.*)([#*])(.*)(#)$)");
+    std::smatch match;
+    std::ostringstream ret;
+    if (std::regex_match(smsAddrs, match, pattern)) {
+        if (match[MATCH_INDEX_TWO] == "") {
+            ret << match[MATCH_INDEX_ONE] << match[MATCH_INDEX_THREE] <<
+                match[MATCH_INDEX_FOUR] << match[MATCH_INDEX_FIVE] << '+';
+        } else {
+            ret << match[MATCH_INDEX_ONE] << match[MATCH_INDEX_TWO] <<
+                match[MATCH_INDEX_THREE] << '+' << match[MATCH_INDEX_FOUR] << match[MATCH_INDEX_FIVE];
+        }
+    } else {
+        std::regex pattern2(R"((^[#*])(.*)([#*])(.*))");
+        if (std::regex_match(smsAddrs, match, pattern2)) {
+            ret << match[MATCH_INDEX_ONE] << match[MATCH_INDEX_TWO] <<
+                match[MATCH_INDEX_THREE] << '+' << match[MATCH_INDEX_FOUR];
+        } else {
+            ret << '+' << smsAddrs;
+        }
+    }
+    return ret.str();
+}
+
 void GsmSmsParamDecode::DecodeSmscPdu(uint8_t *srcAddr, uint8_t addrLen, enum TypeOfNum ton, std::string &desAddr)
 {
     if (srcAddr == nullptr || addrLen == 0) {
@@ -165,11 +196,12 @@ void GsmSmsParamDecode::DecodeSmscPdu(uint8_t *srcAddr, uint8_t addrLen, enum Ty
 
     GsmSmsCommonUtils utils;
     if (ton == TYPE_INTERNATIONAL) {
-        desAddr[0] = '+';
         if (!utils.BcdToDigit(srcAddr, addrLen, desAddr, SMS_MAX_ADDRESS_LEN)) {
             TELEPHONY_LOGE("BcdToDigit fail!");
             return;
         }
+        std::string newStrAddress = regProcessSmsAddrs(desAddr);
+        desAddr = newStrAddress;
     } else {
         if (!utils.BcdToDigit(srcAddr, addrLen, desAddr, SMS_MAX_ADDRESS_LEN)) {
             TELEPHONY_LOGE("BcdToDigit fail!");
@@ -210,11 +242,9 @@ uint8_t GsmSmsParamDecode::DecodeSmscPdu(const uint8_t *pTpdu, uint8_t pduLen, s
         }
         std::string addrNum;
         utils.BcdToDigit(&(pTpdu[offset]), addrLen, addrNum, SMS_MAX_ADDRESS_LEN);
-        for (uint8_t i = 0; i < addrNum.size() && i < MAX_ADDRESS_LEN; i++) {
-            desAddrObj.address[i + 1] = addrNum[i];
-        }
-        if (desAddrObj.address[1] != '\0') {
-            desAddrObj.address[0] = '+';
+        std::string newStrAddress = regProcessSmsAddrs(addrNum);
+        for (uint8_t i = 0; i < newStrAddress.size() && i < MAX_ADDRESS_LEN; i++) {
+            desAddrObj.address[i] = newStrAddress[i];
         }
     } else {
         if (addrLen > SMS_MAX_ADDRESS_LEN || (offset + addrLen) >= pduLen) {

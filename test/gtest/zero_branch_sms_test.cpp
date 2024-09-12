@@ -16,8 +16,12 @@
 #define private public
 #define protected public
 
+#include <regex>
+
 #include "cdma_sms_message.h"
 #include "delivery_short_message_callback_stub.h"
+#include "gsm_pdu_hex_value.h"
+#include "gsm_sms_common_utils.h"
 #include "gsm_sms_message.h"
 #include "gsm_sms_param_decode.h"
 #include "gsm_sms_receive_handler.h"
@@ -81,6 +85,7 @@ const std::string CBN_NUM = "+86192********";
 const int NUM_LENGTH = 11;
 const std::string PREFIX = "+86";
 const std::vector<uint8_t> PDU = { 0 };
+static constexpr uint8_t MAX_SMSC_LEN = 20;
 } // namespace
 
 class BranchSmsTest : public testing::Test {
@@ -842,6 +847,326 @@ HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0006, Function | MediumTest | Level1) {
     std::string pdu = StringUtils::HexToString("0ED0A3F19CDD7A52A1"); // D0, ton = 5
     auto decodeBuffer = std::make_shared<SmsReadBuffer>(pdu);
     EXPECT_TRUE(gsmSmsParamCodec->DecodeAddressPdu(*decodeBuffer, pAddress));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0007
+ * @tc.name     Test GsmSmsParamCodec DecodeSmscPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0007, Function | MediumTest | Level1) {
+    /**
+    * test supporting number and +
+    */
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    EXPECT_NE(gsmSmsParamCodec, nullptr);
+    AddressNumber smsAddress;
+
+    unsigned char encodeData[] = { 0x6, 0x90, 0x31, 0x00, 0x55, 0x05, 0x20, 0xF0 };
+    unsigned char *pSMSC = encodeData;
+    EXPECT_GE(gsmSmsParamCodec->DecodeSmscPdu(pSMSC, 9, smsAddress), 0);
+    std::string address(smsAddress.address);
+    EXPECT_EQ(address, "+13005550020");
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0008
+ * @tc.name     Test GsmSmsParamCodec DecodeSmscPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0008, Function | MediumTest | Level1) {
+    /**
+    * test supporting number * + and #
+    */
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    EXPECT_NE(gsmSmsParamCodec, nullptr);
+    AddressNumber smsAddress;
+
+    unsigned char encodeData1[] = { 0x6, 0x91, 0x31, 0x00, 0x55, 0x05, 0x20, 0xB0 };
+    unsigned char *pSMSC1 = encodeData1;
+    EXPECT_GE(gsmSmsParamCodec->DecodeSmscPdu(pSMSC1, 9, smsAddress), 0);
+    std::string address1(smsAddress.address);
+    EXPECT_EQ(address1, "+13005550020#");
+
+    unsigned char encodeData2[] = { 0x2, 0x91, 0x2A, 0xB1 };
+    unsigned char *pSMSC2 = encodeData2;
+    EXPECT_GE(gsmSmsParamCodec->DecodeSmscPdu(pSMSC2, 5, smsAddress), 0);
+    std::string address2(smsAddress.address);
+    EXPECT_EQ(address2, "*21#+");
+
+    unsigned char encodeData3[] = { 0x3, 0x91, 0xAA, 0x12, 0xFB };
+    unsigned char *pSMSC3 = encodeData3;
+    EXPECT_GE(gsmSmsParamCodec->DecodeSmscPdu(pSMSC3, 6, smsAddress), 0);
+    std::string address3(smsAddress.address);
+    EXPECT_EQ(address3, "**21#+");
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0009
+ * @tc.name     Test GsmSmsParamCodec DecodeSmscPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0009, Function | MediumTest | Level1) {
+    /**
+    * test supporting number + * and #
+    */
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    EXPECT_NE(gsmSmsParamCodec, nullptr);
+    AddressNumber smsAddress;
+
+    unsigned char encodeData1[] = { 0x8, 0x91, 0x9A, 0xA9, 0x31, 0x00, 0x55, 0x05, 0x20, 0xB0 };
+    unsigned char *pSMSC1 = encodeData1;
+    EXPECT_GE(gsmSmsParamCodec->DecodeSmscPdu(pSMSC1, 11, smsAddress), 0);
+    std::string address1(smsAddress.address);
+    EXPECT_EQ(address1, "*99*+13005550020#");
+
+    unsigned char encodeData5[] = { 0x9, 0x91, 0xAA, 0x12, 0x1A, 0x03, 0x50, 0x55, 0x00, 0x02, 0xFB };
+    unsigned char *pSMSC2 = encodeData5;
+    EXPECT_GE(gsmSmsParamCodec->DecodeSmscPdu(pSMSC2, 12, smsAddress), 0);
+    std::string address2(smsAddress.address);
+    EXPECT_EQ(address2, "**21*+13005550020#");
+
+    unsigned char encodeData6[] = { 0x9, 0x91, 0x2A, 0xB1, 0x31, 0x00, 0x55, 0x05, 0x20, 0xF0 };
+    unsigned char *pSMSC3 = encodeData6;
+    EXPECT_GE(gsmSmsParamCodec->DecodeSmscPdu(pSMSC3, 12, smsAddress), 0);
+    std::string address3(smsAddress.address);
+    EXPECT_EQ(address3, "*21#+13005550020");
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0010
+ * @tc.name     Test GsmSmsParamCodec EncodeSmscPdu and DecodeSmscPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0010, Function | MediumTest | Level1) {
+    /**
+    * test supporting number
+    */
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    EXPECT_NE(gsmSmsParamCodec, nullptr);
+    const std::string smsc = "17005550020";
+    AddressNumber *pAddress = new AddressNumber();
+    uint8_t encodeSmscAddr[MAX_SMSC_LEN];
+    memset_s(encodeSmscAddr, sizeof(encodeSmscAddr), 0x00, sizeof(encodeSmscAddr));
+    std::string decodeAddr;
+    memcpy_s(&pAddress->address, sizeof(pAddress->address), smsc.data(), smsc.length());
+    pAddress->address[smsc.length()] = '\0';
+    pAddress->ton = TYPE_INTERNATIONAL;
+    pAddress->npi = SMS_NPI_ISDN;
+    uint8_t encodeSmscLen = 0;
+    encodeSmscLen = gsmSmsParamCodec->EncodeSmscPdu(pAddress, encodeSmscAddr, sizeof(encodeSmscAddr));
+    EXPECT_GE(encodeSmscLen, 0);
+
+    AddressNumber smsAddress;
+    unsigned char *pSMSC = encodeSmscAddr;
+    EXPECT_GE(gsmSmsParamCodec->DecodeSmscPdu(pSMSC, sizeof(encodeSmscAddr), smsAddress), 0);
+    std::string address2(smsAddress.address);
+    EXPECT_EQ(address2, "+" + smsc);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0011
+ * @tc.name     Test GsmSmsParamCodec EncodeSmscPdu and DecodeSmscPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0011, Function | MediumTest | Level1) {
+    /**
+    * test supporting number
+    */
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    EXPECT_NE(gsmSmsParamCodec, nullptr);
+    const std::string smsc = "**21#";
+    AddressNumber *pAddress = new AddressNumber();
+    uint8_t encodeSmscAddr[MAX_SMSC_LEN];
+    memset_s(encodeSmscAddr, sizeof(encodeSmscAddr), 0x00, sizeof(encodeSmscAddr));
+    std::string decodeAddr;
+    memcpy_s(&pAddress->address, sizeof(pAddress->address), smsc.data(), smsc.length());
+    pAddress->address[smsc.length()] = '\0';
+    pAddress->ton = TYPE_INTERNATIONAL;
+    pAddress->npi = SMS_NPI_ISDN;
+    uint8_t encodeSmscLen = 0;
+    encodeSmscLen = gsmSmsParamCodec->EncodeSmscPdu(pAddress, encodeSmscAddr, sizeof(encodeSmscAddr));
+    EXPECT_GE(encodeSmscLen, 0);
+
+    AddressNumber smsAddress;
+    unsigned char *pSMSC = encodeSmscAddr;
+    EXPECT_GE(gsmSmsParamCodec->DecodeSmscPdu(pSMSC, sizeof(encodeSmscAddr), smsAddress), 0);
+    std::string address2(smsAddress.address);
+    EXPECT_EQ(address2, smsc + "+");
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0012
+ * @tc.name     Test GsmSmsParamCodec EncodeSmscPdu and DecodeSmscPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0012, Function | MediumTest | Level1) {
+    /**
+    * test supporting number
+    */
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    EXPECT_NE(gsmSmsParamCodec, nullptr);
+    const std::string smsc = "**21*13005550020#";
+    AddressNumber *pAddress = new AddressNumber();
+    uint8_t encodeSmscAddr[MAX_SMSC_LEN];
+    memset_s(encodeSmscAddr, sizeof(encodeSmscAddr), 0x00, sizeof(encodeSmscAddr));
+    std::string decodeAddr;
+    memcpy_s(&pAddress->address, sizeof(pAddress->address), smsc.data(), smsc.length());
+    pAddress->address[smsc.length()] = '\0';
+    pAddress->ton = TYPE_INTERNATIONAL;
+    pAddress->npi = SMS_NPI_ISDN;
+    uint8_t encodeSmscLen = 0;
+    encodeSmscLen = gsmSmsParamCodec->EncodeSmscPdu(pAddress, encodeSmscAddr, sizeof(encodeSmscAddr));
+    EXPECT_GE(encodeSmscLen, 0);
+
+    AddressNumber smsAddress;
+    unsigned char *pSMSC = encodeSmscAddr;
+    EXPECT_GE(gsmSmsParamCodec->DecodeSmscPdu(pSMSC, sizeof(encodeSmscAddr), smsAddress), 0);
+    std::string address2(smsAddress.address);
+    EXPECT_EQ(address2, "**21*+13005550020#");
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0013
+ * @tc.name     Test GsmSmsParamCodec DecodeAddressPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0013, Function | MediumTest | Level1) {
+    /**
+    * test DecodeAddressPdu when ton is TYPE_INTERNATIONAL
+    */
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    EXPECT_NE(gsmSmsParamCodec, nullptr);
+    AddressNumber *pAddress = new AddressNumber();
+    std::string hexStr = "0891683108501705F0040D91683177474733F20008429011015535230E90FD4E0D559C6B227684597D50CF";
+    std::string pdu = StringUtils::HexToString(hexStr);
+    auto decodeBuffer = std::make_shared<SmsReadBuffer>(pdu);
+    EXPECT_TRUE(gsmSmsParamCodec->DecodeAddressPdu(*decodeBuffer, pAddress));
+    EXPECT_NE(pAddress, nullptr);
+    std::string address = pAddress->address;
+    EXPECT_TRUE(address.find('+') != std::string::npos);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0001
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, CreateMessage_0001, Function | MediumTest | Level1) {
+    /*
+        step1: The pdu whose mti is 0
+    */
+    std::string pduHex = "07914151551512f2040B916105551511f100006060605130308A04D4F29C0E";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_TRUE(result != nullptr);
+    EXPECT_TRUE(result->GetSmscAddr()== "+14155551212");
+    EXPECT_TRUE(result->GetOriginatingAddress() == "+16505551111");
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0002
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, CreateMessage_0002, Function | MediumTest | Level1) {
+    /*
+        step1: The pdu whose mti is 1
+    */
+    std::string pduHex = "07914151551512f2050B916105551511f100006060605130308A04D4F29C0E";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0003
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, CreateMessage_0003, Function | MediumTest | Level1) {
+    /*
+        step1: The pdu whose mti is 2
+    */
+    std::string pduHex = "07914151551512f2060B916105551511f100006060605130308A04D4F29C0E";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0004
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, CreateMessage_0004, Function | MediumTest | Level1) {
+    /*
+        step1: The pdu whose mti is 3
+    */
+    std::string pduHex = "07914151551512f2070B916105551511f100006060605130308A04D4F29C0E";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_TRUE(result != nullptr);
+    EXPECT_TRUE(result->GetSmscAddr() == "+14155551212");
+    EXPECT_TRUE(result->GetOriginatingAddress() == "+16505551111");
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0005
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, CreateMessage_0005, Function | MediumTest | Level1) {
+    /*
+        step1: The pdu whose ton is TYPE_ALPHA_NUMERIC
+    */
+    const std::string pduHex =
+        "07915892208800F0040ED0A3F19CDD7A52A10008424011119582235C4F60768400630073006C00200041007000"
+        "704E006B2160275BC678BC70BA0034003800370033003200373002598267097591554FFF0C8ACB806F7D61006300"
+        "73006C670D52D971B17DDA003200350031003200330031003200333002";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_TRUE(result != nullptr);
+    EXPECT_TRUE(result->GetSmscAddr() == "+85290288000");
+    EXPECT_TRUE(result->GetOriginatingAddress() == "#csl-OTP");
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0006
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, CreateMessage_0006, Function | MediumTest | Level1) {
+    /*
+        step1: The pdu whose ton is TYPE_ALPHA_NUMERIC
+    */
+    const std::string pduHex =
+        "07915892208800F0040ED0B4F19CDD8B61A10108424011119582235C4F60768400630073006C0020004100700"
+        "0704E006B2160275BC678BC70BA0034003800370033003200373002598267097591554FFF0C8ACB806F7D610063"
+        "0073006C670D52D971B17DDA003200350031003200330031003200333002";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_TRUE(result != nullptr);
+    EXPECT_TRUE(result->GetSmscAddr() == "+85290288000");
+    EXPECT_TRUE(result->GetOriginatingAddress() == "4csl=1XP");
 }
 
 /**
@@ -1904,6 +2229,31 @@ HWTEST_F(BranchSmsTest, GsmSmsParamDecode_0001, Function | MediumTest | Level1)
     std::shared_ptr<SmsBaseMessage> smsBaseMessage = nullptr;
     smsReceiveManager->gsmSmsReceiveHandler_->HandleNormalSmsByType(smsBaseMessage);
     EXPECT_TRUE(smsReceiveManager->gsmSmsReceiveHandler_ != nullptr);
+}
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamDecode_0002
+ * @tc.name     Test GsmSmsParamDecode regProcessSmscAddrs
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsParamDecode_0002, Function | MediumTest | Level1)
+{
+    auto gsmSmsParamDecode = std::make_shared<GsmSmsParamDecode>();
+    EXPECT_NE(gsmSmsParamDecode, nullptr);
+    std::string smscAddrs = "**21888#";
+    std::string ret = gsmSmsParamDecode->regProcessSmsAddrs(smscAddrs);
+    EXPECT_EQ(ret, "**21888#+");
+
+    smscAddrs = "**21*+888#";
+    ret = gsmSmsParamDecode->regProcessSmsAddrs(smscAddrs);
+    EXPECT_EQ(ret, "**21*++888#");
+
+    smscAddrs = "#21#1188881";
+    ret = gsmSmsParamDecode->regProcessSmsAddrs(smscAddrs);
+    EXPECT_EQ(ret, "#21#+1188881");
+
+    smscAddrs = "1811111";
+    ret = gsmSmsParamDecode->regProcessSmsAddrs(smscAddrs);
+    EXPECT_EQ(ret, "+1811111");
 }
 
 /**

@@ -16,6 +16,9 @@
 #define private public
 #define protected public
 
+#include <vector>
+
+#include "gsm_pdu_hex_value.h"
 #include "gsm_sms_common_utils.h"
 #include "gtest/gtest.h"
 #include "ims_sms_client.h"
@@ -32,6 +35,7 @@ const int BUF_SIZE = 2401;
 const int TEXT_LENGTH = 2;
 const int FILL_BITS = 2;
 const int DIGIT_LEN = 3;
+const int DIGIT_LEN2 = 6;
 const unsigned char SRC_TEXT = 2;
 } // namespace
 
@@ -173,6 +177,114 @@ HWTEST_F(BranchUtilsTest, SmsCommonUtils_0001, Function | MediumTest | Level1)
     std::string digits;
     EXPECT_EQ(gsmUtils->BcdToDigit(userData, 1, digits, 1), 0);
     EXPECT_EQ(gsmUtils->BcdToDigit(nullptr, 1, digits, 1), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCommonUtils_0002
+ * @tc.name     Test SmsCommonUtils DigitToBcd support for +*#
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchUtilsTest, SmsCommonUtils_0002, Function | MediumTest | Level1)
+{
+    // input data with pure number
+    const std::string packDataStr = "hello world";
+    const std::string digitTestStr = "17288424569";
+    const char *digit = (const char *)digitTestStr.c_str();
+    unsigned char *packData = (unsigned char *)packDataStr.c_str();
+    auto gsmUtils = std::make_shared<GsmSmsCommonUtils>();
+    EXPECT_NE(gsmUtils, nullptr);
+    uint8_t len = static_cast<uint8_t>(DIGIT_LEN);
+    EXPECT_FALSE(gsmUtils->DigitToBcd(digit, DIGIT_LEN, packData, DIGIT_LEN, len));
+    EXPECT_FALSE(gsmUtils->DigitToBcd(digit, DIGIT_LEN, packData, DIGIT_LEN - 1, len));
+    len = 0;
+    EXPECT_TRUE(gsmUtils->DigitToBcd(digit, DIGIT_LEN2, packData, DIGIT_LEN2, len));
+    std::vector<uint8_t> userDataVec(packData, packData + DIGIT_LEN2);
+    EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(), 0x71) != userDataVec.end());
+    EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(), 0x82) != userDataVec.end());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCommonUtils_0003
+ * @tc.name     Test SmsCommonUtils DigitToBcd
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchUtilsTest, SmsCommonUtils_0003, Function | MediumTest | Level1)
+{
+    // input data with number and +
+    const std::string packDataStr = "hello world";
+    const std::string digitTestStr = "+17288424569";
+    const char *digit = (const char *)digitTestStr.c_str();
+    unsigned char *packData = (unsigned char *)packDataStr.c_str();
+    auto gsmUtils = std::make_shared<GsmSmsCommonUtils>();
+    EXPECT_NE(gsmUtils, nullptr);
+    uint8_t len;
+    EXPECT_TRUE(gsmUtils->DigitToBcd(digit, DIGIT_LEN2, packData, DIGIT_LEN2, len));
+    std::vector<uint8_t> userDataVec(packData, packData + DIGIT_LEN2);
+    EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(), 0x78) != userDataVec.end());
+    EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(), 0x27) != userDataVec.end());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCommonUtils_0004
+ * @tc.name     Test SmsCommonUtils DigitToBcd
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchUtilsTest, SmsCommonUtils_0004, Function | MediumTest | Level1)
+{
+    // input data with number and #
+    const std::string packDataStr = "hello world";
+    const std::string digitTestStr = "#17288424569";
+    const char *digit = (const char *)digitTestStr.c_str();
+    unsigned char *packData = (unsigned char *)packDataStr.c_str();
+    auto gsmUtils = std::make_shared<GsmSmsCommonUtils>();
+    EXPECT_NE(gsmUtils, nullptr);
+    uint8_t len;
+    EXPECT_TRUE(gsmUtils->DigitToBcd(digit, DIGIT_LEN2, packData, DIGIT_LEN2, len));
+    std::vector<uint8_t> userDataVec(packData, packData + DIGIT_LEN2);
+    EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(), 0x1b) != userDataVec.end());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCommonUtils_0005
+ * @tc.name     Test SmsCommonUtils DigitToBcd
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchUtilsTest, SmsCommonUtils_0005, Function | MediumTest | Level1)
+{
+    // input data with # and *
+    const std::string packDataStr = "hello world";
+    const std::string digitTestStr = "*0#0765";
+    const char *digit = (const char *)digitTestStr.c_str();
+    unsigned char *packData = (unsigned char *)packDataStr.c_str();
+    auto gsmUtils = std::make_shared<GsmSmsCommonUtils>();
+    EXPECT_NE(gsmUtils, nullptr);
+    uint8_t len;
+    EXPECT_TRUE(gsmUtils->DigitToBcd(digit, DIGIT_LEN2, packData, DIGIT_LEN2, len));
+    std::vector<uint8_t> userDataVec(packData, packData + DIGIT_LEN2);
+    EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(), HEX_VALUE_0B) != userDataVec.end());
+    EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(), HEX_VALUE_0A) != userDataVec.end());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCommonUtils_0006
+ * @tc.name     Test SmsCommonUtils DigitToBcd
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchUtilsTest, SmsCommonUtils_0006, Function | MediumTest | Level1)
+{
+    // input data with # and *
+    const std::string packDataStr = "hello world";
+    const std::string digitTestStr = "*21#13105550020#";
+    const char *digit = (const char *)digitTestStr.c_str();
+    unsigned char *packData = (unsigned char *)packDataStr.c_str();
+    auto gsmUtils = std::make_shared<GsmSmsCommonUtils>();
+    EXPECT_NE(gsmUtils, nullptr);
+    uint8_t len;
+    EXPECT_TRUE(gsmUtils->DigitToBcd(digit, DIGIT_LEN2, packData, DIGIT_LEN2, len));
+    std::vector<uint8_t> userDataVec(packData, packData + DIGIT_LEN2);
+    EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(),  0x2a) != userDataVec.end());
+    EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(),  0xb1) != userDataVec.end());
+    EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(),  0x6f) != userDataVec.end());
 }
 } // namespace Telephony
 } // namespace OHOS
