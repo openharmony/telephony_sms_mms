@@ -203,6 +203,7 @@ void SmsInterfaceStub::OnSendSmsDataRequest(MessageParcel &data, MessageParcel &
     int16_t dataLen = data.ReadInt16();
     const uint8_t *buffer = reinterpret_cast<const uint8_t *>(data.ReadRawData(dataLen));
     if (buffer == nullptr) {
+        reply.WriteInt32(-1);
         return;
     }
     RemoveSpacesInDesAddr(desAddr);
