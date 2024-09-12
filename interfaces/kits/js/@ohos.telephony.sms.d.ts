@@ -1758,7 +1758,7 @@ declare namespace sms {
     contentId: string;
 
     /**
-     * Indicates the content location.
+     * Indicates the content location for the attachment.
      *
      * @type { string }
      * @syscap SystemCapability.Telephony.SmsMms
@@ -1933,7 +1933,7 @@ declare namespace sms {
     TYPE_MMS_RETRIEVE_CONF,
 
     /**
-     * Indicates the type of multimedia message confirmation index.
+     * Indicates an MMs message acknowledgement.
      *
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
@@ -2395,7 +2395,7 @@ declare namespace sms {
     /**
      * Indicates the new status for the updating SIM message options.
      *
-     * @type { SimMessageStatus }
+     * @type { number }
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
      * @since 7

@@ -400,27 +400,6 @@ void SmsSender::SetNetworkId(std::optional<int32_t> &id)
     networkId_ = id;
 }
 
-void SmsSender::OnRilAdapterHostDied()
-{
-    std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
-    for (auto it = sendCacheMap_.begin(); it != sendCacheMap_.end(); ++it) {
-        smsIndexer = it->second;
-        if (smsIndexer == nullptr || smsIndexer->GetIsFailure()) {
-            TELEPHONY_LOGE("smsIndexer is nullptr");
-            continue;
-        }
-        if (!SendCacheMapEraseItem(smsIndexer->GetMsgRefId64Bit())) {
-            TELEPHONY_LOGE("SendCacheMapEraseItem fail !!!!!");
-        }
-        smsIndexer->SetIsFailure(true);
-        smsIndexer->SetPsResendCount(INITIAL_COUNT);
-        smsIndexer->SetCsResendCount(INITIAL_COUNT);
-        sptr<ISendShortMessageCallback> sendCallback = smsIndexer->GetSendCallback();
-        SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGI("Message(s) failed to send due to RIL died.");
-    }
-}
-
 void SmsSender::CharArrayToString(const uint8_t *data, uint32_t dataLen, std::string &dataStr)
 {
     uint32_t indexData = 0;
@@ -554,6 +533,27 @@ void SmsSender::DataBasedSmsDeliverySendSplitPage(std::shared_ptr<struct EncodeI
     indexer->SetNetWorkType(NET_TYPE_GSM);
     indexer->SetTimeStamp(timeStamp);
     SendSmsToRil(indexer);
+}
+
+void SmsSender::OnRilAdapterHostDied()
+{
+    std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
+    for (auto it = sendCacheMap_.begin(); it != sendCacheMap_.end(); ++it) {
+        smsIndexer = it->second;
+        if (smsIndexer == nullptr || smsIndexer->GetIsFailure()) {
+            TELEPHONY_LOGE("smsIndexer is nullptr");
+            continue;
+        }
+        if (!SendCacheMapEraseItem(smsIndexer->GetMsgRefId64Bit())) {
+            TELEPHONY_LOGE("SendCacheMapEraseItem fail !!!!!");
+        }
+        smsIndexer->SetIsFailure(true);
+        smsIndexer->SetPsResendCount(INITIAL_COUNT);
+        smsIndexer->SetCsResendCount(INITIAL_COUNT);
+        sptr<ISendShortMessageCallback> sendCallback = smsIndexer->GetSendCallback();
+        SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        TELEPHONY_LOGI("Message(s) failed to send due to RIL died.");
+    }
 }
 } // namespace Telephony
 } // namespace OHOS

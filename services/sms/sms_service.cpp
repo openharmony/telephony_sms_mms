@@ -315,10 +315,6 @@ int32_t SmsService::GetImsShortMessageFormat(std::u16string &format)
         TELEPHONY_LOGE("Non-system applications use system APIs!");
         return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
     }
-    if (!TelephonyPermission::CheckPermission(Permission::GET_TELEPHONY_STATE)) {
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
-        return TELEPHONY_ERR_PERMISSION_ERR;
-    }
     int32_t slotId = GetDefaultSmsSlotId();
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
@@ -631,10 +627,6 @@ int32_t SmsService::GetSmsSegmentsInfo(
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
         TELEPHONY_LOGE("Non-system applications use system APIs!");
         return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
-    }
-    if (!TelephonyPermission::CheckPermission(Permission::GET_TELEPHONY_STATE)) {
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
-        return TELEPHONY_ERR_PERMISSION_ERR;
     }
     if (message.empty()) {
         return TELEPHONY_ERR_ARGUMENT_NULL;

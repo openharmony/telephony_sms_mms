@@ -67,7 +67,20 @@ private:
         std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage &gsmSmsMessage,
         const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
-
+    void UpdateUserData(std::shared_ptr<struct SmsTpdu> tpdu, std::vector<struct SplitInfo> cellsInfos, int i,
+        unsigned char msgRef8bit);
+    void UpdateSmsContact(std::shared_ptr<SmsSendIndexer> indexer, SmsConcat &concat, unsigned char msgRef8bit,
+        int cellsInfosSize, int i);
+    void UpdateHeaderCnt(int &headerCnt, GsmSmsMessage &gsmSmsMessage, DataCodingScheme codingType,
+        std::vector<struct SplitInfo> cellsInfos, int i);
+    void SetHeaderCnt(std::shared_ptr<SmsSendIndexer> indexer, std::vector<struct SplitInfo> cellsInfos, int i,
+        std::shared_ptr<struct SmsTpdu> tpdu, int &headerCnt);
+    void UpdateStatusReport(
+        int cellsInfosSize, int i, bool &isMore, std::shared_ptr<struct SmsTpdu> tpdu, bool isStatusReport);
+    void TextBasedSmsPartDelivery(std::shared_ptr<SmsSendIndexer> indexer,
+        std::shared_ptr<struct EncodeInfo> encodeInfo, unsigned char msgRef8bit,
+        std::shared_ptr<uint8_t> unSentCellCount, std::shared_ptr<bool> hasCellFailed);
+        
 private:
     std::mutex mutex_;
     bool isImsGsmHandlerRegistered = false;
