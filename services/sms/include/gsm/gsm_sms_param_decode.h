@@ -49,6 +49,7 @@ private:
     void DecodeDcsUnknownGroupPdu(uint8_t dcs, struct SmsDcs *smsDcs);
     bool DecodeTimePduPartData(SmsReadBuffer &buffer, struct SmsTimeStamp *pTimeStamp);
     bool DecodeTimePduData(SmsReadBuffer &buffer, struct SmsTimeStamp *pTimeStamp);
+    std::string regProcessSmsAddrs(std::string &smsAddrs);
 };
 } // namespace Telephony
 } // namespace OHOS

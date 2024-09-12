@@ -35,7 +35,8 @@ public:
     bool BcdToDigit(const uint8_t *bcd, uint8_t bcdLen, std::string &digit, uint8_t maxDigitLen);
 
 private:
-    char BcdToChar(const uint8_t c);
+    char BcdToChar(const uint8_t b);
+    uint8_t charToBcd(const char c);
     bool Pack7bitCharPartData(SmsWriteBuffer &buffer, const uint8_t *userData, uint8_t &srcIdx, uint8_t &shift);
 };
 } // namespace Telephony
