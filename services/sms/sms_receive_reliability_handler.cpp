@@ -54,6 +54,8 @@ static constexpr const char *SMS_BROADCAST_SMS_TEXT_TYPE_KEY = "TEXT_SMS_RECEIVE
 static constexpr const char *SMS_BROADCAST_SMS_DATA_TYPE_KEY = "DATA_SMS_RECEIVE";
 static constexpr const char *SMS_BROADCAST_SMS_PORT_KEY = "port";
 const std::string CT_SMSC = "10659401";
+const std::string CT_SMSC_86 = "8610659401";
+const std::string CT_SMSC_INTERNATION_86 = "+8610659401";
 const std::string CT_AUTO_REG_SMS_ACTION = "ct_auto_reg_sms_receive_completed";
 
 SmsReceiveReliabilityHandler::SmsReceiveReliabilityHandler(int32_t slotId) : slotId_(slotId)
@@ -337,7 +339,7 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
 
     MatchingSkills smsSkills;
     std::string addr = indexer->GetOriginatingAddress();
-    if (CT_SMSC.compare(addr) != 0) {
+    if (CT_SMSC.compare(addr) != 0 && CT_SMSC_86.compare(addr) != 0 && CT_SMSC_INTERNATION_86.compare(addr) != 0) {
         TELEPHONY_LOGI("Sms Broadcast");
         smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
     } else {
@@ -347,7 +349,7 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
     smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     bool cbResult = false;
-    if (CT_SMSC.compare(addr) != 0) {
+    if (CT_SMSC.compare(addr) != 0 && CT_SMSC_86.compare(addr) != 0 && CT_SMSC_INTERNATION_86.compare(addr) != 0) {
         auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(
             smsSubscriberInfo, shared_from_this(), indexer->GetMsgRefId(), indexer->GetDataBaseId(), addr);
         cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, smsReceiver);
@@ -356,7 +358,7 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
         cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     }
     HiSysEventCBResult(cbResult);
-    if (CT_SMSC.compare(addr) == 0) {
+    if (CT_SMSC.compare(addr) == 0 || CT_SMSC_86.compare(addr) == 0 || CT_SMSC_INTERNATION_86.compare(addr) == 0) {
         TELEPHONY_LOGI("del ct auto sms from db");
         DeleteAutoSmsFromDB(shared_from_this(), indexer->GetMsgRefId(), indexer->GetDataBaseId());
     }
@@ -365,7 +367,9 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
 void SmsReceiveReliabilityHandler::PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsReceiveIndexer> indexer,
     EventFwk::CommonEventData &data, EventFwk::CommonEventPublishInfo &publishInfo)
 {
-    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0) {
+    if (CT_SMSC.compare(indexer->GetOriginatingAddress()) != 0 &&
+        CT_SMSC_86.compare(indexer->GetOriginatingAddress()) != 0 &&
+        CT_SMSC_INTERNATION_86.compare(indexer->GetOriginatingAddress()) != 0) {
         want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
     } else {
         want.SetAction(CT_AUTO_REG_SMS_ACTION);
