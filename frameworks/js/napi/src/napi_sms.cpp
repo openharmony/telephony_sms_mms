@@ -1557,8 +1557,7 @@ static void GetSmsSegmentsInfoCallback(napi_env env, napi_status status, void *d
         NapiUtil::SetPropertyInt32(env, callbackValue, "encodeCountRemaining", context->encodeCountRemaining);
         NapiUtil::SetPropertyInt32(env, callbackValue, "scheme", static_cast<int32_t>(context->scheme));
     } else {
-        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
-            context->errorCode, "getSmsSegmentsInfo", "ohos.permission.GET_TELEPHONY_STATE");
+        JsError error = NapiUtil::ConverErrorMessageForJs(context->errorCode);
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     if (context->content.capacity() != 0) {
@@ -1689,8 +1688,7 @@ static void GetImsShortMessageFormatCallback(napi_env env, napi_status status, v
         std::string toUtf8Value = to_utf8(context->value);
         napi_create_string_utf8(env, toUtf8Value.c_str(), toUtf8Value.size(), &callbackValue);
     } else {
-        JsError error = NapiUtil::ConverErrorMessageWithPermissionForJs(
-            context->errorCode, "getImsShortMessageFormat", "ohos.permission.GET_TELEPHONY_STATE");
+        JsError error = NapiUtil::ConverErrorMessageForJs(context->errorCode);
         callbackValue = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
