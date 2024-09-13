@@ -14,6 +14,7 @@
  */
 
 #include "text_coder.h"
+
 #include "glib.h"
 #include "mms_charset.h"
 #include "securec.h"
@@ -429,7 +430,6 @@ int TextCoder::Gsm7bitToUtf8(
 int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength)
 {
     if (srcLength == -1 && src) {
-        TELEPHONY_LOGE("stcLength == -1 && src branch");
         // null terminated string
         srcLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(src)));
     }
@@ -1014,6 +1014,5 @@ void TextCoder::GetPortuSingleToUcs2(const uint8_t &srcText, uint16_t &result)
         0x0020, 0x00E3, 0x00F5, 0x0020, 0x0020, 0x00E2 };
     result = portuSingleToUcs2[srcText];
 }
-
 } // namespace Telephony
 } // namespace OHOS

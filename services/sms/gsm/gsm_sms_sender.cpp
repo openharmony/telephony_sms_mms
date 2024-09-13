@@ -87,10 +87,9 @@ void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const s
         return;
     }
     for (int i = 0; i < cellsInfosSize; i++) {
-        std::shared_ptr<SmsSendIndexer> indexer = nullptr;
         std::string segmentText;
         segmentText.append((char *)(cellsInfos[i].encodeData.data()), cellsInfos[i].encodeData.size());
-        indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, segmentText, sendCallback, deliveryCallback);
+        auto indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, segmentText, sendCallback, deliveryCallback);
         if (indexer == nullptr) {
             SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
             return;
@@ -98,7 +97,6 @@ void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const s
         indexer->SetDcs(cellsInfos[i].encodeType);
         (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
         if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1) {
-            TELEPHONY_LOGE("TextBasedSmsDelivery data length invalid.");
             return;
         }
         int ret = memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, &cellsInfos[i].encodeData[0],
@@ -107,46 +105,82 @@ void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const s
             SendResultCallBack(indexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
             return;
         }
-        tpdu->data.submit.userData.length = cellsInfos[i].encodeData.size();
-        tpdu->data.submit.userData.data[cellsInfos[i].encodeData.size()] = 0;
-        tpdu->data.submit.msgRef = msgRef8bit;
+        UpdateUserData(tpdu, cellsInfos, i, msgRef8bit);
         int headerCnt = 0;
         if (cellsInfosSize > 1) {
-            indexer->SetIsConcat(true);
             SmsConcat concat;
-            concat.msgRef = msgRef8bit;
-            concat.totalSeg = static_cast<uint16_t>(cellsInfosSize);
-            concat.seqNum = static_cast<uint16_t>(i + 1);
-            indexer->SetSmsConcat(concat);
+            UpdateSmsContact(indexer, concat, msgRef8bit, cellsInfosSize, i);
             headerCnt += gsmSmsMessage.SetHeaderConcat(headerCnt, concat);
-            concat.is8Bits = true;
         }
-        /* Set User Data Header for Alternate Reply Address */
-        headerCnt += gsmSmsMessage.SetHeaderReply(headerCnt);
-        /* Set User Data Header for National Language Single Shift */
-        headerCnt += gsmSmsMessage.SetHeaderLang(headerCnt, codingType, cellsInfos[i].langId);
-        indexer->SetLangId(cellsInfos[i].langId);
-        tpdu->data.submit.userData.headerCnt = headerCnt;
-        tpdu->data.submit.bHeaderInd = (headerCnt > 0) ? true : false;
+        UpdateHeaderCnt(headerCnt, gsmSmsMessage, codingType, cellsInfos, i);
+        SetHeaderCnt(indexer, cellsInfos, i, tpdu, headerCnt);
         bool isMore = false;
-        if (cellsInfosSize > 1 && i < (cellsInfosSize - 1)) {
-            isMore = true;
-            tpdu->data.submit.bStatusReport = false;
-        } else {
-            tpdu->data.submit.bStatusReport = isStatusReport;
-            isMore = false;
-        }
-        std::shared_ptr<struct EncodeInfo> encodeInfo = gsmSmsMessage.GetSubmitEncodeInfo(scAddr, isMore);
+        UpdateStatusReport(cellsInfosSize, i, isMore, tpdu, isStatusReport);
+        auto encodeInfo = gsmSmsMessage.GetSubmitEncodeInfo(scAddr, isMore);
         if (encodeInfo == nullptr) {
             SendResultCallBack(indexer, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-            TELEPHONY_LOGE("create encodeInfo encodeInfo nullptr error.");
             continue;
         }
-        SetSendIndexerInfo(indexer, encodeInfo, msgRef8bit);
-        indexer->SetUnSentCellCount(*unSentCellCount);
-        indexer->SetHasCellFailed(hasCellFailed);
-        SendSmsToRil(indexer);
+        TextBasedSmsPartDelivery(indexer, encodeInfo, msgRef8bit, unSentCellCount, hasCellFailed);
     }
+}
+
+void GsmSmsSender::UpdateUserData(
+    std::shared_ptr<struct SmsTpdu> tpdu, std::vector<struct SplitInfo> cellsInfos, int i, unsigned char msgRef8bit)
+{
+    tpdu->data.submit.userData.length = cellsInfos[i].encodeData.size();
+    tpdu->data.submit.userData.data[cellsInfos[i].encodeData.size()] = 0;
+    tpdu->data.submit.msgRef = msgRef8bit;
+}
+
+void GsmSmsSender::UpdateSmsContact(
+    std::shared_ptr<SmsSendIndexer> indexer, SmsConcat &concat, unsigned char msgRef8bit, int cellsInfosSize, int i)
+{
+    indexer->SetIsConcat(true);
+    concat.msgRef = msgRef8bit;
+    concat.totalSeg = static_cast<uint16_t>(cellsInfosSize);
+    concat.seqNum = static_cast<uint16_t>(i + 1);
+    indexer->SetSmsConcat(concat);
+    concat.is8Bits = true;
+}
+
+void GsmSmsSender::UpdateHeaderCnt(int &headerCnt, GsmSmsMessage &gsmSmsMessage, DataCodingScheme codingType,
+    std::vector<struct SplitInfo> cellsInfos, int i)
+{
+    /* Set User Data Header for Alternate Reply Address /
+    headerCnt += gsmSmsMessage.SetHeaderReply(headerCnt);
+    / Set User Data Header for National Language Single Shift */
+    headerCnt += gsmSmsMessage.SetHeaderLang(headerCnt, codingType, cellsInfos[i].langId);
+}
+
+void GsmSmsSender::SetHeaderCnt(std::shared_ptr<SmsSendIndexer> indexer, std::vector<struct SplitInfo> cellsInfos,
+    int i, std::shared_ptr<struct SmsTpdu> tpdu, int &headerCnt)
+{
+    indexer->SetLangId(cellsInfos[i].langId);
+    tpdu->data.submit.userData.headerCnt = headerCnt;
+    tpdu->data.submit.bHeaderInd = (headerCnt > 0) ? true : false;
+}
+
+void GsmSmsSender::UpdateStatusReport(
+    int cellsInfosSize, int i, bool &isMore, std::shared_ptr<struct SmsTpdu> tpdu, bool isStatusReport)
+{
+    if (cellsInfosSize > 1 && i < (cellsInfosSize - 1)) {
+    isMore = true;
+    tpdu->data.submit.bStatusReport = false;
+    } else {
+    tpdu->data.submit.bStatusReport = isStatusReport;
+    isMore = false;
+    }
+}
+
+void GsmSmsSender::TextBasedSmsPartDelivery(std::shared_ptr<SmsSendIndexer> indexer,
+    std::shared_ptr<struct EncodeInfo> encodeInfo, unsigned char msgRef8bit, std::shared_ptr<uint8_t> unSentCellCount,
+    std::shared_ptr<bool> hasCellFailed)
+{
+    SetSendIndexerInfo(indexer, encodeInfo, msgRef8bit);
+    indexer->SetUnSentCellCount(*unSentCellCount);
+    indexer->SetHasCellFailed(hasCellFailed);
+    SendSmsToRil(indexer);
 }
 
 void GsmSmsSender::DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, int32_t port,

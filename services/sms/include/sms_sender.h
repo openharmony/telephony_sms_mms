@@ -65,7 +65,6 @@ public:
     void SetNetworkId(std::optional<int32_t> &id);
     void SyncSwitchISmsResponse();
     bool SetImsSmsConfig(int32_t slotId, int32_t enable);
-    void OnRilAdapterHostDied();
     void DataBasedSmsDeliverySplitPage(GsmSmsMessage &gsmSmsMessage, std::vector<struct SplitInfo> cellsInfos,
         std::shared_ptr<struct SmsTpdu> tpdu, uint8_t msgRef8bit, const std::string &desAddr, const std::string &scAddr,
         int32_t port, const sptr<ISendShortMessageCallback> &sendCallback,
@@ -79,6 +78,7 @@ public:
         const sptr<ISendShortMessageCallback> &sendCallback, std::shared_ptr<SmsSendIndexer> indexer,
         uint8_t msgRef8bit, uint32_t totalPage);
     void SendCallbackExceptionCase(const sptr<ISendShortMessageCallback> &sendCallback, std::string str);
+    void OnRilAdapterHostDied();
     static SmsCodingNationalType GetSmsCodingNationalType(int slotId);
 
 public:
