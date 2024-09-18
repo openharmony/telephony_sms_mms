@@ -149,7 +149,8 @@ void SendSmsTest(const uint8_t *data, size_t size)
         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
         iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
-    sender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    uint16_t dataBaseId = 1;
+    sender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     sender->DataBasedSmsDelivery(desAddr, scAddr, size, data, size, sendCallback, deliveryCallback);
 
     std::vector<struct SplitInfo> cellsInfos;
@@ -164,7 +165,7 @@ void SendSmsTest(const uint8_t *data, size_t size)
     std::shared_ptr<struct SmsTpdu> tpdu =
         msg.CreateDefaultSubmitSmsTpdu(desAddr, scAddr, text, isStatusReport, codingType);
     sender->TextBasedSmsSplitDelivery(
-        text, text, cellsInfos, codingType, isStatusReport, tpdu, msg, sendCallback, deliveryCallback);
+        text, text, cellsInfos, codingType, isStatusReport, tpdu, msg, sendCallback, deliveryCallback, dataBaseId);
     sender->SendCallbackExceptionCase(sendCallback, text);
 
     std::shared_ptr<SmsSendIndexer> smsIndexer =

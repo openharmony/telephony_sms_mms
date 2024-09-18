@@ -36,7 +36,7 @@ public:
     void Init() override;
     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
         const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t id, bool isMmsApp = true) override;
     void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, int32_t port, const uint8_t *data,
         uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
@@ -66,7 +66,7 @@ private:
         std::vector<struct SplitInfo> cellsInfos, DataCodingScheme codingType, bool isStatusReport,
         std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage &gsmSmsMessage,
         const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t databaseId, bool isMmsApp = true);
 
 private:
     std::mutex mutex_;

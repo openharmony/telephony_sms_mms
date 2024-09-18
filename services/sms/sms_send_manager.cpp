@@ -101,7 +101,7 @@ void SmsSendManager::InitNetworkHandle()
 
 void SmsSendManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
 {
     if (desAddr.empty() || text.empty()) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
@@ -123,10 +123,12 @@ void SmsSendManager::TextBasedSmsDelivery(const string &desAddr, const string &s
     TELEPHONY_LOGI("netWorkType = %{public}d.", netWorkType);
     if (netWorkType == NetWorkType::NET_TYPE_GSM) {
         gsmSmsSender_->RegisterImsHandler();
-        gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+        gsmSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback,
+            dataBaseId, isMmsApp);
     } else if (netWorkType == NetWorkType::NET_TYPE_CDMA) {
         cdmaSmsSender_->RegisterImsHandler();
-        cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+        cdmaSmsSender_->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback,
+            dataBaseId, isMmsApp);
     } else {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE);
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,

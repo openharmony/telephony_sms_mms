@@ -141,6 +141,15 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         if (messageType == ISendShortMessageCallback::SEND_SMS_SUCCESS) {
             SmsHiSysEvent::WriteSmsSendBehaviorEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE);
         }
+        if (!smsIndexer->GetIsMmsApp() && smsIndexer->GetIsText()) {
+            DataShare::DataShareValuesBucket sessionBucket;
+            sessionBucket.Put(SmsMmsInfo::MSG_STATE, SMS_MMS_INFO_MSG_STATE_SUCCEED);
+            DataShare::DataSharePredicates predicates;
+            predicates.EqualTo(SmsMmsInfo::MSG_ID, smsIndexer->GetDataBaseId());
+            if (!DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
+                TELEPHONY_LOGE("modify db fail while SendMessageSucceed. id:%{public}d;", smsIndexer->GetDataBaseId());
+            }
+        }
     }
 }
 
@@ -167,7 +176,17 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
         // save to db and update state
         sptr<ISendShortMessageCallback> sendCallback = smsIndexer->GetSendCallback();
         SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
-        TELEPHONY_LOGE("send sms result fail from ril response");
+        TELEPHONY_LOGE("send sms result fail from ril response. IsMmsApp:%{public}d;dataBaseId:%{public}d;",
+            smsIndexer->GetIsMmsApp(), smsIndexer->GetDataBaseId());
+        if (!smsIndexer->GetIsMmsApp() && smsIndexer->GetIsText()) {
+            DataShare::DataShareValuesBucket sessionBucket;
+            sessionBucket.Put(SmsMmsInfo::MSG_STATE, SMS_MMS_INFO_MSG_STATE_FAILED);
+            DataShare::DataSharePredicates predicates;
+            predicates.EqualTo(SmsMmsInfo::MSG_ID, smsIndexer->GetDataBaseId());
+            if (!DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
+                TELEPHONY_LOGE("modify fail while SendMessageFailed. id:%{public}d;", smsIndexer->GetDataBaseId());
+            }
+        }
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_SEND_RESULT_FAIL, "send sms result fail from ril response");
     }
