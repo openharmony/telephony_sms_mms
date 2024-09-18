@@ -32,7 +32,7 @@ SmsServiceProxy::SmsServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy
 
 int32_t SmsServiceProxy::SendMessage(int32_t slotId, const std::u16string desAddr, const std::u16string scAddr,
     const std::u16string text, const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliverCallback)
+    const sptr<IDeliveryShortMessageCallback> &deliverCallback, bool isMmsApp)
 {
     TELEPHONY_LOGI("SmsServiceProxy::SendMessage with text slotId : %{public}d", slotId);
     MessageParcel dataParcel;

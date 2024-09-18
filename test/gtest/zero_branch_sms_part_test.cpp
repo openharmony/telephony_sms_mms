@@ -237,11 +237,12 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0001, Function | MediumTest | Le
     auto callStub = iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
     auto deliveryStub = iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
     std::string emptyStr = "";
-
-    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, dataStr, callStub, deliveryStub);
-    interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, dataStr, callStub, deliveryStub);
-    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, emptyStr, callStub, deliveryStub);
-    int32_t result = interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, emptyStr, callStub, deliveryStub);
+    uint16_t dataBaseId = 0;
+    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, dataStr, callStub, deliveryStub, dataBaseId);
+    interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, dataStr, callStub, deliveryStub, dataBaseId);
+    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, emptyStr, callStub, deliveryStub, dataBaseId);
+    int32_t result = interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, emptyStr,
+        callStub, deliveryStub, dataBaseId);
     EXPECT_GE(result, 0);
 
     const uint8_t *data = reinterpret_cast<const uint8_t *>(dataStr.c_str());
@@ -249,7 +250,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0001, Function | MediumTest | Le
     interfaceManager->DataBasedSmsDelivery(dataStr, emptyStr, 0, data, dataStr.size(), callStub, deliveryStub);
     interfaceManager->DataBasedSmsDelivery(dataStr, dataStr, 0, nullptr, 0, callStub, deliveryStub);
     interfaceManager->smsSendManager_ = nullptr;
-    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, dataStr, callStub, deliveryStub);
+    interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, dataStr, callStub, deliveryStub, dataBaseId);
     result = interfaceManager->DataBasedSmsDelivery(dataStr, dataStr, 0, data, dataStr.size(), callStub, deliveryStub);
     EXPECT_GE(result, 0);
 

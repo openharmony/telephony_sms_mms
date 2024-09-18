@@ -39,7 +39,7 @@ public:
 
     virtual void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr,
         const std::string &text, const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) = 0;
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp = true) = 0;
 
     virtual void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, int32_t port,
         const uint8_t *data, uint32_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
@@ -122,6 +122,8 @@ private:
     static constexpr uint8_t MSG_QUEUE_LIMIT = 25;
     static constexpr uint8_t MAX_REPORT_LIST_LIMIT = 25;
     static constexpr const char *KEY_SMS_CODING_NATIONAL_INT = "sms_coding_national_int";
+    static constexpr const char *SMS_MMS_INFO_MSG_STATE_SUCCEED = "0";
+    static constexpr const char *SMS_MMS_INFO_MSG_STATE_FAILED = "2";
 
     SmsSender(const SmsSender &) = delete;
     SmsSender(const SmsSender &&) = delete;

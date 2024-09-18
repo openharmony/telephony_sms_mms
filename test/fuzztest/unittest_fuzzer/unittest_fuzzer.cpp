@@ -364,10 +364,12 @@ protected:
         std::string strDtAddr = GetString(MAX_ADDRESS_LEN-1);
         std::string strText = GetString();
         size_t      nPort   = GetPort();
+        uint16_t dataBaseId = 0;
         sptr<ISendShortMessageCallback> sendCallback = nullptr;
         sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
 
-        m_pCdmaSmsSender->TextBasedSmsDeliveryViaIms(strDtAddr, strScAddr, strText, sendCallback, deliveryCallback);
+        m_pCdmaSmsSender->TextBasedSmsDeliveryViaIms(strDtAddr, strScAddr, strText, sendCallback, deliveryCallback,
+            dataBaseId);
         m_pCdmaSmsSender->DataBasedSmsDeliveryViaIms(
             strDtAddr, strScAddr, nPort, g_data, g_size, sendCallback, deliveryCallback);
     }

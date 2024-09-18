@@ -98,6 +98,20 @@ bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBu
     return ret >= 0 ? true : false;
 }
 
+bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBucket &values, uint16_t &id)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    Uri uri(tableUri);
+    int ret = helper->Insert(uri, values);
+    helper->Release();
+    id = ret;
+    return ret >= 0;
+}
+
 bool SmsPersistHelper::QuerySession(
     DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount)
 {
@@ -131,6 +145,19 @@ bool SmsPersistHelper::QuerySession(
     resultSet->Close();
     helper->Release();
     return false;
+}
+
+bool SmsPersistHelper::UpdateSms(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    Uri uri(SMS_MMS_INFO);
+    int ret = helper->Update(uri, predicates, values);
+    helper->Release();
+    return ret >= 0;
 }
 
 bool SmsPersistHelper::Update(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values)

@@ -31,10 +31,10 @@ public:
     ~CdmaSmsSender() override;
     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
         const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback) override;
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t id, bool isMmsApp = true) override;
     void TextBasedSmsDeliveryViaIms(const std::string &desAddr, const std::string &scAddr, const std::string &text,
         const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp = true);
     bool TpduNullOrSmsPageOverNormalOrSmsEncodeFail(std::vector<struct SplitInfo> cellsInfos,
         std::shared_ptr<struct SmsTpdu> tpdu, std::shared_ptr<uint8_t> unSentCellCount,
         std::shared_ptr<bool> hasCellFailed, const sptr<ISendShortMessageCallback> &sendCallback);
@@ -42,7 +42,8 @@ public:
         const std::string &scAddr, std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage gsmSmsMessage,
         std::shared_ptr<uint8_t> unSentCellCount, std::shared_ptr<bool> hasCellFailed, DataCodingScheme codingType,
         uint8_t msgRef8bit, const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
+        uint16_t dataBaseId, bool isMmsApp = true);
     void ReadySendSms(GsmSmsMessage gsmSmsMessage, const std::string &scAddr, bool isMore,
         std::shared_ptr<SmsSendIndexer> indexer, uint8_t msgRef8bit, std::shared_ptr<uint8_t> unSentCellCount,
         std::shared_ptr<bool> hasCellFailed);
@@ -61,6 +62,9 @@ public:
     void StatusReportSetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
     void StatusReportGetImsSms(const AppExecFwk::InnerEvent::Pointer &event) override;
     void RegisterImsHandler() override;
+    void UpdateIndexerInfo(std::shared_ptr<SmsSendIndexer> &smsIndexer, uint8_t msgRef8bit,
+        const uint8_t unSentCellCount, std::shared_ptr<bool> hasCellFailed,
+        long timeStamp, uint16_t msgId, uint16_t dataBaseId, bool isMmsApp);
     void SetSendIndexerInfo(const std::shared_ptr<SmsSendIndexer> &indexer,
         const std::shared_ptr<struct EncodeInfo> &encodeInfo, unsigned char msgRef8bit);
 
@@ -86,7 +90,7 @@ private:
     void TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
         std::vector<struct SplitInfo> splits, std::unique_ptr<CdmaTransportMsg> transMsg, uint8_t msgRef8bit,
         uint16_t msgId, long timeStamp, const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp = true);
 
 private:
     uint8_t msgSeqNum_ = 0;

@@ -232,15 +232,17 @@ HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
     const std::string desAddr = "qwe";
     const std::string scAddr = "123";
     cdmaSmsSender->isImsNetDomain_ = true;
-    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    uint16_t dataBaseId = 0;
+    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     std::vector<struct SplitInfo> splits;
     std::unique_ptr<CdmaTransportMsg> transMsg;
     uint8_t msgRef8bit = 0;
     uint16_t msgId = 0;
     long timeStamp = 0;
     cdmaSmsSender->TextBasedSmsSplitDelivery(
-        desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp, sendCallback, deliveryCallback);
-    cdmaSmsSender->TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback);
+        desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp, sendCallback, deliveryCallback,
+        dataBaseId);
+    cdmaSmsSender->TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
     cdmaSmsSender->SendSmsToRil(smsIndexer);
     cdmaSmsSender->ResendTextDelivery(smsIndexer);
@@ -545,6 +547,7 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0001, Function | MediumTest | Level1)
     std::string desAddr = "";
     std::string scAddr = "123";
     std::string text = "";
+    uint16_t dataBaseId = 0;
     std::u16string format = u"";
     uint8_t *data = nullptr;
     const sptr<ISendShortMessageCallback> sendCallback =
@@ -552,35 +555,35 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0001, Function | MediumTest | Level1)
     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
         iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
     auto smsIndexer = std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
     desAddr = "qwe";
     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     text = "123";
     data = new uint8_t(1);
     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     smsSendManager->networkManager_ = smsNetworkPolicyManager;
     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     smsSendManager->RetriedSmsDelivery(smsIndexer);
     smsSendManager->gsmSmsSender_ = gsmSmsSender;
     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     smsSendManager->RetriedSmsDelivery(smsIndexer);
     smsSendManager->cdmaSmsSender_ = cdmaSmsSender;
     smsSendManager->networkManager_->netWorkType_ = NetWorkType::NET_TYPE_GSM;
     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     EXPECT_EQ(smsSendManager->GetImsShortMessageFormat(format), TELEPHONY_ERR_SUCCESS);
     smsSendManager->networkManager_->netWorkType_ = NetWorkType::NET_TYPE_CDMA;
     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     EXPECT_EQ(smsSendManager->GetImsShortMessageFormat(format), TELEPHONY_ERR_SUCCESS);
     smsSendManager->networkManager_->netWorkType_ = NetWorkType::NET_TYPE_UNKNOWN;
     smsSendManager->DataBasedSmsDelivery(desAddr, scAddr, 1, data, 1, sendCallback, deliveryCallback);
-    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback);
+    smsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     smsIndexer = nullptr;
     smsSendManager->RetriedSmsDelivery(smsIndexer);
     EXPECT_EQ(smsSendManager->GetImsShortMessageFormat(format), TELEPHONY_ERR_SUCCESS);
@@ -1855,8 +1858,10 @@ HWTEST_F(BranchSmsTest, SmsService_0001, Function | MediumTest | Level1)
     uint8_t *data = nullptr;
     sptr<ISendShortMessageCallback> sendCallback = nullptr;
     sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
-    EXPECT_GT(
-        smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback, deliveryCallback), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback,
+        deliveryCallback, true), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SendMessage(0, desAddr, desAddr, desAddr, sendCallback,
+        deliveryCallback, false), TELEPHONY_ERR_SUCCESS);
     EXPECT_GT(smsService->SendMessage(0, desAddr, desAddr, 1, data, 1, sendCallback, deliveryCallback),
         TELEPHONY_ERR_SUCCESS);
     bool isSupported = true;
@@ -2269,17 +2274,20 @@ HWTEST_F(BranchSmsTest, SmsService_0004, Function | MediumTest | Level1)
     sptr<IDeliveryShortMessageCallback> deliveryCallback;
     auto smsService = DelayedSingleton<SmsService>::GetInstance();
     AccessMmsToken token;
-    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback);
+    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, true);
+    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, false);
     uint16_t port = 1;
     uint8_t *data = nullptr;
     smsService->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
     slotId = -1;
     desAddr = u"test";
-    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback);
+    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, true);
+    smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, false);
     smsService->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
     slotId = 0;
     std::string telephone = "13888888888";
-    smsService->InsertSessionAndDetail(slotId, telephone, telephone);
+    uint16_t dataBaseId = 0;
+    smsService->InsertSessionAndDetail(slotId, telephone, telephone, dataBaseId);
     bool isSupported = false;
     slotId = -1;
     smsService->IsImsSmsSupported(slotId, isSupported);
