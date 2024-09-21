@@ -142,10 +142,32 @@ bool GsmSmsCbHandler::AddCbMessageToList(const std::shared_ptr<GsmCbCodec> &cbMe
         info.header = cbHeader;
         info.cbMsgs.insert(std::make_pair(cbHeader->page, cbMessage));
         InitLocation(info);
+        auto size = cbMsgList_.size();
+        if (size > MAX_CB_MSG_LIST_SIZE) {
+            auto halfSize = size / 2;
+            cbMsgList_.erase(cbMsgList_.begin(), cbMsgList_.begin() + halfSize);
+            TELEPHONY_LOGI("AddCbMessageToList clear message count: %{public}zu", halfSize);
+        }
         cbMsgList_.push_back(info);
         return true;
     }
     return false;
+}
+
+void GsmSmsCbHandler::ClearExpiredMessage()
+{
+    if (cbMsgList_.empty()) {
+        return;
+    }
+    std::time_t timep;
+    int64_t currentTime = time(&timep);
+    for (auto i = cbMsgList_.size() - 1; i > 0; i--) {
+        if (currentTime - cbMsgList_[i].header->recvTime > static_cast<long long>(DEFAULT_EXPIRED_TIME)) {
+            cbMsgList_.erase(cbMsgList_.begin(), cbMsgList_.begin() + i);
+            TELEPHONY_LOGI("ClearExpiredMessage clear message count: %{public}zu", i);
+            return;
+        }
+    }
 }
 
 bool GsmSmsCbHandler::InitLocation(SmsCbInfo &info)
@@ -241,6 +263,7 @@ void GsmSmsCbHandler::HandleCbMessage(std::shared_ptr<CBConfigReportInfo> &messa
         return;
     }
 
+    ClearExpiredMessage();
     uint8_t pageCnt = CheckCbMessage(cbMessage);
     if (header->totalPages == pageCnt) {
         SendCbMessageBroadcast(cbMessage);
