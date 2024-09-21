@@ -85,8 +85,11 @@ private:
     bool InitLocation(SmsCbInfo &info);
     void GetCbData(const std::shared_ptr<GsmCbCodec> &cbMessage, SmsCbData::CbData &SendData);
     void PackageWantData(SmsCbData::CbData &sendData, EventFwk::Want &want);
+    void ClearExpiredMessage();
 
 private:
+    static constexpr uint16_t MAX_CB_MSG_LIST_SIZE = 10000;
+    static constexpr uint64_t DEFAULT_EXPIRED_TIME = 3 * 60 * 60 * 1000;
     int32_t slotId_;
     std::vector<SmsCbInfo> cbMsgList_;
     int32_t cid_ = -1;
