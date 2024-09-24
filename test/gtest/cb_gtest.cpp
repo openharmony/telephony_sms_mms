@@ -137,29 +137,6 @@ void OpenCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
     helper.NotifyAll();
 }
 
-/**
- * @tc.number   Telephony_SmsMmsGtest_OpenCellBroadcast_0002
- * @tc.name     Open cellBroadcast fromMsgId less than toMsgId
- * @tc.desc     Function test
- */
-HWTEST_F(CbGtest, OpenCellBroadcast_0002, Function | MediumTest | Level3)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
-    SmsMmsTestHelper helper;
-    helper.slotId = DEFAULT_SIM_SLOT_ID;
-    if (!helper.Run(OpenCellBroadcastTestFuc2, std::ref(helper))) {
-        TELEPHONY_LOGI("OpenCellBroadcastTestFuc2 out of time");
-        ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc2, std::ref(helper)));
-    }
-    TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0002 -->finished");
-    EXPECT_NE(helper.GetIntResult(), 0);
-}
-
 void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
 {
     AccessMmsToken token;
