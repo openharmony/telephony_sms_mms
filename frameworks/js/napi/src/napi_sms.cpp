@@ -146,7 +146,7 @@ static int32_t ActuallySendTextMessage(SendMessageContext &parameter, std::uniqu
         deliveryCallback->OnSmsDeliveryResult(u"");
         return TELEPHONY_ERR_SLOTID_INVALID;
     }
-    return DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(parameter.slotId,
+    return Singleton<SmsServiceManagerClient>::GetInstance().SendMessage(parameter.slotId,
         parameter.destinationHost, parameter.serviceCenter, parameter.textContent, sendCallback.release(),
         deliveryCallback.release());
 }
@@ -160,7 +160,7 @@ static int32_t ActuallySendTextMessageWithoutSave(SendMessageContext &parameter,
         deliveryCallback->OnSmsDeliveryResult(u"");
         return TELEPHONY_ERR_SLOTID_INVALID;
     }
-    return DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessageWithoutSave(parameter.slotId,
+    return Singleton<SmsServiceManagerClient>::GetInstance().SendMessageWithoutSave(parameter.slotId,
         parameter.destinationHost, parameter.serviceCenter, parameter.textContent, sendCallback.release(),
         deliveryCallback.release());
 }
@@ -176,7 +176,7 @@ static int32_t ActuallySendDataMessage(SendMessageContext &parameter, std::uniqu
     }
     if (parameter.rawDataContent.size() > 0) {
         uint16_t arrayLength = static_cast<uint16_t>(parameter.rawDataContent.size());
-        return DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(parameter.slotId,
+        return Singleton<SmsServiceManagerClient>::GetInstance().SendMessage(parameter.slotId,
             parameter.destinationHost, parameter.serviceCenter, parameter.destinationPort, &parameter.rawDataContent[0],
             arrayLength, sendCallback.release(), deliveryCallback.release());
     }
@@ -621,7 +621,7 @@ static void NativeSetDefaultSmsSlotId(napi_env env, void *data)
         context->errorCode = ERROR_SLOT_ID_INVALID;
         return;
     }
-    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetDefaultSmsSlotId(context->slotId);
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().SetDefaultSmsSlotId(context->slotId);
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
     }
@@ -689,7 +689,7 @@ static bool MatchGetDefaultSmsSlotIdParameters(napi_env env, const napi_value pa
 static void NativeGetDefaultSmsSlotId(napi_env env, void *data)
 {
     auto context = static_cast<GetDefaultSmsSlotIdContext *>(data);
-    context->defaultSmsSlotId = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetDefaultSmsSlotId();
+    context->defaultSmsSlotId = Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSlotId();
     TELEPHONY_LOGI("NativeGetDefaultSmsSlotId defaultSmsSlotId  = %{public}d", context->defaultSmsSlotId);
     if (context->defaultSmsSlotId >= SIM_SLOT_0) {
         context->resolved = true;
@@ -744,7 +744,7 @@ static void NativeGetDefaultSmsSimId(napi_env env, void *data)
 {
     auto context = static_cast<GetDefaultSmsSimIdContext *>(data);
     int32_t simId = 0;
-    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetDefaultSmsSimId(simId);
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSimId(simId);
     TELEPHONY_LOGI("result = %{public}d", context->errorCode);
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->defaultSmsSimId = simId;
@@ -821,7 +821,7 @@ static void NativeSetSmscAddr(napi_env env, void *data)
         context->errorCode = ERROR_SLOT_ID_INVALID;
         return;
     }
-    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetScAddress(context->slotId,
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().SetScAddress(context->slotId,
         NapiUtil::ToUtf16(context->smscAddr));
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
@@ -901,8 +901,7 @@ static void NativeGetSmscAddr(napi_env env, void *data)
         return;
     }
     std::u16string smscAddress;
-    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->
-        GetScAddress(context->slotId, smscAddress);
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().GetScAddress(context->slotId, smscAddress);
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->smscAddr = NapiUtil::ToUtf8(smscAddress);
         context->resolved = true;
@@ -988,7 +987,7 @@ static void NativeAddSimMessage(napi_env env, void *data)
     if (wrapStatus != MESSAGE_UNKNOWN_STATUS) {
         ISmsServiceInterface::SimMessageStatus status =
             static_cast<ISmsServiceInterface::SimMessageStatus>(wrapStatus);
-        context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->AddSimMessage(
+        context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().AddSimMessage(
             context->slotId, NapiUtil::ToUtf16(context->smsc), NapiUtil::ToUtf16(context->pdu), status);
         if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
             context->resolved = true;
@@ -1084,7 +1083,7 @@ static void NativeDelSimMessage(napi_env env, void *data)
         context->errorCode = ERROR_SLOT_ID_INVALID;
         return;
     }
-    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DelSimMessage(context->slotId,
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().DelSimMessage(context->slotId,
         context->msgIndex);
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
@@ -1174,7 +1173,7 @@ static void NativeUpdateSimMessage(napi_env env, void *data)
     if (!context->pdu.empty() && (newStatus > -1)) {
         std::string msgPud(context->pdu.begin(), context->pdu.end());
         TELEPHONY_LOGD("NativeUpdateSimMessage msgPud = %{private}s", msgPud.c_str());
-        context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->UpdateSimMessage(context->slotId,
+        context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().UpdateSimMessage(context->slotId,
             context->msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(context->newStatus),
             NapiUtil::ToUtf16(context->pdu), NapiUtil::ToUtf16(context->smsc));
         if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
@@ -1280,7 +1279,7 @@ static void NativeGetAllSimMessages(napi_env env, void *data)
         context->errorCode = ERROR_SLOT_ID_INVALID;
         return;
     }
-    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().
         GetAllSimMessages(context->slotId, context->messageArray);
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
@@ -1384,7 +1383,7 @@ static bool MatchSetCBConfigParameters(napi_env env, const napi_value parameters
 static void NativeSetCBConfig(napi_env env, void *data)
 {
     auto context = static_cast<CBConfigContext *>(data);
-    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         context->slotId, context->enable, context->startMessageId, context->endMessageId, context->ranType);
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
@@ -1470,7 +1469,7 @@ static void NativeSplitMessage(napi_env env, void *data)
     auto context = static_cast<SplitMessageContext *>(data);
     std::u16string content = NapiUtil::ToUtf16(context->content);
     context->errorCode =
-        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SplitMessage(content, context->messageArray);
+        Singleton<SmsServiceManagerClient>::GetInstance().SplitMessage(content, context->messageArray);
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
     }
@@ -1536,7 +1535,7 @@ static napi_value SplitMessage(napi_env env, napi_callback_info info)
 static napi_value HasSmsCapability(napi_env env, napi_callback_info info)
 {
     napi_value result = nullptr;
-    napi_get_boolean(env, DelayedSingleton<SmsServiceManagerClient>::GetInstance()->HasSmsCapability(), &result);
+    napi_get_boolean(env, Singleton<SmsServiceManagerClient>::GetInstance().HasSmsCapability(), &result);
     return result;
 }
 
@@ -1563,7 +1562,7 @@ static void NativeGetSmsSegmentsInfo(napi_env env, void *data)
     }
     std::u16string content = NapiUtil::ToUtf16(context->content);
     ISmsServiceInterface::SmsSegmentsInfo info;
-    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetSmsSegmentsInfo(context->slotId,
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().GetSmsSegmentsInfo(context->slotId,
         content, context->force7BitCode, info);
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
@@ -1645,7 +1644,7 @@ static bool MatchIsImsSmsSupportedParameters(napi_env env, const napi_value para
 static void NativeIsImsSmsSupported(napi_env env, void *data)
 {
     auto context = static_cast<IsImsSmsSupportedContext *>(data);
-    context->errorCode = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().IsImsSmsSupported(
         context->slotId, context->setResult);
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
@@ -1698,8 +1697,7 @@ static napi_value IsImsSmsSupported(napi_env env, napi_callback_info info)
 static void NativeGetImsShortMessageFormat(napi_env env, void *data)
 {
     auto context = static_cast<SingleValueContext<std::u16string> *>(data);
-    context->errorCode =
-        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetImsShortMessageFormat(context->value);
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance().GetImsShortMessageFormat(context->value);
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
     }

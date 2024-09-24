@@ -76,8 +76,8 @@ void CdmaSmsGtest::SetUpTestCase()
     if (g_telephonyService == nullptr) {
         return;
     }
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->ResetSmsServiceProxy();
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->InitSmsServiceProxy();
+    Singleton<SmsServiceManagerClient>::GetInstance().ResetSmsServiceProxy();
+    Singleton<SmsServiceManagerClient>::GetInstance().InitSmsServiceProxy();
 }
 
 sptr<ISmsServiceInterface> CdmaSmsGtest::GetProxy()

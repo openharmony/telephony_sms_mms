@@ -24,14 +24,14 @@ namespace Telephony {
 std::string MmsBase64::Encode(const std::string src)
 {
     std::string dest;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetBase64Encode(src, dest);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Encode(src, dest);
     return dest;
 }
 
 std::string MmsBase64::Decode(const std::string src)
 {
     std::string dest;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetBase64Decode(src, dest);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Decode(src, dest);
     return dest;
 }
 } // namespace Telephony
