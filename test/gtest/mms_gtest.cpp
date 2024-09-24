@@ -114,8 +114,8 @@ void MmsGtest::SetUpTestCase()
     if (g_telephonyService == nullptr) {
         return;
     }
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->ResetSmsServiceProxy();
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->InitSmsServiceProxy();
+    Singleton<SmsServiceManagerClient>::GetInstance().ResetSmsServiceProxy();
+    Singleton<SmsServiceManagerClient>::GetInstance().InitSmsServiceProxy();
 }
 
 sptr<ISmsServiceInterface> MmsGtest::GetProxy()
@@ -1045,19 +1045,14 @@ HWTEST_F(MmsGtest, SmsServiceTest_0001, Function | MediumTest | Level1)
     GetPduToFile(slotId);
     dbUrl = GetFileToDb();
     homeUrlVal = GetMmsc(slotId);
-    auto smsService = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-    if (smsService == nullptr) {
-        return;
-    }
     std::u16string mmsc = StringUtils::ToUtf16(homeUrlVal);
     std::u16string data = StringUtils::ToUtf16(dbUrl);
     std::u16string ua = u"";
     std::u16string uaprof = u"";
-    smsService->SendMms(slotId, mmsc, data, ua, uaprof);
-    smsService->DownloadMms(slotId, mmsc, data, ua, uaprof);
+    Singleton<SmsServiceManagerClient>::GetInstance().SendMms(slotId, mmsc, data, ua, uaprof);
+    Singleton<SmsServiceManagerClient>::GetInstance().DownloadMms(slotId, mmsc, data, ua, uaprof);
     EXPECT_GE(dbUrl.length(), 0);
     EXPECT_GE(homeUrlVal.length(), 0);
-    EXPECT_TRUE(smsService != nullptr);
 }
 #endif // TEL_TEST_UNSUPPORT
 } // namespace Telephony

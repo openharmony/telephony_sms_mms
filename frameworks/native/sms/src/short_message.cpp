@@ -204,8 +204,8 @@ int32_t ShortMessage::CreateMessage(
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
     std::string indicates = StringUtils::ToUtf8(specification);
-    auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-    int32_t errorCode = client->CreateMessage(StringUtils::StringToHex(pdu), indicates, messageObj);
+    int32_t errorCode = Singleton<SmsServiceManagerClient>::GetInstance().
+        CreateMessage(StringUtils::StringToHex(pdu), indicates, messageObj);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGE("CreateMessage fail errorCode:%{public}d", errorCode);
         return errorCode;
@@ -226,9 +226,8 @@ ShortMessage ShortMessage::CreateIccMessage(std::vector<unsigned char> &pdu, std
         simStatus == SMS_SIM_MESSAGE_STATUS_SENT || simStatus == SMS_SIM_MESSAGE_STATUS_UNSENT) {
         message.simMessageStatus_ = static_cast<SmsSimMessageStatus>(simStatus);
         std::vector<unsigned char> pduTemp(pdu.begin() + MIN_ICC_PDU_LEN, pdu.end());
-
-        auto client = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
-        int32_t errorCode = client->CreateMessage(StringUtils::StringToHex(pduTemp), specification, message);
+        int32_t errorCode = Singleton<SmsServiceManagerClient>::GetInstance().
+            CreateMessage(StringUtils::StringToHex(pduTemp), specification, message);
         if (errorCode != TELEPHONY_ERR_SUCCESS) {
             TELEPHONY_LOGE("CreateMessage fail errorCode:%{public}d", errorCode);
             return message;
