@@ -1997,47 +1997,47 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     std::u16string desAddr = u"";
     sptr<ISendShortMessageCallback> sendCallback;
     sptr<IDeliveryShortMessageCallback> deliveryCallback;
-    auto smsServiceManagerClient = DelayedSingleton<SmsServiceManagerClient>::GetInstance();
     int32_t ret = 0;
-    ret = smsServiceManagerClient->SetDefaultSmsSlotId(slotId);
+    ret = Singleton<SmsServiceManagerClient>::GetInstance().SetDefaultSmsSlotId(slotId);
     EXPECT_GE(ret, 0);
-    smsServiceManagerClient->GetDefaultSmsSlotId();
-    smsServiceManagerClient->GetDefaultSmsSimId(slotId);
-    smsServiceManagerClient->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSlotId();
+    Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSimId(slotId);
+    Singleton<SmsServiceManagerClient>::GetInstance().SendMessage
+        (slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback);
     uint16_t port = 1;
     uint8_t *data = nullptr;
-    smsServiceManagerClient->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
+    Singleton<SmsServiceManagerClient>::GetInstance().SendMessage
+        (slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
     std::u16string scAddr = u"1234";
-    smsServiceManagerClient->SetScAddress(slotId, scAddr);
-    smsServiceManagerClient->GetScAddress(slotId, scAddr);
+    Singleton<SmsServiceManagerClient>::GetInstance().SetScAddress(slotId, scAddr);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetScAddress(slotId, scAddr);
     std::u16string smsc = u"test";
-    smsServiceManagerClient->AddSimMessage(
+    Singleton<SmsServiceManagerClient>::GetInstance().AddSimMessage(
         slotId, smsc, smsc, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD);
     uint32_t msgIndex = 1;
-    smsServiceManagerClient->DelSimMessage(slotId, msgIndex);
-    smsServiceManagerClient->UpdateSimMessage(
+    Singleton<SmsServiceManagerClient>::GetInstance().DelSimMessage(slotId, msgIndex);
+    Singleton<SmsServiceManagerClient>::GetInstance().UpdateSimMessage(
         slotId, msgIndex, ISmsServiceInterface::SimMessageStatus::SIM_MESSAGE_STATUS_UNREAD, smsc, smsc);
     std::vector<ShortMessage> messages;
-    smsServiceManagerClient->GetAllSimMessages(slotId, messages);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetAllSimMessages(slotId, messages);
     bool enable = true;
     uint8_t ranType = 1;
-    smsServiceManagerClient->SetCBConfig(slotId, enable, msgIndex, msgIndex, ranType);
-    smsServiceManagerClient->SetImsSmsConfig(slotId, enable);
+    Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(slotId, enable, msgIndex, msgIndex, ranType);
+    Singleton<SmsServiceManagerClient>::GetInstance().SetImsSmsConfig(slotId, enable);
     std::vector<std::u16string> splitMessage;
-    smsServiceManagerClient->SplitMessage(desAddr, splitMessage);
+    Singleton<SmsServiceManagerClient>::GetInstance().SplitMessage(desAddr, splitMessage);
     ISmsServiceInterface::SmsSegmentsInfo segInfo;
-    smsServiceManagerClient->GetSmsSegmentsInfo(slotId, desAddr, enable, segInfo);
-    smsServiceManagerClient->IsImsSmsSupported(slotId, enable);
-    smsServiceManagerClient->GetImsShortMessageFormat(desAddr);
-    smsServiceManagerClient->HasSmsCapability();
+    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsSegmentsInfo(slotId, desAddr, enable, segInfo);
+    Singleton<SmsServiceManagerClient>::GetInstance().IsImsSmsSupported(slotId, enable);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetImsShortMessageFormat(desAddr);
+    Singleton<SmsServiceManagerClient>::GetInstance().HasSmsCapability();
     std::string pdu = "";
     ShortMessage message;
-    smsServiceManagerClient->CreateMessage(pdu, pdu, message);
-    smsServiceManagerClient->GetBase64Encode(pdu, pdu);
-    smsServiceManagerClient->GetBase64Decode(pdu, pdu);
+    Singleton<SmsServiceManagerClient>::GetInstance().CreateMessage(pdu, pdu, message);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Encode(pdu, pdu);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Decode(pdu, pdu);
     uint32_t charset = 1;
-    smsServiceManagerClient->GetEncodeStringFunc(pdu, charset, charset, pdu);
-    EXPECT_TRUE(smsServiceManagerClient != nullptr);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetEncodeStringFunc(pdu, charset, charset, pdu);
 }
 
 /**

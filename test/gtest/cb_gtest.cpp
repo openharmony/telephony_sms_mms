@@ -69,8 +69,8 @@ void CbGtest::SetUpTestCase()
     if (g_telephonyService == nullptr) {
         return;
     }
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->ResetSmsServiceProxy();
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->InitSmsServiceProxy();
+    Singleton<SmsServiceManagerClient>::GetInstance().ResetSmsServiceProxy();
+    Singleton<SmsServiceManagerClient>::GetInstance().InitSmsServiceProxy();
 }
 
 sptr<ISmsServiceInterface> CbGtest::GetProxy()
@@ -95,7 +95,7 @@ void OpenCellBroadcastTestFuc(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -131,7 +131,7 @@ void OpenCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 20;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -144,7 +144,7 @@ void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 3;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -180,7 +180,7 @@ void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -216,7 +216,7 @@ void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 1000;
     uint8_t netType = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -251,7 +251,7 @@ void OpenCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 0;
     uint8_t netType = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -431,7 +431,7 @@ void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -467,7 +467,7 @@ void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 20;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -503,7 +503,7 @@ void CloseCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 3;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -539,7 +539,7 @@ void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 10;
     uint8_t netType = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -575,7 +575,7 @@ void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 1000;
     uint8_t netType = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -610,7 +610,7 @@ void CloseCellBroadcastTestFuc6(SmsMmsTestHelper &helper)
     uint32_t fromMsgId = 0;
     uint32_t toMsgId = 0;
     uint8_t netType = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetCBConfig(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(
         helper.slotId, enable, fromMsgId, toMsgId, netType);
     helper.SetIntResult(result);
     helper.NotifyAll();

@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace Telephony {
 class SmsServiceManagerClient : public std::enable_shared_from_this<SmsServiceManagerClient> {
-    DECLARE_DELAYED_SINGLETON(SmsServiceManagerClient)
+    DECLARE_SINGLETON(SmsServiceManagerClient)
 public:
     /**
      * @brief Init the proxy of SmsService.
