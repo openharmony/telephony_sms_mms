@@ -165,7 +165,7 @@ void NativeSendMms(napi_env env, void *data)
         asyncContext->data = NapiUtil::ToUtf16(helper.GetDbUrl());
     }
     asyncContext->errorCode =
-        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMms(asyncContext->slotId, asyncContext->mmsc,
+        Singleton<SmsServiceManagerClient>::GetInstance().SendMms(asyncContext->slotId, asyncContext->mmsc,
             asyncContext->data, asyncContext->mmsConfig.userAgent, asyncContext->mmsConfig.userAgentProfile);
     if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
         asyncContext->resolved = true;
@@ -451,7 +451,7 @@ void NativeDownloadMms(napi_env env, void *data)
     }
     std::u16string dbUrls;
     asyncContext->errorCode =
-        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DownloadMms(asyncContext->slotId, asyncContext->mmsc,
+        Singleton<SmsServiceManagerClient>::GetInstance().DownloadMms(asyncContext->slotId, asyncContext->mmsc,
             dbUrls, asyncContext->mmsConfig.userAgent, asyncContext->mmsConfig.userAgentProfile);
     TELEPHONY_LOGI("NativeDownloadMms dbUrls:%{public}s", NapiUtil::ToUtf8(dbUrls).c_str());
     if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {

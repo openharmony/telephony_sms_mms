@@ -84,8 +84,8 @@ void SmsGtest::SetUpTestCase()
     if (g_telephonyService == nullptr) {
         return;
     }
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->ResetSmsServiceProxy();
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->InitSmsServiceProxy();
+    Singleton<SmsServiceManagerClient>::GetInstance().ResetSmsServiceProxy();
+    Singleton<SmsServiceManagerClient>::GetInstance().InitSmsServiceProxy();
 }
 
 sptr<ISmsServiceInterface> SmsGtest::GetProxy()
@@ -118,7 +118,7 @@ HWTEST_F(SmsGtest, GetProxy_0001, Function | MediumTest | Level0)
 
 void SetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
 {
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetDefaultSmsSlotId(helper.slotId);
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetDefaultSmsSlotId(helper.slotId);
     helper.SetIntResult(result);
     helper.NotifyAll();
 }
@@ -200,7 +200,7 @@ HWTEST_F(SmsGtest, SetDefaultSmsSlotId_0003, Function | MediumTest | Level2)
 
 void GetDefaultSmsSlotIdTestFuc(SmsMmsTestHelper &helper)
 {
-    int32_t slotId = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetDefaultSmsSlotId();
+    int32_t slotId = Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSlotId();
     helper.SetIntResult(slotId);
     helper.NotifyAll();
 }
@@ -230,7 +230,7 @@ HWTEST_F(SmsGtest, GetDefaultSmsSlotId_0001, Function | MediumTest | Level2)
 void GetDefaultSmsSimIdTestFuc(SmsMmsTestHelper &helper)
 {
     int32_t simId = DEFAULT_SIM_SLOT_ID_REMOVE;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetDefaultSmsSimId(simId);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSimId(simId);
     helper.SetIntResult(simId);
     helper.NotifyAll();
 }
@@ -283,7 +283,7 @@ void SetSmscAddrTestFuc(SmsMmsTestHelper &helper)
 {
     // invalid slotID scenario, a invalid smsc addr is OKAY
     std::string scAddr("1234");
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetScAddress(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetScAddress(
         helper.slotId, StringUtils::ToUtf16(scAddr));
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -347,10 +347,10 @@ void DelAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
 {
     AccessMmsToken token;
     std::vector<ShortMessage> message;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetAllSimMessages(helper.slotId, message);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetAllSimMessages(helper.slotId, message);
     for (auto msg : message) {
         TELEPHONY_LOGI("DelAllSimMessagesTestFuc,index:%{public}d", msg.GetIndexOnSim());
-        DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DelSimMessage(helper.slotId, msg.GetIndexOnSim());
+        Singleton<SmsServiceManagerClient>::GetInstance().DelSimMessage(helper.slotId, msg.GetIndexOnSim());
     }
     helper.SetBoolResult(message.size() >= 0);
     helper.NotifyAll();
@@ -407,7 +407,7 @@ void AddSimMessageTestFuc(SmsMmsTestHelper &helper)
     std::u16string smscData(u"");
     std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
     uint32_t status = 3;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->AddSimMessage(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().AddSimMessage(
         helper.slotId, smscData, pduData, static_cast<ISmsServiceInterface::SimMessageStatus>(status));
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -494,7 +494,7 @@ HWTEST_F(SmsGtest, AddSimMessage_0003, Function | MediumTest | Level3)
 void GetAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
 {
     std::vector<ShortMessage> message;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetAllSimMessages(helper.slotId, message);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetAllSimMessages(helper.slotId, message);
     bool empty = message.empty();
     helper.SetBoolResult(empty);
     helper.NotifyAll();
@@ -582,7 +582,7 @@ void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
     std::u16string pduData(u"01000B818176251308F4000007E8B0BCFD76E701");
     uint32_t status = 3;
 
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->UpdateSimMessage(
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().UpdateSimMessage(
         helper.slotId, msgIndex, static_cast<ISmsServiceInterface::SimMessageStatus>(status), pduData, smscData);
     helper.SetIntResult(result);
     helper.NotifyAll();
@@ -667,7 +667,7 @@ HWTEST_F(SmsGtest, UpdateSimMessage_0003, Function | MediumTest | Level3)
 void DelSimMessageTestFuc(SmsMmsTestHelper &helper)
 {
     uint32_t msgIndex = 1;
-    int32_t result = DelayedSingleton<SmsServiceManagerClient>::GetInstance()->DelSimMessage(helper.slotId, msgIndex);
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().DelSimMessage(helper.slotId, msgIndex);
     helper.SetIntResult(result);
     helper.NotifyAll();
 }
@@ -749,9 +749,9 @@ HWTEST_F(SmsGtest, DelSimMessage_0003, Function | MediumTest | Level3)
 
 void SetImsSmsConfigTestFuc(SmsMmsTestHelper &helper)
 {
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetImsSmsConfig(helper.slotId, 1);
+    Singleton<SmsServiceManagerClient>::GetInstance().SetImsSmsConfig(helper.slotId, 1);
     bool isSupported = false;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId, isSupported);
+    Singleton<SmsServiceManagerClient>::GetInstance().IsImsSmsSupported(helper.slotId, isSupported);
     helper.SetBoolResult(isSupported);
     helper.NotifyAll();
 }
@@ -790,8 +790,8 @@ void SetImsSmsConfigTestFuc2(SmsMmsTestHelper &helper)
 {
     AccessMmsToken token;
     bool isSupported = false;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SetImsSmsConfig(helper.slotId, 0);
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId, isSupported);
+    Singleton<SmsServiceManagerClient>::GetInstance().SetImsSmsConfig(helper.slotId, 0);
+    Singleton<SmsServiceManagerClient>::GetInstance().IsImsSmsSupported(helper.slotId, isSupported);
     helper.SetBoolResult(isSupported);
     helper.NotifyAll();
 }
@@ -915,7 +915,7 @@ void SendDataMessageTestFuc(SmsMmsTestHelper &helper)
         helper.NotifyAll();
     }
     sendCallBackPtr->HasDeliveryCallBack(true);
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
+    Singleton<SmsServiceManagerClient>::GetInstance().SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
         StringUtils::ToUtf16(sca), port, DATA_SMS, (sizeof(DATA_SMS) / sizeof(DATA_SMS[0]) - 1), sendCallBackPtr,
         deliveryCallBackPtr);
 }
@@ -943,7 +943,7 @@ void SendDataMessageTestFuc2(SmsMmsTestHelper &helper)
         helper.NotifyAll();
     }
     sendCallBackPtr->HasDeliveryCallBack(false);
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
+    Singleton<SmsServiceManagerClient>::GetInstance().SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
         StringUtils::ToUtf16(sca), port, DATA_SMS, (sizeof(DATA_SMS) / sizeof(DATA_SMS[0]) - 1), sendCallBackPtr,
         deliveryCallBackPtr);
 }
@@ -1045,7 +1045,7 @@ void SendTextMessageTestFuc(SmsMmsTestHelper &helper)
         return;
     }
     sendCallBackPtr->HasDeliveryCallBack(true);
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
+    Singleton<SmsServiceManagerClient>::GetInstance().SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
         StringUtils::ToUtf16(sca), StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
 }
 
@@ -1074,7 +1074,7 @@ void SendTextMessageTestFuc2(SmsMmsTestHelper &helper)
         return;
     }
     sendCallBackPtr->HasDeliveryCallBack(false);
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
+    Singleton<SmsServiceManagerClient>::GetInstance().SendMessage(helper.slotId, StringUtils::ToUtf16(dest),
         StringUtils::ToUtf16(sca), StringUtils::ToUtf16(text), sendCallBackPtr, deliveryCallBackPtr);
 }
 
@@ -1238,10 +1238,10 @@ void GetSmsSegmentsInfoTestFuc(SmsMmsTestHelper &helper)
     std::u16string message = u"";
     bool force7BitCode = false;
     ISmsServiceInterface::SmsSegmentsInfo result;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetSmsSegmentsInfo(
+    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsSegmentsInfo(
         helper.slotId, message, force7BitCode, result);
     bool isSupported = false;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId, isSupported);
+    Singleton<SmsServiceManagerClient>::GetInstance().IsImsSmsSupported(helper.slotId, isSupported);
     helper.SetBoolResult(isSupported);
     helper.NotifyAll();
 }
@@ -1251,10 +1251,10 @@ void GetSmsSegmentsInfoTestFuc2(SmsMmsTestHelper &helper)
     std::u16string message = u"message";
     bool force7BitCode = true;
     ISmsServiceInterface::SmsSegmentsInfo result;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->GetSmsSegmentsInfo(
+    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsSegmentsInfo(
         helper.slotId, message, force7BitCode, result);
     bool isSupported = false;
-    DelayedSingleton<SmsServiceManagerClient>::GetInstance()->IsImsSmsSupported(helper.slotId, isSupported);
+    Singleton<SmsServiceManagerClient>::GetInstance().IsImsSmsSupported(helper.slotId, isSupported);
     helper.SetBoolResult(isSupported);
     helper.NotifyAll();
 }
