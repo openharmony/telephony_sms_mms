@@ -163,7 +163,7 @@ void GsmSmsCbHandler::ClearExpiredMessage()
     int64_t currentTime = time(&timep);
     for (auto i = cbMsgList_.size() - 1; i > 0; i--) {
         if (currentTime - cbMsgList_[i].header->recvTime > static_cast<long long>(DEFAULT_EXPIRED_TIME)) {
-            cbMsgList_.erase(cbMsgList_.begin(), cbMsgList_.begin() + i);
+            cbMsgList_.erase(cbMsgList_.begin(), cbMsgList_.begin() + i + 1);
             TELEPHONY_LOGI("ClearExpiredMessage clear message count: %{public}zu", i);
             return;
         }

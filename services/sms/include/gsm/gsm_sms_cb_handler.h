@@ -89,7 +89,7 @@ private:
 
 private:
     static constexpr uint16_t MAX_CB_MSG_LIST_SIZE = 10000;
-    static constexpr uint64_t DEFAULT_EXPIRED_TIME = 3 * 60 * 60 * 1000;
+    static constexpr uint64_t DEFAULT_EXPIRED_TIME = 3 * 60 * 60;
     int32_t slotId_;
     std::vector<SmsCbInfo> cbMsgList_;
     int32_t cid_ = -1;
