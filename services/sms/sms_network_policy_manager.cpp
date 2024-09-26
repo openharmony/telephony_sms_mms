@@ -174,6 +174,7 @@ std::optional<int32_t> SmsNetworkPolicyManager::NetworkRegister(
         return std::nullopt;
     }
     callback(isImsNetDomain_, voiceServiceState_);
+    std::lock_guard<std::mutex> lock(callbackMapMutex_);
     callbackMap_.emplace(GetId(), callback);
     return id_;
 }
@@ -186,6 +187,7 @@ std::optional<int32_t>  SmsNetworkPolicyManager::NetworkRegister(
         return std::nullopt;
     }
     callback(isImsNetDomain_, voiceServiceState_);
+    std::lock_guard<std::mutex> lock(callbackMapMutex_);
     callbackMap_.emplace(GetId(), std::move(callback));
     return id_;
 }
