@@ -607,5 +607,255 @@ HWTEST_F(BranchCbTest, GsmSmsCbHandler_0001, Function | MediumTest | Level1)
     EXPECT_TRUE(gsmSmsCbHandler->FindCbMessage(cbMessage) == nullptr);
     EXPECT_EQ(gsmSmsCbHandler->CheckCbMessage(cbMessage), 0);
 }
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbCodecOperator_0001
+ * @tc.name     Test GsmCbCodec::operator==
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbCodecOperator_0001, Function | MediumTest | Level1)
+{
+    GsmCbCodec gsmCbCodec1;
+    GsmCbCodec gsmCbCodec2;
+    const std::vector<unsigned char> pdu = {0x01, 0x02};
+    EXPECT_FALSE(gsmCbCodec1 == gsmCbCodec2);
+
+    bool ret = gsmCbCodec2.ParamsCheck(pdu);
+    EXPECT_FALSE(gsmCbCodec1 == gsmCbCodec2);
+
+    gsmCbCodec2.cbHeader_ = nullptr;
+    ret = gsmCbCodec1.ParamsCheck(pdu);
+    EXPECT_FALSE(gsmCbCodec1 == gsmCbCodec2);
+
+    ret = gsmCbCodec2.ParamsCheck(pdu);
+    EXPECT_TRUE(gsmCbCodec1 == gsmCbCodec2);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_PickOneByte_0001
+ * @tc.name     Test PickOneByte
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, PickOneByte_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    std::vector<unsigned char> pdu(GsmSmsCbHandler::MAX_CB_MSG_LEN + 1, 0x01);
+    bool ret = cbMsg->PduAnalysis(pdu);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GetPduData_0001
+ * @tc.name     Test GetPduData
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GetPduData_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    std::vector<unsigned char> dataPdu = {0x01};
+    cbMsg->GetPduData(dataPdu);
+    EXPECT_TRUE(cbMsg->cbPduBuffer_ == nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_ConvertToUTF8_0001
+ * @tc.name     Test ConvertToUTF8
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, ConvertToUTF8_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    const std::string raw = "raw";
+    std::string message = "message";
+    cbMsg->ConvertToUTF8(raw, message);
+    EXPECT_TRUE(cbMsg->cbHeader_ == nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_DecodeGeneralDcs_0001
+ * @tc.name     Test DecodeGeneralDcs
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, DecodeGeneralDcs_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    const uint8_t dcsData = 0x04;
+    GsmCbCodec::GsmCbMsgDcs dcs = {};
+    uint8_t tmpScheme = (dcsData & 0x0C) >> 0x02;
+    EXPECT_EQ(tmpScheme, 0x01);
+    cbMsg->DecodeGeneralDcs(dcsData, dcs);
+    EXPECT_EQ(dcs.codingScheme, DATA_CODING_8BIT);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_DecodeCbMsgDCS_0001
+ * @tc.name     Test DecodeCbMsgDCS
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, DecodeCbMsgDCS_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    const uint8_t dcsData = 0xE0;
+    const unsigned short iosData = 1;
+    GsmCbCodec::GsmCbMsgDcs dcs = {};
+    cbMsg->DecodeCbMsgDCS(dcsData, iosData, dcs);
+    EXPECT_EQ(dcs.codingGroup, GsmCbCodec::SMS_CBMSG_CODGRP_WAP);
+
+    const uint8_t dcsData1 = 0xF0;
+    cbMsg->DecodeCbMsgDCS(dcsData1, iosData, dcs);
+    EXPECT_EQ(dcs.codingGroup, GsmCbCodec::SMS_CBMSG_CODGRP_CLASS_CODING);
+
+    const uint8_t dcsData2 = 0xD0;
+    cbMsg->DecodeCbMsgDCS(dcsData2, iosData, dcs);
+    EXPECT_EQ(dcs.codingGroup, GsmCbCodec::SMS_CBMSG_CODGRP_GENERAL_DCS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbCodecToString_0001
+ * @tc.name     Test GsmCbCodecToString
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbCodecToString_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    std::string ret = cbMsg->ToString();
+    EXPECT_EQ(ret, "GsmCbCodec Header nullptr");
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbCodecGetBranch_0001
+ * @tc.name     Test GsmCbCodecGetBranch
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbCodecGetBranch_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    int8_t cbPriority = 1;
+    bool ret = cbMsg->GetPriority(cbPriority);
+    EXPECT_FALSE(ret);
+
+    uint8_t geoScope = 1;
+    ret = cbMsg->GetGeoScope(geoScope);
+    EXPECT_FALSE(ret);
+
+    uint16_t cbSerial = 1;
+    ret = cbMsg->GetSerialNum(cbSerial);
+    EXPECT_FALSE(ret);
+
+    uint16_t cbCategoty = 1;
+    ret = cbMsg->GetServiceCategory(cbCategoty);
+    EXPECT_FALSE(ret);
+
+    bool primary = true;
+    ret = cbMsg->IsEtwsPrimary(primary);
+    EXPECT_FALSE(ret);
+
+    ret = cbMsg->IsEtwsMessage(primary);
+    EXPECT_FALSE(ret);
+
+    ret = cbMsg->IsCmasMessage(primary);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GetWarningType_0001
+ * @tc.name     Test GetWarningType
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GetWarningType_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    uint16_t type = 1;
+    bool ret = cbMsg->GetWarningType(type);
+    EXPECT_FALSE(ret);
+
+    std::vector<unsigned char> pdu = {0x01};
+    ret = cbMsg->ParamsCheck(pdu);
+    ret = cbMsg->GetWarningType(type);
+    EXPECT_TRUE(ret);
+
+    type = -2; // OTHER_TYPE = -2
+    ret = cbMsg->GetWarningType(type);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbCodecIsEtws_0001
+ * @tc.name     Test GsmCbCodecIsEtws
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbCodecIsEtws_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    bool alert = true;
+    bool ret = cbMsg->IsEtwsEmergencyUserAlert(alert);
+    EXPECT_FALSE(ret);
+
+    ret = cbMsg->IsEtwsPopupAlert(alert);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbCodecGetCmas_0001
+ * @tc.name     Test GsmCbCodecGetCmas
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbCodecGetCmas_0001, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    uint8_t severity = 1;
+    bool ret = cbMsg->GetCmasSeverity(severity);
+    EXPECT_FALSE(ret);
+
+    uint8_t urgency = 1;
+    ret = cbMsg->GetCmasUrgency(urgency);
+    EXPECT_FALSE(ret);
+
+    uint8_t certainty = 1;
+    ret = cbMsg->GetCmasCertainty(certainty);
+    EXPECT_FALSE(ret);
+
+    uint8_t cmasClass = 1;
+    ret = cbMsg->GetCmasMessageClass(cmasClass);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmCbCodecGetBranch_0002
+ * @tc.name     Test GsmCbCodecGetBranch
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCbTest, GsmCbCodecGetBranch_0002, Function | MediumTest | Level1)
+{
+    auto cbMsg = std::make_shared<GsmCbCodec>();
+    ASSERT_NE(cbMsg, nullptr);
+    uint16_t msgId = 1;
+    bool ret = cbMsg->GetMessageId(msgId);
+    EXPECT_FALSE(ret);
+
+    uint8_t msgType = 1;
+    ret = cbMsg->GetMsgType(msgType);
+    EXPECT_FALSE(ret);
+
+    ret = cbMsg->GetLangType(msgType);
+    EXPECT_FALSE(ret);
+
+    ret = cbMsg->GetDcs(msgType);
+    EXPECT_FALSE(ret);
+
+    int64_t receiveTime = 1;
+    ret = cbMsg->GetReceiveTime(receiveTime);
+    EXPECT_FALSE(ret);
+}
 } // namespace Telephony
 } // namespace OHOS
