@@ -132,6 +132,7 @@ private:
     static constexpr const char *KEY_SMS_CODING_NATIONAL_INT = "sms_coding_national_int";
     static constexpr const char *SMS_MMS_INFO_MSG_STATE_SUCCEED = "0";
     static constexpr const char *SMS_MMS_INFO_MSG_STATE_FAILED = "2";
+    static constexpr const char *SHORT_MESSAGE_SENT_RESULT = "SHORT_MESSAGE_SENT_RESULT";
 
     SmsSender(const SmsSender &) = delete;
     SmsSender(const SmsSender &&) = delete;
