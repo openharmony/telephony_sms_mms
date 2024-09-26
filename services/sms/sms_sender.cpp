@@ -150,7 +150,7 @@ void SmsSender::SendMessageSucceed(const shared_ptr<SmsSendIndexer> &smsIndexer)
             if (!DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
                 TELEPHONY_LOGE("modify db fail while SendMessageSucceed. id:%{public}d;", smsIndexer->GetDataBaseId());
             }
-            SendBroadcast(smsIndexer, SMS_MMS_INFO_MSG_STATE_SUCCEED);
+            SendBroadcast(smsIndexer, SMS_MMS_INFO_MSG_STATE_SUCCEED, SMS_MMS_INFO_SMS_TYPE);
         }
     }
 }
@@ -189,14 +189,13 @@ void SmsSender::SendMessageFailed(const shared_ptr<SmsSendIndexer> &smsIndexer)
                 TELEPHONY_LOGE("modify fail while SendMessageFailed. id:%{public}d;", smsIndexer->GetDataBaseId());
             }
         }
-        SendBroadcast(smsIndexer, SMS_MMS_INFO_MSG_STATE_FAILED);
+        SendBroadcast(smsIndexer, SMS_MMS_INFO_MSG_STATE_FAILED, SMS_MMS_INFO_SMS_TYPE);
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_SEND_RESULT_FAIL, "send sms result fail from ril response");
     }
 }
 
-void SmsSender::SendBroadcast(
-    const std::shared_ptr<SmsSendIndexer> indexer, std::string context)
+void SmsSender::SendBroadcast(const std::shared_ptr<SmsSendIndexer> indexer, std::string stauts, std::string type)
 {
     if (indexer == nullptr) {
         TELEPHONY_LOGE("indexer is nullptr");
@@ -205,23 +204,17 @@ void SmsSender::SendBroadcast(
     EventFwk::Want want;
     EventFwk::CommonEventData data;
     EventFwk::CommonEventPublishInfo publishInfo;
-    PacketSmsData(want, indexer, data, publishInfo);
-    want.SetParam(SmsMmsInfo::RECEIVER_NUMBER, indexer->GetDestAddr());
-    want.SetParam(SmsMmsInfo::SENDER_NUMBER, indexer->GetSmcaAddr());
-    want.SetParam(SmsMmsInfo::MSG_CONTENT, context);
-    data.SetWant(want);
-    EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
-}
-
-void SmsSender::PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsSendIndexer> indexer,
-    EventFwk::CommonEventData &data, EventFwk::CommonEventPublishInfo &publishInfo)
-{
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
-    data.SetData(SHORT_MESSAGE_SENT_RESULT);
-    data.SetCode(1);
+    want.SetAction(MESSAGE_STATUS_CHANGE_NOTIFY);
     std::vector<std::string> smsPermissions;
     smsPermissions.emplace_back(Permission::SEND_MESSAGES);
     publishInfo.SetSubscriberPermissions(smsPermissions);
+    want.SetParam(SmsMmsInfo::MSG_ID, indexer->GetDataBaseId());
+    want.SetParam(SmsMmsInfo::RECEIVER_NUMBER, indexer->GetDestAddr());
+    want.SetParam(SmsMmsInfo::MSG_TYPE, type);
+    want.SetParam(SmsMmsInfo::MSG_STATE, stauts);
+    data.SetData(indexer->GetDataBaseId());
+    data.SetWant(want);
+    EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
 }
 
 void SmsSender::SendResultCallBack(

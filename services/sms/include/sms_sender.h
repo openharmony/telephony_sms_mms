@@ -85,9 +85,7 @@ public:
         uint8_t msgRef8bit, uint32_t totalPage);
     void SendCallbackExceptionCase(const sptr<ISendShortMessageCallback> &sendCallback, std::string str);
     static SmsCodingNationalType GetSmsCodingNationalType(int slotId);
-    void SendBroadcast(const std::shared_ptr<SmsSendIndexer> indexer, std::string context);
-    void PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsSendIndexer> indexer,
-        EventFwk::CommonEventData &data, EventFwk::CommonEventPublishInfo &publishInfo);
+    void SendBroadcast(const std::shared_ptr<SmsSendIndexer> indexer, std::string stauts, std::string type);
 
 public:
     bool resIsSmsReady_ = false;
@@ -132,7 +130,8 @@ private:
     static constexpr const char *KEY_SMS_CODING_NATIONAL_INT = "sms_coding_national_int";
     static constexpr const char *SMS_MMS_INFO_MSG_STATE_SUCCEED = "0";
     static constexpr const char *SMS_MMS_INFO_MSG_STATE_FAILED = "2";
-    static constexpr const char *SHORT_MESSAGE_SENT_RESULT = "SHORT_MESSAGE_SENT_RESULT";
+    static constexpr const char *SMS_MMS_INFO_SMS_TYPE = "0";
+    static constexpr const char *MESSAGE_STATUS_CHANGE_NOTIFY = "MESSAGE_STATUS_CHANGE_NOTIFY";
 
     SmsSender(const SmsSender &) = delete;
     SmsSender(const SmsSender &&) = delete;
