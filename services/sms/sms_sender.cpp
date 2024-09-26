@@ -201,13 +201,14 @@ void SmsSender::SendBroadcast(
         TELEPHONY_LOGE("indexer is nullptr");
         return;
     }
+    
+    TELEPHONY_LOGE("context:%{public}s", context.c_str());
     EventFwk::Want want;
     EventFwk::CommonEventData data;
     EventFwk::CommonEventPublishInfo publishInfo;
     PacketSmsData(want, indexer, data, publishInfo);
     want.SetParam(SmsMmsInfo::RECEIVER_NUMBER, indexer->GetDestAddr());
     want.SetParam(SmsMmsInfo::SENDER_NUMBER, indexer->GetSmcaAddr());
-    want.SetParam(SmsMmsInfo::MSG_CONTENT, context);
     data.SetWant(want);
     EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
 }
@@ -217,7 +218,7 @@ void SmsSender::PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsSen
 {
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
     data.SetData(SHORT_MESSAGE_SENT_RESULT);
-    data.SetCode(1);
+    data.SetCode(0);
     std::vector<std::string> smsPermissions;
     smsPermissions.emplace_back(Permission::SEND_MESSAGES);
     publishInfo.SetSubscriberPermissions(smsPermissions);
