@@ -22,6 +22,7 @@
 #include <queue>
 #include <unordered_map>
 
+#include "common_event_manager.h"
 #include "gsm_sms_message.h"
 #include "tel_ril_sms_parcel.h"
 #include "i_sms_service_interface.h"
@@ -29,6 +30,10 @@
 #include "sms_persist_helper.h"
 #include "sms_send_indexer.h"
 #include "tel_event_handler.h"
+#include "want.h"
+#include "common_event_support.h"
+#include "sms_broadcast_subscriber_receiver.h"
+#include "sms_wap_push_handler.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -80,6 +85,9 @@ public:
         uint8_t msgRef8bit, uint32_t totalPage);
     void SendCallbackExceptionCase(const sptr<ISendShortMessageCallback> &sendCallback, std::string str);
     static SmsCodingNationalType GetSmsCodingNationalType(int slotId);
+    void SendBroadcast(const std::shared_ptr<SmsSendIndexer> indexer, std::string context);
+    void PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsSendIndexer> indexer,
+        EventFwk::CommonEventData &data, EventFwk::CommonEventPublishInfo &publishInfo);
 
 public:
     bool resIsSmsReady_ = false;
