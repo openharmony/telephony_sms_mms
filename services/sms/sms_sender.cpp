@@ -212,7 +212,7 @@ void SmsSender::SendBroadcast(const std::shared_ptr<SmsSendIndexer> indexer, std
     want.SetParam(SmsMmsInfo::RECEIVER_NUMBER, indexer->GetDestAddr());
     want.SetParam(SmsMmsInfo::MSG_TYPE, type);
     want.SetParam(SmsMmsInfo::MSG_STATE, stauts);
-    data.SetData(indexer->GetDataBaseId());
+    data.SetData(std::to_string(indexer->GetDataBaseId()));
     data.SetWant(want);
     EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
 }
