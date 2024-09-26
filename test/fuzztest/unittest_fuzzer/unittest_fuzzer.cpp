@@ -159,6 +159,8 @@ public:
         TestGetMmscUrl();
         TestSetMmsProxyAddressAndProxyPort();
         TestGetMmsProxyAddressAndProxyPort();
+        TestSplitAndMatchApnTypes();
+        TestGetMmsApnValue();
         DestoryObject();
     }
 protected:
@@ -189,6 +191,20 @@ protected:
     {
         m_pMmsApnInfo->getMmsProxyAddressAndProxyPort();
     }
+    void TestSplitAndMatchApnTypes()
+    {
+        std::string apn = GetString();
+        m_pMmsApnInfo->SplitAndMatchApnTypes(apn);
+        apn += ",mms";
+        m_pMmsApnInfo->SplitAndMatchApnTypes(apn);
+    }
+    void TestGetMmsApnValue()
+    {
+        int count = 0;
+        std::string homeUrlVal = GetString();
+        std::string mmsIPAddressVal = GetString();
+        m_pMmsApnInfo->GetMmsApnValue(nullptr, count, homeUrlVal, mmsIPAddressVal);
+    }
 private:
     std::unique_ptr<MmsApnInfo> m_pMmsApnInfo;
 };
@@ -209,6 +225,14 @@ public:
         }
         TestExecutePost();
         TestExecuteGet();
+        TestGetMmsDataBuf();
+        TestCheckSendConf();
+        TestGetCoverUrl();
+        TestUpdateMmsPduToStorage();
+        TestGetMmsPduFromFile();
+        TestGetMmsPduFromDataBase();
+        TestDeleteMmsPdu();
+        TestWriteBufferToFile();
         DestoryObject();
     }
 protected:
@@ -237,6 +261,51 @@ protected:
         m_pMmsNetworkClient->Execute("GET", strNormalUrl, strPostData, "ua", "uaprof");
         m_pMmsNetworkClient->Execute("GET", strBadUrl, strPostData, "ua", "uaprof");
     }
+    void TestGetMmsDataBuf()
+    {
+        std::string  fileName = "www.baidu.com";
+        std::string  strBuf = GetString(256);
+        m_pMmsNetworkClient->GetMmsDataBuf(strBuf, fileName);
+    }
+    void TestCheckSendConf()
+    {
+        m_pMmsNetworkClient->CheckSendConf();
+    }
+    void TestGetCoverUrl()
+    {
+        std::string emptyStr;
+        m_pMmsNetworkClient->GetCoverUrl(emptyStr);
+        std::string str = GetString(20);
+        m_pMmsNetworkClient->GetCoverUrl(str);
+    }
+    void TestUpdateMmsPduToStorage()
+    {
+        std::string storeDirName = GetString(20);
+        m_pMmsNetworkClient->UpdateMmsPduToStorage(storeDirName);
+    }
+    void TestGetMmsPduFromFile()
+    {
+        std::string fileName = GetString(20);
+        std::string strBuf = GetString(20);
+        m_pMmsNetworkClient->GetMmsPduFromFile(fileName, strBuf);
+    }
+    void TestGetMmsPduFromDataBase()
+    {
+        std::string dbUrl = GetString(20);
+        std::string strBuf = GetString(20);
+        m_pMmsNetworkClient->GetMmsPduFromDataBase(dbUrl, strBuf);
+    }
+    void TestDeleteMmsPdu()
+    {
+        std::string dbUrl = GetString(20);
+        m_pMmsNetworkClient->DeleteMmsPdu(dbUrl);
+    }
+    void TestWriteBufferToFile()
+    {
+        std::unique_ptr<char[]> bufp = std::make_unique<char[]>(g_size);
+        std::string strPathName = GetString(20);
+        m_pMmsNetworkClient->WriteBufferToFile(bufp, g_size, strPathName);
+    }
 private:
     std::unique_ptr<MmsNetworkClient> m_pMmsNetworkClient;
 };
@@ -256,6 +325,9 @@ public:
         TestGet();
         TestDelete();
         TestGet();
+        TestSetMmsPdu();
+        TestSplitPdu();
+        TestSplitUrl();
         DestoryObject();
     }
 protected:
@@ -284,6 +356,23 @@ protected:
     void TestDelete()
     {
         m_pMmsPersistHelper->DeleteMmsPdu(m_strUrl);
+    }
+    void TestSetMmsPdu()
+    {
+        std::string mmsPdu = GetString(100);
+        m_pMmsPersistHelper->SetMmsPdu(mmsPdu);
+    }
+    void TestSplitPdu()
+    {
+        std::string mmsPdu = StringUtils::StringToHex(GetString(100));
+        m_pMmsPersistHelper->SplitPdu(mmsPdu);
+    }
+    void TestSplitUrl()
+    {
+        std::string url = GetString(100);
+        m_pMmsPersistHelper->SplitUrl(url);
+        url += ",fuzzer";
+        m_pMmsPersistHelper->SplitUrl(url);
     }
 private:
     std::string                       m_strUrl;
@@ -367,9 +456,10 @@ protected:
         uint16_t dataBaseId = 0;
         sptr<ISendShortMessageCallback> sendCallback = nullptr;
         sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
+        bool isMmsApp = true;
 
         m_pCdmaSmsSender->TextBasedSmsDeliveryViaIms(strDtAddr, strScAddr, strText, sendCallback, deliveryCallback,
-            dataBaseId);
+            dataBaseId, isMmsApp);
         m_pCdmaSmsSender->DataBasedSmsDeliveryViaIms(
             strDtAddr, strScAddr, nPort, g_data, g_size, sendCallback, deliveryCallback);
     }
@@ -385,21 +475,21 @@ protected:
             sendCallback, deliveryCallback);
 
         m_pCdmaSmsSender->SendSmsToRil(pSendIndexer);
+        m_pCdmaSmsSender->ResendTextDelivery(nullptr);
         m_pCdmaSmsSender->ResendTextDelivery(pSendIndexer);
+        m_pCdmaSmsSender->ResendDataDelivery(nullptr);
         m_pCdmaSmsSender->ResendDataDelivery(pSendIndexer);
 
         std::unique_ptr<CdmaTransportMsg> transMsg = std::make_unique<CdmaTransportMsg>();
         transMsg->type = GetEnumRandom_CdmaTransportMsgType();
 
+        pSendIndexer->SetIsConcat(true);
         m_pCdmaSmsSender->SetConcact(pSendIndexer, transMsg);
     }
     void TestGetOrSimpleCall()
     {
         bool bIsSupported;
-        std::shared_ptr<SmsReceiveIndexer> pRecvIndexer;
         m_pCdmaSmsSender->IsImsSmsSupported(g_slotId, bIsSupported);
-        m_pCdmaSmsSender->ReceiveStatusReport(pRecvIndexer);
-        m_pCdmaSmsSender->RegisterImsHandler();
         m_pCdmaSmsSender->GetSeqNum();
         m_pCdmaSmsSender->GetSubmitMsgId();
     }
@@ -424,7 +514,6 @@ public:
             return;
         }
         TestHandleSmsAndSendCBB();
-        TestReplySmsToSmsc();
         TestTransformMessageInfo();
         DestoryObject();
     }
@@ -432,12 +521,10 @@ protected:
     bool CreateObject()
     {
         m_pCdmaSmsReceiveHandler = std::make_unique<CdmaSmsReceiveHandler>(g_slotId);
-        m_pCdmaSmsReceiveHandler->Init();
         return m_pCdmaSmsReceiveHandler != nullptr;
     }
     void DestoryObject()
     {
-        m_pCdmaSmsReceiveHandler->UnRegisterHandler();
         m_pCdmaSmsReceiveHandler.reset();
     }
     void TestHandleSmsAndSendCBB()
@@ -460,7 +547,9 @@ protected:
         smsBaseMessage-> visibleMessageBody_ ="123";
 
         m_pCdmaSmsReceiveHandler->HandleSmsOtherSvcid(smsBaseMessage);
+        m_pCdmaSmsReceiveHandler->HandleSmsOtherSvcid(nullptr);
         m_pCdmaSmsReceiveHandler->SendCBBroadcast(smsBaseMessage);
+        m_pCdmaSmsReceiveHandler->SendCBBroadcast(nullptr);
     }
     void TestReplySmsToSmsc()
     {
@@ -542,7 +631,6 @@ protected:
         m_pCdmaSmsMessage->IsCphsMwi();
         m_pCdmaSmsMessage->IsWapPushMsg();
         m_pCdmaSmsMessage->GetSpecialSmsInd();
-        m_pCdmaSmsMessage->IsStatusReport();
         m_pCdmaSmsMessage->GetDestPort();
         m_pCdmaSmsMessage->IsBroadcastMsg();
         m_pCdmaSmsMessage->GetCMASCategory();
@@ -588,5 +676,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     RunFuzzer<OHOS::MmsNetworkClientFuzzer>(data, size);
     RunFuzzer<OHOS::MmsPersistHelperFuzzer>(data, size);
     RunFuzzer<OHOS::MmsConnCallbackStubFuzzer>(data, size);
+    RunFuzzer<OHOS::CdmaSmsMessageFuzzer>(data, size);
+    RunFuzzer<OHOS::CdmaSmsSenderFuzzer>(data, size);
+    RunFuzzer<OHOS::CdmaSmsReceiveHandleFuzzer>(data, size);
     return 0;
 }
