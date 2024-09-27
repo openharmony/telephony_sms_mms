@@ -22,6 +22,7 @@
 #include <queue>
 #include <unordered_map>
 
+#include "common_event_manager.h"
 #include "gsm_sms_message.h"
 #include "tel_ril_sms_parcel.h"
 #include "i_sms_service_interface.h"
@@ -29,6 +30,10 @@
 #include "sms_persist_helper.h"
 #include "sms_send_indexer.h"
 #include "tel_event_handler.h"
+#include "want.h"
+#include "common_event_support.h"
+#include "sms_broadcast_subscriber_receiver.h"
+#include "sms_wap_push_handler.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -80,6 +85,7 @@ public:
         uint8_t msgRef8bit, uint32_t totalPage);
     void SendCallbackExceptionCase(const sptr<ISendShortMessageCallback> &sendCallback, std::string str);
     static SmsCodingNationalType GetSmsCodingNationalType(int slotId);
+    void SendBroadcast(const std::shared_ptr<SmsSendIndexer> indexer, std::string stauts, std::string type);
 
 public:
     bool resIsSmsReady_ = false;
@@ -124,6 +130,8 @@ private:
     static constexpr const char *KEY_SMS_CODING_NATIONAL_INT = "sms_coding_national_int";
     static constexpr const char *SMS_MMS_INFO_MSG_STATE_SUCCEED = "0";
     static constexpr const char *SMS_MMS_INFO_MSG_STATE_FAILED = "2";
+    static constexpr const char *SMS_MMS_INFO_SMS_TYPE = "0";
+    static constexpr const char *MESSAGE_STATUS_CHANGE_NOTIFY = "MESSAGE_STATUS_CHANGE_NOTIFY";
 
     SmsSender(const SmsSender &) = delete;
     SmsSender(const SmsSender &&) = delete;
