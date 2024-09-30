@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "i_sms_service_interface.h"
-#include "refbase.h"
 #include "singleton.h"
 
 namespace OHOS {
