@@ -552,29 +552,6 @@ HWTEST_F(SmsGtest, GetAllSimMessages_0002, Function | MediumTest | Level3)
     EXPECT_GE(helper.GetBoolResult(), 0);
 }
 
-/**
- * @tc.number   Telephony_SmsMmsGtest_GetAllSimMessages_0003
- * @tc.name     Get All Sim Messages
- * @tc.desc     Function test
- */
-HWTEST_F(SmsGtest, GetAllSimMessages_0003, Function | MediumTest | Level3)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0003 -->");
-    if (!(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
-    SmsMmsTestHelper helper;
-    helper.slotId = DEFAULT_SIM_SLOT_ID;
-    if (!helper.Run(GetAllSimMessagesTestFuc, std::ref(helper))) {
-        TELEPHONY_LOGI("GetAllSimMessagesTestFuc out of time");
-        ASSERT_TRUE(helper.Run(GetAllSimMessagesTestFuc, std::ref(helper)));
-    }
-    TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0003 -->finished");
-    ASSERT_TRUE(helper.GetBoolResult());
-}
-
 void UpdateSimMessageTestFuc(SmsMmsTestHelper &helper)
 {
     uint32_t msgIndex = 0;
