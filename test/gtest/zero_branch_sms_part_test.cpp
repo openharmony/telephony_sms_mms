@@ -19,6 +19,7 @@
 #include "delivery_short_message_callback_stub.h"
 #include "gtest/gtest.h"
 #include "gsm_sms_param_decode.h"
+#include "gsm_sms_tpdu_encode.h"
 #include "send_short_message_callback_stub.h"
 #include "sms_misc_manager.h"
 #include "sms_mms_gtest.h"
@@ -38,6 +39,8 @@ const std::string SMS_ADDR_FOUR = "1 23";
 const std::string SMS_ADDR_FIVE = " a 123 ";
 const std::string SEND_MMS_FILE_URL = "1,2,";
 const std::string VNET_MMSC = "http://mmsc.vnet.mobi";
+static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
+static constexpr uint8_t MAX_SMSC_LEN = 20;
 } // namespace
 
 class BranchSmsPartTest : public testing::Test {
@@ -707,6 +710,586 @@ HWTEST_F(BranchSmsPartTest, GsmSmsMessage_0007, Function | MediumTest | Level1)
     EXPECT_TRUE(gsmSmsMessage != nullptr);
     gsmSmsMessage->CreateDefaultSubmit(false, DataCodingScheme::DATA_CODING_7BIT);
     EXPECT_EQ(gsmSmsMessage->smsTpdu_->tpduType, OHOS::Telephony::SmsTpduType::SMS_TPDU_SUBMIT);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsMessage_0008
+ * @tc.name     Test GsmSmsMessage PduAnalysisMsg
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsMessage_0008, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    EXPECT_TRUE(gsmSmsMessage != nullptr);
+    gsmSmsMessage->smsTpdu_ = std::make_shared<struct SmsTpdu>();
+    gsmSmsMessage->smsTpdu_->tpduType = OHOS::Telephony::SmsTpduType::SMS_TPDU_STATUS_REP;
+    // also test AnalysisMsgDeliver
+    EXPECT_TRUE(gsmSmsMessage->PduAnalysisMsg());
+    gsmSmsMessage->smsTpdu_->tpduType = OHOS::Telephony::SmsTpduType::SMS_TPDU_SUBMIT;
+    // alse test AnalysisMsgSubmit
+    EXPECT_TRUE(gsmSmsMessage->PduAnalysisMsg());
+    gsmSmsMessage->smsTpdu_->tpduType = OHOS::Telephony::SmsTpduType::SMS_TPDU_DELIVER_REP;
+    EXPECT_FALSE(gsmSmsMessage->PduAnalysisMsg());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsMessage_0009
+ * @tc.name     Test GsmSmsMessage ConvertUserData and ConvertUserPartData
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsMessage_0009, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    EXPECT_TRUE(gsmSmsMessage != nullptr);
+
+    gsmSmsMessage->smsTpdu_ = std::make_shared<struct SmsTpdu>();
+    gsmSmsMessage->smsTpdu_->tpduType = OHOS::Telephony::SmsTpduType::SMS_TPDU_DELIVER;
+    gsmSmsMessage->codingScheme_ = OHOS::Telephony::DataCodingScheme::DATA_CODING_7BIT;
+    size_t  oldSize = gsmSmsMessage->visibleMessageBody_.size();
+    gsmSmsMessage->smsUserData_.header[0].udh.singleShift.langId = 1;
+    std::string text = "1234566";
+    gsmSmsMessage->SetFullText(text);
+    gsmSmsMessage->ConvertUserData();
+    size_t  newSize = gsmSmsMessage->visibleMessageBody_.size();
+    EXPECT_EQ(newSize, oldSize);
+
+    gsmSmsMessage->codingScheme_ = OHOS::Telephony::DataCodingScheme::DATA_CODING_UCS2;
+    oldSize = gsmSmsMessage->visibleMessageBody_.size();
+    gsmSmsMessage->ConvertUserData();
+    newSize = gsmSmsMessage->visibleMessageBody_.size();
+    EXPECT_EQ(newSize, oldSize);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsMessage_0010
+ * @tc.name     Test GsmSmsMessage IsSpecialMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsMessage_0010, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    EXPECT_TRUE(gsmSmsMessage != nullptr);
+    gsmSmsMessage->protocolId_ = 0x40;
+    EXPECT_TRUE(gsmSmsMessage->IsSpecialMessage());
+
+    gsmSmsMessage->msgClass_ = OHOS::Telephony::SmsMessageClass::SMS_SIM_MESSAGE;
+    gsmSmsMessage->protocolId_ = 0x7f;
+    EXPECT_TRUE(gsmSmsMessage->IsSpecialMessage());
+
+    gsmSmsMessage->protocolId_ = 0x7c;
+    EXPECT_TRUE(gsmSmsMessage->IsSpecialMessage());
+
+    gsmSmsMessage->protocolId_ = 0x41;
+    gsmSmsMessage->bMwiSet_ = true;
+    EXPECT_TRUE(gsmSmsMessage->IsSpecialMessage());
+
+    gsmSmsMessage->bMwiClear_ = true;
+    EXPECT_TRUE(gsmSmsMessage->IsSpecialMessage());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsMessage_0011
+ * @tc.name     Test GsmSmsMessage DecodeMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsMessage_0011, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    EXPECT_TRUE(gsmSmsMessage != nullptr);
+
+    std::string msgText("");
+    // init destination array of pdu data
+    uint8_t decodeData[(MAX_GSM_7BIT_DATA_LEN * OHOS::Telephony::MAX_SEGMENT_NUM) + 1];
+    EXPECT_EQ(memset_s(decodeData, sizeof(decodeData), 0x00, sizeof(decodeData)), EOK);
+
+    int encodeLen = 0;
+    bool bAbnormal = false;
+    unsigned char langId = OHOS::Telephony::MsgLanguageId::MSG_ID_RESERVED_LANG;
+    OHOS::Telephony::DataCodingScheme codingType = OHOS::Telephony::DataCodingScheme::DATA_CODING_7BIT;
+
+    encodeLen = gsmSmsMessage->DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
+    EXPECT_EQ(encodeLen, 0);
+
+    msgText = "123456";
+    encodeLen = gsmSmsMessage->DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
+    EXPECT_GT(encodeLen, 0);
+
+    codingType = OHOS::Telephony::DataCodingScheme::DATA_CODING_8BIT;
+    encodeLen = gsmSmsMessage->DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
+    EXPECT_GT(encodeLen, 0);
+
+    msgText.append(sizeof(decodeData), '1');
+    encodeLen = gsmSmsMessage->DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
+    EXPECT_EQ(encodeLen, 0);
+
+    msgText = "123456";
+    codingType = OHOS::Telephony::DataCodingScheme::DATA_CODING_UCS2;
+    encodeLen = gsmSmsMessage->DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
+    EXPECT_GT(encodeLen, 0);
+
+    codingType = OHOS::Telephony::DataCodingScheme::DATA_CODING_AUTO;
+    encodeLen = gsmSmsMessage->DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
+    EXPECT_GT(encodeLen, 0);
+
+    codingType = OHOS::Telephony::DataCodingScheme::DATA_CODING_EUCKR;
+    encodeLen = gsmSmsMessage->DecodeMessage(decodeData, sizeof(decodeData), codingType, msgText, bAbnormal, langId);
+    EXPECT_GT(encodeLen, 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0016
+ * @tc.name     Test GsmSmsParamCodec EncodeAddressPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsParamCodec_0016, Function | MediumTest | Level1)
+{
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    AddressNumber *pAddress = new AddressNumber();
+    std::string paramStr;
+
+    std::string smsc = "**21*1300555002012345";
+    memcpy_s(&pAddress->address, sizeof(pAddress->address), smsc.data(), smsc.length());
+    pAddress->address[smsc.length()] = '\0';
+    pAddress->ton = TYPE_INTERNATIONAL;
+    pAddress->npi = SMS_NPI_ISDN;
+    EXPECT_FALSE(gsmSmsParamCodec->EncodeAddressPdu(pAddress, paramStr)); // second branch
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsParamCodec_0017
+ * @tc.name     Test GsmSmsParamCodec EncodeSmscPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsParamCodec_0017, Function | MediumTest | Level1)
+{
+    /*
+     *   test third branch
+     */
+    auto gsmSmsParamCodec = std::make_shared<GsmSmsParamCodec>();
+    EXPECT_NE(gsmSmsParamCodec, nullptr);
+    const std::string smsc = "+17005550020";
+    AddressNumber *pAddress = new AddressNumber();
+    uint8_t encodeSmscAddr[MAX_SMSC_LEN];
+    memset_s(encodeSmscAddr, sizeof(encodeSmscAddr), 0x00, sizeof(encodeSmscAddr));
+    std::string decodeAddr;
+    memcpy_s(&pAddress->address, sizeof(pAddress->address), smsc.data(), smsc.length());
+    pAddress->address[smsc.length()] = '\0';
+    pAddress->ton = TYPE_INTERNATIONAL;
+    pAddress->npi = SMS_NPI_ISDN;
+    uint8_t encodeSmscLen = 0;
+    encodeSmscLen = gsmSmsParamCodec->EncodeSmscPdu(pAddress, encodeSmscAddr, sizeof(encodeSmscAddr));
+    EXPECT_GT(encodeSmscLen, 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0005
+ * @tc.name     Test GsmSmsTpduCodec EncodeSubmitPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0005, Function | MediumTest | Level1)
+{
+    auto tpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer->data_[0] = 1;
+    SmsSubmit *pSubmit = new SmsSubmit();
+    /*
+     * parameter check
+     */
+    auto encode = std::make_shared<GsmSmsTpduEncode>(nullptr, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_FALSE(encode->EncodeSubmitPdu(*encodeBuffer, pSubmit));
+    auto encode1 = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, nullptr, tpduCodec);
+    EXPECT_FALSE(encode1->EncodeSubmitPdu(*encodeBuffer, pSubmit));
+
+    auto encode2 = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_TRUE(encode2->EncodeSubmitPdu(*encodeBuffer, pSubmit));
+    /*
+     * third branch
+     */
+    const std::string smsc = "+17005550020324556627";
+    memcpy_s(&pSubmit->destAddress.address, sizeof(pSubmit->destAddress.address), smsc.data(), smsc.length());
+    pSubmit->destAddress.address[smsc.length()] = '\0';
+    EXPECT_FALSE(encode2->EncodeSubmitPdu(*encodeBuffer, pSubmit));
+
+    delete pSubmit;
+    pSubmit = nullptr;
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0006
+ * @tc.name     Test GsmSmsTpduCodec EncodeSubmitPduPartData
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0006, Function | MediumTest | Level1)
+{
+    auto tpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    SmsSubmit *pSubmit = new SmsSubmit();
+    auto encode = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_NE(encode, nullptr);
+    /*
+     * parameter check
+     */
+    encodeBuffer->data_ = nullptr;
+    EXPECT_FALSE(encode->EncodeSubmitPduPartData(*encodeBuffer, pSubmit));
+    /*
+     * third branch
+     */
+    encodeBuffer->index_ = 0;
+    pSubmit->vpf = OHOS::Telephony::SmsVpf::SMS_VPF_ENHANCED;
+    EXPECT_FALSE(encode->EncodeSubmitPdu(*encodeBuffer, pSubmit));
+
+    encodeBuffer->data_ = nullptr;
+    EXPECT_FALSE(encode->EncodeSubmitPdu(*encodeBuffer, pSubmit));
+
+    delete pSubmit;
+    pSubmit = nullptr;
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0007
+ * @tc.name     Test GsmSmsTpduCodec EncodeSubmitTpduType
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0007, Function | MediumTest | Level1)
+{
+    auto tpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    SmsSubmit pSubmit;
+    auto encode = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_NE(encode, nullptr);
+
+    /*
+     * parameter check
+     */
+    pSubmit.bRejectDup = false;
+    encodeBuffer->data_ = nullptr;
+    uint16_t count = encodeBuffer->GetSize();
+    encode->EncodeSubmitTpduType(*encodeBuffer, pSubmit);
+    EXPECT_EQ(encodeBuffer->GetSize(), count);
+    /*
+     * third branch
+     */
+    auto encodeBuffer2 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer2->data_[0] = 1;
+    encodeBuffer2->bitIndex_ = 1;
+    uint16_t count2 = encodeBuffer2->GetSize();
+    encode->EncodeSubmitTpduType(*encodeBuffer2, pSubmit);
+    EXPECT_EQ(encodeBuffer2->GetSize(), count2);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0008
+ * @tc.name     Test GsmSmsTpduCodec EncodeSubmitTypePartData
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0008, Function | MediumTest | Level1)
+{
+    auto tpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    SmsSubmit pSubmit;
+    auto encode = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_NE(encode, nullptr);
+    pSubmit.bStatusReport = false;
+    pSubmit.bHeaderInd = false;
+    pSubmit.bReplyPath = false;
+    /*
+     * SMS_VPF_ENHANCED
+     */
+    pSubmit.vpf = OHOS::Telephony::SmsVpf::SMS_VPF_ENHANCED;
+    encodeBuffer->data_ = nullptr;
+    uint16_t count1 = encodeBuffer->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer, pSubmit);
+    EXPECT_EQ(encodeBuffer->GetSize(), count1);
+
+    auto encodeBuffer2 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer2->data_[0] = 1;
+    encodeBuffer2->index_ = 1;
+    uint16_t count2 = encodeBuffer2->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer2, pSubmit);
+    EXPECT_EQ(encodeBuffer2->GetSize(), count2);
+    /*
+     * SMS_VPF_RELATIVE
+     */
+    pSubmit.vpf = OHOS::Telephony::SmsVpf::SMS_VPF_ENHANCED;
+    auto encodeBuffer3 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer3->data_ = nullptr;
+    uint16_t count3 = encodeBuffer3->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer3, pSubmit);
+    EXPECT_EQ(encodeBuffer3->GetSize(), count3);
+
+    auto encodeBuffer4 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer4->data_[0] = 1;
+    encodeBuffer4->index_ = 1;
+    uint16_t count4 = encodeBuffer4->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer4, pSubmit);
+    EXPECT_EQ(encodeBuffer4->GetSize(), count4);
+    /*
+     * SMS_VPF_RELATIVE
+     */
+    pSubmit.vpf = OHOS::Telephony::SmsVpf::SMS_VPF_RELATIVE;
+    auto encodeBuffer5 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer5->data_ = nullptr;
+    uint16_t count5 = encodeBuffer5->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer5, pSubmit);
+    EXPECT_EQ(encodeBuffer5->GetSize(), count5);
+
+    auto encodeBuffer6 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer6->data_[0] = 1;
+    encodeBuffer6->index_ = 1;
+    uint16_t count6 = encodeBuffer6->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer6, pSubmit);
+    EXPECT_EQ(encodeBuffer6->GetSize(), count6);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0009
+ * @tc.name     Test GsmSmsTpduCodec EncodeSubmitTypePartData
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0009, Function | MediumTest | Level1)
+{
+    auto tpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    SmsSubmit pSubmit;
+    auto encode = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_NE(encode, nullptr);
+    pSubmit.bStatusReport = false;
+    pSubmit.bHeaderInd = false;
+    pSubmit.bReplyPath = false;
+    /*
+     * SMS_VPF_ABSOLUTE
+     */
+    pSubmit.vpf = OHOS::Telephony::SmsVpf::SMS_VPF_ABSOLUTE;
+    auto encodeBuffer7 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer7->data_ = nullptr;
+    uint16_t count7 = encodeBuffer7->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer7, pSubmit);
+    EXPECT_EQ(encodeBuffer7->GetSize(), count7);
+
+    auto encodeBuffer8 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer8->data_[0] = 1;
+    encodeBuffer8->index_ = 1;
+    uint16_t count8 = encodeBuffer8->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer8, pSubmit);
+    EXPECT_EQ(encodeBuffer8->GetSize(), count8);
+    /*
+     * SMS_VPF_NOT_PRESENT
+     */
+    pSubmit.vpf = OHOS::Telephony::SmsVpf::SMS_VPF_NOT_PRESENT;
+    auto encodeBuffer9 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer9->data_ = nullptr;
+    uint16_t count9 = encodeBuffer9->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer9, pSubmit);
+    EXPECT_EQ(encodeBuffer9->GetSize(), count9);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0010
+ * @tc.name     Test GsmSmsTpduCodec EncodeSubmitTypeData
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0010, Function | MediumTest | Level1)
+{
+    auto tpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    SmsSubmit pSubmit;
+    auto encode = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_NE(encode, nullptr);
+    /*
+     * pSubmit->bStatusReport is true
+     */
+    pSubmit.bStatusReport = true;
+    encode->EncodeSubmitTypePartData(*encodeBuffer, pSubmit);
+    auto encodeBuffer1 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer1->data_[0] = 1;
+    encodeBuffer1->index_ = 1;
+    uint16_t count1 = encodeBuffer1->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer1, pSubmit);
+    EXPECT_EQ(encodeBuffer1->GetSize(), count1);
+    /*
+     * pSubmit.bHeaderInd is true
+     */
+    auto encodeBuffer2 = std::make_shared<SmsWriteBuffer>();
+    pSubmit.bStatusReport = false;
+    pSubmit.bHeaderInd = true;
+    const std::string smsc = "17005550020";
+    memcpy_s(&pSubmit.destAddress.address, sizeof(pSubmit.destAddress.address), smsc.data(), smsc.length());
+    pSubmit.destAddress.address[smsc.length()] = '\0';
+    encodeBuffer2->data_ = nullptr;
+    uint16_t count2 = encodeBuffer2->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer2, pSubmit);
+    EXPECT_EQ(encodeBuffer2->GetSize(), count2);
+
+    auto encodeBuffer3 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer3->data_[0] = 1;
+    encodeBuffer3->index_ = 1;
+    uint16_t count3 = encodeBuffer3->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer3, pSubmit);
+    EXPECT_EQ(encodeBuffer3->GetSize(), count3);
+    /*
+     * pSubmit.bReplyPath is true
+     */
+    pSubmit.bStatusReport = false;
+    pSubmit.bHeaderInd = false;
+    pSubmit.bReplyPath = true;
+    auto encodeBuffer4 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer4->data_ = nullptr;
+    uint16_t count4 = encodeBuffer4->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer4, pSubmit);
+    EXPECT_EQ(encodeBuffer4->GetSize(), count4);
+
+    auto encodeBuffer5 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer5->data_[0] = 1;
+    encodeBuffer5->index_ = 1;
+    uint16_t count5 = encodeBuffer5->GetSize();
+    encode->EncodeSubmitTypePartData(*encodeBuffer5, pSubmit);
+    EXPECT_EQ(encodeBuffer5->GetSize(), count5);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0011
+ * @tc.name     Test GsmSmsTpduCodec EncodeDeliverPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0011, Function | MediumTest | Level1)
+{
+    auto tpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    SmsDeliver *pDeliver = new SmsDeliver();
+    auto encode = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_NE(encode, nullptr);
+    /*
+     * second branch
+     */
+    encodeBuffer->data_ = nullptr;
+    EXPECT_FALSE(encode->EncodeDeliverPdu(*encodeBuffer, pDeliver));
+    /*
+     * third branch pDeliver->bMoreMsg is false
+     */
+    auto encodeBuffer1 = std::make_shared<SmsWriteBuffer>();
+    pDeliver->bMoreMsg = false;
+    EXPECT_FALSE(encode->EncodeDeliverPdu(*encodeBuffer1, pDeliver));
+
+    auto encodeBuffer2 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer2->data_[0] = 1;
+    encodeBuffer2->index_ = 1;
+    EXPECT_FALSE(encode->EncodeDeliverPdu(*encodeBuffer2, pDeliver));
+    /*
+     * fourth branch pDeliver->bStatusReport is true
+     */
+    pDeliver->bMoreMsg = true;
+    pDeliver->bStatusReport = true;
+    auto encodeBuffer3 = std::make_shared<SmsWriteBuffer>();
+    EXPECT_FALSE(encode->EncodeDeliverPdu(*encodeBuffer3, pDeliver));
+
+    auto encodeBuffer4 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer4->data_[0] = 1;
+    encodeBuffer4->index_ = 1;
+    EXPECT_FALSE(encode->EncodeDeliverPdu(*encodeBuffer4, pDeliver));
+    /*
+     * fifth branch pDeliver->bHeaderInd is true
+     */
+    auto encodeBuffer5 = std::make_shared<SmsWriteBuffer>();
+    pDeliver->bStatusReport = false;
+    pDeliver->bHeaderInd = true;
+    EXPECT_FALSE(encode->EncodeDeliverPdu(*encodeBuffer5, pDeliver));
+
+    auto encodeBuffer6 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer6->data_[0] = 1;
+    encodeBuffer6->index_ = 1;
+    EXPECT_FALSE(encode->EncodeDeliverPdu(*encodeBuffer6, pDeliver));
+
+    delete pDeliver;
+    pDeliver = nullptr;
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0012
+ * @tc.name     Test GsmSmsTpduCodec EncodeDeliverPartData
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0012, Function | MediumTest | Level1)
+{
+    auto tpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    SmsDeliver *pDeliver = new SmsDeliver();
+    /*
+     * parameter check
+     */
+    auto encode0 = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, nullptr, tpduCodec);
+    EXPECT_NE(encode0, nullptr);
+    EXPECT_FALSE(encode0->EncodeDeliverPartData(*encodeBuffer, pDeliver));
+
+    auto encode = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_NE(encode, nullptr);
+    /*
+     * pDeliver->bReplyPath is true
+     */
+    pDeliver->bReplyPath = true;
+    encodeBuffer->data_ = nullptr;
+    EXPECT_FALSE(encode->EncodeDeliverPartData(*encodeBuffer, pDeliver));
+
+    auto encodeBuffer1 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer1->data_[0] = 1;
+    encodeBuffer1->index_ = 1;
+    EXPECT_FALSE(encode->EncodeDeliverPartData(*encodeBuffer, pDeliver));
+    /*
+     * third branch
+     */
+    auto encodeBuffer2 = std::make_shared<SmsWriteBuffer>();
+    pDeliver->bReplyPath = false;
+    const std::string smsc = "17005550020111111111";
+    memcpy_s(&pDeliver->originAddress.address, sizeof(pDeliver->originAddress.address), smsc.data(), smsc.length());
+    pDeliver->originAddress.address[smsc.length()] = '\0';
+    EXPECT_FALSE(encode->EncodeDeliverPartData(*encodeBuffer2, pDeliver));
+    /*
+     * fourth branch
+     */
+    auto encodeBuffer3 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer3->data_[0] = 1;
+    EXPECT_FALSE(encode->EncodeDeliverPartData(*encodeBuffer3, pDeliver));
+
+    delete pDeliver;
+    pDeliver = nullptr;
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0013
+ * @tc.name     Test GsmSmsTpduCodec EncodeDeliverData
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0013, Function | MediumTest | Level1)
+{
+    auto tpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    SmsDeliver *pDeliver = new SmsDeliver();
+    /*
+     * parameter check
+     */
+    auto encode0 = std::make_shared<GsmSmsTpduEncode>(nullptr, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_NE(encode0, nullptr);
+    EXPECT_FALSE(encode0->EncodeDeliverData(*encodeBuffer, pDeliver));
+    /*
+     * second branch
+     */
+    auto encode = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    EXPECT_NE(encode, nullptr);
+    encodeBuffer->data_ = nullptr;
+    EXPECT_FALSE(encode->EncodeDeliverData(*encodeBuffer, pDeliver));
+
+    auto encodeBuffer1 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer->index_ = 1;
+    EXPECT_FALSE(encode->EncodeDeliverPartData(*encodeBuffer1, pDeliver));
+    /*
+     * main branch
+     */
+    auto encodeBuffer2 = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer2->data_[0] = 1;
+    encodeBuffer2->index_ = 1;
+    EXPECT_FALSE(encode->EncodeDeliverPartData(*encodeBuffer2, pDeliver));
+
+    delete pDeliver;
+    pDeliver = nullptr;
 }
 } // namespace Telephony
 } // namespace OHOS
