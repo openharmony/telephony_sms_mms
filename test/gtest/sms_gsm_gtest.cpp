@@ -29,6 +29,8 @@ namespace OHOS {
 namespace Telephony {
 using namespace testing::ext;
 
+static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
+
 class SmsGsmTest : public testing::Test {
 public:
     static void SetUpTestCase()
@@ -224,6 +226,12 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_011, Function | MediumTest | Level1)
     vectData.push_back(4);
     SmsWriteBuffer buffer;
     EXPECT_TRUE(utils->Pack7bitChar(buffer, static_cast<const uint8_t*>(&vectData[0]), vectData.size(), fillBits));
+
+    vectData.clear();
+    vectData.assign(MAX_GSM_7BIT_DATA_LEN + 1, 1); // first branch
+    EXPECT_FALSE(utils->Pack7bitChar(buffer, static_cast<const uint8_t*>(&vectData[0]), vectData.size(), fillBits));
+    vectData.clear();
+    EXPECT_TRUE(utils->Pack7bitChar(buffer, static_cast<const uint8_t*>(&vectData[0]), vectData.size(), fillBits));
 }
 
 /**
@@ -239,6 +247,8 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_012, Function | MediumTest | Level1)
     uint8_t dstIdx = 0;
 
     SmsReadBuffer buffer(strBuffer);
+    EXPECT_FALSE(utils->Unpack7bitChar(buffer, strBuffer.size(), fillBits,  nullptr, 0, dstIdx));
+    fillBits = 8;
     EXPECT_FALSE(utils->Unpack7bitChar(buffer, strBuffer.size(), fillBits,  nullptr, 0, dstIdx));
 }
 
@@ -258,6 +268,23 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_013, Function | MediumTest | Level1)
     SmsReadBuffer buffer(strBuffer);
     EXPECT_FALSE(utils->Unpack7bitChar(buffer, strBuffer.size(), fillBits,
         static_cast<uint8_t*>(&vectData[0]), vectData.size(), dstIdx));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_014
+ * @tc.name     SmsGsmTest_014
+ * @tc.desc     Function test Unpack7bitCharForMiddlePart
+ */
+HWTEST_F(SmsGsmTest, SmsGsmTest_014, Function | MediumTest | Level1)
+{
+    std::shared_ptr<GsmSmsCommonUtils> utils = std::make_shared<GsmSmsCommonUtils>();
+    std::string dataStr("1141515");
+    std::vector<uint8_t> vectData;
+
+    const uint8_t *buffer = reinterpret_cast<const uint8_t *>(dataStr.c_str());
+    EXPECT_FALSE(utils->Unpack7bitCharForMiddlePart(nullptr, 0, static_cast<uint8_t*>(&vectData[0])));
+    EXPECT_FALSE(utils->Unpack7bitCharForMiddlePart(buffer, dataStr.size(), nullptr));
+    EXPECT_FALSE(utils->Unpack7bitCharForMiddlePart(buffer, 0, static_cast<uint8_t*>(&vectData[0])));
 }
 }
 }
