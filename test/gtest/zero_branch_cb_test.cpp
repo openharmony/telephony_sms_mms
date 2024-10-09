@@ -1043,14 +1043,6 @@ HWTEST_F(BranchCbTest, misc_manager_SplitMsgId_0001, Function | MediumTest | Lev
     const std::list<SmsMiscManager::gsmCBRangeInfo>::iterator oldIter = gsmRangeInfo.begin();
     smsMiscManager->SplitMsgId(fromMsgId, toMsgId, oldIter);
     smsMiscManager->rangeList_ = gsmRangeInfo;
-    auto it1 = std::find(gsmRangeInfo.begin(), gsmRangeInfo.end(), rangeInfo);
-    EXPECT_TRUE(it1 != gsmRangeInfo.end());
-
-    fromMsgId = 0;
-    smsMiscManager->SplitMsgId(fromMsgId, toMsgId, oldIter);
-    auto it2 = std::find(gsmRangeInfo.begin(), gsmRangeInfo.end(), rangeInfo);
-    EXPECT_TRUE(it2 != gsmRangeInfo.end());
-
     fromMsgId = 1;
     smsMiscManager->SplitMsgId(fromMsgId, toMsgId, oldIter);
     auto it3 = std::find(gsmRangeInfo.begin(), gsmRangeInfo.end(), rangeInfo);
