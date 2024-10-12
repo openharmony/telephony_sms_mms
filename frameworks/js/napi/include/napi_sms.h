@@ -28,7 +28,6 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "napi_util.h"
-#include "refbase.h"
 #include "short_message.h"
 #include "sms_service_manager_client.h"
 #include "telephony_log_wrapper.h"

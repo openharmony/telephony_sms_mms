@@ -31,15 +31,19 @@ class MmsNetworkClient {
 public:
     explicit MmsNetworkClient(int32_t slotId);
     virtual ~MmsNetworkClient();
-    int32_t Execute(const std::string &method, const std::string &mmsc, std::string &data);
+    int32_t Execute(const std::string &method, const std::string &mmsc, std::string &data, const std::string &ua,
+        const std::string &uaprof);
 
 private:
     std::string GetIfaceName();
-    int32_t PostUrl(const std::string &mmsc, const std::string &filename);
+    int32_t PostUrl(const std::string &mmsc, const std::string &filename, const std::string &ua,
+        const std::string &uaprof);
     int32_t GetMmscFromDb(const std::string &mmsc);
     int32_t GetMmsDataBuf(std::string &strBuf, const std::string &fileName);
-    int32_t GetUrl(const std::string &mmsc, std::string &storeDirName);
-    int32_t HttpRequest(const std::string &method, const std::string &url, const std::string &data);
+    int32_t GetUrl(const std::string &mmsc, std::string &storeDirName, const std::string &ua,
+        const std::string &uaprof);
+    int32_t HttpRequest(const std::string &method, const std::string &url, const std::string &data,
+        const std::string &ua, const std::string &uaprof);
     int32_t GetMmsApnPorxy(NetStack::HttpClient::HttpProxy &httpProxy);
     bool WriteBufferToFile(const std::unique_ptr<char[]> &buff, uint32_t len, std::string &strPathName) const;
     void DeleteMmsPdu(const std::string &dbUrl);
