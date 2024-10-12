@@ -39,7 +39,7 @@ int32_t MmsSender::ExecuteSendMms(
     }
 
     std::unique_lock<std::mutex> lock(sendMmsMutex_);
-    return ExecuteMms(SEND_METHOD, mmsNetworkMgr, contentUrl, pduDir);
+    return ExecuteMms(SEND_METHOD, mmsNetworkMgr, contentUrl, pduDir, ua, uaprof);
 }
 } // namespace Telephony
 } // namespace OHOS

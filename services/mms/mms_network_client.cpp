@@ -61,16 +61,17 @@ MmsNetworkClient::MmsNetworkClient(int32_t slotId)
 
 MmsNetworkClient::~MmsNetworkClient() {}
 
-int32_t MmsNetworkClient::Execute(const std::string &method, const std::string &mmsc, std::string &data)
+int32_t MmsNetworkClient::Execute(const std::string &method, const std::string &mmsc, std::string &data,
+    const std::string &ua, const std::string &uaprof)
 {
     int32_t ret = TELEPHONY_ERR_FAIL;
     if (METHOD_POST.compare(method) == 0) {
-        ret = PostUrl(mmsc, data);
+        ret = PostUrl(mmsc, data, ua, uaprof);
         std::unique_lock<std::mutex> lck(clientCts_);
         responseData_ = "";
         return ret;
     } else if (METHOD_GET.compare(method) == 0) {
-        ret = GetUrl(mmsc, data);
+        ret = GetUrl(mmsc, data, ua, uaprof);
         std::unique_lock<std::mutex> lck(clientCts_);
         responseData_ = "";
         return ret;
@@ -139,7 +140,8 @@ int32_t MmsNetworkClient::GetMmsApnPorxy(NetStack::HttpClient::HttpProxy &httpPr
     return TELEPHONY_SUCCESS;
 }
 
-int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fileName)
+int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fileName, const std::string &ua,
+    const std::string &uaprof)
 {
     int32_t ret = GetMmscFromDb(mmsc);
     if (ret != TELEPHONY_SUCCESS) {
@@ -154,7 +156,7 @@ int32_t MmsNetworkClient::PostUrl(const std::string &mmsc, const std::string &fi
         return ret;
     }
     for (retryTimes_ = 0; retryTimes_ <= MAX_RETRY_TIMES; retryTimes_++) {
-        ret = HttpRequest(METHOD_POST, mmsc, strBuf);
+        ret = HttpRequest(METHOD_POST, mmsc, strBuf, ua, uaprof);
         if (ret != TELEPHONY_ERR_SUCCESS) {
             TELEPHONY_LOGE("http fail error");
             return ret;
@@ -241,7 +243,8 @@ void MmsNetworkClient::GetCoverUrl(std::string str)
     TELEPHONY_LOGI("decode result is: %{public}s", str.c_str());
 }
 
-int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::string &url, const std::string &data)
+int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::string &url, const std::string &data,
+    const std::string &ua, const std::string &uaprof)
 {
     HttpClientRequest httpReq;
     httpReq.SetURL(url);
@@ -259,10 +262,12 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
         httpReq.SetBody(data.c_str(), data.size());
         httpReq.SetMethod(HttpConstant::HTTP_METHOD_POST);
         httpReq.SetHeader("content-type", "application/vnd.wap.mms-message; charset=utf-8");
-        httpReq.SetHeader("Accept", "application/vnd.wap.mms-message, application/vnd.wap.sic");
+        httpReq.SetHeader("Accept", "*/*, application/vnd.wap.mms-message, application/vnd.wap.sic");
     } else {
         httpReq.SetMethod(HttpConstant::HTTP_METHOD_GET);
     }
+    httpReq.SetHeader("User-Agent", ua);
+    httpReq.SetHeader("x-wap-profile", uaprof);
     HttpSession &session = HttpSession::GetInstance();
     auto task = session.CreateTask(httpReq);
     if (task == nullptr || task->GetCurlHandle() == nullptr) {
@@ -285,12 +290,13 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
     return TELEPHONY_ERR_SUCCESS;
 }
 
-int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, std::string &storeDirName)
+int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, std::string &storeDirName, const std::string &ua,
+    const std::string &uaprof)
 {
     std::unique_lock<std::mutex> lck(clientCts_);
     for (retryTimes_ = 0; retryTimes_ <= MAX_RETRY_TIMES; retryTimes_++) {
         std::string strData = "";
-        if (HttpRequest(METHOD_GET, mmsc, strData) != TELEPHONY_ERR_SUCCESS) {
+        if (HttpRequest(METHOD_GET, mmsc, strData, ua, uaprof) != TELEPHONY_ERR_SUCCESS) {
             TELEPHONY_LOGE("http fail error");
             return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
         }
