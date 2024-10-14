@@ -1198,14 +1198,14 @@ HWTEST_F(BranchMmsTest, MmsNetworkClient_0001, Function | MediumTest | Level1)
     MmsNetworkClient client(0);
     client.GetIfaceName();
     std::string storeDirName;
-    client.Execute(METHOD_POST, "", storeDirName);
-    client.Execute(METHOD_GET, "", storeDirName);
-    client.HttpRequest(METHOD_POST, "", TEST_DATA);
+    client.Execute(METHOD_POST, "", storeDirName, "ua", "uaprof");
+    client.Execute(METHOD_GET, "", storeDirName, "ua", "uaprof");
+    client.HttpRequest(METHOD_POST, "", TEST_DATA, "ua", "uaprof");
     client.DeleteMmsPdu("");
 
     MmsNetworkClient clientSlot1(1);
-    clientSlot1.Execute(METHOD_POST, "", storeDirName);
-    clientSlot1.HttpRequest(METHOD_POST, "", storeDirName);
+    clientSlot1.Execute(METHOD_POST, "", storeDirName, "ua", "uaprof");
+    clientSlot1.HttpRequest(METHOD_POST, "", storeDirName, "ua", "uaprof");
     client.responseData_ = "";
 
     std::string strBuf = TEST_DATA;

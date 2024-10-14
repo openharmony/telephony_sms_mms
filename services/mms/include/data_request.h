@@ -29,9 +29,9 @@ public:
     explicit DataRequest(int32_t slotId);
     ~DataRequest();
     int32_t HttpRequest(int32_t slotId, const std::string &method, std::shared_ptr<MmsNetworkManager> netMgr,
-        const std::string &contentUrl, std::string &pduDir);
+        const std::string &contentUrl, std::string &pduDir, const std::string &ua, const std::string &uaprof);
     int32_t ExecuteMms(const std::string &method, std::shared_ptr<MmsNetworkManager> mmsNetworkMgr,
-        const std::string &contentUrl, std::string &pduDir);
+        const std::string &contentUrl, std::string &pduDir, const std::string &ua, const std::string &uaprof);
     uint8_t GetRequestId();
     void CreateRequestId();
 

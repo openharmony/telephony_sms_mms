@@ -30,7 +30,7 @@ DataRequest::DataRequest(int32_t slotId) : slotId_(slotId) {}
 DataRequest::~DataRequest() {}
 
 int32_t DataRequest::HttpRequest(int32_t slotId, const std::string &method, std::shared_ptr<MmsNetworkManager> netMgr,
-    const std::string &contentUrl, std::string &pduDir)
+    const std::string &contentUrl, std::string &pduDir, const std::string &ua, const std::string &uaprof)
 {
     if (netMgr == nullptr) {
         TELEPHONY_LOGE("netMgr is nullptr");
@@ -41,11 +41,11 @@ int32_t DataRequest::HttpRequest(int32_t slotId, const std::string &method, std:
         TELEPHONY_LOGE("netClient is nullptr");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    return netClient->Execute(method, contentUrl, pduDir);
+    return netClient->Execute(method, contentUrl, pduDir, ua, uaprof);
 }
 
 int32_t DataRequest::ExecuteMms(const std::string &method, std::shared_ptr<MmsNetworkManager> mmsNetworkMgr,
-    const std::string &contentUrl, std::string &pduDir)
+    const std::string &contentUrl, std::string &pduDir, const std::string &ua, const std::string &uaprof)
 {
     std::unique_lock<std::mutex> lck(ctx_);
     if (mmsNetworkMgr->AcquireNetwork(slotId_, GetRequestId()) != NETMANAGER_SUCCESS) {
@@ -67,7 +67,7 @@ int32_t DataRequest::ExecuteMms(const std::string &method, std::shared_ptr<MmsNe
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
 
-    int32_t executeResult = HttpRequest(slotId_, method, mmsNetworkMgr, contentUrl, pduDir);
+    int32_t executeResult = HttpRequest(slotId_, method, mmsNetworkMgr, contentUrl, pduDir, ua, uaprof);
     mmsNetworkMgr->ReleaseNetwork(GetRequestId(), false);
     return executeResult;
 }
