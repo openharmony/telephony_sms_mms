@@ -288,7 +288,7 @@ std::shared_ptr<struct EncodeInfo> GsmSmsMessage::GetSubmitEncodeInfo(const std:
         if (sc[0] == '+') {
             pAddress.ton = TYPE_INTERNATIONAL;
         } else {
-            pAddress.ton = TYPE_NATIONAL;
+            pAddress.ton = TYPE_UNKNOWN;
         }
         pAddress.npi = SMS_NPI_ISDN; /* app cannot set this value */
         GsmSmsParamCodec codec;

@@ -226,16 +226,16 @@ protected:
         std::string  strNormalUrl = "www.baidu.com";
         std::string  strBadUrl = GetString(30);
         std::string  strPostData = GetString(256);
-        m_pMmsNetworkClient->Execute("POST", strNormalUrl, strPostData);
-        m_pMmsNetworkClient->Execute("POST", strBadUrl, strPostData);
+        m_pMmsNetworkClient->Execute("POST", strNormalUrl, strPostData, "ua", "uaprof");
+        m_pMmsNetworkClient->Execute("POST", strBadUrl, strPostData, "ua", "uaprof");
     }
     void TestExecuteGet()
     {
         std::string  strNormalUrl = "www.baidu.com";
         std::string  strBadUrl = GetString(30);
         std::string  strPostData = GetString(256);
-        m_pMmsNetworkClient->Execute("GET", strNormalUrl, strPostData);
-        m_pMmsNetworkClient->Execute("GET", strBadUrl, strPostData);
+        m_pMmsNetworkClient->Execute("GET", strNormalUrl, strPostData, "ua", "uaprof");
+        m_pMmsNetworkClient->Execute("GET", strBadUrl, strPostData, "ua", "uaprof");
     }
 private:
     std::unique_ptr<MmsNetworkClient> m_pMmsNetworkClient;
