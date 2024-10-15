@@ -56,7 +56,6 @@ ohos_shared_library("sms") {
     "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "node:node_header_notice",
     "samgr:samgr_proxy",
     "telephony_data:tel_telephony_data",
   ]
