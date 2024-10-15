@@ -50,7 +50,6 @@
                 "napi",
                 "netmanager_base",
                 "netstack",
-                "node",
                 "os_account",
                 "power_manager",
                 "resource_management",
