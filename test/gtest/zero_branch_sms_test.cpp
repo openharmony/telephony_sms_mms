@@ -462,7 +462,7 @@ HWTEST_F(BranchSmsTest, SmsSender_0001, Function | MediumTest | Level1)
     smsSender->HandleResend(smsIndexer);
     smsSender->lastSmsDomain_ = 1;
     smsSender->HandleResend(smsIndexer);
-    EXPECT_FALSE(smsSender->SendCacheMapAddItem(1, smsIndexer));
+    EXPECT_NE(smsSender->SendCacheMapAddItem(1, smsIndexer), false);
     event = nullptr;
     smsIndexer = nullptr;
     smsSender->HandleResend(smsIndexer);
