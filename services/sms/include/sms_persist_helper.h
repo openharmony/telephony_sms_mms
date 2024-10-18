@@ -37,6 +37,7 @@ public:
     bool UpdateSms(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values);
     bool QueryBlockPhoneNumber(const std::string &phoneNum);
     bool QueryParamBoolean(const std::string key, bool defValue);
+    bool QuerySmsMmsForId(DataShare::DataSharePredicates &predicates, uint16_t &dataBaseId);
     bool QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId);
     bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount);
     bool UpdateContact(const std::string &address);

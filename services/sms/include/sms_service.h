@@ -316,7 +316,21 @@ public:
      * @return Returns {@code 0} if send mms success; returns {@code false} otherwise
      */
     int32_t SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua,
-        const std::u16string &uaprof) override;
+        const std::u16string &uaprof, int64_t &time, bool isMmsApp = false) override;
+
+    /**
+     * Service after Send Mms.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param time Indicates tiemstamp of hap call NAPI function
+     * @param dataBaseId id of mms in sqlite
+     * @param sessionBucket  object of DataShareValuesBucket to upate sqlite
+     * @param sendStatus status of mms sent
+     * @return Returns {@code 0} if send mms success; returns {@code false} otherwise
+     */
+    void ServiceAfterSendMmsComplete(int32_t slotId, int64_t &time, uint16_t &dataBaseId,
+        DataShare::DataShareValuesBucket &sessionBucket, std::string  &sendStatus);
 
     /**
      * Download a Mms.

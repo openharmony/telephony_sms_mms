@@ -34,6 +34,7 @@ struct MmsConfigPara {
 
 struct MmsContext : BaseContext {
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    int64_t timeStamp = 0;
     std::u16string mmsc = u"";
     std::u16string data = u"";
     MmsConfigPara mmsConfig;
