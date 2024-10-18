@@ -1366,11 +1366,12 @@ HWTEST_F(BranchMmsTest, SendMms_0001, Function | MediumTest | Level1)
     std::u16string data = u"";
     std::u16string ua = u"";
     std::u16string uaprof = u"";
-    int32_t notAccess = smsService->SendMms(slotId, mmsc, data, ua, uaprof);
+    int64_t time = 0;
+    int32_t notAccess = smsService->SendMms(slotId, mmsc, data, ua, uaprof, time);
     AccessMmsToken token;
-    int32_t noMmsc = smsService->SendMms(slotId, mmsc, data, ua, uaprof);
+    int32_t noMmsc = smsService->SendMms(slotId, mmsc, data, ua, uaprof, time);
     mmsc = StringUtils::ToUtf16(VNET_MMSC);
-    int32_t noData = smsService->SendMms(slotId, mmsc, data, ua, uaprof);
+    int32_t noData = smsService->SendMms(slotId, mmsc, data, ua, uaprof, time);
     EXPECT_GE(notAccess, 0);
     EXPECT_GE(noMmsc, 0);
     EXPECT_GE(noData, 0);
@@ -1389,14 +1390,37 @@ HWTEST_F(BranchMmsTest, DownloadMms_0001, Function | MediumTest | Level1)
     std::u16string data = u"";
     std::u16string ua = u"";
     std::u16string uaprof = u"";
+    int64_t time = 0;
     int32_t notAccess = smsService->DownloadMms(slotId, mmsc, data, ua, uaprof);
     AccessMmsToken token;
     int32_t noMmsc = smsService->DownloadMms(slotId, mmsc, data, ua, uaprof);
     mmsc = StringUtils::ToUtf16(VNET_MMSC);
     int32_t noData = smsService->DownloadMms(slotId, mmsc, data, ua, uaprof);
+    notAccess = smsService->SendMms(slotId, mmsc, data, ua, uaprof, time, true);
+    noMmsc = smsService->SendMms(slotId, mmsc, data, ua, uaprof, time, true);
+    mmsc = StringUtils::ToUtf16(VNET_MMSC);
+    noData = smsService->SendMms(slotId, mmsc, data, ua, uaprof, time, true);
     EXPECT_GE(notAccess, 0);
     EXPECT_GE(noMmsc, 0);
     EXPECT_GE(noData, 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_ServiceAfterSendMmsComplete_0001
+ * @tc.name     Test ServiceAfterSendMmsComplete_0001
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchMmsTest, ServiceAfterSendMmsComplete_0001, Function | MediumTest | Level1)
+{
+    std::shared_ptr<SmsService> smsService = std::make_shared<SmsService>();
+    int32_t slotId = 0;
+    int64_t time = 0;
+    DataShare::DataShareValuesBucket sessionBucket;
+    uint16_t dataBaseId = 0;
+    std::string sendStatus = "";
+    smsService->ServiceAfterSendMmsComplete(slotId, time, dataBaseId, sessionBucket, sendStatus);
+    dataBaseId = 1;
+    smsService->ServiceAfterSendMmsComplete(slotId, time, dataBaseId, sessionBucket, sendStatus);
 }
 } // namespace Telephony
 } // namespace OHOS

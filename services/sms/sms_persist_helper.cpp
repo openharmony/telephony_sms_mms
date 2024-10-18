@@ -160,6 +160,33 @@ bool SmsPersistHelper::UpdateSms(DataShare::DataSharePredicates &predicates, Dat
     return ret >= 0;
 }
 
+bool SmsPersistHelper::QuerySmsMmsForId(DataShare::DataSharePredicates &predicates, uint16_t &dataBaseId)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    Uri uri(SMS_MMS_INFO);
+    std::vector<std::string> columns;
+    auto resultSet = helper->Query(uri, predicates, columns);
+    if (resultSet == nullptr) {
+        TELEPHONY_LOGE("Query Result Set nullptr Failed.");
+        helper->Release();
+        return false;
+    }
+    resultSet->GoToFirstRow();
+    int32_t columnInt;
+    int columnIndex;
+    resultSet->GetColumnIndex(SmsMmsInfo::MSG_ID, columnIndex);
+    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
+        dataBaseId = columnInt;
+    }
+    resultSet->Close();
+    helper->Release();
+    return true;
+}
+
 bool SmsPersistHelper::Update(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateDataShareHelper(SMS_URI);

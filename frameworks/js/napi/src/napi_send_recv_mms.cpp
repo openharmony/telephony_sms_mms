@@ -14,12 +14,15 @@
  */
 #include "napi_send_recv_mms.h"
 
+#include <chrono>
+
 #include "ability.h"
 #include "napi_base_context.h"
 #include "napi_mms_pdu.h"
 #include "napi_mms_pdu_helper.h"
 #include "sms_constants_utils.h"
 #include "telephony_permission.h"
+
 
 namespace OHOS {
 namespace Telephony {
@@ -127,6 +130,11 @@ void StoreSendMmsPduToDataBase(NapiMmsPduHelper &helper) __attribute__((no_sanit
     mmsPduObj->InsertMmsPdu(helper, mmsPdu);
 }
 
+void UpdateTimeStamp(int64_t &timeStamp, MmsContext &context)
+{
+    context.timeStamp = timeStamp;
+}
+
 void NativeSendMms(napi_env env, void *data)
 {
     auto asyncContext = static_cast<MmsContext *>(data);
@@ -166,7 +174,8 @@ void NativeSendMms(napi_env env, void *data)
     }
     asyncContext->errorCode =
         Singleton<SmsServiceManagerClient>::GetInstance().SendMms(asyncContext->slotId, asyncContext->mmsc,
-            asyncContext->data, asyncContext->mmsConfig.userAgent, asyncContext->mmsConfig.userAgentProfile);
+            asyncContext->data, asyncContext->mmsConfig.userAgent,
+            asyncContext->mmsConfig.userAgentProfile, asyncContext->timeStamp);
     if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
         asyncContext->resolved = true;
     } else {
@@ -284,7 +293,9 @@ napi_value NapiSendRecvMms::SendMms(napi_env env, napi_callback_info info)
     napi_value parameters[THREE_PARAMETERS] = { 0 };
     napi_value thisVar = nullptr;
     void *data = nullptr;
-
+    int64_t timeStamp =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
     napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
     if (!MatchMmsParameters(env, parameters, parameterCount)) {
         TELEPHONY_LOGE("parameter matching failed.");
@@ -304,6 +315,7 @@ napi_value NapiSendRecvMms::SendMms(napi_env env, napi_callback_info info)
     if (parameterCount == THREE_PARAMETERS) {
         napi_create_reference(env, parameters[PARAMETERS_INDEX_TWO], DEFAULT_REF_COUNT, &context->callbackRef);
     }
+    UpdateTimeStamp(timeStamp, *context);
     napi_value result = NapiUtil::HandleAsyncWork(env, context, "SendMms", NativeSendMms, SendMmsCallback);
     return result;
 }
