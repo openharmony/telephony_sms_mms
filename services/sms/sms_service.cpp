@@ -21,6 +21,7 @@
 #include "core_manager_inner.h"
 #include "ims_sms_client.h"
 #include "sms_dump_helper.h"
+#include "sms_mms_common.h"
 #include "sms_hisysevent.h"
 #include "string_utils.h"
 #include "telephony_common_utils.h"
@@ -164,10 +165,19 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
 
-    uint16_t dataId = -1;
+    uint16_t dataId = 0;
     if (!isMmsApp) {
         InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(text), dataId);
         TELEPHONY_LOGI("InsertSessionAndDetail write data to db. the id:%{public}d", dataId);
+    } else {
+        DataShare::DataSharePredicates predicates;
+        predicates.EqualTo(SmsMmsInfo::MSG_TYPE, SmsMmsCommonData::SMS_MSM_TYPE_SMS);
+        predicates.EqualTo(SmsMmsInfo::RECEIVER_NUMBER, StringUtils::ToUtf8(desAddr));
+        predicates.EqualTo(SmsMmsInfo::SLOT_ID, slotId);
+        predicates.EqualTo(SmsMmsInfo::MSG_CONTENT, StringUtils::ToUtf8(text));
+        predicates.EqualTo(SmsMmsInfo::MSG_STATE, SmsMmsCommonData::SMS_MSM_STATUS_SENDING);
+        predicates.OrderByDesc(SmsMmsInfo::START_TIME);
+        DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySmsMmsForId(predicates, dataId);
     }
     bool ret = interfaceManager->TextBasedSmsDelivery(StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(scAddr),
         StringUtils::ToUtf8(text), sendCallback, deliveryCallback, dataId, isMmsApp);
@@ -753,7 +763,7 @@ bool SmsService::GetEncodeStringFunc(
 }
 
 int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
-    const std::u16string &ua, const std::u16string &uaprof)
+    const std::u16string &ua, const std::u16string &uaprof, int64_t &time, bool isMmsApp)
 {
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
         TELEPHONY_LOGE("Non-system applications use system APIs!");
@@ -776,15 +786,51 @@ int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const st
         TELEPHONY_LOGE("mms pdu file is empty");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    TELEPHONY_LOGI("send mms slotId:%{public}d", slotId);
-    int32_t ret = interfaceManager->SendMms(mmsc, data, ua, uaprof);
-    if (ret == TELEPHONY_ERR_SUCCESS) {
-        TELEPHONY_LOGI("send mms successed");
-        return TELEPHONY_ERR_SUCCESS;
-    } else {
-        TELEPHONY_LOGI("send mms failed");
-        return ret;
+    uint16_t dataBaseId = 0;
+    if (isMmsApp) {
+        DataShare::DataSharePredicates predicates;
+        predicates.EqualTo(SmsMmsInfo::MSG_TYPE, SmsMmsCommonData::SMS_MSM_TYPE_MMS);
+        predicates.EqualTo(SmsMmsInfo::MSG_STATE, SmsMmsCommonData::SMS_MSM_STATUS_SENDING);
+        predicates.EqualTo(SmsMmsInfo::SLOT_ID, slotId);
+        predicates.LessThanOrEqualTo(SmsMmsInfo::START_TIME, time);
+        predicates.OrderByDesc(SmsMmsInfo::START_TIME);
+        DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySmsMmsForId(predicates, dataBaseId);
+        TELEPHONY_LOGI("SmsService::SendMms. slot:%{public}d;;time:%{public}s;id:%{public}d",
+            slotId, std::to_string(time).c_str(), dataBaseId);
     }
+    DataShare::DataShareValuesBucket sessionBucket;
+    int32_t ret = interfaceManager->SendMms(mmsc, data, ua, uaprof);
+    std::string  sendStatus = SmsMmsCommonData::SMS_MMS_INFO_MSG_STATE_FAILED;
+    if (ret == TELEPHONY_ERR_SUCCESS) {
+        sessionBucket.Put(SmsMmsInfo::MSG_STATE, SmsMmsCommonData::SMS_MSM_STATUS_SUCCEED);
+        sendStatus = SmsMmsCommonData::SMS_MMS_INFO_MSG_STATE_SUCCEED;
+    } else {
+        sessionBucket.Put(SmsMmsInfo::MSG_STATE, SmsMmsCommonData::SMS_MSM_STATUS_FAILED);
+    }
+    if (isMmsApp) {
+        ServiceAfterSendMmsComplete(slotId, time, dataBaseId, sessionBucket, sendStatus);
+    }
+    return ret;
+}
+
+void SmsService::ServiceAfterSendMmsComplete(int32_t slotId, int64_t &time, uint16_t &dataBaseId,
+    DataShare::DataShareValuesBucket &sessionBucket, std::string  &sendStatus)
+{
+    if (0 >= dataBaseId) {
+        TELEPHONY_LOGE("SmsService::SendMms. slot:%{public}d;time:%{public}s",
+            slotId, std::to_string(time).c_str());
+    } else {
+        DataShare::DataSharePredicates predicates;
+        predicates.EqualTo(SmsMmsInfo::MSG_ID, dataBaseId);
+        if (!DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateSms(predicates, sessionBucket)) {
+            TELEPHONY_LOGE("SmsService::SendMms. Failed UpdateSms;dataBaseId:%{public}d;",  dataBaseId);
+        }
+        TELEPHONY_LOGI("before send boradcast. SmsService::SendMms %{public}d", dataBaseId);
+        DelayedSingleton<SmsMmsCommon>::GetInstance()->SendBroadcast(dataBaseId,
+            SmsMmsCommonData::SMS_MMS_SENT_RESULT_NOTIFY, sendStatus,
+            SmsMmsCommonData::SMS_MMS_INFO_MMS_TYPE);
+    }
+    return;
 }
 
 int32_t SmsService::DownloadMms(int32_t slotId, const std::u16string &mmsc, std::u16string &data,

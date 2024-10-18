@@ -204,11 +204,11 @@ bool SmsServiceManagerClient::SetImsSmsConfig(int32_t slotId, int32_t enable)
 }
 
 int32_t SmsServiceManagerClient::SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
-    const std::u16string &ua, const std::u16string &uaprof)
+    const std::u16string &ua, const std::u16string &uaprof, int64_t &time)
 {
     if (InitSmsServiceProxy()) {
         std::lock_guard<std::mutex> lock(mutex_);
-        return smsServiceInterface_->SendMms(slotId, mmsc, data, ua, uaprof);
+        return smsServiceInterface_->SendMms(slotId, mmsc, data, ua, uaprof, time);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }

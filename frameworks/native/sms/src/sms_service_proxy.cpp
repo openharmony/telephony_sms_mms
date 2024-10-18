@@ -571,7 +571,7 @@ bool SmsServiceProxy::HasSmsCapability()
 }
 
 int32_t SmsServiceProxy::SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
-    const std::u16string &ua, const std::u16string &uaprof)
+    const std::u16string &ua, const std::u16string &uaprof, int64_t &time, bool isMmsApp)
 {
     MessageParcel dataParcel;
     MessageParcel replyParcel;
@@ -585,6 +585,9 @@ int32_t SmsServiceProxy::SendMms(int32_t slotId, const std::u16string &mmsc, con
     dataParcel.WriteString16(data);
     dataParcel.WriteString16(ua);
     dataParcel.WriteString16(uaprof);
+    dataParcel.WriteInt64(time);
+    std::string bundleName = GetBundleName();
+    dataParcel.WriteString(bundleName);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TELEPHONY_LOGE("SendMms Remote is null");

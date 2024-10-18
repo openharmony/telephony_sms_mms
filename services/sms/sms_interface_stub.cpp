@@ -555,7 +555,12 @@ void SmsInterfaceStub::OnSendMms(MessageParcel &data, MessageParcel &reply, Mess
     u16string mmsData = data.ReadString16();
     u16string ua = data.ReadString16();
     u16string uaprof = data.ReadString16();
-    int32_t result = SendMms(slotId, mmsc, mmsData, ua, uaprof);
+    int64_t time = data.ReadInt64();
+    std::string bundleName = data.ReadString();
+    TELEPHONY_LOGI("SmsInterfaceStub::OnSendMms read time stamp :%{public}s;bundleName:%{public}s",
+        std::to_string(time).c_str(), bundleName.c_str());
+    bool isMmsApp = (bundleName == MMS_APP);
+    int32_t result = SendMms(slotId, mmsc, mmsData, ua, uaprof, time, isMmsApp);
     if (!reply.WriteInt32(result)) {
         TELEPHONY_LOGE("SmsInterfaceStub::OnSendMms write reply failed");
         return;

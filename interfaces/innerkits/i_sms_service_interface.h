@@ -383,7 +383,7 @@ public:
      * @return Returns {@code 0} if send mms success
      */
     virtual int32_t SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
-        const std::u16string &ua, const std::u16string &uaprof) = 0;
+        const std::u16string &ua, const std::u16string &uaprof, int64_t &time, bool isMmsApp = false) = 0;
 
     /**
      * Download a mms

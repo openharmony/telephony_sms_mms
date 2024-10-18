@@ -1961,12 +1961,16 @@ HWTEST_F(BranchSmsTest, SmsPersistHelper_0001, Function | MediumTest | Level1)
     std::string id = "1";
     bucket.Put(SLOT_ID, id);
     uint16_t dataBaseId = 0;
+    smsPersistHelper->QuerySmsMmsForId(predicates, dataBaseId);
+    EXPECT_GE(dataBaseId, 0);
     smsPersistHelper->Insert(bucket, dataBaseId);
     smsPersistHelper->Insert(TABLE_URL, bucket);
     uint16_t sessionId = 0;
     uint16_t messageCount = 0;
     smsPersistHelper->QuerySession(predicates, sessionId, messageCount);
     EXPECT_GE(sessionId, 0);
+    smsPersistHelper->QuerySmsMmsForId(predicates, dataBaseId);
+    EXPECT_GE(dataBaseId, 0);
 
     smsPersistHelper->Update(predicates, bucket);
     std::vector<SmsReceiveIndexer> indexers;
