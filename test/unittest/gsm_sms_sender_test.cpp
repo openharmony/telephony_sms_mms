@@ -142,7 +142,14 @@ void GsmSmsSenderTest::TestSendMms(const sptr<ISmsServiceInterface> &smsService)
     std::u16string data(StringUtils::ToUtf16(SEND_MMS_FILE_URL));
     std::u16string ua(u"");
     std::u16string uaprof(u"");
-    int32_t result = smsService->SendMms(slotId, mmsc, data, ua, uaprof);
+    int64_t time = 0;
+    int32_t result = smsService->SendMms(slotId, mmsc, data, ua, uaprof, time);
+    if (result == 0) {
+        std::cout << "send mms success" << std::endl;
+    } else {
+        std::cout << "send mms fail" << std::endl;
+    }
+    result = smsService->SendMms(slotId, mmsc, data, ua, uaprof, time, true);
     if (result == 0) {
         std::cout << "send mms success" << std::endl;
     } else {

@@ -1040,6 +1040,7 @@ HWTEST_F(MmsGtest, SmsServiceTest_0001, Function | MediumTest | Level1)
 {
     AccessMmsToken token;
     int32_t slotId = 0;
+    int64_t timeStamp = 0;
     std::string homeUrlVal;
     std::string dbUrl;
     GetPduToFile(slotId);
@@ -1049,7 +1050,7 @@ HWTEST_F(MmsGtest, SmsServiceTest_0001, Function | MediumTest | Level1)
     std::u16string data = StringUtils::ToUtf16(dbUrl);
     std::u16string ua = u"";
     std::u16string uaprof = u"";
-    Singleton<SmsServiceManagerClient>::GetInstance().SendMms(slotId, mmsc, data, ua, uaprof);
+    Singleton<SmsServiceManagerClient>::GetInstance().SendMms(slotId, mmsc, data, ua, uaprof, timeStamp);
     Singleton<SmsServiceManagerClient>::GetInstance().DownloadMms(slotId, mmsc, data, ua, uaprof);
     EXPECT_GE(dbUrl.length(), 0);
     EXPECT_GE(homeUrlVal.length(), 0);

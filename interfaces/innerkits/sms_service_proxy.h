@@ -269,10 +269,12 @@ public:
      * @param data Indicates file path of mms pdu
      * @param ua Indicates mms user agent
      * @param uaprof Indicates mms user agent profile
+     * @param time Indicates milliSecond while get Mms call
+     * @param isMmsApp Indicates whether system message hap call this
      * @return Returns {@code 0} if send mms success; returns {@code false} otherwise
      */
     int32_t SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua,
-        const std::u16string &uaprof) override;
+        const std::u16string &uaprof, int64_t &time, bool isMmsApp = true) override;
 
     /**
      * Download a mms
