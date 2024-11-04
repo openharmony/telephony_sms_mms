@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <regex>
+
 #include "gsm_sms_message.h"
 
 #include "core_manager_inner.h"
@@ -28,6 +30,11 @@ static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
 static constexpr uint8_t MAX_SMSC_LEN = 20;
 static constexpr uint16_t MAX_TPDU_DATA_LEN = 255;
 static constexpr uint16_t TAPI_TEXT_SIZE_MAX = 520;
+static constexpr uint16_t ADDRESS_LEN = 4;
+static constexpr uint16_t MATCH_TWO = 2;
+static std::string NAME_ADDR_EMAIL_REGEX = "\\s*(\"[^\"]*\"|[^<>\"]+)\\s*<([^<>]+)>\\s*";
+static std::string ADDR_EMAIL_REGEX =
+    "^([A-Za-z0-9_\\-\\.\u4e00-\u9fa5])+\\@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,63})$";
 
 uint8_t GsmSmsMessage::CalcReplyEncodeAddress(const std::string &replyAddress)
 {
@@ -583,9 +590,17 @@ void GsmSmsMessage::ConvertUserPartData()
         visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
     } else if (codingScheme_ == DATA_CODING_8BIT) {
         visibleMessageBody_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
+    } else if (codingScheme_ == DATA_CODING_EUCKR) {
+        int dataSize = TextCoder::Instance().EuckrToUtf8(
+            buff, MAX_MSG_TEXT_LEN, reinterpret_cast<uint8_t *>(smsUserData_.data), smsUserData_.length);
+        visibleMessageBody_.insert(0, reinterpret_cast<char *>(buff), dataSize);
     }
     rawUserData_.insert(0, static_cast<char *>(smsUserData_.data), smsUserData_.length);
     rawWapPushUserData_.insert(0, smsWapPushUserData_.ud, smsWapPushUserData_.udl);
+
+    if (!visibleMessageBody_.empty()) {
+        ParseEmailFromMessageBody();
+    }
 }
 
 void GsmSmsMessage::SetFullText(const std::string &text)
@@ -730,6 +745,46 @@ int GsmSmsMessage::DecodeMessage(uint8_t *decodeData, unsigned int len, DataCodi
     }
     TELEPHONY_LOGI("DecodeMessage, message coding type is %{public}d", codingType);
     return decodeLen;
+}
+
+void GsmSmsMessage::ParseEmailFromMessageBody()
+{
+    if (originatingAddress_.empty()) {
+        return;
+    }
+    if (originatingAddress_.length() > ADDRESS_LEN) {
+        return;
+    }
+    std::regex re("( /)|( )");
+    std::smatch match;
+    if (!std::regex_search(visibleMessageBody_, match, re)) {
+        return;
+    }
+    size_t pos = match.position();
+    emailFrom_ = visibleMessageBody_.substr(0, pos);
+    std::string emailBody = visibleMessageBody_.substr(pos + 1);
+    if (!emailBody.empty() && emailBody.front() == '/') {
+        emailBody = emailBody.substr(1);
+    }
+    emailBody_ = emailBody;
+    isEmail_ = IsEmailAddress(emailFrom_);
+}
+
+bool GsmSmsMessage::IsEmailAddress(std::string emailFrom)
+{
+    if (emailFrom.empty()) {
+        return false;
+    }
+    std::regex nameAddrEmailRegex(NAME_ADDR_EMAIL_REGEX);
+    std::smatch match;
+    std::string emailAddress;
+    if (std::regex_search(emailFrom, match, nameAddrEmailRegex)) {
+        emailAddress = match[MATCH_TWO].str();
+    } else {
+        emailAddress = emailFrom;
+    }
+    std::regex addrEmailRegex(ADDR_EMAIL_REGEX);
+    return std::regex_match(emailAddress, addrEmailRegex);
 }
 } // namespace Telephony
 } // namespace OHOS
