@@ -74,6 +74,8 @@ private:
         const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId);
     bool PduAnalysisMsg();
     void ConvertUserPartData();
+    void ParseEmailFromMessageBody();
+    bool IsEmailAddress(std::string emailFrom);
 
 public:
     static constexpr uint16_t TAPI_NETTEXT_SMDATA_SIZE_MAX = 255;
