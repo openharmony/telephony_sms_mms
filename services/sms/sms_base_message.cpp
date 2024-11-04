@@ -59,6 +59,9 @@ string SmsBaseMessage::GetOriginatingAddress() const
 
 string SmsBaseMessage::GetVisibleOriginatingAddress() const
 {
+    if (isEmail_) {
+        return emailFrom_;
+    }
     return originatingAddress_;
 }
 
@@ -69,7 +72,25 @@ enum SmsMessageClass SmsBaseMessage::GetMessageClass() const
 
 string SmsBaseMessage::GetVisibleMessageBody() const
 {
+    if (isEmail_) {
+        return emailBody_;
+    }
     return visibleMessageBody_;
+}
+
+string SmsBaseMessage::GetEmailAddress() const
+{
+    return emailFrom_;
+}
+
+string SmsBaseMessage::GetEmailMessageBody() const
+{
+    return emailBody_;
+}
+
+bool SmsBaseMessage::IsEmail() const
+{
+    return isEmail_;
 }
 
 std::vector<uint8_t> SmsBaseMessage::GetRawPdu() const

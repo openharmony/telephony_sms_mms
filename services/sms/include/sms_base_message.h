@@ -69,6 +69,9 @@ public:
     virtual std::string GetOriginatingAddress() const;
     virtual std::string GetVisibleOriginatingAddress() const;
     virtual std::string GetVisibleMessageBody() const;
+    virtual std::string GetEmailAddress() const;
+    virtual std::string GetEmailMessageBody() const;
+    virtual bool IsEmail() const;
     virtual enum SmsMessageClass GetMessageClass() const;
     std::vector<uint8_t> GetRawPdu() const;
     std::string GetRawUserData() const;
@@ -139,6 +142,9 @@ protected:
     std::shared_ptr<SmsAppPortAddr> portAddress_;
     std::shared_ptr<SpecialSmsIndication> specialSmsInd_;
     int32_t indexOnSim_ = -1;
+    std::string emailFrom_;
+    std::string emailBody_;
+    bool isEmail_ = false;
 
 private:
     virtual int DecodeMessage(uint8_t *decodeData, unsigned int length, DataCodingScheme &codingType,
