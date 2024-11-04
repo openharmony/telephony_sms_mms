@@ -418,6 +418,80 @@ HWTEST_F(BranchSmsTest, GsmSmsMessage_0002, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsMessage_004
+ * @tc.name     Test GsmSmsMessage 7Bit
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsMessage_0004, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    string pdu = "039122F2010006916666660010023018";
+    auto message = gsmSmsMessage->CreateMessage(pdu);
+    EXPECT_TRUE(message != nullptr);
+
+    auto body = message->GetVisibleMessageBody();
+    auto messageBody = StringUtils::StringToHex(body.c_str(), body.length());
+    string strData = "3030";
+    EXPECT_TRUE(messageBody == strData);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsMessage_005
+ * @tc.name     Test GsmSmsMessage 8Bit
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsMessage_0005, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    string pdu = "039122F2010006916666660014023030";
+    auto message = gsmSmsMessage->CreateMessage(pdu);
+    EXPECT_TRUE(message != nullptr);
+
+    auto body = message->GetVisibleMessageBody();
+    auto messageBody = StringUtils::StringToHex(body.c_str(), body.length());
+    string strData = "3030";
+    EXPECT_TRUE(messageBody == strData);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsMessage_006
+ * @tc.name     Test GsmSmsMessage UCS2
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsMessage_0006, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    string pdu = "0891683108200955F1240D91687103920059F100084290404103352318BC1CC1A1B0B4C6A";
+    pdu += "9C740D55CAD6DC5B4C785B2C8B2E4002E";
+    auto message = gsmSmsMessage->CreateMessage(pdu);
+    EXPECT_TRUE(message != nullptr);
+
+    auto body = message->GetVisibleMessageBody();
+    auto messageBody = StringUtils::StringToHex(body.c_str(), body.length());
+    string strData = "EBB09CEC86A1EB82B4EC9AA9EC9D";
+    strData += "80ED959CEAB5ADEC96B4EC9E85EB8B88EB8BA42E";
+    EXPECT_TRUE(messageBody == strData);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsMessage_007
+ * @tc.name     Test GsmSmsMessage KSC5601
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, GsmSmsMessage_0007, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    string pdu = "07915892208800F0040ED0A3F19CDD7A52A100844240111195822302AAF2";
+    auto message = gsmSmsMessage->CreateMessage(pdu);
+    EXPECT_TRUE(message != nullptr);
+
+    auto body = message->GetVisibleMessageBody();
+    auto messageBody = StringUtils::StringToHex(body.c_str(), body.length());
+    string strData = "E38292";
+    EXPECT_TRUE(messageBody == strData);
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_SmsSender_0001
  * @tc.name     Test SmsSender
  * @tc.desc     Function test

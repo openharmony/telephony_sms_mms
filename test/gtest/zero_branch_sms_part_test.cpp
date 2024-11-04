@@ -361,6 +361,58 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_SmsEmailMessage_0001
+ * @tc.name     Test SmsEmailMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsEmailMessage_0001, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    string pdu = ("07963258974152f204038105f300008022110232438a28e6a71b40c587eb7"
+                  "076d9357eb7412f7d793a07ddeb6278794d07bde8d5391b246e93d3");
+    EXPECT_TRUE(gsmSmsMessage->CreateMessage(pdu) != nullptr);
+    auto message = gsmSmsMessage->CreateMessage(pdu);
+    EXPECT_EQ(message->GetEmailMessageBody(), "zeSs wubpekt /tUsl bmdi");
+    EXPECT_EQ(message->GetVisibleMessageBody(), "zeSs wubpekt /tUsl bmdi");
+    EXPECT_EQ(message->GetEmailAddress(), "fOn@Txauple.com");
+    EXPECT_EQ(message->GetVisibleOriginatingAddress(), "fOn@Txauple.com");
+    EXPECT_TRUE(message->IsEmail());
+
+    pdu = ("07913244457812f204038105f400007120103215358a29d6e71b503667db7076d935"
+           "7eb741af0d0a442fcfe8c13639bfe16d289bdee6b5f1813629");
+    EXPECT_TRUE(gsmSmsMessage->CreateMessage(pdu) != nullptr);
+    message = gsmSmsMessage->CreateMessage(pdu);
+    EXPECT_EQ(message->GetEmailMessageBody(), "{ te3tAmdy[^~\\] }");
+    EXPECT_EQ(message->GetVisibleMessageBody(), "{ te3tAmdy[^~\\] }");
+    EXPECT_EQ(message->GetEmailAddress(), "VOo@efYmple.com");
+    EXPECT_EQ(message->GetVisibleOriginatingAddress(), "VOo@efYmple.com");
+    EXPECT_TRUE(message->IsEmail());
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsEmailMessage_0002
+ * @tc.name     Test SmsEmailMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsEmailMessage_0002, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    string pdu = ("07963258974152f204038105f300008022110232438a28e6a71b40c587eb"
+                  "7076d9357eb7412f7d793a07ddeb6278794d07bde8d5391b246e93d3");
+    EXPECT_TRUE(gsmSmsMessage->CreateMessage(pdu) != nullptr);
+    auto message = gsmSmsMessage->CreateMessage(pdu);
+    EXPECT_TRUE(message != nullptr);
+
+    EXPECT_TRUE(message->IsEmailAddress("\"DAS\" <NAME@sadds.com>"));
+    EXPECT_TRUE(message->IsEmailAddress("DAS <NAME@sadds.com>"));
+    EXPECT_FALSE(message->IsEmailAddress(""));
+    EXPECT_FALSE(message->IsEmailAddress("\"DAS\" 45654654564"));
+    EXPECT_FALSE(message->IsEmailAddress("DAS 13254654654"));
+    EXPECT_TRUE(message->IsEmailAddress("阿松大@163.com"));
+    EXPECT_TRUE(message->IsEmailAddress("aaa@aa.bb.163.com"));
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_SmsStateObserver_0001
  * @tc.name     Test SmsStateObserver_0001
  * @tc.desc     Function test
