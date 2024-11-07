@@ -413,6 +413,26 @@ HWTEST_F(BranchSmsPartTest, SmsEmailMessage_0002, Function | MediumTest | Level1
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_SmsEmailMessage_0003
+ * @tc.name     Test SmsEmailMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsEmailMessage_0003, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    string pdu = ("07963258974152f2040D91687103920059F100008022110232438a28e6a71b40c587e"
+           "b7076d9357eb7412f7d793a07ddeb6278794d07bde8d5391b246e93d3");
+    EXPECT_TRUE(gsmSmsMessage->CreateMessage(pdu) != nullptr);
+    auto message = gsmSmsMessage->CreateMessage(pdu);
+    EXPECT_FALSE(message->IsEmail());
+
+    pdu = ("07963258974152f204038105f300008022110232438a10e6a71b40c587eb7076d9357eb743");
+    EXPECT_TRUE(gsmSmsMessage->CreateMessage(pdu) != nullptr);
+    message = gsmSmsMessage->CreateMessage(pdu);
+    EXPECT_FALSE(message->IsEmail());
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_SmsStateObserver_0001
  * @tc.name     Test SmsStateObserver_0001
  * @tc.desc     Function test
