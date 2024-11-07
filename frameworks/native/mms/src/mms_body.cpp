@@ -48,7 +48,7 @@ bool MmsBody::DecodeMultipart(MmsDecodeBuffer &decodeBuffer)
     bodyEntrys_ = nEntries;
     while (nEntries) {
         MmsBodyPart bodyPart;
-        if (!bodyPart.DecodePart(decodeBuffer)) {
+        if (!bodyPart.DecodePart(decodeBuffer, nEntries)) {
             TELEPHONY_LOGE("Body decode multipart DecodePart fail.");
             return false;
         }

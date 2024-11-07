@@ -103,7 +103,7 @@ void MmsBodyPart::AssignBodyPart(const MmsBodyPart &obj)
  * @return true
  * @return false
  */
-bool MmsBodyPart::DecodePart(MmsDecodeBuffer &decodeBuffer)
+bool MmsBodyPart::DecodePart(MmsDecodeBuffer &decodeBuffer, uint32_t nEntries)
 {
     uint32_t headerLength = 0;
     uint32_t bodyLength = 0;
@@ -136,7 +136,7 @@ bool MmsBodyPart::DecodePart(MmsDecodeBuffer &decodeBuffer)
         TELEPHONY_LOGE("Decode Body Part Body Error.");
         return false;
     }
-    DecodeSetFileName();
+    DecodeSetFileName(nEntries);
     return true;
 }
 
@@ -386,7 +386,7 @@ bool MmsBodyPart::EncodeMmsBodyPart(MmsEncodeBuffer &encodeBuffer)
     return true;
 }
 
-void MmsBodyPart::DecodeSetFileName()
+void MmsBodyPart::DecodeSetFileName(uint32_t nEntries)
 {
     std::string fileName = "";
     GetContentType().GetContentParam().GetFileName(fileName);
@@ -426,7 +426,10 @@ void MmsBodyPart::DecodeSetFileName()
     if (timeptr != nullptr) {
         (void)strftime(chCurrentTime, sizeof(chCurrentTime), "%Y%m%d%H%M%S", timeptr);
     }
-    strFileName_ = chCurrentTime;
+    std::string finalFileName(chCurrentTime);
+    finalFileName += '_';
+    finalFileName += '0' + nEntries;
+    strFileName_ = finalFileName;
     return;
 }
 
