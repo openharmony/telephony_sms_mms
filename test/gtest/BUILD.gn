@@ -25,7 +25,6 @@ ohos_unittest("tel_sms_mms_gtest") {
     "mms_gtest.cpp",
     "sms_broadcast_subscriber_gtest.cpp",
     "sms_delivery_callback_gtest.cpp",
-    "sms_gtest.cpp",
     "sms_ims_service_interaction_gtest.cpp",
     "sms_mms_common_test.cpp",
     "sms_mms_receive_gtest.cpp",
