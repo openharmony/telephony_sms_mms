@@ -30,7 +30,7 @@ public:
     ~MmsBodyPart();
     void DumpMmsBodyPart();
     bool DecodePartHeader(MmsDecodeBuffer &decodeBuffer, uint32_t headerLen);
-    bool DecodePart(MmsDecodeBuffer &decodeBuffer); // main entry
+    bool DecodePart(MmsDecodeBuffer &decodeBuffer, uint32_t nEntries); // main entry
     bool DecodePartBody(MmsDecodeBuffer &decodeBuffer, uint32_t bodyLength);
     bool EncodeMmsBodyPart(MmsEncodeBuffer &encodeBuffer);
     bool SetAttachment(MmsAttachment &attachment);
@@ -57,7 +57,7 @@ private:
     void AssignBodyPart(const MmsBodyPart &obj);
     bool WriteBodyFromAttachmentBuffer(MmsAttachment &attachment);
     bool WriteBodyFromFile(std::string path);
-    void DecodeSetFileName();
+    void DecodeSetFileName(uint32_t nEntries);
 
 private:
     bool isSmilFile_ = false;
