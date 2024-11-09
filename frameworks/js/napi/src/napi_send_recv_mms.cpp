@@ -187,9 +187,6 @@ void NativeSendMms(napi_env env, void *data)
 void SendMmsCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<MmsContext *>(data);
-    if (g_datashareHelper != nullptr) {
-        g_datashareHelper->Release();
-    }
     if (context == nullptr) {
         TELEPHONY_LOGE("SendMmsCallback context nullptr");
         return;
@@ -490,9 +487,6 @@ void NativeDownloadMms(napi_env env, void *data)
 void DownloadMmsCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<MmsContext *>(data);
-    if (g_datashareHelper != nullptr && !NapiSendRecvMms::waitFlag) {
-        g_datashareHelper->Release();
-    }
     if (context == nullptr) {
         TELEPHONY_LOGE("SendMmsCallback context nullptr");
         return;
