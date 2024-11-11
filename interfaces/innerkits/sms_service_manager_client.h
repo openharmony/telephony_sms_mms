@@ -321,6 +321,7 @@ public:
 
 private:
     std::mutex mutex_;
+    std::mutex mmsMutex_;
     sptr<ISmsServiceInterface> smsServiceInterface_;
     sptr<IRemoteObject::DeathRecipient> recipient_;
 };
