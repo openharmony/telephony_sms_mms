@@ -61,6 +61,7 @@ bool SmsServiceManagerClient::InitSmsServiceProxy()
 void SmsServiceManagerClient::ResetSmsServiceProxy()
 {
     std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> mmsLock(mmsMutex_);
     if ((smsServiceInterface_ != nullptr) && (smsServiceInterface_->AsObject() != nullptr)) {
         smsServiceInterface_->AsObject()->RemoveDeathRecipient(recipient_);
     }
@@ -207,7 +208,7 @@ int32_t SmsServiceManagerClient::SendMms(int32_t slotId, const std::u16string &m
     const std::u16string &ua, const std::u16string &uaprof, int64_t &time)
 {
     if (InitSmsServiceProxy()) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(mmsMutex_);
         return smsServiceInterface_->SendMms(slotId, mmsc, data, ua, uaprof, time);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
@@ -217,7 +218,7 @@ int32_t SmsServiceManagerClient::DownloadMms(int32_t slotId, const std::u16strin
     const std::u16string &ua, const std::u16string &uaprof)
 {
     if (InitSmsServiceProxy()) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(mmsMutex_);
         return smsServiceInterface_->DownloadMms(slotId, mmsc, data, ua, uaprof);
     }
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
