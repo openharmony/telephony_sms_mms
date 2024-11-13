@@ -167,13 +167,17 @@ bool MmsBodyPartHeader::DecodeContentDisposition(MmsDecodeBuffer &decodeBuffer, 
  * @return false
  */
 bool MmsBodyPartHeader::DecodeDispositionParameter(
-    MmsDecodeBuffer &decodeBuffer, uint32_t dispLen, uint32_t beginPos)
+    MmsDecodeBuffer &decodeBuffer, uint32_t &dispLen, uint32_t beginPos)
 {
     const uint8_t pFileNameValue = 0x98;
     uint32_t endPostion = decodeBuffer.GetCurPosition();
     uint8_t oneByte = 0;
-    if ((endPostion < beginPos) || dispLen <= (endPostion - beginPos)) {
-        TELEPHONY_LOGI("Body part header data.");
+    if (endPostion < beginPos) {
+        TELEPHONY_LOGI("Body part header data case 1.");
+        return true;
+    } else if ((dispLen <= (endPostion - beginPos)) && dispLen >= 1) {
+        dispLen = endPostion - beginPos - 1;
+        TELEPHONY_LOGI("Body part header data case 2.");
         return true;
     }
 

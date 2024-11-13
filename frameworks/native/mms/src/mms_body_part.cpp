@@ -112,16 +112,18 @@ bool MmsBodyPart::DecodePart(MmsDecodeBuffer &decodeBuffer, uint32_t nEntries)
         TELEPHONY_LOGE("Decode Body Part Header Uintvar Error.");
         return false;
     }
+    TELEPHONY_LOGE("header length: %{public}d", headerLength);
     if (!decodeBuffer.DecodeUintvar(bodyLength, length)) {
         TELEPHONY_LOGE("Decode Body Part Body Lenght Uintvar Error.");
         return false;
     }
+    TELEPHONY_LOGE("body length: %{public}d", bodyLength);
     int32_t contentLength = 0;
     if (!bodyPartContentType_.DecodeMmsContentType(decodeBuffer, contentLength)) {
         TELEPHONY_LOGE("Decode Body Part ContentType Error.");
         return false;
     }
-
+    TELEPHONY_LOGE("content length: %{public}d", contentLength);
     headerLen_ = headerLength;
     bodyLen_ = bodyLength;
     if (headerLen_ < static_cast<uint32_t>(contentLength)) {
@@ -165,6 +167,7 @@ bool MmsBodyPart::DecodePartHeader(MmsDecodeBuffer &decodeBuffer, uint32_t heade
             TELEPHONY_LOGE("Decode Body Part PeekOneByte Error.");
             return false;
         }
+        TELEPHONY_LOGE("part header onebyte:%{public}u", oneByte);
         if (headerAccept <= oneByte && headerCacheControl >= oneByte) {
             if (!mmsBodyPartHeader_.DecodeWellKnownHeader(decodeBuffer, headerLen)) {
                 TELEPHONY_LOGE("Decode Body Part DecodeWellKnownHeader Error.");
