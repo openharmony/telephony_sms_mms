@@ -46,7 +46,7 @@ public:
     bool DecodeContentLocation(MmsDecodeBuffer &decodeBuffer, uint32_t &Len);
     bool DecodeContentId(MmsDecodeBuffer &decodeBuffer, uint32_t &Len);
     bool DecodeContentDisposition(MmsDecodeBuffer &decodeBuffer, uint32_t &Len);
-    bool DecodeDispositionParameter(MmsDecodeBuffer &decodeBuffer, uint32_t dispLen, uint32_t beginPos);
+    bool DecodeDispositionParameter(MmsDecodeBuffer &decodeBuffer, uint32_t &dispLen, uint32_t beginPos);
 
     bool EncodeContentLocation(MmsEncodeBuffer &encodeBuffer);
     bool EncodeContentId(MmsEncodeBuffer &encodeBuffer);
