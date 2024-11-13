@@ -46,6 +46,7 @@ bool MmsBody::DecodeMultipart(MmsDecodeBuffer &decodeBuffer)
         return false;
     }
     bodyEntrys_ = nEntries;
+    TELEPHONY_LOGE("attachment number: %{public}u", nEntries);
     while (nEntries) {
         MmsBodyPart bodyPart;
         if (!bodyPart.DecodePart(decodeBuffer, nEntries)) {
