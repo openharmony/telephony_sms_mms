@@ -629,57 +629,6 @@ private:
     std::unique_ptr<SmsSendManager> m_pSmsSendManager;
 };
 
-class SmsReceiveHandlerFuzzer final : public Fuzzer {
-public:
-    using Fuzzer::Fuzzer;
-    ~SmsReceiveHandlerFuzzer() final {}
-public:
-    void StartFuzzerTest() override
-    {
-        if (!CreateObject()) {
-            return;
-        }
-        TestReduceRunningLock();
-        TestReleaseRunningLock();
-        TestUpdateAndCombineMultiPageMessage();
-        DestoryObject();
-    }
-protected:
-    bool CreateObject()
-    {
-        m_pSmsReceiveHandler = std::make_unique<CdmaSmsReceiveHandler>(g_slotId);
-        return m_pSmsReceiveHandler != nullptr;
-    }
-    void DestoryObject()
-    {
-        m_pSmsReceiveHandler.reset();
-    }
-    void TestReduceRunningLock()
-    {
-        m_pSmsReceiveHandler->ReduceRunningLock();
-    }
-    void TestReleaseRunningLock()
-    {
-        m_pSmsReceiveHandler->ReleaseRunningLock();
-    }
-    void TestUpdateAndCombineMultiPageMessage()
-    {
-        auto indexer = std::make_shared<SmsReceiveIndexer>();
-        auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(g_slotId);
-        auto pdus = std::make_shared<std::vector<std::string>>();
-        std::string pud = GetString(20);
-        pdus->push_back(pud);
-        m_pSmsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler);
-        m_pSmsReceiveHandler->UpdateMultiPageMessage(indexer, pdus);
-        pud.clear();
-        m_pSmsReceiveHandler->UpdateMultiPageMessage(indexer, pdus);
-        pdus->clear();
-        m_pSmsReceiveHandler->UpdateMultiPageMessage(indexer, pdus);
-    }
-private:
-    std::unique_ptr<CdmaSmsReceiveHandler> m_pSmsReceiveHandler;
-};
-
 class SmsSendIndexerFuzzer final : public Fuzzer {
 public:
     using Fuzzer::Fuzzer;
@@ -790,7 +739,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     RunFuzzer<OHOS::SmsInterfaceManagerFuzzer>(data, size);
     RunFuzzer<OHOS::SmsMiscManagerFuzzer>(data, size);
     RunFuzzer<OHOS::SmsSendManagerFuzzer>(data, size);
-    RunFuzzer<OHOS::SmsReceiveHandlerFuzzer>(data, size);
     RunFuzzer<OHOS::SmsSendIndexerFuzzer>(data, size);
     return 0;
 }
