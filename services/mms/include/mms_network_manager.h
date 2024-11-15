@@ -30,7 +30,7 @@ public:
     void ReleaseNetwork(uint8_t requestId, bool shouldDelayRelease);
 
 private:
-    std::shared_ptr<MmsNetworkClient> mmsNetworkClient_;
+    std::shared_ptr<MmsNetworkClient> mmsNetworkClient_ = nullptr;
     sptr<MmsConnCallbackStub> callback_;
 };
 } // namespace Telephony
