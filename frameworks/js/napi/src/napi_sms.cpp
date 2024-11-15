@@ -143,7 +143,9 @@ static int32_t ActuallySendTextMessage(SendMessageContext &parameter, std::uniqu
     if (!IsValidSlotId(parameter.slotId)) {
         auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
         sendCallback->OnSmsSendResult(result);
-        deliveryCallback->OnSmsDeliveryResult(u"");
+        if (deliveryCallback != nullptr) {
+            deliveryCallback->OnSmsDeliveryResult(u"");
+        }
         return TELEPHONY_ERR_SLOTID_INVALID;
     }
     return Singleton<SmsServiceManagerClient>::GetInstance().SendMessage(parameter.slotId,
@@ -157,7 +159,9 @@ static int32_t ActuallySendTextMessageWithoutSave(SendMessageContext &parameter,
     if (!IsValidSlotId(parameter.slotId) || parameter.isPersist) {
         auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
         sendCallback->OnSmsSendResult(result);
-        deliveryCallback->OnSmsDeliveryResult(u"");
+        if (deliveryCallback != nullptr) {
+            deliveryCallback->OnSmsDeliveryResult(u"");
+        }
         return TELEPHONY_ERR_SLOTID_INVALID;
     }
     return Singleton<SmsServiceManagerClient>::GetInstance().SendMessageWithoutSave(parameter.slotId,
@@ -171,7 +175,9 @@ static int32_t ActuallySendDataMessage(SendMessageContext &parameter, std::uniqu
     if (InValidSlotIdOrInValidPort(parameter.slotId, parameter.destinationPort)) {
         auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
         sendCallback->OnSmsSendResult(result);
-        deliveryCallback->OnSmsDeliveryResult(u"");
+        if (deliveryCallback != nullptr) {
+            deliveryCallback->OnSmsDeliveryResult(u"");
+        }
         return TELEPHONY_ERR_SLOTID_INVALID;
     }
     if (parameter.rawDataContent.size() > 0) {
