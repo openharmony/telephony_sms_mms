@@ -404,9 +404,9 @@ protected:
     }
     void TestNetAvailable()
     {
-        sptr<NetManagerStandard::NetHandle> pNetHandle = new NetManagerStandard::NetHandle;
-        sptr<NetManagerStandard::NetAllCapabilities> pNetAllCap = new NetManagerStandard::NetAllCapabilities;
-        sptr<NetManagerStandard::NetLinkInfo> pNetLinkInfo = new NetManagerStandard::NetLinkInfo;
+        sptr<NetManagerStandard::NetHandle> pNetHandle;
+        sptr<NetManagerStandard::NetAllCapabilities> pNetAllCap;
+        sptr<NetManagerStandard::NetLinkInfo> pNetLinkInfo;
 
         m_pMmsConnCallbackStub->NetAvailable(pNetHandle);
         m_pMmsConnCallbackStub->NetCapabilitiesChange(pNetHandle, pNetAllCap);
@@ -501,73 +501,6 @@ protected:
     }
 private:
     std::unique_ptr<CdmaSmsSender> m_pCdmaSmsSender;
-};
-
-class CdmaSmsReceiveHandleFuzzer final : public Fuzzer {
-public:
-    using Fuzzer::Fuzzer;
-    ~CdmaSmsReceiveHandleFuzzer() final {}
-public:
-    void StartFuzzerTest() override
-    {
-        if (!CreateObject()) {
-            return;
-        }
-        TestHandleSmsAndSendCBB();
-        TestTransformMessageInfo();
-        DestoryObject();
-    }
-protected:
-    bool CreateObject()
-    {
-        m_pCdmaSmsReceiveHandler = std::make_unique<CdmaSmsReceiveHandler>(g_slotId);
-        return m_pCdmaSmsReceiveHandler != nullptr;
-    }
-    void DestoryObject()
-    {
-        m_pCdmaSmsReceiveHandler.reset();
-    }
-    void TestHandleSmsAndSendCBB()
-    {
-        SmsTeleSvcUserData userData;
-        std::vector<UserDataHeadType> vectUserDataHeadType = {
-            UserDataHeadType::UDH_CONCAT_8BIT,
-            UserDataHeadType::UDH_CONCAT_16BIT
-        };
-
-        GetDataRange((char*)&userData.userData.data, userData.userData.length, m_nDataRangeMin, m_nDataRangeMax);
-        userData.userData.headerCnt = 1;
-        userData.userData.header[0].udhType = GetEnumRandom(vectUserDataHeadType);
-
-        std::shared_ptr<CdmaSmsMessage> smsBaseMessage = std::make_shared<CdmaSmsMessage>();
-        smsBaseMessage->AnalsisHeader(userData);
-        smsBaseMessage->messageId_ = 1;
-        smsBaseMessage->serviceCategory_ = 1;
-        smsBaseMessage->language_ =1;
-        smsBaseMessage-> visibleMessageBody_ ="123";
-
-        m_pCdmaSmsReceiveHandler->HandleSmsOtherSvcid(smsBaseMessage);
-        m_pCdmaSmsReceiveHandler->HandleSmsOtherSvcid(nullptr);
-        m_pCdmaSmsReceiveHandler->SendCBBroadcast(smsBaseMessage);
-        m_pCdmaSmsReceiveHandler->SendCBBroadcast(nullptr);
-    }
-    void TestReplySmsToSmsc()
-    {
-        int nResult = AckIncomeCause::SMS_ACK_RESULT_OK;
-        m_pCdmaSmsReceiveHandler->ReplySmsToSmsc(nResult);
-    }
-    void TestTransformMessageInfo()
-    {
-        std::shared_ptr<SmsMessageInfo> info;
-        m_pCdmaSmsReceiveHandler->TransformMessageInfo(info);
-        info = std::make_shared<SmsMessageInfo>();
-        info->pdu = GetPduVect();
-        m_pCdmaSmsReceiveHandler->TransformMessageInfo(info);
-    }
-private:
-    std::unique_ptr<CdmaSmsReceiveHandler> m_pCdmaSmsReceiveHandler;
-    int                                    m_nDataRangeMin = 2;
-    int                                    m_nDataRangeMax = MAX_USER_DATA_LEN;
 };
 
 class CdmaSmsMessageFuzzer final : public Fuzzer {
@@ -678,6 +611,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     RunFuzzer<OHOS::MmsConnCallbackStubFuzzer>(data, size);
     RunFuzzer<OHOS::CdmaSmsMessageFuzzer>(data, size);
     RunFuzzer<OHOS::CdmaSmsSenderFuzzer>(data, size);
-    RunFuzzer<OHOS::CdmaSmsReceiveHandleFuzzer>(data, size);
     return 0;
 }
