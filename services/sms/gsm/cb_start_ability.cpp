@@ -27,7 +27,6 @@ namespace Telephony {
 const std::string BUNDLE_NAME_BEGIN = "com.hua";
 const std::string BUNDLE_NAME_END = "wei.hmos.cellbroadcast";
 constexpr const char *ABILITY_NAME = "AlertService";
-constexpr const char *MODULE_NAME = "entry";
 static constexpr int32_t USER_ID = 100;
 
 CbStartAbility::~CbStartAbility() {}
@@ -39,7 +38,7 @@ void CbStartAbility::StartAbility(AAFwk::Want &want)
     std::vector<int> activatedOsAccountIds;
     AccountSA::OsAccountManager::QueryActiveOsAccountIds(activatedOsAccountIds);
     TELEPHONY_LOGI("start cellbroadcast ability");
-    want.SetElementName("", BUNDLE_NAME_BEGIN + BUNDLE_NAME_END, ABILITY_NAME, MODULE_NAME);
+    want.SetElementName("", BUNDLE_NAME_BEGIN + BUNDLE_NAME_END, ABILITY_NAME);
     if (!activatedOsAccountIds.empty()) {
         TELEPHONY_LOGI("the foreground OS account local ID: %{public}d", activatedOsAccountIds[0]);
         ErrCode code = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr,
