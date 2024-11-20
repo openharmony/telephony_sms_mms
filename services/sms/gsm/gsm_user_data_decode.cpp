@@ -179,20 +179,24 @@ bool GsmUserDataDecode::Decode8bitPdu(
         TELEPHONY_LOGE("udl length error");
         return false;
     }
-
+    uint8_t udhl = 0;
+    if (!buffer.PickOneByte(udhl)) {
+        TELEPHONY_LOGE("get udhl error, use original value: 6");
+        udhl = WAP_PUSH_UDHL - 1;
+    }
     /* Setting for Wap Push */
-    if (pTPUD != nullptr && udl > WAP_PUSH_UDHL) {
-        pTPUD->udl = udl - WAP_PUSH_UDHL;
+    if (pTPUD != nullptr && udl > (udhl + 1)) {
+        pTPUD->udl = udl - (udhl + 1);
         if (pTPUD->udl >= sizeof(pTPUD->ud)) {
             TELEPHONY_LOGE("udl length error");
             return false;
         }
 
-        if (buffer.data_ == nullptr || (buffer.GetIndex() + pTPUD->udl + WAP_PUSH_UDHL > buffer.GetSize())) {
+        if (buffer.data_ == nullptr || (buffer.GetIndex() + pTPUD->udl + (udhl + 1) > buffer.GetSize())) {
             TELEPHONY_LOGE("buffer error.");
             return false;
         }
-        if (memcpy_s(pTPUD->ud, sizeof(pTPUD->ud), buffer.data_.get() + buffer.GetIndex() + WAP_PUSH_UDHL,
+        if (memcpy_s(pTPUD->ud, sizeof(pTPUD->ud), buffer.data_.get() + buffer.GetIndex() + (udhl + 1),
                 pTPUD->udl) != EOK) {
             TELEPHONY_LOGE("memcpy_s error.");
             return false;
