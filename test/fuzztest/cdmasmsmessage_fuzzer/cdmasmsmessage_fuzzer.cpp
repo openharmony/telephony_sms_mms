@@ -91,6 +91,8 @@ void CreateMessageTest(const uint8_t *data, size_t size)
 
 void TestAnalysisP2pMsg(const uint8_t *data, size_t size)
 {
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    m_pCdmaSmsMessage->CreateMessage(pdu);
     CdmaP2PMsg p2pMsg;
     p2pMsg.teleserviceId = static_cast<uint16_t>(size);
     p2pMsg.telesvcMsg.type = TeleserviceMsgType::DELIVER;
@@ -112,6 +114,8 @@ void TestAnalysisP2pMsg(const uint8_t *data, size_t size)
 
 void TestAnalysisDeliverMwi(const uint8_t *data, size_t size)
 {
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    m_pCdmaSmsMessage->CreateMessage(pdu);
     CdmaP2PMsg p2pMsg;
     p2pMsg.teleserviceId = static_cast<uint16_t>(size);
     p2pMsg.telesvcMsg.type = TeleserviceMsgType::DELIVER;
@@ -124,6 +128,8 @@ void TestAnalysisDeliverMwi(const uint8_t *data, size_t size)
 
 void TestAnalysisDeliverMsg(const uint8_t *data, size_t size)
 {
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    m_pCdmaSmsMessage->CreateMessage(pdu);
     TeleserviceDeliver deliverMsg;
     deliverMsg.displayMode = SmsDisplayMode::IMMEDIATE;
     m_pCdmaSmsMessage->AnalsisDeliverMsg(deliverMsg);
@@ -137,6 +143,8 @@ void TestAnalysisDeliverMsg(const uint8_t *data, size_t size)
 
 void TestAnalsisUserData(const uint8_t *data, size_t size)
 {
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    m_pCdmaSmsMessage->CreateMessage(pdu);
     SmsTeleSvcUserData userData;
     userData.userData.headerCnt = 1;
     userData.userData.header[0].udhType = UserDataHeadType::UDH_CONCAT_8BIT;
@@ -154,6 +162,8 @@ void TestAnalsisUserData(const uint8_t *data, size_t size)
 
 void TestAnalysisCbMsg(const uint8_t *data, size_t size)
 {
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    m_pCdmaSmsMessage->CreateMessage(pdu);
     CdmaBroadCastMsg cbMsg;
     m_pCdmaSmsMessage->AnalysisCbMsg(cbMsg);
     cbMsg.telesvcMsg.type = TeleserviceMsgType::DELIVER;
@@ -164,6 +174,8 @@ void TestAnalysisCbMsg(const uint8_t *data, size_t size)
 
 void TestAnalsisHeader(const uint8_t *data, size_t size)
 {
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    m_pCdmaSmsMessage->CreateMessage(pdu);
     SmsUDH header;
     m_pCdmaSmsMessage->AddUserDataHeader(header);
     SmsTeleSvcUserData userData;
