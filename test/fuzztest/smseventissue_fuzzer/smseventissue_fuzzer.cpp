@@ -24,6 +24,7 @@
 #include "delivery_short_message_callback_stub.h"
 #include "send_short_message_callback_stub.h"
 #include "sms_interface_manager.h"
+#include "cdma_sms_message.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
@@ -86,7 +87,9 @@ void DoSentIssuePartTest(const uint8_t *data, size_t size, std::shared_ptr<SmsSe
     std::int64_t erase = static_cast<int64_t>(size);
     smsSendManager->gsmSmsSender_->SendCacheMapEraseItem(erase);
     smsSendManager->cdmaSmsSender_->SendCacheMapEraseItem(erase);
-
+    CdmaSmsMessage msg;
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    msg.CreateMessage(pdu);
     std::int32_t eventId = static_cast<int32_t>(size);
     std::int64_t refId = static_cast<int64_t>(size);
     AppExecFwk::InnerEvent::Pointer response = AppExecFwk::InnerEvent::Get(eventId, refId);

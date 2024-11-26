@@ -19,6 +19,7 @@
 #include "cdma_sms_sub_parameter.h"
 #include "cdma_sms_transport_message.h"
 #include "securec.h"
+#include "cdma_sms_message.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
@@ -150,6 +151,9 @@ void BaseParameterEncode(const uint8_t *data, size_t size)
 
 void ReservedParameterEncode(const uint8_t *data, size_t size)
 {
+    CdmaSmsMessage msg;
+    std::string oriPdu(reinterpret_cast<const char *>(data), size);
+    msg.CreateMessage(oriPdu);
     auto parameter = std::make_unique<CdmaSmsReservedParameter>(CdmaSmsSubParameter::MESSAGE_IDENTIFIER);
     if (parameter == nullptr) {
         return;
