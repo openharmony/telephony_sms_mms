@@ -20,6 +20,7 @@
 #include "core_manager_inner.h"
 #include "i_sms_service_interface.h"
 #include "sms_service.h"
+#include "cdma_sms_message.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
@@ -143,7 +144,9 @@ void DelSimMessage(const uint8_t *data, size_t size)
     if (!IsServiceInited()) {
         return;
     }
-
+    CdmaSmsMessage msg;
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    msg.CreateMessage(pdu);
     MessageParcel dataParcel;
     MessageParcel replyParcel;
     MessageOption option(MessageOption::TF_SYNC);
