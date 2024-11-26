@@ -21,6 +21,7 @@
 #include "core_manager_inner.h"
 #include "ims_sms_callback_stub.h"
 #include "sms_service.h"
+#include "cdma_sms_message.h"
 
 using namespace OHOS::Telephony;
 namespace OHOS {
@@ -127,7 +128,9 @@ void OnRemoteRequest(const uint8_t *data, size_t size)
     if (!IsServiceInited()) {
         return;
     }
-
+    CdmaSmsMessage msg;
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    msg.CreateMessage(pdu);
     MessageParcel dataParcel;
     if (!dataParcel.WriteInterfaceToken(SmsInterfaceStub::GetDescriptor())) {
         TELEPHONY_LOGE("OnRemoteRequest WriteInterfaceToken is false");
@@ -175,7 +178,9 @@ void ImsSetSmsConfigResponseInner(const uint8_t *data, size_t size)
     if (!IsServiceInited()) {
         return;
     }
-
+    CdmaSmsMessage msg;
+    std::string pdu(reinterpret_cast<const char *>(data), size);
+    msg.CreateMessage(pdu);
     MessageParcel dataParcel;
     MessageParcel replyParcel;
 
