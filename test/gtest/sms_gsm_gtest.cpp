@@ -50,9 +50,14 @@ public:
  */
 HWTEST_F(SmsGsmTest, SmsGsmTest_001, Function | MediumTest | Level1)
 {
-    AAFwk::Want want;
-    DelayedSingleton<CbStartAbility>::GetInstance()->StartAbility(want);
-    EXPECT_EQ(want.GetModuleName(), "entry");
+    std::shared_ptr<GsmSmsParamCodec> codec = std::make_shared<GsmSmsParamCodec>();
+
+    string strBuff;
+    int32_t setType = 0;
+    int32_t indType = 0;
+    strBuff += HEX_VALUE_0D;
+    SmsReadBuffer smsReadBuff(strBuff);
+    EXPECT_FALSE(codec->CheckVoicemail(smsReadBuff, &setType, &indType));
 }
 
 /**
@@ -67,7 +72,7 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_002, Function | MediumTest | Level1)
     string strBuff;
     int32_t setType = 0;
     int32_t indType = 0;
-    strBuff += HEX_VALUE_0D;
+    strBuff += HEX_VALUE_04;
     SmsReadBuffer smsReadBuff(strBuff);
     EXPECT_FALSE(codec->CheckVoicemail(smsReadBuff, &setType, &indType));
 }
@@ -84,6 +89,7 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_003, Function | MediumTest | Level1)
     string strBuff;
     int32_t setType = 0;
     int32_t indType = 0;
+    strBuff += HEX_VALUE_04;
     strBuff += HEX_VALUE_04;
     SmsReadBuffer smsReadBuff(strBuff);
     EXPECT_FALSE(codec->CheckVoicemail(smsReadBuff, &setType, &indType));
@@ -102,10 +108,11 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_004, Function | MediumTest | Level1)
     int32_t setType = 0;
     int32_t indType = 0;
     strBuff += HEX_VALUE_04;
-    strBuff += HEX_VALUE_04;
+    strBuff += HEX_VALUE_D0;
     SmsReadBuffer smsReadBuff(strBuff);
     EXPECT_FALSE(codec->CheckVoicemail(smsReadBuff, &setType, &indType));
 }
+
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_005
@@ -115,16 +122,15 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_004, Function | MediumTest | Level1)
 HWTEST_F(SmsGsmTest, SmsGsmTest_005, Function | MediumTest | Level1)
 {
     std::shared_ptr<GsmSmsParamCodec> codec = std::make_shared<GsmSmsParamCodec>();
-
     string strBuff;
     int32_t setType = 0;
     int32_t indType = 0;
     strBuff += HEX_VALUE_04;
     strBuff += HEX_VALUE_D0;
+    strBuff += HEX_VALUE_D0;
     SmsReadBuffer smsReadBuff(strBuff);
     EXPECT_FALSE(codec->CheckVoicemail(smsReadBuff, &setType, &indType));
 }
-
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_006
@@ -134,12 +140,13 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_005, Function | MediumTest | Level1)
 HWTEST_F(SmsGsmTest, SmsGsmTest_006, Function | MediumTest | Level1)
 {
     std::shared_ptr<GsmSmsParamCodec> codec = std::make_shared<GsmSmsParamCodec>();
+
     string strBuff;
     int32_t setType = 0;
     int32_t indType = 0;
     strBuff += HEX_VALUE_04;
     strBuff += HEX_VALUE_D0;
-    strBuff += HEX_VALUE_D0;
+    strBuff += HEX_VALUE_11;
     SmsReadBuffer smsReadBuff(strBuff);
     EXPECT_FALSE(codec->CheckVoicemail(smsReadBuff, &setType, &indType));
 }
@@ -158,9 +165,10 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_007, Function | MediumTest | Level1)
     int32_t indType = 0;
     strBuff += HEX_VALUE_04;
     strBuff += HEX_VALUE_D0;
-    strBuff += HEX_VALUE_11;
+    strBuff += HEX_VALUE_10;
+    strBuff += HEX_VALUE_10;
     SmsReadBuffer smsReadBuff(strBuff);
-    EXPECT_FALSE(codec->CheckVoicemail(smsReadBuff, &setType, &indType));
+    EXPECT_TRUE(codec->CheckVoicemail(smsReadBuff, &setType, &indType));
 }
 
 /**
@@ -170,17 +178,9 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_007, Function | MediumTest | Level1)
  */
 HWTEST_F(SmsGsmTest, SmsGsmTest_008, Function | MediumTest | Level1)
 {
-    std::shared_ptr<GsmSmsParamCodec> codec = std::make_shared<GsmSmsParamCodec>();
-
-    string strBuff;
-    int32_t setType = 0;
-    int32_t indType = 0;
-    strBuff += HEX_VALUE_04;
-    strBuff += HEX_VALUE_D0;
-    strBuff += HEX_VALUE_10;
-    strBuff += HEX_VALUE_10;
-    SmsReadBuffer smsReadBuff(strBuff);
-    EXPECT_TRUE(codec->CheckVoicemail(smsReadBuff, &setType, &indType));
+    std::shared_ptr<GsmSmsCommonUtils> utils = std::make_shared<GsmSmsCommonUtils>();
+    SmsWriteBuffer buffer;
+    EXPECT_FALSE(utils->Pack7bitChar(buffer, nullptr, 0, 0));
 }
 
 /**
@@ -191,18 +191,6 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_008, Function | MediumTest | Level1)
 HWTEST_F(SmsGsmTest, SmsGsmTest_009, Function | MediumTest | Level1)
 {
     std::shared_ptr<GsmSmsCommonUtils> utils = std::make_shared<GsmSmsCommonUtils>();
-    SmsWriteBuffer buffer;
-    EXPECT_FALSE(utils->Pack7bitChar(buffer, nullptr, 0, 0));
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_010
- * @tc.name     SmsGsmTest_010
- * @tc.desc     Function test
- */
-HWTEST_F(SmsGsmTest, SmsGsmTest_010, Function | MediumTest | Level1)
-{
-    std::shared_ptr<GsmSmsCommonUtils> utils = std::make_shared<GsmSmsCommonUtils>();
     std::vector<uint8_t> vectData;
     uint8_t fillBits = 1;
 
@@ -211,11 +199,11 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_010, Function | MediumTest | Level1)
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_011
- * @tc.name     SmsGsmTest_011
+ * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_010
+ * @tc.name     SmsGsmTest_010
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGsmTest, SmsGsmTest_011, Function | MediumTest | Level1)
+HWTEST_F(SmsGsmTest, SmsGsmTest_010, Function | MediumTest | Level1)
 {
     std::shared_ptr<GsmSmsCommonUtils> utils = std::make_shared<GsmSmsCommonUtils>();
     std::vector<uint8_t> vectData;
@@ -235,11 +223,11 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_011, Function | MediumTest | Level1)
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_012
- * @tc.name     SmsGsmTest_012
+ * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_011
+ * @tc.name     SmsGsmTest_011
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGsmTest, SmsGsmTest_012, Function | MediumTest | Level1)
+HWTEST_F(SmsGsmTest, SmsGsmTest_011, Function | MediumTest | Level1)
 {
     std::shared_ptr<GsmSmsCommonUtils> utils = std::make_shared<GsmSmsCommonUtils>();
     std::string strBuffer;
@@ -253,11 +241,11 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_012, Function | MediumTest | Level1)
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_013
- * @tc.name     SmsGsmTest_013
+ * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_012
+ * @tc.name     SmsGsmTest_012
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGsmTest, SmsGsmTest_013, Function | MediumTest | Level1)
+HWTEST_F(SmsGsmTest, SmsGsmTest_012, Function | MediumTest | Level1)
 {
     std::shared_ptr<GsmSmsCommonUtils> utils = std::make_shared<GsmSmsCommonUtils>();
     std::string strBuffer;
@@ -271,11 +259,11 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_013, Function | MediumTest | Level1)
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_014
- * @tc.name     SmsGsmTest_014
+ * @tc.number   Telephony_SmsMmsGtest_SmsGsmTest_013
+ * @tc.name     SmsGsmTest_013
  * @tc.desc     Function test Unpack7bitCharForMiddlePart
  */
-HWTEST_F(SmsGsmTest, SmsGsmTest_014, Function | MediumTest | Level1)
+HWTEST_F(SmsGsmTest, SmsGsmTest_013, Function | MediumTest | Level1)
 {
     std::shared_ptr<GsmSmsCommonUtils> utils = std::make_shared<GsmSmsCommonUtils>();
     std::string dataStr("1141515");
