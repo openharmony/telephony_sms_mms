@@ -52,7 +52,7 @@ HWTEST_F(SmsGsmTest, SmsGsmTest_001, Function | MediumTest | Level1)
 {
     AAFwk::Want want;
     DelayedSingleton<CbStartAbility>::GetInstance()->StartAbility(want);
-    EXPECT_EQ(want.GetModuleName(), "entry");
+    EXPECT_EQ(want.GetBundle(), "com.huawei.hmos.cellbroadcast");
 }
 
 /**
