@@ -83,10 +83,6 @@ bool GsmCbGsmCodec::Decode2gHeader()
     }
     cbHeader_->msgId = (temp << HEX_VALUE_08) | oneByte;
     bool isEtws;
-    if (cbCodec_ == nullptr) {
-        TELEPHONY_LOGE("cbCodec_ nullptr error.");
-        return false;
-    }
     cbCodec_->IsEtwsMessage(isEtws);
     if (isEtws && cbPduBuffer_->GetSize() <= MAX_ETWS_PDU_LEN) {
         if (!Decode2gHeaderEtws()) {
