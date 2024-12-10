@@ -22,7 +22,9 @@
         "syscap": [
             "SystemCapability.Telephony.SmsMms"
         ],
-        "features": [],
+        "features": [
+            "sms_mms_dynamic_start"
+        ],
         "adapted_system_type": [
             "standard"
         ],

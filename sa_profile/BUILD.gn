@@ -12,8 +12,17 @@
 # limitations under the License.
 
 import("//build/ohos/sa_profile/sa_profile.gni")
+
+declare_args() {
+  sms_mms_dynamic_start = false
+}
+
 ohos_sa_profile("sms_mms_sa_profile") {
-  sources = [ "4008.json" ]
+  if (!sms_mms_dynamic_start) {
+    sources = [ "4008.json" ]
+  } else {
+    sources = [ "4008_dynamic.json" ]
+  }
 
   part_name = "sms_mms"
 }
