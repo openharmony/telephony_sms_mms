@@ -31,10 +31,12 @@ public:
     /* add for etws */
     typedef bool (*IS_CUST_ETWS_MSG)(uint16_t channle);
     typedef void (*GET_CUST_ETWS_TYPE)(uint16_t channle, uint16_t &type);
+    typedef uint32_t (*GET_CBS_PDU_LENGTH)(const std::vector<unsigned char> &pdu);
  
     /* add for etws */
     IS_CUST_ETWS_MSG isCustEtwsMessage_ = nullptr;
     GET_CUST_ETWS_TYPE getCustEtwsType_ = nullptr;
+    GET_CBS_PDU_LENGTH getCbsPduLength_ = nullptr;
  
 private:
     void* telephonyExtWrapperHandle_ = nullptr;
