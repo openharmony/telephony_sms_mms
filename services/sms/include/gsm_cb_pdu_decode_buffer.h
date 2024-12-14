@@ -27,6 +27,7 @@ public:
     bool GetOneByte(uint8_t &oneByte);
     uint32_t GetCurPosition();
     uint32_t GetSize();
+    void SetSize(uint32_t len);
     void IncreasePointer(uint32_t offset);
     bool PickOneByte(uint8_t &oneByte);
     void SetPointer(uint32_t offset);

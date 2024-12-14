@@ -138,16 +138,30 @@ bool GsmCbCodec::PduAnalysis(const std::vector<unsigned char> &pdu)
         return false;
     }
     if (cbHeader_->bEtwsMessage && cbHeader_->cbEtwsType == ETWS_PRIMARY) {
+        PduAfterDiscardNullBlock(pdu);
         return gsmCodec->DecodeEtwsMsg();
     }
 
     if (cbHeader_->cbNetType == GSM_NET_CB) {
+        PduAfterDiscardNullBlock(pdu);
         decodeResult = gsmCodec->Decode2gCbMsg();
     } else if (cbHeader_->cbNetType == UMTS_NET_CB) {
         decodeResult = umtsCodec->Decode3gCbMsg();
     }
     TELEPHONY_LOGI("CB decode result:%{public}d.", decodeResult);
     return decodeResult;
+}
+
+void GsmCbCodec::PduAfterDiscardNullBlock(const std::vector<unsigned char> &pdu)
+{
+    if (cbPduBuffer_ == nullptr) {
+        TELEPHONY_LOGE("cbPduBuffer_ nullptr error");
+        return;
+    }
+    if (TELEPHONY_EXT_WRAPPER.getCbsPduLength_ != nullptr) {
+        uint32_t len = TELEPHONY_EXT_WRAPPER.getCbsPduLength_(pdu);
+        cbPduBuffer_ -> SetSize(len);
+    }
 }
 
 bool GsmCbCodec::ParamsCheck(const std::vector<unsigned char> &pdu)
