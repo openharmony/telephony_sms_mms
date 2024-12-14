@@ -78,5 +78,10 @@ uint32_t GsmCbPduDecodeBuffer::GetSize()
 {
     return totolLength_;
 }
+
+void GsmCbPduDecodeBuffer::SetSize(uint32_t len)
+{
+    totolLength_ = len;
+}
 } // namespace Telephony
 } // namespace OHOS

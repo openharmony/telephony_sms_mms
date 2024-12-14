@@ -256,6 +256,7 @@ public:
     bool GetReceiveTime(int64_t &receiveTime) const;
     int64_t GetRecvTime() const;
     void GetPduData(std::vector<uint8_t> &dataPdu);
+    void PduAfterDiscardNullBlock(const std::vector<unsigned char> &pdu);
 
     bool IsEtwsPrimary(bool &primary) const;
     bool IsEtwsMessage(bool &etws) const;

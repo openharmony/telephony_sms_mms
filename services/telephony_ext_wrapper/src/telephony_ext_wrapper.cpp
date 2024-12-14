@@ -44,7 +44,8 @@ void TelephonyExtWrapper::InitTelephonyExtWrapper()
     }
     isCustEtwsMessage_ = (IS_CUST_ETWS_MSG)dlsym(telephonyExtWrapperHandle_, "IsCustEtwsMessage");
     getCustEtwsType_ = (GET_CUST_ETWS_TYPE)dlsym(telephonyExtWrapperHandle_, "GetCustEtwsType");
-    if (isCustEtwsMessage_ == nullptr || getCustEtwsType_ == nullptr) {
+    getCbsPduLength_ = (GET_CBS_PDU_LENGTH)dlsym(telephonyExtWrapperHandle_, "getCbsPduLength");
+    if (isCustEtwsMessage_ == nullptr || getCustEtwsType_ == nullptr || getCbsPduLength_ == nullptr) {
         TELEPHONY_LOGE("[ETWS]telephony ext wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
