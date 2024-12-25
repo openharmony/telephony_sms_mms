@@ -114,37 +114,38 @@ bool GsmSmsCommonUtils::Unpack7bitChar(SmsReadBuffer &buffer, uint8_t dataLen, u
     if (shift > 0) {
         buffer.MoveForward(1);
     }
-    for (; dstIdx < unpackDataLen; dstIdx++) {
+    for (; dstIdx < dataLen; dstIdx++) {
         if (shift == 0) {
             uint8_t oneByte = 0;
             if (!buffer.ReadByte(oneByte)) {
-                TELEPHONY_LOGI("data unpack finish.");
+                TELEPHONY_LOGE("ReadByte error");
                 return true;
             }
             unpackData[dstIdx] = oneByte & HEX_VALUE_7F;
             shift = SMS_ENCODE_GSM_BIT;
             dstIdx++;
-            if (dstIdx >= unpackDataLen) {
+            if (dstIdx >= dataLen) {
                 break;
             }
         }
 
         uint8_t oneByte = 0;
         if (!buffer.PickOneByteFromIndex(buffer.GetIndex() - 1, oneByte)) {
-            TELEPHONY_LOGI("data unpack finish.");
+            TELEPHONY_LOGE("PickOneByteFromIndex error");
             return true;
         }
-        uint8_t nextByte = 0;
-        if (!buffer.PickOneByte(nextByte)) {
-            TELEPHONY_LOGI("data unpack finish.");
+        if (shift == 1) {
             unpackData[dstIdx] = (oneByte >> shift);
-            if (unpackData[dstIdx] != 0) {
-                dstIdx++;
+            unpackData[dstIdx] &= HEX_VALUE_7F;
+        } else {
+            uint8_t nextByte = 0;
+            if (!buffer.PickOneByte(nextByte)) {
+                TELEPHONY_LOGE("PickOneByte error");
+                return true;
             }
-            return true;
+            unpackData[dstIdx] = (oneByte >> shift) + (nextByte << (SMS_BYTE_BIT - shift));
+            unpackData[dstIdx] &= HEX_VALUE_7F;
         }
-        unpackData[dstIdx] = (oneByte >> shift) + (nextByte << (SMS_BYTE_BIT - shift));
-        unpackData[dstIdx] &= HEX_VALUE_7F;
         shift--;
         if (shift > 0) {
             buffer.MoveForward(1);
