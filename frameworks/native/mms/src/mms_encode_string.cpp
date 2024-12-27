@@ -46,6 +46,7 @@ bool MmsEncodeString::DecodeEncodeString(MmsDecodeBuffer &decodeBuffer)
 {
     uint8_t oneByte = 0;
     const uint8_t maxHasCharsetNum = 30;
+    const uint8_t lengthQuote = 0x1f;
     strEncodeString_.clear();
     if (!decodeBuffer.PeekOneByte(oneByte)) {
         TELEPHONY_LOGE("Decode encodeString PeekOneByte fail.");
@@ -59,7 +60,7 @@ bool MmsEncodeString::DecodeEncodeString(MmsDecodeBuffer &decodeBuffer)
         return false;
     }
 
-    if (oneByte < maxHasCharsetNum) {
+    if (oneByte <= maxHasCharsetNum || oneByte == lengthQuote) {
         if (!decodeBuffer.DecodeValueLength(valLength_)) {
             TELEPHONY_LOGE("Decode encodeString DecodeValueLength fail.");
             return false;
