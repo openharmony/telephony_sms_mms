@@ -48,6 +48,7 @@ public:
     inline static const std::string SMS_ENCODING_PARAM_KEY = "persist.sys.sms.config.7bitforce";
 
 private:
+    std::shared_ptr<DataShare::DataShareHelper> CreateSmsHelper();
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper(const std::string &uri);
     void ResultSetConvertToIndexer(
         SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
@@ -62,6 +63,9 @@ private:
     bool QueryRawContactId(const std::string &address, int32_t &rawCountId);
     void CbnFormat(std::string &numTemp, const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo,
         std::string &formatNum);
+
+private:
+    std::shared_ptr<DataShare::DataShareHelper> smsDataShareHelper_ = nullptr;
 };
 } // namespace Telephony
 } // namespace OHOS
