@@ -27,8 +27,6 @@ namespace Telephony {
 class TextCoder {
 public:
     static TextCoder &Instance();
-    void Base64Encode(const std::string &src, std::string &dest);
-    void Base64Decode(const std::string &src, std::string &dest);
     bool GetEncodeString(
         std::string &encodeString, uint32_t charset, uint32_t valLength, const std::string &strEncodeString);
     int Utf8ToGsm7bit(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, MSG_LANGUAGE_ID_T &langId);
