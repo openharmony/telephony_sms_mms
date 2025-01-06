@@ -171,64 +171,41 @@ void TextCoder::InitReplaceCharMap()
         { 0x017C, 0x7A }, { 0x017E, 0x7A }, { 0x0179, 0x5A }, { 0x017B, 0x5A }, { 0x017D, 0x5A } };
 }
 
-void TextCoder::Base64Encode(const std::string &src, std::string &dest)
-{
-    gchar *encode_data = g_base64_encode((guchar *)src.data(), src.length());
-    if (encode_data == nullptr) {
-        return;
-    }
-    gsize out_len = 0;
-    out_len = strlen(encode_data);
-    std::string temp(encode_data, out_len);
-    dest = temp;
-
-    if (encode_data != nullptr) {
-        g_free(encode_data);
-    }
-}
-
-void TextCoder::Base64Decode(const std::string &src, std::string &dest)
-{
-    gsize out_len = 0;
-    gchar *decodeData = reinterpret_cast<gchar *>(g_base64_decode(src.data(), &out_len));
-    if (decodeData == nullptr) {
-        return;
-    }
-    std::string temp(decodeData, out_len);
-    dest = temp;
-
-    if (decodeData != nullptr) {
-        g_free(decodeData);
-    }
-}
-
 bool TextCoder::GetEncodeString(
     std::string &encodeString, uint32_t charset, uint32_t valLength, const std::string &strEncodeString)
 {
-    bool ret = false;
-    gchar *pDest = nullptr;
-    gsize bytes_read = 0;
-    gsize bytes_written = 0;
-    GError *error = nullptr;
     std::string strToCodeset("UTF-8");
     std::string strFromCodeset;
     auto charSetInstance = DelayedSingleton<MmsCharSet>::GetInstance();
     if (charSetInstance == nullptr || (!charSetInstance->GetCharSetStrFromInt(strFromCodeset, charset))) {
         strFromCodeset = "UTF-8";
     }
-    pDest = g_convert(strEncodeString.c_str(), valLength, strToCodeset.c_str(), strFromCodeset.c_str(), &bytes_read,
-        &bytes_written, &error);
-    if (!error) {
-        encodeString = std::string(pDest, bytes_written);
-        ret = true;
-    } else {
-        TELEPHONY_LOGE("EncodeString charset convert fail.");
-        ret = false;
+    std::string strToCodeset("UTF-8");
+    std::string strFromCodeset;
+    auto charSetInstance = DelayedSingleton<MmsCharSet>::GetInstance();
+    if (charSetInstance == nullptr || (!charSetInstance->GetCharSetStrFromInt(strFromCodeset, charset))) {
+        strFromCodeset = "UTF-8";
     }
-    if (pDest != nullptr) {
-        g_free(pDest);
+    iconv_t cd = iconv_open(strToCodeset.c_str(), strFromCodeset.c_str());
+    if (static_cast<int>(cd) == -1) {
+        TELEPHONY_LOGE("GetEncodeString iconv_open failed");
+        return false;
     }
-    return ret;
+    std::vector<char> inBuf(strEncodeString.begin(), strEncodeString.end());
+    inBuf.push_back('\0');  // 确保 null 终止符
+    size_t inLen = static_cast<size_t>(valLength);
+    auto outBufSize = strEncodeString.size() * 4;
+    std::unique_ptr<char[]> outBufPtr = std::make_unique<char[]>(outBufSize);
+    char *outBuf = outBufPtr.get();
+    // Convert the string
+    size_t err = iconv(cd, einterpret_cast<char**>(&inBuf[0]), &inLen, &outBuf, &outBufSize);
+    iconv_close(cd);
+    if (static_cast<int>(err) == -1) {
+        TELEPHONY_LOGE("iconv conversion failed");
+        return false;
+    }
+    encodeString = std::string(outBufPtr.get(), outBufSize);
+    return true;
 }
 
 /**
@@ -241,7 +218,7 @@ int TextCoder::Utf8ToGsm7bit(uint8_t *dest, int maxLength, const uint8_t *src, i
 {
     if (srcLength == -1 && src) {
         // null terminated string
-        srcLength = strlen(reinterpret_cast<const gchar *>(src));
+        srcLength = strlen(reinterpret_cast<const char *>(src));
     }
     if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
         TELEPHONY_LOGE("text is null");
@@ -273,24 +250,26 @@ int TextCoder::Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int 
 {
     if (srcLength == -1 && src) {
         // null terminated string
-        srcLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(src)));
+        srcLength = strlen(reinterpret_cast<char *>(const_cast<uint8_t *>(src)));
     }
     if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
         TELEPHONY_LOGE("text is null");
         return 0;
     }
 
-    gsize textLen = static_cast<gsize>(srcLength);
+    size_t textLen = static_cast<size_t>(srcLength);
     auto unicodeTemp = reinterpret_cast<uint8_t *>(dest);
-    gsize remainedLength = static_cast<gsize>(maxLength);
-    uint32_t err = 0;
-    GIConv cd = g_iconv_open("UTF16BE", "UTF8");
-    if (cd != nullptr) {
-        err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
-            reinterpret_cast<gchar **>(&unicodeTemp), reinterpret_cast<gsize *>(&remainedLength));
+    size_t remainedLength = static_cast<size_t>(maxLength);
+    iconv_t cd = iconv_open("UTF16BE", "UTF8");
+    if (static_cast<int>(cd) == -1) {
+        TELEPHONY_LOGE("Utf8ToUcs2-iconv_open is error");
+        return 0;
+ 
     }
-    g_iconv_close(cd);
-    return (err != 0) ? -1 : (maxLength - static_cast<int>(remainedLength));
+    size_t err = iconv(cd, reinterpret_cast<char **>(const_cast<uint8_t **>(&src)), &textLen,
+        reinterpret_cast<char **>(&unicodeTemp), &remainedLength);
+    iconv_close(cd);
+    return (static_cast<int>(err) == -1) ? -1 : (maxLength - static_cast<int>(remainedLength));
 }
 
 int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength,
@@ -431,24 +410,28 @@ int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int 
     if (srcLength == -1 && src) {
         TELEPHONY_LOGE("stcLength == -1 && src branch");
         // null terminated string
-        srcLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(src)));
+        srcLength = strlen(reinterpret_cast<char *>(const_cast<uint8_t *>(src)));
     }
     if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
         TELEPHONY_LOGE("text is null");
         return 0;
     }
 
-    gsize textLen = static_cast<gsize>(srcLength);
-    uint32_t err = 0;
-    gsize remainedLength = static_cast<gsize>(maxLength);
-    GIConv cd = g_iconv_open("UTF8", "UTF16BE");
-    if (cd != nullptr) {
-        err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
-            reinterpret_cast<gchar **>(&dest), reinterpret_cast<gsize *>(&remainedLength));
+    size_t  textLen = static_cast<size_t >(srcLength);
+    size_t  remainedLength = static_cast<size_t >(maxLength);
+    iconv_t cd = iconv_open("UTF8", "UTF16BE");
+    if (static_cast<int>(cd) == -1) {
+        TELEPHONY_LOGE("Ucs2ToUtf8 iconv_open is error");
+        return 0;
+ 
     }
-    g_iconv_close(cd);
-    if (err != 0) {
-        TELEPHONY_LOGE("g_iconv result is %{public}u", err);
+    size_t err = iconv(cd, reinterpret_cast<char **>(const_cast<uint8_t **>(&src)),
+        reinterpret_cast<size_t *>(&textLen), reinterpret_cast<char **>(&dest),
+        reinterpret_cast<size_t *>(&remainedLength));
+    iconv_close(cd);
+    if (static_cast<int>(err) == -1) {
+        TELEPHONY_LOGE("Ucs2ToUtf8-iconv result is err");
+        return 0;
     }
     int length = maxLength - static_cast<int>(remainedLength);
     if (length < 0 || length >= maxLength) {
@@ -461,24 +444,28 @@ int TextCoder::EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int
 {
     if (srcLength == -1 && src) {
         // null terminated string
-        srcLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(src)));
+        srcLength = strlen(reinterpret_cast<char *>(const_cast<uint8_t *>(src)));
     }
     if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
         TELEPHONY_LOGE("text is null");
         return 0;
     }
 
-    gsize remainedLength = static_cast<gsize>(maxLength);
-    gsize textLen = static_cast<gsize>(srcLength);
-    uint32_t err = 0;
-    GIConv cd = g_iconv_open("UTF8", "EUCKR");
-    if (cd != nullptr) {
-        err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
-            reinterpret_cast<gchar **>(&dest), reinterpret_cast<gsize *>(&remainedLength));
+    size_t remainedLength = static_cast<size_t>(maxLength);
+    size_t textLen = static_cast<size_t>(srcLength);
+    iconv_t cd = iconv_open("UTF8", "EUCKR");
+    if (static_cast<int>(cd) == -1) {
+        TELEPHONY_LOGE("EuckrToUtf8 iconv_open is error");
+        return 0;
+ 
+ 
     }
-    g_iconv_close(cd);
-    if (err != 0) {
-        TELEPHONY_LOGE("g_iconv result is %{public}u", err);
+    size_t err = iconv(cd, reinterpret_cast<char **>(const_cast<uint8_t **>(&src)),
+        reinterpret_cast<size_t *>(&textLen), reinterpret_cast<char **>(&dest),
+        reinterpret_cast<size_t *>(&remainedLength));
+    if (static_cast<int>(err) == -1) {
+        TELEPHONY_LOGE("EuckrToUtf8 iconv result is err");
+        return 0;
     }
     int utf8Length = maxLength - static_cast<int>(remainedLength);
     if (utf8Length < 0 || utf8Length >= maxLength) {
@@ -492,23 +479,28 @@ int TextCoder::ShiftjisToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, 
 {
     if (srcLength == -1 && src) {
         // null terminated string
-        srcLength = strlen(reinterpret_cast<gchar *>(const_cast<uint8_t *>(src)));
+        srcLength = strlen(reinterpret_cast<char *>(const_cast<uint8_t *>(src)));
     }
     if (srcLength <= 0 || src == nullptr || dest == nullptr || maxLength <= 0) {
         TELEPHONY_LOGE("text is null");
         return 0;
     }
 
-    gsize textLen = static_cast<gsize>(srcLength);
-    gsize remainedLength = static_cast<gsize>(maxLength);
-    uint32_t err = 0;
-    GIConv cd = g_iconv_open("UTF8", "SHIFT-JIS");
-    if (cd != nullptr) {
-        err = g_iconv(cd, reinterpret_cast<gchar **>(const_cast<uint8_t **>(&src)), reinterpret_cast<gsize *>(&textLen),
-            reinterpret_cast<gchar **>(&dest), reinterpret_cast<gsize *>(&remainedLength));
+    size_t textLen = static_cast<size_t>(srcLength);
+    size_t remainedLength = static_cast<size_t>(maxLength);
+    iconv_t cd = iconv_open("UTF8", "SHIFT-JIS");
+    if (static_cast<int>(cd) == -1) {
+        TELEPHONY_LOGE("ShiftjisToUtf8 iconv_open is error");
+        return 0;
     }
-    g_iconv_close(cd);
-    TELEPHONY_LOGI("g_iconv result is %{public}u", err);
+    size_t err = iconv(cd, reinterpret_cast<char **>(const_cast<uint8_t **>(&src)),
+        reinterpret_cast<size_t *>(&textLen), reinterpret_cast<char **>(&dest),
+        reinterpret_cast<size_t *>(&remainedLength));
+    iconv_close(cd);
+    if (static_cast<int>(err) == -1) {
+        TELEPHONY_LOGE("ShiftjisToUtf8 iconv result is err");
+        return 0;
+    }
     int utf8Length = maxLength - static_cast<int>(remainedLength);
     if (utf8Length < 0 || utf8Length >= maxLength) {
         return 0;
