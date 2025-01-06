@@ -29,6 +29,7 @@
 #include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
 #include "text_coder.h"
+#include "base64.h"
 
 namespace OHOS {
 namespace Telephony {
