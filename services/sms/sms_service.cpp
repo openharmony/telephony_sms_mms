@@ -759,8 +759,8 @@ bool SmsService::GetBase64Decode(std::string src, std::string &dest)
 {
     auto results = Base64::Decode(src);
     if (results == nullptr) {
-		TELEPHONY_LOGE("Base64 decoding failed: empty vector returned");
-		return false;
+        TELEPHONY_LOGE("Base64 decoding failed: empty vector returned");
+        return false;
     }
     dest = std::string(results->begin(), results->end());
     return true;
