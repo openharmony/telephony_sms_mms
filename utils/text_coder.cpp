@@ -181,7 +181,7 @@ bool TextCoder::GetEncodeString(
         strFromCodeset = "UTF-8";
     }
     iconv_t cd = iconv_open(strToCodeset.c_str(), strFromCodeset.c_str());
-    if (cd == (iconv_t)-1) {
+    if (cd == (iconv_t)(-1)) {
         TELEPHONY_LOGE("GetEncodeString iconv_open failed");
         return false;
     }
@@ -255,10 +255,9 @@ int TextCoder::Utf8ToUcs2(uint8_t *dest, int maxLength, const uint8_t *src, int 
     auto unicodeTemp = reinterpret_cast<uint8_t *>(dest);
     size_t remainedLength = static_cast<size_t>(maxLength);
     iconv_t cd = iconv_open("UTF16BE", "UTF8");
-    if (cd == (iconv_t)-1) {
+    if (cd == (iconv_t)(-1)) {
         TELEPHONY_LOGE("Utf8ToUcs2-iconv_open is error");
         return 0;
- 
     }
     size_t err = iconv(cd, reinterpret_cast<char **>(const_cast<uint8_t **>(&src)), &textLen,
         reinterpret_cast<char **>(&unicodeTemp), &remainedLength);
@@ -414,10 +413,9 @@ int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int 
     size_t  textLen = static_cast<size_t >(srcLength);
     size_t  remainedLength = static_cast<size_t >(maxLength);
     iconv_t cd = iconv_open("UTF8", "UTF16BE");
-    if (cd == (iconv_t)-1) {
+    if (cd == (iconv_t)(-1)) {
         TELEPHONY_LOGE("Ucs2ToUtf8 iconv_open is error");
         return 0;
- 
     }
     size_t err = iconv(cd, reinterpret_cast<char **>(const_cast<uint8_t **>(&src)),
         reinterpret_cast<size_t *>(&textLen), reinterpret_cast<char **>(&dest),
@@ -448,11 +446,9 @@ int TextCoder::EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int
     size_t remainedLength = static_cast<size_t>(maxLength);
     size_t textLen = static_cast<size_t>(srcLength);
     iconv_t cd = iconv_open("UTF8", "EUCKR");
-    if (cd == (iconv_t)-1) {
+    if (cd == (iconv_t)(-1)) {
         TELEPHONY_LOGE("EuckrToUtf8 iconv_open is error");
         return 0;
- 
- 
     }
     size_t err = iconv(cd, reinterpret_cast<char **>(const_cast<uint8_t **>(&src)),
         reinterpret_cast<size_t *>(&textLen), reinterpret_cast<char **>(&dest),
@@ -483,7 +479,7 @@ int TextCoder::ShiftjisToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, 
     size_t textLen = static_cast<size_t>(srcLength);
     size_t remainedLength = static_cast<size_t>(maxLength);
     iconv_t cd = iconv_open("UTF8", "SHIFT-JIS");
-    if (cd == (iconv_t)-1) {
+    if (cd == (iconv_t)(-1)) {
         TELEPHONY_LOGE("ShiftjisToUtf8 iconv_open is error");
         return 0;
     }
