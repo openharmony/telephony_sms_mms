@@ -746,13 +746,23 @@ int32_t SmsService::CreateMessage(std::string pdu, std::string specification, Sh
 
 bool SmsService::GetBase64Encode(std::string src, std::string &dest)
 {
-    TextCoder::Instance().Base64Encode(src, dest);
+    auto results = Base64::Encode(std::vector<unsigned char>(src.begin(), src.end()));
+    if (results == nullptr) {
+        TELEPHONY_LOGE("Base64 encoding failed: nullptr returned");
+        return false;
+    }
+    dest = *results;
     return true;
 }
 
 bool SmsService::GetBase64Decode(std::string src, std::string &dest)
 {
-    TextCoder::Instance().Base64Decode(src, dest);
+    auto results = Base64::Decode(src);
+    if (results == nullptr) {
+		TELEPHONY_LOGE("Base64 decoding failed: empty vector returned");
+		return false;
+    }
+    dest = std::string(results->begin(), results->end());
     return true;
 }
 
