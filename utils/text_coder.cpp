@@ -181,7 +181,7 @@ bool TextCoder::GetEncodeString(
         strFromCodeset = "UTF-8";
     }
     iconv_t cd = iconv_open(strToCodeset.c_str(), strFromCodeset.c_str());
-    if (cd == static_cast<iconv_t>(-1)) {
+    if (cd == reinterpret_cast<iconv_t>(-1)) {
         TELEPHONY_LOGE("GetEncodeString iconv_open failed");
         return false;
     }
