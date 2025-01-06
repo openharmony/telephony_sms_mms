@@ -42,7 +42,6 @@
                 "curl",
                 "data_share",
                 "eventhandler",
-                "glib",
                 "hilog",
                 "hisysevent",
                 "icu",
