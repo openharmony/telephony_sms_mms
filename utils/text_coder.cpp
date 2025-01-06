@@ -14,7 +14,7 @@
  */
 
 #include "text_coder.h"
-#include "glib.h"
+#include "iconv.h"
 #include "mms_charset.h"
 #include "securec.h"
 #include "telephony_log_wrapper.h"
