@@ -180,12 +180,6 @@ bool TextCoder::GetEncodeString(
     if (charSetInstance == nullptr || (!charSetInstance->GetCharSetStrFromInt(strFromCodeset, charset))) {
         strFromCodeset = "UTF-8";
     }
-    std::string strToCodeset("UTF-8");
-    std::string strFromCodeset;
-    auto charSetInstance = DelayedSingleton<MmsCharSet>::GetInstance();
-    if (charSetInstance == nullptr || (!charSetInstance->GetCharSetStrFromInt(strFromCodeset, charset))) {
-        strFromCodeset = "UTF-8";
-    }
     iconv_t cd = iconv_open(strToCodeset.c_str(), strFromCodeset.c_str());
     if (static_cast<int>(cd) == -1) {
         TELEPHONY_LOGE("GetEncodeString iconv_open failed");
