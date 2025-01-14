@@ -145,6 +145,12 @@ HWTEST_F(BranchUtilsTest, TextCoder_0002, Function | MediumTest | Level1)
     EXPECT_GT(TextCoder::Instance().EscapeToUcs2(SRC_TEXT, pLangInfo), 0);
     pLangInfo.bSingleShift = false;
     EXPECT_GT(TextCoder::Instance().EscapeToUcs2(SRC_TEXT, pLangInfo), 0);
+    std::string convertCharseInput = "123ascQ世界!@";
+    std::string convertCharseOUtput = "";
+    std::string convertCharseOUtputContrasts = "123ascQ荳也阜!@";
+    uint32_t valLength = convertCharseInput.length();
+    EXPECT_GE(TextCoder::Instance().GetEncodeString(convertCharseOUtput, 17, valLength, convertCharseInput), true);
+    EXPECT_GE(convertCharseOUtput, convertCharseOUtputContrasts);
 }
 
 /**
