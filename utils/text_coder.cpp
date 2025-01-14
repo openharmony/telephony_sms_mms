@@ -185,12 +185,11 @@ bool TextCoder::GetEncodeString(
         TELEPHONY_LOGE("GetEncodeString iconv_open failed");
         return false;
     }
-	char* inBuf = const_cast<char*>(strEncodeString.c_str());
     size_t inLen = static_cast<size_t>(valLength);
     auto outBufSize = strEncodeString.size() * 4;
     std::unique_ptr<char[]> outBufPtr = std::make_unique<char[]>(outBufSize);
     char *outBuf = outBufPtr.get();
-    // Convert the string
+	char* inBuf = const_cast<char*>(strEncodeString.c_str());
     size_t err = iconv(cd, &inBuf, &inLen, &outBuf, &outBufSize);
     iconv_close(cd);
     if (static_cast<int>(err) == -1) {
