@@ -4,7 +4,7 @@
         {
             "name": 4008,
             "libpath": "libtel_sms_mms.z.so",
-            "run-on-create": false,
+            "run-on-create": true,
             "depend": [
                 4010
             ],
