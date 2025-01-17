@@ -66,7 +66,7 @@ private:
     bool QueryRawContactId(const std::string &address, int32_t &rawCountId);
     void CbnFormat(std::string &numTemp, const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo,
         std::string &formatNum);
-    void ReleaseSmsDataShareHelper();   
+    void ReleaseSmsDataShareHelper();
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> smsDataShareHelper_ = nullptr;
