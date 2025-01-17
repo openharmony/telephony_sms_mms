@@ -43,7 +43,7 @@ public:
     bool QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId);
     bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount);
     bool UpdateContact(const std::string &address);
-    void ProcessEvent(const AppExcFwk::InnerEvent::Pointer &event) override;
+    void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 
     inline static const std::string SMS_CAPABLE_KEY = "sms_config_capable";
     inline static const std::string SMS_ENCODING_KEY = "sms_config_force_7bit_encoding";
