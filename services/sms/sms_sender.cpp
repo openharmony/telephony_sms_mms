@@ -366,8 +366,7 @@ void SmsSender::HandleResend(const std::shared_ptr<SmsSendIndexer> &smsIndexer)
     }
     // resending mechanism
     bool errorCode = false;
-    if ((smsIndexer->GetErrorCode() == static_cast<int32_t>(ErrType::ERR_GENERIC_FAILURE)) ||
-        (smsIndexer->GetErrorCode() == static_cast<int32_t>(ErrType::ERR_CMD_SEND_FAILURE))) {
+    if (smsIndexer->GetErrorCode() == static_cast<int32_t>(ErrType::ERR_CMD_SEND_FAILURE)) {
         errorCode = true;
     }
     bool csResend = false;
