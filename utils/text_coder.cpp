@@ -189,7 +189,7 @@ bool TextCoder::GetEncodeString(
     auto outBufSize = strEncodeString.size() * 4;
     std::unique_ptr<char[]> outBufPtr = std::make_unique<char[]>(outBufSize);
     char *outBuf = outBufPtr.get();
-    char* inBuf = const_cast<char*>(strEncodeString.c_str());
+    char *inBuf = const_cast<char*>(strEncodeString.c_str());
     size_t err = iconv(cd, &inBuf, &inLen, &outBuf, &outBufSize);
     iconv_close(cd);
     if (static_cast<int>(err) == -1) {
