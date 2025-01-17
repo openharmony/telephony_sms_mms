@@ -578,7 +578,7 @@ void SmsPersistHelper::ReleaseSmsDataShareHelper()
 
 void SmsPersistHelper::ProcessEvent(const AppExcFwk::InnerEvent::Pointer &event)
 {
-    switch(event->GetInnerEventId()) {
+    switch (event->GetInnerEventId()) {
         case DELAY_RELEASE_DATA_SHARE_HELPRE_EVENT_ID:
             ReleaseSmsDataShareHelper();
             break;
