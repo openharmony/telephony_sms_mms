@@ -221,7 +221,7 @@ HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
     auto cdmaSmsSender = std::make_shared<CdmaSmsSender>(INVALID_SLOTID, fun);
     cdmaSmsSender->isImsCdmaHandlerRegistered = true;
-    cdmaSmsSender->RegisterImsHandler();
+    ASSERT_NO_THROW(cdmaSmsSender->RegisterImsHandler());
     const sptr<ISendShortMessageCallback> sendCallback =
         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
     ASSERT_NE(sendCallback, nullptr);
@@ -233,31 +233,33 @@ HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
     const std::string scAddr = "123";
     cdmaSmsSender->isImsNetDomain_ = true;
     uint16_t dataBaseId = 0;
-    cdmaSmsSender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+    ASSERT_NO_THROW(cdmaSmsSender->TextBasedSmsDelivery(
+        desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId));
     std::vector<struct SplitInfo> splits;
     std::unique_ptr<CdmaTransportMsg> transMsg;
     uint8_t msgRef8bit = 0;
     uint16_t msgId = 0;
     long timeStamp = 0;
-    cdmaSmsSender->TextBasedSmsSplitDelivery(
+    ASSERT_NO_THROW(cdmaSmsSender->TextBasedSmsSplitDelivery(
         desAddr, scAddr, splits, std::move(transMsg), msgRef8bit, msgId, timeStamp, sendCallback, deliveryCallback,
-        dataBaseId);
-    cdmaSmsSender->TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
+        dataBaseId));
+    ASSERT_NO_THROW(cdmaSmsSender->TextBasedSmsDeliveryViaIms(
+        desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId));
     std::shared_ptr<SmsSendIndexer> smsIndexer = nullptr;
-    cdmaSmsSender->SendSmsToRil(smsIndexer);
-    cdmaSmsSender->ResendTextDelivery(smsIndexer);
-    cdmaSmsSender->ResendDataDelivery(smsIndexer);
+    ASSERT_NO_THROW(cdmaSmsSender->SendSmsToRil(smsIndexer));
+    ASSERT_NO_THROW(cdmaSmsSender->ResendTextDelivery(smsIndexer));
+    ASSERT_NO_THROW(cdmaSmsSender->ResendDataDelivery(smsIndexer));
     smsIndexer = std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
-    cdmaSmsSender->SendSmsToRil(smsIndexer);
-    cdmaSmsSender->ResendTextDelivery(smsIndexer);
-    cdmaSmsSender->ResendDataDelivery(smsIndexer);
+    ASSERT_NO_THROW(cdmaSmsSender->SendSmsToRil(smsIndexer));
+    ASSERT_NO_THROW(cdmaSmsSender->ResendTextDelivery(smsIndexer));
+    ASSERT_NO_THROW(cdmaSmsSender->ResendDataDelivery(smsIndexer));
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(0, 1);
-    cdmaSmsSender->StatusReportGetImsSms(event);
-    cdmaSmsSender->StatusReportAnalysis(event);
+    ASSERT_NO_THROW(cdmaSmsSender->StatusReportGetImsSms(event));
+    ASSERT_NO_THROW(cdmaSmsSender->StatusReportAnalysis(event));
     event = nullptr;
-    cdmaSmsSender->StatusReportSetImsSms(event);
-    cdmaSmsSender->StatusReportGetImsSms(event);
-    cdmaSmsSender->StatusReportAnalysis(event);
+    ASSERT_NO_THROW(cdmaSmsSender->StatusReportSetImsSms(event));
+    ASSERT_NO_THROW(cdmaSmsSender->StatusReportGetImsSms(event));
+    ASSERT_NO_THROW(cdmaSmsSender->StatusReportAnalysis(event));
 }
 
 /**
