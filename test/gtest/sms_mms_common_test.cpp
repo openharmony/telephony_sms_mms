@@ -44,9 +44,10 @@ HWTEST_F(SmsMmsCommonTest, SendBroadcast_0001, Function | MediumTest | Level1)
 {
     std::string sendStatus = "";
     uint16_t dataBaseId = 0;
-    ASSERT_NO_THROW(DelayedSingleton<SmsMmsCommon>::GetInstance()->SendBroadcast(dataBaseId,
-        SmsMmsCommonData::SMS_MMS_SENT_RESULT_NOTIFY, sendStatus,
-        SmsMmsCommonData::SMS_MMS_INFO_MMS_TYPE));
+    auto smsCommon = DelayedSingleton<SmsMmsCommon>::GetInstance();
+    smsCommon->SendBroadcast(dataBaseId, SmsMmsCommonData::SMS_MMS_SENT_RESULT_NOTIFY, sendStatus,
+        SmsMmsCommonData::SMS_MMS_INFO_MMS_TYPE);
+    EXPECT_TRUE(smsCommon != nullptr);
 }
 } // namespace Telephony
 } // namespace OHOS

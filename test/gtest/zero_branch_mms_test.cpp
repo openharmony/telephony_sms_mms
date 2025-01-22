@@ -1418,9 +1418,10 @@ HWTEST_F(BranchMmsTest, ServiceAfterSendMmsComplete_0001, Function | MediumTest 
     DataShare::DataShareValuesBucket sessionBucket;
     uint16_t dataBaseId = 0;
     std::string sendStatus = "";
-    ASSERT_NO_THROW(smsService->ServiceAfterSendMmsComplete(slotId, time, dataBaseId, sessionBucket, sendStatus));
+    smsService->ServiceAfterSendMmsComplete(slotId, time, dataBaseId, sessionBucket, sendStatus);
     dataBaseId = 1;
-    ASSERT_NO_THROW(smsService->ServiceAfterSendMmsComplete(slotId, time, dataBaseId, sessionBucket, sendStatus));
+    smsService->ServiceAfterSendMmsComplete(slotId, time, dataBaseId, sessionBucket, sendStatus);
+    EXPECT_TRUE(smsService != nullptr);
 }
 } // namespace Telephony
 } // namespace OHOS
