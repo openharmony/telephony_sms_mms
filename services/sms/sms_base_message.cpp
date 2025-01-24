@@ -21,7 +21,6 @@
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 #include "text_coder.h"
-#include "unicode/brkiter.h"
 #include "unicode/rbbi.h"
 #include "unicode/unistr.h"
 #include "unicode/ucnv.h"
