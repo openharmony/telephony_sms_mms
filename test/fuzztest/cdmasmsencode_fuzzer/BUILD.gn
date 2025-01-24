@@ -51,7 +51,7 @@ ohos_fuzztest("CdmaSmsEncodeFuzzTest") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_single",
-    "libphonenumber:libphonenumber_standard",
+    "libphonenumber:phonenumber_standard",
     "napi:ace_napi",
     "netmanager_base:net_conn_manager_if",
     "netstack:http_client",
