@@ -458,15 +458,10 @@ void SmsBaseMessage::SplitMessageUcs2(std::vector<struct SplitInfo> &splitResult
          * if it is not boundary, use previous function or next function(set the para to -1)to find the previous
          * boundary before end of segment
          */
-        if (fullDataIter->isBoundary(index + segSizeHalf)) {
-            splitInfo.encodeData = std::vector<uint8_t>(&decodeData[index * utf16Multiples],
-                &decodeData[index * utf16Multiples] + segSize);
-            index += segSizeHalf;
-        } else {
-            splitInfo.encodeData = std::vector<uint8_t>(&decodeData[index * utf16Multiples],
-                &decodeData[index * utf16Multiples] + (fullDataIter->previous() - index) * utf16Multiples);
-            index = fullDataIter->current();
-        }
+        int32_t nextIndex = FindNextUnicodePosition(index, segSizeHalf, fullDataIter, fullData);
+        splitInfo.encodeData = std::vector<uint8_t>(&decodeData[index * utf16Multiples],
+            &decodeData[index * utf16Multiples] + (nextIndex - index) * utf16Multiples);
+        index = nextIndex;
         ConvertSpiltToUtf8(splitInfo, codingType);
         splitResult.push_back(splitInfo);
         fullDataIter->first();
@@ -596,6 +591,19 @@ int32_t SmsBaseMessage::GetIndexOnSim() const
 void SmsBaseMessage::SetIndexOnSim(int32_t index)
 {
     indexOnSim_ = index;
+}
+
+int32_t SmsBaseMessage::FindNextUnicodePosition(int32_t index, int32_t segSizeHalf, icu::BreakIterator * fullDataIter,
+    const icu::UnicodeString &fullData)
+{
+    int32_t nextIndex = index + segSizeHalf;
+    if (!fullDataIter->isBoundary(nextIndex)) {
+        int32_t breakPos = fullDataIter->previous();
+        if (breakPos > index) {
+            nextIndex = breakPos;
+        }
+    }
+    return nextIndex;
 }
 } // namespace Telephony
 } // namespace OHOS
