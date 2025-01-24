@@ -52,7 +52,7 @@ ohos_fuzztest("TextBasedSmsDeliveryFuzzTest") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_single",
-    "libphonenumber:libphonenumber_standard",
+    "libphonenumber:phonenumber_standard",
     "netmanager_base:net_conn_manager_if",
     "netstack:http_client",
     "protobuf:protobuf",
