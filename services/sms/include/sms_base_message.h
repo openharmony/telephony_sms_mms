@@ -24,6 +24,7 @@
 #include "msg_text_convert_common.h"
 #include "sms_common_utils.h"
 #include "string_utils.h"
+#include "unicode/brkiter.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -150,6 +151,8 @@ private:
     virtual int DecodeMessage(uint8_t *decodeData, unsigned int length, DataCodingScheme &codingType,
         const std::string &msgText, bool &bAbnormal, MSG_LANGUAGE_ID_T &langId) = 0;
     void ConvertSpiltToUtf8(SplitInfo &split, const DataCodingScheme &codingType);
+    int32_t FindNextUnicodePosition(int32_t index, int32_t segSizeHalf, icu::BreakIterator *fullDataIter,
+        const icu::UnicodeString &fullData);
 };
 } // namespace Telephony
 } // namespace OHOS
