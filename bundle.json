@@ -66,6 +66,7 @@
             "sub_component": [
                 "//base/telephony/sms_mms:tel_sms_mms",
                 "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
+                "//base/telephony/sms_mms/frameworks/cj:cj_sms_ffi",
                 "//base/telephony/sms_mms/frameworks/js/napi/:sms",
                 "//base/telephony/sms_mms/sa_profile:sms_mms_sa_profile"
             ],
