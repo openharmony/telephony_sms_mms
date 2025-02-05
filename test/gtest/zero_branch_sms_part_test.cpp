@@ -387,8 +387,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(1, 0xFF);
-    for (size_t i = 0; i < randomLength; i++)
-    {
+    for (size_t i = 0; i < randomLength; i++) {
         randomText += static_cast<char>(dis(gen));
     }
     splitMessage.clear();
