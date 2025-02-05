@@ -367,7 +367,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
     interfaceManager->smsSendManager_->networkManager_->netWorkType_ = NetWorkType::NET_TYPE_GSM;
     std::string specialText =
         "ฏ็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็";
-    std::vector>std::u16string> splitMessage;
+    std::vector<std::u16string> splitMessage;
     interfaceManager->SplitMessage(specialText, splitMessage);
     size_t segCount = 2;
     size_t maxSegLen = 67;
