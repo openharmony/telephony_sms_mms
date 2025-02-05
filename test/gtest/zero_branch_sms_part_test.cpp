@@ -16,6 +16,7 @@
 #define private public
 #define protected public
 
+#include "random"
 #include "delivery_short_message_callback_stub.h"
 #include "gtest/gtest.h"
 #include "gsm_sms_param_decode.h"
@@ -358,6 +359,41 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
     int32_t downloadMmsRet = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
     EXPECT_GE(sendMmsRet, 0);
     EXPECT_GE(downloadMmsRet, 0);
+
+    if(interfaceManager->smsSendManager_ == nullptr) {
+        interfaceManager->smsSendManager_ = std::make_unique<SmsSendManager>(0);
+    }
+    interfaceManager->smsSendManager_->Init();
+    interfaceManager->smsSendManager_->networkManager_->netWorkType_ = NetWorkType::NET_TYPE_GSM;
+    std::string specialText =
+        "ฏ็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็็";
+    std::vector>std::u16string> splitMessage;
+    interfaceManager->SplitMessage(specialText, splitMessage);
+    size_t segCount = 2;
+    size_t maxSegLen = 67;
+    ASSERT_EQ(splitMessage.size(), segCount);
+    EXPECT_EQ(splitMessage[0].size(), maxSegLen);
+
+    std::string mormalText =
+        "这是一个普通的长短信，由数字0123456789、小写字母abcdefghijklmnopqrstuvwxyz、大写字母ABCDEFGHIJKLMNOPQRSTUVWXYZ和汉字组成";
+    splitMessage.clear();
+    interfaceManager->SplitMessage(normalText, splitMessage);
+    ASSERT_EQ(splitMessage.size(), segCount);
+    EXPECT_EQ(splitMessage[0].size(), maxSegLen);
+
+    std::string randomText;
+    size_t randomLength = 500;
+    randomText.reserve(randomLength);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(1, 0xFF);
+    for (size_t i = 0; i < randomLength; i++)
+    {
+        randomText += static_cast<char>(dis(gen));
+    }
+    splitMessage.clear();
+    interfaceManager->SplitMessage(randomText, splitMessage);
+    EXPECT_GE(splitMessage.size(), 1);
 }
 
 /**
