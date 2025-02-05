@@ -360,7 +360,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
     EXPECT_GE(sendMmsRet, 0);
     EXPECT_GE(downloadMmsRet, 0);
 
-    if(interfaceManager->smsSendManager_ == nullptr) {
+    if (interfaceManager->smsSendManager_ == nullptr) {
         interfaceManager->smsSendManager_ = std::make_unique<SmsSendManager>(0);
     }
     interfaceManager->smsSendManager_->Init();
