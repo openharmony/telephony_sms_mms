@@ -374,7 +374,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
     ASSERT_EQ(splitMessage.size(), segCount);
     EXPECT_EQ(splitMessage[0].size(), maxSegLen);
 
-    std::string mormalText =
+    std::string normalText =
         "这是一个普通的长短信，由数字0123456789、小写字母abcdefghijklmnopqrstuvwxyz、大写字母ABCDEFGHIJKLMNOPQRSTUVWXYZ和汉字组成";
     splitMessage.clear();
     interfaceManager->SplitMessage(normalText, splitMessage);
