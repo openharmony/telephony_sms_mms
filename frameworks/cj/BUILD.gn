@@ -1,0 +1,58 @@
+# Copyright (C) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+config("ffi_common_deps_config") {
+  include_dirs = [ "include" ]
+}
+
+ohos_shared_library("cj_sms_ffi") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  if (!defined(defines)) {
+    defines = []
+  }
+  include_dirs = [ "include" ]
+  public_configs = [ ":ffi_common_deps_config" ]
+
+  deps = [ "../../../sms_mms/frameworks/native:tel_sms_mms_api" ]
+  external_deps = [
+    "c_utils:utils",
+    "core_service:libtel_common",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+  ]
+  sources = [
+    "src/sms_ffi.cpp",
+    "src/sms_utils.cpp",
+  ]
+
+  cflags = [
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+
+  subsystem_name = "telephony"
+  part_name = "sms_mms"
+}
