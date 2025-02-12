@@ -760,7 +760,7 @@ void GsmSmsMessage::ParseEmailFromMessageBody()
     if (!std::regex_search(visibleMessageBody_, match, re)) {
         return;
     }
-    size_t pos = match.position();
+    size_t pos = static_cast<size_t>(match.position());
     emailFrom_ = visibleMessageBody_.substr(0, pos);
     std::string emailBody = visibleMessageBody_.substr(pos + 1);
     if (!emailBody.empty() && emailBody.front() == '/') {
