@@ -97,6 +97,7 @@ bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values, uint16_t
     Uri uri(SMS_SUBSECTION);
     int ret = helper->Insert(uri, values);
     dataBaseId = ret;
+    TELEPHONY_LOGI("Insert result: %{public}d.", ret);
     return ret >= 0 ? true : false;
 }
 
@@ -109,6 +110,7 @@ bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBu
     }
     Uri uri(tableUri);
     int ret = helper->Insert(uri, values);
+    TELEPHONY_LOGI("Insert result: %{public}d.", ret);
     return ret >= 0 ? true : false;
 }
 
@@ -122,6 +124,7 @@ bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBu
     Uri uri(tableUri);
     int ret = helper->Insert(uri, values);
     id = ret;
+    TELEPHONY_LOGI("Insert result: %{public}d.", ret);
     return ret >= 0;
 }
 
@@ -166,6 +169,7 @@ bool SmsPersistHelper::UpdateSms(DataShare::DataSharePredicates &predicates, Dat
     }
     Uri uri(SMS_MMS_INFO);
     int ret = helper->Update(uri, predicates, values);
+    TELEPHONY_LOGI("UpdateSms result: %{public}d.", ret);
     return ret >= 0;
 }
 
@@ -203,6 +207,7 @@ bool SmsPersistHelper::Update(DataShare::DataSharePredicates &predicates, DataSh
     }
     Uri uri(SMS_SESSION);
     int ret = helper->Update(uri, predicates, values);
+    TELEPHONY_LOGI("Update result: %{public}d.", ret);
     return ret >= 0 ? true : false;
 }
 
@@ -269,6 +274,7 @@ bool SmsPersistHelper::Delete(DataShare::DataSharePredicates &predicates)
     }
     Uri uri(SMS_SUBSECTION);
     int ret = helper->Delete(uri, predicates);
+    TELEPHONY_LOGI("Delete result: %{public}d.", ret);
     return ret >= 0 ? true : false;
 }
 
