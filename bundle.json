@@ -77,6 +77,13 @@
                         "header_base" : "//base/telephony/sms_mms/interfaces/innerkits",
                         "header_files": []
                     }
+                },
+                {
+                    "name":"//base/telephony/sms_mms/frameworks/cj:cj_sms_ffi",
+                    "header": {
+                        "header_base" : "//base/telephony/sms_mms/frameworks/cj/include",
+                        "header_files": []
+                    }
                 }
             ],
             "test": [
