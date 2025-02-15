@@ -226,15 +226,15 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t 
         std::string formatNum;
         int32_t ret = persistHelper->FormatSmsNumber(
             telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
-        if (ret != TELEPHONE_SUCCESS) {
+        if (ret != TELEPHONY_SUCCESS) {
             ret = persistHelper->FormatSmsNumber(
                 telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164, formatNum);
         }
-        if (ret != TELEPHONE_SUCCESS) {
+        if (ret != TELEPHONY_SUCCESS) {
             formatNum = telephone;
         }
-        // 增加contactsNum字段的判断，防止单聊通过endswitch匹配到群聊。
-        predicates>In(Session::CONTACTS_NUMj, std::vector<string>({ "0", "1" }));
+        // 增加contactsNum字段的判断，防止单聊通过endswith匹配到群聊。
+        predicates.In(Session::CONTACTS_NUM, std::vector<string>({ "0", "1" }));
         predicates.And();
         predicates.Endswith(Session::TELEPHONE, telephone);
     }
