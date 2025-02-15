@@ -904,5 +904,11 @@ int32_t SmsService::OnRilAdapterHostDied(int32_t slotId)
     interfaceManager->OnRilAdapterHostDied();
     return TELEPHONY_ERR_SUCCESS;
 }
+
+bool SmsService::ISInfoMsg(const std::string &telephone)
+{
+    std::regex regex(INFO_MSG_TELEPHONE_REG);
+    return std::regex_match(telephone, regex);
+}
 } // namespace Telephony
 } // namespace OHOS
