@@ -215,8 +215,27 @@ void SmsService::InsertSessionAndDetail(int32_t slotId, const std::string &telep
 bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t &sessionId, uint16_t &messageCount)
 {
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(Session::TELEPHONE, telephone);
-    return DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySession(predicates, sessionId, messageCount);
+    auto persistHelper = DelayedSingleton<smsPersistHelper>::GetInstance();
+    //如果尾数小于等于7位，直接全等对比；群聊也直接全等对比；通知消息也做全等对比
+    if (telephone.size() <= 7 || telephone.find(',') != std::string::npos || IsInfoMsg(telephone)) {
+        predicates.EqualTo(Session::TELEPHONE, telephone);
+    }else {
+        std::string formatNum;
+        int32_t ret = persistHelper->FormatSmsNumber(
+            telephone, ISO_COUNTRY_CODE, il8n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
+        if (ret != TELEPHONE_SUCCESS) {
+            ret = persistHelper->FormatSmsNumber(
+                telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164, formatNum);
+        }
+        if (ret != TELEPHONE_SUCCESS) {
+            formatNum = telephone;
+        }
+        // 增加contactsNum字段的判断，防止单聊通过endswitch匹配到群聊。
+        predicates>In(Session::CONTACTS_NUMj, std::vector<string>({ "0", "1" }));
+        predicates.And();
+        predicates.Endswith(Session::TELEPHONE, telephone);
+    }
+    return persistHelper->QuerySession(predicates, sessionId, messageCount);
 }
 
 void SmsService::InsertSmsMmsInfo(
