@@ -218,7 +218,7 @@ void SmsService::InsertSessionAndDetail(int32_t slotId, const std::string &telep
 bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t &sessionId, uint16_t &messageCount)
 {
     DataShare::DataSharePredicates predicates;
-    auto persistHelper = DelayedSingleton<smsPersistHelper>::GetInstance();
+    auto persistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
     // 如果尾数小于等于7位，直接全等对比；群聊也直接全等对比；通知消息也做全等对比
     if (telephone.size() <= 7 || telephone.find(',') != std::string::npos || IsInfoMsg(telephone)) {
         predicates.EqualTo(Session::TELEPHONE, telephone);
@@ -233,10 +233,10 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t 
         if (ret != TELEPHONY_SUCCESS) {
             formatNum = telephone;
         }
-        // 增加contactsNum字段的判断，防止单聊通过endswith匹配到群聊。
+        // 增加contactsNum字段的判断，防止单聊通过endsWith匹配到群聊。
         predicates.In(Session::CONTACTS_NUM, std::vector<string>({ "0", "1" }));
         predicates.And();
-        predicates.Endswith(Session::TELEPHONE, telephone);
+        predicates.EndsWith(Session::TELEPHONE, telephone);
     }
     return persistHelper->QuerySession(predicates, sessionId, messageCount);
 }
@@ -908,7 +908,7 @@ int32_t SmsService::OnRilAdapterHostDied(int32_t slotId)
     return TELEPHONY_ERR_SUCCESS;
 }
 
-bool SmsService::ISInfoMsg(const std::string &telephone)
+bool SmsService::IsInfoMsg(const std::string &telephone)
 {
     std::regex regex(INFO_MSG_TELEPHONE_REG);
     return std::regex_match(telephone, regex);
