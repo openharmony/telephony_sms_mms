@@ -1398,5 +1398,97 @@ HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0013, Function | MediumTest | Level1
     delete pDeliver;
     pDeliver = nullptr;
 }
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsBaseMessage_0001
+ * @tc.name     Test SmsBaseMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsBaseMessage_0001, Function | MediumTest | Level1)
+{
+    auto smsBaseMessage = std::make_shared<GsmSmsMessage>();
+    smsBaseMessage->ConvertMessageClass(SmsMessageClass::SMS_SIM_MESSAGE);
+    smsBaseMessage->ConvertMessageClass(SmsMessageClass::SMS_INSTANT_MESSAGE);
+    smsBaseMessage->ConvertMessageClass(SmsMessageClass::SMS_OPTIONAL_MESSAGE);
+    smsBaseMessage->ConvertMessageClass(SmsMessageClass::SMS_FORWARD_MESSAGE);
+    smsBaseMessage->ConvertMessageClass(SmsMessageClass::SMS_CLASS_UNKNOWN);
+    SplitInfo split;
+    DataCodingScheme codingType = DataCodingScheme::DATA_CODING_7BIT;
+    smsBaseMessage->ConvertSpiltToUtf8(split, codingType);
+    split.encodeData.push_back(1);
+    codingType = DataCodingScheme::DATA_CODING_UCS2;
+    smsBaseMessage->ConvertSpiltToUtf8(split, codingType);
+    codingType = DataCodingScheme::DATA_CODING_AUTO;
+    smsBaseMessage->ConvertSpiltToUtf8(split, codingType);
+    smsBaseMessage->smsUserData_.headerCnt = 1;
+    smsBaseMessage->smsUserData_.header[0].udhType = UserDataHeadType::UDH_CONCAT_8BIT;
+    EXPECT_FALSE(smsBaseMessage->GetConcatMsg() == nullptr);
+    smsBaseMessage->smsUserData_.header[0].udhType = UserDataHeadType::UDH_CONCAT_16BIT;
+    EXPECT_FALSE(smsBaseMessage->GetConcatMsg() == nullptr);
+    smsBaseMessage->smsUserData_.header[0].udhType = UserDataHeadType::UDH_APP_PORT_8BIT;
+    EXPECT_FALSE(smsBaseMessage->GetPortAddress() == nullptr);
+    smsBaseMessage->smsUserData_.header[0].udhType = UserDataHeadType::UDH_APP_PORT_16BIT;
+    EXPECT_FALSE(smsBaseMessage->GetPortAddress() == nullptr);
+    smsBaseMessage->smsUserData_.header[0].udhType = UserDataHeadType::UDH_SPECIAL_SMS;
+    EXPECT_FALSE(smsBaseMessage->GetSpecialSmsInd() == nullptr);
+    smsBaseMessage->smsUserData_.header[0].udhType = UserDataHeadType::UDH_APP_PORT_8BIT;
+    EXPECT_FALSE(smsBaseMessage->IsWapPushMsg());
+    MSG_LANGUAGE_ID_T langId = 1;
+    codingType = DataCodingScheme::DATA_CODING_7BIT;
+    EXPECT_GT(smsBaseMessage->GetMaxSegmentSize(codingType, 1, true, langId, 1), 0);
+    EXPECT_GT(smsBaseMessage->GetSegmentSize(codingType, 1, true, langId), 0);
+    codingType = DataCodingScheme::DATA_CODING_ASCII7BIT;
+    EXPECT_GT(smsBaseMessage->GetMaxSegmentSize(codingType, 1, true, langId, 1), 0);
+    EXPECT_GT(smsBaseMessage->GetSegmentSize(codingType, 1, true, langId), 0);
+    codingType = DataCodingScheme::DATA_CODING_8BIT;
+    EXPECT_GT(smsBaseMessage->GetMaxSegmentSize(codingType, 1, true, langId, 1), 0);
+    EXPECT_GT(smsBaseMessage->GetSegmentSize(codingType, 1, true, langId), 0);
+    codingType = DataCodingScheme::DATA_CODING_UCS2;
+    EXPECT_GT(smsBaseMessage->GetMaxSegmentSize(codingType, 1, true, langId, 1), 0);
+    EXPECT_GT(smsBaseMessage->GetSegmentSize(codingType, 1, true, langId), 0);
+    std::string message = "";
+    LengthInfo lenInfo;
+    EXPECT_GE(smsBaseMessage->GetSmsSegmentsInfo(message, true, lenInfo), 0);
+    message = "123";
+    EXPECT_EQ(smsBaseMessage->GetSmsSegmentsInfo(message, true, lenInfo), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsBaseMessage->GetSmsSegmentsInfo(message, false, lenInfo), TELEPHONY_ERR_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsBaseMessage_0002
+ * @tc.name     Test SmsBaseMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsBaseMessage_0002, Function | MediumTest | Level1)
+{
+    auto gsmSmsMessage = std::make_shared<GsmSmsMessage>();
+    std::vector<struct SplitInfo> splitResult;
+    DataCodingScheme codingType = DATA_CODING_AUTO;
+    std::string text = {0xe4, 0xbd, 0xa0, 0xe4, 0xbd, 0xa0, 0xe4, 0xbd, 0xa0, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5,
+        0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3,
+        0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3,
+        0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3,
+        0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3,
+        0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3,
+        0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3,
+        0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3,
+        0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3,
+        0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3, 0xf0, 0x9f, 0xa5, 0xb3};
+    std::string desAddr = "";
+    gsmSmsMessage->SplitMessage(splitResult, text, false, codingType, false, desAddr);
+    std::vector<unsigned char> expect1 = {0x4f, 0x60, 0x4f, 0x60, 0x4f, 0x60, 0xd8, 0x3e, 0xdd, 0x73,
+        0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73,
+        0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73,
+        0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73,
+        0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73,
+        0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73,
+        0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73,
+        0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73,
+        0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73};
+    std::vector<unsigned char> expect2 = {0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73,
+        0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73};
+    EXPECT_TRUE(splitResult[0].encodeData == expect1);
+    EXPECT_TRUE(splitResult[1].encodeData == expect2);
+}
 } // namespace Telephony
 } // namespace OHOS

@@ -44,6 +44,8 @@ public:
     bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount);
     bool UpdateContact(const std::string &address);
     void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
+    int32_t FormatSmsNumber(const std::string &num, std::string countryCode,
+        const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo, std::string &formatNum);
 
     inline static const std::string SMS_CAPABLE_KEY = "sms_config_capable";
     inline static const std::string SMS_ENCODING_KEY = "sms_config_force_7bit_encoding";
@@ -59,8 +61,6 @@ private:
         SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
     void ConvertStringToIndexer(
         SmsReceiveIndexer &info, const std::shared_ptr<DataShare::DataShareResultSet> &resultSet);
-    int32_t FormatSmsNumber(const std::string &num, std::string countryCode,
-        const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo, std::string &formatNum);
     void TrimSpace(std::string &num);
     bool QueryContactedCount(const std::string &address, int32_t &rawCountId, int32_t &contactedCount);
     bool QueryRawContactId(const std::string &address, int32_t &rawCountId);
