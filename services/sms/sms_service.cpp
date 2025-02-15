@@ -20,6 +20,7 @@
 #include "cdma_sms_message.h"
 #include "core_manager_inner.h"
 #include "ims_sms_client.h"
+#include "phonenumbers/phonenumber.pb.h"
 #include "sms_dump_helper.h"
 #include "sms_mms_common.h"
 #include "sms_hisysevent.h"
@@ -39,7 +40,9 @@ using namespace HiviewDFX;
 constexpr static uint32_t CONNECT_SERVICE_WAIT_TIME = 2000;
 constexpr static size_t MIN_LEN = 1;
 bool g_registerResult = SystemAbility::MakeAndRegisterAbility(DelayedSingleton<SmsService>::GetInstance().get());
-
+const std::string INFO_MSG_TELEPHONE_REG = "^(0086|\\+?86|\\+)?(9|95|100|101|106|108|111|116|118|123|125|400|800|1212|"
+    "000000|\\d{2,4}12123$|\\d{2,4}12329$|^02[0-9]|010|^05[34]|^07[56])";
+const std::string ISO_COUNTRY_CODE = "CN";
 SmsService::SmsService() : SystemAbility(TELEPHONY_SMS_MMS_SYS_ABILITY_ID, true) {}
 
 SmsService::~SmsService() {}
@@ -216,13 +219,13 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t 
 {
     DataShare::DataSharePredicates predicates;
     auto persistHelper = DelayedSingleton<smsPersistHelper>::GetInstance();
-    //如果尾数小于等于7位，直接全等对比；群聊也直接全等对比；通知消息也做全等对比
+    // 如果尾数小于等于7位，直接全等对比；群聊也直接全等对比；通知消息也做全等对比
     if (telephone.size() <= 7 || telephone.find(',') != std::string::npos || IsInfoMsg(telephone)) {
         predicates.EqualTo(Session::TELEPHONE, telephone);
     }else {
         std::string formatNum;
         int32_t ret = persistHelper->FormatSmsNumber(
-            telephone, ISO_COUNTRY_CODE, il8n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
+            telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
         if (ret != TELEPHONE_SUCCESS) {
             ret = persistHelper->FormatSmsNumber(
                 telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164, formatNum);
