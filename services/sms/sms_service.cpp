@@ -222,7 +222,7 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t 
     // 如果尾数小于等于7位，直接全等对比；群聊也直接全等对比；通知消息也做全等对比
     if (telephone.size() <= 7 || telephone.find(',') != std::string::npos || IsInfoMsg(telephone)) {
         predicates.EqualTo(Session::TELEPHONE, telephone);
-    }else {
+    } else {
         std::string formatNum;
         int32_t ret = persistHelper->FormatSmsNumber(
             telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
