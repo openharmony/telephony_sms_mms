@@ -138,7 +138,7 @@ void SmsServiceInterfaceTest(const uint8_t *data, size_t size)
     service->GetSpendTime();
     service->GetBase64Encode(argsStr, argsStr);
     service->GetBase64Decode(argsStr, argsStr);
-    service->GetEncodeStringFunc(argsStr, index, index, argsStr);
+    service->GetEncodeStringFunc(argsStr, index, argsStr.size(), argsStr);
     int64_t timeStamp = 0;
     service->SendMms(slotId, argsStrU16, argsStrU16, argsStrU16, argsStrU16, timeStamp);
     service->DownloadMms(slotId, argsStrU16, argsStrU16, argsStrU16, argsStrU16);
