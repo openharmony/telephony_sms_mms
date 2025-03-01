@@ -16,18 +16,16 @@
 #ifndef SMS_PERSIST_HELPER_H
 #define SMS_PERSIST_HELPER_H
 
-#include "mutex"
 #include "datashare_helper.h"
 #include "datashare_predicates.h"
 #include "phonenumbers/phonenumberutil.h"
 #include "singleton.h"
 #include "sms_mms_data.h"
 #include "sms_receive_indexer.h"
-#include "tel_event_handler.h"
 
 namespace OHOS {
 namespace Telephony {
-class SmsPersistHelper : public TelEventHandler {
+class SmsPersistHelper {
     DECLARE_DELAYED_SINGLETON(SmsPersistHelper)
 public:
     bool Insert(DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId);
@@ -66,11 +64,9 @@ private:
     bool QueryRawContactId(const std::string &address, int32_t &rawCountId);
     void CbnFormat(std::string &numTemp, const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo,
         std::string &formatNum);
-    void ReleaseSmsDataShareHelper();
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> smsDataShareHelper_ = nullptr;
-    std::mutex smsDataShareMutex_;
 };
 } // namespace Telephony
 } // namespace OHOS
