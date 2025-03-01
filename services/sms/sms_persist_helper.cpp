@@ -54,6 +54,7 @@ const std::string NUMBER_START_STR = "192";
 
 SmsPersistHelper::SmsPersistHelper() {}
 
+
 std::shared_ptr<DataShare::DataShareHelper> SmsPersistHelper::CreateSmsHelper()
 {
     if (smsDataShareHelper_ == nullptr) {
