@@ -41,7 +41,6 @@ public:
     bool QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId);
     bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount);
     bool UpdateContact(const std::string &address);
-    void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
     int32_t FormatSmsNumber(const std::string &num, std::string countryCode,
         const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo, std::string &formatNum);
 
