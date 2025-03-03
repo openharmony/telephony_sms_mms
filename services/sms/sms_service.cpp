@@ -219,7 +219,7 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t 
 {
     DataShare::DataSharePredicates predicates;
     auto persistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
-    UpdatePredicatesByPhoneNum(predicates, telephone);    
+    UpdatePredicatesByPhoneNum(predicates, telephone);
     return persistHelper->QuerySession(predicates, sessionId, messageCount);
 }
 
