@@ -360,6 +360,7 @@ private:
     bool QuerySessionByTelephone(const std::string &telephone, uint16_t &sessionId, uint16_t &messageCount);
     void UpdateSmsContact(const std::string &address);
     bool IsInfoMsg(const std::string &telephone);
+    void UpdatePredicatesByPhoneNum(DataShare::DataSharePredicates &predicates, const std::string &phoneNum);
 
 private:
     int64_t bindTime_ = 0;
