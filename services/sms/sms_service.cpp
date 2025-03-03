@@ -899,24 +899,24 @@ bool SmsService::IsInfoMsg(const std::string &telephone)
 void SmsService::UpdatePredicatesByPhoneNum(DataShare::DataSharePredicates &predicates, const std::string &phoneNum)
 {
     // 如果尾数小于等于7位，直接全等对比；群聊也直接全等对比；通知消息也做全等对比
-    if (telephone.size() <= 7 || telephone.find(',') != std::string::npos || IsInfoMsg(telephone)) {
-        predicates.EqualTo(Session::TELEPHONE, telephone);
+    if (phoneNum.size() <= 7 || phoneNum.find(',') != std::string::npos || IsInfoMsg(phoneNum)) {
+        predicates.EqualTo(Session::TELEPHONE, phoneNum);
     } else {
         std::string formatNum;
         auto persistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
         int32_t ret = persistHelper->FormatSmsNumber(
-            telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
+            phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
         if (ret != TELEPHONY_SUCCESS) {
             ret = persistHelper->FormatSmsNumber(
-                telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164, formatNum);
+                phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164, formatNum);
         }
         if (ret != TELEPHONY_SUCCESS) {
-            formatNum = telephone;
+            formatNum = phoneNum;
         }
         // 增加contactsNum字段的判断，防止单聊通过endsWith匹配到群聊。
         predicates.In(Session::CONTACTS_NUM, std::vector<string>({ "0", "1" }));
         predicates.And();
-        predicates.EndsWith(Session::TELEPHONE, telephone);
+        predicates.EndsWith(Session::TELEPHONE, phoneNum);
     }
 }
 } // namespace Telephony
