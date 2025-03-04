@@ -541,7 +541,7 @@ bool GsmSmsSender::SetPduInfo(
         return ret;
     }
     (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
-    if (smsIndexer->GetText().length() > MAX_USER_DATA_LEN + 1) {
+    if (smsIndexer->GetText().length() >= MAX_USER_DATA_LEN + 1) {
         TELEPHONY_LOGE("SetPduInfo data length invalid.");
         return ret;
     }
