@@ -22,6 +22,21 @@
 namespace OHOS {
 namespace Telephony {
 extern "C" {
+void SetCJShortMessage(CJShortMessage* res, ShortMessage* shortMessage)
+{
+    if (res == nullptr || shortMessage == nullptr) {
+        return;
+    }
+    res->protocolId = shortMessage->GetProtocolId();
+    std::u16string smscAddress;
+    shortMessage->GetScAddress(smscAddress);
+    res->scAddress = MallocCString(NapiUtil::ToUtf8(smscAddress));
+    res->scTimestamp = shortMessage->GetScTimestamp();
+    res->status = shortMessage->GetStatus();
+    res->visibleMessageBody = MallocCString(NapiUtil::ToUtf8(shortMessage->GetVisibleMessageBody()));
+    res->visibleRawAddress = MallocCString(NapiUtil::ToUtf8(shortMessage->GetVisibleRawAddress()));
+}
+
 CJShortMessage FfiSMSCreateMessage(CArrI32 arr, char* specification)
 {
     CJShortMessage res = CJShortMessage { 0 };
@@ -36,6 +51,10 @@ CJShortMessage FfiSMSCreateMessage(CArrI32 arr, char* specification)
     }
     std::u16string specification16 = NapiUtil::ToUtf16(specification8);
     auto shortMessage = new ShortMessage();
+    if (shortMessage == nullptr) {
+        res.errCode = JS_ERROR_TELEPHONY_SYSTEM_ERROR;
+        return res;
+    }
     res.errCode = ShortMessage::CreateMessage(pdu, specification16, *shortMessage);
     if (res.errCode == TELEPHONY_ERR_SUCCESS) {
         res.hasReplyPath = shortMessage->HasReplyPath();
@@ -43,6 +62,11 @@ CJShortMessage FfiSMSCreateMessage(CArrI32 arr, char* specification)
         res.isSmsStatusReportMessage = shortMessage->IsSmsStatusReportMessage();
         res.messageClass = shortMessage->GetMessageClass();
         std::vector<unsigned char> pdu_ = shortMessage->GetPdu();
+        if (pdu_.size() == 0) {
+            delete shortMessage;
+            res.errCode = JS_ERROR_TELEPHONY_SYSTEM_ERROR;
+            return res;
+        }
         res.pdu.head = static_cast<int32_t*>(malloc(sizeof(int32_t) * pdu_.size()));
         if (res.pdu.head == nullptr) {
             delete shortMessage;
@@ -53,14 +77,7 @@ CJShortMessage FfiSMSCreateMessage(CArrI32 arr, char* specification)
             res.pdu.head[i] = pdu_[i];
         }
         res.pdu.size = static_cast<int64_t>(pdu_.size());
-        res.protocolId = shortMessage->GetProtocolId();
-        std::u16string smscAddress;
-        shortMessage->GetScAddress(smscAddress);
-        res.scAddress = MallocCString(NapiUtil::ToUtf8(smscAddress));
-        res.scTimestamp = shortMessage->GetScTimestamp();
-        res.status = shortMessage->GetStatus();
-        res.visibleMessageBody = MallocCString(NapiUtil::ToUtf8(shortMessage->GetVisibleMessageBody()));
-        res.visibleRawAddress = MallocCString(NapiUtil::ToUtf8(shortMessage->GetVisibleRawAddress()));
+        SetCJShortMessage(&res, shortMessage);
     }
     delete shortMessage;
     if (res.errCode != TELEPHONY_ERR_SUCCESS) {
