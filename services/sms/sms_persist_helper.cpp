@@ -51,13 +51,20 @@ const std::string LASTEST_CONTACTED_TIME = "lastest_contacted_time";
 constexpr static uint8_t TYPE_ID_VALUE = 5;
 const std::string PREFIX = "+86";
 const std::string NUMBER_START_STR = "192";
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+constexpr int64_t RELEASE_DATA_SHARE_HELPER_TIMEOUT = 5000;
 
-SmsPersistHelper::SmsPersistHelper() {}
+static std::shared_ptr<AppExecFwk::EventRunner> SmsPersistHelperEventRunner_ =
+    AppExecFwk::EventRunner::Create("SmsPersistHelper");
+SmsPersistHelper::SmsPersistHelper() : AppExecFwk::EventHandler(SmsPersistHelperEventRunner_) {}
 
 SmsPersistHelper::~SmsPersistHelper() {}
 
 std::shared_ptr<DataShare::DataShareHelper> SmsPersistHelper::CreateSmsHelper()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+    RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+    SendEvent(EVENT_RELEASE_DATA_SHARE_HELPER, 0, RELEASE_DATA_SHARE_HELPER_TIMEOUT);
     if (smsDataShareHelper_ == nullptr) {
         smsDataShareHelper_ = CreateDataShareHelper(SMS_URI);
     }
@@ -566,6 +573,19 @@ void SmsPersistHelper::ResultSetConvertToIndexer(
 {
     ConvertIntToIndexer(info, resultSet);
     ConvertStringToIndexer(info, resultSet);
+}
+
+void SmsPersistHelper::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
+{
+    if (event->GetInnerEventId() == EVENT_RELEASE_DATA_SHARE_HELPER) {
+        ReleaseDataShareHelper();
+    }
+}
+
+void SmsPersistHelper::ReleaseDataShareHelper()
+{
+    std::lock_guard<mutex> lock(mutex_);
+    smsDataShareHelper_ = nullptr;
 }
 } // namespace Telephony
 } // namespace OHOS

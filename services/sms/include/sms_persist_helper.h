@@ -16,8 +16,10 @@
 #ifndef SMS_PERSIST_HELPER_H
 #define SMS_PERSIST_HELPER_H
 
+#include <mutex>
 #include "datashare_helper.h"
 #include "datashare_predicates.h"
+#include "event_handler.h"
 #include "phonenumbers/phonenumberutil.h"
 #include "singleton.h"
 #include "sms_mms_data.h"
@@ -25,7 +27,7 @@
 
 namespace OHOS {
 namespace Telephony {
-class SmsPersistHelper {
+class SmsPersistHelper : public AppExecFwk::EventHandler {
     DECLARE_DELAYED_SINGLETON(SmsPersistHelper)
 public:
     bool Insert(DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId);
@@ -43,6 +45,7 @@ public:
     bool UpdateContact(const std::string &address);
     int32_t FormatSmsNumber(const std::string &num, std::string countryCode,
         const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo, std::string &formatNum);
+    void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 
     inline static const std::string SMS_CAPABLE_KEY = "sms_config_capable";
     inline static const std::string SMS_ENCODING_KEY = "sms_config_force_7bit_encoding";
@@ -63,9 +66,11 @@ private:
     bool QueryRawContactId(const std::string &address, int32_t &rawCountId);
     void CbnFormat(std::string &numTemp, const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo,
         std::string &formatNum);
+    void ReleaseDataShareHelper();
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> smsDataShareHelper_ = nullptr;
+    std::mutex mutex_;
 };
 } // namespace Telephony
 } // namespace OHOS

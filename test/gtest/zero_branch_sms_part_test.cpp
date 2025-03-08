@@ -1490,5 +1490,21 @@ HWTEST_F(BranchSmsPartTest, SmsBaseMessage_0002, Function | MediumTest | Level1)
     EXPECT_TRUE(splitResult[0].encodeData == expect1);
     EXPECT_TRUE(splitResult[1].encodeData == expect2);
 }
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsPersistHelper_0002
+ * @tc.name     Test SmsPersistHelper
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsPersistHelper_0002, Function | MediumTest | Level1)
+{
+    auto smsPersistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
+    smsPersistHelper->CreateSmsHelper();
+    smsPersistHelper->SendEvent(0);
+    uint32_t releaseDataShareHelperEventId = 10000;
+    smsPersistHelper->SendEvent(releaseDataShareHelperEventId);
+    EXPECT_TRUE(smsPersistHelper->smsDataShareHelper_ == nullptr);
+    smsPersistHelper->RemoveEvent(releaseDataShareHelperEventId);
+}
 } // namespace Telephony
 } // namespace OHOS
