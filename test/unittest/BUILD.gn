@@ -61,6 +61,7 @@ ohos_executable("tel_sms_mms_test") {
     "core_service:tel_core_service_api",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",

@@ -16,10 +16,10 @@
 #ifndef SMS_PERSIST_HELPER_H
 #define SMS_PERSIST_HELPER_H
 
-#include <mutex>
 #include "datashare_helper.h"
 #include "datashare_predicates.h"
 #include "event_handler.h"
+#include "ffrt.h"
 #include "phonenumbers/phonenumberutil.h"
 #include "singleton.h"
 #include "sms_mms_data.h"
