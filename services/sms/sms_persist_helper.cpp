@@ -54,9 +54,9 @@ const std::string NUMBER_START_STR = "192";
 constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
 constexpr int64_t RELEASE_DATA_SHARE_HELPER_TIMEOUT = 5000;
 
-static std::shared_ptr<AppExecFwk::EventRunner> SmsPersistHelperEventRunner_ =
+static std::shared_ptr<AppExecFwk::EventRunner> smsPersistHelperEventRunner_ =
     AppExecFwk::EventRunner::Create("SmsPersistHelper");
-SmsPersistHelper::SmsPersistHelper() : AppExecFwk::EventHandler(SmsPersistHelperEventRunner_) {}
+SmsPersistHelper::SmsPersistHelper() : AppExecFwk::EventHandler(smsPersistHelperEventRunner_) {}
 
 SmsPersistHelper::~SmsPersistHelper() {}
 
