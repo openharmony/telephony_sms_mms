@@ -25,6 +25,7 @@
 #include "sms_misc_manager.h"
 #include "sms_mms_gtest.h"
 #include "sms_service.h"
+#include "sms_persist_helper.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
