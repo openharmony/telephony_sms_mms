@@ -25,6 +25,7 @@
 #include "sms_misc_manager.h"
 #include "sms_mms_gtest.h"
 #include "sms_service.h"
+#include "sms_persist_helper.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
@@ -1489,6 +1490,22 @@ HWTEST_F(BranchSmsPartTest, SmsBaseMessage_0002, Function | MediumTest | Level1)
         0xd8, 0x3e, 0xdd, 0x73, 0xd8, 0x3e, 0xdd, 0x73};
     EXPECT_TRUE(splitResult[0].encodeData == expect1);
     EXPECT_TRUE(splitResult[1].encodeData == expect2);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsPersistHelper_0002
+ * @tc.name     Test SmsPersistHelper
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsPersistHelper_0002, Function | MediumTest | Level1)
+{
+    auto smsPersistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
+    smsPersistHelper->CreateSmsHelper();
+    smsPersistHelper->SendEvent(0);
+    uint32_t releaseDataShareHelperEventId = 10000;
+    smsPersistHelper->SendEvent(releaseDataShareHelperEventId);
+    EXPECT_TRUE(smsPersistHelper->smsDataShareHelper_ == nullptr);
+    smsPersistHelper->RemoveEvent(releaseDataShareHelperEventId);
 }
 } // namespace Telephony
 } // namespace OHOS
