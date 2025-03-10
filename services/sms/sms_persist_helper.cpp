@@ -62,7 +62,7 @@ SmsPersistHelper::~SmsPersistHelper() {}
 
 std::shared_ptr<DataShare::DataShareHelper> SmsPersistHelper::CreateSmsHelper()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
     SendEvent(EVENT_RELEASE_DATA_SHARE_HELPER, 0, RELEASE_DATA_SHARE_HELPER_TIMEOUT);
     if (smsDataShareHelper_ == nullptr) {
@@ -584,7 +584,10 @@ void SmsPersistHelper::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event
 
 void SmsPersistHelper::ReleaseDataShareHelper()
 {
-    std::lock_guard<mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
+    if (smsDataShareHelper_ != nullptr) {
+        smsDataShareHelper_->Release();
+    }
     smsDataShareHelper_ = nullptr;
 }
 } // namespace Telephony
