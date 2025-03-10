@@ -70,7 +70,7 @@ private:
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> smsDataShareHelper_ = nullptr;
-    std::mutex mutex_;
+    ffrt::mutex mutex_;
 };
 } // namespace Telephony
 } // namespace OHOS
