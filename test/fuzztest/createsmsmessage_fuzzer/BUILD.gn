@@ -49,6 +49,7 @@ ohos_fuzztest("CreateSmsMessageFuzzTest") {
     "curl:curl_shared",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_single",
     "libphonenumber:phonenumber_standard",

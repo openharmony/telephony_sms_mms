@@ -135,6 +135,7 @@ ohos_shared_library("tel_sms_mms") {
     "curl:curl_shared",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "icu:shared_icui18n",
