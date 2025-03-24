@@ -32,8 +32,8 @@ static constexpr uint16_t MAX_TPDU_DATA_LEN = 255;
 static constexpr uint16_t TAPI_TEXT_SIZE_MAX = 520;
 static constexpr uint16_t ADDRESS_LEN = 4;
 static constexpr uint16_t MATCH_TWO = 2;
-static std::string NAME_ADDR_EMAIL_REGEX = "\\s*(\"[^\"]*\"|[^<>\"]+)\\s*<([^<>]+)>\\s*";
-static std::string ADDR_EMAIL_REGEX =
+static std::string g_nameAddrEmailRegex = "\\s*(\"[^\"]*\"|[^<>\"]+)\\s*<([^<>]+)>\\s*";
+static std::string g_addrEmailRegex =
     "^([A-Za-z0-9_\\-\\.\u4e00-\u9fa5])+\\@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,63})$";
 
 uint8_t GsmSmsMessage::CalcReplyEncodeAddress(const std::string &replyAddress)
@@ -775,7 +775,7 @@ bool GsmSmsMessage::IsEmailAddress(std::string emailFrom)
     if (emailFrom.empty()) {
         return false;
     }
-    std::regex nameAddrEmailRegex(NAME_ADDR_EMAIL_REGEX);
+    std::regex nameAddrEmailRegex(g_nameAddrEmailRegex);
     std::smatch match;
     std::string emailAddress;
     if (std::regex_search(emailFrom, match, nameAddrEmailRegex)) {
@@ -783,7 +783,7 @@ bool GsmSmsMessage::IsEmailAddress(std::string emailFrom)
     } else {
         emailAddress = emailFrom;
     }
-    std::regex addrEmailRegex(ADDR_EMAIL_REGEX);
+    std::regex addrEmailRegex(g_addrEmailRegex);
     return std::regex_match(emailAddress, addrEmailRegex);
 }
 } // namespace Telephony

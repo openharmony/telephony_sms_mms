@@ -44,7 +44,7 @@ const std::string ISO_COUNTRY_CODE = "CN";
 const std::string PHONE_NUMBER = "phone_number";
 const std::string DETAIL_INFO = "detail_info";
 const std::string TYPE_ID = "type_id";
-std::string ID = "id";
+std::string g_id = "id";
 const std::string RAW_CONTACT_ID = "raw_contact_id";
 const std::string CONTACTED_COUNT = "contacted_count";
 const std::string LASTEST_CONTACTED_TIME = "lastest_contacted_time";
@@ -380,7 +380,7 @@ bool SmsPersistHelper::UpdateContact(const std::string &address)
     int64_t currentTime = time(&timep);
     Uri uri(RAW_CONTACT);
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(ID, rawCountId);
+    predicates.EqualTo(g_id, rawCountId);
     DataShare::DataShareValuesBucket bucket;
     bucket.Put(CONTACTED_COUNT, contactedCount + 1);
     bucket.Put(LASTEST_CONTACTED_TIME, std::to_string(currentTime));
@@ -405,7 +405,7 @@ bool SmsPersistHelper::QueryContactedCount(const std::string &address, int32_t &
     Uri uri(RAW_CONTACT);
     std::vector<std::string> columns;
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(ID, rawCountId);
+    predicates.EqualTo(g_id, rawCountId);
     auto resultSet = helper->Query(uri, predicates, columns);
     bool result = false;
     if (resultSet == nullptr) {
