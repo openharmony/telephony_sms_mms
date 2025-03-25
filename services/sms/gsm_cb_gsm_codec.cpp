@@ -216,7 +216,7 @@ bool GsmCbGsmCodec::Decode2gCbMsg()
                 TELEPHONY_LOGE("CB pdu data error.");
                 return false;
             }
-            for (uint8_t i = cbPduBuffer_->GetCurPosition(); i < cbPduBuffer_->GetSize(); i++) {
+            for (uint32_t i = cbPduBuffer_->GetCurPosition(); i < cbPduBuffer_->GetSize(); i++) {
                 messageRaw_.push_back(cbPduBuffer_->pduBuffer_[i]);
             }
             cbCodec_->SetCbMessageRaw(messageRaw_);
@@ -250,7 +250,7 @@ bool GsmCbGsmCodec::Decode2gCbMsg7bit(uint16_t dataLen)
         TELEPHONY_LOGE("CB pdu data error.");
         return false;
     }
-    for (uint8_t i = 0; i < unpackLen; i++) {
+    for (uint16_t i = 0; i < unpackLen; i++) {
         messageRaw_.push_back(static_cast<char>(pageData[i]));
     }
     cbCodec_->SetCbMessageRaw(messageRaw_);

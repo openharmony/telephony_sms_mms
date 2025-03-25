@@ -231,7 +231,7 @@ bool GsmCbUmtsCodec::Decode3gUCS2()
             offset = (i * MAX_PAGE_PDU_LEN) + i;
         }
         if (dataLen > 0 && dataLen <= MAX_PAGE_PDU_LEN && dataLen < tpduLen) {
-            for (uint8_t position = offset; position < offset + dataLen; position++) {
+            for (uint16_t position = offset; position < offset + dataLen; position++) {
                 messageRaw_.push_back(static_cast<char>(tpdu[position]));
             }
         }
