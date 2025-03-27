@@ -168,18 +168,18 @@ HWTEST_F(BranchUtilsTest, TextCoder_0003, Function | MediumTest | Level1)
     unsigned short result = 1;
     const uint8_t *pMsgText = (const uint8_t *)TEXT_SMS_CONTENT.c_str();
     uint8_t *pDestText = encodeData;
-    EXPECT_EQ(TextCoder::Instance().Utf8ToGsm7bit(nullptr, 0, nullptr, -1, pLangInfo), 0);
-    EXPECT_EQ(TextCoder::Instance().Gsm7bitToUcs2(nullptr, 1, pMsgText, -1, pLangInfo), 0);
-    EXPECT_EQ(TextCoder::Instance().Gsm7bitToUcs2(pDestText, 0, pMsgText, 0, pLangInfo), 0);
-    EXPECT_EQ(TextCoder::Instance().Gsm7bitToUcs2(pDestText, 0, pMsgText, 1, pLangInfo), 0);
+    EXPECT_EQ(TextCoder::Instance().Utf8ToGsm7bit(nullptr, 0, nullptr, -1, langId), 0);
+    EXPECT_EQ(TextCoder::Instance().Utf8ToGsm7bit(nullptr, 1, pMsgText, -1, langId), 0);
+    EXPECT_EQ(TextCoder::Instance().Utf8ToGsm7bit(pDestText, 0, pMsgText, 0, langId), 0);
+    EXPECT_EQ(TextCoder::Instance().Utf8ToGsm7bit(pDestText, 0, pMsgText, 1, langId), 0);
     EXPECT_EQ(TextCoder::Instance().Gsm7bitToUcs2(nullptr, 0, nullptr, -1, pLangInfo), -1);
     EXPECT_EQ(TextCoder::Instance().Gsm7bitToUcs2(nullptr, 1, pMsgText, -1, pLangInfo), -1);
     EXPECT_EQ(TextCoder::Instance().Gsm7bitToUcs2(pDestText, 0, pMsgText, 0, pLangInfo), -1);
     EXPECT_EQ(TextCoder::Instance().Gsm7bitToUcs2(pDestText, 0, pMsgText, 1, pLangInfo), -1);
-    EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(nullptr, 0, nullptr, -1, pLangInfo), 0);
-    EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(nullptr, 1, pMsgText, -1, pLangInfo), 0);
-    EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(pDestText, 0, pMsgText, 0, pLangInfo), 0);
-    EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(pDestText, 0, pMsgText, 1, pLangInfo), 0);
+    EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(nullptr, 0, nullptr, -1), 0);
+    EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(nullptr, 1, pMsgText, -1), 0);
+    EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(pDestText, 0, pMsgText, 0), 0);
+    EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(pDestText, 0, pMsgText, 1), 0);
     EXPECT_EQ(TextCoder::Instance().Get7BitCodingExtMap(SMS_CODING_NATIONAL_TYPE_DEFAULT),
         TextCoder::Instance().gsm7bitExtMap_);
     EXPECT_EQ(TextCoder::Instance().Get7BitCodingExtMap(SMS_CODING_NATIONAL_TYPE_TURKISH),
