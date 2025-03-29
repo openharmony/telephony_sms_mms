@@ -84,7 +84,6 @@ std::string NapiMmsPduHelper::GetDbUrl()
 
 std::shared_ptr<DataShare::DataShareHelper> NapiMmsPduHelper::GetDataShareHelper()
 {
-    std::unique_lock<std::mutex> lock(mtx_);
     return datashareHelper_;
 }
 } // namespace Telephony
