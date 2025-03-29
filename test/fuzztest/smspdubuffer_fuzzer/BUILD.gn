@@ -37,6 +37,7 @@ ohos_fuzztest("SmsPduBufferFuzzTest") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "safwk:system_ability_fwk",
   ]
   defines = [
     "TELEPHONY_LOG_TAG = \"SmsMmsFuzzTest\"",
