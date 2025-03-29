@@ -57,6 +57,7 @@ ohos_fuzztest("GsmSmsMessageFuzzTest") {
     "netmanager_base:net_conn_manager_if",
     "netstack:http_client",
     "protobuf:protobuf",
+    "safwk:system_ability_fwk",
     "telephony_data:tel_telephony_data",
   ]
   defines = [
