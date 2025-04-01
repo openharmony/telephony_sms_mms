@@ -16,11 +16,14 @@
 #define private public
 #define protected public
 
-#include "random"
+#include <gmock/gmock.h>
+#include <random>
 #include "delivery_short_message_callback_stub.h"
 #include "gtest/gtest.h"
 #include "gsm_sms_param_decode.h"
 #include "gsm_sms_tpdu_encode.h"
+#include "mock/mock_data_share_helper.h"
+#include "mock/mock_data_share_result_set.h"
 #include "send_short_message_callback_stub.h"
 #include "sms_misc_manager.h"
 #include "sms_mms_gtest.h"
@@ -31,6 +34,9 @@
 namespace OHOS {
 namespace Telephony {
 using namespace testing::ext;
+using ::texting::Invoke;
+using ::texting::Return;
+using ::texting::_;
 
 namespace {
 const std::string TEST_SOURCE_DATA = "srcData";
@@ -1506,6 +1512,131 @@ HWTEST_F(BranchSmsPartTest, SmsPersistHelper_0002, Function | MediumTest | Level
     smsPersistHelper->SendEvent(releaseDataShareHelperEventId);
     EXPECT_TRUE(smsPersistHelper->smsDataShareHelper_ == nullptr);
     smsPersistHelper->RemoveEvent(releaseDataShareHelperEventId);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveHandler_0001
+ * @tc.name     Test SmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0001, Function | MediumTest | Level1)
+{
+    auto dataShareHelperMock = std::make_shared<DataShareHelperMock>();
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = dataShareHelperMock;
+    auto resultSet = std::make_shared<DataShareResultSetMock>();
+    std::shared_ptr<SmsReceiveHandler> smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(0);
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(0);
+    auto indexer = std::make_shared<SmsReceiveIndexer>();
+    indexer->msgCount_ = 1;
+    auto pdus = std::make_shared<vector<string>>();
+    EXPECT_CALL(*dataShareHelperMock, Query(_, _, _, _))
+        .WillRepeatedly(Return(resultSet));
+    EXPECT_CALL(*resultSet, GoToFirstRow)
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, GoToNextRow)
+        .WillOnce(Return(0))
+        .WillRepeatedly(Return(-1));
+    EXPECT_CALL(*resultSet, GetColumnIndex(_, _))
+        .WillRepeatedly(Invoke([](const std::string &columnName, int &columnIndex) -> int {
+            if (columnName == SmsSubsection::SIZE) {
+                columnIndex = 1;
+            } else if (columnName == SmsSubsection::SUBSECTION_INDEX) {
+                columnIndex = 2;
+            }
+            return 0;
+        }));
+    EXPECT_CALL(*resultSet, GetInt(_, _))
+        .WillRepeatedly(Invoke([](int columnIndex, int &value) -> int {
+            if (columnIndex == 1) {
+                value = 1;
+            } else if (columnIndex == 2) {
+                value = 2;
+            }
+            return 0;
+        }));
+    EXPECT_CALL(*resultSet, GetString(_, _))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, Close())
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*dataShareHelperMock, Release())
+        .WillRepeatedly(Return(0));
+    EXPECT_FALSE(smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler));
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = nullptr;
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveHandler_0002
+ * @tc.name     Test SmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0002, Function | MediumTest | Level1)
+{
+    auto dataShareHelperMock = std::make_shared<DataShareHelperMock>();
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = dataShareHelperMock;
+    auto resultSet = std::make_shared<DataShareResultSetMock>();
+    std::shared_ptr<SmsReceiveHandler> smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(0);
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(0);
+    auto indexer = std::make_shared<SmsReceiveIndexer>();
+    indexer->msgCount_ = 4;
+    auto pdus = std::make_shared<vector<string>>();
+    EXPECT_CALL(*dataShareHelperMock, Query(_, _, _, _))
+        .WillRepeatedly(Return(resultSet));
+    EXPECT_CALL(*resultSet, GoToFirstRow)
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, GoToNextRow)
+        .WillOnce(Return(0))
+        .WillRepeatedly(Return(-1));
+    EXPECT_CALL(*resultSet, GetColumnIndex(_, _))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, GetInt(_, _))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, GetString(_, _))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, Close())
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*dataShareHelperMock, Release())
+        .WillRepeatedly(Return(0));
+    EXPECT_FALSE(smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler));
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = nullptr;
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveHandler_0003
+ * @tc.name     Test SmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0003, Function | MediumTest | Level1)
+{
+    auto dataShareHelperMock = std::make_shared<DataShareHelperMock>();
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = dataShareHelperMock;
+    auto resultSet = std::make_shared<DataShareResultSetMock>();
+    std::shared_ptr<SmsReceiveHandler> smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(0);
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(0);
+    auto indexer = std::make_shared<SmsReceiveIndexer>();
+    indexer->msgCount_ = 4;
+    auto pdus = std::make_shared<vector<string>>();
+    EXPECT_CALL(*dataShareHelperMock, Query(_, _, _, _))
+        .WillRepeatedly(Return(resultSet));
+    EXPECT_CALL(*resultSet, GoToFirstRow)
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, GoToNextRow)
+        .WillOnce(Return(0))
+        .WillRepeatedly(Return(-1));
+    EXPECT_CALL(*resultSet, GetColumnIndex(_, _))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, GetInt(_, _))
+        .WillRepeatedly(Invoke([](int columnIndex, int &value) -> int {
+            value = 1;
+            return 0;
+        }));
+    EXPECT_CALL(*resultSet, GetString(_, _))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, Close())
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*dataShareHelperMock, Release())
+        .WillRepeatedly(Return(0));
+    EXPECT_FALSE(smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler));
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = nullptr;
 }
 } // namespace Telephony
 } // namespace OHOS

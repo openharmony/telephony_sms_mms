@@ -17,7 +17,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   subsystem_name = "telephony"
   part_name = "sms_mms"
   test_module = "tel_sms_mms_gtest"
-  module_out_path = part_name + "/" + test_module
+  module_out_path = part_name + "/" + part_name + "/" + test_module
 
   sources = [
     "cb_gtest.cpp",
@@ -67,9 +67,12 @@ ohos_unittest("tel_sms_mms_gtest") {
     "core_service:libtel_common",
     "core_service:tel_core_service_api",
     "curl:curl_shared",
+    "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "icu:shared_icui18n",
     "icu:shared_icuuc",
@@ -93,7 +96,7 @@ ohos_unittest("tel_mmssms_gtest") {
   subsystem_name = "telephony"
   part_name = "sms_mms"
   test_module = "tel_sms_mms_gtest"
-  module_out_path = part_name + "/" + test_module
+  module_out_path = part_name + "/" + part_name + "/" + test_module
 
   sources = [
     "mms_cdma_gtest.cpp",
@@ -154,7 +157,7 @@ ohos_unittest("tel_sms_mms_gsm_gtest") {
   subsystem_name = "telephony"
   part_name = "sms_mms"
   test_module = "tel_sms_mms_gtest"
-  module_out_path = part_name + "/" + test_module
+  module_out_path = part_name + "/" + part_name + "/" + test_module
 
   sources = [
     "sms_gsm_gtest.cpp",
@@ -215,7 +218,7 @@ ohos_unittest("tel_sms_services_mms_gtest") {
   subsystem_name = "telephony"
   part_name = "sms_mms"
   test_module = "tel_sms_mms_gtest"
-  module_out_path = part_name + "/" + test_module
+  module_out_path = part_name + "/" + part_name + "/" + test_module
 
   sources = [ "sms_services_mms_gtest.cpp" ]
 
