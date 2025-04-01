@@ -44,8 +44,8 @@ private:
     void GetWapPushUserDataMultipage(int32_t &smsPagesCount, std::vector<SmsReceiveIndexer> &dbIndexers, int32_t place,
         std::shared_ptr<std::vector<std::string>> userDataRaws);
     void ReadyDecodeWapPushUserData(SmsReceiveIndexer &indexer, std::shared_ptr<std::vector<std::string>> userDataRaws);
-    void GetSmsUserDataMultipage(int32_t &smsPagesCount, std::vector<SmsReceiveIndexer> &dbIndexers, int32_t position,
-        std::shared_ptr<std::vector<std::string>> pdus);
+    void GetSmsUserDataMultipage(int32_t &smsPagesCount, uint16_t msgCount, std::vector<SmsReceiveIndexer> &dbIndexers,
+        int32_t position, std::shared_ptr<std::vector<std::string>> pdus);
     void ReadySendSmsBroadcast(SmsReceiveIndexer &indexerObj, std::shared_ptr<std::vector<std::string>> pdus);
     void PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsReceiveIndexer> indexer,
         EventFwk::CommonEventData &data, EventFwk::CommonEventPublishInfo &publishInfo);
