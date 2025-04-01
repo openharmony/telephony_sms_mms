@@ -1250,7 +1250,7 @@ HWTEST_F(BranchCbTest, Sms_GetSmsUserDataMultipage_0001, Function | MediumTest |
 
     dbIndexers[position].msgSeqId_ = MAX_SEGMENT_NUM + 1;
     reliabilityHandler->HiSysEventCBResult(true);
-    rreliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers[position].GetMsgCount(), dbIndexers,
+    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers[position].GetMsgCount(), dbIndexers,
         position, userDataRaws);
     EXPECT_TRUE(dbIndexers[position].GetMsgSeqId() > MAX_SEGMENT_NUM);
 

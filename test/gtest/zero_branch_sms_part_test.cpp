@@ -34,9 +34,9 @@
 namespace OHOS {
 namespace Telephony {
 using namespace testing::ext;
-using ::texting::Invoke;
-using ::texting::Return;
-using ::texting::_;
+using ::testing::Invoke;
+using ::testing::Return;
+using ::testing::_;
 
 namespace {
 const std::string TEST_SOURCE_DATA = "srcData";
@@ -1531,9 +1531,9 @@ HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0001, Function | MediumTest | Leve
     auto pdus = std::make_shared<vector<string>>();
     EXPECT_CALL(*dataShareHelperMock, Query(_, _, _, _))
         .WillRepeatedly(Return(resultSet));
-    EXPECT_CALL(*resultSet, GoToFirstRow)
+    EXPECT_CALL(*resultSet, GoToFirstRow())
         .WillRepeatedly(Return(0));
-    EXPECT_CALL(*resultSet, GoToNextRow)
+    EXPECT_CALL(*resultSet, GoToNextRow())
         .WillOnce(Return(0))
         .WillRepeatedly(Return(-1));
     EXPECT_CALL(*resultSet, GetColumnIndex(_, _))
@@ -1581,9 +1581,9 @@ HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0002, Function | MediumTest | Leve
     auto pdus = std::make_shared<vector<string>>();
     EXPECT_CALL(*dataShareHelperMock, Query(_, _, _, _))
         .WillRepeatedly(Return(resultSet));
-    EXPECT_CALL(*resultSet, GoToFirstRow)
+    EXPECT_CALL(*resultSet, GoToFirstRow())
         .WillRepeatedly(Return(0));
-    EXPECT_CALL(*resultSet, GoToNextRow)
+    EXPECT_CALL(*resultSet, GoToNextRow())
         .WillOnce(Return(0))
         .WillRepeatedly(Return(-1));
     EXPECT_CALL(*resultSet, GetColumnIndex(_, _))
@@ -1613,13 +1613,13 @@ HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0003, Function | MediumTest | Leve
     std::shared_ptr<SmsReceiveHandler> smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(0);
     auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(0);
     auto indexer = std::make_shared<SmsReceiveIndexer>();
-    indexer->msgCount_ = 4;
+    indexer->msgCount_ = 1;
     auto pdus = std::make_shared<vector<string>>();
     EXPECT_CALL(*dataShareHelperMock, Query(_, _, _, _))
         .WillRepeatedly(Return(resultSet));
-    EXPECT_CALL(*resultSet, GoToFirstRow)
+    EXPECT_CALL(*resultSet, GoToFirstRow())
         .WillRepeatedly(Return(0));
-    EXPECT_CALL(*resultSet, GoToNextRow)
+    EXPECT_CALL(*resultSet, GoToNextRow())
         .WillOnce(Return(0))
         .WillRepeatedly(Return(-1));
     EXPECT_CALL(*resultSet, GetColumnIndex(_, _))
