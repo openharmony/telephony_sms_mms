@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DATA_SHARE_RESULT_SET_MOCK_H
-#define DATA_SHARE_RESULT_SET_MOCK_H
+#ifndef DATASHARE_RESULT_SET_MOCK_H
+#define DATASHARE_RESULT_SET_MOCK_H
 #include <gmock/gmock.h>
 #include "datashare_result_set.h"
 
@@ -34,25 +34,25 @@ public:
     MOCK_METHOD(int, GoToRow, (int position), (override));
     MOCK_METHOD(int, GetDataType, (int columnIndex, DataType &dataType), (override));
     MOCK_METHOD(int, GetRowIndex, (int &position), (override));
-    MOCK_METHOD(int, GoTo, (int offSet), (override));
+    MOCK_METHOD(int, GoTo, (int offset), (override));
     MOCK_METHOD(int, GoToFirstRow, (), (override));
     MOCK_METHOD(int, GoToLastRow, (), (override));
     MOCK_METHOD(int, GoToNextRow, (), (override));
     MOCK_METHOD(int, GoToPreviousRow, (), (override));
     MOCK_METHOD(int, IsAtFirstRow, (bool &result), (override));
-    MOCK_METHOD(int, IsAtLasrRow, (bool &result), (override));
+    MOCK_METHOD(int, IsAtLastRow, (bool &result), (override));
     MOCK_METHOD(int, IsStarted, (bool &result), (override));
     MOCK_METHOD(int, IsEnded, (bool &result), (override));
     MOCK_METHOD(int, GetColumnCount, (int &count), (override));
     MOCK_METHOD(int, GetColumnIndex, (const std::string &columnName, int &columnIndex), (override));
     MOCK_METHOD(int, GetColumnName, (int columnIndex, std::string &columnName), (override));
-    MOCK_METHOD(int, IsClosed, (), (override));
+    MOCK_METHOD(bool, IsClosed, (), (override));
     MOCK_METHOD(int, Close, (), (override));
     MOCK_METHOD(std::shared_ptr<AppDataFwk::SharedBlock>, GetBlock, (), (override));
-    MOCK_METHOD(int, OnGo, (int startRowIndex, int targetRowIndex, int *cachedIndex), (override));
-    MOCK_METHOD(int, FillBlock, (int startRowIndex, AppDataFwk::SharedBlock *block), (override));
-    MOCK_METHOD(int, SetBlock, (AppDataFwk::SharedBlock *block), (override));
-    MOCK_METHOD(int, Finalize, (), (override));
+    MOCK_METHOD(bool, OnGo, (int startRowIndex, int targetRowIndex, int *cachedIndex), (override));
+    MOCK_METHOD(void, FillBlock, (int startRowIndex, AppDataFwk::SharedBlock *block), (override));
+    MOCK_METHOD(void, SetBlock, (AppDataFwk::SharedBlock *block), (override));
+    MOCK_METHOD(void, Finalize, (), (override));
 };
 } // Telephony
 } // OHOS

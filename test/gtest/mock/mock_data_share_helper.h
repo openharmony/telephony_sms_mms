@@ -33,15 +33,15 @@ public:
         (override));
     MOCK_METHOD(int, Update, (Uri& uri, const DataShare::DataSharePredicates& predicates,
         const DataShare::DataShareValuesBucket& value), (override));
-    MOCK_METHOD(bool, BatchUpdate, (const DataShare::UpdateOperations& operations,
+    MOCK_METHOD(int, BatchUpdate, (const DataShare::UpdateOperations& operations,
         std::vector<BatchUpdateResult>& results), (override));
     MOCK_METHOD(int, Delete, (Uri& uri, const DataShare::DataSharePredicates& predicates), (override));
     MOCK_METHOD(std::shared_ptr<DataShare::DataShareResultSet>, Query, (Uri& uri,
         const DataShare::DataSharePredicates& predicates, std::vector<std::string>& columns,
-        DataShareBusinessError* businessError), (override));
+        DatashareBusinessError* businessError), (override));
     MOCK_METHOD(std::string, GetType, (Uri& uri), (override));
-    MOCK_METHOD(int, BatchInsert, (Uri& uri, const std::vector<DataShareValuesBucket>& values), (override));
-    MOCK_METHOD(int, ExecuteBatch, (const std::vector<Datashare::OperationStatement> statements,
+    MOCK_METHOD(int, BatchInsert, (Uri& uri, const std::vector<DataShare::DataShareValuesBucket>& values), (override));
+    MOCK_METHOD(int, ExecuteBatch, (const std::vector<Datashare::OperationStatement>& statements,
         ExecResultSet& result), (override));
     MOCK_METHOD(int, RegisterObserver, (const Uri& uri, const sptr<AAFwk::IDataAbilityObserver>& dataObserver),
         (override));
@@ -50,9 +50,9 @@ public:
     MOCK_METHOD(void, NotifyChange, (const Uri& uri), (override));
     MOCK_METHOD(Uri, NormalizeUri, (Uri& uri), (override));
     MOCK_METHOD(Uri, DenormalizeUri, (Uri& uri), (override));
-    MOCK_METHOD(int, AddQueryTemplate, (const std::string& uri, int64_t subscriberId, Template&tpl), (override));
+    MOCK_METHOD(int, AddQueryTemplate, (const std::string& uri, int64_t subscriberId, Template& tpl), (override));
     MOCK_METHOD(int, DelQueryTemplate, (const std::string& uri, int64_t subscriberId), (override));
-    MOCK_METHOD(std::vector<OperationResult>, Publish, (cosnt Data& data, const std::string& bundleName), (override));
+    MOCK_METHOD(std::vector<OperationResult>, Publish, (const Data& data, const std::string& bundleName), (override));
     MOCK_METHOD(Data, GetPublishedData, (const std::string& bundleName, int& resultCode), (override));
     MOCK_METHOD(std::vector<OperationResult>, SubscribeRdbData, (const std::vector<std::string>& uris,
         const TemplateId& templateId, const std::function<void(const RdbChangeNode& changeNode)> &callback),
@@ -64,19 +64,19 @@ public:
     MOCK_METHOD(std::vector<OperationResult>, DisableRdbSubs, (const std::vector<std::string>& uris,
         const TemplateId& templateId), (override));
     MOCK_METHOD(std::vector<OperationResult>, SubscribePublishedData, (const std::vector<std::string>& uris,
-        int64_t subscribedId, const std::function<void(const PublishedDataChangeNode& changeNode)> &callback),
+        int64_t subscriberId, const std::function<void(const PublishedDataChangeNode& changeNode)> &callback),
         (override));
     MOCK_METHOD(std::vector<OperationResult>, UnsubscribePublishedData, (const std::vector<std::string>& uris,
-        int64_t subscribedId), (override));
+        int64_t subscriberId), (override));
     MOCK_METHOD(std::vector<OperationResult>, EnablePubSubs, (const std::vector<std::string>& uris,
-        int64_t subscribedId), (override));
+        int64_t subscriberId), (override));
     MOCK_METHOD(std::vector<OperationResult>, DisablePubSubs, (const std::vector<std::string>& uris,
-        int64_t subscribedId), (override));
+        int64_t subscriberId), (override));
     MOCK_METHOD(std::pair<int32_t, int32_t>, InsertEx,
-        (Uri& uri, const DataShareValuesBucket& value), (override));
-    MOCK_METHOD(std::pair<int32_t, int32_t>, UpdateEx, (Uri& uri, const DataShare::DataSharePredicates& predicates,
+        (Uri& uri, const DataShare::DataShareValuesBucket& value), (override));
+    MOCK_METHOD((std::pair<int32_t, int32_t>), UpdateEx, (Uri& uri, const DataShare::DataSharePredicates& predicates,
         const DataShare::DataShareValuesBucket& value), (override));
-    MOCK_METHOD(std::pair<int32_t, int32_t>, DeleteEx, (Uri& uri, const DataShare::DataSharePredicates& predicates),
+    MOCK_METHOD((std::pair<int32_t, int32_t>), DeleteEx, (Uri& uri, const DataShare::DataSharePredicates& predicates),
         (override));
 };
 } // Telephony
