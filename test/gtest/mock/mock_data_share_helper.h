@@ -41,7 +41,7 @@ public:
         DatashareBusinessError* businessError), (override));
     MOCK_METHOD(std::string, GetType, (Uri& uri), (override));
     MOCK_METHOD(int, BatchInsert, (Uri& uri, const std::vector<DataShare::DataShareValuesBucket>& values), (override));
-    MOCK_METHOD(int, ExecuteBatch, (const std::vector<Datashare::OperationStatement>& statements,
+    MOCK_METHOD(int, ExecuteBatch, (const std::vector<DataShare::OperationStatement>& statements,
         ExecResultSet& result), (override));
     MOCK_METHOD(int, RegisterObserver, (const Uri& uri, const sptr<AAFwk::IDataAbilityObserver>& dataObserver),
         (override));
@@ -72,7 +72,7 @@ public:
         int64_t subscriberId), (override));
     MOCK_METHOD(std::vector<OperationResult>, DisablePubSubs, (const std::vector<std::string>& uris,
         int64_t subscriberId), (override));
-    MOCK_METHOD(std::pair<int32_t, int32_t>, InsertEx,
+    MOCK_METHOD((std::pair<int32_t, int32_t>), InsertEx,
         (Uri& uri, const DataShare::DataShareValuesBucket& value), (override));
     MOCK_METHOD((std::pair<int32_t, int32_t>), UpdateEx, (Uri& uri, const DataShare::DataSharePredicates& predicates,
         const DataShare::DataShareValuesBucket& value), (override));
