@@ -17,9 +17,10 @@
 
 #include <condition_variable>
 #include <mutex>
-#include "ffrt.h"
+
 #include "datashare_helper.h"
 #include "datashare_predicates.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Telephony {
