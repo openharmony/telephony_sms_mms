@@ -83,7 +83,7 @@ void DoRecvItemsTest(const uint8_t *data, size_t size, std::shared_ptr<SmsReceiv
     reliabilityHandler->GetWapPushUserDataSinglePage(indexer, userDataRaws);
     reliabilityHandler->GetWapPushUserDataMultipage(pages, dbIndexers, size, userDataRaws);
     reliabilityHandler->ReadyDecodeWapPushUserData(indexer, userDataRaws);
-    reliabilityHandler->GetSmsUserDataMultipage(pages, dbIndexers, size, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(pages, indexer.GetMsgCount(), dbIndexers, size, userDataRaws);
     reliabilityHandler->ReadySendSmsBroadcast(indexer, userDataRaws);
     reliabilityHandler->DeleteMessageFormDb(size, size);
     reliabilityHandler->RemoveBlockedSms(dbIndexers);
