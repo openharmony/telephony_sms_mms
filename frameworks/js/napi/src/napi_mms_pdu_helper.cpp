@@ -39,7 +39,7 @@ void NapiMmsPduHelper::NotifyAll()
 
 bool NapiMmsPduHelper::WaitForResult(int32_t timeoutSecond) __attribute__((no_sanitize("cfi")))
 {
-    std::unique_lock<ffrt::mutex> lock(mtx_);
+    std::unique_lock<std::mutex> lock(mtx_);
     if (cv_.wait_for(lock, std::chrono::seconds(timeoutSecond)) == std::cv_status::timeout) {
         TELEPHONY_LOGI("Interface overtime");
         return false;
