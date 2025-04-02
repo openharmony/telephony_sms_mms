@@ -40,7 +40,7 @@ public:
 
 private:
     std::string pduFileName_;
-    std::mutex mtx_;
+    ffrt::mutex mtx_;
     std::condition_variable cv_;
     std::shared_ptr<DataShare::DataShareHelper> datashareHelper_;
     std::string dbUrl_;
