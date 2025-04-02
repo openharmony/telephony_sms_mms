@@ -236,17 +236,18 @@ void SmsReceiveReliabilityHandler::SmsReceiveReliabilityProcessing()
     CheckUnReceiveWapPush(dbIndexers);
 
     for (auto position = dbIndexers.begin(); position != dbIndexers.end();) {
+        auto msgCount = position->GetMsgCount();
         std::shared_ptr<vector<string>> pdus = make_shared<vector<string>>();
-        if (position->GetMsgCount() == SMS_INVALID_PAGE_COUNT) {
+        if (msgCount == SMS_INVALID_PAGE_COUNT) {
             position++;
             continue;
-        } else if (position->GetMsgCount() == SMS_SINGLE_PAGE_COUNT) {
+        } else if (msgCount == SMS_SINGLE_PAGE_COUNT) {
             pdus->push_back(StringUtils::StringToHex(position->GetPdu()));
         } else {
             int32_t smsPagesCount = SMS_PAGE_INITIAL;
             int32_t pos = static_cast<int32_t>(std::distance(dbIndexers.begin(), position));
-            GetSmsUserDataMultipage(smsPagesCount, dbIndexers, pos, pdus);
-            if (position->GetMsgCount() != smsPagesCount) {
+            GetSmsUserDataMultipage(smsPagesCount, msgCount, dbIndexers, pos, pdus);
+            if (msgCount != smsPagesCount) {
                 position = dbIndexers.erase(position);
                 continue;
             }
@@ -258,15 +259,15 @@ void SmsReceiveReliabilityHandler::SmsReceiveReliabilityProcessing()
     }
 }
 
-void SmsReceiveReliabilityHandler::GetSmsUserDataMultipage(int32_t &smsPagesCount,
+void SmsReceiveReliabilityHandler::GetSmsUserDataMultipage(int32_t &smsPagesCount, uint16_t msgCount,
     std::vector<SmsReceiveIndexer> &dbIndexers, int32_t position, std::shared_ptr<std::vector<std::string>> pdus)
 {
     if (position < 0 || position >= static_cast<int32_t>(dbIndexers.size())) {
         TELEPHONY_LOGE("position over max");
         return;
     }
-    pdus->assign(MAX_SEGMENT_NUM, "");
-    if (dbIndexers[position].GetMsgSeqId() < PDU_POS_OFFSET || dbIndexers[position].GetMsgSeqId() > MAX_SEGMENT_NUM) {
+    pdus->assign(msgCount, "");
+    if (dbIndexers[position].GetMsgSeqId() < PDU_POS_OFFSET || dbIndexers[position].GetMsgSeqId() > msgCount) {
         TELEPHONY_LOGE("seqId invalid");
         return;
     }
@@ -277,7 +278,7 @@ void SmsReceiveReliabilityHandler::GetSmsUserDataMultipage(int32_t &smsPagesCoun
             locate++;
             continue;
         }
-        if (locate->GetMsgSeqId() < PDU_POS_OFFSET || locate->GetMsgSeqId() > MAX_SEGMENT_NUM) {
+        if (locate->GetMsgSeqId() < PDU_POS_OFFSET || locate->GetMsgSeqId() > msgCount) {
             TELEPHONY_LOGE("seqId invalid");
             locate = dbIndexers.erase(locate);
             return;

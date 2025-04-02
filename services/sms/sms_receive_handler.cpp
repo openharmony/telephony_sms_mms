@@ -303,8 +303,8 @@ void SmsReceiveHandler::CombineMessagePart(const std::shared_ptr<SmsReceiveIndex
 bool SmsReceiveHandler::CombineMultiPageMessage(const std::shared_ptr<SmsReceiveIndexer> &indexer,
     std::shared_ptr<std::vector<std::string>> pdus, std::shared_ptr<SmsReceiveReliabilityHandler> reliabilityHandler)
 {
-    pdus->assign(MAX_SEGMENT_NUM, "");
     int msgSeg = static_cast<int>(indexer->GetMsgCount());
+    pdus->assign(msgSeg, "");
     int8_t notNullPart = msgSeg;
     std::vector<SmsReceiveIndexer> dbIndexers;
     DataShare::DataSharePredicates predicates;
@@ -318,7 +318,7 @@ bool SmsReceiveHandler::CombineMultiPageMessage(const std::shared_ptr<SmsReceive
     for (const auto &v : dbIndexers) {
         ++count;
         string pdu = StringUtils::StringToHex(v.GetPdu());
-        if ((v.GetMsgSeqId() - PDU_POS_OFFSET >= MAX_SEGMENT_NUM) || (v.GetMsgSeqId() - PDU_POS_OFFSET < 0)) {
+        if ((v.GetMsgSeqId() - PDU_POS_OFFSET >= msgSeg) || (v.GetMsgSeqId() - PDU_POS_OFFSET < 0)) {
             reliabilityHandler->DeleteMessageFormDb(indexer->GetMsgRefId());
             return false;
         }
