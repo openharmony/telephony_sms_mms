@@ -32,7 +32,7 @@ bool NapiMmsPduHelper::Run(void (*func)(NapiMmsPduHelper &), NapiMmsPduHelper &h
 
 void NapiMmsPduHelper::NotifyAll()
 {
-    std::unique_lock<ffrt::mutex> lock(mtx_);
+    std::unique_lock<std::mutex> lock(mtx_);
     cv_.notify_all();
     TELEPHONY_LOGI("Thread NotifyAll");
 }
@@ -84,7 +84,7 @@ std::string NapiMmsPduHelper::GetDbUrl()
 
 std::shared_ptr<DataShare::DataShareHelper> NapiMmsPduHelper::GetDataShareHelper()
 {
-    std::unique_lock<ffrt::mutex> lock(mtx_);
+    std::unique_lock<ffrt::mutex> lock(mutex_);
     return datashareHelper_;
 }
 } // namespace Telephony
