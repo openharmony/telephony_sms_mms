@@ -52,13 +52,13 @@ ohos_shared_library("sms") {
     "c_utils:utils",
     "core_service:libtel_common",
     "data_share:datashare_consumer",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
     "samgr:samgr_proxy",
     "telephony_data:tel_telephony_data",
-    "ffrt:libffrt",
   ]
 
   cflags = [
