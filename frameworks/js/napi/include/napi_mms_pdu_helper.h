@@ -20,6 +20,7 @@
 
 #include "datashare_helper.h"
 #include "datashare_predicates.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -40,8 +41,8 @@ public:
 
 private:
     std::string pduFileName_;
-    std::mutex mtx_;
-    std::condition_variable cv_;
+    ffrt::mutex mtx_;
+    ffrt::condition_variable cv_;
     std::shared_ptr<DataShare::DataShareHelper> datashareHelper_;
     std::string dbUrl_;
     std::string storeFileName_;
