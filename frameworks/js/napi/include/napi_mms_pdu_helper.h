@@ -41,9 +41,8 @@ public:
 
 private:
     std::string pduFileName_;
-    ffrt::mutex mutex_;
-    std::mutex mtx_;
-    std::condition_variable cv_;
+    ffrt::mutex mtx_;
+    ffrt::condition_variable cv_;
     std::shared_ptr<DataShare::DataShareHelper> datashareHelper_;
     std::string dbUrl_;
     std::string storeFileName_;
