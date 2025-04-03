@@ -32,15 +32,15 @@ bool NapiMmsPduHelper::Run(void (*func)(NapiMmsPduHelper &), NapiMmsPduHelper &h
 
 void NapiMmsPduHelper::NotifyAll()
 {
-    std::unique_lock<std::mutex> lock(mtx_);
+    std::unique_lock<ffrt::mutex> lock(mtx_);
     cv_.notify_all();
     TELEPHONY_LOGI("Thread NotifyAll");
 }
 
 bool NapiMmsPduHelper::WaitForResult(int32_t timeoutSecond) __attribute__((no_sanitize("cfi")))
 {
-    std::unique_lock<std::mutex> lock(mtx_);
-    if (cv_.wait_for(lock, std::chrono::seconds(timeoutSecond)) == std::cv_status::timeout) {
+    std::unique_lock<ffrt::mutex> lock(mtx_);
+    if (cv_.wait_for(lock, std::chrono::seconds(timeoutSecond)) == ffrt::cv_status::timeout) {
         TELEPHONY_LOGI("Interface overtime");
         return false;
     }
@@ -64,6 +64,7 @@ void NapiMmsPduHelper::SetDbUrl(const std::string &dbUrl)
 
 void NapiMmsPduHelper::SetDataShareHelper(std::shared_ptr<DataShare::DataShareHelper> &datashareHelper)
 {
+    std::unique_lock<ffrt::mutex> lock(mtx_);
     datashareHelper_ = datashareHelper;
 }
 
@@ -84,7 +85,7 @@ std::string NapiMmsPduHelper::GetDbUrl()
 
 std::shared_ptr<DataShare::DataShareHelper> NapiMmsPduHelper::GetDataShareHelper()
 {
-    std::unique_lock<ffrt::mutex> lock(mutex_);
+    std::unique_lock<ffrt::mutex> lock(mtx_);
     return datashareHelper_;
 }
 } // namespace Telephony
