@@ -1676,7 +1676,7 @@ HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0004, Function | MediumTest | Leve
     smsReceiveHandler->smsLockSerialNum_ = 0;
     smsReceiveHandler->smsRunningLockCount_ = 0;
 #ifdef ABILITY_POWER_SUPPORT
-smsReceiveHandler->smsRunningLock_ = nullptr;
+    smsReceiveHandler->smsRunningLock_ = nullptr;
 #endif
     AppExecFwk::InnerEvent::Pointer event =
         AppExecFwk::InnerEvent::Get(SmsReceiveHandler::RUNNING_LOCK_TIMEOUT_EVENT_ID, -1);
