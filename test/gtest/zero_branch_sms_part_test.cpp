@@ -25,6 +25,7 @@
 #include "mock/mock_data_share_helper.h"
 #include "mock/mock_data_share_result_set.h"
 #include "send_short_message_callback_stub.h"
+#include "sms_hisysevent.h"
 #include "sms_misc_manager.h"
 #include "sms_mms_gtest.h"
 #include "sms_service.h"
@@ -1515,6 +1516,30 @@ HWTEST_F(BranchSmsPartTest, SmsPersistHelper_0002, Function | MediumTest | Level
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_SmsPersistHelper_0003
+ * @tc.name     Test SmsPersistHelper
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsPersistHelper_0003, Function | MediumTest | Level1)
+{
+    auto dataShareHelperMock = std::make_shared<DataShareHelperMock>();
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = dataShareHelperMock;
+    EXPECT_CALL(*dataShareHelperMock, Query(_, _, _, _))
+        .WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*dataShareHelperMock, Release())
+        .WillRepeatedly(Return(true));
+    DataShare::DataShareValuesBucket values;
+    uint16_t dataBaseId;
+    DataShare::DataSharePredicates predicates;
+    EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySession(predicates, dataBaseId, dataBaseId));
+    EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySmsMmsForId(predicates, dataBaseId));
+    std::vector<SmsReceiveIndexer> indexers;
+    EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->Query(predicates, indexers));
+    EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryMaxGroupId(predicates, dataBaseId));
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->ReleaseDataShareHelper();
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_SmsReceiveHandler_0001
  * @tc.name     Test SmsReceiveHandler
  * @tc.desc     Function test
@@ -1561,7 +1586,7 @@ HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0001, Function | MediumTest | Leve
     EXPECT_CALL(*dataShareHelperMock, Release())
         .WillRepeatedly(Return(0));
     EXPECT_FALSE(smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler));
-    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = nullptr;
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->ReleaseDataShareHelper();
 }
 
 /**
@@ -1589,15 +1614,15 @@ HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0002, Function | MediumTest | Leve
     EXPECT_CALL(*resultSet, GetColumnIndex(_, _))
         .WillRepeatedly(Return(0));
     EXPECT_CALL(*resultSet, GetInt(_, _))
-        .WillRepeatedly(Return(0));
+        .WillRepeatedly(Return(-1));
     EXPECT_CALL(*resultSet, GetString(_, _))
-        .WillRepeatedly(Return(0));
+        .WillRepeatedly(Return(-1));
     EXPECT_CALL(*resultSet, Close())
         .WillRepeatedly(Return(0));
     EXPECT_CALL(*dataShareHelperMock, Release())
         .WillRepeatedly(Return(0));
     EXPECT_FALSE(smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler));
-    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = nullptr;
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->ReleaseDataShareHelper();
 }
 
 /**
@@ -1636,7 +1661,196 @@ HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0003, Function | MediumTest | Leve
     EXPECT_CALL(*dataShareHelperMock, Release())
         .WillRepeatedly(Return(0));
     EXPECT_FALSE(smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler));
-    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = nullptr;
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->ReleaseDataShareHelper();
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveHandler_0004
+ * @tc.name     Test SmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0004, Function | MediumTest | Level1)
+{
+    std::shared_ptr<SmsReceiveHandler> smsReceiverHandler = std::make_shared<SmsReceiveHandler>(0);
+    EXPECT_TRUE(smsReceiverHandler != nullptr);
+    smsReceiverHandler->smsLockSerialNum_ = 0;
+    smsReceiverHandler->smsRunningLockCount_ = 0;
+#ifdef ABILITY_POWER_SUPPORT
+    smsReceiverHandler->smsRunningLock_ = nullptr;
+#endif
+    AppExecFwk::InnerEvent::Pointer event =
+        AppExecFwk::InnnerEvent::Get(SmsReceiveHandler::RUNNING_LOCK_TIMEOUT_EVENT_ID, -1);
+    smsReceiverHandler->ProcessEvent(event);
+    event = AppExecFwk::InnnerEvent::Get(SmsReceiveHandler::RUNNING_LOCK_TIMEOUT_EVENT_ID, 0);
+    smsReceiverHandler->ProcessEvent(event);
+    event = AppExecFwk::InnnerEvent::Get(SmsReceiveHandler::DELAY_RELEASE_RUNNING_LOCK_EVENT_ID, 0);
+    smsReceiverHandler->ProcessEvent(event);
+    event = AppExecFwk::InnnerEvent::Get(SmsReceiveHandler::RETRY_CONNECT_DATASHARE_EVENT_ID, 0);
+    smsReceiverHandler->ProcessEvent(event);
+    smsReceiverHandler->ReduceRunningLock();
+    smsReceiverHandler->ReleaseRunningLock();
+    smsReceiverHandler->ApplyRunningLock();
+#ifdef ABILITY_POWER_SUPPORT
+    EXPECT_EQ(smsReceiverHandler->smsRunningLockCount_, 1);
+    smsReceiverHandler->ApplyRunningLock();
+    EXPECT_EQ(smsReceiverHandler->smsRunningLockCount_, 2);
+    smsReceiverHandler->ReduceRunningLock();
+    EXPECT_EQ(smsReceiverHandler->smsRunningLockCount_, 1);
+    smsReceiverHandler->ReduceRunningLock();
+    EXPECT_EQ(smsReceiverHandler->smsRunningLockCount_, 0);
+#endif
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveHandler_0005
+ * @tc.name     Test SmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0005, Function | MediumTest | Level1)
+{
+    std::shared_ptr<SmsReceiveIndexer> indexer = nullptr;
+    std::shared_ptr<SmsReceiveHandler> smsReceiverHandler = std::make_shared<SmsReceiveHandler>(0);
+    smsReceiverHandler->UpdateMultiPageMessage(indexer, nullptr);
+    EXPECT_FALSE(smsReceiverHandler->IsRepeatedMessagePart(indexer));
+    indexer = std::make_shared<SmsReceiveIndexer>();
+    smsReceiverHandler->UpdateMultiPageMessage(indexer, nullptr);
+    indexer->msgCount_ = 2;
+    smsReceiverHandler->CombineMessagePart(indexer);
+    auto dataShareHelperMock = std::make_shared<DataShareHelperMock>();
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = dataShareHelperMock;
+    auto resultSet = std::make_shared<DataShareResultSetMock>();
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(0);
+    auto pdus = std::make_shared<vector<string>>();
+    smsReceiverHandler->UpdateMultiPageMessage(indexer, pdus);
+    EXPECT_CALL(*dataShareHelperMock, Query(_, _, _, _))
+        .WillRepeatedly(Return(resultSet));
+    EXPECT_CALL(*resultSet, GoToFirstRow())
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, GoToNextRow())
+        .WillOnce(Return(0))
+        .WillRepeatedly(Return(-1));
+    EXPECT_CALL(*resultSet, GetColumnIndex(_, _))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*resultSet, GetInt(_, _))
+        .WillRepeatedly(Invoke([](int columnIndex, int &value) -> int {
+            value = 1;
+            return 0;
+        }));
+    EXPECT_CALL(*resultSet, GetString(_, _))
+        .WillRepeatedly(Invoke([](int columnIndex, std::string &value) -> int {
+            value = "test";
+            return 0;
+        }));
+    EXPECT_CALL(*resultSet, Close())
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*dataShareHelperMock, Release())
+        .WillRepeatedly(Return(true));
+    EXPECT_TRUE(smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler));
+    EXPECT_FALSE(smsReceiverHandler->IsRepeatedMessagePart(indexer));
+    std::shared_ptr<GsmSmsMessage> message = std::make_shared<GsmSmsMessage>();
+    smsReceiveHandler->HandleReceivedSmsWithoutDataShare(messgae);
+    indexer->msgSeqId_ = 1;
+    EXPECT_TRUE(smsReceiverHandler->IsRepeatedMessagePart(indexer));
+    std::make_shared<SmsReceiveReliabilityHandler>(0)->SmsReceiveReliabilityProcessing();
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->ReleaseDataShareHelper();
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveReliabilityHandler_0001
+ * @tc.name     Test SmsReceiveReliabilityHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsReceiveReliabilityHandler_0001, Function | MediumTest | Level1)
+{
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(0);
+    auto indexer = std::make_shared<SmsReceiveIndexer>();
+    auto pdus = std::make_shared<vector<string>>();
+    indexer->originatingAddress_ = "10659401";
+    reliabilityHandler->SendBroadcast(indexer, pdus);
+    indexer->originatingAddress_ = "8610659401";
+    reliabilityHandler->SendBroadcast(indexer, pdus);
+    indexer->originatingAddress_ = "+8610659401";
+    reliabilityHandler->SendBroadcast(indexer, pdus);
+    indexer->originatingAddress_ = "+86106594011";
+    reliabilityHandler->SendBroadcast(indexer, pdus);
+    reliabilityHandler->HiSysEventCBResult(false);
+    DelayedSingleton<SmsHiSysEvent>::GetInstance()->smsBroadCastStartTime_ = 0;
+    reliabilityHandler->HiSysEventCBResult(true);
+    EXPECT_NE(DelayedSingleton<SmsHiSysEvent>::GetInstance()->smsBroadCastStartTime_, 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveReliabilityHandler_0002
+ * @tc.name     Test SmsReceiveReliabilityHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsReceiveReliabilityHandler_0002, Function | MediumTest | Level1)
+{
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(0);
+    int32_t smsPagesCount = 0;
+    std::vector<SmsReceiveIndexer> dbIndexers;
+    SmsReceiveIndexer indexer;
+    indexer.msgRefId_ = 1;
+    indexer.msgSeqId_ = 1;
+    std::vector<uint8_t> pdu = { 8, 145, 104, 49, 8, 32, 1, 5, 240, 68, 13, 145, 103, 145, 39, 32, 49, 100, 240,
+        0, 0, 82, 64, 80, 34, 145, 17, 35, 160, 5, 0, 3, 1, 2, 1, 98, 177, 88, 44, 22, 139, 197, 98, 177, 88, 44,
+        22, 139, 197, 98, 177, 152, 44, 54, 171, 209, 108, 55, 25, 142, 54, 163, 213, 108, 180, 90, 12, 55, 187,
+        213, 104, 177, 88, 44, 22, 139, 197, 98, 177, 88, 44, 22, 197, 98, 177, 88, 44, 22, 155, 213, 104,
+        182, 155, 12, 71, 155, 209, 106, 54, 90, 45, 134, 155, 221, 106, 180, 88, 44, 22, 139, 197, 98, 177, 88,
+        44, 22, 139, 197, 98, 177, 88, 44, 38, 139, 205, 106, 52, 219, 77, 134, 163, 205, 104, 53, 27, 173, 22,
+        195, 205, 110, 53, 90, 44, 22, 139, 197, 98, 177, 88, 44, 22, 139, 197, 98, 177, 88, 44, 22, 147, 197, 102,
+        53,154, 237, 38, 195, 209, 102 };
+    indexer.pdu_ = pdu;
+    dbIndexers.push_back(indexer);
+    indexer.msgSeqId_ = -1;
+    dbIndexers.push_back(indexer);
+    indexer.msgSeqId_ = MAX_SEGMENT_NUM + 1;
+    dbIndexers.push_back(indexer);
+    indexer.msgRefId_ = 2;
+    dbIndexers.push_back(indexer);
+    indexer.msgRefId_ = 1;
+    indexer.pdu_ = {};
+    dbIndexers.push_back(indexer);
+    std::shared_ptr<std::vector<std::string>> userDataRaws = std::make_shared<std::vector<std::string>>();
+    userDataRaws->assign(MAX_SEGMENT_NUM, "");
+    reliabilityHandler->GetWapPushUserDataMultipage(smsPagesCount, dbIndexers, -1, userDataRaws);
+    reliabilityHandler->GetWapPushUserDataMultipage(smsPagesCount, dbIndexers, 100, userDataRaws);
+    reliabilityHandler->GetWapPushUserDataMultipage(smsPagesCount, dbIndexers, 1, userDataRaws);
+    reliabilityHandler->GetWapPushUserDataMultipage(smsPagesCount, dbIndexers, 2, userDataRaws);
+    reliabilityHandler->GetWapPushUserDataMultipage(smsPagesCount, dbIndexers, 0, userDataRaws);
+    EXPECT_EQ(smsPagesCount, 1);
+    reliabilityHandler->GetWapPushUserDataMultipage(smsPagesCount, dbIndexers, 0, userDataRaws);
+    reliabilityHandler->GetWapPushUserDataMultipage(smsPagesCount, dbIndexers, 0, userDataRaws);
+    EXPECT_EQ(smsPagesCount, 2);
+    reliabilityHandler->DeleteMessageFormDb(0, 1);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveReliabilityHandler_0003
+ * @tc.name     Test SmsReceiveReliabilityHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsReceiveReliabilityHandler_0003, Function | MediumTest | Level1)
+{
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(0);
+    std::vector<SmsReceiveIndexer> dbIndexers;
+    SmsReceiveIndexer indexer;
+    indexer.destPort_ = 2948;
+    indexer.msgCount_ = 1;
+    std::vector<uint8_t> pdu = { 8, 145, 104, 49, 8, 32, 1, 5, 240, 68, 13, 145, 103, 145, 39, 32, 49, 100, 240,
+        0, 0, 82, 64, 80, 34, 145, 17, 35, 160, 5, 0, 3, 1, 2, 1, 98, 177, 88, 44, 22, 139, 197, 98, 177, 88, 44,
+        22, 139, 197, 98, 177, 152, 44, 54, 171, 209, 108, 55, 25, 142, 54, 163, 213, 108, 180, 90, 12, 55, 187,
+        213, 104, 177, 88, 44, 22, 139, 197, 98, 177, 88, 44, 22, 197, 98, 177, 88, 44, 22, 155, 213, 104,
+        182, 155, 12, 71, 155, 209, 106, 54, 90, 45, 134, 155, 221, 106, 180, 88, 44, 22, 139, 197, 98, 177, 88,
+        44, 22, 139, 197, 98, 177, 88, 44, 38, 139, 205, 106, 52, 219, 77, 134, 163, 205, 104, 53, 27, 173, 22,
+        195, 205, 110, 53, 90, 44, 22, 139, 197, 98, 177, 88, 44, 22, 139, 197, 98, 177, 88, 44, 22, 147, 197, 102,
+        53,154, 237, 38, 195, 209, 102 };
+    indexer.pdu_ = pdu;
+    dbIndexers.push_back(indexer);
+    indexer.msgCount_ = 2;
+    dbIndexers.push_back(indexer);
+    reliabilityHandler->CheckUnReceiveWapPush(dbIndexers);
+    EXPECT_EQ(dbIndexers.size(), 0);
 }
 } // namespace Telephony
 } // namespace OHOS
