@@ -73,6 +73,7 @@ ohos_unittest("tel_sms_mms_gtest") {
     "ffrt:libffrt",
     "googletest:gmock_main",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "icu:shared_icui18n",
     "icu:shared_icuuc",
     "init:libbegetutil",
