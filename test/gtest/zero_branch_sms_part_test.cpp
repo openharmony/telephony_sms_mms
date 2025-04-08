@@ -1859,18 +1859,18 @@ HWTEST_F(BranchSmsPartTest, SmsReceiveReliabilityHandler_0003, Function | Medium
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_SmsReceiveReliabilityHandler_0003
- * @tc.name     Test SmsReceiveReliabilityHandler
+ * @tc.number   Telephony_SmsMmsGtest_SmsNetworkPolicyManager_0001
+ * @tc.name     Test SmsNetworkPolicyManager
  * @tc.desc     Function test
  */
-HWTEST_F(BranchSmsPartTest, SmsReceiveReliabilityHandler_0003, Function | MediumTest | Level1)
+HWTEST_F(BranchSmsPartTest, SmsNetworkPolicyManager_0001, Function | MediumTest | Level1)
 {
     SmsNetworkPolicyManager manager(0);
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(1234567);
     manager.ProcessEvent(event);
     auto dataShareHelperMock = std::make_shared<DataShareHelperMock>();
     DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = dataShareHelperMock;
-    EXPECT_CALL(*dataShareHelperMock, Delete(_, _,))
+    EXPECT_CALL(*dataShareHelperMock, Delete(_, _))
         .WillRepeatedly(Return(0));
     EXPECT_CALL(*dataShareHelperMock, Release())
         .WillRepeatedly(Return(true));
@@ -1959,7 +1959,7 @@ HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0014, Function | MediumTest | Level1
     encode->EncodeStatusReportData(*encodeBuffer, &pStatusRep, 0);
     decode->DecodeStatusReportData(*decodeBuffer, &pStatusRep);
     decode->tpdu_ = nullptr;
-    EXPECT_FALSE(decode->DecodeStatusReportData(*decodeBuffer, &pSmsSub));
+    EXPECT_FALSE(decode->DecodeStatusReportData(*decodeBuffer, &pStatusRep));
     EXPECT_FALSE(decode->DecodeDeliver(*decodeBuffer, &pDeliver));
     EXPECT_FALSE(decode->DecodeSubmit(*decodeBuffer, &pSmsSub));
     decode->paramCodec_ = nullptr;
@@ -2005,13 +2005,13 @@ HWTEST_F(BranchSmsPartTest, GsmUserDataPdu_0001, Function | MediumTest | Level1)
     EXPECT_FALSE(gsmUserDataPdu.DecodeHeader(rBuf, header, len));
     gsmUserDataPdu.EncodeHeaderConcat8Bit(wBuf, header);
     gsmUserDataPdu.EncodeHeaderConcat16Bit(wBuf, header);
-    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderConcat8Bit(rBuf, header, len));
-    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderConcat16Bit(rBuf, header, len));
-    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderAppPort16Bit(rBuf, header, len));
-    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderSpecialSms(rBuf, header, len));
-    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderSingleShift(rBuf, header, len));
-    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderLockingShift(rBuf, header, len));
-    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderDefaultCase(rBuf, header, len));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderConcat8Bit(rBuf, header));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderConcat16Bit(rBuf, header));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderAppPort16Bit(rBuf, header));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderSpecialSms(rBuf, header));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderSingleShift(rBuf, header));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderLockingShift(rBuf, header));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderDefaultCase(rBuf, header));
 }
 } // namespace Telephony
 } // namespace OHOS

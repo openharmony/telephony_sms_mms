@@ -313,11 +313,11 @@ HWTEST_F(SmsServicesMmsGtest, SmsSender_0001, Function | MediumTest | Level1)
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(MSG_SMS_RETRY_DELIVERY);
     sender.ProcessEvent(event);
     EXPECT_TRUE(hasRetry);
-    event = AppExecFwk::InnerEvent::Get(MSG_SMS_RETRY_DELIVERY, std::shared_ptr<SendSmsResultInfo>());
+    event = AppExecFwk::InnerEvent::Get(MSG_SMS_RETRY_DELIVERY, std::make_shared<SendSmsResultInfo>());
     EXPECT_EQ(sender.FindCacheMapAndTransform(event), nullptr);
     sender.sendCacheMap_[0] = nullptr;
     EXPECT_EQ(sender.FindCacheMapAndTransform(event), nullptr);
-    event = AppExecFwk::InnerEvent::Get(MSG_SMS_RETRY_DELIVERY, std::shared_ptr<RadioResponseInfo>());
+    event = AppExecFwk::InnerEvent::Get(MSG_SMS_RETRY_DELIVERY, std::make_shared<RadioResponseInfo>());
     EXPECT_EQ(sender.FindCacheMapAndTransform(event), nullptr);
     sender.sendCacheMap_.clear();
     EXPECT_EQ(sender.FindCacheMapAndTransform(event), nullptr);
@@ -345,7 +345,7 @@ HWTEST_F(SmsServicesMmsGtest, GsmCbUmtsCodec_0001, Function | MediumTest | Level
     EXPECT_FALSE(codec.Decode3gHeader());
     codec.cbCodec_ = nullptr;
     EXPECT_FALSE(codec.Decode3gHeader());
-    codec.cbCodec_ = codec;
+    codec.cbCodec_ = cbCodec;
     codec.cbHeader_ = nullptr;
     EXPECT_FALSE(codec.Decode3gHeader());
 }
