@@ -18,16 +18,21 @@
 
 #include <gmock/gmock.h>
 #include <random>
+#include "cdma_sms_message.h"
 #include "delivery_short_message_callback_stub.h"
 #include "gtest/gtest.h"
+#include "gsm_sms_tpdu_decode.h"
 #include "gsm_sms_param_decode.h"
 #include "gsm_sms_tpdu_encode.h"
+#include "gsm_user_data_pdu.h"
 #include "mock/mock_data_share_helper.h"
 #include "mock/mock_data_share_result_set.h"
+#include "radio_event.h"
 #include "send_short_message_callback_stub.h"
 #include "sms_hisysevent.h"
 #include "sms_misc_manager.h"
 #include "sms_mms_gtest.h"
+#include "sms_network_policy_manager.h"
 #include "sms_service.h"
 #include "sms_persist_helper.h"
 #include "system_ability_definition.h"
@@ -1851,6 +1856,162 @@ HWTEST_F(BranchSmsPartTest, SmsReceiveReliabilityHandler_0003, Function | Medium
     dbIndexers.push_back(indexer);
     reliabilityHandler->CheckUnReceiveWapPush(dbIndexers);
     EXPECT_EQ(dbIndexers.size(), 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsReceiveReliabilityHandler_0003
+ * @tc.name     Test SmsReceiveReliabilityHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsReceiveReliabilityHandler_0003, Function | MediumTest | Level1)
+{
+    SmsNetworkPolicyManager manager(0);
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(1234567);
+    manager.ProcessEvent(event);
+    auto dataShareHelperMock = std::make_shared<DataShareHelperMock>();
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = dataShareHelperMock;
+    EXPECT_CALL(*dataShareHelperMock, Delete(_, _,))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*dataShareHelperMock, Release())
+        .WillRepeatedly(Return(true));
+    event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_FACTORY_RESET);
+    manager.ProcessEvent(event);
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->ReleaseDataShareHelper();
+    event = nullptr;
+    manager.ProcessEvent(event);
+    std::function<void(bool isImsNetDomain, int32_t voiceServiceState)> callback = nullptr;
+    EXPECT_EQ(manager.NetworkRegister(callback), std::nullopt);
+    manager.NetworkUnregister(0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsReceiveHandler_0001
+ * @tc.name     Test GsmSmsReceiveHandler
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsReceiveHandler_0001, Function | MediumTest | Level1)
+{
+    std::vector<uint8_t> pdu = { 8, 145, 104, 49, 8, 32, 1, 5, 240, 68, 13, 145, 104, 145, 39, 32, 49, 100, 240,
+        0, 0, 82, 64, 80, 34, 145, 17, 35, 160, 5, 0, 3, 1, 2, 1, 98, 177, 88, 44, 22, 139, 197, 98, 177, 88, 44,
+        22, 139, 197, 98, 177, 152, 44, 54, 171, 209, 108, 55, 25, 142, 54, 163, 213, 108, 180, 90, 12, 55, 187,
+        213, 104, 177, 88, 44, 22, 139, 197, 98, 177, 88, 44, 22, 139, 197, 98, 177, 88, 76, 22, 155, 213, 104,
+        182, 155, 12, 71, 155, 209, 106, 54, 90, 45, 134, 155, 221, 106, 180, 88, 44, 22, 139, 197, 98, 177, 88,
+        44, 22, 139, 197, 98, 177, 88, 44, 38, 139, 205, 106, 52, 219, 77, 134, 163, 205, 104, 53, 27, 173, 22,
+        195, 205, 110, 53, 90, 44, 22, 139, 197, 98, 177, 88, 44, 22, 139, 197, 98, 177, 88, 44, 22, 147, 197, 102,
+        53, 154, 237, 38, 195, 209, 102 };
+    std::shared_ptr<SmsBaseMessage> baseMessage = GsmSmsMessage::CreateMessage(StringUtils::StringToHex(pdu));
+    EXPECT_NE(baseMessage, nullptr);
+    std::shared_ptr<GsmSmsReceiveHandler> smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(0);
+    smsReceiveHandler->HandleReceivedSmsWithoutDataShare(baseMessage);
+    smsReceiveHandler->HandleRemainDataShare(baseMessage);
+    EXPECT_NE(smsReceiveHandler->HandleAck(baseMessage), AckIncomeCause::SMS_ACK_UNKNOWN_ERROR);
+    std::shared_ptr<CdmaSmsMessage> message = std::make_shared<CdmaSmsMessage>();
+    EXPECT_NE(message, nullptr);
+    message->transMsg_ = std::make_unique<struct CdmaTransportMsg>();
+    EXPECT_NE(message->transMsg_, nullptr);
+    (void)memset_s(message->transMsg_.get(), sizeof(struct CdmaTransportMsg), 0x00, sizeof(struct CdmaTransportMsg));
+    std::make_shared<CdmaSmsReceiveHandler>(0)->HandleRemainDataShare(message);
+    EXPECT_NE(std::make_shared<CdmaSmsReceiveHandler>(0)->HandleAck(message), AckIncomeCause::SMS_ACK_UNKNOWN_ERROR);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsTpduCodec_0014
+ * @tc.name     Test GsmSmsTpduCodec
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmSmsTpduCodec_0014, Function | MediumTest | Level1)
+{
+    auto tpduCodec = std::make_shared<GsmSmsTpduCodec>();
+    SmsStatusReport pStatusRep;
+    SmsSubmit pSmsSub;
+
+    auto encode = std::make_shared<GsmSmsTpduEncode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    auto encodeBuffer = std::make_shared<SmsWriteBuffer>();
+    encodeBuffer->data_[0] = 1;
+    EXPECT_FALSE(encode->EncodeStatusReportPdu(*encodeBuffer, nullptr));
+    EXPECT_FALSE(encode->EncodeStatusReportPdu(*encodeBuffer, &pStatusRep));
+    pStatusRep.bMoreMsg = true;
+    pStatusRep.bStatusReport = true;
+    pStatusRep.bHeaderInd = true;
+    pStatusRep.paramInd = 1;
+    EXPECT_FALSE(encode->EncodeStatusReportPdu(*encodeBuffer, &pStatusRep));
+    pStatusRep.paramInd = 2;
+    EXPECT_FALSE(encode->EncodeStatusReportPdu(*encodeBuffer, &pStatusRep));
+    pStatusRep.paramInd = 4;
+    EXPECT_FALSE(encode->EncodeStatusReportPdu(*encodeBuffer, &pStatusRep));
+    encode->paramCodec_ = nullptr;
+    EXPECT_FALSE(encode->EncodeDeliverReportPartData(*encodeBuffer, nullptr));
+    EXPECT_FALSE(encode->EncodeStatusReportPartData(*encodeBuffer, &pStatusRep));
+    encode->uDataCodec_ = nullptr;
+    EXPECT_FALSE(encode->EncodeDeliverReportPartData(*encodeBuffer, nullptr));
+    EXPECT_FALSE(encode->EncodeStatusReportData(*encodeBuffer, &pStatusRep, 0));
+
+    auto decode = std::make_shared<GsmSmsTpduDecode>(tpduCodec->uDataCodec_, tpduCodec->paramCodec_, tpduCodec);
+    auto decodeBuffer = std::make_shared<SmsReadBuffer>("00");
+    decodeBuffer->data_[0] = 1;
+    EXPECT_FALSE(decode->DecodeSubmit(*decodeBuffer, &pSmsSub));
+    EXPECT_FALSE(decode->DecodeSubmit(*decodeBuffer, nullptr));
+    SmsDeliver pDeliver;
+    EXPECT_FALSE(decode->DecodeDeliver(*decodeBuffer, &pDeliver));
+    EXPECT_FALSE(decode->DecodeDeliver(*decodeBuffer, nullptr));
+    EXPECT_FALSE(decode->DecodeStatusReport(*decodeBuffer, &pStatusRep));
+    EXPECT_FALSE(decode->DecodeStatusReport(*decodeBuffer, nullptr));
+    encode->EncodeStatusReportData(*encodeBuffer, &pStatusRep, 0);
+    decode->DecodeStatusReportData(*decodeBuffer, &pStatusRep);
+    decode->tpdu_ = nullptr;
+    EXPECT_FALSE(decode->DecodeStatusReportData(*decodeBuffer, &pSmsSub));
+    EXPECT_FALSE(decode->DecodeDeliver(*decodeBuffer, &pDeliver));
+    EXPECT_FALSE(decode->DecodeSubmit(*decodeBuffer, &pSmsSub));
+    decode->paramCodec_ = nullptr;
+    EXPECT_FALSE(decode->DecodeSubmitPartData(*decodeBuffer, &pSmsSub));
+    EXPECT_FALSE(decode->DecodeDeliver(*decodeBuffer, &pDeliver));
+    EXPECT_FALSE(decode->DecodeStatusReport(*decodeBuffer, &pStatusRep));
+    decode->uDataCodec_ = nullptr;
+    EXPECT_FALSE(decode->DecodeSubmitPartData(*decodeBuffer, &pSmsSub));
+    EXPECT_FALSE(decode->DecodeDeliverPartData(*decodeBuffer, nullptr));
+    EXPECT_FALSE(decode->DecodeStatusReportData(*decodeBuffer, &pStatusRep));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_GsmUserDataPdu_0001
+ * @tc.name     Test GsmUserDataPdu
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, GsmUserDataPdu_0001, Function | MediumTest | Level1)
+{
+    SmsWriteBuffer wBuf;
+    wBuf.data_ = nullptr;
+    SmsReadBuffer rBuf("");
+    rBuf.data_ = nullptr;
+    GsmUserDataPdu gsmUserDataPdu;
+    uint8_t udhl = 0;
+    EXPECT_FALSE(gsmUserDataPdu.GetHeaderCnt(rBuf, nullptr, udhl, MAX_UD_HEADER_NUM));
+    SmsUDH header;
+    header.udhType = UDH_SINGLE_SHIFT;
+    gsmUserDataPdu.EncodeHeader(wBuf, header);
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderPartData(rBuf, header, 0));
+    header.udhType = UDH_LOCKING_SHIFT;
+    gsmUserDataPdu.EncodeHeader(wBuf, header);
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderPartData(rBuf, header, 0));
+    header.udhType = UDH_NONE;
+    gsmUserDataPdu.EncodeHeaderAppPort8bit(wBuf, header);
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderPartData(rBuf, header, 0));
+    header.udhType = UDH_CONCAT_8BIT;
+    gsmUserDataPdu.EncodeHeaderAppPort16bit(wBuf, header);
+    uint16_t len = 0;
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeader(rBuf, header, len));
+    header.udhType = UDH_APP_PORT_8BIT;
+    gsmUserDataPdu.EncodeHeaderReplyAddress(wBuf, header);
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeader(rBuf, header, len));
+    gsmUserDataPdu.EncodeHeaderConcat8Bit(wBuf, header);
+    gsmUserDataPdu.EncodeHeaderConcat16Bit(wBuf, header);
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderConcat8Bit(rBuf, header, len));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderConcat16Bit(rBuf, header, len));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderAppPort16Bit(rBuf, header, len));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderSpecialSms(rBuf, header, len));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderSingleShift(rBuf, header, len));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderLockingShift(rBuf, header, len));
+    EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderDefaultCase(rBuf, header, len));
 }
 } // namespace Telephony
 } // namespace OHOS
