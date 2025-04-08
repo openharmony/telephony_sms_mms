@@ -19,9 +19,13 @@
 #include "cdma_sms_common.h"
 #include "cdma_sms_sub_parameter.h"
 #include "data_request.h"
+#include "gsm_cb_umts_codec.h"
+#include "gsm_sms_sender.h"
 #include "gtest/gtest.h"
+#include "ims_reg_state_callback_stub.h"
 #include "mms_apn_info.h"
 #include "sms_pdu_buffer.h"
+#include "sms_state_handler.h"
 #include "telephony_errors.h"
 
 namespace OHOS {
@@ -278,6 +282,72 @@ HWTEST_F(SmsServicesMmsGtest, CdmaSmsCmasData_0001, Function | MediumTest | Leve
     EXPECT_FALSE(message1->DecodeType1Data(rBuffer));
     EXPECT_FALSE(message1->DecodeType2Data(rBuffer));
     EXPECT_FALSE(message1->DecodeAbsTime(rBuffer));
+}
+
+HWTEST_F(SmsServicesMmsGtest, ImsRegStateCallbackStub_0001, Function | MediumTest | Level1)
+{
+    ImsRegStateCallbackStub stub(nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    EXPECT_EQ(stub.OnRemoteRequest(0, data, reply, option), TELEPHONY_ERR_DESCRIPTOR_MISMATCH);
+    data.WriteInterfaceToken(stub.GetDescriptor());
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(stub.OnRemoteRequest(0, data, reply, option), TELEPHONY_SUCCESS);
+}
+
+HWTEST_F(SmsServicesMmsGtest, SmsStateHandler_0001, Function | MediumTest | Level1)
+{
+    SmsStateHandler handler;
+    handler.smsStateObserver_ = nullptr;
+    EXPECT_FALSE(handler.UnRegisterHandler());
+    handler.UnInit();
+}
+
+HWTEST_F(SmsServicesMmsGtest, SmsSender_0001, Function | MediumTest | Level1)
+{
+    bool hasRetry = false;
+    GsmSmsSender sender(0, [&hasRetry](std::shared_ptr<SmsSendIndexer>) { hasRetry = true; });
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(MSG_SMS_RETRY_DELIVERY);
+    sender.ProcessEvent(event);
+    EXPECT_TRUE(hasRetry);
+    event = AppExecFwk::InnerEvent::Get(MSG_SMS_RETRY_DELIVERY, std::shared_ptr<SendSmsResultInfo>());
+    EXPECT_EQ(sender.FindCacheMapAndTransform(event), nullptr);
+    sender.sendCacheMap_[0] = nullptr;
+    EXPECT_EQ(sender.FindCacheMapAndTransform(event), nullptr);
+    event = AppExecFwk::InnerEvent::Get(MSG_SMS_RETRY_DELIVERY, std::shared_ptr<RadioResponseInfo>());
+    EXPECT_EQ(sender.FindCacheMapAndTransform(event), nullptr);
+    sender.sendCacheMap_.clear();
+    EXPECT_EQ(sender.FindCacheMapAndTransform(event), nullptr);
+}
+
+HWTEST_F(SmsServicesMmsGtest, GsmCbUmtsCodec_0001, Function | MediumTest | Level1)
+{
+    GsmCbUmtsCodec codec(nullptr, nullptr, nullptr);
+    EXPECT_FALSE(codec.Decode3gHeader());
+    std::shared_ptr<GsmCbCodec::GsmCbMessageHeader> header = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
+    std::shared_ptr<GsmCbPduDecodeBuffer> buffer = std::make_shared<GsmCbPduDecodeBuffer>(0);
+    buffer->totolLength_ = 0;
+    std::shared_ptr<GsmCbCodec> cbCodec = std::make_shared<GsmCbCodec>();
+    codec.cbHeader_ = header;
+    EXPECT_FALSE(codec.Decode3gHeader());
+    codec.cbHeader_ = nullptr;
+    codec.cbPduBuffer_ = buffer;
+    EXPECT_FALSE(codec.Decode3gHeader());
+    codec.cbPduBuffer_ = nullptr;
+    codec.cbCodec_ = cbCodec;
+    EXPECT_FALSE(codec.Decode3gHeader());
+    codec.cbHeader_ = header;
+    EXPECT_FALSE(codec.Decode3gHeader());
+    codec.cbPduBuffer_ = buffer;
+    EXPECT_FALSE(codec.Decode3gHeader());
+    codec.cbCodec_ = nullptr;
+    EXPECT_FALSE(codec.Decode3gHeader());
+    codec.cbCodec_ = codec;
+    codec.cbHeader_ = nullptr;
+    EXPECT_FALSE(codec.Decode3gHeader());
 }
 } // namespace Telephony
 } // namespace OHOS
