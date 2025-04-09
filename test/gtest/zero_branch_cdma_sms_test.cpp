@@ -17,6 +17,7 @@
 #define protected public
 
 #include "cdma_sms_message.h"
+#include "cdma_sms_parameter_record.h"
 #include "cdma_sms_receive_handler.h"
 #include "cdma_sms_transport_message.h"
 #include "gtest/gtest.h"
@@ -1607,6 +1608,51 @@ HWTEST_F(BranchCdmaSmsTest, CdmaSmsSubParameter_0020, Function | MediumTest | Le
     SmsDisplayMode v5 = SmsDisplayMode::DEFAULT_SETTING;
     auto message5 = std::make_shared<CdmaSmsDisplayMode>(v5);
     EXPECT_FALSE(message5->Encode(wBuffer));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_CdmaSmsParameterRecord_0008
+ * @tc.name     Test CdmaSmsParameterRecord
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchCdmaSmsTest, CdmaSmsParameterRecord_0008, Function | MediumTest | Level1)
+{
+    SmsWriteBuffer wBuf;
+    wBuf.data_ = nullptr;
+    SmsReadBuffer rBuf("");
+    rBuf.data_ = nullptr;
+    uint16_t cat = 0;
+    CdmaSmsTeleserviceId teleserviceId(cat);
+    EXPECT_FALSE(teleserviceId.Encode(wBuf));
+    CdmaSmsServiceCategory category(cat);
+    EXPECT_FALSE(category.Encode(wBuf));
+    uint8_t seq = 0;
+    CdmaSmsBearerReply reply(seq);
+    EXPECT_FALSE(reply.Encode(wBuf));
+    TransportCauseCode code;
+    CdmaSmsCauseCodes codes(code);
+    EXPECT_FALSE(codes.Encode(wBuf));
+    TransportAddr addr;
+    CdmaSmsAddressParameter parameter(addr, 0);
+    EXPECT_FALSE(parameter.Encode(wBuf));
+    EXPECT_FALSE(parameter.Decode(rBuf));
+    parameter.isInvalid_ = false;
+    EXPECT_FALSE(parameter.Encode(wBuf));
+    EXPECT_FALSE(parameter.Decode(rBuf));
+    EXPECT_FALSE(parameter.EncodeAddress(wBuf));
+    EXPECT_FALSE(parameter.DecodeAddress(rBuf));
+    TransportSubAddr subAddr;
+    CdmaSmsSubaddress address(subAddr, 0);
+    EXPECT_FALSE(address.Encode(wBuf));
+    EXPECT_FALSE(address.Decode(rBuf));
+    address.isInvalid_ = false;
+    EXPECT_FALSE(address.Encode(wBuf));
+    EXPECT_FALSE(address.Decode(rBuf));
+    CdmaTeleserviceMsg msg;
+    CdmaSmsBearerData data(msg);
+    EXPECT_FALSE(data.Encode(wBuf));
+    data.teleserviceMessage_ = nullptr;
+    EXPECT_FALSE(data.Decode(rBuf));
 }
 } // namespace Telephony
 } // namespace OHOS
