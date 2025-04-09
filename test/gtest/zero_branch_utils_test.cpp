@@ -329,5 +329,45 @@ HWTEST_F(BranchUtilsTest, SmsCommonUtils_0006, Function | MediumTest | Level1)
     EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(),  0xb1) != userDataVec.end());
     EXPECT_TRUE(std::find(userDataVec.begin(), userDataVec.end(),  0x6f) != userDataVec.end());
 }
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsCommonUtils_0007
+ * @tc.name     Test SmsCommonUtils DigitToBcd
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchUtilsTest, SmsCommonUtils_0007, Function | MediumTest | Level1)
+{
+    auto smsCommonUtils = std::make_shared<SmsCommonUtils>();
+    const uint8_t *userData = reinterpret_cast<const uint8_t *>("hello");
+    uint8_t *packData = static_cast<uint8_t *>(malloc(1));
+    uint8_t *nullData = nullptr;
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(userData, 161, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(nullptr, 161, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(userData, 161, 0, nullData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(nullptr, 161, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(nullptr, 0, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(userData, 0, 0, nullData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Pack7bitChar(nullptr, 0, 0, packData, 1), 0);
+
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(userData, 1, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(nullptr, 1, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(userData, 1, 0, nullData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(nullptr, 1, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(nullptr, 0, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(userData, 0, 0, nullData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitChar(nullptr, 0, 0, packData, 1), 0);
+
+    EXPECT_EQ(smsCommonUtils->Unpack7bitCharForCBPdu(userData, 1, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitCharForCBPdu(nullptr, 1, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitCharForCBPdu(userData, 1, 0, nullData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitCharForCBPdu(nullptr, 1, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitCharForCBPdu(nullptr, 0, 0, packData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitCharForCBPdu(userData, 0, 0, nullData, 1), 0);
+    EXPECT_EQ(smsCommonUtils->Unpack7bitCharForCBPdu(nullptr, 0, 0, packData, 1), 0);
+
+    EXPECT_EQ(smsCommonUtils->DtmfCharToDigit(smsCommonUtils->DigitToDtmfChar('0')), '0');
+    EXPECT_EQ(smsCommonUtils->DtmfCharToDigit(smsCommonUtils->DigitToDtmfChar('#')), '#');
+    free(packData);
+}
 } // namespace Telephony
 } // namespace OHOS
