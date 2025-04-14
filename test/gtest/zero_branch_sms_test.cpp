@@ -181,7 +181,7 @@ HWTEST_F(BranchSmsTest, SmsReceiveReliabilityHandler_0001, Function | MediumTest
     reliabilityHandler->GetWapPushUserDataMultipage(count, dbIndexers, VALUE_LENGTH, userDataRaws);
     reliabilityHandler->GetWapPushUserDataMultipage(count, dbIndexers, VALUE_LENGTH + 1, userDataRaws);
     reliabilityHandler->ReadyDecodeWapPushUserData(indexer, userDataRaws);
-    reliabilityHandler->GetSmsUserDataMultipage(pages, dbIndexers, 0, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(pages, indexer.GetMsgCount(), dbIndexers, 0, userDataRaws);
     reliabilityHandler->ReadySendSmsBroadcast(indexer, userDataRaws);
     reliabilityHandler->DeleteMessageFormDb(strData.size(), strData.size());
     reliabilityHandler->RemoveBlockedSms(dbIndexers);

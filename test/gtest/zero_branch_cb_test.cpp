@@ -1236,35 +1236,40 @@ HWTEST_F(BranchCbTest, Sms_GetSmsUserDataMultipage_0001, Function | MediumTest |
     int32_t position = -1;
     std::vector<std::string> initialData = {"User1", "User2"};
     std::shared_ptr<std::vector<std::string>> userDataRaws = std::make_shared<std::vector<std::string>>(initialData);
-    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers, position, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, MAX_SEGMENT_NUM, dbIndexers, position, userDataRaws);
     EXPECT_TRUE(position < 0);
 
     position = 2;
-    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers, position, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, MAX_SEGMENT_NUM, dbIndexers, position, userDataRaws);
     EXPECT_TRUE(position >= static_cast<int32_t>(dbIndexers.size()));
 
     position = 0;
-    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers, position, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers[position].GetMsgCount(), dbIndexers,
+        position, userDataRaws);
     EXPECT_TRUE(dbIndexers[position].GetMsgSeqId() < 1);
 
     dbIndexers[position].msgSeqId_ = MAX_SEGMENT_NUM + 1;
     reliabilityHandler->HiSysEventCBResult(true);
-    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers, position, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers[position].GetMsgCount(), dbIndexers,
+        position, userDataRaws);
     EXPECT_TRUE(dbIndexers[position].GetMsgSeqId() > MAX_SEGMENT_NUM);
 
     dbIndexers[position].msgSeqId_ = 1;
     dbIndexers[position + 1].msgSeqId_ = 0;
-    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers, position, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers[position].GetMsgCount(), dbIndexers,
+        position, userDataRaws);
     EXPECT_TRUE(dbIndexers[position + 1].GetMsgSeqId() < 1);
 
     dbIndexers.push_back(smsReceiveIndexer);
     dbIndexers[position + 1].msgSeqId_ = MAX_SEGMENT_NUM + 1;
-    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers, position, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers[position].GetMsgCount(), dbIndexers,
+        position, userDataRaws);
     EXPECT_TRUE(dbIndexers[position + 1].GetMsgSeqId() > MAX_SEGMENT_NUM);
 
     dbIndexers.push_back(smsReceiveIndexer);
     dbIndexers[position + 1].msgSeqId_ = 1;
-    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers, position, userDataRaws);
+    reliabilityHandler->GetSmsUserDataMultipage(smsPagesCount, dbIndexers[position].GetMsgCount(), dbIndexers,
+        position, userDataRaws);
     EXPECT_EQ(smsPagesCount, 2);
 }
 
