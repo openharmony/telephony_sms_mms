@@ -1912,6 +1912,20 @@ HWTEST_F(BranchSmsPartTest, GsmSmsReceiveHandler_0001, Function | MediumTest | L
     (void)memset_s(message->transMsg_.get(), sizeof(struct CdmaTransportMsg), 0x00, sizeof(struct CdmaTransportMsg));
     std::make_shared<CdmaSmsReceiveHandler>(0)->HandleRemainDataShare(message);
     EXPECT_NE(std::make_shared<CdmaSmsReceiveHandler>(0)->HandleAck(message), AckIncomeCause::SMS_ACK_UNKNOWN_ERROR);
+    pdu = { 1, 1, 2, 0, 4, 8, 19, 0, 3, 16, 8, 208, 1, 6, 16, 44, 40, 112, 225, 66, 8, 1, 192, 12, 1, 192 };
+    message = CdmaSmsMessage::CreateMessage(StringUtils::StringToHex(pdu));
+    EXPECT_NE(message, nullptr);
+    auto dataShareHelperMock = std::make_shared<DataShareHelperMock>();
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = dataShareHelperMock;
+    EXPECT_CALL(*dataShareHelperMock, Insert(_, _))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*dataShareHelperMock, Delete(_, _))
+        .WillOnce(Return(-1));
+        .WillRepeatedly(Return(0));
+    std::make_shared<CdmaSmsReceiveHandler>(0)->HandleRemainDataShare(message);
+    std::make_shared<CdmaSmsReceiveHandler>(0)->HandleRemainDataShare(message);
+    EXPECT_NE(std::make_shared<CdmaSmsReceiveHandler>(0)->HandleAck(message), AckIncomeCause::SMS_ACK_UNKNOWN_ERROR);
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = nullptr;
 }
 
 /**
