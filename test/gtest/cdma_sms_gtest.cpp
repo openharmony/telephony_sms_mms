@@ -519,7 +519,7 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsBearerData_0002, Function | MediumTest | Level1)
  */
 HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0001, Function | MediumTest | Level1)
 {
-    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer){};
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer) {};
     std::shared_ptr<CdmaSmsSender> smsSender = std::make_shared<CdmaSmsSender>(DEFAULT_SIM_SLOT_ID, fun);
     int i = 0;
     std::vector<struct SplitInfo> cellsInfos;
@@ -560,7 +560,7 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0001, Function | MediumTest | Level1)
  */
 HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0002, Function | MediumTest | Level1)
 {
-    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer){};
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer) {};
     std::shared_ptr<CdmaSmsSender> smsSender = std::make_shared<CdmaSmsSender>(DEFAULT_SIM_SLOT_ID, fun);
     std::shared_ptr<SmsSendIndexer> indexer = std::make_shared<SmsSendIndexer>("des", "src", "text", nullptr, nullptr);
     std::shared_ptr<struct EncodeInfo> encodeInfo = std::make_shared<struct EncodeInfo>();
@@ -571,13 +571,13 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0002, Function | MediumTest | Level1)
     smsSender->isImsNetDomain_ = true;
     smsSender->imsSmsCfg_ = true;
     std::vector<struct SplitInfo> cellsInfos;
-    Split info;
+    SplitInfo info;
     for (uint8_t j = 0; j < MAX_USER_DATA_LEN; j++) {
         info.encodeData.push_back(j);
     }
-    smsSender->DataBasedSmsDelivery("des", "src", 0, info.encodeData.data(), info.encodeData.size(),nullptr, nullptr);
+    smsSender->DataBasedSmsDelivery("des", "src", 0, info.encodeData.data(), info.encodeData.size(), nullptr, nullptr);
     smsSender->imsSmsCfg_ = false;
-    smsSender->DataBasedSmsDelivery("des", "src", 0, info.encodeData.data(), info.encodeData.size(),nullptr, nullptr);
+    smsSender->DataBasedSmsDelivery("des", "src", 0, info.encodeData.data(), info.encodeData.size(), nullptr, nullptr);
     std::unique_ptr<CdmaTransportMsg> transMsg2 = std::make_unique<CdmaTransportMsg>();
     smsSender->EncodeMsgData(std::move(transMsg2), indexer, 0, nullptr);
     for (uint8_t j = 0; j < MAX_SEGMENT_NUM + 2; j++) {
@@ -608,7 +608,7 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0003, Function | MediumTest | Level1)
 {
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer){};
     std::shared_ptr<CdmaSmsSender> smsSender = std::make_shared<CdmaSmsSender>(DEFAULT_SIM_SLOT_ID, fun);
-    std::shared_ptr<SmsReceiverIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
+    std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(0, statusInfo);
     smsSender->StatusReportAnalysis(event);
     std::vector<uint8_t> pdu = { 1, 1, 2, 0, 4, 8, 19, 0, 3, 16, 8, 208, 1, 6, 16, 44, 40, 112, 225, 66, 8, 1, 192, 12, 1, 192 };
@@ -626,29 +626,29 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0003, Function | MediumTest | Level1)
     smsSender->StatusReportAnalysis(event);
     smsSender->StatusReportSetImsSms(event);
     std::shared_ptr<RadioResponseInfo> imsResponseInfo = std::make_shared<RadioResponseInfo>();
-    imsRepsonseInfo->error = ErrType::NONE;
+    imsResponseInfo->error = ErrType::NONE;
     event = AppExecFwk::InnerEvent::Get(0, imsResponseInfo);
     smsSender->StatusReportSetImsSms(event);
-    imsRepsonseInfo->error = ErrType::ERR_GENERIC_FAILURE;
+    imsResponseInfo->error = ErrType::ERR_GENERIC_FAILURE;
     event = AppExecFwk::InnerEvent::Get(0, imsResponseInfo);
     smsSender->imsSmsCfg_ = CdmaSmsSender::IMS_SMS_ENABLE;
     smsSender->StatusReportSetImsSms(event);
     EXPECT_EQ(smsSender->imsSmsCfg_, CdmaSmsSender::IMS_SMS_DISABLE);
     std::shared_ptr<int32_t> imsSmsInfo = std::make_shared<int32_t>(CdmaSmsSender::IMS_SMS_ENABLE);
     event = AppExecFwk::InnerEvent::Get(0, imsSmsInfo);
-    smsSender->StatusReportSetImsSms(event);
+    smsSender->StatusReportGetImsSms(event);
     EXPECT_EQ(smsSender->imsSmsCfg_, CdmaSmsSender::IMS_SMS_ENABLE);
     CdmaTransportMsg msg;
     EXPECT_EQ(smsSender->EncodeMsg(msg), nullptr);
     indexer->SetIsConcat(true);
-    std::unique_ptr<CdmaTransportMsg> transMsg = std::make_unique<CdamTransportMsg>();
+    std::unique_ptr<CdmaTransportMsg> transMsg = std::make_unique<CdmaTransportMsg>();
     SmsConcat concat;
     concat.is8Bits = false;
     indexer->SetSmsConcat(concat);
-    smsSender->SetConcat(indexer, transMsg);
+    smsSender->SetConcact(indexer, transMsg);
     concat.is8Bits = true;
     indexer->SetSmsConcat(concat);
-    smsSender->SetConcat(indexer, transMsg);
+    smsSender->SetConcact(indexer, transMsg);
     EXPECT_EQ(transMsg->data.p2p.teleserviceId, static_cast<uint16_t>(SmsTransTelsvcId::WEMT));
 }
 
@@ -661,9 +661,9 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsTeleserviceMessage_0003, Function | MediumTest | L
 {
     SmsWriteBuffer wPdu;
     wPdu.data_ = nullptr;
-    SmsReadBuffer rPdu;
+    SmsReadBuffer rPdu("");
     rPdu.data_ = nullptr;
-    CdamSmsTeleserviceMessage msg;
+    CdmaSmsTeleserviceMessage msg;
     EXPECT_FALSE(msg.Encode(wPdu));
     EXPECT_FALSE(msg.Decode(rPdu));
     EXPECT_EQ(msg.GetMessageType(rPdu), CdmaSmsTeleserviceMessage::RESERVED);
@@ -671,8 +671,8 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsTeleserviceMessage_0003, Function | MediumTest | L
     CdmaSmsSubmitMessage submitMsg(submit, rPdu);
     TeleserviceDeliver deliver;
     CdmaSmsDeliverMessage deliverMsg(deliver, rPdu, false);
-    TeleserviceDeliver deliverAck;
-    CdmaSmsDeliverAck ack(deliverAck, rPdu);
+    TeleserviceDeliverAck deliverAck;
+    CdmaSmsDeliveryAck ack(deliverAck, rPdu);
     EXPECT_NE(ack.type_, CdmaSmsTeleserviceMessage::DELIVERY_ACK);
     TeleserviceUserAck userAck;
     CdmaSmsUserAck smsUserAck(userAck, rPdu);
@@ -681,14 +681,14 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsTeleserviceMessage_0003, Function | MediumTest | L
     CdmaSmsReadAck smsReadAck(readAck, rPdu);
     EXPECT_NE(smsReadAck.type_, CdmaSmsTeleserviceMessage::READ_ACK);
     SmsReadBuffer rPdu2("001020304050");
-    CdmaSmsDeliverAck ack2(deliverAck, rPdu2);
+    CdmaSmsDeliveryAck ack2(deliverAck, rPdu2);
     EXPECT_EQ(ack2.type_, CdmaSmsTeleserviceMessage::DELIVERY_ACK);
     SmsReadBuffer rPdu3("001020304050");
     CdmaSmsUserAck smsUserAck2(userAck, rPdu3);
-    EXPECT_NE(smsUserAck2.type_, CdmaSmsTeleserviceMessage::USER_ACK);
+    EXPECT_EQ(smsUserAck2.type_, CdmaSmsTeleserviceMessage::USER_ACK);
     SmsReadBuffer rPdu4("001020304050");
     CdmaSmsReadAck smsReadAck2(readAck, rPdu4);
-    EXPECT_NE(smsReadAck2.type_, CdmaSmsTeleserviceMessage::READ_ACK);
+    EXPECT_EQ(smsReadAck2.type_, CdmaSmsTeleserviceMessage::READ_ACK);
     SmsReadBuffer rPdu5("1");
     EXPECT_EQ(msg.GetMessageType(rPdu5), CdmaSmsTeleserviceMessage::RESERVED);
     SmsReadBuffer rPdu6("10");
@@ -782,7 +782,7 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0003, Function | MediumTest | Level1)
     EXPECT_FALSE(message.Decode(rPdu1));
     SmsReadBuffer rPdu2("0011");
     EXPECT_FALSE(message.Decode(rPdu2));
-    SmsReadBuffer rPdu4("00111");
+    SmsReadBuffer rPdu4("001111");
     EXPECT_TRUE(message.Decode(rPdu4));
 
     SmsWriteBuffer wPdu;
@@ -822,15 +822,15 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0004, Function | MediumTest | Level1)
 
     SmsWriteBuffer wPdu;
     wPdu.length_ = 0;
-    EXPECT_FALSE(message.Encode(wPdu));
+    EXPECT_FALSE(parameter.Encode(wPdu));
     wPdu.length_ = 1;
-    EXPECT_FALSE(message.Encode(wPdu));
+    EXPECT_FALSE(parameter.Encode(wPdu));
     wPdu.index_ = 0;
     wPdu.length_ = 2;
-    EXPECT_FALSE(message.Encode(wPdu));
+    EXPECT_FALSE(parameter.Encode(wPdu));
     wPdu.index_ = 0;
     wPdu.length_ = 3;
-    EXPECT_TRUE(message.Encode(wPdu));
+    EXPECT_TRUE(parameter.Encode(wPdu));
 
     SmsReplyOption op;
     CdmaSmsReplyOption option(op);
@@ -955,13 +955,13 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0007, Function | MediumTest | Level1)
     EXPECT_FALSE(parameter.Decode(rPdu));
 
     SmsStatusCode code;
-    CdmaSmsMessageStatus status;
+    CdmaSmsMessageStatus status(code);
     status.id_ = id;
     SmsReadBuffer rPdu1("00");
     EXPECT_FALSE(status.Decode(rPdu1));
 
     uint32_t value = 0;
-    CdmaSmsNumberMessages messages;
+    CdmaSmsNumberMessages messages(value);
     messages.id_ = id;
     SmsReadBuffer rPdu2("00");
     EXPECT_FALSE(messages.Decode(rPdu2));
@@ -979,13 +979,13 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0007, Function | MediumTest | Level1)
     EXPECT_FALSE(ind.Decode(rPdu4));
 
     SmsTeleSvcAddr addr;
-    CdmaSmsCallbakcNumber number(addr);
+    CdmaSmsCallbackNumber number(addr);
     number.id_ = id;
     SmsReadBuffer rPdu5("00");
     EXPECT_FALSE(number.Decode(rPdu5));
-    SmsReadBuffer rPdu6("00" + std::string(1, static_cast<char>(ob1 << 7)));
+    SmsReadBuffer rPdu6("00" + std::string(1, static_cast<char>(0b1 << 7)));
     EXPECT_FALSE(number.Decode(rPdu6));
-    SmsReadBuffer rPdu7("00" + std::string(1, static_cast<char>(ob1 << 7)) + "11");
+    SmsReadBuffer rPdu7("00" + std::string(1, static_cast<char>(0b1 << 7)) + "11");
     EXPECT_FALSE(number.Decode(rPdu7));
     SmsReadBuffer rPdu8("0011");
     EXPECT_FALSE(number.Decode(rPdu8));
@@ -1084,21 +1084,21 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0009, Function | MediumTest | Level1)
 HWTEST_F(CdmaSmsGtest, CdmaSmsParameterRecord_0001, Function | MediumTest | Level1)
 {
     uint16_t value = 0;
-    CdmaSmsTeleserviceId paramter(value);
+    CdmaSmsTeleserviceId parameter(value);
     SmsWriteBuffer wPdu;
     wPdu.length_ = 0;
-    EXPECT_FALSE(paramter.Encode(wPdu));
+    EXPECT_FALSE(parameter.Encode(wPdu));
     wPdu.length_ = 1;
-    EXPECT_FALSE(paramter.Encode(wPdu));
+    EXPECT_FALSE(parameter.Encode(wPdu));
     wPdu.index_ = 0;
     wPdu.length_ = 2;
-    EXPECT_FALSE(paramter.Encode(wPdu));
+    EXPECT_FALSE(parameter.Encode(wPdu));
     wPdu.index_ = 0;
     wPdu.length_ = 3;
-    EXPECT_FALSE(paramter.Encode(wPdu));
+    EXPECT_FALSE(parameter.Encode(wPdu));
     wPdu.index_ = 0;
     wPdu.length_ = 4;
-    EXPECT_TRUE(paramter.Encode(wPdu));
+    EXPECT_TRUE(parameter.Encode(wPdu));
 
     CdmaSmsServiceCategory cat(value);
     wPdu.length_ = 0;
@@ -1151,10 +1151,10 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsParameterRecord_0002, Function | MediumTest | Leve
     SmsReadBuffer rPdu("00");
     EXPECT_FALSE(codes.Decode(rPdu));
     SmsReadBuffer rPdu1("001");
-    EXPECT_FALSE(codes.Decode(rPdu1));
+    EXPECT_TRUE(codes.Decode(rPdu1));
 
     TransportAddr addr;
-    CdmaSmsAddressParamter parameter(addr, CdamSmsParameterRecord::ORG_ADDRESS);
+    CdmaSmsAddressParameter parameter(addr, CdmaSmsParameterRecord::ORG_ADDRESS);
     EXPECT_FALSE(parameter.Encode(wPdu));
     parameter.id_ = id;
     parameter.isInvalid_ = false;

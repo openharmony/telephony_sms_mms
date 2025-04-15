@@ -1920,7 +1920,7 @@ HWTEST_F(BranchSmsPartTest, GsmSmsReceiveHandler_0001, Function | MediumTest | L
     EXPECT_CALL(*dataShareHelperMock, Insert(_, _))
         .WillRepeatedly(Return(0));
     EXPECT_CALL(*dataShareHelperMock, Delete(_, _))
-        .WillOnce(Return(-1));
+        .WillOnce(Return(-1))
         .WillRepeatedly(Return(0));
     std::make_shared<CdmaSmsReceiveHandler>(0)->HandleRemainDataShare(message);
     std::make_shared<CdmaSmsReceiveHandler>(0)->HandleRemainDataShare(message);
