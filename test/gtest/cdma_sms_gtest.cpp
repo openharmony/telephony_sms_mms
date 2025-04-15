@@ -606,7 +606,7 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0002, Function | MediumTest | Level1)
  */
 HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0003, Function | MediumTest | Level1)
 {
-    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer){};
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer) {};
     std::shared_ptr<CdmaSmsSender> smsSender = std::make_shared<CdmaSmsSender>(DEFAULT_SIM_SLOT_ID, fun);
     std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(0, statusInfo);
