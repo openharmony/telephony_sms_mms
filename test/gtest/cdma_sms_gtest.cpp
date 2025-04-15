@@ -611,7 +611,8 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0003, Function | MediumTest | Level1)
     std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(0, statusInfo);
     smsSender->StatusReportAnalysis(event);
-    std::vector<uint8_t> pdu = { 1, 1, 2, 0, 4, 8, 19, 0, 3, 16, 8, 208, 1, 6, 16, 44, 40, 112, 225, 66, 8, 1, 192, 12, 1, 192 };
+    std::vector<uint8_t> pdu =
+        { 1, 1, 2, 0, 4, 8, 19, 0, 3, 16, 8, 208, 1, 6, 16, 44, 40, 112, 225, 66, 8, 1, 192, 12, 1, 192 };
     statusInfo->SetPdu(pdu);
     event = AppExecFwk::InnerEvent::Get(0, statusInfo);
     std::shared_ptr<SmsSendIndexer> indexer = std::make_shared<SmsSendIndexer>("des", "src", "text", nullptr, nullptr);
