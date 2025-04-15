@@ -17,8 +17,10 @@
 #define protected public
 
 #include "cdma_sms_message.h"
+#include "cdma_sms_teleservice_message.h"
 #include "cdma_sms_transport_message.h"
 #include "core_service_client.h"
+#include "delivery_short_message_callback_stub.h"
 #include "gtest/gtest.h"
 #include "i_sms_service_interface.h"
 #include "if_system_ability_manager.h"
@@ -508,6 +510,667 @@ HWTEST_F(CdmaSmsGtest, CdmaSmsBearerData_0002, Function | MediumTest | Level1)
     EXPECT_EQ(v.data.submit.deferValPeriod.time.absTime.year, 97);
     EXPECT_EQ(v.data.submit.deferValPeriod.time.absTime.month, 6);
     EXPECT_EQ(v.data.submit.deferValPeriod.time.absTime.day, 18);
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSender_0001
+ * @tc.name     Test CdmaSmsSender
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0001, Function | MediumTest | Level1)
+{
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer) {};
+    std::shared_ptr<CdmaSmsSender> smsSender = std::make_shared<CdmaSmsSender>(DEFAULT_SIM_SLOT_ID, fun);
+    int i = 0;
+    std::vector<struct SplitInfo> cellsInfos;
+    SplitInfo info;
+    for (uint8_t j = 0; j < MAX_USER_DATA_LEN + 2; j++) {
+        info.encodeData.push_back(j);
+    }
+    cellsInfos.push_back(info);
+    GsmSmsMessage gsmSmsMessage;
+    std::shared_ptr<struct SmsTpdu> tpdu = std::make_shared<struct SmsTpdu>();
+    std::shared_ptr<uint8_t> unSentCellCount = std::make_shared<uint8_t>(0);
+    std::shared_ptr<bool> hasCellFailed = std::make_shared<bool>(false);
+    smsSender->SendSmsForEveryIndexer(i, cellsInfos, "", "", tpdu, gsmSmsMessage, unSentCellCount,
+        hasCellFailed, DATA_CODING_7BIT, 0, nullptr, nullptr, 0, false);
+    
+    info.encodeData.clear();
+    for (uint8_t j = 0; j < MAX_USER_DATA_LEN; j++) {
+        info.encodeData.push_back(j);
+    }
+    cellsInfos.push_back(info);
+    i = 1;
+    smsSender->SendSmsForEveryIndexer(i, cellsInfos, "", "", tpdu, gsmSmsMessage, unSentCellCount,
+        hasCellFailed, DATA_CODING_7BIT, 0, nullptr, nullptr, 0, false);
+    
+    cellsInfos.push_back(info);
+    cellsInfos.push_back(info);
+    i = 1;
+    tpdu->data.submit.bStatusReport = true;
+    smsSender->SendSmsForEveryIndexer(i, cellsInfos, "", "", tpdu, gsmSmsMessage, unSentCellCount,
+        hasCellFailed, DATA_CODING_7BIT, 0, nullptr, nullptr, 0, false);
+    EXPECT_FALSE(tpdu->data.submit.bStatusReport);
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSender_0002
+ * @tc.name     Test CdmaSmsSender
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0002, Function | MediumTest | Level1)
+{
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer) {};
+    std::shared_ptr<CdmaSmsSender> smsSender = std::make_shared<CdmaSmsSender>(DEFAULT_SIM_SLOT_ID, fun);
+    std::shared_ptr<SmsSendIndexer> indexer = std::make_shared<SmsSendIndexer>("des", "src", "text", nullptr, nullptr);
+    std::shared_ptr<struct EncodeInfo> encodeInfo = std::make_shared<struct EncodeInfo>();
+    smsSender->SetSendIndexerInfo(indexer, nullptr, 0);
+    smsSender->SetSendIndexerInfo(nullptr, encodeInfo, 0);
+    std::unique_ptr<CdmaTransportMsg> transMsg = std::make_unique<CdmaTransportMsg>();
+    smsSender->SetPduSeqInfo(indexer, 2, transMsg, 0, 0);
+    smsSender->isImsNetDomain_ = true;
+    smsSender->imsSmsCfg_ = true;
+    std::vector<struct SplitInfo> cellsInfos;
+    SplitInfo info;
+    for (uint8_t j = 0; j < MAX_USER_DATA_LEN; j++) {
+        info.encodeData.push_back(j);
+    }
+    smsSender->DataBasedSmsDelivery("des", "src", 0, info.encodeData.data(), info.encodeData.size(), nullptr, nullptr);
+    smsSender->imsSmsCfg_ = false;
+    smsSender->DataBasedSmsDelivery("des", "src", 0, info.encodeData.data(), info.encodeData.size(), nullptr, nullptr);
+    std::unique_ptr<CdmaTransportMsg> transMsg2 = std::make_unique<CdmaTransportMsg>();
+    smsSender->EncodeMsgData(std::move(transMsg2), indexer, 0, nullptr);
+    for (uint8_t j = 0; j < MAX_SEGMENT_NUM + 2; j++) {
+        cellsInfos.push_back(info);
+    }
+    std::shared_ptr<struct SmsTpdu> tpdu = std::make_shared<struct SmsTpdu>();
+    std::shared_ptr<uint8_t> unSentCellCount = std::make_shared<uint8_t>(0);
+    std::shared_ptr<bool> hasCellFailed = std::make_shared<bool>(false);
+    EXPECT_TRUE(smsSender->TpduNullOrSmsPageOverNormalOrSmsEncodeFail(cellsInfos, nullptr, unSentCellCount,
+        hasCellFailed, nullptr));
+    EXPECT_TRUE(smsSender->TpduNullOrSmsPageOverNormalOrSmsEncodeFail(cellsInfos, tpdu, unSentCellCount,
+        hasCellFailed, nullptr));
+    cellsInfos.clear();
+    EXPECT_TRUE(smsSender->TpduNullOrSmsPageOverNormalOrSmsEncodeFail(cellsInfos, tpdu, nullptr,
+        hasCellFailed, nullptr));
+    EXPECT_TRUE(smsSender->TpduNullOrSmsPageOverNormalOrSmsEncodeFail(cellsInfos, tpdu, unSentCellCount,
+        nullptr, nullptr));
+    EXPECT_FALSE(smsSender->TpduNullOrSmsPageOverNormalOrSmsEncodeFail(cellsInfos, tpdu, unSentCellCount,
+        hasCellFailed, nullptr));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSender_0003
+ * @tc.name     Test CdmaSmsSender
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSender_0003, Function | MediumTest | Level1)
+{
+    std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer) {};
+    std::shared_ptr<CdmaSmsSender> smsSender = std::make_shared<CdmaSmsSender>(DEFAULT_SIM_SLOT_ID, fun);
+    std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(0, statusInfo);
+    smsSender->StatusReportAnalysis(event);
+    std::vector<uint8_t> pdu =
+        { 1, 1, 2, 0, 4, 8, 19, 0, 3, 16, 8, 208, 1, 6, 16, 44, 40, 112, 225, 66, 8, 1, 192, 12, 1, 192 };
+    statusInfo->SetPdu(pdu);
+    event = AppExecFwk::InnerEvent::Get(0, statusInfo);
+    std::shared_ptr<SmsSendIndexer> indexer = std::make_shared<SmsSendIndexer>("des", "src", "text", nullptr, nullptr);
+    auto message = CdmaSmsMessage::CreateMessage(StringUtils::StringToHex(pdu));
+    ASSERT_NE(message, nullptr);
+    indexer->SetMsgRefId(message->GetMsgRef() + 1);
+    smsSender->reportList_.push_back(indexer);
+    smsSender->StatusReportAnalysis(event);
+    indexer->SetMsgRefId(message->GetMsgRef());
+    sptr<DeliveryShortMessageCallbackStub> callback = new DeliveryShortMessageCallbackStub();
+    indexer->SetDeliveryCallback(callback);
+    smsSender->StatusReportAnalysis(event);
+    smsSender->StatusReportSetImsSms(event);
+    std::shared_ptr<RadioResponseInfo> imsResponseInfo = std::make_shared<RadioResponseInfo>();
+    imsResponseInfo->error = ErrType::NONE;
+    event = AppExecFwk::InnerEvent::Get(0, imsResponseInfo);
+    smsSender->StatusReportSetImsSms(event);
+    imsResponseInfo->error = ErrType::ERR_GENERIC_FAILURE;
+    event = AppExecFwk::InnerEvent::Get(0, imsResponseInfo);
+    smsSender->imsSmsCfg_ = CdmaSmsSender::IMS_SMS_ENABLE;
+    smsSender->StatusReportSetImsSms(event);
+    EXPECT_EQ(smsSender->imsSmsCfg_, CdmaSmsSender::IMS_SMS_DISABLE);
+    std::shared_ptr<int32_t> imsSmsInfo = std::make_shared<int32_t>(CdmaSmsSender::IMS_SMS_ENABLE);
+    event = AppExecFwk::InnerEvent::Get(0, imsSmsInfo);
+    smsSender->StatusReportGetImsSms(event);
+    EXPECT_EQ(smsSender->imsSmsCfg_, CdmaSmsSender::IMS_SMS_ENABLE);
+    CdmaTransportMsg msg;
+    EXPECT_EQ(smsSender->EncodeMsg(msg), nullptr);
+    indexer->SetIsConcat(true);
+    std::unique_ptr<CdmaTransportMsg> transMsg = std::make_unique<CdmaTransportMsg>();
+    SmsConcat concat;
+    concat.is8Bits = false;
+    indexer->SetSmsConcat(concat);
+    smsSender->SetConcact(indexer, transMsg);
+    concat.is8Bits = true;
+    indexer->SetSmsConcat(concat);
+    smsSender->SetConcact(indexer, transMsg);
+    EXPECT_EQ(transMsg->data.p2p.teleserviceId, static_cast<uint16_t>(SmsTransTelsvcId::WEMT));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsTeleserviceMessage_0003
+ * @tc.name     Test CdmaSmsTeleserviceMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsTeleserviceMessage_0003, Function | MediumTest | Level1)
+{
+    SmsWriteBuffer wPdu;
+    wPdu.data_ = nullptr;
+    SmsReadBuffer rPdu("");
+    rPdu.data_ = nullptr;
+    CdmaSmsTeleserviceMessage msg;
+    EXPECT_FALSE(msg.Encode(wPdu));
+    EXPECT_FALSE(msg.Decode(rPdu));
+    EXPECT_EQ(msg.GetMessageType(rPdu), CdmaSmsTeleserviceMessage::RESERVED);
+    TeleserviceSubmit submit;
+    CdmaSmsSubmitMessage submitMsg(submit, rPdu);
+    TeleserviceDeliver deliver;
+    CdmaSmsDeliverMessage deliverMsg(deliver, rPdu, false);
+    TeleserviceDeliverAck deliverAck;
+    CdmaSmsDeliveryAck ack(deliverAck, rPdu);
+    EXPECT_NE(ack.type_, CdmaSmsTeleserviceMessage::DELIVERY_ACK);
+    TeleserviceUserAck userAck;
+    CdmaSmsUserAck smsUserAck(userAck, rPdu);
+    EXPECT_NE(smsUserAck.type_, CdmaSmsTeleserviceMessage::USER_ACK);
+    TeleserviceReadAck readAck;
+    CdmaSmsReadAck smsReadAck(readAck, rPdu);
+    EXPECT_NE(smsReadAck.type_, CdmaSmsTeleserviceMessage::READ_ACK);
+    SmsReadBuffer rPdu2("001020304050");
+    CdmaSmsDeliveryAck ack2(deliverAck, rPdu2);
+    EXPECT_EQ(ack2.type_, CdmaSmsTeleserviceMessage::DELIVERY_ACK);
+    SmsReadBuffer rPdu3("001020304050");
+    CdmaSmsUserAck smsUserAck2(userAck, rPdu3);
+    EXPECT_EQ(smsUserAck2.type_, CdmaSmsTeleserviceMessage::USER_ACK);
+    SmsReadBuffer rPdu4("001020304050");
+    CdmaSmsReadAck smsReadAck2(readAck, rPdu4);
+    EXPECT_EQ(smsReadAck2.type_, CdmaSmsTeleserviceMessage::READ_ACK);
+    SmsReadBuffer rPdu5("1");
+    EXPECT_EQ(msg.GetMessageType(rPdu5), CdmaSmsTeleserviceMessage::RESERVED);
+    SmsReadBuffer rPdu6("10");
+    EXPECT_EQ(msg.GetMessageType(rPdu6), CdmaSmsTeleserviceMessage::RESERVED);
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSubParameter_0001
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0001, Function | MediumTest | Level1)
+{
+    uint8_t data;
+    CdmaSmsBaseParameter param(0, data);
+    SmsReadBuffer rPdu("1");
+    EXPECT_FALSE(param.Decode(rPdu));
+    SmsReadBuffer rPdu2("11");
+    EXPECT_FALSE(param.Decode(rPdu2));
+    SmsTimeAbs timeAbs;
+    uint8_t id = static_cast<uint8_t>('0');
+    CdmaSmsAbsoluteTime time(id, timeAbs);
+    SmsReadBuffer rPdu3("00");
+    EXPECT_FALSE(time.Decode(rPdu3));
+    SmsReadBuffer rPdu4("001");
+    EXPECT_FALSE(time.Decode(rPdu4));
+    SmsReadBuffer rPdu5("0011");
+    EXPECT_FALSE(time.Decode(rPdu5));
+    SmsReadBuffer rPdu6("00111");
+    EXPECT_FALSE(time.Decode(rPdu6));
+    SmsReadBuffer rPdu7("001111");
+    EXPECT_FALSE(time.Decode(rPdu7));
+    SmsReadBuffer rPdu8("0011111");
+    EXPECT_FALSE(time.Decode(rPdu8));
+    SmsReadBuffer rPdu9("00111111");
+    EXPECT_TRUE(time.Decode(rPdu9));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSubParameter_0002
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0002, Function | MediumTest | Level1)
+{
+    SmsTimeAbs timeAbs;
+    uint8_t id = static_cast<uint8_t>('0');
+    CdmaSmsAbsoluteTime time(id, timeAbs);
+    SmsWriteBuffer wPdu;
+    wPdu.length_ = 0;
+    EXPECT_FALSE(time.Encode(wPdu));
+    wPdu.length_ = 1;
+    EXPECT_FALSE(time.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 2;
+    EXPECT_FALSE(time.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 3;
+    EXPECT_FALSE(time.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 4;
+    EXPECT_FALSE(time.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 5;
+    EXPECT_FALSE(time.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 6;
+    EXPECT_FALSE(time.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 7;
+    EXPECT_FALSE(time.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 8;
+    EXPECT_TRUE(time.Encode(wPdu));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSubParameter_0003
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0003, Function | MediumTest | Level1)
+{
+    uint8_t id = static_cast<uint8_t>('0');
+    SmsTeleSvcMsgId value;
+    CdmaSmsMessageId message(value, CdmaSmsTeleserviceMessage::DELIVER);
+    message.id_ = id;
+    SmsReadBuffer rPdu("00");
+    EXPECT_FALSE(message.Decode(rPdu));
+    SmsReadBuffer rPdu1("001");
+    EXPECT_FALSE(message.Decode(rPdu1));
+    SmsReadBuffer rPdu2("0011");
+    EXPECT_FALSE(message.Decode(rPdu2));
+    SmsReadBuffer rPdu4("001111");
+    EXPECT_TRUE(message.Decode(rPdu4));
+
+    SmsWriteBuffer wPdu;
+    wPdu.length_ = 0;
+    EXPECT_FALSE(message.Encode(wPdu));
+    wPdu.length_ = 1;
+    EXPECT_FALSE(message.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 2;
+    EXPECT_FALSE(message.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 3;
+    EXPECT_FALSE(message.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 4;
+    EXPECT_FALSE(message.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 5;
+    EXPECT_TRUE(message.Encode(wPdu));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSubParameter_0004
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0004, Function | MediumTest | Level1)
+{
+    uint8_t id = static_cast<uint8_t>('0');
+    SmsPrivacyIndicator value;
+    CdmaSmsPrivacyInd parameter(value);
+    parameter.id_ = id;
+    SmsReadBuffer rPdu("00");
+    EXPECT_FALSE(parameter.Decode(rPdu));
+    SmsReadBuffer rPdu1("001");
+    EXPECT_TRUE(parameter.Decode(rPdu1));
+
+    SmsWriteBuffer wPdu;
+    wPdu.length_ = 0;
+    EXPECT_FALSE(parameter.Encode(wPdu));
+    wPdu.length_ = 1;
+    EXPECT_FALSE(parameter.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 2;
+    EXPECT_FALSE(parameter.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 3;
+    EXPECT_TRUE(parameter.Encode(wPdu));
+
+    SmsReplyOption op;
+    CdmaSmsReplyOption option(op);
+    option.id_ = id;
+    SmsReadBuffer rPdu2("00");
+    EXPECT_FALSE(option.Decode(rPdu2));
+
+    wPdu.index_ = 0;
+    wPdu.length_ = 0;
+    EXPECT_FALSE(option.Encode(wPdu));
+    wPdu.length_ = 1;
+    EXPECT_FALSE(option.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 2;
+    EXPECT_FALSE(option.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 3;
+    EXPECT_TRUE(option.Encode(wPdu));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSubParameter_0005
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0005, Function | MediumTest | Level1)
+{
+    uint8_t id = static_cast<uint8_t>('0');
+    SmsTeleSvcUserData value;
+    bool headerInd = false;
+    CdmaSmsUserData parameter(value, headerInd);
+    parameter.id_ = id;
+    SmsReadBuffer rPdu("00");
+    EXPECT_FALSE(parameter.Decode(rPdu));
+    SmsReadBuffer rPdu1("00" + std::string(1, static_cast<char>(static_cast<uint8_t>(SmsEncodingType::EPM) << 3)));
+    EXPECT_FALSE(parameter.Decode(rPdu1));
+    SmsReadBuffer rPdu2("00" +
+        std::string(1, static_cast<char>(static_cast<uint8_t>(SmsEncodingType::GSMDCS) << 3)) + "1");
+    EXPECT_FALSE(parameter.Decode(rPdu2));
+    SmsReadBuffer rPdu3("00" +
+        std::string(1, static_cast<char>(static_cast<uint8_t>(SmsEncodingType::UNICODE) << 3)) + "1");
+    EXPECT_FALSE(parameter.Decode(rPdu3));
+    SmsReadBuffer rPdu4("00" +
+        std::string(1, static_cast<char>(static_cast<uint8_t>(SmsEncodingType::GSMDCS) << 3)) + "11");
+    EXPECT_FALSE(parameter.Decode(rPdu4));
+    SmsReadBuffer rPdu5("00" +
+        std::string(1, static_cast<char>(static_cast<uint8_t>(SmsEncodingType::LATIN) << 3)) + "1");
+    EXPECT_FALSE(parameter.Decode(rPdu5));
+
+    SmsReadBuffer rPdu6("");
+    parameter.headerInd_ = true;
+    EXPECT_EQ(parameter.DecodeHeader7Bit(rPdu6), 0);
+    SmsReadBuffer rPdu7("0");
+    EXPECT_EQ(parameter.DecodeHeader7Bit(rPdu7), 0);
+    SmsReadBuffer rPdu8("01");
+    EXPECT_EQ(parameter.DecodeHeader7Bit(rPdu8), 0);
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSubParameter_0006
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0006, Function | MediumTest | Level1)
+{
+    SmsTeleSvcCmasData value;
+    CdmaSmsCmasData parameter(value);
+    uint8_t id = static_cast<uint8_t>('0');
+    parameter.id_ = id;
+    SmsReadBuffer rPdu("00");
+    EXPECT_FALSE(parameter.Decode(rPdu));
+    SmsReadBuffer rPdu1("00" +
+        std::string(1, static_cast<char>(static_cast<uint8_t>(SmsEncodingType::EUCKR) << 3)));
+    EXPECT_FALSE(parameter.Decode(rPdu1));
+    SmsReadBuffer rPdu2("00" +
+        std::string(1, static_cast<char>((static_cast<uint8_t>(SmsEncodingType::OCTET) << 3) + 1)));
+    EXPECT_FALSE(parameter.Decode(rPdu2));
+    SmsReadBuffer rPdu3("00" +
+        std::string(1, static_cast<char>((static_cast<uint8_t>(SmsEncodingType::OCTET) << 3) + 1)) + "1");
+    EXPECT_FALSE(parameter.Decode(rPdu3));
+    SmsReadBuffer rPdu4("00" +
+        std::string(1, static_cast<char>((static_cast<uint8_t>(SmsEncodingType::OCTET) << 3) + 1)) + "11");
+    EXPECT_FALSE(parameter.Decode(rPdu4));
+    SmsReadBuffer rPdu5(std::string(1, static_cast<char>(0)) + "1");
+    EXPECT_FALSE(parameter.DecodeData(rPdu5));
+    SmsReadBuffer rPdu6(std::string(1, static_cast<char>(1)) + "1");
+    EXPECT_FALSE(parameter.DecodeData(rPdu6));
+    SmsReadBuffer rPdu7(std::string(1, static_cast<char>(1)) + "11");
+    EXPECT_FALSE(parameter.DecodeData(rPdu7));
+    SmsReadBuffer rPdu8(std::string(1, static_cast<char>(1)) + "111");
+    EXPECT_FALSE(parameter.DecodeData(rPdu8));
+    SmsReadBuffer rPdu9(std::string(1, static_cast<char>(2)) + "1");
+    EXPECT_FALSE(parameter.DecodeData(rPdu9));
+    SmsReadBuffer rPdu10(std::string(1, static_cast<char>(2)) + "11");
+    EXPECT_FALSE(parameter.DecodeData(rPdu10));
+    SmsReadBuffer rPdu11(std::string(1, static_cast<char>(2)) + "111");
+    EXPECT_FALSE(parameter.DecodeData(rPdu11));
+    SmsReadBuffer rPdu12(std::string(1, static_cast<char>(2)) + "1111");
+    EXPECT_FALSE(parameter.DecodeData(rPdu12));
+    SmsReadBuffer rPdu13(std::string(1, static_cast<char>(2)) + "11111");
+    EXPECT_FALSE(parameter.DecodeData(rPdu13));
+    SmsReadBuffer rPdu14(std::string(1, static_cast<char>(2)) + "111111");
+    EXPECT_FALSE(parameter.DecodeData(rPdu14));
+    SmsReadBuffer rPdu15(std::string(1, static_cast<char>(2)) + "1111111");
+    EXPECT_FALSE(parameter.DecodeData(rPdu15));
+    SmsReadBuffer rPdu16(std::string(1, static_cast<char>(2)) + "11111111");
+    EXPECT_FALSE(parameter.DecodeData(rPdu16));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSubParameter_0007
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0007, Function | MediumTest | Level1)
+{
+    uint8_t id = static_cast<uint8_t>('0');
+    SmsDisplayMode mode;
+    CdmaSmsDisplayMode parameter(mode);
+    parameter.id_ = id;
+    SmsReadBuffer rPdu("00");
+    EXPECT_FALSE(parameter.Decode(rPdu));
+
+    SmsStatusCode code;
+    CdmaSmsMessageStatus status(code);
+    status.id_ = id;
+    SmsReadBuffer rPdu1("00");
+    EXPECT_FALSE(status.Decode(rPdu1));
+
+    uint32_t value = 0;
+    CdmaSmsNumberMessages messages(value);
+    messages.id_ = id;
+    SmsReadBuffer rPdu2("00");
+    EXPECT_FALSE(messages.Decode(rPdu2));
+
+    SmsAlertPriority p = SmsAlertPriority::HIGH;
+    CdmaSmsAlertPriority priority(p);
+    priority.id_ = id;
+    SmsReadBuffer rPdu3("00");
+    EXPECT_FALSE(priority.Decode(rPdu3));
+
+    SmsLanguageType l = SmsLanguageType::CHINESE;
+    CdmaSmsLanguageInd ind(l);
+    ind.id_ = id;
+    SmsReadBuffer rPdu4("00");
+    EXPECT_FALSE(ind.Decode(rPdu4));
+
+    SmsTeleSvcAddr addr;
+    CdmaSmsCallbackNumber number(addr);
+    number.id_ = id;
+    SmsReadBuffer rPdu5("00");
+    EXPECT_FALSE(number.Decode(rPdu5));
+    SmsReadBuffer rPdu6("00" + std::string(1, static_cast<char>(0b1 << 7)));
+    EXPECT_FALSE(number.Decode(rPdu6));
+    SmsReadBuffer rPdu7("00" + std::string(1, static_cast<char>(0b1 << 7)) + "11");
+    EXPECT_FALSE(number.Decode(rPdu7));
+    SmsReadBuffer rPdu8("0011");
+    EXPECT_FALSE(number.Decode(rPdu8));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSubParameter_0008
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0008, Function | MediumTest | Level1)
+{
+    SmsEnhancedVmn value;
+    CdmaSmsEnhancedVmn parameter(value);
+    uint8_t id = static_cast<uint8_t>('0');
+    parameter.id_ = id;
+    SmsReadBuffer rPdu("00");
+    EXPECT_FALSE(parameter.Decode(rPdu));
+    SmsReadBuffer rPdu1("001");
+    EXPECT_FALSE(parameter.Decode(rPdu1));
+    SmsReadBuffer rPdu2("0011");
+    EXPECT_FALSE(parameter.Decode(rPdu2));
+    SmsReadBuffer rPdu3("00111");
+    EXPECT_FALSE(parameter.Decode(rPdu3));
+    SmsReadBuffer rPdu4("001111");
+    EXPECT_FALSE(parameter.Decode(rPdu4));
+    SmsReadBuffer rPdu5("0011111");
+    EXPECT_FALSE(parameter.Decode(rPdu5));
+    SmsReadBuffer rPdu6("00111111");
+    EXPECT_FALSE(parameter.Decode(rPdu6));
+    SmsReadBuffer rPdu7("001111111");
+    EXPECT_FALSE(parameter.Decode(rPdu7));
+    SmsReadBuffer rPdu8("0011111111");
+    EXPECT_FALSE(parameter.Decode(rPdu8));
+    SmsReadBuffer rPdu9("00111111111");
+    EXPECT_FALSE(parameter.Decode(rPdu9));
+    SmsReadBuffer rPdu10("001111111111");
+    EXPECT_FALSE(parameter.Decode(rPdu10));
+    SmsReadBuffer rPdu11("0011111111111");
+    EXPECT_FALSE(parameter.Decode(rPdu11));
+    SmsReadBuffer rPdu12("00111111111111");
+    EXPECT_FALSE(parameter.Decode(rPdu12));
+    SmsReadBuffer rPdu13("001111111111111");
+    EXPECT_FALSE(parameter.Decode(rPdu13));
+    SmsReadBuffer rPdu14("0011111111111111");
+    EXPECT_FALSE(parameter.Decode(rPdu14));
+
+    SmsReadBuffer rPdu15("");
+    EXPECT_FALSE(parameter.DecodeCallingPartyNumber(rPdu15));
+    SmsReadBuffer rPdu16("0");
+    EXPECT_FALSE(parameter.DecodeCallingPartyNumber(rPdu16));
+    SmsReadBuffer rPdu17("01");
+    EXPECT_FALSE(parameter.DecodeCallingPartyNumber(rPdu17));
+    SmsReadBuffer rPdu18("011");
+    EXPECT_FALSE(parameter.DecodeCallingPartyNumber(rPdu18));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsSubParameter_0009
+ * @tc.name     Test CdmaSmsSubParameter
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsSubParameter_0009, Function | MediumTest | Level1)
+{
+    SmsEnhancedVmnAck value;
+    CdmaSmsEnhancedVmnAck parameter(value);
+    uint8_t id = static_cast<uint8_t>('0');
+    parameter.id_ = id;
+    SmsReadBuffer rPdu("00");
+    EXPECT_FALSE(parameter.Decode(rPdu));
+    SmsReadBuffer rPdu1("001");
+    EXPECT_FALSE(parameter.Decode(rPdu1));
+    SmsReadBuffer rPdu2("0011");
+    EXPECT_FALSE(parameter.Decode(rPdu2));
+    SmsReadBuffer rPdu3("00111");
+    EXPECT_FALSE(parameter.Decode(rPdu3));
+    SmsReadBuffer rPdu4("001111");
+    EXPECT_FALSE(parameter.Decode(rPdu4));
+    SmsReadBuffer rPdu5("0011111");
+    EXPECT_FALSE(parameter.Decode(rPdu5));
+    SmsReadBuffer rPdu6("00111111");
+    EXPECT_FALSE(parameter.Decode(rPdu6));
+    SmsReadBuffer rPdu7("001111111");
+    EXPECT_FALSE(parameter.Decode(rPdu7));
+    SmsReadBuffer rPdu8("0011111111");
+    EXPECT_FALSE(parameter.Decode(rPdu8));
+    SmsReadBuffer rPdu9("00111111111");
+    EXPECT_FALSE(parameter.Decode(rPdu9));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsParameterRecord_0001
+ * @tc.name     Test CdmaSmsParameterRecord
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsParameterRecord_0001, Function | MediumTest | Level1)
+{
+    uint16_t value = 0;
+    CdmaSmsTeleserviceId parameter(value);
+    SmsWriteBuffer wPdu;
+    wPdu.length_ = 0;
+    EXPECT_FALSE(parameter.Encode(wPdu));
+    wPdu.length_ = 1;
+    EXPECT_FALSE(parameter.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 2;
+    EXPECT_FALSE(parameter.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 3;
+    EXPECT_FALSE(parameter.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 4;
+    EXPECT_TRUE(parameter.Encode(wPdu));
+
+    CdmaSmsServiceCategory cat(value);
+    wPdu.length_ = 0;
+    EXPECT_FALSE(cat.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 1;
+    EXPECT_FALSE(cat.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 2;
+    EXPECT_FALSE(cat.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 3;
+    EXPECT_FALSE(cat.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 4;
+    EXPECT_TRUE(cat.Encode(wPdu));
+
+    uint8_t r = 0;
+    CdmaSmsBearerReply reply(r);
+    wPdu.length_ = 0;
+    EXPECT_FALSE(reply.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 1;
+    EXPECT_FALSE(reply.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 2;
+    EXPECT_FALSE(reply.Encode(wPdu));
+    wPdu.index_ = 0;
+    wPdu.length_ = 3;
+    EXPECT_TRUE(reply.Encode(wPdu));
+    reply.id_ = static_cast<uint8_t>('0');
+    SmsReadBuffer rPdu("00");
+    EXPECT_FALSE(reply.Decode(rPdu));
+}
+
+/**
+ * @tc.number   Telephony_CdmaSmsGtest_CdmaSmsParameterRecord_0002
+ * @tc.name     Test CdmaSmsParameterRecord
+ * @tc.desc     Function test
+ */
+HWTEST_F(CdmaSmsGtest, CdmaSmsParameterRecord_0002, Function | MediumTest | Level1)
+{
+    TransportCauseCode value;
+    CdmaSmsCauseCodes codes(value);
+    SmsWriteBuffer wPdu;
+    wPdu.length_ = 0;
+    EXPECT_FALSE(codes.Encode(wPdu));
+    uint8_t id = static_cast<uint8_t>('0');
+    codes.id_ = id;
+    SmsReadBuffer rPdu("00");
+    EXPECT_FALSE(codes.Decode(rPdu));
+    SmsReadBuffer rPdu1("001");
+    EXPECT_TRUE(codes.Decode(rPdu1));
+
+    TransportAddr addr;
+    CdmaSmsAddressParameter parameter(addr, CdmaSmsParameterRecord::ORG_ADDRESS);
+    EXPECT_FALSE(parameter.Encode(wPdu));
+    parameter.id_ = id;
+    parameter.isInvalid_ = false;
+    SmsReadBuffer rPdu2("00");
+    EXPECT_FALSE(parameter.Decode(rPdu2));
+
+    TransportSubAddr subAddr;
+    CdmaSmsSubaddress subAddress(subAddr, CdmaSmsParameterRecord::ORG_SUB_ADDRESS);
+    EXPECT_FALSE(subAddress.Encode(wPdu));
+    subAddress.id_ = id;
+    subAddress.isInvalid_ = false;
+    SmsReadBuffer rPdu3("00");
+    EXPECT_FALSE(subAddress.Decode(rPdu3));
+    SmsReadBuffer rPdu4("001");
+    EXPECT_FALSE(subAddress.Decode(rPdu4));
 }
 #endif // TEL_TEST_UNSUPPORT
 } // namespace Telephony
