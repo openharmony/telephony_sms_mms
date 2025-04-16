@@ -261,7 +261,7 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
     if (method.compare(METHOD_POST) == 0) {
         httpReq.SetBody(data.c_str(), data.size());
         httpReq.SetMethod(HttpConstant::HTTP_METHOD_POST);
-        httpReq.SetHeader("content-type", "application/vnd.wap.mms-message; charset=utf-8");
+        httpReq.SetHeader("content-type", "application/vnd.wap.mms-message");
         httpReq.SetHeader("Accept", "*/*, application/vnd.wap.mms-message, application/vnd.wap.sic");
     } else {
         httpReq.SetMethod(HttpConstant::HTTP_METHOD_GET);
