@@ -1904,7 +1904,9 @@ HWTEST_F(BranchSmsPartTest, GsmSmsReceiveHandler_0001, Function | MediumTest | L
     std::shared_ptr<GsmSmsReceiveHandler> smsReceiveHandler = std::make_shared<GsmSmsReceiveHandler>(0);
     smsReceiveHandler->HandleReceivedSmsWithoutDataShare(baseMessage);
     smsReceiveHandler->HandleRemainDataShare(baseMessage);
+    smsReceiveHandler->HandleRemainDataShare(nullptr);
     EXPECT_NE(smsReceiveHandler->HandleAck(baseMessage), AckIncomeCause::SMS_ACK_UNKNOWN_ERROR);
+    EXPECT_EQ(smsReceiveHandler->HandleAck(nullptr), AckIncomeCause::SMS_ACK_UNKNOWN_ERROR);
     std::shared_ptr<CdmaSmsMessage> message = std::make_shared<CdmaSmsMessage>();
     EXPECT_NE(message, nullptr);
     message->transMsg_ = std::make_unique<struct CdmaTransportMsg>();
