@@ -17,7 +17,7 @@
 #define private public
 #define protected public
 #include "cb_start_ability.h"
-#include "delivery_short_message_callback_ipc_interface_code.h"
+#include "delivery_short_message_callback_stub.h"
 #include "os_account.h"
 #include "ios_account.h"
 #include "gsm_sms_param_codec.h"
@@ -303,15 +303,15 @@ HWTEST_F(SmsGsmTest, GsmSmsTpduCodec_001, Function | MediumTest | Level1)
     EXPECT_FALSE(decode.DecodeStatusReportPartData(buffer, &statusRep));
     EXPECT_FALSE(decode.DecodeStatusReportPartData(buffer2, &statusRep));
     SmsReadBuffer buffer3("00000000");
-    EXPECT_TRUE(decode.DecodeStatusReportPartData(buffer2, &statusRep));
+    EXPECT_TRUE(decode.DecodeStatusReportPartData(buffer3, &statusRep));
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_GsmSmsUserDataDecode_001
- * @tc.name     GsmSmsUserDataDecode_001
+ * @tc.number   Telephony_SmsMmsGtest_GsmUserDataDecode_001
+ * @tc.name     GsmUserDataDecode_001
  * @tc.desc     Function test decode
  */
-HWTEST_F(SmsGsmTest, GsmSmsUserDataDecode_001, Function | MediumTest | Level1)
+HWTEST_F(SmsGsmTest, GsmUserDataDecode_001, Function | MediumTest | Level1)
 {
     GsmUserDataDecode decode(nullptr);
     GsmUserDataDecode decode2(std::make_shared<GsmUserDataPdu>());
@@ -341,16 +341,16 @@ HWTEST_F(SmsGsmTest, GsmSmsUserDataDecode_001, Function | MediumTest | Level1)
     SmsReadBuffer buffer3(std::string(2, 141));
     EXPECT_FALSE(decode.DecodeUcs2Pdu(buffer3, false, &userData, &tpud));
 
-    EXPECT_FALSE(decode.Decode8bitPduPartData(buffer, false, &userData, udl, fillBits));
-    EXPECT_FALSE(decode2.Decode8bitPduPartData(buffer, true, &userData, udl, fillBits));
+    EXPECT_FALSE(decode.DecodeUcs2PduPartData(buffer, false, &userData, udl, fillBits));
+    EXPECT_FALSE(decode2.DecodeUcs2PduPartData(buffer, true, &userData, udl, fillBits));
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_GsmSmsUserDataEncode_001
- * @tc.name     GsmSmsUserDataEncode_001
+ * @tc.number   Telephony_SmsMmsGtest_GsmUserDataEncode_001
+ * @tc.name     GsmUserDataEncode_001
  * @tc.desc     Function test encode
  */
-HWTEST_F(SmsGsmTest, GsmSmsUserDataEncode_001, Function | MediumTest | Level1)
+HWTEST_F(SmsGsmTest, GsmUserDataEncode_001, Function | MediumTest | Level1)
 {
     GsmUserDataEncode encode(nullptr);
     SmsWriteBuffer buffer;
@@ -360,8 +360,8 @@ HWTEST_F(SmsGsmTest, GsmSmsUserDataEncode_001, Function | MediumTest | Level1)
     EXPECT_FALSE(encode.EncodeGsmHeadPdu(buffer, nullptr, fillBits));
     EXPECT_FALSE(encode.EncodeGsmBodyPdu(buffer, nullptr, fillBits));
     std::string destAddr = "";
-    EXPECT_FALSE(encode.Encode8bitHeadPdu(buffer, &userData, fillBits));
-    EXPECT_FALSE(encode.Encode8bitHeadPdu(buffer, nullptr, fillBits));
+    EXPECT_FALSE(encode.Encode8bitHeadPdu(buffer, &userData, destAddr));
+    EXPECT_FALSE(encode.Encode8bitHeadPdu(buffer, nullptr, destAddr));
     buffer.data_ = nullptr;
     EXPECT_FALSE(encode.Encode8bitBodyPdu(buffer, &userData));
     EXPECT_FALSE(encode.Encode8bitBodyPdu(buffer, nullptr));
@@ -371,15 +371,15 @@ HWTEST_F(SmsGsmTest, GsmSmsUserDataEncode_001, Function | MediumTest | Level1)
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_GsmSmsUserDataEncode_001
- * @tc.name     GsmSmsUserDataEncode_001
- * @tc.desc     Function test encode
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsSender_001
+ * @tc.name     GsmSmsSender_001
+ * @tc.desc     Function test GsmSmsSender
  */
-HWTEST_F(SmsGsmTest, GsmSmsUserDataEncode_001, Function | MediumTest | Level1)
+HWTEST_F(SmsGsmTest, GsmSmsSender_001, Function | MediumTest | Level1)
 {
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer) {};
     std::shared_ptr<GsmSmsSender> smsSender = std::make_shared<GsmSmsSender>(DEFAULT_SIM_SLOT_ID, fun);
-    std::shared_ptr<SmsReceiveIndexer> statusInfo = std::make_shared<SmsReceiveIndexer>();
+    std::shared_ptr<SmsMessageInfo> statusInfo = std::make_shared<SmsMessageInfo>();
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(0, statusInfo);
     smsSender->StatusReportAnalysis(event);
     std::vector<uint8_t> pdu = { 8, 145, 104, 49, 8, 32, 1, 5, 240, 68, 13, 145, 104, 145, 39, 32, 49, 100, 240,
@@ -419,16 +419,16 @@ HWTEST_F(SmsGsmTest, GsmSmsUserDataEncode_001, Function | MediumTest | Level1)
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_GsmSmsUserDataEncode_001
- * @tc.name     GsmSmsUserDataEncode_001
- * @tc.desc     Function test encode
+ * @tc.number   Telephony_SmsMmsGtest_GsmSmsSender_002
+ * @tc.name     GsmSmsSender_002
+ * @tc.desc     Function test GsmSmsSender
  */
-HWTEST_F(SmsGsmTest, GsmSmsUserDataEncode_001, Function | MediumTest | Level1)
+HWTEST_F(SmsGsmTest, GsmSmsSender_002, Function | MediumTest | Level1)
 {
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = [](std::shared_ptr<SmsSendIndexer> indexer) {};
     std::shared_ptr<GsmSmsSender> smsSender = std::make_shared<GsmSmsSender>(DEFAULT_SIM_SLOT_ID, fun);
     GsmSimMessageParam smsData;
-    std::shared_ptr<SmsSenderIndexer> indexer = std::make_shared<SmsSendIndexer>("des", "src", "text", nullptr, nullptr);
+    std::shared_ptr<SmsSendIndexer> indexer = std::make_shared<SmsSendIndexer>("des", "src", "text", nullptr, nullptr);
     indexer->hasMore_ = true;
     smsSender->SendSatelliteSms(indexer, smsData);
     indexer->csResendCount_ = 1;
