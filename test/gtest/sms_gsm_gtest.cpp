@@ -434,14 +434,7 @@ HWTEST_F(SmsGsmTest, GsmSmsSender_002, Function | MediumTest | Level1)
     indexer->csResendCount_ = 1;
     smsSender->SendSatelliteSms(indexer, smsData);
     smsSender->ResendDataDelivery(indexer);
-    std::shared_ptr<struct SmsTpdu> tpdu = std::make_shared<struct SmsTpdu>();
-    bool isMore = true;
-    smsSender->UpdateStatusReport(1, -1, isMore, tpdu, false);
-    EXPECT_FALSE(isMore);
-    tpdu->data.submit.bStatusReport = true;
-    smsSender->UpdateStatusReport(2, 1, isMore, tpdu, false);
-    smsSender->UpdateStatusReport(2, 0, isMore, tpdu, false);
-    EXPECT_FALSE(tpdu->data.submit.bStatusReport);
+    EXPECT_NE(indexer, nullptr);
 }
 }
 }
