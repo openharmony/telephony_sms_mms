@@ -26,7 +26,7 @@ namespace OHOS {
 namespace Telephony {
 class NapiMmsPduHelper {
 public:
-    bool Run(void (*func)(NapiMmsPduHelper &), NapiMmsPduHelper &helper);
+    bool Run(void (*func)(std::shared_ptr<NapiMmsPduHelper>), std::shared_ptr<NapiMmsPduHelper> helper);
     void NotifyAll();
     bool WaitForResult(int32_t timeoutSecond);
     void SetPduFileName(const std::string &pduFileName);
