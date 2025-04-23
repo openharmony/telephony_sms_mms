@@ -113,21 +113,25 @@ bool GetMmsPduFromFile(const std::string &fileName, std::string &mmsPdu)
     return true;
 }
 
-void StoreSendMmsPduToDataBase(NapiMmsPduHelper &helper) __attribute__((no_sanitize("cfi")))
+void StoreSendMmsPduToDataBase(std::shared_ptr<NapiMmsPduHelper> helper) __attribute__((no_sanitize("cfi")))
 {
+    if (!helper) {
+        TELEPHONY_LOGE("mmsPduHelper is null");
+        return;
+    }
     std::shared_ptr<NAPIMmsPdu> mmsPduObj = std::make_shared<NAPIMmsPdu>();
     if (mmsPduObj == nullptr) {
         TELEPHONY_LOGE("mmsPduObj nullptr");
-        helper.NotifyAll();
+        helper->NotifyAll();
         return;
     }
     std::string mmsPdu;
-    if (!GetMmsPduFromFile(helper.GetPduFileName(), mmsPdu)) {
+    if (!GetMmsPduFromFile(helper->GetPduFileName(), mmsPdu)) {
         TELEPHONY_LOGE("get mmsPdu fail");
-        helper.NotifyAll();
+        helper->NotifyAll();
         return;
     }
-    mmsPduObj->InsertMmsPdu(helper, mmsPdu);
+    mmsPduObj->InsertMmsPdu(*helper, mmsPdu);
 }
 
 void UpdateTimeStamp(int64_t &timeStamp, MmsContext &context)
@@ -161,16 +165,16 @@ void NativeSendMms(napi_env env, void *data)
             TELEPHONY_LOGE("g_datashareHelper is nullptr");
             return;
         }
-        NapiMmsPduHelper helper;
-        helper.SetDataShareHelper(g_datashareHelper);
-        helper.SetPduFileName(pduFileName);
-        if (!helper.Run(StoreSendMmsPduToDataBase, helper)) {
+        std::shared_ptr<NapiMmsPduHelper> helper = std::make_shared<NapiMmsPduHelper>();
+        helper->SetDataShareHelper(g_datashareHelper);
+        helper->SetPduFileName(pduFileName);
+        if (!helper->Run(StoreSendMmsPduToDataBase, helper)) {
             TELEPHONY_LOGE("StoreMmsPdu fail");
             asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
             asyncContext->resolved = false;
             return;
         }
-        asyncContext->data = NapiUtil::ToUtf16(helper.GetDbUrl());
+        asyncContext->data = NapiUtil::ToUtf16(helper->GetDbUrl());
     }
     asyncContext->errorCode =
         Singleton<SmsServiceManagerClient>::GetInstance().SendMms(asyncContext->slotId, asyncContext->mmsc,
@@ -372,20 +376,24 @@ bool StoreMmsPduToFile(const std::string &fileName, const std::string &mmsPdu)
     return true;
 }
 
-void GetMmsPduFromDataBase(NapiMmsPduHelper &helper) __attribute__((no_sanitize("cfi")))
+void GetMmsPduFromDataBase(std::shared_ptr<NapiMmsPduHelper> helper) __attribute__((no_sanitize("cfi")))
 {
+    if (!helper) {
+        TELEPHONY_LOGE("mmsPduHelper is null");
+        return;
+    }
     NAPIMmsPdu mmsPduObj;
-    std::string mmsPdu = mmsPduObj.GetMmsPdu(helper);
+    std::string mmsPdu = mmsPduObj.GetMmsPdu(*helper);
     if (mmsPdu.empty()) {
         TELEPHONY_LOGE("from dataBase empty");
         return;
     }
 
-    mmsPduObj.DeleteMmsPdu(helper);
-    if (!StoreMmsPduToFile(helper.GetStoreFileName(), mmsPdu)) {
+    mmsPduObj.DeleteMmsPdu(*helper);
+    if (!StoreMmsPduToFile(helper->GetStoreFileName(), mmsPdu)) {
         TELEPHONY_LOGE("store mmsPdu fail");
     }
-    helper.NotifyAll();
+    helper->NotifyAll();
 }
 
 static bool DownloadExceptionCase(
@@ -466,11 +474,11 @@ void NativeDownloadMms(napi_env env, void *data)
     if (asyncContext->errorCode == TELEPHONY_ERR_SUCCESS) {
         asyncContext->resolved = true;
         if (!STORE_MMS_PDU_TO_FILE) {
-            NapiMmsPduHelper helper;
-            helper.SetDataShareHelper(g_datashareHelper);
-            helper.SetDbUrl(NapiUtil::ToUtf8(dbUrls));
-            helper.SetStoreFileName(NapiUtil::ToUtf8(asyncContext->data));
-            if (!helper.Run(GetMmsPduFromDataBase, helper)) {
+            std::shared_ptr<NapiMmsPduHelper> helper = std::make_shared<NapiMmsPduHelper>();
+            helper->SetDataShareHelper(g_datashareHelper);
+            helper->SetDbUrl(NapiUtil::ToUtf8(dbUrls));
+            helper->SetStoreFileName(NapiUtil::ToUtf8(asyncContext->data));
+            if (!helper->Run(GetMmsPduFromDataBase, helper)) {
                 TELEPHONY_LOGE("StoreMmsPdu fail");
                 asyncContext->errorCode = TELEPHONY_ERR_LOCAL_PTR_NULL;
                 asyncContext->resolved = false;
