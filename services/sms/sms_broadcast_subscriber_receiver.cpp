@@ -15,8 +15,8 @@
 
 #include "sms_broadcast_subscriber_receiver.h"
 #include "sms_persist_helper.h"
-#include "telephony_log_wrapper.h"
 #include "sms_receive_reliability_handler.h"
+#include "telephony_log_wrapper.h"
 #include "want.h"
 #include "event_handler.h"
 #include "event_runner.h"
@@ -25,8 +25,8 @@ namespace OHOS {
 namespace Telephony {
 using namespace EventFwk;
 
-SmsBroadcastSubscriberReceiver::SmsBroadcastSubscriberReceiver(const CommonEventSubscribeInfo &subscriberInfo)
-    : CommonEventSubscriber(subscriberInfo) {}
+SmsBroadcastSubscriberReceiver::SmsBroadcastSubscriberReceiver(
+    const CommonEventSubscribeInfo &subscriberInfo) : CommonEventSubscriber(subscriberInfo) {}
 
 void SmsBroadcastSubscriberReceiver::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
 {
@@ -38,7 +38,7 @@ void SmsBroadcastSubscriberReceiver::OnReceiveEvent(const OHOS::EventFwk::Common
         int refId = want.GetIntParam(SMS_BROADCAST_MSG_REF_ID_KEY, 0);
         int dataBaseId = want.GetIntParam(SMS_BROADCAST_DATABASE_ID_KEY, 0);
         TELEPHONY_LOGI("OnReceiveEvent refId =%{public}d, dataBaseId =%{public}d", refId, dataBaseId);
-        istd::string address = want.GetStringParam(SMS_BROADCAST_ADDRESS_KEY);
+        std::string address = want.GetStringParam(SMS_BROADCAST_ADDRESS_KEY);
         if (!address.empty() && isSms) {
             DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateContact(address);
         }

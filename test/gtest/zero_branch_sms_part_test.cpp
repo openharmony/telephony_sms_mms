@@ -2044,7 +2044,7 @@ HWTEST_F(BranchSmsPartTest, SmsBroadcastSubscriberReceiver_0001, Function | Medi
     EXPECT_CALL(*dataShareHelperMock, Delete(_, _))
         .WillRepeatedly(Return(0));
     MatchingSkills smsSkills;
-    smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
+    smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
     CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
     smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     auto receiver = std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo);
@@ -2062,12 +2062,6 @@ HWTEST_F(BranchSmsPartTest, SmsBroadcastSubscriberReceiver_0001, Function | Medi
     data.SetWant(want);
     receiver->OnReceiveEvent(data);
 
-    want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
-    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_ADDRESS_KEY, addr);
-    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_DATABASE_ID_KEY, 1);
-    data.SetWant(want);
-    receiver->OnReceiveEvent(data);
-
     want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
     data.SetWant(want);
     receiver->OnReceiveEvent(data);
@@ -2077,8 +2071,8 @@ HWTEST_F(BranchSmsPartTest, SmsBroadcastSubscriberReceiver_0001, Function | Medi
     receiver->OnReceiveEvent(data);
     DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = nullptr;
 
-    SmsWapPushHandler wapPushHander(0);
-    EXPECT_FALSE(wapPushHander.SendWapPushMessageBroadcast(nullptr));
+    SmsWapPushHandler wapPushHandler(0);
+    EXPECT_FALSE(wapPushHandler.SendWapPushMessageBroadcast(nullptr));
 }
 } // namespace Telephony
 } // namespace OHOS
