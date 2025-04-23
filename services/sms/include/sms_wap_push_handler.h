@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "sms_broadcast_subscriber_receiver.h"
 #include "sms_receive_indexer.h"
 #include "sms_wap_push_buffer.h"
 #include "sms_wap_push_content_type.h"
@@ -44,6 +45,7 @@ private:
     void DeleteWapPush(std::shared_ptr<SmsReceiveIndexer> indexer);
 
 private:
+    static std::shared_ptr<SmsBroadcastSubscriberReceiver> g_receiver;
     int32_t slotId_ = 0;
     uint8_t pushType_ = 0;
     std::string strAppId_;
