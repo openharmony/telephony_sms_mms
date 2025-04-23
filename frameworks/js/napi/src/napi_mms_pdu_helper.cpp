@@ -22,10 +22,10 @@ namespace OHOS {
 namespace Telephony {
 constexpr static const int32_t WAIT_TIME_SECOND = 30;
 
-bool NapiMmsPduHelper::Run(void (*func)(NapiMmsPduHelper &), NapiMmsPduHelper &helper)
+bool NapiMmsPduHelper::Run(void (*func)(std::shared_ptr<NapiMmsPduHelper>), std::shared_ptr<NapiMmsPduHelper> helper)
     __attribute__((no_sanitize("cfi")))
 {
-    TelFFRTUtils::Submit([&]() { func(helper); });
+    TelFFRTUtils::Submit([=]() { func(helper); });
     TELEPHONY_LOGI("Thread running");
     return WaitForResult(WAIT_TIME_SECOND);
 }
