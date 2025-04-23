@@ -115,8 +115,7 @@ bool GetMmsPduFromFile(const std::string &fileName, std::string &mmsPdu)
 
 void StoreSendMmsPduToDataBase(std::shared_ptr<NapiMmsPduHelper> helper) __attribute__((no_sanitize("cfi")))
 {
-    if (!helper)
-    {
+    if (!helper) {
         TELEPHONY_LOGE("mmsPduHelper is null");
         return;
     }
