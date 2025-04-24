@@ -29,6 +29,7 @@
 #include "mock/mock_data_share_result_set.h"
 #include "radio_event.h"
 #include "send_short_message_callback_stub.h"
+#include "sms_broadcast_subscriber_receiver.h"
 #include "sms_hisysevent.h"
 #include "sms_misc_manager.h"
 #include "sms_mms_gtest.h"
@@ -2028,6 +2029,50 @@ HWTEST_F(BranchSmsPartTest, GsmUserDataPdu_0001, Function | MediumTest | Level1)
     EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderSingleShift(rBuf, header));
     EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderLockingShift(rBuf, header));
     EXPECT_FALSE(gsmUserDataPdu.DecodeHeaderDefaultCase(rBuf, header));
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsBroadcastSubscriberReceiver_0001
+ * @tc.name     Test SmsBroadcastSubscriberReceiver
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsBroadcastSubscriberReceiver_0001, Function | MediumTest | Level1)
+{
+    using namespace EventFwk;
+    auto dataShareHelperMock = std::make_shared<DataShareHelperMock>();
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = dataShareHelperMock;
+    EXPECT_CALL(*dataShareHelperMock, Delete(_, _))
+        .WillRepeatedly(Return(0));
+    MatchingSkills smsSkills;
+    smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
+    smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
+    auto receiver = std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo);
+    Want want;
+    CommonEventData data;
+    std::string addr = "";
+    want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_ADDRESS_KEY, addr);
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_DATABASE_ID_KEY, 1);
+    data.SetWant(want);
+    receiver->OnReceiveEvent(data);
+
+    addr = "addr";
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_ADDRESS_KEY, addr);
+    data.SetWant(want);
+    receiver->OnReceiveEvent(data);
+
+    want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
+    data.SetWant(want);
+    receiver->OnReceiveEvent(data);
+
+    want.SetAction("invalid action");
+    data.SetWant(want);
+    receiver->OnReceiveEvent(data);
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->smsDataShareHelper_ = nullptr;
+
+    SmsWapPushHandler wapPushHandler(0);
+    EXPECT_FALSE(wapPushHandler.SendWapPushMessageBroadcast(nullptr));
 }
 } // namespace Telephony
 } // namespace OHOS
