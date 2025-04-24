@@ -17,6 +17,7 @@
 #define SMS_RECEIVE_RELIABILITY_HANDLER_H
 
 #include "common_event_manager.h"
+#include "sms_broadcast_subscriber_receiver.h"
 #include "sms_wap_push_handler.h"
 #include "want.h"
 
@@ -53,6 +54,7 @@ private:
         std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, uint16_t dataBaseId);
 
 private:
+    static std::shared_ptr<SmsBroadcastSubscriberReceiver> g_receiver;
     std::unique_ptr<SmsWapPushHandler> smsWapPushHandler_;
     int32_t slotId_ = -1;
 };

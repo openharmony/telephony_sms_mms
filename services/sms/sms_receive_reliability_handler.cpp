@@ -58,6 +58,14 @@ const std::string CT_SMSC_86 = "8610659401";
 const std::string CT_SMSC_INTERNATION_86 = "+8610659401";
 const std::string CT_AUTO_REG_SMS_ACTION = "ct_auto_reg_sms_receive_completed";
 
+std::shared_ptr<SmsBroadcastSubscriberReceiver> SmsReceiveReliabilityHandler::g_receiver = []() {
+    MatchingSkills smsSkills;
+    smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
+    smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
+    return std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo);
+}();
+
 SmsReceiveReliabilityHandler::SmsReceiveReliabilityHandler(int32_t slotId) : slotId_(slotId)
 {
     smsWapPushHandler_ = std::make_unique<SmsWapPushHandler>(slotId);
@@ -336,26 +344,18 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     CommonEventPublishInfo publishInfo;
     PacketSmsData(want, indexer, data, publishInfo);
     want.SetParam(SMS_BROADCAST_PDU_KEY, newPdus);
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_DATABASE_ID_KEY, indexer->GetDataBaseId());
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_MSG_REF_ID_KEY, indexer->GetMsgRefId());
+    std::string addr = indexer->GetOriginatingAddress();
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_ADDRESS_KEY, addr);
     data.SetWant(want);
 
-    MatchingSkills smsSkills;
-    std::string addr = indexer->GetOriginatingAddress();
-    if (CT_SMSC.compare(addr) != 0 && CT_SMSC_86.compare(addr) != 0 && CT_SMSC_INTERNATION_86.compare(addr) != 0) {
-        TELEPHONY_LOGI("Sms Broadcast");
-        smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
-    } else {
-        TELEPHONY_LOGI("CT AutoReg Broadcast");
-        smsSkills.AddEvent(CT_AUTO_REG_SMS_ACTION);
-    }
-    CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
-    smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     bool cbResult = false;
     if (CT_SMSC.compare(addr) != 0 && CT_SMSC_86.compare(addr) != 0 && CT_SMSC_INTERNATION_86.compare(addr) != 0) {
-        auto smsReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(
-            smsSubscriberInfo, shared_from_this(), indexer->GetMsgRefId(), indexer->GetDataBaseId(), addr);
-        cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, smsReceiver);
-        sptrQueue.push(smsReceiver);
+        TELEPHONY_LOGI("Sms Broadcast");
+        cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, g_receiver);
     } else {
+        TELEPHONY_LOGI("CT AutoReg Broadcast");
         cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr);
     }
     HiSysEventCBResult(cbResult);
