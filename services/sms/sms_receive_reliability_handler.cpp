@@ -58,11 +58,12 @@ const std::string CT_SMSC_86 = "8610659401";
 const std::string CT_SMSC_INTERNATION_86 = "+8610659401";
 const std::string CT_AUTO_REG_SMS_ACTION = "ct_auto_reg_sms_receive_completed";
 
-MatchingSkills smsSkills;
-smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
-CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
-smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
-return std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo);
+std::shared_ptr<SmsBroadcastSubscriberReceiver> SmsReceiveReliabilityHandler::g_receiver = []() {
+    MatchingSkills smsSkills;
+    smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
+    CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
+    smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
+    return std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo);
 }();
 
 SmsReceiveReliabilityHandler::SmsReceiveReliabilityHandler(int32_t slotId) : slotId_(slotId)
