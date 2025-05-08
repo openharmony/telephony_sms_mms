@@ -360,7 +360,7 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     }
     HiSysEventCBResult(cbResult);
     if (CT_SMSC.compare(addr) == 0 || CT_SMSC_86.compare(addr) == 0 || CT_SMSC_INTERNATION_86.compare(addr) == 0) {
-        TELEPHONY_LOGI("del ct auto sms from db");
+        TELEPHONY_LOGI("del ct auto sms from db ");
         DeleteAutoSmsFromDB(shared_from_this(), indexer->GetMsgRefId(), indexer->GetDataBaseId());
     }
 }
