@@ -22,9 +22,9 @@
 #include "common_event_support.h"
 #include "mms_msg.h"
 #include "securec.h"
-#include "sms_broadcast_subscriber_receiver.h"
 #include "sms_hisysevent.h"
 #include "sms_persist_helper.h"
+#include "sms_receive_reliability_handler.h"
 #include "string_utils.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
@@ -37,6 +37,14 @@ static constexpr uint8_t PDU_TYPE_PUSH = 0x06;
 static constexpr uint8_t PDU_TYPE_CONFIRMED_PUSH = 0x07;
 static constexpr uint32_t PARAMETER_X_WAP_APPLICATION_ID = 0x2F;
 static constexpr const char *CONTENT_MIME_TYPE_B_PUSH_CO = "application/vnd.wap.coc";
+
+std::shared_ptr<SmsBroadcastSubscriberReceiver> SmsWapPushHandler::g_receiver = []() {
+    MatchingSkills smsSkills;
+    smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
+    CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
+    smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
+    return std::make_shared<SmsBroadcastSubscriberReceiver>(smsSubscriberInfo);
+}();
 
 SmsWapPushHandler::SmsWapPushHandler(int32_t slotId) : slotId_(slotId) {}
 
@@ -344,6 +352,9 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast(std::shared_ptr<SmsReceiveIn
     want.SetParam("contentType", contentType_.GetContentType());
     want.SetParam("headerData", hexHeaderData_);
     want.SetParam("rawData", hexWbXmlData_);
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_DATABASE_ID_KEY, indexer->GetDataBaseId());
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_MSG_REF_ID_KEY, indexer->GetMsgRefId());
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_ADDRESS_KEY, indexer->GetOriginatingAddress());
 
     EventFwk::CommonEventData data;
     data.SetWant(want);
@@ -355,15 +366,7 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast(std::shared_ptr<SmsReceiveIn
     wappushPermissions.emplace_back(Permission::RECEIVE_MMS);
     publishInfo.SetSubscriberPermissions(wappushPermissions);
 
-    MatchingSkills smsSkills;
-    smsSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
-    CommonEventSubscribeInfo smsSubscriberInfo(smsSkills);
-    smsSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
-    auto handler = std::make_shared<SmsReceiveReliabilityHandler>(slotId_);
-    auto wapPushReceiver = std::make_shared<SmsBroadcastSubscriberReceiver>(
-        smsSubscriberInfo, handler, indexer->GetMsgRefId(), indexer->GetDataBaseId(), indexer->GetOriginatingAddress());
-    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, wapPushReceiver);
-    sptrQueue.push(wapPushReceiver);
+    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, g_receiver);
     HiSysEventWapPushResult(publishResult);
     return true;
 }
