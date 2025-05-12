@@ -653,7 +653,7 @@ HWTEST_F(BranchMmsTest, SmsWapPushContentType_0003, Function | MediumTest | Leve
  * @tc.name     Test MmsBodyPart
  * @tc.desc     Function test
  */
-HWTEST_F(BranchMmsTest, MmsBodyPart_0001, Function | MediumTest | Level3)
+HWTEST_F(BranchMmsTest, MmsBodyPart_0001, TestSize.Level1)
 {
     MmsBodyPart mmsBodyPart;
     MmsBodyPart testBodyPart;
@@ -709,7 +709,7 @@ HWTEST_F(BranchMmsTest, MmsBodyPart_0001, Function | MediumTest | Level3)
  * @tc.name     Test MmsBodyPart
  * @tc.desc     Function test
  */
-HWTEST_F(BranchMmsTest, MmsBodyPart_0002, Function | MediumTest | Level3)
+HWTEST_F(BranchMmsTest, MmsBodyPart_0002, TestSize.Level)
 {
     MmsBodyPart mmsBodyPart;
 
@@ -747,7 +747,7 @@ HWTEST_F(BranchMmsTest, MmsBodyPart_0002, Function | MediumTest | Level3)
  * @tc.name     Test MmsContentType
  * @tc.desc     Function test
  */
-HWTEST_F(BranchMmsTest, MmsContentType_0001, Function | MediumTest | Level3)
+HWTEST_F(BranchMmsTest, MmsContentType_0001, TestSize.Level0)
 {
     MmsContentType mmsContentType;
     MmsContentType mmsTContentType;
@@ -784,7 +784,7 @@ HWTEST_F(BranchMmsTest, MmsContentType_0001, Function | MediumTest | Level3)
  * @tc.name     Test MmsContentType
  * @tc.desc     Function test
  */
-HWTEST_F(BranchMmsTest, MmsContentType_0002, Function | MediumTest | Level3)
+HWTEST_F(BranchMmsTest, MmsContentType_0002, TestSize.Level0)
 {
     MmsContentType mmsContentType;
     MmsDecodeBuffer decoderBuffer;
@@ -833,7 +833,7 @@ HWTEST_F(BranchMmsTest, MmsContentType_0002, Function | MediumTest | Level3)
  * @tc.name     Test MmsContentType
  * @tc.desc     Function test
  */
-HWTEST_F(BranchMmsTest, MmsContentType_0003, Function | MediumTest | Level3)
+HWTEST_F(BranchMmsTest, MmsContentType_0003, TestSize.Level0)
 {
     MmsEncodeBuffer mmsEncodeBuffer;
     MmsContentType mmsContentType;
@@ -876,7 +876,7 @@ HWTEST_F(BranchMmsTest, MmsContentType_0003, Function | MediumTest | Level3)
  * @tc.name     Test MmsContentType
  * @tc.desc     Function test
  */
-HWTEST_F(BranchMmsTest, MmsContentType_0004, Function | MediumTest | Level3)
+HWTEST_F(BranchMmsTest, MmsContentType_0004, TestSize.Level0)
 {
     MmsContentType mmsContentType;
     MmsEncodeBuffer mmsEncodeBuffer;
