@@ -709,7 +709,7 @@ HWTEST_F(BranchMmsTest, MmsBodyPart_0001, TestSize.Level1)
  * @tc.name     Test MmsBodyPart
  * @tc.desc     Function test
  */
-HWTEST_F(BranchMmsTest, MmsBodyPart_0002, TestSize.Level)
+HWTEST_F(BranchMmsTest, MmsBodyPart_0002, TestSize.Level0)
 {
     MmsBodyPart mmsBodyPart;
 
