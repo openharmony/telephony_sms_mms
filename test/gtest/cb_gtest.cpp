@@ -106,7 +106,7 @@ void OpenCellBroadcastTestFuc(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast slotId is -1
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0001, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_0001, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -155,7 +155,7 @@ void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast netType is unknown.
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_0003, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -191,7 +191,7 @@ void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast parameter is valid.
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_0004, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -227,7 +227,7 @@ void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_0005, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -268,7 +268,7 @@ void OpenCellBroadcastTestFuc6WithToken(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_0006, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -291,7 +291,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
  * @tc.name     Open cellBroadcast fromMsgId less than toMsgId
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0007, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_0007, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
@@ -314,7 +314,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0007, Function | MediumTest | Level3)
  * @tc.name     Open cellBroadcast netType is unknown.
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_0008, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0008 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
@@ -337,7 +337,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
  * @tc.name     Open cellBroadcast parameter is valid.
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_0009, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
@@ -360,7 +360,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_00010, TestSize.Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
@@ -383,7 +383,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0011, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_0011, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
@@ -406,7 +406,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0011, Function | MediumTest | Level3)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0012, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, OpenCellBroadcast_0012, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0012 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -442,7 +442,7 @@ void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast slotId is -1
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0001, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0001, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -478,7 +478,7 @@ void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast fromMsgId less than toMsgId
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0002, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0002, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -514,7 +514,7 @@ void CloseCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast netType is unknown
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0003, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -550,7 +550,7 @@ void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0004, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -586,7 +586,7 @@ void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0005, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -627,7 +627,7 @@ void CloseCellBroadcastTestFuc6WithToken(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0006, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
@@ -650,7 +650,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
  * @tc.name     Close cellBroadcast fromMsgId less than toMsgId
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0007, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0007, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
@@ -673,7 +673,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0007, Function | MediumTest | Level3)
  * @tc.name     Close cellBroadcast netType is unknown
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0008, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0008 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
@@ -696,7 +696,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0009, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
@@ -719,7 +719,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0010, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
@@ -742,7 +742,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_00011, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
@@ -765,7 +765,7 @@ HWTEST_F(CbGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0012, Function | MediumTest | Level3)
+HWTEST_F(CbGtest, CloseCellBroadcast_0012, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0012 -->");
     if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
