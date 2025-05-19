@@ -108,6 +108,7 @@ ohos_shared_library("tel_sms_mms") {
     "services/telephony_ext_wrapper/src/telephony_ext_wrapper.cpp",
     "utils/sms_common_utils.cpp",
     "utils/sms_hisysevent.cpp",
+    "utils/sms_policy_utils.cpp",
     "utils/string_utils.cpp",
     "utils/text_coder.cpp",
   ]

@@ -24,6 +24,7 @@
 #include "sms_dump_helper.h"
 #include "sms_mms_common.h"
 #include "sms_hisysevent.h"
+#include "sms_policy_utils.h"
 #include "string_utils.h"
 #include "telephony_common_utils.h"
 #include "telephony_ext_wrapper.h"
@@ -780,6 +781,9 @@ bool SmsService::GetEncodeStringFunc(
 int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
     const std::u16string &ua, const std::u16string &uaprof, int64_t &time, bool isMmsApp)
 {
+    if (DelayedSingleton<SmsPolicyUtils>::GetInstance()->IsMmsPolicyDisable()) {
+        return TELEPHONY_ERR_POLICY_DISABLED;
+    }
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
         TELEPHONY_LOGE("Non-system applications use system APIs!");
         return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
@@ -851,6 +855,10 @@ void SmsService::ServiceAfterSendMmsComplete(int32_t slotId, int64_t &time, uint
 int32_t SmsService::DownloadMms(int32_t slotId, const std::u16string &mmsc, std::u16string &data,
     const std::u16string &ua, const std::u16string &uaprof)
 {
+    if (DelayedSingleton<SmsPolicyUtils>::GetInstance()->IsMmsPolicyDisable()) {
+        TELEPHONY_LOGE("SmsService::DownloadMms mms policy is disable");
+        return TELEPHONY_ERR_POLICY_DISABLED;
+    }
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
         TELEPHONY_LOGE("Non-system applications use system APIs!");
         return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
