@@ -781,16 +781,9 @@ bool SmsService::GetEncodeStringFunc(
 int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const std::u16string &data,
     const std::u16string &ua, const std::u16string &uaprof, int64_t &time, bool isMmsApp)
 {
-    if (DelayedSingleton<SmsPolicyUtils>::GetInstance()->IsMmsPolicyDisable()) {
-        return TELEPHONY_ERR_POLICY_DISABLED;
-    }
-    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
-        TELEPHONY_LOGE("Non-system applications use system APIs!");
-        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
-    }
-    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
-        TELEPHONY_LOGE("check permission failed");
-        return TELEPHONY_ERR_PERMISSION_ERR;
+    const int32_t permissionCheck = CheckMmsPermissions();
+    if (permissionCheck != TELEPHONY_ERR_SUCCESS) {
+        return permissionCheck;
     }
     std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
     if (interfaceManager == nullptr) {
@@ -807,15 +800,7 @@ int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const st
     }
     uint16_t dataBaseId = 0;
     if (isMmsApp) {
-        DataShare::DataSharePredicates predicates;
-        predicates.EqualTo(SmsMmsInfo::MSG_TYPE, SmsMmsCommonData::SMS_MSM_TYPE_MMS);
-        predicates.EqualTo(SmsMmsInfo::MSG_STATE, SmsMmsCommonData::SMS_MSM_STATUS_SENDING);
-        predicates.EqualTo(SmsMmsInfo::SLOT_ID, slotId);
-        predicates.LessThanOrEqualTo(SmsMmsInfo::START_TIME, time);
-        predicates.OrderByDesc(SmsMmsInfo::START_TIME);
-        DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySmsMmsForId(predicates, dataBaseId);
-        TELEPHONY_LOGI("SmsService::SendMms. slot:%{public}d;;time:%{public}s;id:%{public}d",
-            slotId, std::to_string(time).c_str(), dataBaseId);
+        dataBaseId = QueryMmsDatabaseId(slotId, time);
     }
     DataShare::DataShareValuesBucket sessionBucket;
     int32_t ret = interfaceManager->SendMms(mmsc, data, ua, uaprof);
@@ -830,6 +815,38 @@ int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const st
         ServiceAfterSendMmsComplete(slotId, time, dataBaseId, sessionBucket, sendStatus);
     }
     return ret;
+}
+
+int32_t SmsService::CheckMmsPermissions()
+{
+    if (DelayedSingleton<SmsPolicyUtils>::GetInstance()->IsMmsPolicyDisable()) {
+        TELEPHONY_LOGE("mms policy is disabled");
+        return TELEPHONY_ERR_POLICY_DISABLED;
+    }
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
+        TELEPHONY_LOGE("check permission failed");
+        return TELEPHONY_ERR_PERMISSION_ERR;
+    }
+    return TELEPHONY_ERR_SUCCESS;
+}
+
+uint16_t SmsService::QueryMmsDatabaseId(int32_t slotId, int64_t time)
+{
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(SmsMmsInfo::MSG_TYPE, SmsMmsCommonData::SMS_MSM_TYPE_MMS);
+    predicates.EqualTo(SmsMmsInfo::MSG_STATE, SmsMmsCommonData::SMS_MSM_STATUS_SENDING);
+    predicates.EqualTo(SmsMmsInfo::SLOT_ID, slotId);
+    predicates.LessThanOrEqualTo(SmsMmsInfo::START_TIME, time);
+    predicates.OrderByDesc(SmsMmsInfo::START_TIME);
+    uint16_t dataBaseId = 0;
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySmsMmsForId(predicates, dataBaseId);
+    TELEPHONY_LOGI("slot:%{public}d;;time:%{public}s;id:%{public}d",
+        slotId, std::to_string(time).c_str(), dataBaseId);
+    return dataBaseId;
 }
 
 void SmsService::ServiceAfterSendMmsComplete(int32_t slotId, int64_t &time, uint16_t &dataBaseId,
