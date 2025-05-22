@@ -319,6 +319,22 @@ public:
         const std::u16string &uaprof, int64_t &time, bool isMmsApp = false) override;
 
     /**
+     * Check send mms permissions.
+     * @return Returns {@code 0} if send mms success; returns {@code false} otherwise
+     */
+    int32_t CheckMmsPermissions();
+
+    /**
+     * Query send mms database id.
+     * @param slotId Indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by
+     * the device
+     * @param time Indicates tiemstamp of hap call NAPI function
+     * @return Returns id of mms in sqlite
+     */
+    uint16_t QueryMmsDatabaseId(int32_t slotId, int64_t time);
+
+    /**
      * Service after Send Mms.
      * @param slotId Indicates the card slot index number,
      * ranging from {@code 0} to the maximum card slot index number supported by
