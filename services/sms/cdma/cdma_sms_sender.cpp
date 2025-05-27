@@ -523,7 +523,7 @@ void CdmaSmsSender::SendImsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, int
     lastSmsDomain_ = IMS_DOMAIN;
     ImsMessageInfo imsMessageInfo;
     imsMessageInfo.refId = refId;
-    imsMessageInfo.smscPdu = "";
+    imsMessageInfo.smscPdu = StringUtils::StringToHex(smsIndexer->GetEncodeSmca());
     imsMessageInfo.pdu = pdu;
     imsMessageInfo.tech = SMS_RADIO_TECH_3GPP;
     int32_t reply = smsClient->ImsSendMessage(slotId_, imsMessageInfo);
