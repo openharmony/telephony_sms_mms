@@ -343,6 +343,9 @@ HWTEST_F(SmsGsmTest, GsmUserDataDecode_001, Function | MediumTest | Level1)
 
     EXPECT_FALSE(decode.DecodeUcs2PduPartData(buffer, false, &userData, udl, fillBits));
     EXPECT_FALSE(decode2.DecodeUcs2PduPartData(buffer, true, &userData, udl, fillBits));
+    userData.length = 0;
+    EXPECT_TRUE(decode2.DecodeUcs2PduPartData(buffer, false, &userData, udl, fillBits));
+    EXPECT_TRUE(decode2.Decode8bitPduPartData(buffer, false, &userData, &tpud, udl, fillBits));
 }
 
 /**

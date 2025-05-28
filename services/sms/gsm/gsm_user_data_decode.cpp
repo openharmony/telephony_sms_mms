@@ -121,7 +121,7 @@ bool GsmUserDataDecode::DecodeGsmHeadPduPartData(
                 TELEPHONY_LOGE("headerLen error");
                 return false;
             }
-            if (buffer.GetIndex() >= buffer.GetSize()) {
+            if (buffer.GetIndex() > buffer.GetSize()) {
                 TELEPHONY_LOGE("data buffer error)");
                 userData_->ResetUserData(*userData);
                 return false;
@@ -234,18 +234,22 @@ bool GsmUserDataDecode::Decode8bitPduPartData(SmsReadBuffer &buffer, bool bHeade
         userData->headerCnt = 0;
     }
 
-    if (udhl > 0 && udl > udhl + 1) {
+    if (udhl > 0 && udl >= udhl + 1) {
         userData->length = (udl) - (udhl + 1);
         buffer.MoveForward(HEX_VALUE_01);
     } else {
         userData->length = udl;
     }
-    if (udl > sizeof(pTPUD->ud) || buffer.GetIndex() >= buffer.GetSize()) {
+    if (udl > sizeof(pTPUD->ud) || buffer.GetIndex() > buffer.GetSize()) {
         TELEPHONY_LOGE("udl length or buffer error");
         return false;
     }
     uint8_t remain = buffer.GetSize() - buffer.GetIndex();
     uint8_t len = userData->length < remain ? userData->length : remain;
+    if (len == 0) {
+        TELEPHONY_LOGI("user data length 0.");
+        return true;
+    }
     if (buffer.data_ == nullptr || len > sizeof(userData->data)) {
         TELEPHONY_LOGE("buffer error.");
         return false;
@@ -330,18 +334,22 @@ bool GsmUserDataDecode::DecodeUcs2PduPartData(
         }
     }
 
-    if (udhl > 0 && udl > udhl + 1) {
+    if (udhl > 0 && udl >= udhl + 1) {
         userData->length = (udl) - (udhl + 1);
     } else {
         userData->length = udl;
     }
 
-    if (buffer.GetIndex() >= buffer.GetSize()) {
+    if (buffer.GetIndex() > buffer.GetSize()) {
         TELEPHONY_LOGE("udl length or buffer error");
         return false;
     }
     uint8_t remain = buffer.GetSize() - buffer.GetIndex();
     uint8_t len = userData->length < remain ? userData->length : remain;
+    if (len == 0) {
+        TELEPHONY_LOGI("user data length 0.");
+        return true;
+    }
     if (buffer.data_ == nullptr || len > sizeof(userData->data)) {
         TELEPHONY_LOGE("buffer error.");
         return false;
