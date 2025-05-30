@@ -504,7 +504,7 @@ bool GsmSmsParamDecode::DecodeTimePduData(SmsReadBuffer &buffer, struct SmsTimeS
         return false;
     }
     timeStamp->time.absolute.second =
-        (pickByte & HEX_VALUE_0F) * HEX_VALUE_10 + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
+        (pickByte & HEX_VALUE_0F) * HEX_VALUE_0A + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
 
     if (!buffer.PickOneByte(pickByte)) {
         TELEPHONY_LOGE("get data error.");
@@ -515,7 +515,7 @@ bool GsmSmsParamDecode::DecodeTimePduData(SmsReadBuffer &buffer, struct SmsTimeS
         return false;
     }
     timeStamp->time.absolute.timeZone =
-        (pickByte & HEX_VALUE_07) * HEX_VALUE_10 + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
+        (pickByte & HEX_VALUE_07) * HEX_VALUE_0A + ((oneByte & HEX_VALUE_F0) >> HEX_VALUE_04);
 
     if (!buffer.ReadByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
