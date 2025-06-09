@@ -15,7 +15,7 @@
 
 #include "sms_dump_helper.h"
 
-#include "core_service_client.h"
+#include "core_manager_inner.h"
 #include "sms_service.h"
 #include "telephony_log_wrapper.h"
 
@@ -42,7 +42,7 @@ static std::string to_utf8(std::u16string str16)
 bool SmsDumpHelper::WhetherHasSimCard(const int32_t slotId) const
 {
     bool hasSimCard = false;
-    DelayedRefSingleton<CoreServiceClient>::GetInstance().HasSimCard(slotId, hasSimCard);
+    CoreManagerInner::GetInstance().HasSimCard(slotId, hasSimCard);
     return hasSimCard;
 }
 
