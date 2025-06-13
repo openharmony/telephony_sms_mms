@@ -154,6 +154,8 @@ void SmsNetworkPolicyManager::GetImsRegState()
     sptr<ImsRegInfoCallback> callback = new ImsRegStateCallbackStub(shared_from_this());
     int32_t ret = CoreServiceClient::GetInstance().RegisterImsRegInfoCallback(slotId_, imsSrvType, callback);
     TELEPHONY_LOGI("SmsNetworkPolicyManager::GetImsRegState ret:%{public}d", ret);
+    ret = CoreServiceClient::GetInstance().RegisterImsRegInfoCallback(slotId_, TYPE_SMS, callback);
+    TELEPHONY_LOGI("register TYPE_SMS callback ret:%{public}d", ret);
 }
 
 bool SmsNetworkPolicyManager::IsImsNetDomain() const
