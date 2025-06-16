@@ -81,7 +81,7 @@ private:
 
     static const int64_t RUNNING_LOCK_DEFAULT_TIMEOUT_MS = 60 * 1000; // 60s
     static const int64_t DELAY_RELEASE_RUNNING_LOCK_TIMEOUT_MS = 5 * 1000; // 5s
-    static const int64_t DELAY_REDUCE_RUNNING_LOCK_TIMEOUT_MS = 8 * 1000; // 8s
+    static const int64_t DELAY_REDUCE_RUNNING_LOCK_TIMEOUT_MS = 4 * 1000; // 8s
     static const int64_t DELAY_REDUCE_RUNNING_LOCK_SMS_QUEUE_TIMEOUT_MS = 20 * 1000; // 20s
     static const int64_t DELAY_RETRY_CONNECT_DATASHARE_MS = 5 * 1000; // 5s
     static const uint8_t RECONNECT_MAX_COUNT = 20;
