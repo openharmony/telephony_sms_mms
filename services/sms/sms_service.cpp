@@ -146,6 +146,11 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
     const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
     bool isMmsApp)
 {
+    if (SmsPolicyUtils::IsSmsPolicyDisable()) {
+        TELEPHONY_LOGE("SmsService::SendMessage sms policy is disabled");
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        return TELEPHONY_ERR_POLICY_DISABLED;
+    }
     if (!CheckSmsPermission(sendCallback)) {
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_PERMISSION_ERROR, Permission::SEND_MESSAGES);
@@ -288,6 +293,11 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
     const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
     const sptr<IDeliveryShortMessageCallback> &deliveryCallback)
 {
+    if (SmsPolicyUtils::IsSmsPolicyDisable()) {
+        TELEPHONY_LOGE("SmsService::SendMessage sms policy is disabled");
+        SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);
+        return TELEPHONY_ERR_POLICY_DISABLED;
+    }
     if (!CheckSmsPermission(sendCallback)) {
         SmsHiSysEvent::WriteSmsSendFaultEvent(slotId, SmsMmsMessageType::SMS_SHORT_MESSAGE,
             SmsMmsErrorCode::SMS_ERROR_PERMISSION_ERROR, Permission::SEND_MESSAGES);
@@ -819,7 +829,7 @@ int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const st
 
 int32_t SmsService::CheckMmsPermissions()
 {
-    if (DelayedSingleton<SmsPolicyUtils>::GetInstance()->IsMmsPolicyDisable()) {
+    if (SmsPolicyUtils::IsMmsPolicyDisable()) {
         TELEPHONY_LOGE("mms policy is disabled");
         return TELEPHONY_ERR_POLICY_DISABLED;
     }
@@ -872,7 +882,7 @@ void SmsService::ServiceAfterSendMmsComplete(int32_t slotId, int64_t &time, uint
 int32_t SmsService::DownloadMms(int32_t slotId, const std::u16string &mmsc, std::u16string &data,
     const std::u16string &ua, const std::u16string &uaprof)
 {
-    if (DelayedSingleton<SmsPolicyUtils>::GetInstance()->IsMmsPolicyDisable()) {
+    if (SmsPolicyUtils::IsMmsPolicyDisable()) {
         TELEPHONY_LOGE("SmsService::DownloadMms mms policy is disable");
         return TELEPHONY_ERR_POLICY_DISABLED;
     }
