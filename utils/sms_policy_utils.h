@@ -16,16 +16,16 @@
 #ifndef SMS_POLICY_UTILS_H
 #define SMS_POLICY_UTILS_H
 
-#include <string>
-#include "singleton.h"
-
 namespace OHOS {
 namespace Telephony {
 class SmsPolicyUtils {
-    DECLARE_DELAYED_SINGLETON(SmsPolicyUtils)
 public:
-    bool IsSmsPolicyDisable();
-    bool IsMmsPolicyDisable();
+    static bool IsSmsPolicyDisable();
+    static bool IsMmsPolicyDisable();
+
+private:
+    SmsPolicyUtils();
+    virtual ~SmsPolicyUtils();
 };
 } // namespace Telephony
 } // namespace OHOS

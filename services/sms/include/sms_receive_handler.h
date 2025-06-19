@@ -70,6 +70,7 @@ private:
         const std::shared_ptr<SmsReceiveIndexer> &indexer, std::shared_ptr<std::vector<std::string>> pdus);
     void CreateRunningLockInner();
     void HandleRunningLockTimeoutEvent(const AppExecFwk::InnerEvent::Pointer &event);
+    void HandleSmsEvent(const AppExecFwk::InnerEvent::Pointer &event);
 
 protected:
     int32_t slotId_ = -1;
