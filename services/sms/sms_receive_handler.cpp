@@ -16,8 +16,10 @@
 #include "sms_receive_handler.h"
 #include "gsm_sms_message.h"
 #include "radio_event.h"
+#include "sms_common.h"
 #include "sms_hisysevent.h"
 #include "sms_persist_helper.h"
+#include "sms_policy_utils.h"
 #include "telephony_log_wrapper.h"
 #include "iservice_registry.h"
 #include <queue>
@@ -128,24 +130,7 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
     switch (eventId) {
         case RadioEvent::RADIO_GSM_SMS:
         case RadioEvent::RADIO_CDMA_SMS: {
-            ApplyRunningLock();
-            std::shared_ptr<SmsBaseMessage> message = nullptr;
-            message = TransformMessageInfo(event->GetSharedObject<SmsMessageInfo>());
-            if (message != nullptr) {
-                TELEPHONY_LOGI("[raw pdu] =%{private}s", StringUtils::StringToHex(message->GetRawPdu()).c_str());
-            }
-            if (!g_alreadySendEvent) {
-                if (IsDataShareReady()) {
-                    HandleReceivedSms(message);
-                    this->SendEvent(DELAY_RELEASE_RUNNING_LOCK_EVENT_ID, DELAY_REDUCE_RUNNING_LOCK_TIMEOUT_MS);
-                } else {
-                    HandleReceivedSmsWithoutDataShare(message);
-                    this->SendEvent(RETRY_CONNECT_DATASHARE_EVENT_ID, DELAY_RETRY_CONNECT_DATASHARE_MS);
-                    g_alreadySendEvent = true;
-                }
-            } else {
-                HandleReceivedSmsWithoutDataShare(message);
-            }
+            HandleSmsEvent(event);
             break;
         }
         case RUNNING_LOCK_TIMEOUT_EVENT_ID:
@@ -161,6 +146,30 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
         default:
             TELEPHONY_LOGE("SmsReceiveHandler::ProcessEvent Unknown eventId %{public}d", eventId);
             break;
+    }
+}
+
+void SmsReceiveHandler::HandleSmsEvent(const AppExecFwk::InnerEvent::Pointer &event)
+{
+    if (SmsPolicyUtils::IsSmsPolicyDisable()) {
+        TELEPHONY_LOGE("SmsReceiveHandler::ProcessEvent sms policy is disabled");
+        ReplySmsToSmsc(AckIncomeCause::SMS_ACK_RESULT_OK);
+        return;
+    }
+    ApplyRunningLock();
+    std::shared_ptr<SmsBaseMessage> message = nullptr;
+    message = TransformMessageInfo(event->GetSharedObject<SmsMessageInfo>());
+    if (!g_alreadySendEvent) {
+        if (IsDataShareReady()) {
+            HandleReceivedSms(message);
+            this->SendEvent(DELAY_RELEASE_RUNNING_LOCK_EVENT_ID, DELAY_REDUCE_RUNNING_LOCK_TIMEOUT_MS);
+        } else {
+            HandleReceivedSmsWithoutDataShare(message);
+            this->SendEvent(RETRY_CONNECT_DATASHARE_EVENT_ID, DELAY_RETRY_CONNECT_DATASHARE_MS);
+            g_alreadySendEvent = true;
+        }
+    } else {
+        HandleReceivedSmsWithoutDataShare(message);
     }
 }
 

@@ -24,7 +24,15 @@
 #include "gtest/gtest.h"
 #include "ims_reg_state_callback_stub.h"
 #include "mms_apn_info.h"
+#include "radio_event.h"
+#include "sms_mms_gtest.h"
 #include "sms_pdu_buffer.h"
+#include "sms_receive_handler.h"
+#include "sms_state_handler.h"
+#include "sms_send_manager.h"
+#include "sms_sender.h"
+#include "sms_service.h"
+#include "sms_service_manager_client.h"
 #include "sms_state_handler.h"
 #include "telephony_errors.h"
 
@@ -37,6 +45,11 @@ static constexpr uint8_t TEST_MAX_FIELD_LEN = 170;
 static constexpr uint8_t MAX_FIELD_LEN = 255;
 static constexpr int TEST_DATA_LEN = 100;
 static constexpr int TEST_SEND_CONF_MAX_SIZE = 600;
+const int32_t INVALID_SLOTID = 2;
+const unsigned int SMS_REF_ID = 10;
+const std::string BLOCK_NUMBER = "123";
+const int16_t WAP_PUSH_PORT = 2948;
+const int8_t TEXT_PORT_NUM = -1;
 } // namespace
 using namespace testing::ext;
 
@@ -348,6 +361,98 @@ HWTEST_F(SmsServicesMmsGtest, GsmCbUmtsCodec_0001, Function | MediumTest | Level
     codec.cbCodec_ = cbCodec;
     codec.cbHeader_ = nullptr;
     EXPECT_FALSE(codec.Decode3gHeader());
+}
+
+HWTEST_F(SmsServicesMmsGtest, SmsReceiveHandlerDisable_0001, Function | MediumTest | Level1)
+{
+    system::SetParameter("persist.edm.sms_disable", "true");
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_GSM_SMS, 1);
+    std::shared_ptr<SmsReceiveHandler> smsReceiveHandler = std::make_shared<CdmaSmsReceiveHandler>(INVALID_SLOTID);
+    smsReceiveHandler->ProcessEvent(event);
+    event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_CDMA_SMS, 1);
+    smsReceiveHandler->ProcessEvent(event);
+    event = AppExecFwk::InnerEvent::Get(RadioEvent::RADIO_CONNECTED, 1);
+    smsReceiveHandler->ProcessEvent(event);
+    event = nullptr;
+    smsReceiveHandler->ProcessEvent(event);
+    std::shared_ptr<SmsReceiveIndexer> indexer = nullptr;
+    std::shared_ptr<SmsBaseMessage> smsBaseMessage = nullptr;
+    std::shared_ptr<vector<string>> pdus = nullptr;
+    auto reliabilityHandler = std::make_shared<SmsReceiveReliabilityHandler>(INVALID_SLOTID);
+    reliabilityHandler->DeleteMessageFormDb(SMS_REF_ID);
+    smsReceiveHandler->CombineMessagePart(indexer);
+
+    reliabilityHandler->CheckBlockedPhoneNumber(BLOCK_NUMBER);
+    reliabilityHandler->DeleteAutoSmsFromDB(reliabilityHandler, 0, 0);
+    reliabilityHandler->SendBroadcast(indexer, pdus);
+    smsReceiveHandler->HandleReceivedSms(smsBaseMessage);
+    indexer = std::make_shared<SmsReceiveIndexer>();
+    smsReceiveHandler->CombineMessagePart(indexer);
+    indexer->msgCount_ = 1;
+    indexer->destPort_ = WAP_PUSH_PORT;
+    smsReceiveHandler->CombineMessagePart(indexer);
+    reliabilityHandler->SendBroadcast(indexer, pdus);
+    pdus = std::make_shared<vector<string>>();
+    string pud = "qwe";
+    pdus->push_back(pud);
+    reliabilityHandler->SendBroadcast(indexer, pdus);
+    smsReceiveHandler->CombineMultiPageMessage(indexer, pdus, reliabilityHandler);
+    smsReceiveHandler->UpdateMultiPageMessage(indexer, pdus);
+    indexer->destPort_ = TEXT_PORT_NUM;
+    reliabilityHandler->SendBroadcast(indexer, pdus);
+    smsReceiveHandler->AddMsgToDB(indexer);
+    smsReceiveHandler->IsRepeatedMessagePart(indexer);
+    indexer = nullptr;
+    EXPECT_FALSE(smsReceiveHandler->AddMsgToDB(indexer));
+    system::SetParameter("persist.edm.sms_disable", "false");
+}
+
+HWTEST_F(SmsServicesMmsGtest, SmsServiceSendMessageDisable_0001, Function | MediumTest | Level1)
+{
+    int32_t slotId = 0;
+    std::u16string desAddr = u"";
+    sptr<ISendShortMessageCallback> sendCallback;
+    sptr<IDeliveryShortMessageCallback> deliveryCallback;
+    auto smsService = DelayedSingleton<SmsService>::GetInstance();
+    AccessMmsToken token;
+    system::SetParameter("persist.edm.sms_disable", "true");
+    int32_t ret = smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, true);
+    EXPECT_TRUE(ret == TELEPHONY_ERR_POLICY_DISABLED);
+    ret = smsService->SendMessage(slotId, desAddr, desAddr, desAddr, sendCallback, deliveryCallback, false);
+    EXPECT_TRUE(ret == TELEPHONY_ERR_POLICY_DISABLED);
+    uint16_t port = 1;
+    uint8_t *data = nullptr;
+    ret = smsService->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
+    EXPECT_TRUE(ret == TELEPHONY_ERR_POLICY_DISABLED);
+    std::string telephone = "13888888888";
+    uint16_t dataBaseId = 0;
+    smsService->InsertSessionAndDetail(slotId, telephone, telephone, dataBaseId);
+    smsService->InsertSessionAndDetail(slotId, "10000", "text", dataBaseId);
+    smsService->InsertSessionAndDetail(slotId, "10000,10001", "text", dataBaseId);
+    smsService->InsertSessionAndDetail(slotId, "11112123", "text", dataBaseId);
+    smsService->InsertSessionAndDetail(slotId, "invalid_number", "text", dataBaseId);
+
+    bool isSupported = false;
+    slotId = 0;
+    smsService->IsImsSmsSupported(slotId, isSupported);
+    std::u16string format = u"";
+    smsService->GetImsShortMessageFormat(format);
+    smsService->HasSmsCapability();
+    int32_t setSmscRes = 0;
+    setSmscRes = smsService->SetSmscAddr(slotId, desAddr);
+    desAddr = u" test";
+    string sca = StringUtils::ToUtf8(desAddr);
+    smsService->TrimSmscAddr(sca);
+    desAddr = u"test ";
+    sca = StringUtils::ToUtf8(desAddr);
+    smsService->TrimSmscAddr(sca);
+    int32_t smscRes = 0;
+
+    smscRes = smsService->GetSmscAddr(slotId, desAddr);
+    system::SetParameter("persist.edm.sms_disable", "false");
+    EXPECT_GE(setSmscRes, TELEPHONY_ERR_SLOTID_INVALID);
+    EXPECT_GE(smscRes, TELEPHONY_ERR_ARGUMENT_INVALID);
+    EXPECT_TRUE(smsService != nullptr);
 }
 } // namespace Telephony
 } // namespace OHOS
