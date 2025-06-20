@@ -97,6 +97,8 @@ private:
     std::atomic_uint smsRunningLockCount_;
     std::atomic_int smsLockSerialNum_;
     std::mutex mutexRunningLock_;
+    bool alreadySendEvent_ = false;
+    uint8_t reconnectDataShareCount_ = 0;
 };
 } // namespace Telephony
 } // namespace OHOS
