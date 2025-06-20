@@ -36,8 +36,6 @@ const std::string STR_URI = "datashare:///com.ohos.smsmmsability/sms_mms/sms_sub
 const std::string EXT_URI = "datashare:///com.ohos.smsmmsability";
 
 std::queue<std::shared_ptr<SmsBaseMessage>> g_smsBaseMessageQueue;
-uint8_t g_reconnectDataShareCount = 0;
-bool g_alreadySendEvent = false;
 
 SmsReceiveHandler::SmsReceiveHandler(int32_t slotId) : TelEventHandler("SmsReceiveHandler"), slotId_(slotId)
 {
@@ -85,9 +83,9 @@ void SmsReceiveHandler::HandleMessageQueue()
     }
     // give app 20s power lock time to handle receive.
     this->SendEvent(DELAY_RELEASE_RUNNING_LOCK_EVENT_ID, DELAY_REDUCE_RUNNING_LOCK_SMS_QUEUE_TIMEOUT_MS);
-    g_reconnectDataShareCount = 0;
+    reconnectDataShareCount_ = 0;
     // set the flag of datashare is not ready to false.
-    g_alreadySendEvent = false;
+    alreadySendEvent_ = false;
 }
 
 void SmsReceiveHandler::HandleReconnectEvent()
@@ -96,16 +94,16 @@ void SmsReceiveHandler::HandleReconnectEvent()
         std::lock_guard<std::mutex> lock(queueMutex_);
         HandleMessageQueue();
     } else {
-        g_reconnectDataShareCount++;
+        reconnectDataShareCount_++;
         // if retry times over 20(the datashare is not ready in 100s), stop try.
-        if (g_reconnectDataShareCount >= RECONNECT_MAX_COUNT) {
+        if (reconnectDataShareCount_ >= RECONNECT_MAX_COUNT) {
             TELEPHONY_LOGI("Over the max reconnect count:20 and there are %{public}zu sms have not been operated",
                 g_smsBaseMessageQueue.size());
-            g_reconnectDataShareCount = 0;
-            g_alreadySendEvent = false;
+            reconnectDataShareCount_ = 0;
+            alreadySendEvent_ = false;
             ReleaseRunningLock();
         } else {
-            TELEPHONY_LOGI("Send event %{public}u times", g_reconnectDataShareCount);
+            TELEPHONY_LOGI("Send event %{public}u times", reconnectDataShareCount_);
             /*
              *applylock can only hold power lock 60s, so reapply lock every 5s to ensure have entire 60s to
              *operate sms when datashare is ready('reduce' to release and 'apply' to rehold)
@@ -157,16 +155,15 @@ void SmsReceiveHandler::HandleSmsEvent(const AppExecFwk::InnerEvent::Pointer &ev
         return;
     }
     ApplyRunningLock();
-    std::shared_ptr<SmsBaseMessage> message = nullptr;
-    message = TransformMessageInfo(event->GetSharedObject<SmsMessageInfo>());
-    if (!g_alreadySendEvent) {
+    std::shared_ptr<SmsBaseMessage> message = TransformMessageInfo(event->GetSharedObject<SmsMessageInfo>());
+    if (!alreadySendEvent_) {
         if (IsDataShareReady()) {
             HandleReceivedSms(message);
             this->SendEvent(DELAY_RELEASE_RUNNING_LOCK_EVENT_ID, DELAY_REDUCE_RUNNING_LOCK_TIMEOUT_MS);
         } else {
             HandleReceivedSmsWithoutDataShare(message);
             this->SendEvent(RETRY_CONNECT_DATASHARE_EVENT_ID, DELAY_RETRY_CONNECT_DATASHARE_MS);
-            g_alreadySendEvent = true;
+            alreadySendEvent_ = true;
         }
     } else {
         HandleReceivedSmsWithoutDataShare(message);
