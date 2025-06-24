@@ -269,7 +269,7 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
     httpReq.SetHeader("x-wap-profile", uaprof);
     httpReq.SetHeader("Accept", "*/*, application/vnd.wap.mms-message, application/vnd.wap.sic");
     std::string host = StringUtils::GetHostnameWithPortFromURL(url);
-    httpReq.SetHeader("Port", host);
+    httpReq.SetHeader("Host", host);
 
     HttpSession &session = HttpSession::GetInstance();
     auto task = session.CreateTask(httpReq);
