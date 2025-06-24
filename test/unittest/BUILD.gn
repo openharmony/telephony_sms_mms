@@ -52,7 +52,7 @@ ohos_executable("tel_sms_mms_test") {
     "ability_runtime:ability_manager",
     "ability_runtime:data_ability_helper",
     "access_token:libaccesstoken_sdk",
-    "access_token:libnativetoken",
+    "access_token:libnativetoken_shared",
     "access_token:libtoken_setproc",
     "curl:curl_shared",
     "c_utils:utils",
