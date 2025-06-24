@@ -34,6 +34,10 @@ public:
     static std::vector<uint8_t> HexToByteVector(const std::string &str);
     static bool IsEmpty(const std::string &str);
 
+    static std::string GetProtocolFromURL(const std::string &url);
+    static std::string GetPortFromURL(const std::string &url);
+    static std::string GetHostnameFromURL(const std::string& url);
+    static std::string GetHostnameWithPortFromURL(const std::string& url);
 private:
     StringUtils();
     virtual ~StringUtils();

@@ -1479,5 +1479,48 @@ HWTEST_F(BranchMmsTest, ServiceAfterSendMmsComplete_0001, Function | MediumTest 
     smsService->ServiceAfterSendMmsComplete(slotId, time, dataBaseId, sessionBucket, sendStatus);
     EXPECT_TRUE(smsService != nullptr);
 }
+
+HWTEST_F(BranchMmsTest, GetPortFromURLTest001, TestSize.Level2)
+{
+    std::string port = StringUtils::GetPortFromURL("https://www.example.com?data_string");
+    EXPECT_STREQ(port.c_str(), "");
+}
+
+HWTEST_F(BranchMmsTest, GetPortFromURLTest002, TestSize.Level2)
+{
+    std::string port = StringUtils::GetPortFromURL("https://www.example.com:9984?data_string");
+    EXPECT_STREQ(port.c_str(), "9984");
+}
+
+HWTEST_F(BranchMmsTest, GetPortFromURLTest003, TestSize.Level2)
+{
+    std::string port = StringUtils::GetPortFromURL("www.example.com:9984?data_string");
+    EXPECT_STREQ(port.c_str(), "9984");
+}
+
+HWTEST_F(BranchMmsTest, GetPortFromURLTest004, TestSize.Level2)
+{
+    std::string port = StringUtils::GetPortFromURL("www.example.com?data_string");
+    EXPECT_STREQ(port.c_str(), "");
+}
+
+HWTEST_F(BranchMmsTest, GetHostnameFromURL01, TestSize.Level2)
+{
+    std::string hostname = StringUtils::GetHostnameFromURL("https:////www.example.com?data_string");
+    EXPECT_STREQ(hostname.c_str(), "www.example.com");
+}
+
+HWTEST_F(BranchMmsTest, GetHostnameFromURL02, TestSize.Level2)
+{
+    std::string hostname = StringUtils::GetHostnameFromURL(R"(https:/\\\\\\///\\/www.example.com?data_string)");
+    EXPECT_STREQ(hostname.c_str(), "www.example.com");
+}
+
+HWTEST_F(BranchMmsTest, GetHostnameFromURL03, TestSize.Level2)
+{
+    std::string hostname = StringUtils::GetHostnameFromURL("");
+    EXPECT_STREQ(hostname.c_str(), "");
+}
+
 } // namespace Telephony
 } // namespace OHOS
