@@ -142,6 +142,26 @@ bool StringUtils::IsEmpty(const std::string &str)
     return strTemp.empty() || strlen(strTemp.c_str()) == 0;
 }
 
+std::string StringUtils::GetPortFromURL(const std::string &url)
+{
+    std::string delimiter = "://";
+    std::string protocol = GetProtocolFromURL(url);
+    std::string hostname = GetHostnameFromURL(url);
+    size_t start = protocol.empty() ? hostname.size() : protocol.size() + delimiter.size() + hostname.size();
+    size_t posStart = url.find_first_of(':', start);
+    if (posStart == std::string::npos) {
+        return "";
+    }
+    size_t posEnd = std::min({url.find('/', start), url.find('?', start)});
+    if (posEnd == std::string::npos) {
+        return url.substr(posStart + 1);
+    }
+    if (posStart > posEnd) {
+        return "";
+    }
+    return url.substr(posStart + 1, posEnd - posStart - 1);
+}
+
 std::string StringUtils::GetHostnameFromURL(const std::string &url)
 {
     if (url.empty()) {
