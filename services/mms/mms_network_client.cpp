@@ -262,12 +262,15 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
         httpReq.SetBody(data.c_str(), data.size());
         httpReq.SetMethod(HttpConstant::HTTP_METHOD_POST);
         httpReq.SetHeader("content-type", "application/vnd.wap.mms-message");
-        httpReq.SetHeader("Accept", "*/*, application/vnd.wap.mms-message, application/vnd.wap.sic");
     } else {
         httpReq.SetMethod(HttpConstant::HTTP_METHOD_GET);
     }
     httpReq.SetHeader("User-Agent", ua);
     httpReq.SetHeader("x-wap-profile", uaprof);
+    httpReq.SetHeader("Accept", "*/*, application/vnd.wap.mms-message, application/vnd.wap.sic");
+    std::string host = StringUtils::GetHostnameWithPortFromURL(url);
+    httpReq.SetHeader("Host", host);
+
     HttpSession &session = HttpSession::GetInstance();
     auto task = session.CreateTask(httpReq);
     if (task == nullptr || task->GetCurlHandle() == nullptr) {
@@ -285,6 +288,11 @@ int32_t MmsNetworkClient::HttpRequest(const std::string &method, const std::stri
         TELEPHONY_LOGE("CURLOPT_INTERFACE failed errCode:%{public}d", errCode);
         return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
     }
+    errCode = curl_easy_setopt(task->GetCurlHandle(), CURLOPT_MMS_RESERVED_DEFAULT_PORT, 1L);
+    if (errCode != CURLE_OK) {
+        TELEPHONY_LOGE("CURLOPT_MMS_RESERVED_DEFAULT_PORT failed errCode:%{public}d", errCode);
+    }
+
     HttpCallBack(task);
     task->Start();
     return TELEPHONY_ERR_SUCCESS;
