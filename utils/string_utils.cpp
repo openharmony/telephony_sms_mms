@@ -142,71 +142,40 @@ bool StringUtils::IsEmpty(const std::string &str)
     return strTemp.empty() || strlen(strTemp.c_str()) == 0;
 }
 
-std::string StringUtils::GetPortFromURL(const std::string &url)
-{
-    std::string delimiter = "://";
-    std::string protocol = GetProtocolFromURL(url);
-    std::string hostname = GetHostnameFromURL(url);
-    size_t start = protocol.empty() ? hostname.size() : protocol.size() + delimiter.size() + hostname.size();
-    size_t posStart = url.find_first_of(':', start);
-    if (posStart == std::string::npos)
-    {
-        return "";
-    }
-    size_t posEnd = std::min({url.find('/', start), url.find('?', start)});
-    if (posEnd == std::string::npos)
-    {
-        return url.substr(posStart + 1);
-    }
-    if (posStart > posEnd)
-    {
-        return "";
-    }
-    return url.substr(posStart + 1, posEnd - posStart - 1);
-}
-
 std::string StringUtils::GetHostnameFromURL(const std::string &url)
 {
-    if (url.empty())
-    {
+    if (url.empty()) {
         return "";
     }
     std::string delimiter = "://";
     std::string tempUrl = url;
     std::replace(tempUrl.begin(), tempUrl.end(), '\\', '/');
     size_t posStart = tempUrl.find(delimiter);
-    if (posStart != std::string::npos)
-    {
-        posStart = delimiter.length();
-    }
-    else
-    {
+    if (posStart != std::string::npos) {
+        posStart += delimiter.length();
+    } else {
         posStart = 0;
     }
     size_t notSlash = tempUrl.find_first_not_of('/', posStart);
-    if (notSlash != std::string::npos)
-    {
+    if (notSlash != std::string::npos) {
         posStart = notSlash;
     }
-    size_t posEnd = std::min({tempUrl.find(':', posStart),
-                              tempUrl.find('/', posStart), tempUrl.find('?', posStart)});
-    if (posEnd != std::string::npos)
-    {
+    size_t posEnd = std::min({ tempUrl.find(':', posStart),
+                              tempUrl.find('/', posStart), tempUrl.find('?', posStart) });
+    if (posEnd != std::string::npos) {
         return tempUrl.substr(posStart, posEnd - posStart);
     }
     return tempUrl.substr(posStart);
 }
 
-std::string StringUtils::GetHostnameWithPortFromURL(const std::string &url)
+std::string StringUtils::GetHostnameWithPortFromURL(const std::string& url)
 {
     std::string portDelimiter = ":";
     auto hostname = GetHostnameFromURL(url);
-    if (!hostname.empty())
-    {
+    if (!hostname.empty()) {
         std::string port = GetPortFromURL(url);
-        if (!port.empty())
-        {
-            hostname = portDelimiter + port;
+        if (!port.empty()) {
+            hostname += portDelimiter + port;
         }
     }
     return hostname;
@@ -216,12 +185,10 @@ std::string StringUtils::GetProtocolFromURL(const std::string &url)
 {
     std::string delimiter = "://";
     size_t pos = url.find(delimiter);
-    if (pos != std::string::npos)
-    {
+    if (pos != std::string::npos) {
         return url.substr(0, pos);
     }
     return "";
 }
-
 } // namespace Telephony
 } // namespace OHOS
