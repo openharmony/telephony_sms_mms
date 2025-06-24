@@ -18,8 +18,6 @@
 #define protected public
 #include "cb_start_ability.h"
 #include "delivery_short_message_callback_stub.h"
-#include "os_account.h"
-#include "ios_account.h"
 #include "gsm_sms_param_codec.h"
 #include "gsm_pdu_hex_value.h"
 #include "gsm_sms_common_utils.h"
