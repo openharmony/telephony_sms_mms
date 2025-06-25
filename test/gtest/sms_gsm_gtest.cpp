@@ -27,6 +27,7 @@
 #include "gsm_sms_tpdu_decode.h"
 #include "gsm_user_data_decode.h"
 #include "gsm_user_data_encode.h"
+#include "short_message.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -436,6 +437,19 @@ HWTEST_F(SmsGsmTest, GsmSmsSender_002, Function | MediumTest | Level1)
     smsSender->SendSatelliteSms(indexer, smsData);
     smsSender->ResendDataDelivery(indexer);
     EXPECT_NE(indexer, nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_ShortMessage_001
+ * @tc.name     ShortMessage_001
+ * @tc.desc     Function test ShortMessage
+ */
+HWTEST_F(SmsGsmTest, ShortMessage_001, Function | MediumTest | Level1)
+{
+    auto shortMessage = std::make_shared<ShortMessage>();
+    Parcel parcel;
+    EXPECT_TRUE(shortMessage->Marshalling(parcel));
+    EXPECT_TRUE(shortMessage->ReadFromParcel(parcel));
 }
 }
 }
