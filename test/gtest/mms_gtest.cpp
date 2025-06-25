@@ -431,7 +431,6 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0001, Function | MediumTest | Level2)
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0001 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 /**

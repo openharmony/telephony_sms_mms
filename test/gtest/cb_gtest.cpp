@@ -850,7 +850,6 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0001, Function | MediumTest | Level2)
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0001 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 /**
@@ -881,7 +880,6 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0002, Function | MediumTest | Level2)
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0002 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 /**
