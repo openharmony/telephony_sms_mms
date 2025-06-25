@@ -584,6 +584,7 @@ HWTEST_F(BranchCbTest, GsmSmsCbHandler_0001, Function | MediumTest | Level1)
     EXPECT_TRUE(gsmSmsCbHandler->FindCbMessage(cbMessage) == nullptr);
     EXPECT_FALSE(gsmSmsCbHandler->AddCbMessageToList(cbMessage));
     EXPECT_FALSE(gsmSmsCbHandler->SendCbMessageBroadcast(cbMessage));
+    EXPECT_TRUE(gsmSmsCbHandler->CheckCbActive(cbMessage));
     cbMessage->cbHeader_ = std::make_shared<GsmCbCodec::GsmCbMessageHeader>();
     EXPECT_EQ(gsmSmsCbHandler->CheckCbMessage(cbMessage), 1);
     cbMessage->cbHeader_->totalPages = 1;
@@ -601,11 +602,14 @@ HWTEST_F(BranchCbTest, GsmSmsCbHandler_0001, Function | MediumTest | Level1)
     EventFwk::Want want;
     gsmSmsCbHandler->PackageWantData(sendData, want);
     gsmSmsCbHandler->HandleCbMessage(message);
+    gsmSmsCbHandler->SetWantData(want, cbMessage);
     EXPECT_FALSE(gsmSmsCbHandler->CheckCbActive(cbMessage));
     EXPECT_FALSE(gsmSmsCbHandler->AddCbMessageToList(cbMessage));
     EXPECT_FALSE(gsmSmsCbHandler->SendCbMessageBroadcast(cbMessage));
     EXPECT_TRUE(gsmSmsCbHandler->FindCbMessage(cbMessage) == nullptr);
     EXPECT_EQ(gsmSmsCbHandler->CheckCbMessage(cbMessage), 0);
+    gsmSmsCbHandler->cbMsgList_.clear();
+    gsmSmsCbHandler->ClearExpiredMessage();
 }
 
 /**
