@@ -487,6 +487,7 @@ static void NativeCreateMessage(napi_env env, void *data)
         asyncContext->shortMessage = shortMessageObj;
     } else {
         TELEPHONY_LOGI("NativeCreateMessage CreateMessage faied");
+        delete shortMessageObj;
     }
 }
 
