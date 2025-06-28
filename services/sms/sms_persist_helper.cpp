@@ -55,7 +55,7 @@ constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
 constexpr int64_t RELEASE_DATA_SHARE_HELPER_TIMEOUT = 5000;
 
 static std::shared_ptr<AppExecFwk::EventRunner> smsPersistHelperEventRunner_ =
-    AppExecFwk::EventRunner::Create("SmsPersistHelper");
+    AppExecFwk::EventRunner::Create("SmsPersistHelper", AppExecFwk::ThreadMode::FFRT);
 SmsPersistHelper::SmsPersistHelper() : AppExecFwk::EventHandler(smsPersistHelperEventRunner_) {}
 
 SmsPersistHelper::~SmsPersistHelper() {}
