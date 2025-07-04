@@ -48,7 +48,11 @@ public:
     void TearDown();
 };
 
-void SmsServicesMmsGtest::TearDownTestCase() {}
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+void SmsServicesMmsGtest::TearDownTestCase()
+{
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+}
 
 void SmsServicesMmsGtest::SetUp() {}
 
