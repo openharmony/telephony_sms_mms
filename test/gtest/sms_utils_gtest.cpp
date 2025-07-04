@@ -16,18 +16,22 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "sms_persist_helper.h"
 #include "string_utils.h"
 
 namespace OHOS {
 namespace Telephony {
 using namespace testing::ext;
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
 
 class SmsUtilsTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {}
     static void TearDownTestCase()
-    {}
+    {
+        DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+    }
     void SetUp()
     {}
     void TearDown()

@@ -97,7 +97,11 @@ public:
 };
 void BranchSmsTest::SetUpTestCase() {}
 
-void BranchSmsTest::TearDownTestCase() {}
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+void BranchSmsTest::TearDownTestCase()
+{
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+}
 
 void BranchSmsTest::SetUp() {}
 
