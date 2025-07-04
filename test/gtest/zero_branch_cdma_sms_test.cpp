@@ -41,7 +41,11 @@ public:
 };
 void BranchCdmaSmsTest::SetUpTestCase() {}
 
-void BranchCdmaSmsTest::TearDownTestCase() {}
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+void BranchCdmaSmsTest::TearDownTestCase()
+{
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+}
 
 void BranchCdmaSmsTest::SetUp() {}
 

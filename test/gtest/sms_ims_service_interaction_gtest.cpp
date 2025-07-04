@@ -23,6 +23,7 @@
 #include "mock/mock_ims_sms_callback_interface.h"
 #include "mock/mock_ims_sms_interface.h"
 #include "mock/mock_remote_object.h"
+#include "sms_persist_helper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -36,7 +37,12 @@ public:
     void TearDown();
 };
 void SmsImsServiceInteractionTest::SetUpTestCase() {}
-void SmsImsServiceInteractionTest::TearDownTestCase() {}
+
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+void SmsImsServiceInteractionTest::TearDownTestCase()
+{
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+}
 void SmsImsServiceInteractionTest::SetUp() {}
 void SmsImsServiceInteractionTest::TearDown() {}
 

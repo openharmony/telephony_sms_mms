@@ -23,6 +23,7 @@
 #include "gtest/gtest.h"
 #include "ims_sms_client.h"
 #include "sms_common_utils.h"
+#include "sms_persist_helper.h"
 #include "text_coder.h"
 
 namespace OHOS {
@@ -48,9 +49,11 @@ public:
 };
 void BranchUtilsTest::SetUpTestCase() {}
 
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
 void BranchUtilsTest::TearDownTestCase()
 {
     DelayedSingleton<ImsSmsClient>::GetInstance()->UnInit();
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
 }
 
 void BranchUtilsTest::SetUp() {}

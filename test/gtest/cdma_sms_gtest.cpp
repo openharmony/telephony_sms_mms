@@ -58,7 +58,11 @@ public:
     }
 };
 
-void CdmaSmsGtest::TearDownTestCase() {}
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+void CdmaSmsGtest::TearDownTestCase()
+{
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+}
 
 void CdmaSmsGtest::SetUp() {}
 

@@ -19,6 +19,7 @@
 #include "satellite_sms_callback.h"
 #include "satellite_sms_proxy.h"
 #include "sms_common.h"
+#include "sms_persist_helper.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 
@@ -101,7 +102,11 @@ public:
     void TearDown();
 };
 
-void SmsSatelliteGtest::TearDownTestCase() {}
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+void SmsSatelliteGtest::TearDownTestCase()
+{
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+}
 
 void SmsSatelliteGtest::SetUp() {}
 

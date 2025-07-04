@@ -36,7 +36,12 @@ public:
     void TearDown();
 };
 void MmsReceiveManagerTest::SetUpTestCase() {}
-void MmsReceiveManagerTest::TearDownTestCase() {}
+
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+void MmsReceiveManagerTest::TearDownTestCase()
+{
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+}
 void MmsReceiveManagerTest::SetUp() {}
 void MmsReceiveManagerTest::TearDown() {}
 
