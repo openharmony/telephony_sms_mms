@@ -34,13 +34,15 @@ namespace Telephony {
 using namespace testing::ext;
 
 static constexpr uint8_t MAX_GSM_7BIT_DATA_LEN = 160;
-
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
 class SmsGsmTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {}
     static void TearDownTestCase()
-    {}
+    {
+        DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+    }
     void SetUp()
     {}
     void TearDown()

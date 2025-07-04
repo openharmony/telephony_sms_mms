@@ -20,6 +20,7 @@
 #include "sms_send_short_message_proxy.h"
 #include "sms_delivery_short_message_proxy.h"
 #include "mock/mock_remote_object.h"
+#include "sms_persist_helper.h"
 namespace OHOS {
 namespace Telephony {
 using namespace testing::ext;
@@ -33,7 +34,11 @@ public:
 };
 void SmsServiceProxyTest::SetUpTestCase() {}
 
-void SmsServiceProxyTest::TearDownTestCase() {}
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+void SmsServiceProxyTest::TearDownTestCase()
+{
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+}
 
 void SmsServiceProxyTest::SetUp() {}
 

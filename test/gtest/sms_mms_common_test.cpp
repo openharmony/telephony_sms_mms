@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 #include "sms_mms_common.h"
+#include "sms_persist_helper.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -29,7 +30,11 @@ public:
 };
 void SmsMmsCommonTest::SetUpTestCase() {}
 
-void SmsMmsCommonTest::TearDownTestCase() {}
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+void SmsMmsCommonTest::TearDownTestCase()
+{
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+}
 
 void SmsMmsCommonTest::SetUp() {}
 
