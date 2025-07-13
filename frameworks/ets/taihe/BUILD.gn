@@ -78,7 +78,7 @@ generate_static_abc("telephony_sms_abc") {             #调用generate_static_ab
   dependencies = [ ":run_taihe" ]               #编译abc依赖太和工具链调用                                                                                                                                                                                                                         
 }
 
-ohos_prebuilt_etc("telephony_sms_etc") {                #调用ohos_prebuilt_etc将abc拷贝到/system/framework’xia
+ohos_prebuilt_etc("telephony_sms_etc") {                #调用ohos_prebuilt_etc将abc拷贝到/system/framework下
   source = "$target_out_dir/telephony_sms_abc.abc"           
   module_install_dir = "framework"
   part_name = "$part_name"
