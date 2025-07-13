@@ -58,7 +58,10 @@
                 "safwk",
                 "samgr",
                 "protobuf",
-                "telephony_data"
+                "telephony_data",
+                "libuv",
+                "image_framework",
+                "runtime_core"
             ],
             "third_party": [
             ]
@@ -69,7 +72,8 @@
                 "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
                 "//base/telephony/sms_mms/frameworks/cj:cj_sms_ffi",
                 "//base/telephony/sms_mms/frameworks/js/napi/:sms",
-                "//base/telephony/sms_mms/sa_profile:sms_mms_sa_profile"
+                "//base/telephony/sms_mms/sa_profile:sms_mms_sa_profile",
+                "//base/telephony/sms_mms/frameworks/ets/taihe:telephony_sms_taihe"
             ],
             "inner_kits": [
                 {
@@ -85,6 +89,9 @@
                         "header_base" : "//base/telephony/sms_mms/frameworks/cj/include",
                         "header_files": []
                     }
+                },
+                {
+                    "name":"//base/telephony/sms_mms/frameworks/ets/taihe:copy_telephonysms"
                 }
             ],
             "test": [
