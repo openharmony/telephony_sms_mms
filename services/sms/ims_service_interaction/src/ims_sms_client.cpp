@@ -204,7 +204,7 @@ int32_t ImsSmsClient::ReConnectService()
 
 void ImsSmsClient::Clean()
 {
-    Utils::UniqueWriteGuard<Utils::RWLock> guard(rwClientLock_);
+    std::lock_guard<ffrt::shared_mutex> lock(ClientLock_);
     if (imsCoreServiceProxy_ != nullptr) {
         imsCoreServiceProxy_.clear();
         imsCoreServiceProxy_ = nullptr;

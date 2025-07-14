@@ -21,7 +21,7 @@
 #include "ims_core_service_interface.h"
 #include "ims_sms_interface.h"
 #include "iremote_stub.h"
-#include "rwlock.h"
+#include "ffrt.h"
 #include "singleton.h"
 #include "system_ability_status_change_stub.h"
 
@@ -139,7 +139,7 @@ private:
     sptr<ImsSmsInterface> imsSmsProxy_ = nullptr;
     sptr<ImsSmsCallbackInterface> imsSmsCallback_ = nullptr;
     std::map<int32_t, std::shared_ptr<AppExecFwk::EventHandler>> handlerMap_;
-    Utils::RWLock rwClientLock_;
+    ffrt::shared_mutex ClientLock_;
     std::mutex mutex_;
     std::mutex mutexCallback_;
     sptr<ISystemAbilityStatusChange> statusChangeListener_ = nullptr;
