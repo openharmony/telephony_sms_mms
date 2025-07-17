@@ -195,6 +195,16 @@ int32_t SmsServiceManagerClient::SetCBConfig(
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 
+int32_t SmsServiceManagerClient::SetCBConfigList(
+    int32_t slotId, const std::vector<int32_t>& messageIds, int32_t ranType)
+{
+    if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return smsServiceInterface_->SetCBConfigList(slotId, messageIds, ranType);
+    }
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+}
+
 bool SmsServiceManagerClient::SetImsSmsConfig(int32_t slotId, int32_t enable)
 {
     if (InitSmsServiceProxy()) {

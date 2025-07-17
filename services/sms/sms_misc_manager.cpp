@@ -29,6 +29,7 @@ static constexpr int32_t TIME_OUT_SECOND = 3;
 static constexpr uint8_t GSM_TYPE = 1;
 static constexpr uint8_t MIN_SMSC_LEN = 2;
 static constexpr uint32_t RANG_MAX = 65535;
+static constexpr int32_t CB_RANGE_PAIR_SIZE = 2;
 bool SmsMiscManager::hasGotCbRange_ = false;
 
 SmsMiscManager::SmsMiscManager(int32_t slotId) : TelEventHandler("SmsMiscManager"), slotId_(slotId) {}
@@ -252,35 +253,40 @@ void SmsMiscManager::UpdateCbRangList(std::shared_ptr<CBConfigInfo> res)
     CombineCBRange();
 }
 
-void SmsMiscManager::CombineCBRange()
+void SmsMiscManager::CombineCBRange(std::list<gsmCBRangeInfo>& ranges)
 {
-    rangeList_.sort();
-    rangeList_.unique();
-    auto iter = rangeList_.begin();
-    while (iter != rangeList_.end()) {
+    ranges.sort();
+    ranges.unique();
+    auto iter = ranges.begin();
+    while (iter != ranges.end()) {
         auto OtherIter = iter;
         OtherIter++;
         bool eraseFlag = false;
-        while (OtherIter != rangeList_.end()) {
+        while (OtherIter != ranges.end()) {
             if (OtherIter->fromMsgId == iter->fromMsgId) {
                 eraseFlag = true;
                 break;
             } else if (OtherIter->toMsgId <= iter->toMsgId) {
-                OtherIter = rangeList_.erase(OtherIter);
+                OtherIter = ranges.erase(OtherIter);
                 continue;
             } else if (OtherIter->fromMsgId <= static_cast<uint32_t>(iter->toMsgId + 1)) {
                 iter->toMsgId = OtherIter->toMsgId;
-                OtherIter = rangeList_.erase(OtherIter);
+                OtherIter = ranges.erase(OtherIter);
                 continue;
             }
             OtherIter++;
         }
         if (eraseFlag) {
-            iter = rangeList_.erase(iter);
+            iter = ranges.erase(iter);
         } else {
             iter++;
         }
     }
+}
+
+void SmsMiscManager::CombineCBRange()
+{
+    CombineCBRange(rangeList_);
 }
 
 void SmsMiscManager::SplitMids(std::string src, std::vector<std::string> &dest, const std::string delimiter)
@@ -379,6 +385,50 @@ void SmsMiscManager::GetModemCBRange()
         }
         hasGotCbRange_ = true;
     }
+}
+
+std::list<SmsMiscManager::gsmCBRangeInfo> SmsMiscManager::ConvertToRangeList(const std::vector<int32_t>& messageIds)
+{
+    std::list<gsmCBRangeInfo> result;
+    if (messageIds.size() % CB_RANGE_PAIR_SIZE != 0) {
+        TELEPHONY_LOGE("Invalid messageIds size (must be even)");
+        return result;
+    }
+    for (size_t i = 0; i < messageIds.size(); i += CB_RANGE_PAIR_SIZE) {
+        result.emplace_back(messageIds[i], messageIds[i + 1]);
+    }
+    return result;
+}
+
+int32_t SmsMiscManager::SetCBConfigList(const std::vector<int32_t>& messageIds, int32_t ranType)
+{
+    if (ranType != GSM_TYPE) {
+        TELEPHONY_LOGE("cb channel invalid, netType is not gsm");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    // 转换为范围列表
+    std::list<gsmCBRangeInfo> newRanges = ConvertToRangeList(messageIds);
+    // 如果没有新范围，直接返回成功（保持原有配置）
+    if (newRanges.empty()) {
+        return TELEPHONY_ERR_SUCCESS;
+    }
+    // 合并新范围到当前缓存（先备份）
+    std::unique_lock<std::mutex> lock(cbMutex_);
+    std::list<gsmCBRangeInfo> oldRangeList = rangeList_;
+    std::list<gsmCBRangeInfo> mergedRanges = oldRangeList;
+    // 将新范围合并到mergedRanges
+    for (const auto& range : newRanges) {
+        mergedRanges.emplace_back(range.fromMsgId, range.toMsgId);
+    }
+    // 合并重叠范围
+    CombineCBRange(mergedRanges);
+    // 发送合并后的范围到RIL
+    if (!SendDataToRil(true, mergedRanges)) {
+        return TELEPHONY_ERR_RIL_CMD_FAIL;
+    }
+    // 发送成功，更新缓存
+    rangeList_ = std::move(mergedRanges);
+    return TELEPHONY_ERR_SUCCESS;
 }
 
 int32_t SmsMiscManager::AddSimMessage(

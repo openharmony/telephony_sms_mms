@@ -71,6 +71,11 @@ enum class SmsServiceInterfaceCode {
     SET_CB_CONFIG,
 
     /**
+     * Request to configure cell broadcast list in some certain band ranges.
+     */
+    SET_CB_CONFIG_LIST,
+
+    /**
      * Request to enable or disable IMS SMS.
      */
     SET_IMS_SMS_CONFIG,

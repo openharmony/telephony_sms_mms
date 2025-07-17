@@ -454,6 +454,23 @@ void GsmSmsSenderTest::TestDisableCBConfig(const sptr<ISmsServiceInterface> &sms
     std::cout << "TestDisableCBConfig:" << result << std::endl;
 }
 
+void GsmSmsSenderTest::TestSetCBConfigList(const sptr<ISmsServiceInterface> &smsService) const
+{
+    AccessMmsToken token;
+    if (smsService == nullptr) {
+        std::cout << "smsService is nullptr." << std::endl;
+        return;
+    }
+    int32_t slotId = 0;
+    std::vector<int32_t> messageIds1 = {4352, 4355, 4388, 4390};
+    std::vector<int32_t> messageIds2 = {4352, 4388, 4390};
+    std::vector<int32_t> messageIds3 = {4355, 4352, 4388, 4390};
+    int32_t ranType = 1;
+    EXPECT_EQ(smsService->SetCBConfigList(slotId, messageIds1, ranType), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsService->SetCBConfigList(slotId, messageIds2, ranType), TELEPHONY_ERR_ARGUMENT_INVALID);
+    EXPECT_EQ(smsService->SetCBConfigList(slotId, messageIds3, ranType), TELEPHONY_ERR_ARGUMENT_INVALID);
+}
+
 void GsmSmsSenderTest::TestSetDefaultSmsSlotId(const sptr<ISmsServiceInterface> &smsService) const
 {
     AccessMmsToken token;

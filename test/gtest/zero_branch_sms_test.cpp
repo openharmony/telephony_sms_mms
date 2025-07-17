@@ -1801,6 +1801,37 @@ HWTEST_F(BranchSmsTest, SmsMiscManager_0001, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_SmsMiscManager_0002
+ * @tc.name     Test SmsMiscManager
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsMiscManager_0002, Function | MediumTest | Level1)
+{
+    auto smsService = DelayedSingleton<SmsService>::GetInstance();
+    auto smsMiscManager = std::make_shared<SmsMiscManager>(0);
+    AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get(SmsMiscManager::SET_CB_CONFIG_FINISH, 1);
+    smsMiscManager->ProcessEvent(event);
+    std::vector<int32_t> messageIds1 = {4352, 4355, 4388, 4390};
+    std::vector<int32_t> messageIds2 = {4352, 4388, 4390};
+    std::vector<int32_t> messageIds3 = {4355, 4352, 4388, 4390};
+    std::vector<int32_t> messageIds4 = {1, 1};
+    EXPECT_GT(smsService->SetCBConfigList(INVALID_SLOTID, messageIds1, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SetCBConfigList(INVALID_SLOTID, messageIds2, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SetCBConfigList(INVALID_SLOTID, messageIds3, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SetCBConfigList(1, messageIds1, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_GT(smsService->SetCBConfigList(1, messageIds2, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_TRUE(smsService->IsValidCBRangeList(messageIds1));
+    EXPECT_FALSE(smsService->IsValidCBRangeList(messageIds2));
+    EXPECT_FALSE(smsService->IsValidCBRangeList(messageIds3));
+    EXPECT_GE(smsMiscManager->SetCBConfigList(messageIds1, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsMiscManager->SetCBConfigList(messageIds2, 1), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsMiscManager->SetCBConfigList(messageIds1, 0), TELEPHONY_ERR_ARGUMENT_INVALID);
+    smsMiscManager->rangeList_.clear();
+    smsMiscManager->rangeList_.emplace_back(VALUE_LENGTH, 1);
+    EXPECT_EQ(smsMiscManager->SetCBConfigList(messageIds4, 1), TELEPHONY_ERR_RIL_CMD_FAIL);
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_SmsMiscManager_0003
  * @tc.name     Test SmsMiscManager
  * @tc.desc     Function test
@@ -2018,6 +2049,8 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     bool enable = true;
     uint8_t ranType = 1;
     Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(slotId, enable, msgIndex, msgIndex, ranType);
+    std::vector<int32_t> messageIds = {4352, 4355, 4388, 4390};
+    Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(slotId, messageIds, 1);
     Singleton<SmsServiceManagerClient>::GetInstance().SetImsSmsConfig(slotId, enable);
     std::vector<std::u16string> splitMessage;
     Singleton<SmsServiceManagerClient>::GetInstance().SplitMessage(desAddr, splitMessage);
