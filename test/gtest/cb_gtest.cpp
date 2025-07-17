@@ -1066,7 +1066,7 @@ HWTEST_F(CbGtest, SetCBConfigList_0003, TestSize.Level0)
     EXPECT_NE(helper.GetIntResult(), 0);
 }
 
-void SetCBConfigListTestFunc2(SmsMmsTestHelper &helper)
+void SetCBConfigListTestFunc4(SmsMmsTestHelper &helper)
 {
     AccessMmsToken token;
     std::vector<int32_t> messageIds = {4352, 4352, 4388, 4389};
