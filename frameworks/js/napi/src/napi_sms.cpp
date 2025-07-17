@@ -2097,7 +2097,6 @@ napi_value DeclareSmsInterface(napi_env env, napi_value exports)
 EXTERN_C_START
 napi_value InitNapiSmsRegistry(napi_env env, napi_value exports)
 {
-    
     DeclareSmsInterface(env, exports);
     CreateEnumSendSmsResult(env, exports);
     CreateEnumShortMessageClass(env, exports);
