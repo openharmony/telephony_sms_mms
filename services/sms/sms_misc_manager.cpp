@@ -410,7 +410,7 @@ int32_t SmsMiscManager::SetCBConfigList(const std::vector<int32_t>& messageIds, 
     std::list<gsmCBRangeInfo> newRanges = ConvertToRangeList(messageIds);
     // 如果没有新范围，直接返回成功（保持原有配置）
     if (newRanges.empty()) {
-        return TELEPHONY_ERR_SUCCESS
+        return TELEPHONY_ERR_SUCCESS;
     }
     // 合并新范围到当前缓存（先备份）
     std::unique_lock<std::mutex> lock(cbMutex_);
