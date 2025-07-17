@@ -969,6 +969,134 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0004, Function | MediumTest | Level2)
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0004 -->finished");
     EXPECT_TRUE(helper.GetBoolResult());
 }
+
+void SetCBConfigListTestFunc1(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    std::vector<int32_t> messageIds = {4352, 4359, 4388, 4389};
+    int32_t ranType = 1;
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(
+        helper.slotId, messageIds, ranType);
+    helper.SetIntResult(result);
+    helper.NotifyAll();
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SetCBConfigList_0001
+ * @tc.name     SetCBConfigList slotId is -1
+ * @tc.desc     Function test
+ */
+HWTEST_F(CbGtest, SetCBConfigList_0001, TestSize.Level0)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0001 -->");
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID_REMOVE;
+    if (!helper.Run(SetCBConfigListTestFunc1, std::ref(helper))) {
+        TELEPHONY_LOGI("SetCBConfigListTestFunc1 out of time");
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0001 -->finished");
+    EXPECT_NE(helper.GetIntResult(), 0);
+}
+
+void SetCBConfigListTestFunc2(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    std::vector<int32_t> messageIds = {4352, 4352, 4388, 4389};
+    int32_t ranType = 1;
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(
+        helper.slotId, messageIds, ranType);
+    helper.SetIntResult(result);
+    helper.NotifyAll();
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SetCBConfigList_0002
+ * @tc.name     SetCBConfigList fromMsgId and toMsgId are equal
+ * @tc.desc     Function test
+ */
+HWTEST_F(CbGtest, SetCBConfigList_0002, TestSize.Level0)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0002 -->");
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!helper.Run(SetCBConfigListTestFunc2, std::ref(helper))) {
+        TELEPHONY_LOGI("SetCBConfigListTestFunc2 out of time");
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0002 -->finished");
+    EXPECT_NE(helper.GetIntResult(), 0);
+}
+
+void SetCBConfigListTestFunc3(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    std::vector<int32_t> messageIds = {4352, 4355, 4388, 4387};
+    int32_t ranType = 1;
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(
+        helper.slotId, messageIds, ranType);
+    helper.SetIntResult(result);
+    helper.NotifyAll();
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SetCBConfigList_0003
+ * @tc.name     SetCBConfigList fromMsgId less than toMsgId
+ * @tc.desc     Function test
+ */
+HWTEST_F(CbGtest, SetCBConfigList_0003, TestSize.Level0)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0003 -->");
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!helper.Run(SetCBConfigListTestFunc3, std::ref(helper))) {
+        TELEPHONY_LOGI("SetCBConfigListTestFunc3 out of time");
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0003 -->finished");
+    EXPECT_NE(helper.GetIntResult(), 0);
+}
+
+void SetCBConfigListTestFunc2(SmsMmsTestHelper &helper)
+{
+    AccessMmsToken token;
+    std::vector<int32_t> messageIds = {4352, 4352, 4388, 4389};
+    int32_t ranType = 1;
+    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(
+        helper.slotId, messageIds, ranType);
+    helper.SetIntResult(result);
+    helper.NotifyAll();
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SetCBConfigList_0004
+ * @tc.name     SetCBConfigList netType is unknown.
+ * @tc.desc     Function test
+ */
+HWTEST_F(CbGtest, SetCBConfigList_0004, TestSize.Level0)
+{
+    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0004 -->");
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("TelephonyTestService has no sim card");
+        return;
+    }
+    SmsMmsTestHelper helper;
+    helper.slotId = DEFAULT_SIM_SLOT_ID_1;
+    if (!helper.Run(SetCBConfigListTestFunc4, std::ref(helper))) {
+        TELEPHONY_LOGI("SetCBConfigListTestFunc4 out of time");
+    }
+    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0004 -->finished");
+    EXPECT_NE(helper.GetIntResult(), 0);
+}
 #endif // TEL_TEST_UNSUPPORT
 } // namespace Telephony
 } // namespace OHOS

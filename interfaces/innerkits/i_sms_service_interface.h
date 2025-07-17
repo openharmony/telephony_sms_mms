@@ -250,6 +250,17 @@ public:
     virtual int32_t SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType) = 0;
 
     /**
+     * @brief Configure cell broadcast list in some certain band range.
+     *
+     * @param slotId [in], indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param messageIds [in], indicates the band ID list.
+     * @param ranType [in], indicates the network type.
+     * @return int32_t, returns {@code 0} if success.
+     */
+    virtual int32_t SetCBConfigList(int32_t slotId, const std::vector<int32_t>& messageIds, int32_t ranType) = 0;
+
+    /**
      * @brief Enable or disable IMS SMS.
      *
      * @param slotId Indicates the card slot index number,

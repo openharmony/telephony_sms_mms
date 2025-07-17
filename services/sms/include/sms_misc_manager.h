@@ -69,6 +69,7 @@ public:
     int32_t SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
     int32_t GetDefaultSmsSimId(int32_t &simId);
+    int32_t SetCBConfigList(const std::vector<int32_t>& messageIds, int32_t ranType);
 
 private:
     using infoData = struct info {
@@ -95,7 +96,9 @@ private:
     bool SplitMidValue(std::string value, std::string &start, std::string &end, const std::string delimiter);
     void GetModemCBRange();
     void CombineCBRange();
+    void CombineCBRange(std::list<gsmCBRangeInfo>& ranges);
     void GetCBConfigFinish(const AppExecFwk::InnerEvent::Pointer &event);
+    std::list<gsmCBRangeInfo> ConvertToRangeList(const std::vector<int32_t>& messageIds);
 
 private:
     std::list<int32_t> fairList_;

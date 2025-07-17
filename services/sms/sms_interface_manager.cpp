@@ -172,6 +172,15 @@ int32_t SmsInterfaceManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32
     return smsMiscManager_->SetCBConfig(enable, fromMsgId, toMsgId, netType);
 }
 
+int32_t SmsInterfaceManager::SetCBConfigList(const std::vector<int32_t>& messageIds, int32_t ranType)
+{
+    if (smsMiscManager_ == nullptr) {
+        TELEPHONY_LOGE("smsMiscManager nullptr error.");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    return smsMiscManager_->SetCBConfigList(messageIds, ranType);
+}
+
 bool SmsInterfaceManager::SetImsSmsConfig(int32_t slotId, int32_t enable)
 {
     if (smsMiscManager_ == nullptr) {

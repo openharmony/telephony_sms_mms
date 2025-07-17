@@ -54,6 +54,8 @@ SmsInterfaceStub::SmsInterfaceStub()
         MessageParcel &reply, MessageOption &option) { OnGetAllSimMessages(data, reply, option); };
     memberFuncMap_[SmsServiceInterfaceCode::SET_CB_CONFIG] = [this](MessageParcel &data,
         MessageParcel &reply, MessageOption &option) { OnSetCBConfig(data, reply, option); };
+    memberFuncMap_[SmsServiceInterfaceCode::SET_CB_CONFIG_LIST] = [this](MessageParcel &data,
+        MessageParcel &reply, MessageOption &option) { OnSetCBConfigList(data, reply, option); };
     memberFuncMap_[SmsServiceInterfaceCode::SET_IMS_SMS_CONFIG] = [this](MessageParcel &data,
         MessageParcel &reply, MessageOption &option) { OnSetImsSmsConfig(data, reply, option); };
     memberFuncMap_[SmsServiceInterfaceCode::SET_DEFAULT_SMS_SLOT_ID] = [this](MessageParcel &data,
@@ -362,6 +364,22 @@ void SmsInterfaceStub::OnSetCBConfig(MessageParcel &data, MessageParcel &reply, 
     int32_t result = SetCBConfig(slotId, enable, fromMsgId, toMsgId, ranType);
     if (result != TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGE("OnSetCBConfig fail, result:%{public}d, slotId:%{public}d", result, slotId);
+    }
+    reply.WriteInt32(result);
+}
+
+void SmsInterfaceStub::OnSetCBConfigList(MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    int32_t slotId = data.ReadInt32();
+    int32_t messageIdsSize = data.ReadInt32();
+    std::vector<int32_t> messageIds;
+    for (int32_t i = 0; i < messageIdsSize; i++) {
+        messageIds.push_back(data.ReadInt32());
+    }
+    int32_t ranType = data.ReadInt32();
+    int32_t result = SetCBConfigList(slotId, messageIds, ranType);
+    if (result != TELEPHONY_ERR_SUCCESS) {
+        TELEPHONY_LOGE("OnSetCBConfigList fail, result:%{public}d, slotId:%{public}d", result, slotId);
     }
     reply.WriteInt32(result);
 }

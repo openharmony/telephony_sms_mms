@@ -39,6 +39,7 @@ using namespace std;
 using namespace AppExecFwk;
 using namespace HiviewDFX;
 constexpr static uint32_t CONNECT_SERVICE_WAIT_TIME = 2000;
+constexpr static int32_t CB_RANGE_PAIR_SIZE = 2;
 constexpr static size_t MIN_LEN = 1;
 bool g_registerResult = SystemAbility::MakeAndRegisterAbility(DelayedSingleton<SmsService>::GetInstance().get());
 const std::string INFO_MSG_TELEPHONE_REG = "^(0086|\\+?86|\\+)?(9|95|100|101|106|108|111|116|118|123|125|400|800|1212|"
@@ -588,6 +589,41 @@ int32_t SmsService::SetCBConfig(int32_t slotId, bool enable, uint32_t fromMsgId,
         return TELEPHONY_ERR_SLOTID_INVALID;
     }
     return interfaceManager->SetCBConfig(enable, fromMsgId, toMsgId, netType);
+}
+
+int32_t SmsService::SetCBConfigList(int32_t slotId, const std::vector<int32_t>& messageIds, int32_t ranType)
+{
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
+    if (!TelephonyPermission::CheckPermission(Permission::RECEIVE_MESSAGES)) {
+        TELEPHONY_LOGE("Check Permission Failed.");
+        return TELEPHONY_ERR_PERMISSION_ERR;
+    }
+    if (!IsValidCBRangeList(messageIds)) {
+        TELEPHONY_LOGE("CB parameter is invalid.");
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("InterfaceManager nullptr error.");
+        return TELEPHONY_ERR_SLOTID_INVALID;
+    }
+    return interfaceManager->SetCBConfigList(messageIds, ranType);
+}
+
+bool SmsService::IsValidCBRangeList(const std::vector<int32_t>& messageIds)
+{
+    if (messageIds.empty() || messageIds.size() % CB_RANGE_PAIR_SIZE != 0) {
+        return false;
+    }
+    for (size_t i = 0; i < messageIds.size(); i += CB_RANGE_PAIR_SIZE) {
+        if (i + 1 < messageIds.size() && messageIds[i + 1] < messageIds[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool SmsService::SetImsSmsConfig(int32_t slotId, int32_t enable)
