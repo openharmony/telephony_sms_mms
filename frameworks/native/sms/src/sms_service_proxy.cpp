@@ -340,6 +340,32 @@ int32_t SmsServiceProxy::SetCBConfig(
     return replyParcel.ReadInt32();
 }
 
+int32_t SmsServiceProxy::SetCBConfigList(
+    int32_t slotId, const std::vector<int32_t>& messageIds, int32_t ranType)
+{
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("SetCBConfigList WriteInterfaceToken is false");
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteInt32(static_cast<int32_t>(messageIds.size()));
+    for (int32_t messageId : messageIds) {
+        dataParcel.WriteInt32(messageId);
+    }
+    dataParcel.WriteInt32(ranType);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TELEPHONY_LOGE("SetCBConfigList Remote is null");
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::SET_CB_CONFIG_LIST), dataParcel,
+        replyParcel, option);
+    return replyParcel.ReadInt32();
+}
+
 bool SmsServiceProxy::SetImsSmsConfig(
     int32_t slotId, int32_t enable)
 {

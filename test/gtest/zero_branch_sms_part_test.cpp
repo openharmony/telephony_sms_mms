@@ -287,6 +287,10 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0001, Function | MediumTest | Le
     std::u16string smsc;
     interfaceManager->GetSmscAddr(smsc);
     interfaceManager->SetCBConfig(false, 0, 1, 0);
+    std::vector<int32_t> messageIds1 = {4352, 4355, 4388, 4390};
+    interfaceManager->SetCBConfigList(messageIds1, 1);
+    std::vector<int32_t> messageIds2 = {4352, 4388, 4390};
+    interfaceManager->SetCBConfigList(messageIds2, 1);
     result = interfaceManager->SetImsSmsConfig(0, false);
     EXPECT_GE(result, 0);
 
@@ -337,6 +341,8 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0002, Function | MediumTest | Le
     EXPECT_GE(result, 0);
 
     interfaceManager->SetCBConfig(false, 0, 1, 0);
+    std::vector<int32_t> messageIds1 = {4352, 4355, 4388, 4390};
+    interfaceManager->SetCBConfigList(messageIds1, 1);
     interfaceManager->SetImsSmsConfig(0, false);
     interfaceManager->SetDefaultSmsSlotId(0);
     interfaceManager->GetDefaultSmsSlotId();

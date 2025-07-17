@@ -53,6 +53,7 @@ constexpr int32_t PARAMETERS_INDEX_TWO = 2;
 constexpr int32_t INVALID_PORT = -1;
 constexpr int32_t MIN_PORT = 0;
 constexpr int32_t MAX_PORT = 0xffff;
+constexpr int32_t CB_RANGE_LIST_MAX_SIZE = 256;
 
 enum class ShortMessageClass {
     /** Indicates an unknown type. */
@@ -178,6 +179,13 @@ struct CBConfigContext : BaseContext {
     bool enable = false;
     int32_t startMessageId = DEFAULT_ERROR;
     int32_t endMessageId = DEFAULT_ERROR;
+    int32_t ranType = DEFAULT_ERROR;
+    bool setResult = false;
+};
+
+struct CBConfigListContext : BaseContext {
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    std::vector<int32_t> messageIds;
     int32_t ranType = DEFAULT_ERROR;
     bool setResult = false;
 };

@@ -554,6 +554,46 @@ declare namespace sms {
   function setCBConfig(options: CBConfigOptions): Promise<void>;
 
   /**
+   * Turn on Cell BroadCast by list.
+   *
+   * @permission ohos.permission.RECEIVE_SMS
+   * @param { CBConfigListOptions } options - Indicates cell broadcast configuration list options.
+   * @param { AsyncCallback<void> } callback - The callback of setCBConfigList.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
+   * Incorrect parameter types.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300999 - Unknown error code.
+   * @syscap SystemCapability.Telephony.SmsMms
+   * @systemapi Hide this for inner system use.
+   * @since 7
+   */
+  function setCBConfigList(options: CBConfigListOptions, callback: AsyncCallback<void>): void;
+
+  /**
+   * Turn on Cell BroadCast by list.
+   *
+   * @permission ohos.permission.RECEIVE_SMS
+   * @param { CBConfigListOptions } options - Indicates cell broadcast configuration list options.
+   * @returns { Promise<void> } The promise returned by the setCBConfigList.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 202 - Non-system applications use system APIs.
+   * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
+   * Incorrect parameter types.
+   * @throws { BusinessError } 8300001 - Invalid parameter value.
+   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8300003 - System internal error.
+   * @throws { BusinessError } 8300999 - Unknown error code.
+   * @syscap SystemCapability.Telephony.SmsMms
+   * @systemapi Hide this for inner system use.
+   * @since 7
+   */
+  function setCBConfigList(options: CBConfigListOptions): Promise<void>;
+
+  /**
    * Get an SMS segment encode relation information.
    *
    * @param { number } slotId - Indicates the card slot index number, ranging from 0 to the maximum card slot index
@@ -2304,6 +2344,46 @@ declare namespace sms {
 
     /**
      * Indicates the RAN type for the cell broadcast configuration options.
+     *
+     * @type { RanType }
+     * @syscap SystemCapability.Telephony.SmsMms
+     * @systemapi Hide this for inner system use.
+     * @since 7
+     */
+    ranType: RanType;
+  }
+
+  /**
+   * Defines the cell broadcast configuration list options.
+   *
+   * @interface CBConfigListOptions
+   * @syscap SystemCapability.Telephony.SmsMms
+   * @systemapi Hide this for inner system use.
+   * @since 7
+   */
+  export interface CBConfigListOptions {
+    /**
+     * Indicates the card slot ID for the cell broadcast configuration list options.
+     *
+     * @type { number }
+     * @syscap SystemCapability.Telephony.SmsMms
+     * @systemapi Hide this for inner system use.
+     * @since 7
+     */
+    slotId: number;
+
+    /**
+     * Indicates the messageIDs for the cell broadcast configuration list options.
+     *
+     * @type { number[] }
+     * @syscap SystemCapability.Telephony.SmsMms
+     * @systemapi Hide this for inner system use.
+     * @since 7
+     */
+    messageIds: number[];
+
+    /**
+     * Indicates the RAN type for the cell broadcast configuration list options.
      *
      * @type { RanType }
      * @syscap SystemCapability.Telephony.SmsMms

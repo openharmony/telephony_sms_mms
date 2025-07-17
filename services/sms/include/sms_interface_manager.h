@@ -51,6 +51,7 @@ public:
     int32_t SetSmscAddr(const std::string &scAddr);
     int32_t GetSmscAddr(std::u16string &smscAddress);
     int32_t SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t toMsgId, uint8_t netType);
+    int32_t SetCBConfigList(const std::vector<int32_t>& messageIds, int32_t ranType);
     bool SetImsSmsConfig(int32_t slotId, int32_t enable);
     int32_t SetDefaultSmsSlotId(int32_t slotId);
     int32_t GetDefaultSmsSlotId();
