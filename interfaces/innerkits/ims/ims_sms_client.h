@@ -139,9 +139,9 @@ private:
     sptr<ImsSmsInterface> imsSmsProxy_ = nullptr;
     sptr<ImsSmsCallbackInterface> imsSmsCallback_ = nullptr;
     std::map<int32_t, std::shared_ptr<AppExecFwk::EventHandler>> handlerMap_;
-    ffrt::shared_mutex ClientLock_;
-    std::mutex mutex_;
-    std::mutex mutexCallback_;
+    ffrt::mutex ClientLock_;
+    ffrt::mutex mutex_;
+    ffrt::mutex mutexCallback_;
     sptr<ISystemAbilityStatusChange> statusChangeListener_ = nullptr;
 };
 } // namespace Telephony
