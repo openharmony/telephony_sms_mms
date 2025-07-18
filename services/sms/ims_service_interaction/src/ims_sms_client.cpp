@@ -69,7 +69,7 @@ void ImsSmsClient::UnInit()
         statusChangeListener_.clear();
         statusChangeListener_ = nullptr;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     handlerMap_.clear();
 }
 
@@ -121,7 +121,7 @@ int32_t ImsSmsClient::RegisterImsSmsCallback()
         TELEPHONY_LOGE("imsSmsProxy_ is null!");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    std::lock_guard<std::mutex> lock(mutexCallback_);
+    std::lock_guard<ffrt::mutex> lock(mutexCallback_);
     imsSmsCallback_ = (std::make_unique<ImsSmsCallbackStub>()).release();
     if (imsSmsCallback_ == nullptr) {
         TELEPHONY_LOGE("RegisterImsSmsCallback return, make unique error.");
@@ -172,7 +172,7 @@ int32_t ImsSmsClient::RegisterImsSmsCallbackHandler(
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     handlerMap_.insert(std::make_pair(slotId, handler));
     TELEPHONY_LOGI("RegisterImsSmsCallbackHandler success.");
     return TELEPHONY_SUCCESS;
@@ -180,7 +180,7 @@ int32_t ImsSmsClient::RegisterImsSmsCallbackHandler(
 
 std::shared_ptr<AppExecFwk::EventHandler> ImsSmsClient::GetHandler(int32_t slotId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (handlerMap_.find(slotId) != handlerMap_.end()) {
         return handlerMap_[slotId];
     } else {
@@ -204,7 +204,7 @@ int32_t ImsSmsClient::ReConnectService()
 
 void ImsSmsClient::Clean()
 {
-    std::lock_guard<ffrt::shared_mutex> clientLock(ClientLock_);
+    std::lock_guard<ffrt::mutex> clientLock(ClientLock_);
     if (imsCoreServiceProxy_ != nullptr) {
         imsCoreServiceProxy_.clear();
         imsCoreServiceProxy_ = nullptr;
@@ -213,7 +213,7 @@ void ImsSmsClient::Clean()
         imsSmsProxy_.clear();
         imsSmsProxy_ = nullptr;
     }
-    std::lock_guard<std::mutex> lock(mutexCallback_);
+    std::lock_guard<ffrt::mutex> lock(mutexCallback_);
     if (imsSmsCallback_ != nullptr) {
         imsSmsCallback_.clear();
         imsSmsCallback_ = nullptr;
