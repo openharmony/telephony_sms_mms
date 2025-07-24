@@ -332,7 +332,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0009, TestSize.Level0)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_00010, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_00010, TestSize.Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->");
     ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));

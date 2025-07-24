@@ -463,7 +463,7 @@ void GetAllSimMessagesTestFucWithToken(SmsMmsTestHelper &helper)
  * @tc.name     Get All Sim Messages
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, GetAllSimMessages_0001, TestSize.Level0)
+HWTEST_F(SmsGtest, GetAllSimMessages_0001, TestSize.Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0001 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
@@ -482,7 +482,7 @@ HWTEST_F(SmsGtest, GetAllSimMessages_0001, TestSize.Level0)
  * @tc.name     Get All Sim Messages
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, GetAllSimMessages_0002, TestSize.Level0)
+HWTEST_F(SmsGtest, GetAllSimMessages_0002, TestSize.Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0002 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
