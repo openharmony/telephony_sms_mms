@@ -61,7 +61,11 @@ public:
     }
 };
 
-void SmsGtest::TearDownTestCase() {}
+constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
+void SmsGtest::TearDownTestCase()
+{
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
+}
 
 void SmsGtest::SetUp() {}
 
@@ -329,7 +333,7 @@ void DelAllSimMessagesTestFuc(SmsMmsTestHelper &helper)
  * @tc.name     Delete All Sim Messages
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, DelAllSimMessages_0001, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, DelAllSimMessages_0001, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::DelAllSimMessages_0001 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
@@ -348,7 +352,7 @@ HWTEST_F(SmsGtest, DelAllSimMessages_0001, Function | MediumTest | Level3)
  * @tc.name     Delete All Sim Messages
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, DelAllSimMessages_0002, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, DelAllSimMessages_0002, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::DelAllSimMessages_0001 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
@@ -384,7 +388,7 @@ void AddSimMessageTestFucWithToken(SmsMmsTestHelper &helper)
  * @tc.name     Add Sim Message
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, AddSimMessage_0001, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0001 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
@@ -404,7 +408,7 @@ HWTEST_F(SmsGtest, AddSimMessage_0001, Function | MediumTest | Level3)
  * @tc.name     Add Sim Message
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, AddSimMessage_0002, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0002 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
@@ -424,7 +428,7 @@ HWTEST_F(SmsGtest, AddSimMessage_0002, Function | MediumTest | Level3)
  * @tc.name     Add Sim Message
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, AddSimMessage_0003, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, AddSimMessage_0003, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::AddSimMessage_0003 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
@@ -459,7 +463,7 @@ void GetAllSimMessagesTestFucWithToken(SmsMmsTestHelper &helper)
  * @tc.name     Get All Sim Messages
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, GetAllSimMessages_0001, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0001 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
@@ -478,7 +482,7 @@ HWTEST_F(SmsGtest, GetAllSimMessages_0001, Function | MediumTest | Level3)
  * @tc.name     Get All Sim Messages
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, GetAllSimMessages_0002, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, GetAllSimMessages_0002, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::GetAllSimMessages_0002 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
@@ -516,7 +520,7 @@ void UpdateSimMessageTestFucWithToken(SmsMmsTestHelper &helper)
  * @tc.name     Update Sim Message
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, UpdateSimMessage_0001, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0001 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
@@ -536,7 +540,7 @@ HWTEST_F(SmsGtest, UpdateSimMessage_0001, Function | MediumTest | Level3)
  * @tc.desc     Function test
  * @tc.require: issueI5K12U
  */
-HWTEST_F(SmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, UpdateSimMessage_0002, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0002 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
@@ -555,7 +559,7 @@ HWTEST_F(SmsGtest, UpdateSimMessage_0002, Function | MediumTest | Level3)
  * @tc.name     Update Sim Message
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, UpdateSimMessage_0003, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, UpdateSimMessage_0003, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::UpdateSimMessage_0003 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
@@ -588,7 +592,7 @@ void DelSimMessageTestFucWithToken(SmsMmsTestHelper &helper)
  * @tc.name     Del Sim Message
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, DelSimMessage_0001, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0001 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
@@ -607,7 +611,7 @@ HWTEST_F(SmsGtest, DelSimMessage_0001, Function | MediumTest | Level3)
  * @tc.name     Del Sim Message
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, DelSimMessage_0002, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, DelSimMessage_0002, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0002 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
@@ -626,7 +630,7 @@ HWTEST_F(SmsGtest, DelSimMessage_0002, Function | MediumTest | Level3)
  * @tc.name     Del Sim Message
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, DelSimMessage_0003, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, DelSimMessage_0003, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::DelSimMessage_0003 -->");
     ASSERT_TRUE(SmsGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
@@ -1553,7 +1557,7 @@ HWTEST_F(SmsGtest, CreateWapPushSms_0002, Function | MediumTest | Level2)
     ASSERT_EQ(helper.GetIntResult(), 0);
 }
 
-HWTEST_F(SmsGtest, Sms_TestDump_0002, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, Sms_TestDump_0002, TestSize.Level0)
 {
     std::string originatingAddress = "";
     bool result = DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryBlockPhoneNumber(originatingAddress);
@@ -1565,7 +1569,7 @@ HWTEST_F(SmsGtest, Sms_TestDump_0002, Function | MediumTest | Level3)
  * @tc.name    TestDump
  * @tc.desc     Function test
  */
-HWTEST_F(SmsGtest, Sms_TestDump_0001, Function | MediumTest | Level3)
+HWTEST_F(SmsGtest, Sms_TestDump_0001, TestSize.Level0)
 {
     std::vector<std::u16string> emptyArgs = {};
     std::vector<std::u16string> args = { u"test", u"test1" };
