@@ -1524,9 +1524,9 @@ HWTEST_F(BranchSmsPartTest, SmsPersistHelper_0002, Function | MediumTest | Level
 {
     auto smsPersistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
     smsPersistHelper->CreateSmsHelper();
-    smsPersistHelper->SendEvent(0);
+    smsPersistHelper->ProcessEvent(0);
     uint32_t releaseDataShareHelperEventId = 10000;
-    smsPersistHelper->SendEvent(releaseDataShareHelperEventId);
+    smsPersistHelper->ProcessEvent(releaseDataShareHelperEventId);
     EXPECT_TRUE(smsPersistHelper->smsDataShareHelper_ == nullptr);
     smsPersistHelper->RemoveEvent(releaseDataShareHelperEventId);
 }
