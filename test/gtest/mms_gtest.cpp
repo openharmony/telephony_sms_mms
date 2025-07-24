@@ -74,11 +74,7 @@ public:
     }
 };
 
-constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
-void MmsGtest::TearDownTestCase()
-{
-    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
-}
+void MmsGtest::TearDownTestCase() {}
 
 void MmsGtest::SetUp() {}
 
@@ -417,11 +413,7 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0001, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0001 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
-    if (!(MmsGtest::HasSimCard(slotId))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(MmsGtest::HasSimCard(slotId));
-        return;
-    }
+    ASSERT_TRUE(MmsGtest::HasSimCard(slotId));
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
 
@@ -452,11 +444,7 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0002, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0002 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!(MmsGtest::HasSimCard(slotId))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(MmsGtest::HasSimCard(slotId));
-        return;
-    }
+    ASSERT_TRUE(MmsGtest::HasSimCard(slotId));
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
 

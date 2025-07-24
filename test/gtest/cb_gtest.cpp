@@ -52,11 +52,7 @@ public:
     }
 };
 
-constexpr uint32_t EVENT_RELEASE_DATA_SHARE_HELPER = 10000;
-void CbGtest::TearDownTestCase()
-{
-    DelayedSingleton<SmsPersistHelper>::GetInstance()->RemoveEvent(EVENT_RELEASE_DATA_SHARE_HELPER);
-}
+void CbGtest::TearDownTestCase() {}
 
 void CbGtest::SetUp() {}
 
@@ -110,14 +106,10 @@ void OpenCellBroadcastTestFuc(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast slotId is -1
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0001, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_0001, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0001 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_REMOVE;
     if (!helper.Run(OpenCellBroadcastTestFuc, std::ref(helper))) {
@@ -159,14 +151,10 @@ void OpenCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast netType is unknown.
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0003, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_0003, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0003 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc3, std::ref(helper))) {
@@ -195,14 +183,10 @@ void OpenCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast parameter is valid.
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0004, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_0004, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0004 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc4, std::ref(helper))) {
@@ -231,14 +215,10 @@ void OpenCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0005, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_0005, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0005 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc5, std::ref(helper))) {
@@ -272,14 +252,10 @@ void OpenCellBroadcastTestFuc6WithToken(SmsMmsTestHelper &helper)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0006, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_0006, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0006 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc6WithToken, std::ref(helper))) {
@@ -295,14 +271,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0006, TestSize.Level0)
  * @tc.name     Open cellBroadcast fromMsgId less than toMsgId
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0007, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_0007, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc2, std::ref(helper))) {
@@ -318,14 +290,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0007, TestSize.Level0)
  * @tc.name     Open cellBroadcast netType is unknown.
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0008, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_0008, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0008 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc3, std::ref(helper))) {
@@ -341,14 +309,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0008, TestSize.Level0)
  * @tc.name     Open cellBroadcast parameter is valid.
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0009, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_0009, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc4, std::ref(helper))) {
@@ -364,14 +328,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0009, TestSize.Level0)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_00010, TestSize.Level1)
+HWTEST_F(CbGtest, OpenCellBroadcast_00010, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc5, std::ref(helper))) {
@@ -387,14 +347,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_00010, TestSize.Level1)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0011, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_0011, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc6WithToken, std::ref(helper))) {
@@ -410,14 +366,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0011, TestSize.Level0)
  * @tc.name     Open cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, OpenCellBroadcast_0012, TestSize.Level0)
+HWTEST_F(CbGtest, OpenCellBroadcast_0012, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0012 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(OpenCellBroadcastTestFuc6, std::ref(helper))) {
@@ -446,14 +398,10 @@ void CloseCellBroadcastTestFuc(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast slotId is -1
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0001, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0001, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0001 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_REMOVE;
     if (!helper.Run(CloseCellBroadcastTestFuc, std::ref(helper))) {
@@ -482,14 +430,10 @@ void CloseCellBroadcastTestFuc2(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast fromMsgId less than toMsgId
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0002, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0002, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0002 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc2, std::ref(helper))) {
@@ -518,14 +462,10 @@ void CloseCellBroadcastTestFuc3(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast netType is unknown
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0003, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0003, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0003 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc3, std::ref(helper))) {
@@ -554,14 +494,10 @@ void CloseCellBroadcastTestFuc4(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0004, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0004, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0004 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc4, std::ref(helper))) {
@@ -590,14 +526,10 @@ void CloseCellBroadcastTestFuc5(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0005, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0005, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0005 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc5, std::ref(helper))) {
@@ -631,14 +563,10 @@ void CloseCellBroadcastTestFuc6WithToken(SmsMmsTestHelper &helper)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0006, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0006, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0006 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc6WithToken, std::ref(helper))) {
@@ -654,14 +582,10 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0006, TestSize.Level0)
  * @tc.name     Close cellBroadcast fromMsgId less than toMsgId
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0007, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0007, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc2, std::ref(helper))) {
@@ -677,14 +601,10 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0007, TestSize.Level0)
  * @tc.name     Close cellBroadcast netType is unknown
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0008, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0008, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0008 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc3, std::ref(helper))) {
@@ -700,14 +620,10 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0008, TestSize.Level0)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0009, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0009, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc4, std::ref(helper))) {
@@ -723,14 +639,10 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0009, TestSize.Level0)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0010, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0010, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc5, std::ref(helper))) {
@@ -746,14 +658,10 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0010, TestSize.Level0)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_00011, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_00011, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc6WithToken, std::ref(helper))) {
@@ -769,14 +677,10 @@ HWTEST_F(CbGtest, CloseCellBroadcast_00011, TestSize.Level0)
  * @tc.name     Close cellBroadcast parameter is valid
  * @tc.desc     Function test
  */
-HWTEST_F(CbGtest, CloseCellBroadcast_0012, TestSize.Level0)
+HWTEST_F(CbGtest, CloseCellBroadcast_0012, Function | MediumTest | Level3)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0012 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc6, std::ref(helper))) {
@@ -835,11 +739,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0001, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0001 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
-    if (!(CbGtest::HasSimCard(slotId))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(slotId));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(slotId));
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
 
@@ -871,11 +771,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0002, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0002 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
-    if (!(CbGtest::HasSimCard(slotId))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(slotId));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(slotId));
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
 
@@ -907,11 +803,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0003, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0003 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!(CbGtest::HasSimCard(slotId))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(slotId));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(slotId));
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
 
@@ -943,11 +835,7 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0004, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0004 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!(CbGtest::HasSimCard(slotId))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        ASSERT_FALSE(CbGtest::HasSimCard(slotId));
-        return;
-    }
+    ASSERT_TRUE(CbGtest::HasSimCard(slotId));
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
 
@@ -968,134 +856,6 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0004, Function | MediumTest | Level2)
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0004 -->finished");
     EXPECT_TRUE(helper.GetBoolResult());
-}
-
-void SetCBConfigListTestFunc1(SmsMmsTestHelper &helper)
-{
-    AccessMmsToken token;
-    std::vector<int32_t> messageIds = {4352, 4359, 4388, 4389};
-    int32_t ranType = 1;
-    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(
-        helper.slotId, messageIds, ranType);
-    helper.SetIntResult(result);
-    helper.NotifyAll();
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_SetCBConfigList_0001
- * @tc.name     SetCBConfigList slotId is -1
- * @tc.desc     Function test
- */
-HWTEST_F(CbGtest, SetCBConfigList_0001, TestSize.Level0)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0001 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        return;
-    }
-    SmsMmsTestHelper helper;
-    helper.slotId = DEFAULT_SIM_SLOT_ID_REMOVE;
-    if (!helper.Run(SetCBConfigListTestFunc1, std::ref(helper))) {
-        TELEPHONY_LOGI("SetCBConfigListTestFunc1 out of time");
-    }
-    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0001 -->finished");
-    EXPECT_NE(helper.GetIntResult(), 0);
-}
-
-void SetCBConfigListTestFunc2(SmsMmsTestHelper &helper)
-{
-    AccessMmsToken token;
-    std::vector<int32_t> messageIds = {4352, 4352, 4388, 4389};
-    int32_t ranType = 1;
-    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(
-        helper.slotId, messageIds, ranType);
-    helper.SetIntResult(result);
-    helper.NotifyAll();
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_SetCBConfigList_0002
- * @tc.name     SetCBConfigList fromMsgId and toMsgId are equal
- * @tc.desc     Function test
- */
-HWTEST_F(CbGtest, SetCBConfigList_0002, TestSize.Level0)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0002 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        return;
-    }
-    SmsMmsTestHelper helper;
-    helper.slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!helper.Run(SetCBConfigListTestFunc2, std::ref(helper))) {
-        TELEPHONY_LOGI("SetCBConfigListTestFunc2 out of time");
-    }
-    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0002 -->finished");
-    EXPECT_NE(helper.GetIntResult(), 0);
-}
-
-void SetCBConfigListTestFunc3(SmsMmsTestHelper &helper)
-{
-    AccessMmsToken token;
-    std::vector<int32_t> messageIds = {4352, 4355, 4388, 4387};
-    int32_t ranType = 1;
-    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(
-        helper.slotId, messageIds, ranType);
-    helper.SetIntResult(result);
-    helper.NotifyAll();
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_SetCBConfigList_0003
- * @tc.name     SetCBConfigList fromMsgId less than toMsgId
- * @tc.desc     Function test
- */
-HWTEST_F(CbGtest, SetCBConfigList_0003, TestSize.Level0)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0003 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        return;
-    }
-    SmsMmsTestHelper helper;
-    helper.slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!helper.Run(SetCBConfigListTestFunc3, std::ref(helper))) {
-        TELEPHONY_LOGI("SetCBConfigListTestFunc3 out of time");
-    }
-    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0003 -->finished");
-    EXPECT_NE(helper.GetIntResult(), 0);
-}
-
-void SetCBConfigListTestFunc4(SmsMmsTestHelper &helper)
-{
-    AccessMmsToken token;
-    std::vector<int32_t> messageIds = {4352, 4352, 4388, 4389};
-    int32_t ranType = 1;
-    int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(
-        helper.slotId, messageIds, ranType);
-    helper.SetIntResult(result);
-    helper.NotifyAll();
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_SetCBConfigList_0004
- * @tc.name     SetCBConfigList netType is unknown.
- * @tc.desc     Function test
- */
-HWTEST_F(CbGtest, SetCBConfigList_0004, TestSize.Level0)
-{
-    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0004 -->");
-    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
-        TELEPHONY_LOGI("TelephonyTestService has no sim card");
-        return;
-    }
-    SmsMmsTestHelper helper;
-    helper.slotId = DEFAULT_SIM_SLOT_ID_1;
-    if (!helper.Run(SetCBConfigListTestFunc4, std::ref(helper))) {
-        TELEPHONY_LOGI("SetCBConfigListTestFunc4 out of time");
-    }
-    TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0004 -->finished");
-    EXPECT_NE(helper.GetIntResult(), 0);
 }
 #endif // TEL_TEST_UNSUPPORT
 } // namespace Telephony
