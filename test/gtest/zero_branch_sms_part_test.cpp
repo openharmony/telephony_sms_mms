@@ -247,6 +247,29 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0003, Function | MediumTest | Level
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceStub_0004
+ * @tc.name     Test SmsInterfaceStub
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0004, Function | MediumTest | Level1) {
+    MessageParcel emcRescueMessage;
+    MessageParcel replyParcel;
+    MessageParcel option(MessageOption::TF_SYNC);
+    emcRescueMessage.WriteInt32(1);
+    emcRescueMessage.WriteString(TEST_SOURCE_DATA);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetImsShortMessageFormat(
+        emcRescueMessage, replyParcel, option);
+    int32_t result = replyParcel.ReadInt32();
+    EXPECT_GE(result, 0);
+
+    MessageParcel cbConfigListMessage;
+    cbConfigListMessage.WriteInt32(1);
+    cbConfigListMessage.WriteInt32(257);
+    replyParcel.WriteInt32(111);
+    DelayedSingleton<SmsService>::GetInstance()->OnSetCBConfigList(cbConfigListMessage, replyParcel, option);
+    EXPECT_GE(replyParcel.ReadInt32(), 111);
+}
+/**
  * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceManager_0001
  * @tc.name     Test SmsInterfaceManager
  * @tc.desc     Function test

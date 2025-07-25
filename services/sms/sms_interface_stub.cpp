@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace Telephony {
 using namespace std;
-
+constexpr static int32_t CB_RANGE_LIST_MAX_SIZE = 256;
 static inline bool IsValidSlotId(int32_t slotId)
 {
     return ((slotId >= DEFAULT_SIM_SLOT_ID) && (slotId < SIM_SLOT_COUNT));
@@ -372,6 +372,9 @@ void SmsInterfaceStub::OnSetCBConfigList(MessageParcel &data, MessageParcel &rep
 {
     int32_t slotId = data.ReadInt32();
     int32_t messageIdsSize = data.ReadInt32();
+    if (messageIdsSize > CB_RANGE_LIST_MAX_SIZE) {
+        return;
+    }
     std::vector<int32_t> messageIds;
     for (int32_t i = 0; i < messageIdsSize; i++) {
         messageIds.push_back(data.ReadInt32());
