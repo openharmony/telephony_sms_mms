@@ -251,7 +251,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0003, Function | MediumTest | Level
  * @tc.name     Test SmsInterfaceStub
  * @tc.desc     Function test
  */
-HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0004, Function | MediumTest | Level1) 
+HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0004, Function | MediumTest | Level1)
 {
     MessageParcel emcRescueMessage;
     MessageParcel replyParcel;
