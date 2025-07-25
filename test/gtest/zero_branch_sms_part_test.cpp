@@ -251,13 +251,14 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0003, Function | MediumTest | Level
  * @tc.name     Test SmsInterfaceStub
  * @tc.desc     Function test
  */
-HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0004, Function | MediumTest | Level1) {
+HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0004, Function | MediumTest | Level1) 
+{
     MessageParcel emcRescueMessage;
     MessageParcel replyParcel;
-    MessageParcel option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     emcRescueMessage.WriteInt32(1);
     emcRescueMessage.WriteString(TEST_SOURCE_DATA);
-    DelayedSingleton<SmsService>::GetInstance()->OnGetImsShortMessageFormat(
+    DelayedSingleton<SmsService>::GetInstance()->OnSendEmcRescueMessage(
         emcRescueMessage, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
     EXPECT_GE(result, 0);
