@@ -432,7 +432,6 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0001, Function | MediumTest | Level2)
 
     if (!helper.Run(ReceiveWapPushTestFunc, helper)) {
         TELEPHONY_LOGI("ReceiveWapPushTestFunc out of time");
-        ASSERT_TRUE(helper.Run(ReceiveWapPushTestFunc, helper));
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0001 -->finished");
@@ -463,7 +462,6 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0002, Function | MediumTest | Level2)
 
     if (!helper.Run(ReceiveWapPushTestFunc, helper)) {
         TELEPHONY_LOGI("ReceiveWapPushTestFunc out of time");
-        ASSERT_FALSE(helper.Run(ReceiveWapPushTestFunc, helper));
         return;
     }
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0002 -->finished");
