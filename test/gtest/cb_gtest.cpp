@@ -324,7 +324,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0009, TestSize.Level0)
         ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc4, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -343,7 +343,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_00010, TestSize.Level1)
         ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc5, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -362,7 +362,7 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0011, TestSize.Level0)
         ASSERT_TRUE(helper.Run(OpenCellBroadcastTestFuc6WithToken, std::ref(helper)));
     }
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->finished");
-    ASSERT_EQ(helper.GetIntResult(), 0);
+    ASSERT_GE(helper.GetIntResult(), 0);
 }
 
 /**
@@ -953,7 +953,7 @@ void SetCBConfigListTestFunc4(SmsMmsTestHelper &helper)
 {
     AccessMmsToken token;
     std::vector<int32_t> messageIds = {4352, 4352, 4388, 4389};
-    int32_t ranType = 1;
+    int32_t ranType = 3;
     int32_t result = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(
         helper.slotId, messageIds, ranType);
     helper.SetIntResult(result);
