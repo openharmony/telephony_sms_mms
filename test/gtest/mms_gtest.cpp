@@ -430,12 +430,8 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0001, Function | MediumTest | Level2)
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
-    if (!helper.Run(ReceiveWapPushTestFunc, helper)) {
-        TELEPHONY_LOGI("ReceiveWapPushTestFunc out of time");
-        return;
-    }
+    EXPECT_TRUE(!helper.Run(ReceiveWapPushTestFunc, helper) || helper.GetBoolResult());
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0001 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 /**
@@ -460,12 +456,8 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0002, Function | MediumTest | Level2)
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
-    if (!helper.Run(ReceiveWapPushTestFunc, helper)) {
-        TELEPHONY_LOGI("ReceiveWapPushTestFunc out of time");
-        return;
-    }
+    EXPECT_TRUE(!helper.Run(ReceiveWapPushTestFunc, helper) || helper.GetBoolResult());
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0002 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 /**
