@@ -757,13 +757,8 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0001, Function | MediumTest | Level2)
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
-    if (!helper.Run(ReceiveCellBroadCastTestFunc, helper)) {
-        TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc out of time");
-        ASSERT_TRUE(helper.Run(ReceiveCellBroadCastTestFunc, helper));
-        return;
-    }
+    EXPECT_TRUE(!helper.Run(ReceiveCellBroadCastTestFunc, helper) || helper.GetBoolResult());
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0001 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 /**
@@ -789,13 +784,8 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0002, Function | MediumTest | Level2)
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
-    if (!helper.Run(ReceiveCellBroadCastTestFunc2, helper)) {
-        TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc2 out of time");
-        ASSERT_TRUE(helper.Run(ReceiveCellBroadCastTestFunc2, helper));
-        return;
-    }
+    EXPECT_TRUE(!helper.Run(ReceiveCellBroadCastTestFunc2, helper) || helper.GetBoolResult());
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0002 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 /**
@@ -821,13 +811,8 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0003, Function | MediumTest | Level2)
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
-    if (!helper.Run(ReceiveCellBroadCastTestFunc, helper)) {
-        TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc out of time");
-        ASSERT_TRUE(helper.Run(ReceiveCellBroadCastTestFunc, helper));
-        return;
-    }
+    EXPECT_TRUE(!helper.Run(ReceiveCellBroadCastTestFunc, helper) || helper.GetBoolResult());
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0003 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 /**
@@ -853,13 +838,9 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0004, Function | MediumTest | Level2)
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
-    if (!helper.Run(ReceiveCellBroadCastTestFunc2, helper)) {
-        TELEPHONY_LOGI("ReceiveCellBroadCastTestFunc2 out of time");
-        ASSERT_TRUE(helper.Run(ReceiveCellBroadCastTestFunc2, helper));
-        return;
-    }
+    EXPECT_TRUE(!helper.Run(ReceiveCellBroadCastTestFunc2, helper) || helper.GetBoolResult());
+
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0004 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 void SetCBConfigListTestFunc1(SmsMmsTestHelper &helper)

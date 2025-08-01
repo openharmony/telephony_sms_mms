@@ -1038,13 +1038,8 @@ HWTEST_F(SmsGtest, Receive_SMS_0001, Function | MediumTest | Level2)
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
-    if (!helper.Run(ReceiveSmsTestFunc, helper)) {
-        TELEPHONY_LOGI("ReceiveSmsTestFunc out of time");
-        ASSERT_FALSE(helper.Run(ReceiveSmsTestFunc, helper));
-        return;
-    }
+    EXPECT_TRUE(!helper.Run(ReceiveSmsTestFunc, helper) || helper.GetBoolResult());
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_SMS_0001 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 /**
@@ -1069,13 +1064,8 @@ HWTEST_F(SmsGtest, Receive_SMS_0002, Function | MediumTest | Level2)
     bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriberTest);
     TELEPHONY_LOGI("subscribeResult is : %{public}d", subscribeResult);
 
-    if (!helper.Run(ReceiveSmsTestFunc, helper)) {
-        TELEPHONY_LOGI("ReceiveSmsTestFunc out of time");
-        ASSERT_FALSE(helper.Run(ReceiveSmsTestFunc, helper));
-        return;
-    }
+    EXPECT_TRUE(!helper.Run(ReceiveSmsTestFunc, helper) || helper.GetBoolResult());
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_SMS_0002 -->finished");
-    EXPECT_TRUE(helper.GetBoolResult());
 }
 
 void GetSmsSegmentsInfoTestFuc(SmsMmsTestHelper &helper)
