@@ -342,11 +342,12 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
         case SmsEncodingType::LATIN_HEBREW:
         case SmsEncodingType::LATIN:
         case SmsEncodingType::OCTET: {
-            if (memcpy_s(buff, sizeof(buff), userData.userData.data, userData.userData.length) != EOK) {
+            dataSize = userData.userData.length;
+            if (memcpy_s(buff, sizeof(buff), userData.userData.data, dataSize) != EOK ||
+                dataSize >= MAX_MSG_TEXT_LEN + 1) {
                 TELEPHONY_LOGE("AnalsisDeliverMsg memcpy_s fail.");
                 return;
             }
-            dataSize = userData.userData.length;
             buff[dataSize] = '\0';
             break;
         }
