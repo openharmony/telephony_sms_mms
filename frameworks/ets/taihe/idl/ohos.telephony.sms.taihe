@@ -17,6 +17,8 @@
 @!sts_inject("""
 static { loadLibrary("telephony_sms_taihe_native.z") }
 """)
+@!sts_inject_into_module("import BaseContext from 'application.BaseContext';")
+@!sts_inject_into_module("import { AsyncCallback } from '@ohos.base';")
 
 enum MmsPriorityType: i32 {
     MMS_LOW = 128,
