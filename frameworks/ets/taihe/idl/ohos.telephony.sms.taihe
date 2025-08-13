@@ -17,5 +17,378 @@
 @!sts_inject("""
 static { loadLibrary("telephony_sms_taihe_native.z") }
 """)
+@!sts_inject_into_module("import BaseContext from 'application.BaseContext';")
+@!sts_inject_into_module("import { AsyncCallback } from '@ohos.base';")
+
+enum MmsPriorityType: i32 {
+    MMS_LOW = 128,
+    MMS_NORMAL = 129,
+    MMS_HIGH = 130,
+}
+
+enum ShortMessageClass: i32{
+    UNKNOWN = 0,
+    INSTANT_MESSAGE = 1,
+    OPTIONAL_MESSAGE = 2,
+    SIM_MESSAGE = 3,
+    FORWARD_MESSAGE = 4,
+}
+
+enum MmsVersionType: i32 {
+    MMS_VERSION_1_0 = 0x10,
+    MMS_VERSION_1_1 = 0x11,
+    MMS_VERSION_1_2 = 0x12,
+    MMS_VERSION_1_3 = 0x13,
+}
+
+enum SendSmsResult: i32 {
+    SEND_SMS_SUCCESS = 0,
+    SEND_SMS_FAILURE_UNKNOWN = 1,
+    SEND_SMS_FAILURE_RADIO_OFF = 2,
+    SEND_SMS_FAILURE_SERVICE_UNAVAILABLE = 3
+}
+
+enum RanType: i32 {
+    TYPE_GSM = 1,
+    TYPE_CDMA = 2,
+}
+
+enum SmsEncodingScheme: i32 {
+    SMS_ENCODING_UNKNOWN = 0,
+    SMS_ENCODING_7BIT = 1,
+    SMS_ENCODING_8BIT = 2,
+    SMS_ENCODING_16BIT = 3,
+}
+
+enum MmsCharSets: i32 {
+    BIG5 = 0x07EA,
+    ISO_10646_UCS_2 = 0x03E8,
+    ISO_8859_1 = 0x04,
+    ISO_8859_2 = 0x05,
+    ISO_8859_3 = 0x06,
+    ISO_8859_4 = 0x07,
+    ISO_8859_5 = 0x08,
+    ISO_8859_6 = 0x09,
+    ISO_8859_7 = 0x0a,
+    ISO_8859_8 = 0x0b,
+    ISO_8859_9 = 0x0c,
+    SHIFT_JIS = 0x11,
+    US_ASCII = 0x03,
+    UTF_8 = 0x6A,
+}
+
+enum MessageType: i32 {
+    TYPE_MMS_SEND_REQ = 128,
+    TYPE_MMS_SEND_CONF = 129,
+    TYPE_MMS_NOTIFICATION_IND = 130,
+    TYPE_MMS_RESP_IND = 131,
+    TYPE_MMS_RETRIEVE_CONF = 132,
+    TYPE_MMS_ACKNOWLEDGE_IND = 133,
+    TYPE_MMS_DELIVERY_IND = 134,
+    TYPE_MMS_READ_REC_IND = 135,
+    TYPE_MMS_READ_ORIG_IND = 136,
+}
+
+enum SimMessageStatus: i32 {
+    SIM_MESSAGE_STATUS_FREE = 0,
+    SIM_MESSAGE_STATUS_READ = 1,
+    SIM_MESSAGE_STATUS_UNREAD = 3,
+    SIM_MESSAGE_STATUS_SENT = 5,
+    SIM_MESSAGE_STATUS_UNSENT = 7,
+}
+
+enum ReportType: i32 {
+    MMS_YES = 128,
+    MMS_NO = 129,
+}
+
+enum DispositionType: i32 {
+    FROM_DATA = 0,
+    ATTACHMENT = 1,
+    INLINE = 2,
+}
+
+struct MmsAddress {
+    address: String;
+    charset: MmsCharSets;
+}
+
+struct MmsAttachment {
+    contentId: String;
+    contentLocation: String;
+    contentDisposition: DispositionType;
+    contentTransferEncoding: String;
+    contentType: String;
+    isSmil: bool;
+    path: Optional<String>;
+    inBuff: Optional<@typedarray Array<u8>>;
+    fileName: Optional<String>;
+    charset: Optional<MmsCharSets>;
+}
+
+struct MmsReadOrigInd {
+    version: MmsVersionType;
+    messageId: String;
+    to: Array<MmsAddress>;
+    @!sts_inject_into_interface("""get from():MmsAddress
+                                set from(value:MmsAddress)
+                                """)
+
+    @!sts_inject_into_class("""
+        get from():MmsAddress{
+            return this.fromAddress;
+    }
+        set from(value: MmsAddress) {
+            this.fromAddress = value;
+        }
+            """)
+    fromAddress: MmsAddress;
+    date: i32;
+    readStatus: i32;
+}
+
+struct MmsReadRecInd {
+    version: MmsVersionType;
+    messageId: String;
+    to: Array<MmsAddress>;
+    @!sts_inject_into_interface("""get from():MmsAddress
+                                set from(value:MmsAddress)
+                                """)
+
+    @!sts_inject_into_class("""
+        get from():MmsAddress{
+            return this.fromAddress;
+    }
+        set from(value: MmsAddress) {
+            this.fromAddress = value;
+        }
+            """)
+    fromAddress: MmsAddress;
+    readStatus: i32;
+    date: Optional<i32>;
+}
+
+struct MmsDeliveryInd {
+    messageId: String;
+    date: i32;
+    to: Array<MmsAddress>;
+    status: i32;
+    version: MmsVersionType;
+}
+
+struct MmsAcknowledgeInd {
+    transactionId: String;
+    version: MmsVersionType;
+    reportAllowed: Optional<ReportType>;
+}
+
+struct MmsRetrieveConf {
+    transactionId: String;
+    messageId: String;
+    date: i32;
+    contentType: String;
+    to: Array<MmsAddress>;
+    version: MmsVersionType;
+   @!sts_inject_into_interface("""get from():MmsAddress | undefined
+                                set from(value:MmsAddress | undefined)
+                                """)
+
+    @!sts_inject_into_class("""
+        get from():MmsAddress | undefined{
+            return this.fromAddress;
+        }
+        set from(value: MmsAddress | undefined) {
+            this.fromAddress = value;
+        }
+            """)
+    fromAddress: Optional<MmsAddress>;
+    cc: Optional<Array<MmsAddress>>;
+    subject: Optional<String>;
+    priority: Optional<MmsPriorityType>;
+    deliveryReport: Optional<i32>;
+    readReport: Optional<i32>;
+    retrieveStatus: Optional<i32>;
+    retrieveText: Optional<String>;
+}
+
+struct MmsRespInd {
+    transactionId: String;
+    status: i32;
+    version: MmsVersionType;
+    reportAllowed: Optional<ReportType>;
+}
+
+struct MmsNotificationInd {
+    transactionId: String;
+    messageClass: i32;
+    messageSize: i32;
+    expiry: i32;
+    contentLocation: String;
+    version: MmsVersionType;
+    @!sts_inject_into_interface("""get from():MmsAddress | undefined
+                                set from(value:MmsAddress | undefined)
+                                """)
+
+    @!sts_inject_into_class("""
+        get from(): MmsAddress | undefined{
+            return this.fromAddress;
+    }
+        set from(value: MmsAddress | undefined) {
+            this.fromAddress = value;
+        }
+            """)
+    fromAddress: Optional<MmsAddress>;
+    subject: Optional<String>;
+    deliveryReport: Optional<i32>;
+    contentClass: Optional<i32>;
+}
+
+union MmsType {
+    mmsTypeSendReq: MmsSendReq;
+    mmsTypeSendConf: MmsSendConf;
+    mmsTypeNotificationInd: MmsNotificationInd;
+    mmsTypeRespInd: MmsRespInd;
+    mmsTypeRetrieveConf: MmsRetrieveConf;
+    mmsTypeAcknowledgeInd: MmsAcknowledgeInd;
+    mmsTypeDeliveryInd: MmsDeliveryInd;
+    mmsTypeReadOrigInd: MmsReadOrigInd;
+    mmsTypeReadRecInd: MmsReadRecInd;
+}
+
+struct MmsInformation {
+    messageType: MessageType;
+    mmsType: MmsType;
+    attachment: Optional<Array<MmsAttachment>>;
+}
+
+struct MmsConfig {
+    userAgent: String;
+    userAgentProfile: String;
+}
+
+struct UpdateSimMessageOptions {
+    slotId: i32;
+    msgIndex: i32;
+    newStatus: SimMessageStatus;
+    pdu: String;
+    smsc: String;
+}
+
+struct SmsSegmentsInfo {
+    splitCount: i32;
+    encodeCount: i32;
+    encodeCountRemaining: i32;
+    scheme: SmsEncodingScheme;
+}
+
+struct MmsSendConf {
+    responseState: i32;
+    transactionId: String;
+    version: MmsVersionType;
+    messageId: Optional<String>;
+}
+
+struct MmsParams {
+    slotId: f64;
+    mmsc: String;
+    data: String;
+    mmsConfig: Optional<MmsConfig>;
+}
+
+struct ISendShortMessageCallback {
+    result: SendSmsResult;
+    url: String;
+    isLastPart: bool;
+}
+
+struct IDeliveryShortMessageCallback {
+    pdu: @typedarray Array<u8>;
+}
+
+/* content: string | Array<number> convert to union */
+union ContentOption {
+    shortMessage: String;
+    dataMessage: @typedarray Array<u8>;
+}
+
+struct SendMessageOptions {
+    slotId: f64;
+    destinationHost: String;
+    serviceCenter: Optional<String>;
+    content: ContentOption;
+    destinationPort: Optional<f64>;
+    sendCallback: Optional<@sts_type("AsyncCallback<ISendShortMessageCallback>") Opaque>;
+    deliveryCallback: Optional<@sts_type("AsyncCallback<IDeliveryShortMessageCallback>") Opaque>;
+    isPersist: Optional<bool>;
+}
+
+struct ShortMessage {
+    visibleMessageBody: String;
+    visibleRawAddress: String;
+    messageClass: ShortMessageClass;
+    protocolId: i32;
+    scAddress: String;
+    scTimestamp: i32;
+    isReplaceMessage: bool;
+    hasReplyPath: bool;
+    pdu: @typedarray Array<u8>;
+    status: i32;
+    isSmsStatusReportMessage: bool;
+}
+
+struct SimShortMessage {
+    shortMessage: ShortMessage;
+    simMessageStatus: SimMessageStatus;
+    indexOnSim: i32;
+}
+
+struct SimMessageOptions {
+    slotId: i32;
+    smsc: String;
+    pdu: String;
+    status: SimMessageStatus;
+}
+
+struct CBConfigOptions {
+    slotId: f64;
+    enable: bool;
+    startMessageId: f64;
+    endMessageId: f64;
+    ranType: RanType;
+}
+
+struct MmsSendReq {
+    @!sts_inject_into_interface("""get from():MmsAddress
+                                set from(value:MmsAddress)
+                                """)
+    @!sts_inject_into_class("""
+        get from(): MmsAddress {
+            return this.fromAddress;
+    }
+        set from(value: MmsAddress) {
+            this.fromAddress = value;
+        }
+            """)
+    fromAddress: MmsAddress;
+    transactionId: String;
+    contentType: String;
+    version: MmsVersionType;
+    to: Optional<Array<MmsAddress>>;
+    date: Optional<i32>;
+    cc: Optional<Array<MmsAddress>>;
+    bcc: Optional<Array<MmsAddress>>;
+    subject: Optional<String>;
+    messageClass: Optional<i32>;
+    expiry: Optional<i32>;
+    priority: Optional<MmsPriorityType>;
+    senderVisibility: Optional<i32>;
+    deliveryReport: Optional<i32>;
+    readReport: Optional<i32>;
+}
+
+union FilePathName {
+    pathNameString: String;
+    pathNameArray: @typedarray Array<u8>;
+}
 
 function HasSmsCapability(): bool;
