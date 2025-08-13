@@ -443,7 +443,9 @@ HWTEST_F(MmsGtest, Receive_Wap_Push_0002, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Wap_Push_0002 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
-    ASSERT_TRUE(MmsGtest::HasSimCard(slotId));
+    if (!(MmsGtest::HasSimCard(slotId))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
 

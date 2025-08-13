@@ -278,7 +278,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0006, TestSize.Level0)
 HWTEST_F(CbGtest, OpenCellBroadcast_0007, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0007 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("no sim card");
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc2, std::ref(helper))) {
@@ -297,7 +300,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0007, TestSize.Level0)
 HWTEST_F(CbGtest, OpenCellBroadcast_0008, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0008 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("no sim card");
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc3, std::ref(helper))) {
@@ -316,7 +322,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0008, TestSize.Level0)
 HWTEST_F(CbGtest, OpenCellBroadcast_0009, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0009 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("no sim card");
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc4, std::ref(helper))) {
@@ -335,7 +344,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_0009, TestSize.Level0)
 HWTEST_F(CbGtest, OpenCellBroadcast_00010, TestSize.Level1)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0010 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("no sim card");
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc5, std::ref(helper))) {
@@ -354,7 +366,10 @@ HWTEST_F(CbGtest, OpenCellBroadcast_00010, TestSize.Level1)
 HWTEST_F(CbGtest, OpenCellBroadcast_0011, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::OpenCellBroadcast_0011 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        TELEPHONY_LOGI("no sim card");
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(OpenCellBroadcastTestFuc6WithToken, std::ref(helper))) {
@@ -797,7 +812,9 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0003, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0003 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
-    ASSERT_TRUE(CbGtest::HasSimCard(slotId));
+    if (!(CbGtest::HasSimCard(slotId))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
 
@@ -824,7 +841,9 @@ HWTEST_F(CbGtest, Receive_Cell_BroadCast_0004, Function | MediumTest | Level2)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::Receive_Cell_BroadCast_0004 -->");
     int32_t slotId = DEFAULT_SIM_SLOT_ID_1;
-    ASSERT_TRUE(CbGtest::HasSimCard(slotId));
+    if (!(CbGtest::HasSimCard(slotId))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = slotId;
 
@@ -891,7 +910,9 @@ void SetCBConfigListTestFunc2(SmsMmsTestHelper &helper)
 HWTEST_F(CbGtest, SetCBConfigList_0002, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0002 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(SetCBConfigListTestFunc2, std::ref(helper))) {
@@ -920,7 +941,9 @@ void SetCBConfigListTestFunc3(SmsMmsTestHelper &helper)
 HWTEST_F(CbGtest, SetCBConfigList_0003, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0003 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(SetCBConfigListTestFunc3, std::ref(helper))) {
@@ -949,7 +972,9 @@ void SetCBConfigListTestFunc4(SmsMmsTestHelper &helper)
 HWTEST_F(CbGtest, SetCBConfigList_0004, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::SetCBConfigList_0004 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if (!(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(SetCBConfigListTestFunc4, std::ref(helper))) {
