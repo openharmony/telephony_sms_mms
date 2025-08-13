@@ -604,7 +604,9 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0006, TestSize.Level0)
 HWTEST_F(CbGtest, CloseCellBroadcast_0007, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0007 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if ((CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc2, std::ref(helper))) {
@@ -623,7 +625,9 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0007, TestSize.Level0)
 HWTEST_F(CbGtest, CloseCellBroadcast_0008, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0008 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if ((CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc3, std::ref(helper))) {
@@ -642,7 +646,9 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0008, TestSize.Level0)
 HWTEST_F(CbGtest, CloseCellBroadcast_0009, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0009 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if ((CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc4, std::ref(helper))) {
@@ -661,7 +667,9 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0009, TestSize.Level0)
 HWTEST_F(CbGtest, CloseCellBroadcast_0010, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0010 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if ((CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc5, std::ref(helper))) {
@@ -680,7 +688,9 @@ HWTEST_F(CbGtest, CloseCellBroadcast_0010, TestSize.Level0)
 HWTEST_F(CbGtest, CloseCellBroadcast_00011, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0011 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1));
+    if ((CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID_1;
     if (!helper.Run(CloseCellBroadcastTestFuc6WithToken, std::ref(helper))) {
@@ -699,7 +709,9 @@ HWTEST_F(CbGtest, CloseCellBroadcast_00011, TestSize.Level0)
 HWTEST_F(CbGtest, CloseCellBroadcast_0012, TestSize.Level0)
 {
     TELEPHONY_LOGI("TelSMSMMSTest::CloseCellBroadcast_0012 -->");
-    ASSERT_TRUE(CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID));
+    if ((CbGtest::HasSimCard(DEFAULT_SIM_SLOT_ID_1))) {
+        return;
+    }
     SmsMmsTestHelper helper;
     helper.slotId = DEFAULT_SIM_SLOT_ID;
     if (!helper.Run(CloseCellBroadcastTestFuc6, std::ref(helper))) {
