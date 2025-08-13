@@ -624,11 +624,11 @@ bool GsmUserDataPdu::DecodeHeaderSpecialSms(SmsReadBuffer &buffer, struct SmsUDH
     }
     pHeader.udh.specialInd.msgInd = static_cast<uint16_t>(oneByte & HEX_VALUE_7F);
 
-    if (!buffer.PickOneByte(pickByte)) {
+    if (!buffer.ReadByte(oneByte)) {
         TELEPHONY_LOGE("get data error.");
         return false;
     }
-    pHeader.udh.specialInd.waitMsgNum = pickByte;
+    pHeader.udh.specialInd.waitMsgNum = oneByte;
     return true;
 }
 
