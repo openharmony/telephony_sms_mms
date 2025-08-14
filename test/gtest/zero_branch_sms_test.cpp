@@ -1259,7 +1259,7 @@ HWTEST_F(BranchSmsTest, CreateMessage_0006, Function | MediumTest | Level1) {
  * @tc.desc     Function test
  */
 HWTEST_F(BranchSmsTest, CreateMessage_0007, Function | MediumTest | Level1) {
-    const std::string pdu = 
+    const std::string pdu =
         "069168310992004412D0C87AF85A4E53CB733A00D85270709182850014"
         "0401020001D0CB733AC8FE4E8FCBED709A0D";
     GsmSmsMessage message;
