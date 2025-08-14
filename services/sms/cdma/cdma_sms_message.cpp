@@ -343,8 +343,8 @@ void CdmaSmsMessage::AnalsisUserData(const SmsTeleSvcUserData &userData)
         case SmsEncodingType::LATIN:
         case SmsEncodingType::OCTET: {
             dataSize = userData.userData.length;
-            if (memcpy_s(buff, sizeof(buff), userData.userData.data, dataSize) != EOK ||
-                dataSize >= MAX_MSG_TEXT_LEN + 1) {
+            if (dataSize >= MAX_MSG_TEXT_LEN + 1 ||
+                memcpy_s(buff, sizeof(buff), userData.userData.data, dataSize) != EOK) {
                 TELEPHONY_LOGE("AnalsisDeliverMsg memcpy_s fail.");
                 return;
             }
