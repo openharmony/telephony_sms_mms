@@ -36,7 +36,8 @@ constexpr const char *PERMISSION_STARTUP_COMPLETED = "ohos.permission.RECEIVER_S
 #endif
 
 std::shared_ptr<SmsStateEventSubscriber> SmsStateObserver::SubscribeToEvents(const std::vector<std::string>& events,
-    int priority, const std::string& permission) {
+    int priority, const std::string& permission)
+{
     MatchingSkills matchingSkills;
     for (const auto& event : events) {
         matchingSkills.AddEvent(event);
