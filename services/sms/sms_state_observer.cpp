@@ -23,48 +23,115 @@
 #include "sms_hisysevent.h"
 #include "system_ability_definition.h"
 #include "telephony_log_wrapper.h"
+#include "telephony_types.h"
 #include "want.h"
 
 namespace OHOS {
 namespace Telephony {
 using namespace OHOS::EventFwk;
 static const int32_t DEFAULT_VALUE = -1;
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+const int32_t MT_RECV_SMS = 6;
+constexpr const char *PERMISSION_STARTUP_COMPLETED = "ohos.permission.RECEIVER_STARTUP_COMPLETED";
+#endif
+
+std::shared_ptr<SmsStateEventSubscriber> SmsStateObserver::SubscribeToEvents(const std::vector<std::string>& events,
+    int priority, const std::string& permission)
+{
+    MatchingSkills matchingSkills;
+    for (const auto& event : events) {
+        matchingSkills.AddEvent(event);
+    }
+
+    CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    subscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
+    if (priority != 0) {
+        subscriberInfo.SetPriority(static_cast<CommonEventPriority>(priority));
+    }
+    if (!permission.empty()) {
+        subscriberInfo.SetPermission(permission);
+    }
+
+    std::shared_ptr<SmsStateEventSubscriber> subscriber =
+        std::make_shared<SmsStateEventSubscriber>(subscriberInfo, *this);
+    subscriber->InitEventMap();
+
+    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgrProxy == nullptr) {
+        TELEPHONY_LOGE("SubscribeToEvents samgrProxy is nullptr");
+        return nullptr;
+    }
+
+    SystemAbilityStatusChangeListener* statusListener = new SystemAbilityStatusChangeListener(subscriber);
+
+    int32_t ret = samgrProxy->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, statusListener);
+    TELEPHONY_LOGI("SubscribeToEvents SubscribeSystemAbility result:%{public}d", ret);
+
+    return subscriber;
+}
+
+void SmsStateObserver::StartDisorderEventSubscriber()
+{
+    std::vector<std::string> events = {
+        CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED,
+        CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED,
+        CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED,
+        CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED
+    };
+
+    smsSubscriber_ = SubscribeToEvents(events);
+}
+
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+void SmsStateObserver::StartOrderEventSubscriber()
+{
+    std::vector<std::string> events = { EXIT_STR_TELEPHONY_NOTIFY };
+    strEnterSubscriber_ = SubscribeToEvents(events, CommonEventPriority::THIRD_PRIORITY, PERMISSION_STARTUP_COMPLETED);
+}
+#endif
 
 void SmsStateObserver::StartEventSubscriber()
 {
-    MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED);
-    CommonEventSubscribeInfo subscriberInfo(matchingSkills);
-    subscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
-    smsSubscriber_ = std::make_shared<SmsStateEventSubscriber>(subscriberInfo);
-    smsSubscriber_->InitEventMap();
-    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgrProxy == nullptr) {
-        TELEPHONY_LOGE("StartEventSubscriber samgrProxy is nullptr");
-        return;
-    }
-    smsStatusListener_ = new (std::nothrow) SystemAbilityStatusChangeListener(smsSubscriber_);
-    if (smsStatusListener_ == nullptr) {
-        TELEPHONY_LOGE("StartEventSubscriber smsStatusListener_ is nullptr");
-        return;
-    }
-    int32_t ret = samgrProxy->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, smsStatusListener_);
-    TELEPHONY_LOGI("StartEventSubscriber SubscribeSystemAbility result:%{public}d", ret);
+    StartDisorderEventSubscriber();
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+    StartOrderEventSubscriber();
+#endif
 }
 
 void SmsStateObserver::StopEventSubscriber()
 {
-    if (smsSubscriber_ == nullptr) {
+    StopEventsSubscriber(smsSubscriber_);
+    smsSubscriber_ = nullptr;
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+    StopEventsSubscriber(strEnterSubscriber_);
+    strEnterSubscriber_ = nullptr;
+#endif
+}
+
+void SmsStateObserver::StopEventsSubscriber(std::shared_ptr<SmsStateEventSubscriber> &subscriber)
+{
+    if (subscriber == nullptr) {
         TELEPHONY_LOGE("SmsStateObserver::StopEventSubscriber subscriber_ is nullptr");
         return;
     }
-    bool unSubscribeResult = CommonEventManager::UnSubscribeCommonEvent(smsSubscriber_);
-    smsSubscriber_ = nullptr;
+    bool unSubscribeResult = CommonEventManager::UnSubscribeCommonEvent(subscriber);
     TELEPHONY_LOGI("SmsStateObserver::StopEventSubscriber unSubscribeResult = %{public}d", unSubscribeResult);
 }
+
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+void SmsStateObserver::SetAsyncCommonEvent(const std::shared_ptr<EventFwk::AsyncCommonEventResult> &result)
+{
+    strEnterEventResult_ = result;
+}
+
+void SmsStateObserver::ProcessStrExitFinishEvent()
+{
+    if (strEnterEventResult_ != nullptr) {
+        TELEPHONY_LOGI("exit str recv msg succ, send FinishCommonEvent");
+        strEnterEventResult_->FinishCommonEvent();
+    }
+}
+#endif
 
 void SmsStateEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
 {
@@ -89,6 +156,15 @@ void SmsStateEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventDa
                 slotId, SmsMmsMessageType::WAP_PUSH);
             SmsHiSysEvent::WriteSmsReceiveBehaviorEvent(slotId, SmsMmsMessageType::WAP_PUSH);
             break;
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+        case COMMON_EVENT_EXIT_STR_TELEPHONY_NOTIFY: {
+            if (data.GetCode() == MT_RECV_SMS) {
+                TELEPHONY_LOGI("recv sms and exit str");
+                observer_.SetAsyncCommonEvent(GoAsyncCommonEvent());
+            }
+            break;
+        }
+#endif
         default:
             break;
     }
@@ -111,6 +187,9 @@ void SmsStateEventSubscriber::InitEventMap()
         { CommonEventSupport::COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED, COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED },
         { CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED, COMMON_EVENT_SMS_RECEIVE_COMPLETED },
         { CommonEventSupport::COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED, COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED },
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+        { EXIT_STR_TELEPHONY_NOTIFY, COMMON_EVENT_EXIT_STR_TELEPHONY_NOTIFY },
+#endif
     };
 }
 

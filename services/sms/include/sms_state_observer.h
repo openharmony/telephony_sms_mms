@@ -31,12 +31,17 @@ enum SmsStateEventIntValue {
     COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED,
     COMMON_EVENT_SMS_RECEIVE_COMPLETED,
     COMMON_EVENT_SMS_WAPPUSH_RECEIVE_COMPLETED,
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+    COMMON_EVENT_EXIT_STR_TELEPHONY_NOTIFY,
+#endif
     COMMON_EVENT_UNKNOWN,
 };
 
+class SmsStateObserver;
 class SmsStateEventSubscriber : public CommonEventSubscriber {
 public:
-    explicit SmsStateEventSubscriber(const CommonEventSubscribeInfo &info) : CommonEventSubscriber(info) {}
+    SmsStateEventSubscriber(const CommonEventSubscribeInfo &info, SmsStateObserver &observer)
+        : CommonEventSubscriber(info), observer_(observer) {}
     ~SmsStateEventSubscriber() = default;
     void OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data) override;
     void InitEventMap();
@@ -46,6 +51,7 @@ private:
 
 private:
     std::map<std::string, SmsStateEventIntValue> smsStateEvenMapIntValues_;
+    SmsStateObserver &observer_;
 };
 
 class SmsStateObserver {
@@ -54,10 +60,27 @@ public:
     ~SmsStateObserver() = default;
     void StartEventSubscriber();
     void StopEventSubscriber();
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+    void SetAsyncCommonEvent(const std::shared_ptr<EventFwk::AsyncCommonEventResult> &result);
+    void ProcessStrExitFinishEvent();
+#endif
+
+private:
+
+    std::shared_ptr<SmsStateEventSubscriber> SubscribeToEvents(const std::vector<std::string>& events,
+        int priority = 0, const std::string& permission = "");
+    void StopEventsSubscriber(std::shared_ptr<SmsStateEventSubscriber> &subscriber);
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+    void StartOrderEventSubscriber();
+#endif
+    void StartDisorderEventSubscriber();
 
 private:
     std::shared_ptr<SmsStateEventSubscriber> smsSubscriber_;
-    sptr<ISystemAbilityStatusChange> smsStatusListener_ = nullptr;
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+    std::shared_ptr<SmsStateEventSubscriber> strEnterSubscriber_ = nullptr;
+    std::shared_ptr<EventFwk::AsyncCommonEventResult> strEnterEventResult_ = nullptr;
+#endif
 
 private:
     class SystemAbilityStatusChangeListener : public SystemAbilityStatusChangeStub {
