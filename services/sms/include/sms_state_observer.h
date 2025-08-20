@@ -40,8 +40,8 @@ enum SmsStateEventIntValue {
 class SmsStateObserver;
 class SmsStateEventSubscriber : public CommonEventSubscriber {
 public:
-    SmsStateEventSubscriber(const CommonEventSubscribeInfo &info, SmsStateObserver &observer) :
-        CommonEventSubscriber(info), observer_(observer) {}
+    SmsStateEventSubscriber(const CommonEventSubscribeInfo &info, SmsStateObserver &observer)
+        : CommonEventSubscriber(info), observer_(observer) {}
     ~SmsStateEventSubscriber() = default;
     void OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data) override;
     void InitEventMap();
