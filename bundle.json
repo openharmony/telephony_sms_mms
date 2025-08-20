@@ -23,7 +23,8 @@
             "SystemCapability.Telephony.SmsMms"
         ],
         "features": [
-            "sms_mms_dynamic_start"
+            "sms_mms_dynamic_start",
+            "sms_mms_tel_power_mode"
         ],
         "adapted_system_type": [
             "standard"

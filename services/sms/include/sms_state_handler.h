@@ -29,6 +29,9 @@ public:
     void UnInit();
     bool UnRegisterHandler();
     bool RegisterHandler();
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+    void ProcessStrExitFinishEvent();
+#endif
 
 private:
     std::shared_ptr<SmsStateObserver> smsStateObserver_ = nullptr;

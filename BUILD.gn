@@ -14,6 +14,10 @@
 
 import("//build/ohos.gni")
 
+declare_args() {
+  sms_mms_tel_power_mode = false
+}
+
 config("tel_sms_mms_config") {
   visibility = [ "./*" ]
   include_dirs = [
@@ -185,6 +189,10 @@ ohos_shared_library("tel_sms_mms") {
     print(
         "telephony_telephony_enhanced = ${global_parts_info.telephony_telephony_enhanced}")
     defines += [ "OHOS_BUILD_ENABLE_TELEPHONY_EXT" ]
+  }
+
+  if (sms_mms_tel_power_mode) {
+    defines += [ "BASE_POWER_IMPROVEMENT_FEATURE" ]
   }
 
   part_name = "sms_mms"

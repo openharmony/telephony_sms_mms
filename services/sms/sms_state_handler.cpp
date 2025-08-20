@@ -58,5 +58,16 @@ void SmsStateHandler::UnInit()
         TELEPHONY_LOGE("SmsStateHandler::UnInit unregister handle fail.");
     }
 }
+
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+void SmsStateHandler::ProcessStrExitFinishEvent()
+{
+    if (smsStateObserver_ == nullptr) {
+        TELEPHONY_LOGE("SmsStateHandler smsStateObserver_ is null.");
+        return;
+    }
+    smsStateObserver_->ProcessStrExitFinishEvent();
+}
+#endif
 } // namespace Telephony
 } // namespace OHOS

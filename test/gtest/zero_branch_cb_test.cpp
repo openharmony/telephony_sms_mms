@@ -1169,9 +1169,10 @@ HWTEST_F(BranchCbTest, misc_manager_SetSmscAddr_0001, Function | MediumTest | Le
  */
 HWTEST_F(BranchCbTest, misc_GetSmsStateEventIntValue_0001, Function | MediumTest | Level1)
 {
+    SmsStateObserver observer;
     std::shared_ptr<CommonEventSubscribeInfo> subscribeInfo = std::make_shared<CommonEventSubscribeInfo>();
     std::shared_ptr<SmsStateEventSubscriber> smsStateEventSubscriber =
-        std::make_shared<SmsStateEventSubscriber>(*subscribeInfo);
+        std::make_shared<SmsStateEventSubscriber>(*subscribeInfo, observer);
     std::string event = "event";
     smsStateEventSubscriber->smsStateEvenMapIntValues_[event] = COMMON_EVENT_SMS_CB_RECEIVE_COMPLETED;
     auto ret = smsStateEventSubscriber->GetSmsStateEventIntValue(event);
@@ -1205,6 +1206,7 @@ HWTEST_F(BranchCbTest, Sms_OnAddSystemAbility_0001, Function | MediumTest | Leve
  */
 HWTEST_F(BranchCbTest, Sms_OnRemoveSystemAbility_0001, Function | MediumTest | Level1)
 {
+    SmsStateObserver observer;
     std::shared_ptr<CommonEventSubscribeInfo> subscribeInfo = std::make_shared<CommonEventSubscribeInfo>();
     std::shared_ptr<SmsStateEventSubscriber> smsStateEventSubscriber = nullptr;
     std::shared_ptr<SmsStateObserver::SystemAbilityStatusChangeListener> sysAbilityStatus =
@@ -1221,7 +1223,7 @@ HWTEST_F(BranchCbTest, Sms_OnRemoveSystemAbility_0001, Function | MediumTest | L
     sysAbilityStatus->OnRemoveSystemAbility(systemAbilityId, deviceId);
     EXPECT_TRUE(sysAbilityStatus->sub_ == nullptr);
 
-    smsStateEventSubscriber = std::make_shared<SmsStateEventSubscriber>(*subscribeInfo);
+    smsStateEventSubscriber = std::make_shared<SmsStateEventSubscriber>(*subscribeInfo, observer);
     sysAbilityStatus =
         std::make_shared<SmsStateObserver::SystemAbilityStatusChangeListener>(smsStateEventSubscriber);
     sysAbilityStatus->OnRemoveSystemAbility(systemAbilityId, deviceId);

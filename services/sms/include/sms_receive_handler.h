@@ -26,7 +26,9 @@
 #include "tel_event_handler.h"
 #include "datashare_helper.h"
 #include "system_ability_definition.h"
-
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+#include "sms_state_handler.h"
+#endif
 #ifdef ABILITY_POWER_SUPPORT
 #include "power_mgr_client.h"
 #include "power_mgr_errors.h"
@@ -72,6 +74,9 @@ private:
     void HandleRunningLockTimeoutEvent(const AppExecFwk::InnerEvent::Pointer &event);
     void HandleSmsEvent(const AppExecFwk::InnerEvent::Pointer &event);
 
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+    void HandleSmsReply();
+#endif
 protected:
     int32_t slotId_ = -1;
 
