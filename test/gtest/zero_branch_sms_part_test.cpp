@@ -519,7 +519,7 @@ HWTEST_F(BranchSmsPartTest, SmsStateObserver_0001, Function | MediumTest | Level
     smsStateObserver->StopEventSubscriber();
     std::shared_ptr<CommonEventSubscribeInfo> subscribeInfo = std::make_shared<CommonEventSubscribeInfo>();
     std::shared_ptr<SmsStateEventSubscriber> smsStateEventSubscriber =
-        std::make_shared<SmsStateEventSubscriber>(*subscribeInfo);
+        std::make_shared<SmsStateEventSubscriber>(*subscribeInfo, *smsStateObserver);
     EventFwk::CommonEventData eventData = EventFwk::CommonEventData();
     AAFwk::Want want = AAFwk::Want();
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SMS_EMERGENCY_CB_RECEIVE_COMPLETED);
@@ -534,6 +534,13 @@ HWTEST_F(BranchSmsPartTest, SmsStateObserver_0001, Function | MediumTest | Level
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BATTERY_LOW);
     eventData.SetWant(want);
     smsStateEventSubscriber->OnReceiveEvent(eventData);
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+    want.SetAction(EXIT_STR_TELEPHONY_NOTIFY);
+    eventData.SetWant(want);
+    eventData.SetCode(6);
+    smsStateEventSubscriber->InitEventMap();
+    smsStateEventSubscriber->OnReceiveEvent(eventData);
+#endif
     EXPECT_TRUE(smsStateObserver != nullptr);
     EXPECT_TRUE(subscribeInfo != nullptr);
     EXPECT_TRUE(smsStateEventSubscriber != nullptr);
@@ -1721,6 +1728,13 @@ HWTEST_F(BranchSmsPartTest, SmsReceiveHandler_0004, Function | MediumTest | Leve
     smsReceiveHandler->ProcessEvent(event);
     event = AppExecFwk::InnerEvent::Get(SmsReceiveHandler::RETRY_CONNECT_DATASHARE_EVENT_ID, 0);
     smsReceiveHandler->ProcessEvent(event);
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+    event = AppExecFwk::InnerEvent::Get(SMS_EVENT_NEW_SMS_REPLY, 0);
+    auto smsStateHandler = DelayedSingleton<SmsStateHandler>::GetInstance();
+    smsStateHandler->smsStateObserver_ = std::make_shared<SmsStateObserver>();
+    smsReceiveHandler->ProcessEvent(event);
+    smsStateHandler->smsStateObserver_ = nullptr;
+#endif
     smsReceiveHandler->ReduceRunningLock();
     smsReceiveHandler->ReleaseRunningLock();
     smsReceiveHandler->ApplyRunningLock();

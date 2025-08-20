@@ -141,6 +141,11 @@ void SmsReceiveHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &even
             HandleReconnectEvent();
             break;
         }
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+        case SMS_EVENT_NEW_SMS_REPLY:
+            HandleSmsReply();
+            break;
+#endif
         default:
             TELEPHONY_LOGE("SmsReceiveHandler::ProcessEvent Unknown eventId %{public}d", eventId);
             break;
@@ -169,6 +174,15 @@ void SmsReceiveHandler::HandleSmsEvent(const AppExecFwk::InnerEvent::Pointer &ev
         HandleReceivedSmsWithoutDataShare(message);
     }
 }
+
+#ifdef BASE_POWER_IMPROVEMENT_FEATURE
+void SmsReceiveHandler::HandleSmsReply()
+{
+    TELEPHONY_LOGI("HandleSmsReply enter");
+    auto smsStateHandler = DelayedSingleton<SmsStateHandler>::GetInstance();
+    smsStateHandler->ProcessStrExitFinishEvent();
+}
+#endif
 
 void SmsReceiveHandler::ApplyRunningLock()
 {
