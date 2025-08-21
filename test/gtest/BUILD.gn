@@ -50,7 +50,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   ]
 
   deps = [
-    "$SMS_MMS_SOURCE_DIR:tel_sms_mms",
+    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test",
     "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
   ]
 
@@ -70,7 +70,7 @@ ohos_unittest("tel_sms_mms_gtest") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
-    "ffrt:libffrt",
+    "core_service:ffrt_mocked",
     "googletest:gmock_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -120,7 +120,7 @@ ohos_unittest("tel_mmssms_gtest") {
   ]
 
   deps = [
-    "$SMS_MMS_SOURCE_DIR:tel_sms_mms",
+    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test",
     "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
   ]
 
@@ -139,7 +139,7 @@ ohos_unittest("tel_mmssms_gtest") {
     "curl:curl_shared",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
-    "ffrt:libffrt",
+    "core_service:ffrt_mocked",
     "hilog:libhilog",
     "icu:shared_icui18n",
     "icu:shared_icuuc",
@@ -180,7 +180,7 @@ ohos_unittest("tel_sms_mms_gsm_gtest") {
   ]
 
   deps = [
-    "$SMS_MMS_SOURCE_DIR:tel_sms_mms",
+    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test",
     "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
   ]
 
@@ -199,7 +199,7 @@ ohos_unittest("tel_sms_mms_gsm_gtest") {
     "curl:curl_shared",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
-    "ffrt:libffrt",
+    "core_service:ffrt_mocked",
     "hilog:libhilog",
     "icu:shared_icui18n",
     "icu:shared_icuuc",
@@ -235,7 +235,7 @@ ohos_unittest("tel_sms_services_mms_gtest") {
   ]
 
   deps = [
-    "$SMS_MMS_SOURCE_DIR:tel_sms_mms",
+    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test",
     "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
   ]
 
@@ -254,7 +254,7 @@ ohos_unittest("tel_sms_services_mms_gtest") {
     "curl:curl_shared",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
-    "ffrt:libffrt",
+    "core_service:ffrt_mocked",
     "hilog:libhilog",
     "icu:shared_icui18n",
     "icu:shared_icuuc",
