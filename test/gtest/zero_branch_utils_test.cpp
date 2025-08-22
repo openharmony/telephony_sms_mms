@@ -168,7 +168,6 @@ HWTEST_F(BranchUtilsTest, TextCoder_0003, Function | MediumTest | Level1)
     pLangInfo.bLockingShift = true;
     pLangInfo.bSingleShift = true;
     unsigned char encodeData[BUF_SIZE];
-    unsigned short result = 1;
     const uint8_t *pMsgText = (const uint8_t *)TEXT_SMS_CONTENT.c_str();
     uint8_t *pDestText = encodeData;
     EXPECT_EQ(TextCoder::Instance().Utf8ToGsm7bit(nullptr, 0, nullptr, -1, langId), 0);
