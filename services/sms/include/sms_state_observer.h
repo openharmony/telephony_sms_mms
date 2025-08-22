@@ -51,7 +51,7 @@ private:
 
 private:
     std::map<std::string, SmsStateEventIntValue> smsStateEvenMapIntValues_;
-    SmsStateObserver &observer_;
+    [[maybe_unused]] SmsStateObserver &observer_;
 };
 
 class SmsStateObserver {
