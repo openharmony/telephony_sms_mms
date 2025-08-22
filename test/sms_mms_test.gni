@@ -12,9 +12,6 @@
 # limitations under the License.
 import("//build/ohos.gni")
 
-declare_args() {
-  sms_mms_tel_power_mode = false
-}
 
 sms_mms_src = [
     "../frameworks/native/sms/src/short_message.cpp",
@@ -171,8 +168,4 @@ sms_mms_deps = [
     print(
         "telephony_telephony_enhanced = ${global_parts_info.telephony_telephony_enhanced}")
     sms_mms_defines += [ "OHOS_BUILD_ENABLE_TELEPHONY_EXT" ]
-  }
-
-  if (sms_mms_tel_power_mode) {
-    sms_mms_defines += [ "BASE_POWER_IMPROVEMENT_FEATURE" ]
   }
