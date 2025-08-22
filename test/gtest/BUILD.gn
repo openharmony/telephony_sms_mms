@@ -50,8 +50,7 @@ ohos_unittest("tel_sms_mms_gtest") {
   ]
 
   deps = [
-    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test",
-    "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
+    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test_base",
   ]
 
   external_deps = [
@@ -120,8 +119,7 @@ ohos_unittest("tel_mmssms_gtest") {
   ]
 
   deps = [
-    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test",
-    "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
+    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test_base",
   ]
 
   external_deps = [
@@ -180,8 +178,7 @@ ohos_unittest("tel_sms_mms_gsm_gtest") {
   ]
 
   deps = [
-    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test",
-    "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
+    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test_base",
   ]
 
   external_deps = [
@@ -235,8 +232,7 @@ ohos_unittest("tel_sms_services_mms_gtest") {
   ]
 
   deps = [
-    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test",
-    "$SMS_MMS_SOURCE_DIR/frameworks/native:tel_sms_mms_api",
+    "$SMS_MMS_SOURCE_DIR/test:tel_sms_mms_test_base",
   ]
 
   external_deps = [

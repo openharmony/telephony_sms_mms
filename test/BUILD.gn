@@ -18,7 +18,7 @@ config("sms_mms_test_config") {
   include_dirs = sms_mms_incluedirs
 }
 
-ohos_static_library("tel_sms_mms_test") {
+ohos_static_library("tel_sms_mms_test_base") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -28,7 +28,6 @@ ohos_static_library("tel_sms_mms_test") {
   branch_protector_ret = "pac_ret"
   sources = sms_mms_src
   public_configs = [ ":sms_mms_test_config" ]
-  deps = sms_mms_deps
   external_deps = sms_mms_external_deps
   external_deps += [ "core_service:ffrt_mocked" ]
   defines = sms_mms_defines
