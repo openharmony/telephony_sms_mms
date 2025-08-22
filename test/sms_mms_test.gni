@@ -1,0 +1,195 @@
+# Copyright (C) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import("//build/ohos.gni")
+
+SMS_MMS_SOURCE_DIR = "../"
+
+sms_mms_src = [
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/short_message.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/mms/data_request.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/mms/mms_apn_info.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/mms/mms_conn_callback_stub.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/mms/mms_network_client.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/mms/mms_network_manager.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/mms/mms_persist_helper.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/mms/mms_receive.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/mms/mms_receive_manager.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/mms/mms_send_manager.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/mms/mms_sender.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/cdma/cdma_sms_message.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/cdma/cdma_sms_parameter_record.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/cdma/cdma_sms_receive_handler.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/cdma/cdma_sms_sender.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/cdma/cdma_sms_sub_parameter.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/cdma/cdma_sms_teleservice_message.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/cdma/cdma_sms_transport_message.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/cb_start_ability.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_cb_handler.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_common_utils.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_message.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_param_codec.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_param_decode.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_param_encode.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_receive_handler.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_sender.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_tpdu_codec.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_tpdu_decode.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_sms_tpdu_encode.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_user_data_decode.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_user_data_encode.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm/gsm_user_data_pdu.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm_cb_codec.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm_cb_gsm_codec.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm_cb_pdu_decode_buffer.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/gsm_cb_umts_codec.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/ims_reg_state_callback_stub.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/ims_service_interaction/src/ims_sms_callback_stub.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/ims_service_interaction/src/ims_sms_client.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/ims_service_interaction/src/ims_sms_proxy.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/proxy/sms_delivery_short_message_proxy.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/proxy/sms_send_short_message_proxy.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_callback.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_callback_stub.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_client.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_proxy.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_base_message.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_broadcast_subscriber_receiver.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_dump_helper.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_interface_manager.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_interface_stub.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_misc_manager.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_mms_common.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_network_policy_manager.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_pdu_buffer.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_persist_helper.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_receive_handler.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_receive_indexer.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_receive_manager.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_receive_reliability_handler.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_send_indexer.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_send_manager.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_sender.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_service.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_state_handler.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_state_observer.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_wap_push_buffer.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_wap_push_content_type.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_wap_push_handler.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/telephony_ext_wrapper/src/telephony_ext_wrapper.cpp",
+    "$SMS_MMS_SOURCE_DIR/utils/sms_common_utils.cpp",
+    "$SMS_MMS_SOURCE_DIR/utils/sms_hisysevent.cpp",
+    "$SMS_MMS_SOURCE_DIR/utils/sms_policy_utils.cpp",
+    "$SMS_MMS_SOURCE_DIR/utils/string_utils.cpp",
+    "$SMS_MMS_SOURCE_DIR/utils/text_coder.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_address.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_attachment.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_body.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_body_part.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_body_part_header.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_buffer.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_content_param.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_content_type.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_decode_buffer.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_encode_buffer.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_encode_string.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_header.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_header_categ.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/mms_msg.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/utils/mms_base64.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/utils/mms_charset.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/src/utils/mms_quoted_printable.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/ims_service_interaction/src/ims_sms_callback_proxy.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/delivery_short_message_callback_stub.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/send_short_message_callback_stub.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/sms_service_death_recipient.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/sms_service_manager_client.cpp",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/sms_service_proxy.cpp",
+]
+
+sms_mms_incluedirs = [
+    "$SMS_MMS_SOURCE_DIR/:tel_sms_mms_config",
+    "$SMS_MMS_SOURCE_DIR/interfaces/innerkits/",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/include",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/include",
+    "$SMS_MMS_SOURCE_DIR/frameworks/native/mms/include/utils",
+    "$SMS_MMS_SOURCE_DIR/interfaces/innerkits/ims",
+    "$SMS_MMS_SOURCE_DIR/utils",
+    "$SMS_MMS_SOURCE_DIR/services/sms/include",
+    "$SMS_MMS_SOURCE_DIR/services/sms/include/cdma",
+    "$SMS_MMS_SOURCE_DIR/services/sms/include/gsm",
+    "$SMS_MMS_SOURCE_DIR/services/sms/include/satellite",
+    "$SMS_MMS_SOURCE_DIR/services/mms/include",
+    "$SMS_MMS_SOURCE_DIR/services/mms/include/utils",
+    "$SMS_MMS_SOURCE_DIR/services/telephony_ext_wrapper/include",
+]
+
+sms_mms_defines = [
+    "TELEPHONY_LOG_TAG = \"SmsMms\"",
+    "LOG_DOMAIN = 0xD001F06",
+]
+
+sms_mms_cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+]
+
+sms_mms_external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "core_service:libtel_common",
+    "core_service:tel_core_service_api",
+    "curl:curl_shared",
+    "data_share:datashare_consumer",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "icu:shared_icui18n",
+    "icu:shared_icuuc",
+    "ipc:ipc_single",
+    "ipc:ipc_core",
+    "libphonenumber:geocoding",
+    "libphonenumber:phonenumber_standard",
+    "netmanager_base:net_conn_manager_if",
+    "netstack:http_client",
+    "os_account:os_account_innerkits",
+    "power_manager:power_ffrt",
+    "protobuf:protobuf",
+    "resource_management:global_resmgr",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "telephony_data:tel_telephony_data",
+]
+
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_power_manager) &&
+      global_parts_info.powermgr_power_manager) {
+    sms_mms_external_deps += [ "power_manager:powermgr_client" ]
+    sms_mms_defines += [ "ABILITY_POWER_SUPPORT" ]
+  }
+
+  if (is_standard_system) {
+    sms_mms_external_deps += [ "init:libbegetutil" ]
+  }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.telephony_telephony_enhanced) &&
+      global_parts_info.telephony_telephony_enhanced) {
+    print(
+        "telephony_telephony_enhanced = ${global_parts_info.telephony_telephony_enhanced}")
+    sms_mms_defines += [ "OHOS_BUILD_ENABLE_TELEPHONY_EXT" ]
+  }
