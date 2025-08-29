@@ -167,6 +167,10 @@ std::string GsmSmsParamDecode::regProcessSmsAddrs(std::string &smsAddrs)
     std::regex pattern(R"((^[#*])(.*)([#*])(.*)(#)$)");
     std::smatch match;
     std::ostringstream ret;
+    if (smsAddrs.empty()) {
+        ret << '+' <<smsAddrs;
+        return ret.str();
+    }
     if (std::regex_match(smsAddrs, match, pattern)) {
         if (match[MATCH_INDEX_TWO] == "") {
             ret << match[MATCH_INDEX_ONE] << match[MATCH_INDEX_THREE] <<
