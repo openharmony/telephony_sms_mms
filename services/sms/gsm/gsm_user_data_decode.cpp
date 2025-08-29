@@ -326,7 +326,6 @@ bool GsmUserDataDecode::DecodeUcs2PduPartData(
                 return false;
             }
             if (headerLen == 0 || buffer.GetIndex() > (current + udhl + SLIDE_DATA_STEP)) {
-                TELEPHONY_LOGI("data error");
                 userData_->ResetUserData(*userData);
                 return false;
             }
@@ -347,15 +346,12 @@ bool GsmUserDataDecode::DecodeUcs2PduPartData(
     uint8_t remain = buffer.GetSize() - buffer.GetIndex();
     uint8_t len = userData->length < remain ? userData->length : remain;
     if (len == 0) {
-        TELEPHONY_LOGI("user data length 0.");
         return true;
     }
     if (buffer.data_ == nullptr || len > sizeof(userData->data)) {
-        TELEPHONY_LOGE("buffer error.");
         return false;
     }
     if (memcpy_s(userData->data, sizeof(userData->data), buffer.data_.get() + buffer.GetIndex(), len) != EOK) {
-        TELEPHONY_LOGE("memcpy_s error.");
         return false;
     }
 
