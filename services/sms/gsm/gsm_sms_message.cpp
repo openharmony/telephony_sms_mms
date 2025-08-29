@@ -769,7 +769,7 @@ void GsmSmsMessage::ParseEmailFromMessageBody()
     }
     std::regex re("( /)|( )");
     std::smatch match;
-    if (visibleMessageBody_.empty() !std::regex_search(visibleMessageBody_, match, re)) {
+    if (visibleMessageBody_.empty() || !std::regex_search(visibleMessageBody_, match, re)) {
         return;
     }
     size_t pos = static_cast<size_t>(match.position());
