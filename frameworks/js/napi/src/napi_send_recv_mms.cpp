@@ -141,6 +141,10 @@ void UpdateTimeStamp(int64_t &timeStamp, MmsContext &context)
 
 void NativeSendMms(napi_env env, void *data)
 {
+    if (data == nullptr) {
+        TELEPHONY_LOGE("data is nullptr");
+        return;
+    }
     auto asyncContext = static_cast<MmsContext *>(data);
     if (asyncContext == nullptr) {
         TELEPHONY_LOGE("asyncContext nullptr");
