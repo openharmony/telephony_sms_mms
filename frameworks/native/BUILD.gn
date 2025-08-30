@@ -32,7 +32,6 @@ ohos_shared_library("tel_sms_mms_api") {
   ]
 
   cflags = [
-    "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
     "-O2",
   ]
