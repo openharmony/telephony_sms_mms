@@ -237,7 +237,7 @@ void SmsInterfaceStub::OnSendSmsDataRequest(MessageParcel &data, MessageParcel &
         deliveryCallback = iface_cast<IDeliveryShortMessageCallback>(remoteDeliveryCallback);
     }
     int16_t dataLen = data.ReadInt16();
-    if (dataLen - 1 < 0) {
+    if (dataLen < 1) {
         TELEPHONY_LOGE("dataLen is invalid");
         return;
     }

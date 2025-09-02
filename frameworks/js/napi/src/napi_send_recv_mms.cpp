@@ -146,10 +146,6 @@ void NativeSendMms(napi_env env, void *data)
         return;
     }
     auto asyncContext = static_cast<MmsContext *>(data);
-    if (asyncContext == nullptr) {
-        TELEPHONY_LOGE("asyncContext nullptr");
-        return;
-    }
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
         TELEPHONY_LOGE("Non-system applications use system APIs!");
         asyncContext->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
@@ -189,7 +185,6 @@ void NativeSendMms(napi_env env, void *data)
     } else {
         asyncContext->resolved = false;
     }
-    TELEPHONY_LOGI("NativeSendMms end resolved = %{public}d", asyncContext->resolved);
 }
 
 void SendMmsCallback(napi_env env, napi_status status, void *data)
