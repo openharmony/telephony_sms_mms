@@ -863,7 +863,6 @@ static napi_value SetSmscAddr(napi_env env, napi_callback_info info)
     TELEPHONY_LOGI("SetSmscAddr start after SetSmscAddrContext contruct");
     napi_get_value_int32(env, parameters[0], &context->slotId);
     context->smscAddr = NapiUtil::Get64StringFromValue(env, parameters[1]);
-    TELEPHONY_LOGI("SetSmscAddr smscAddr = %{private}s", context->smscAddr.data());
     if (parameterCount == THREE_PARAMETERS) {
         napi_create_reference(env, parameters[PARAMETERS_INDEX_2], DEFAULT_REF_COUNT, &context->callbackRef);
     }

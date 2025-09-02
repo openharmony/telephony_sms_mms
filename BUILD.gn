@@ -174,7 +174,6 @@ ohos_shared_library("tel_sms_mms") {
   public_configs = [ ":tel_sms_mms_config" ]
 
   cflags = [
-    "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
     "-O2",
   ]

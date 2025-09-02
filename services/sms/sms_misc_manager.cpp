@@ -521,7 +521,6 @@ int32_t SmsMiscManager::GetAllSimMessages(std::vector<ShortMessage> &message)
 
 int32_t SmsMiscManager::SetSmscAddr(const std::string &scAddr)
 {
-    TELEPHONY_LOGI("SmsMiscManager::SetSmscAddr [%{private}s]", scAddr.c_str());
     std::unique_lock<std::mutex> lock(mutex_);
     isSuccess_ = false;
     int32_t condition = conditonVar_++;

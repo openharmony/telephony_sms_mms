@@ -1402,6 +1402,10 @@ void NativeEncodeMms(napi_env env, void *data)
 
 void EncodeMmsCallback(napi_env env, napi_status status, void *data)
 {
+    if (data == nullptr) {
+        TELEPHONY_LOGE("data is nullptr");
+        return;
+    }
     auto context = static_cast<EncodeMmsContext *>(data);
 
     napi_value callbackValue = nullptr;
