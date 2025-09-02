@@ -185,6 +185,7 @@ void NativeSendMms(napi_env env, void *data)
     } else {
         asyncContext->resolved = false;
     }
+    TELEPHONY_LOGI("NativeSendMms end resolved = %{public}d", asyncContext->resolved);
 }
 
 void SendMmsCallback(napi_env env, napi_status status, void *data)
