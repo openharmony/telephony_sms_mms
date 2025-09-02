@@ -141,11 +141,11 @@ void UpdateTimeStamp(int64_t &timeStamp, MmsContext &context)
 
 void NativeSendMms(napi_env env, void *data)
 {
-    auto asyncContext = static_cast<MmsContext *>(data);
-    if (asyncContext == nullptr) {
-        TELEPHONY_LOGE("asyncContext nullptr");
+    if (data == nullptr) {
+        TELEPHONY_LOGE("data is nullptr");
         return;
     }
+    auto asyncContext = static_cast<MmsContext *>(data);
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
         TELEPHONY_LOGE("Non-system applications use system APIs!");
         asyncContext->errorCode = TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;

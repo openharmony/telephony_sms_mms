@@ -102,6 +102,10 @@ int GsmSmsMessage::SetHeaderLang(int index, const DataCodingScheme codingType, c
         TELEPHONY_LOGE("TPdu is null.");
         return ret;
     }
+    if (index < 0 || index >= MAX_UD_HEADER_NUM) {
+        TELEPHONY_LOGE("index is invalid");
+        return ret;
+    }
     switch (smsTpdu_->tpduType) {
         case SMS_TPDU_SUBMIT:
             if (codingType == DATA_CODING_7BIT && langId != MSG_ID_RESERVED_LANG) {
@@ -121,6 +125,10 @@ int GsmSmsMessage::SetHeaderConcat(int index, const SmsConcat &concat)
     int ret = 0;
     if (smsTpdu_ == nullptr) {
         TELEPHONY_LOGE("TPdu is null.");
+        return ret;
+    }
+    if (index < 0 || index >= MAX_UD_HEADER_NUM) {
+        TELEPHONY_LOGE("index is invalid");
         return ret;
     }
     switch (smsTpdu_->tpduType) {
@@ -154,6 +162,10 @@ int GsmSmsMessage::SetHeaderReply(int index)
     }
     if (smsTpdu_ == nullptr) {
         TELEPHONY_LOGE("smsTpdu_ is null.");
+        return ret;
+    }
+    if (index < 0 || index >= MAX_UD_HEADER_NUM) {
+        TELEPHONY_LOGE("index is invalid");
         return ret;
     }
     switch (smsTpdu_->tpduType) {
@@ -757,7 +769,7 @@ void GsmSmsMessage::ParseEmailFromMessageBody()
     }
     std::regex re("( /)|( )");
     std::smatch match;
-    if (!std::regex_search(visibleMessageBody_, match, re)) {
+    if (visibleMessageBody_.empty() || !std::regex_search(visibleMessageBody_, match, re)) {
         return;
     }
     size_t pos = static_cast<size_t>(match.position());
@@ -784,6 +796,9 @@ bool GsmSmsMessage::IsEmailAddress(std::string emailFrom)
         emailAddress = emailFrom;
     }
     std::regex addrEmailRegex(g_addrEmailRegex);
+    if (emailAddress.empty()) {
+        return false;
+    }
     return std::regex_match(emailAddress, addrEmailRegex);
 }
 } // namespace Telephony

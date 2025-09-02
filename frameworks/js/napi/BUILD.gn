@@ -62,7 +62,6 @@ ohos_shared_library("sms") {
   ]
 
   cflags = [
-    "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
     "-O2",
   ]

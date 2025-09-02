@@ -759,6 +759,9 @@ bool SmsService::ValidDestinationAddress(std::string desAddr)
 {
     // Allow address start with '+' and number, Address length range 3 to 20
     std::regex regexMode("^([0-9_+]{1})([0-9]{2,19})$");
+    if (desAddr.empty()) {
+        return false;
+    }
     return std::regex_match(desAddr, regexMode);
 }
 
@@ -964,6 +967,9 @@ int32_t SmsService::OnRilAdapterHostDied(int32_t slotId)
 bool SmsService::IsInfoMsg(const std::string &telephone)
 {
     std::regex regex(INFO_MSG_TELEPHONE_REG);
+    if (telephone.empty()) {
+        return false;
+    }
     return std::regex_match(telephone, regex);
 }
 

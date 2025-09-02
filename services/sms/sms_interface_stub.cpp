@@ -237,6 +237,10 @@ void SmsInterfaceStub::OnSendSmsDataRequest(MessageParcel &data, MessageParcel &
         deliveryCallback = iface_cast<IDeliveryShortMessageCallback>(remoteDeliveryCallback);
     }
     int16_t dataLen = data.ReadInt16();
+    if (dataLen < 1) {
+        TELEPHONY_LOGE("dataLen is invalid");
+        return;
+    }
     const uint8_t *buffer = reinterpret_cast<const uint8_t *>(data.ReadRawData(dataLen));
     if (buffer == nullptr) {
         return;
