@@ -725,7 +725,8 @@ bool SmsService::GetBase64Encode(std::string src, std::string &dest)
         TELEPHONY_LOGE("Base64 encoding failed: nullptr returned");
         return false;
     }
-    dest = *results;    return true;
+    dest = *results;
+    return true;
 }
 
 bool SmsService::GetBase64Decode(std::string src, std::string &dest)
