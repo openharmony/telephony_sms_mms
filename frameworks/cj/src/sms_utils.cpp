@@ -29,6 +29,9 @@ char* MallocCString(const std::string& origin)
         return nullptr;
     }
     auto len = origin.length() + 1;
+    if (len > 10000) {  // 10000 is max string length
+        return nullptr
+    }
     char* res = static_cast<char*>(malloc(sizeof(char) * len));
     if (res == nullptr) {
         return nullptr;
