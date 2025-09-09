@@ -66,7 +66,7 @@ CJShortMessage FfiSMSCreateMessage(CArrI32 arr, char* specification)
         res.isSmsStatusReportMessage = shortMessage->IsSmsStatusReportMessage();
         res.messageClass = shortMessage->GetMessageClass();
         std::vector<unsigned char> pdu_ = shortMessage->GetPdu();
-        if (pdu_.size() == 0 || pud_.size() > 10000) { //   10000 is max pdu size
+        if (pdu_.size() == 0 || pdu_.size() > 10000) { //   10000 is max pdu size
             delete shortMessage;
             res.errCode = JS_ERROR_TELEPHONY_SYSTEM_ERROR;
             return res;
