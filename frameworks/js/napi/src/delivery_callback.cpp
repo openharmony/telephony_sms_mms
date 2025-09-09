@@ -42,7 +42,7 @@ void GetCallbackValues(napi_env &env, const std::string &pdu, napi_value *values
         TELEPHONY_LOGE("callback values len invalid");
         return;
     }
-    if (!pdu.empty()) {
+    if (!pdu.empty() && pdu.size() <= 10000) {  // 10000 is max pdu size
         values[0] = NapiUtil::CreateUndefined(env);
         napi_create_object(env, &values[1]);
         napi_value arrayValue = nullptr;
