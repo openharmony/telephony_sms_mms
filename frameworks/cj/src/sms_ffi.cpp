@@ -40,14 +40,11 @@ void SetCJShortMessage(CJShortMessage* res, ShortMessage* shortMessage)
 CJShortMessage FfiSMSCreateMessage(CArrI32 arr, char* specification)
 {
     CJShortMessage res = CJShortMessage { 0 };
-    std::vector<unsigned char> pdu {};
     if (arr.size > 10000) {     // 10000 is max arr size
         res.errCode = JS_ERROR_TELEPHONY_SYSTEM_ERROR;
         return res;
     }
-    for (uint32_t i = 0; i < static_cast<uint32_t>(arr.size); i++) {
-        pdu.push_back(static_cast<unsigned char>(arr.head[i]));
-    }
+    std::vector<unsigned char> pdu(arr.head, arr.head + arr.size);
     std::string specification8 = specification;
     if (pdu.empty() || specification8.empty()) {
         res.errCode = JS_ERROR_TELEPHONY_ARGUMENT_ERROR;
