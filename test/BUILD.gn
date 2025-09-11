@@ -24,7 +24,6 @@ ohos_static_library("tel_sms_mms_test_base") {
     cfi_cross_dso = true
     debug = false
   }
-  use_exceptions = true
   branch_protector_ret = "pac_ret"
   sources = sms_mms_src
   public_configs = [ ":sms_mms_test_config" ]
@@ -32,6 +31,7 @@ ohos_static_library("tel_sms_mms_test_base") {
   external_deps += [ "core_service:ffrt_mocked" ]
   defines = sms_mms_defines
   cflags = sms_mms_cflags
+  cflags_cc = cflags
   part_name = "sms_mms"
   subsystem_name = "telephony"
 }

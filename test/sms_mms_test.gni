@@ -142,6 +142,11 @@ sms_mms_cflags = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
     "-O2",
+    "-w",
+    "-fno-omit-frame-pointer",
+    "-fno-optimize-sibling-calls",
+    "-fno-access-control",
+    "-fno-exceptions",
 ]
 
 sms_mms_external_deps = [
