@@ -272,7 +272,7 @@ void GsmSmsSender::SendImsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, GsmS
     imsMessageInfo.pdu = smsData.pdu;
     imsMessageInfo.tech = SMS_RADIO_TECH_3GPP;
     int32_t reply = smsClient->ImsSendMessage(slotId_, imsMessageInfo);
-    TELEPHONY_LOGI("SendImsSms reply = %{public}d", reply);
+    HILOG_COMM_INFO("SendImsSms reply = %{public}d", reply);
 }
 
 int32_t GsmSmsSender::IsImsSmsSupported(int32_t slotId, bool &isSupported)
