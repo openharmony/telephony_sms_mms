@@ -184,7 +184,7 @@ void GsmSmsReceiveHandler::HandleRemainDataShare(const std::shared_ptr<SmsBaseMe
     }
     indexer->SetRawUserData(message->GetRawUserData());
     indexer->SetRawWapPushUserData(message->GetRawWapPushUserData());
-    TELEPHONY_LOGI("received a gsm sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
+    HILOG_COMM_INFO("received a gsm sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
         indexer->GetMsgRefId(), indexer->GetMsgSeqId(), indexer->GetMsgCount());
     if (indexer->GetIsText() && message->IsConcatMsg() && IsRepeatedMessagePart(indexer)) {
         TELEPHONY_LOGE("Ack repeated error.");
@@ -252,7 +252,7 @@ int32_t GsmSmsReceiveHandler::HandleNormalSmsByType(const shared_ptr<SmsBaseMess
     indexer->SetRawUserData(message->GetRawUserData());
     indexer->SetRawWapPushUserData(message->GetRawWapPushUserData());
 
-    TELEPHONY_LOGI("received a gsm sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
+    HILOG_COMM_INFO("received a gsm sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
         indexer->GetMsgRefId(), indexer->GetMsgSeqId(), indexer->GetMsgCount());
     if (indexer->GetIsText() && message->IsConcatMsg() && IsRepeatedMessagePart(indexer)) {
         TELEPHONY_LOGE("Ack repeated error.");
