@@ -134,7 +134,7 @@ void CdmaSmsReceiveHandler::HandleRemainDataShare(const std::shared_ptr<SmsBaseM
         TELEPHONY_LOGE("indexer is nullptr.");
         return;
     }
-    TELEPHONY_LOGI("received a cdma sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
+    HILOG_COMM_INFO("received a cdma sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
         indexer->GetMsgRefId(), indexer->GetMsgSeqId(), indexer->GetMsgCount());
     if (indexer->GetIsText() && message->IsConcatMsg() && IsRepeatedMessagePart(indexer)) {
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,
@@ -184,7 +184,7 @@ int32_t CdmaSmsReceiveHandler::HandleSmsOtherSvcid(const std::shared_ptr<SmsBase
         TELEPHONY_LOGE("indexer is nullptr.");
         return AckIncomeCause::SMS_ACK_UNKNOWN_ERROR;
     }
-    TELEPHONY_LOGI("received a cdma sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
+    HILOG_COMM_INFO("received a cdma sms, the refid is %{public}d, this is %{public}d, a total of %{public}d",
         indexer->GetMsgRefId(), indexer->GetMsgSeqId(), indexer->GetMsgCount());
     if (indexer->GetIsText() && message->IsConcatMsg() && IsRepeatedMessagePart(indexer)) {
         SmsHiSysEvent::WriteSmsReceiveFaultEvent(slotId_, SmsMmsMessageType::SMS_SHORT_MESSAGE,

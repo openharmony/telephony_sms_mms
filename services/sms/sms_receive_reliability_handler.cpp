@@ -352,7 +352,7 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
 
     bool cbResult = false;
     if (CT_SMSC.compare(addr) != 0 && CT_SMSC_86.compare(addr) != 0 && CT_SMSC_INTERNATION_86.compare(addr) != 0) {
-        TELEPHONY_LOGI("Sms Broadcast");
+        HILOG_COMM_INFO("Sms Broadcast");
         cbResult = CommonEventManager::PublishCommonEvent(data, publishInfo, g_receiver);
     } else {
         TELEPHONY_LOGI("CT AutoReg Broadcast");

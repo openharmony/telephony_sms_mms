@@ -159,6 +159,7 @@ ohos_shared_library("tel_sms_mms") {
   defines = [
     "TELEPHONY_LOG_TAG = \"SmsMms\"",
     "LOG_DOMAIN = 0xD001F06",
+    "LOG_TAG = \"SmsMms\"",
   ]
 
   defines += global_defines
