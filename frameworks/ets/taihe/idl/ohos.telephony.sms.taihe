@@ -15,7 +15,7 @@
 
 @!namespace("@ohos.telephony.sms", "sms")
 @!sts_inject("""
-static { loadLibrary("telephony_sms_taihe_native.z") }
+static { loadLibraryWithPermissionCheck("telephony_sms_taihe_native.z", "@ohos.telephony.sms") }
 """)
 
 function HasSmsCapability(): bool;
