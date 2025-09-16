@@ -23,7 +23,7 @@ static { loadLibrary("telephony_sms_taihe_native.z") }
 enum MmsPriorityType: i32 {
     MMS_LOW = 128,
     MMS_NORMAL = 129,
-    MMS_HIGH = 130,
+    MMS_HIGH = 130
 }
 
 enum ShortMessageClass: i32{
@@ -31,14 +31,14 @@ enum ShortMessageClass: i32{
     INSTANT_MESSAGE = 1,
     OPTIONAL_MESSAGE = 2,
     SIM_MESSAGE = 3,
-    FORWARD_MESSAGE = 4,
+    FORWARD_MESSAGE = 4
 }
 
 enum MmsVersionType: i32 {
     MMS_VERSION_1_0 = 0x10,
     MMS_VERSION_1_1 = 0x11,
     MMS_VERSION_1_2 = 0x12,
-    MMS_VERSION_1_3 = 0x13,
+    MMS_VERSION_1_3 = 0x13
 }
 
 enum SendSmsResult: i32 {
@@ -50,14 +50,14 @@ enum SendSmsResult: i32 {
 
 enum RanType: i32 {
     TYPE_GSM = 1,
-    TYPE_CDMA = 2,
+    TYPE_CDMA = 2
 }
 
 enum SmsEncodingScheme: i32 {
     SMS_ENCODING_UNKNOWN = 0,
     SMS_ENCODING_7BIT = 1,
     SMS_ENCODING_8BIT = 2,
-    SMS_ENCODING_16BIT = 3,
+    SMS_ENCODING_16BIT = 3
 }
 
 enum MmsCharSets: i32 {
@@ -74,7 +74,7 @@ enum MmsCharSets: i32 {
     ISO_8859_9 = 0x0c,
     SHIFT_JIS = 0x11,
     US_ASCII = 0x03,
-    UTF_8 = 0x6A,
+    UTF_8 = 0x6A
 }
 
 enum MessageType: i32 {
@@ -86,7 +86,7 @@ enum MessageType: i32 {
     TYPE_MMS_ACKNOWLEDGE_IND = 133,
     TYPE_MMS_DELIVERY_IND = 134,
     TYPE_MMS_READ_REC_IND = 135,
-    TYPE_MMS_READ_ORIG_IND = 136,
+    TYPE_MMS_READ_ORIG_IND = 136
 }
 
 enum SimMessageStatus: i32 {
@@ -94,18 +94,18 @@ enum SimMessageStatus: i32 {
     SIM_MESSAGE_STATUS_READ = 1,
     SIM_MESSAGE_STATUS_UNREAD = 3,
     SIM_MESSAGE_STATUS_SENT = 5,
-    SIM_MESSAGE_STATUS_UNSENT = 7,
+    SIM_MESSAGE_STATUS_UNSENT = 7
 }
 
 enum ReportType: i32 {
     MMS_YES = 128,
-    MMS_NO = 129,
+    MMS_NO = 129
 }
 
 enum DispositionType: i32 {
     FROM_DATA = 0,
     ATTACHMENT = 1,
-    INLINE = 2,
+    INLINE = 2
 }
 
 struct MmsAddress {
@@ -289,7 +289,7 @@ struct MmsSendConf {
 }
 
 struct MmsParams {
-    slotId: f64;
+    slotId: i32;
     mmsc: String;
     data: String;
     mmsConfig: Optional<MmsConfig>;
@@ -312,14 +312,13 @@ union ContentOption {
 }
 
 struct SendMessageOptions {
-    slotId: f64;
+    slotId: i32;
     destinationHost: String;
     serviceCenter: Optional<String>;
     content: ContentOption;
-    destinationPort: Optional<f64>;
+    destinationPort: Optional<i32>;
     sendCallback: Optional<@sts_type("AsyncCallback<ISendShortMessageCallback>") Opaque>;
     deliveryCallback: Optional<@sts_type("AsyncCallback<IDeliveryShortMessageCallback>") Opaque>;
-    isPersist: Optional<bool>;
 }
 
 struct ShortMessage {
@@ -350,10 +349,10 @@ struct SimMessageOptions {
 }
 
 struct CBConfigOptions {
-    slotId: f64;
+    slotId: i32;
     enable: bool;
-    startMessageId: f64;
-    endMessageId: f64;
+    startMessageId: i32;
+    endMessageId: i32;
     ranType: RanType;
 }
 
