@@ -236,7 +236,7 @@ HWTEST_F(BranchSmsTest, CdmaSmsSender_0001, Function | MediumTest | Level1)
     const std::string desAddr = "qwe";
     const std::string scAddr = "123";
     cdmaSmsSender->isImsNetDomain_ = true;
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     cdmaSmsSender->TextBasedSmsDelivery(
         desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     std::vector<struct SplitInfo> splits;
@@ -628,7 +628,7 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0001, Function | MediumTest | Level1)
     std::string desAddr = "";
     std::string scAddr = "123";
     std::string text = "";
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     std::u16string format = u"";
     uint8_t *data = nullptr;
     const sptr<ISendShortMessageCallback> sendCallback =
@@ -1996,7 +1996,7 @@ HWTEST_F(BranchSmsTest, SmsPersistHelper_0001, Function | MediumTest | Level1)
     DataShare::DataShareValuesBucket bucket;
     std::string id = "1";
     bucket.Put(SLOT_ID, id);
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     smsPersistHelper->QuerySmsMmsForId(predicates, dataBaseId);
     EXPECT_GE(dataBaseId, 0);
     smsPersistHelper->Insert(bucket, dataBaseId);
@@ -2328,7 +2328,7 @@ HWTEST_F(BranchSmsTest, SmsService_0004, Function | MediumTest | Level1)
     smsService->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
     slotId = 0;
     std::string telephone = "13888888888";
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     smsService->InsertSessionAndDetail(slotId, telephone, telephone, dataBaseId);
     smsService->InsertSessionAndDetail(slotId, "10000", "text", dataBaseId);
     smsService->InsertSessionAndDetail(slotId, "10000,10001", "text", dataBaseId);

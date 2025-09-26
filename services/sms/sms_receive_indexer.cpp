@@ -109,12 +109,12 @@ void SmsReceiveIndexer::SetMsgRefId(uint16_t msgRefId)
     msgRefId_ = msgRefId;
 }
 
-uint16_t SmsReceiveIndexer::GetDataBaseId() const
+int32_t SmsReceiveIndexer::GetDataBaseId() const
 {
     return dataBaseId_;
 }
 
-void SmsReceiveIndexer::SetDataBaseId(uint16_t dataBaseId)
+void SmsReceiveIndexer::SetDataBaseId(int32_t dataBaseId)
 {
     dataBaseId_ = dataBaseId;
 }

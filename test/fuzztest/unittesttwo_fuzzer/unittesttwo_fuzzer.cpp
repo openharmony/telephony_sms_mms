@@ -326,7 +326,7 @@ protected:
         std::string desAddr = GetString(10);
         std::string scAddr = GetString(10);
         std::string text = GetString(50);
-        uint16_t dataBaseId = static_cast<uint16_t>(GetNumRandom(0, 10));
+        int32_t dataBaseId = static_cast<int32_t>(GetNumRandom(0, 10));
         m_pSmsInterfaceManager->TextBasedSmsDelivery(desAddr, scAddr, text, nullptr, nullptr, dataBaseId);
     }
     void TestDataBasedSmsDelivery()
@@ -511,7 +511,7 @@ protected:
         std::string desAddr = GetString(10);
         std::string scAddr = GetString(10);
         std::string text = GetString(50);
-        uint16_t dataBaseId = static_cast<uint16_t>(GetNumRandom(0, 10));
+        int32_t dataBaseId = static_cast<int32_t>(GetNumRandom(0, 10));
         m_pSmsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, nullptr, nullptr, dataBaseId);
         desAddr.clear();
         m_pSmsSendManager->TextBasedSmsDelivery(desAddr, scAddr, text, nullptr, nullptr, dataBaseId);

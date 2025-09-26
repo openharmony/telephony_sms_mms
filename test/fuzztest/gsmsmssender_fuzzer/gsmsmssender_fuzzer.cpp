@@ -149,7 +149,7 @@ void SendSmsTest(const uint8_t *data, size_t size)
         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
         iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
-    uint16_t dataBaseId = 1;
+    int32_t dataBaseId = 1;
     sender->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
     sender->DataBasedSmsDelivery(desAddr, scAddr, size, data, size, sendCallback, deliveryCallback);
 

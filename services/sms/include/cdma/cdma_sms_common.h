@@ -283,7 +283,7 @@ struct SmsTeleSvcCmasData {
     SmsCmaeSeverity severity;
     SmsCmaeUrgency urgency;
     SmsCmaeCertainty certainty;
-    uint16_t id;
+    int32_t id;
     SmsCmaeAlertHandle alertHandle;
     SmsTimeAbs expires;
     SmsLanguageType language;

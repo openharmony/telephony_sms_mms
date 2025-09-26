@@ -433,7 +433,7 @@ bool SmsReceiveHandler::AddMsgToDB(const std::shared_ptr<SmsReceiveIndexer> inde
     bucket.Put(SmsSubsection::SMS_SUBSECTION_ID, indexer->GetMsgRefId());
     bucket.Put(SmsSubsection::SIZE, indexer->GetMsgCount());
     bucket.Put(SmsSubsection::SUBSECTION_INDEX, indexer->GetMsgSeqId());
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     bool ret = DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(bucket, dataBaseId);
     indexer->SetDataBaseId(dataBaseId);
     if (!ret) {

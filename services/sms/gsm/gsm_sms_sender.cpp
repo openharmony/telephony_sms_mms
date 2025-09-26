@@ -42,7 +42,7 @@ void GsmSmsSender::Init()
 
 void GsmSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, int32_t dataBaseId, bool isMmsApp)
 {
     DataCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
@@ -77,7 +77,7 @@ void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const s
     std::vector<struct SplitInfo> cellsInfos, DataCodingScheme codingType, bool isStatusReport,
     std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage &gsmSmsMessage,
     const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
-    uint16_t dataBaseId, bool isMmsApp)
+    int32_t dataBaseId, bool isMmsApp)
 {
     int cellsInfosSize = static_cast<int>(cellsInfos.size());
     unsigned char msgRef8bit = GetMsgRef8Bit();

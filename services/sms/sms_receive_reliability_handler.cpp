@@ -309,7 +309,7 @@ void SmsReceiveReliabilityHandler::ReadySendSmsBroadcast(
     SendBroadcast(indexer, pdus);
 }
 
-void SmsReceiveReliabilityHandler::DeleteMessageFormDb(const uint16_t refId, const uint16_t dataBaseId)
+void SmsReceiveReliabilityHandler::DeleteMessageFormDb(const uint16_t refId, const int32_t dataBaseId)
 {
     if (refId == 0 && dataBaseId == 0) {
         TELEPHONY_LOGE("DeleteMessageFormDb fail by refId error");
@@ -405,7 +405,7 @@ void SmsReceiveReliabilityHandler::HiSysEventCBResult(bool publishResult)
 }
 
 void SmsReceiveReliabilityHandler::DeleteAutoSmsFromDB(
-    std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, uint16_t dataBaseId)
+    std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, int32_t dataBaseId)
 {
     handler->DeleteMessageFormDb(refId, dataBaseId);
 }
