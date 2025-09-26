@@ -41,7 +41,7 @@ class SmsMmsCommon {
     DECLARE_DELAYED_SINGLETON(SmsMmsCommon)
 
 public:
-    void SendBroadcast(uint16_t id, std::string notify, std::string stauts, std::string type);
+    void SendBroadcast(int32_t id, std::string notify, std::string stauts, std::string type);
 };
 } // namespace Telephony
 } // namespace OHOS

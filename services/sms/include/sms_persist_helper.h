@@ -30,16 +30,16 @@ namespace Telephony {
 class SmsPersistHelper : public AppExecFwk::EventHandler {
     DECLARE_DELAYED_SINGLETON(SmsPersistHelper)
 public:
-    bool Insert(DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId);
+    bool Insert(DataShare::DataShareValuesBucket &values, int32_t &dataBaseId);
     bool Insert(std::string tableUri, DataShare::DataShareValuesBucket &values);
-    bool Insert(std::string tableUri, DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId);
+    bool Insert(std::string tableUri, DataShare::DataShareValuesBucket &values, int32_t &dataBaseId);
     bool Query(DataShare::DataSharePredicates &predicates, std::vector<SmsReceiveIndexer> &indexers);
     bool Delete(DataShare::DataSharePredicates &predicates);
     bool Update(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values);
     bool UpdateSms(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values);
     bool QueryBlockPhoneNumber(const std::string &phoneNum);
     bool QueryParamBoolean(const std::string key, bool defValue);
-    bool QuerySmsMmsForId(DataShare::DataSharePredicates &predicates, uint16_t &dataBaseId);
+    bool QuerySmsMmsForId(DataShare::DataSharePredicates &predicates, int32_t &dataBaseId);
     bool QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId);
     bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount);
     bool UpdateContact(const std::string &address);

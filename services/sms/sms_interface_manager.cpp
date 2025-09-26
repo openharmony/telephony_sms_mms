@@ -65,7 +65,7 @@ void SmsInterfaceManager::InitInterfaceManager()
 
 int32_t SmsInterfaceManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
-    uint16_t dataBaseId, bool isMmsApp)
+    int32_t dataBaseId, bool isMmsApp)
 {
     if (desAddr.empty() || text.empty()) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);

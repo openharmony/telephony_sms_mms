@@ -30,7 +30,7 @@ SmsMmsCommon::SmsMmsCommon() {}
 
 SmsMmsCommon::~SmsMmsCommon() {}
 
-void SmsMmsCommon::SendBroadcast(uint16_t id, std::string notify, std::string stauts, std::string type)
+void SmsMmsCommon::SendBroadcast(int32_t id, std::string notify, std::string stauts, std::string type)
 {
     EventFwk::Want want;
     EventFwk::CommonEventData data;

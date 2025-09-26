@@ -276,7 +276,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0001, Function | MediumTest | Le
     auto callStub = iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
     auto deliveryStub = iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
     std::string emptyStr = "";
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, dataStr, callStub, deliveryStub, dataBaseId);
     interfaceManager->TextBasedSmsDelivery(dataStr, emptyStr, dataStr, callStub, deliveryStub, dataBaseId);
     interfaceManager->TextBasedSmsDelivery(dataStr, dataStr, emptyStr, callStub, deliveryStub, dataBaseId);
@@ -1570,13 +1570,14 @@ HWTEST_F(BranchSmsPartTest, SmsPersistHelper_0003, Function | MediumTest | Level
     EXPECT_CALL(*dataShareHelperMock, Release())
         .WillRepeatedly(Return(true));
     DataShare::DataShareValuesBucket values;
-    uint16_t dataBaseId;
+    int32_t dataBaseId;
+    uint16_t idxId;
     DataShare::DataSharePredicates predicates;
-    EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySession(predicates, dataBaseId, dataBaseId));
+    EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySession(predicates, idxId, idxId));
     EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySmsMmsForId(predicates, dataBaseId));
     std::vector<SmsReceiveIndexer> indexers;
     EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->Query(predicates, indexers));
-    EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryMaxGroupId(predicates, dataBaseId));
+    EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->QueryMaxGroupId(predicates, idxId));
     DelayedSingleton<SmsPersistHelper>::GetInstance()->ReleaseDataShareHelper();
 }
 
