@@ -86,7 +86,7 @@ std::shared_ptr<DataShare::DataShareHelper> SmsPersistHelper::CreateDataShareHel
     return DataShare::DataShareHelper::Creator(remoteObj, uri);
 }
 
-bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values, uint16_t &dataBaseId)
+bool SmsPersistHelper::Insert(DataShare::DataShareValuesBucket &values, int32_t &dataBaseId)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateSmsHelper();
     if (helper == nullptr) {
@@ -113,7 +113,7 @@ bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBu
     return ret >= 0 ? true : false;
 }
 
-bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBucket &values, uint16_t &id)
+bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBucket &values, int32_t &id)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateSmsHelper();
     if (helper == nullptr) {
@@ -172,7 +172,7 @@ bool SmsPersistHelper::UpdateSms(DataShare::DataSharePredicates &predicates, Dat
     return ret >= 0;
 }
 
-bool SmsPersistHelper::QuerySmsMmsForId(DataShare::DataSharePredicates &predicates, uint16_t &dataBaseId)
+bool SmsPersistHelper::QuerySmsMmsForId(DataShare::DataSharePredicates &predicates, int32_t &dataBaseId)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateSmsHelper();
     if (helper == nullptr) {

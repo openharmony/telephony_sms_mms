@@ -61,7 +61,7 @@ void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     if (deliveryCallback == nullptr) {
         return;
     }
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     smsInterfaceManager->TextBasedSmsDelivery(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId);
 
     auto smsSendManager = std::make_shared<SmsSendManager>(slotId);

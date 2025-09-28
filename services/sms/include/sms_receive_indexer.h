@@ -49,8 +49,8 @@ public:
     void SetMsgRefId(uint16_t msgRefId);
     uint16_t GetMsgSeqId() const;
     void SetMsgSeqId(uint16_t msgSeqId);
-    uint16_t GetDataBaseId() const;
-    void SetDataBaseId(uint16_t dataBaseId);
+    int32_t GetDataBaseId() const;
+    void SetDataBaseId(int32_t dataBaseId);
     uint16_t GetMsgCount() const;
     void SetMsgCount(uint16_t msgCount);
     std::string GetEraseRefId() const;
@@ -76,8 +76,8 @@ private:
     std::string originatingAddress_;
     uint16_t msgRefId_ = 0;
     uint16_t msgSeqId_ = 0;
-    uint16_t dataBaseId_ = 0;
     uint16_t msgCount_ = 0;
+    int32_t dataBaseId_ = 0;
     std::string eraseRefId_;
     std::string visibleAddress_;
     std::string rawUserData_;

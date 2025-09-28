@@ -429,7 +429,7 @@ HWTEST_F(SmsServicesMmsGtest, SmsServiceSendMessageDisable_0001, Function | Medi
     ret = smsService->SendMessage(slotId, desAddr, desAddr, port, data, port, sendCallback, deliveryCallback);
     EXPECT_TRUE(ret == TELEPHONY_ERR_POLICY_DISABLED);
     std::string telephone = "13888888888";
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     smsService->InsertSessionAndDetail(slotId, telephone, telephone, dataBaseId);
     smsService->InsertSessionAndDetail(slotId, "10000", "text", dataBaseId);
     smsService->InsertSessionAndDetail(slotId, "10000,10001", "text", dataBaseId);

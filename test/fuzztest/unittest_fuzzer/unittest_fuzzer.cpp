@@ -453,7 +453,7 @@ protected:
         std::string strDtAddr = GetString(MAX_ADDRESS_LEN-1);
         std::string strText = GetString();
         size_t      nPort   = GetPort();
-        uint16_t dataBaseId = 0;
+        int32_t dataBaseId = 0;
         sptr<ISendShortMessageCallback> sendCallback = nullptr;
         sptr<IDeliveryShortMessageCallback> deliveryCallback = nullptr;
         bool isMmsApp = true;

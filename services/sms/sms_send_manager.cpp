@@ -101,7 +101,7 @@ void SmsSendManager::InitNetworkHandle()
 
 void SmsSendManager::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, int32_t dataBaseId, bool isMmsApp)
 {
     if (desAddr.empty() || text.empty()) {
         SmsSender::SendResultCallBack(sendCallback, ISendShortMessageCallback::SEND_SMS_FAILURE_UNKNOWN);

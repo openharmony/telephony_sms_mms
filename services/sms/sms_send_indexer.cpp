@@ -340,12 +340,12 @@ void SmsSendIndexer::SetMsgId(uint16_t msgId)
     msgId_ = msgId;
 }
 
-uint16_t SmsSendIndexer::GetDataBaseId() const
+int32_t SmsSendIndexer::GetDataBaseId() const
 {
     return dataBaseId_;
 }
 
-void SmsSendIndexer::SetDataBaseId(uint16_t databaseId)
+void SmsSendIndexer::SetDataBaseId(int32_t databaseId)
 {
     dataBaseId_ = databaseId;
 }
