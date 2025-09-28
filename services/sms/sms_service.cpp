@@ -176,7 +176,7 @@ int32_t SmsService::SendMessage(int32_t slotId, const u16string desAddr, const u
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
 
-    uint16_t dataId = 0;
+    int32_t dataId = 0;
     if (!isMmsApp) {
         InsertSessionAndDetail(slotId, StringUtils::ToUtf8(desAddr), StringUtils::ToUtf8(text), dataId);
         TELEPHONY_LOGI("InsertSessionAndDetail write data to db. the id:%{public}d", dataId);
@@ -204,7 +204,7 @@ int32_t SmsService::SendMessageWithoutSave(int32_t slotId, const u16string desAd
 }
 
 void SmsService::InsertSessionAndDetail(int32_t slotId, const std::string &telephone, const std::string &text,
-    uint16_t &dataBaseId)
+    int32_t &dataBaseId)
 {
     uint16_t sessionId = 0;
     uint16_t messageCount = 0;
@@ -231,7 +231,7 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t 
 }
 
 void SmsService::InsertSmsMmsInfo(
-    int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text, uint16_t &dataBaseId)
+    int32_t slotId, uint16_t sessionId, const std::string &number, const std::string &text, int32_t &dataBaseId)
 {
     DataShare::DataSharePredicates predicates;
     uint16_t maxGroupId = 0;
@@ -847,7 +847,7 @@ int32_t SmsService::SendMms(int32_t slotId, const std::u16string &mmsc, const st
         TELEPHONY_LOGE("mms pdu file is empty");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     if (isMmsApp) {
         dataBaseId = QueryMmsDatabaseId(slotId, time);
     }
@@ -883,7 +883,7 @@ int32_t SmsService::CheckMmsPermissions()
     return TELEPHONY_ERR_SUCCESS;
 }
 
-uint16_t SmsService::QueryMmsDatabaseId(int32_t slotId, int64_t time)
+int32_t SmsService::QueryMmsDatabaseId(int32_t slotId, int64_t time)
 {
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SmsMmsInfo::MSG_TYPE, SmsMmsCommonData::SMS_MSM_TYPE_MMS);
@@ -891,14 +891,14 @@ uint16_t SmsService::QueryMmsDatabaseId(int32_t slotId, int64_t time)
     predicates.EqualTo(SmsMmsInfo::SLOT_ID, slotId);
     predicates.LessThanOrEqualTo(SmsMmsInfo::START_TIME, time);
     predicates.OrderByDesc(SmsMmsInfo::START_TIME);
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySmsMmsForId(predicates, dataBaseId);
     TELEPHONY_LOGI("slot:%{public}d;;time:%{public}s;id:%{public}d",
         slotId, std::to_string(time).c_str(), dataBaseId);
     return dataBaseId;
 }
 
-void SmsService::ServiceAfterSendMmsComplete(int32_t slotId, int64_t &time, uint16_t &dataBaseId,
+void SmsService::ServiceAfterSendMmsComplete(int32_t slotId, int64_t &time, int32_t &dataBaseId,
     DataShare::DataShareValuesBucket &sessionBucket, std::string  &sendStatus)
 {
     if (0 >= dataBaseId) {

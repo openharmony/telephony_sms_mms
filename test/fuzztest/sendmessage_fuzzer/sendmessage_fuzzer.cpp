@@ -100,7 +100,7 @@ void SmsServiceInterfaceTest(const uint8_t *data, size_t size)
     if (!IsServiceInited()) {
         return;
     }
-    uint16_t id = 0;
+    int32_t id = 0;
     int32_t fd = static_cast<int32_t>(data[0]);
     auto service = DelayedSingleton<SmsService>::GetInstance();
     std::vector<std::u16string> args;

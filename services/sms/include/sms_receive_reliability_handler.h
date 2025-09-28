@@ -31,7 +31,7 @@ public:
     std::string GetSmsExpire();
     bool DeleteExpireSmsFromDB();
     bool CheckSmsCapable();
-    void DeleteMessageFormDb(const uint16_t refId, const uint16_t dataBaseId = 0);
+    void DeleteMessageFormDb(const uint16_t refId, const int32_t dataBaseId = 0);
     bool CheckBlockedPhoneNumber(std::string originatingAddress);
     void SendBroadcast(
         const std::shared_ptr<SmsReceiveIndexer> indexer, const std::shared_ptr<std::vector<std::string>> pdus);
@@ -51,7 +51,7 @@ private:
     void PacketSmsData(EventFwk::Want &want, const std::shared_ptr<SmsReceiveIndexer> indexer,
         EventFwk::CommonEventData &data, EventFwk::CommonEventPublishInfo &publishInfo);
     void DeleteAutoSmsFromDB(
-        std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, uint16_t dataBaseId);
+        std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, int32_t dataBaseId);
 
 private:
     static std::shared_ptr<SmsBroadcastSubscriberReceiver> g_receiver;

@@ -1476,7 +1476,7 @@ HWTEST_F(BranchMmsTest, ServiceAfterSendMmsComplete_0001, Function | MediumTest 
     int32_t slotId = 0;
     int64_t time = 0;
     DataShare::DataShareValuesBucket sessionBucket;
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     std::string sendStatus = "";
     smsService->ServiceAfterSendMmsComplete(slotId, time, dataBaseId, sessionBucket, sendStatus);
     dataBaseId = 1;

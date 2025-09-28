@@ -39,7 +39,7 @@ CdmaSmsSender::~CdmaSmsSender() {}
 
 void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, int32_t dataBaseId, bool isMmsApp)
 {
     if (isImsNetDomain_ && imsSmsCfg_) {
         TextBasedSmsDeliveryViaIms(desAddr, scAddr, text, sendCallback, deliveryCallback, dataBaseId, isMmsApp);
@@ -80,7 +80,7 @@ void CdmaSmsSender::TextBasedSmsDelivery(const string &desAddr, const string &sc
 void CdmaSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const std::string &scAddr,
     std::vector<struct SplitInfo> splits, std::unique_ptr<CdmaTransportMsg> transMsg, uint8_t msgRef8bit,
     uint16_t msgId, long timeStamp, const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, int32_t dataBaseId, bool isMmsApp)
 {
     shared_ptr<bool> hasCellFailed = make_shared<bool>(false);
     if (hasCellFailed == nullptr) {
@@ -133,7 +133,7 @@ void CdmaSmsSender::UpdateIndexerInfo(
     shared_ptr<bool> hasCellFailed,
     long timeStamp,
     uint16_t msgId,
-    uint16_t dataBaseId,
+    int32_t dataBaseId,
     bool isMmsApp)
 {
     indexer->SetMsgRefId(msgRef8bit);
@@ -148,7 +148,7 @@ void CdmaSmsSender::UpdateIndexerInfo(
 
 void CdmaSmsSender::TextBasedSmsDeliveryViaIms(const string &desAddr, const string &scAddr, const string &text,
     const sptr<ISendShortMessageCallback> &sendCallback, const sptr<IDeliveryShortMessageCallback> &deliveryCallback,
-    uint16_t dataBaseId, bool isMmsApp)
+    int32_t dataBaseId, bool isMmsApp)
 {
     DataCodingScheme codingType;
     GsmSmsMessage gsmSmsMessage;
@@ -180,7 +180,7 @@ void CdmaSmsSender::SendSmsForEveryIndexer(int &i, std::vector<struct SplitInfo>
     const string &scAddr, std::shared_ptr<struct SmsTpdu> tpdu, GsmSmsMessage gsmSmsMessage,
     shared_ptr<uint8_t> unSentCellCount, shared_ptr<bool> hasCellFailed, DataCodingScheme codingType,
     uint8_t msgRef8bit, const sptr<ISendShortMessageCallback> &sendCallback,
-    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t dataBaseId, bool isMmsApp)
+    const sptr<IDeliveryShortMessageCallback> &deliveryCallback, int32_t dataBaseId, bool isMmsApp)
 {
     std::string segmentText;
     segmentText.append((char *)(cellsInfos[i].encodeData.data()), cellsInfos[i].encodeData.size());

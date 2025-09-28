@@ -33,7 +33,7 @@ public:
     virtual ~SmsSendManager();
     void TextBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const std::string &text,
         const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, uint16_t id, bool isMmsApp = true);
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, int32_t id, bool isMmsApp = true);
     void DataBasedSmsDelivery(const std::string &desAddr, const std::string &scAddr, const uint16_t port,
         const uint8_t *data, uint16_t dataLen, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);

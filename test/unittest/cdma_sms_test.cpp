@@ -505,7 +505,7 @@ void CdmaSmsTest::EncodeMsg(CdmaTransportMsg &msg) const
 
 void CdmaSmsTest::TestTextBasedSmsDelivery() const
 {
-    uint16_t dataBaseId = 0;
+    int32_t dataBaseId = 0;
     std::cout << "CdmaSmsTest::TestTextBasedSmsDelivery" << std::endl;
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
     auto cdmaSmsSender = std::make_shared<CdmaSmsSender>(1, fun);
