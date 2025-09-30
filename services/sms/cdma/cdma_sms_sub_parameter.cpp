@@ -904,8 +904,7 @@ bool CdmaSmsCmasData::DecodeType2Data(SmsReadBuffer &pdu)
         TELEPHONY_LOGE("id read error");
         return false;
     }
-    data_.id = v1;
-    data_.id = (data_.id << BIT8) + v2;
+    data_.id = (v1 << BIT8) + v2;
     if (!pdu.ReadBits(v1, BIT8)) {
         TELEPHONY_LOGE("alert handle read error");
         return false;
