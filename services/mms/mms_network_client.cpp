@@ -236,6 +236,10 @@ void MmsNetworkClient::GetCoverUrl(std::string str)
         TELEPHONY_LOGI("url is empty");
         return;
     }
+    if (str.size() >= UINT8_MAX) {
+        TELEPHONY_LOGI("url is exceed UINT8_MAX");
+        return;
+    }
     int32_t stride = 2;
     for (uint8_t i = 0; i < str.size(); i = i + stride) {
         str[i] = '*';
