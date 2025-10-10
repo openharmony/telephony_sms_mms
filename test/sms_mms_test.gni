@@ -114,6 +114,10 @@ sms_mms_src = [
     "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/sms_service_death_recipient.cpp",
     "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/sms_service_manager_client.cpp",
     "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/sms_service_proxy.cpp",
+    "$SMS_MMS_SOURCE_DIR/test/gtest/sms_delivery_callback_gtest.cpp",
+    "$SMS_MMS_SOURCE_DIR/test/gtest/sms_mms_test_helper.cpp",
+    "$SMS_MMS_SOURCE_DIR/test/gtest/sms_broadcast_subscriber_gtest.cpp",
+    "$SMS_MMS_SOURCE_DIR/test/gtest/sms_send_callback_gtest.cpp",
 ]
 
 sms_mms_incluedirs = [
