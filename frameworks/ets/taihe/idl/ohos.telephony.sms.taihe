@@ -130,18 +130,18 @@ struct MmsReadOrigInd {
     version: MmsVersionType;
     messageId: String;
     to: Array<MmsAddress>;
-    @!sts_inject_into_interface("""get from():MmsAddress
-                                set from(value:MmsAddress)
-                                """)
-
+    @!sts_inject_into_interface("""
+    	get from():MmsAddress
+        set from(value:MmsAddress)
+    """)
     @!sts_inject_into_class("""
-        get from():MmsAddress{
+        get from():MmsAddress {
             return this.fromAddress;
-    }
+    	}
         set from(value: MmsAddress) {
             this.fromAddress = value;
         }
-            """)
+    """)
     fromAddress: MmsAddress;
     date: i32;
     readStatus: i32;
@@ -151,18 +151,18 @@ struct MmsReadRecInd {
     version: MmsVersionType;
     messageId: String;
     to: Array<MmsAddress>;
-    @!sts_inject_into_interface("""get from():MmsAddress
-                                set from(value:MmsAddress)
-                                """)
-
+    @!sts_inject_into_interface("""
+    	get from():MmsAddress
+        set from(value:MmsAddress)
+    """)
     @!sts_inject_into_class("""
-        get from():MmsAddress{
+        get from():MmsAddress {
             return this.fromAddress;
-    }
+    	}
         set from(value: MmsAddress) {
             this.fromAddress = value;
         }
-            """)
+    """)
     fromAddress: MmsAddress;
     readStatus: i32;
     date: Optional<i32>;
@@ -189,18 +189,18 @@ struct MmsRetrieveConf {
     contentType: String;
     to: Array<MmsAddress>;
     version: MmsVersionType;
-   @!sts_inject_into_interface("""get from():MmsAddress | undefined
-                                set from(value:MmsAddress | undefined)
-                                """)
-
+   @!sts_inject_into_interface("""
+   	get from():MmsAddress | undefined
+        set from(value:MmsAddress | undefined)
+    """)
     @!sts_inject_into_class("""
-        get from():MmsAddress | undefined{
+        get from():MmsAddress | undefined {
             return this.fromAddress;
         }
         set from(value: MmsAddress | undefined) {
             this.fromAddress = value;
         }
-            """)
+    """)
     fromAddress: Optional<MmsAddress>;
     cc: Optional<Array<MmsAddress>>;
     subject: Optional<String>;
@@ -225,18 +225,18 @@ struct MmsNotificationInd {
     expiry: i32;
     contentLocation: String;
     version: MmsVersionType;
-    @!sts_inject_into_interface("""get from():MmsAddress | undefined
-                                set from(value:MmsAddress | undefined)
-                                """)
-
+    @!sts_inject_into_interface("""
+    	get from():MmsAddress | undefined
+        set from(value:MmsAddress | undefined)
+    """)
     @!sts_inject_into_class("""
-        get from(): MmsAddress | undefined{
+        get from(): MmsAddress | undefined {
             return this.fromAddress;
-    }
+        }
         set from(value: MmsAddress | undefined) {
             this.fromAddress = value;
         }
-            """)
+    """)
     fromAddress: Optional<MmsAddress>;
     subject: Optional<String>;
     deliveryReport: Optional<i32>;
@@ -357,17 +357,18 @@ struct CBConfigOptions {
 }
 
 struct MmsSendReq {
-    @!sts_inject_into_interface("""get from():MmsAddress
-                                set from(value:MmsAddress)
-                                """)
+    @!sts_inject_into_interface("""
+    	get from():MmsAddress
+        set from(value:MmsAddress)
+    """)
     @!sts_inject_into_class("""
         get from(): MmsAddress {
             return this.fromAddress;
-    }
+    	}
         set from(value: MmsAddress) {
             this.fromAddress = value;
         }
-            """)
+    """)
     fromAddress: MmsAddress;
     transactionId: String;
     contentType: String;
@@ -391,3 +392,75 @@ union FilePathName {
 }
 
 function HasSmsCapability(): bool;
+
+@gen_async("sendMms")
+@gen_promise("sendMms")
+function SendMmsSync(context: @sts_type("BaseContext") Opaque, mmsParams: MmsParams): void;
+
+@gen_async("getDefaultSmsSlotId")
+@gen_promise("getDefaultSmsSlotId")
+function GetDefaultSmsSlotIdSync(): i32;
+
+@gen_async("getDefaultSmsSimId")
+@gen_promise("getDefaultSmsSimId")
+function GetDefaultSmsSimIdSync(): i32;
+
+@gen_async("getSmsSegmentsInfo")
+@gen_promise("getSmsSegmentsInfo")
+function GetSmsSegmentsInfoSync(slotId: i32, message: String, force7bit: bool): SmsSegmentsInfo;
+
+@gen_async("isImsSmsSupported")
+@gen_promise("isImsSmsSupported")
+function IsImsSmsSupportedSync(slotId: i32): bool;
+
+@gen_async("getImsShortMessageFormat")
+@gen_promise("getImsShortMessageFormat")
+function GetImsShortMessageFormatSync(): String;
+
+@gen_async("downloadMms")  
+@gen_promise("downloadMms")  
+function DownloadMmsSync(context: @sts_type("BaseContext") Opaque, mmsParams: MmsParams): void;
+  
+@gen_async("decodeMms")
+@gen_promise("decodeMms")
+function DecodeMmsSync(mmsFilePathName: FilePathName): MmsInformation;
+
+@gen_async("encodeMms")
+@gen_promise("encodeMms")
+function EncodeMmsSync(mms: MmsInformation): @typedarray Array<u8>;
+
+@gen_async("getSmscAddr")
+@gen_promise("getSmscAddr")
+function GetSmscAddrSync(slotId: i32): String;
+
+@gen_async("addSimMessage")
+@gen_promise("addSimMessage")
+function AddSimMessageSync(options: SimMessageOptions): void;
+
+@gen_async("delSimMessage")
+@gen_promise("delSimMessage")
+function DelSimMessageSync(slotId: i32, msgIndex: i32): void;
+
+@gen_async("getAllSimMessages")
+@gen_promise("getAllSimMessages")
+function GetAllSimMessagesSync(slotId: i32): Array<SimShortMessage>;
+
+@gen_async("setCBConfig")
+@gen_promise("setCBConfig")
+function SetCBConfigSync(options: CBConfigOptions): void;
+
+@gen_async("splitMessage")
+@gen_promise("splitMessage")
+function SplitMessageSync(content:String):Array<String>;
+
+@gen_async("createMessage")
+@gen_promise("createMessage")   
+function CreateMessageSync(pdu:Array<u8>,specification:String):ShortMessage;
+
+@gen_async("setDefaultSmsSlotId")
+@gen_promise("setDefaultSmsSlotId")   
+function SetDefaultSmsSlotIdSync(slotId: i32):void;
+
+@gen_async("setSmscAddr")
+@gen_promise("setSmscAddr")   
+function SetSmscAddrSync(slotId: i32,smscAddr: String):void;
