@@ -37,14 +37,25 @@ taihe_shared_library("telephony_sms_taihe_native") {                #调用taihe
   part_name = "$part_name"
   subsystem_name = "$subsystem_name"
   sources = get_target_outputs(":run_taihe")
-  include_dirs = [ "../../js/napi/include" ]                #根据业务需求添加include目录
+  shlib_type = "sa"
+  include_dirs = [ 
+    "../../js/napi/include",
+    "include",
+    "//base/telephony/sms_mms/interfaces/innerkits",
+  ]                #根据业务需求添加include目录
   sources += [
     "src/ani_constructor.cpp",
     "src/ohos.telephony.sms.impl.cpp",
+    "src/ani_mms_pdu_helper.cpp",
+    "src/ani_mms_pdu.cpp",
+    "src/ani_send_recv_mms.cpp",
+    "src/ani_send_callback.cpp",
+    "src/ani_delivery_callback.cpp",
   ]
   deps = [
     ":run_taihe",
-    "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api"               #根据业务添加编译依赖
+    "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",               #根据业务添加编译依赖
+    "//base/telephony/sms_mms:tel_sms_mms",
   ]
 
   external_deps = [
@@ -52,6 +63,8 @@ taihe_shared_library("telephony_sms_taihe_native") {                #调用taihe
     "ability_base:want",
     "ability_runtime:ability_manager",
     "ability_runtime:napi_common",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:ani_base_context",
     "c_utils:utils",
     "core_service:libtel_common",
     "core_service:tel_core_service_api",
@@ -61,6 +74,9 @@ taihe_shared_library("telephony_sms_taihe_native") {                #调用taihe
     "init:libbegetutil",
     "libuv:uv",
     "napi:ace_napi",
+    "data_share:datashare_consumer",
+    "ipc:ipc_single",
+    "runtime_core:ani_helpers",
   ]
 
   sanitize = {
@@ -85,6 +101,7 @@ ohos_prebuilt_etc("telephony_sms_etc") {                #调用ohos_prebuilt_etc
   subsystem_name = "$subsystem_name"
   deps = [ ":telephony_sms_abc" ]               #拷贝abc依赖编译abc
 }
+
 group("telephony_sms_taihe") {
   deps = [
     ":telephony_sms_etc",
