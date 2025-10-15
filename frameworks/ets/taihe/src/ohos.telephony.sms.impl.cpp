@@ -34,7 +34,7 @@
 #include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
 #include "telephony_types.h"
-
+#include "napi_util.h"
 
 using namespace taihe;
 using namespace OHOS;
@@ -119,6 +119,16 @@ struct SendMessageContext : BaseContext {
     int32_t messageType = MESSAGE_PARAMETER_NOT_MATCH;
     uint16_t destinationPort = 0;
 };
+
+static void ConvertErrorForBusinessError(int32_t errorCode)
+{
+    if (errorCode == TELEPHONY_ERR_PERMISSION_ERR) {
+        set_business_error(JS_ERROR_TELEPHONY_PERMISSION_DENIED,
+            "BusinessError 201:Permission denied");
+    }
+    OHOS::Telephony::JsError error = NapiUtil::ConverErrorMessageForJs(errorCode);
+    set_business_error(error.errorCode, error.errorMessage);
+}
 
 static bool IsValidSlotId(int32_t slotId)
 {
@@ -233,7 +243,7 @@ void SendMmsSync(uintptr_t context, ::ohos::telephony::sms::MmsParams const & mm
     GetMmsContext(mmsParams, mmsContext);
     auto errorCode = AniSendRecvMms::SendMms(context, mmsContext);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "SendMmsSync failed");
+        ConvertErrorForBusinessError(errorCode);
     }
 }
 
@@ -241,7 +251,7 @@ int32_t GetDefaultSmsSlotIdSync()
 {
     int32_t slotId = Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSlotId();
     if (!IsValidSlotId(slotId)) {
-        set_business_error(TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL, "GetDefaultSmsSlotIdSync slotId is invalid");
+        ConvertErrorForBusinessError(TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
     }
     return slotId;
 }
@@ -251,7 +261,7 @@ int32_t GetDefaultSmsSimIdSync()
     int32_t simId = SMS_INVALID_SIM_ID;
     auto errorCode = Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSimId(simId);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "GetDefaultSmsSimIdSync SmsSimId is invalid");
+        ConvertErrorForBusinessError(errorCode);
     }
     return simId;
 }
@@ -265,14 +275,14 @@ int32_t GetDefaultSmsSimIdSync()
 
     ISmsServiceInterface::SmsSegmentsInfo info;
     if (!IsValidSlotId(slotId)) {
-        set_business_error(TELEPHONY_ERR_SLOTID_INVALID, "GetSmsSegmentsInfoSync slotId is invalid");
+        ConvertErrorForBusinessError(TELEPHONY_ERR_SLOTID_INVALID);
         return smsInfo;
     }
     std::u16string content = StringUtils::ToUtf16(message.c_str());
     uint32_t errorCode =
         Singleton<SmsServiceManagerClient>::GetInstance().GetSmsSegmentsInfo(slotId, content, force7bit, info);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "GetSmsSegmentsInfoSync failed");
+        ConvertErrorForBusinessError(errorCode);
     } else {
         smsInfo.encodeCount = info.msgEncodingCount;
         smsInfo.encodeCountRemaining = info.msgRemainCount;
@@ -287,7 +297,7 @@ bool IsImsSmsSupportedSync(int32_t slotId)
     bool setResult = false;
     uint32_t errorCode = Singleton<SmsServiceManagerClient>::GetInstance().IsImsSmsSupported(slotId, setResult);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "IsImsSmsSupportedSync failed");
+        ConvertErrorForBusinessError(errorCode);
     }
     return setResult;
 }
@@ -297,7 +307,7 @@ bool IsImsSmsSupportedSync(int32_t slotId)
     std::u16string value = u"";
     uint32_t errorCode = Singleton<SmsServiceManagerClient>::GetInstance().GetImsShortMessageFormat(value);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "GetImsShortMessageFormatSync failed");
+        ConvertErrorForBusinessError(errorCode);
     }
     return taihe::string(StringUtils::ToUtf8(value).c_str());
 }
@@ -308,7 +318,7 @@ void DownloadMmsSync(uintptr_t context, ::ohos::telephony::sms::MmsParams const 
     GetMmsContext(mmsParams, mmsContext);
     auto errorCode = AniSendRecvMms::DownloadMms(context, mmsContext);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "DownloadMmsSync failed");
+        ConvertErrorForBusinessError(errorCode);
     }
 }
 
@@ -578,7 +588,7 @@ static void GetMmsValueByMessageType(const ::ohos::telephony::sms::MessageType m
         ::taihe::optional<::taihe::array<ohos::telephony::sms::MmsAttachment>>(std::nullopt) };
 
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
-        set_business_error(TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API, "Non-system applications use system APIs!");
+        ConvertErrorForBusinessError(TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API);
         return mmsInfo;
     }
     MmsMsg mmsMsg;
@@ -594,7 +604,7 @@ static void GetMmsValueByMessageType(const ::ohos::telephony::sms::MessageType m
         mmsResult = mmsMsg.DecodeMsg(std::move(unique_ptr), mmsFilePathName.get_pathNameArray_ref().size());
     }
     if (!mmsResult) {
-        set_business_error(TELEPHONY_ERR_FAIL, "DecodeMsg error!");
+        ConvertErrorForBusinessError(TELEPHONY_ERR_FAIL);
         return mmsInfo;
     }
     mmsMsg.DumpMms();
@@ -982,7 +992,7 @@ static void AttachmentArrayToVector(const ::taihe::array<::ohos::telephony::sms:
 {
     ::taihe::array<uint8_t> arrayEncodeResult = {};
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
-        set_business_error(TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API, "Non-system applications use system APIs!");
+        ConvertErrorForBusinessError(TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API);
         return arrayEncodeResult;
     }
     MmsMsg mmsMsg;
@@ -993,14 +1003,14 @@ static void AttachmentArrayToVector(const ::taihe::array<::ohos::telephony::sms:
     }
 
     if (!SetAttachmentToCore(mmsMsg, attachment)) {
-        set_business_error(TELEPHONY_ERR_ARGUMENT_INVALID, "EncodeMmsSync SetAttachmentToCore Failed!");
+        ConvertErrorForBusinessError(TELEPHONY_ERR_ARGUMENT_INVALID);
         return arrayEncodeResult;
     }
     SetRequestToCore(mmsMsg, mms);
     uint32_t outLen = 0;
     auto encodeResult = mmsMsg.EncodeMsg(outLen);
     if (encodeResult == nullptr || outLen == 0) {
-        set_business_error(TELEPHONY_ERR_FAIL, "EncodeMmsSync Failed!");
+        ConvertErrorForBusinessError(TELEPHONY_ERR_FAIL);
         return arrayEncodeResult;
     }
     return ::taihe::array<uint8_t>(taihe::copy_data_t{}, encodeResult.get(), outLen);
@@ -1009,13 +1019,13 @@ static void AttachmentArrayToVector(const ::taihe::array<::ohos::telephony::sms:
 ::taihe::string GetSmscAddrSync(int32_t slotId)
 {
     if (!IsValidSlotId(slotId)) {
-        set_business_error(ERROR_SLOT_ID_INVALID, "GetSmscAddrSync slotId is invalid");
+        ConvertErrorForBusinessError(ERROR_SLOT_ID_INVALID);
         return "";
     }
     std::u16string smscAddress = u"";
     int32_t errorCode = Singleton<SmsServiceManagerClient>::GetInstance().GetScAddress(slotId, smscAddress);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "GetSmscAddrSync GetScAddress failed");
+        ConvertErrorForBusinessError(errorCode);
     }
     return taihe::string(StringUtils::ToUtf8(smscAddress).c_str());
 }
@@ -1030,22 +1040,22 @@ void AddSimMessageSync(::ohos::telephony::sms::SimMessageOptions const & options
         int32_t errorCode =
             Singleton<SmsServiceManagerClient>::GetInstance().AddSimMessage(options.slotId, strSmsc, strPdu, status);
         if (errorCode != TELEPHONY_ERR_SUCCESS) {
-            set_business_error(errorCode, "AddSimMessageSync AddSimMessage failed");
+            ConvertErrorForBusinessError(errorCode);
         }
     } else {
-        set_business_error(SMS_MMS_UNKNOWN_SIM_MESSAGE_STATUS, "AddSimMessageSync status is unknown");
+        ConvertErrorForBusinessError(SMS_MMS_UNKNOWN_SIM_MESSAGE_STATUS);
     }
 }
 
 void DelSimMessageSync(int32_t slotId, int32_t msgIndex)
 {
     if (!IsValidSlotId(slotId)) {
-        set_business_error(ERROR_SLOT_ID_INVALID, "DelSimMessageSync slotId is invalid");
+        ConvertErrorForBusinessError(ERROR_SLOT_ID_INVALID);
         return;
     }
     int32_t errorCode = Singleton<SmsServiceManagerClient>::GetInstance().DelSimMessage(slotId, msgIndex);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "DelSimMessageSync DelSimMessage failed");
+        ConvertErrorForBusinessError(errorCode);
     }
 }
 
@@ -1059,7 +1069,7 @@ void DelSimMessageSync(int32_t slotId, int32_t msgIndex)
     ohos::telephony::sms::SimShortMessage stuSSM = ohos::telephony::sms::SimShortMessage{ stuSm, enuSMS, -1 };
     taihe::array<ohos::telephony::sms::SimShortMessage> megArr = {};
     if (!IsValidSlotId(slotId)) {
-        set_business_error(ERROR_SLOT_ID_INVALID, "GetAllSimMessagesSync slotId is invalid");
+        ConvertErrorForBusinessError(ERROR_SLOT_ID_INVALID);
         return megArr;
     }
     std::vector<ShortMessage> messageArray;
@@ -1085,7 +1095,7 @@ void DelSimMessageSync(int32_t slotId, int32_t msgIndex)
             stuSSM.indexOnSim = message.indexOnSim_;
         }
     } else {
-        set_business_error(errorCode, "GetAllSimMessagesSync GetAllSimMessages failed");
+        ConvertErrorForBusinessError(errorCode);
     }
     return megArr;
 }
@@ -1095,7 +1105,7 @@ void SetCBConfigSync(::ohos::telephony::sms::CBConfigOptions const & options)
     int32_t errorCode = Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(options.slotId, options.enable,
         options.startMessageId, options.endMessageId, options.ranType);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "SetCBConfigSync SetCBConfig failed");
+        ConvertErrorForBusinessError(errorCode);
     }
 }
 
@@ -1110,7 +1120,7 @@ void SetCBConfigSync(::ohos::telephony::sms::CBConfigOptions const & options)
         std::transform(messageArray.begin(), messageArray.end(), std::back_inserter(message), StringUtils::ToUtf8);
         result = ::taihe::array<taihe::string>(taihe::copy_data_t{}, message.data(), message.size());
     } else {
-        set_business_error(errorCode, "SplitMessageSync SplitMessage failed");
+        ConvertErrorForBusinessError(errorCode);
     }
     return result;
 }
@@ -1122,7 +1132,7 @@ void SetCBConfigSync(::ohos::telephony::sms::CBConfigOptions const & options)
     ohos::telephony::sms::ShortMessage shortMessage =
         ohos::telephony::sms::ShortMessage{ "", "", shortMessageClass, -1, "", -1, false, false, {}, -1, false };
     if (specification.empty() || pdu.empty()) {
-        set_business_error(TELEPHONY_ERR_ARGUMENT_INVALID, "CreateMessageSync failed");
+        ConvertErrorForBusinessError(TELEPHONY_ERR_ARGUMENT_INVALID);
         return shortMessage;
     }
     std::u16string specification16(StringUtils::ToUtf16(specification.c_str()));
@@ -1144,7 +1154,7 @@ void SetCBConfigSync(::ohos::telephony::sms::CBConfigOptions const & options)
         shortMessage.status = shortMessageObj->status_;
         shortMessage.isSmsStatusReportMessage = shortMessageObj->isSmsStatusReportMessage_;
     } else {
-        set_business_error(errorCode, "CreateMessageSync CreateMessage failed");
+        ConvertErrorForBusinessError(errorCode);
         return shortMessage;
     }
     return shortMessage;
@@ -1153,25 +1163,25 @@ void SetCBConfigSync(::ohos::telephony::sms::CBConfigOptions const & options)
 void SetDefaultSmsSlotIdSync(int32_t slotId)
 {
     if (!IsValidSlotId(slotId) && (slotId != DEFAULT_SIM_SLOT_ID_REMOVE)) {
-        set_business_error(ERROR_SLOT_ID_INVALID, "SetDefaultSmsSlotIdSync slotId is invalid");
+        ConvertErrorForBusinessError(ERROR_SLOT_ID_INVALID);
         return;
     }
     uint32_t errorCode = Singleton<SmsServiceManagerClient>::GetInstance().SetDefaultSmsSlotId(slotId);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "SetDefaultSmsSlotIdSync SetDefaultSmsSlotId failed");
+        ConvertErrorForBusinessError(errorCode);
     }
 }
 
 void SetSmscAddrSync(int32_t slotId, ::taihe::string_view smscAddr)
 {
     if (!IsValidSlotId(slotId)) {
-        set_business_error(ERROR_SLOT_ID_INVALID, "SetSmscAddrSync slotId is invalid");
+        ConvertErrorForBusinessError(ERROR_SLOT_ID_INVALID);
         return;
     }
     uint32_t errorCode =
         Singleton<SmsServiceManagerClient>::GetInstance().SetScAddress(slotId, StringUtils::ToUtf16(smscAddr.c_str()));
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
-        set_business_error(errorCode, "SetSmscAddrSync SetScAddress failed");
+        ConvertErrorForBusinessError(errorCode);
     }
 }
 } // namespace
