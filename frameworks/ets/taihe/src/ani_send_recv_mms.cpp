@@ -18,13 +18,13 @@
 #include "ani_mms_pdu.h"
 #include "sms_constants_utils.h"
 #include "sms_service_manager_client.h"
-#include "string_utils.h"
 #include "taihe/runtime.hpp"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_permission.h"
 #include <chrono>
 #include <string>
+#include "napi_util.h"
 
 using namespace taihe;
 
@@ -147,7 +147,7 @@ static int32_t NativeSendMms(uintptr_t context, MmsContext &mmsContext)
         return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
     }
     if (!STORE_MMS_PDU_TO_FILE) {
-        std::string pduFileName = StringUtils::ToUtf8(mmsContext.data);
+        std::string pduFileName = NapiUtil::ToUtf8(mmsContext.data);
         if (pduFileName.empty()) {
             TELEPHONY_LOGE("pduFileName empty");
             return TELEPHONY_ERR_ARGUMENT_INVALID;
@@ -165,7 +165,7 @@ static int32_t NativeSendMms(uintptr_t context, MmsContext &mmsContext)
             TELEPHONY_LOGE("StoreMmsPdu fail");
             return TELEPHONY_ERR_LOCAL_PTR_NULL;
         }
-        mmsContext.data = StringUtils::ToUtf16(helper.GetDbUrl());
+        mmsContext.data = NapiUtil::ToUtf16(helper.GetDbUrl());
     }
     auto errorCode = Singleton<SmsServiceManagerClient>::GetInstance().SendMms(mmsContext.slotId, mmsContext.mmsc,
         mmsContext.data, mmsContext.mmsConfig.userAgent, mmsContext.mmsConfig.userAgentProfile, mmsContext.timeStamp);
@@ -268,7 +268,7 @@ static int32_t DownloadExceptionCase(MmsContext &context,
         TELEPHONY_LOGE("g_datashareHelper is nullptr");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
-    std::string fileName = StringUtils::ToUtf8(context.data);
+    std::string fileName = NapiUtil::ToUtf8(context.data);
     char realPath[PATH_MAX] = {0};
     if (fileName.empty() || realpath(fileName.c_str(), realPath) == nullptr) {
         TELEPHONY_LOGE("path or realPath is nullptr");
@@ -326,13 +326,13 @@ static int32_t NativeDownloadMms(uintptr_t context, struct MmsContext &mmsContex
     std::u16string dbUrls;
     errorCode = Singleton<SmsServiceManagerClient>::GetInstance().DownloadMms(mmsContext.slotId, mmsContext.mmsc,
         dbUrls, mmsContext.mmsConfig.userAgent, mmsContext.mmsConfig.userAgentProfile);
-    TELEPHONY_LOGI("NativeDownloadMms dbUrls:%{public}s", StringUtils::ToUtf8(dbUrls).c_str());
+    TELEPHONY_LOGI("NativeDownloadMms dbUrls:%{public}s", NapiUtil::ToUtf8(dbUrls).c_str());
     if (errorCode == TELEPHONY_ERR_SUCCESS) {
         if (!STORE_MMS_PDU_TO_FILE) {
             AniMmsPduHelper helper;
             helper.SetDataShareHelper(g_datashareHelper);
-            helper.SetDbUrl(StringUtils::ToUtf8(dbUrls));
-            helper.SetStoreFileName(StringUtils::ToUtf8(mmsContext.data));
+            helper.SetDbUrl(NapiUtil::ToUtf8(dbUrls));
+            helper.SetStoreFileName(NapiUtil::ToUtf8(mmsContext.data));
             if (!helper.Run(GetMmsPduFromDataBase, helper)) {
                 TELEPHONY_LOGE("StoreMmsPdu fail");
                 return TELEPHONY_ERR_LOCAL_PTR_NULL;
