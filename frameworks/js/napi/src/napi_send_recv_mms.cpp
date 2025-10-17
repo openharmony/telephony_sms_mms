@@ -386,6 +386,7 @@ void GetMmsPduFromDataBase(std::shared_ptr<NapiMmsPduHelper> helper) __attribute
     std::string mmsPdu = mmsPduObj.GetMmsPdu(*helper);
     if (mmsPdu.empty()) {
         TELEPHONY_LOGE("from dataBase empty");
+        helper->NotifyAll();
         return;
     }
 

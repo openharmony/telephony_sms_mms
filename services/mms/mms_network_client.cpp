@@ -349,7 +349,12 @@ int32_t MmsNetworkClient::GetUrl(const std::string &mmsc, std::string &storeDirN
 int32_t MmsNetworkClient::UpdateMmsPduToStorage(std::string &storeDirName)
 {
     uint32_t len = responseData_.size();
-    if (len > MMS_PDU_MAX_SIZE || len == 0) {
+    if (len == 0) {
+        // 0kb mms fix
+        TELEPHONY_LOGE("MMS pdu length 0");
+        return TELEPHONY_ERR_SUCCESS;
+    }
+    if (len > MMS_PDU_MAX_SIZE) {
         TELEPHONY_LOGE("MMS pdu length invalid");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
