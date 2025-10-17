@@ -32,6 +32,10 @@ bool MmsMsg::DecodeMsg(std::string mmsFilePathName)
         TELEPHONY_LOGE("Read File To Buffer Error.");
         return false;
     }
+    if (decodeBuffer.GetSize() == 0) {
+        TELEPHONY_LOGE("Decode Mms Empty Content.");
+        return true;
+    }
     if (!mmsHeader_.DecodeMmsHeader(decodeBuffer)) {
         TELEPHONY_LOGE("Decode Mms Header Error.");
         return false;

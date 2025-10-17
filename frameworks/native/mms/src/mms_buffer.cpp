@@ -123,7 +123,13 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
     }
     (void)fseek(pFile, 0, SEEK_END);
     long fileLen = ftell(pFile);
-    if (fileLen <= 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
+    if (fileLen == 0) {
+        (void)fclose(pFile);
+        totolLength_ = 0;
+        TELEPHONY_LOGE("Mmms File Is Empty.");
+        return true;
+    }
+    if (fileLen < 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
         (void)fclose(pFile);
         TELEPHONY_LOGE("Mms Over Long Error .");
         return false;
