@@ -37,7 +37,6 @@ taihe_shared_library("telephony_sms_taihe_native") {                #调用taihe
   part_name = "$part_name"
   subsystem_name = "$subsystem_name"
   sources = get_target_outputs(":run_taihe")
-  shlib_type = "sa"
   include_dirs = [ 
     "../../js/napi/include",
     "include",
@@ -55,7 +54,6 @@ taihe_shared_library("telephony_sms_taihe_native") {                #调用taihe
   deps = [
     ":run_taihe",
     "//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",               #根据业务添加编译依赖
-    "//base/telephony/sms_mms:tel_sms_mms",
   ]
 
   external_deps = [
