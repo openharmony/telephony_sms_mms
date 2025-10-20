@@ -27,7 +27,6 @@
 #include "sms_service_manager_client.h"
 #include "stdexcept"
 #include "string_ex.h"
-#include "string_utils.h"
 #include "taihe/runtime.hpp"
 #include "taihe/string.hpp"
 #include "telephony_errors.h"
@@ -159,19 +158,19 @@ static void GetMmsContext(::ohos::telephony::sms::MmsParams const & mmsParams, M
 {
     mmsContext.slotId = mmsParams.slotId;
     if (GetMmsValueLength(std::string(mmsParams.mmsc))) {
-        mmsContext.mmsc = StringUtils::ToUtf16(std::string(mmsParams.mmsc));
+        mmsContext.mmsc = NapiUtil::ToUtf16(std::string(mmsParams.mmsc));
     }
     if (GetMmsValueLength(std::string(mmsParams.data))) {
-        mmsContext.data = StringUtils::ToUtf16(std::string(mmsParams.data));
+        mmsContext.data = NapiUtil::ToUtf16(std::string(mmsParams.data));
     }
     if (mmsParams.mmsConfig.has_value()) {
         auto ua = std::string(mmsParams.mmsConfig.value().userAgent);
         if (GetMmsValueLength(ua)) {
-            mmsContext.mmsConfig.userAgent = StringUtils::ToUtf16(ua);
+            mmsContext.mmsConfig.userAgent = NapiUtil::ToUtf16(ua);
         }
         auto uaprof = std::string(mmsParams.mmsConfig.value().userAgentProfile);
         if (GetMmsValueLength(uaprof)) {
-            mmsContext.mmsConfig.userAgentProfile = StringUtils::ToUtf16(uaprof);
+            mmsContext.mmsConfig.userAgentProfile = NapiUtil::ToUtf16(uaprof);
         }
     }
 }
@@ -278,7 +277,7 @@ int32_t GetDefaultSmsSimIdSync()
         ConvertErrorForBusinessError(TELEPHONY_ERR_SLOTID_INVALID);
         return smsInfo;
     }
-    std::u16string content = StringUtils::ToUtf16(message.c_str());
+    std::u16string content = NapiUtil::ToUtf16(message.c_str());
     uint32_t errorCode =
         Singleton<SmsServiceManagerClient>::GetInstance().GetSmsSegmentsInfo(slotId, content, force7bit, info);
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
@@ -309,7 +308,7 @@ bool IsImsSmsSupportedSync(int32_t slotId)
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
         ConvertErrorForBusinessError(errorCode);
     }
-    return taihe::string(StringUtils::ToUtf8(value).c_str());
+    return taihe::string(NapiUtil::ToUtf8(value).c_str());
 }
 
 void DownloadMmsSync(uintptr_t context, ::ohos::telephony::sms::MmsParams const & mmsParams)
@@ -1027,7 +1026,7 @@ static void AttachmentArrayToVector(const ::taihe::array<::ohos::telephony::sms:
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
         ConvertErrorForBusinessError(errorCode);
     }
-    return taihe::string(StringUtils::ToUtf8(smscAddress).c_str());
+    return taihe::string(NapiUtil::ToUtf8(smscAddress).c_str());
 }
 
 void AddSimMessageSync(::ohos::telephony::sms::SimMessageOptions const & options)
@@ -1035,8 +1034,8 @@ void AddSimMessageSync(::ohos::telephony::sms::SimMessageOptions const & options
     int32_t wrapStatus = static_cast<int32_t>(options.status);
     if (wrapStatus != MESSAGE_UNKNOWN_STATUS) {
         ISmsServiceInterface::SimMessageStatus status = static_cast<ISmsServiceInterface::SimMessageStatus>(wrapStatus);
-        std::u16string strSmsc(StringUtils::ToUtf16(options.smsc.c_str()));
-        std::u16string strPdu(StringUtils::ToUtf16(options.pdu.c_str()));
+        std::u16string strSmsc(NapiUtil::ToUtf16(options.smsc.c_str()));
+        std::u16string strPdu(NapiUtil::ToUtf16(options.pdu.c_str()));
         int32_t errorCode =
             Singleton<SmsServiceManagerClient>::GetInstance().AddSimMessage(options.slotId, strSmsc, strPdu, status);
         if (errorCode != TELEPHONY_ERR_SUCCESS) {
@@ -1076,11 +1075,11 @@ void DelSimMessageSync(int32_t slotId, int32_t msgIndex)
     int32_t errorCode = Singleton<SmsServiceManagerClient>::GetInstance().GetAllSimMessages(slotId, messageArray);
     if (errorCode == TELEPHONY_ERR_SUCCESS) {
         for (const auto &message : messageArray) {
-            stuSm.visibleMessageBody = taihe::string(StringUtils::ToUtf8(message.visibleMessageBody_).c_str());
-            stuSm.visibleRawAddress = taihe::string(StringUtils::ToUtf8(message.visibleMessageBody_).c_str());
+            stuSm.visibleMessageBody = taihe::string(NapiUtil::ToUtf8(message.visibleMessageBody_).c_str());
+            stuSm.visibleRawAddress = taihe::string(NapiUtil::ToUtf8(message.visibleMessageBody_).c_str());
             stuSm.messageClass.from_value(static_cast<int32_t>(message.messageClass_));
             stuSm.protocolId = message.protocolId_;
-            stuSm.scAddress = taihe::string(StringUtils::ToUtf8(message.scAddress_).c_str());
+            stuSm.scAddress = taihe::string(NapiUtil::ToUtf8(message.scAddress_).c_str());
             stuSm.scTimestamp = message.scTimestamp_;
             stuSm.isReplaceMessage = message.isSmsStatusReportMessage_;
             stuSm.hasReplyPath = message.hasReplyPath_;
@@ -1111,13 +1110,13 @@ void SetCBConfigSync(::ohos::telephony::sms::CBConfigOptions const & options)
 
 ::taihe::array<::taihe::string> SplitMessageSync(::taihe::string_view content)
 {
-    std::u16string content16 = StringUtils::ToUtf16(content.c_str());
+    std::u16string content16 = NapiUtil::ToUtf16(content.c_str());
     taihe::array<taihe::string> result = {};
     std::vector<std::u16string> messageArray;
     int32_t errorCode = Singleton<SmsServiceManagerClient>::GetInstance().SplitMessage(content16, messageArray);
     if (errorCode == TELEPHONY_ERR_SUCCESS) {
         std::vector<std::string> message;
-        std::transform(messageArray.begin(), messageArray.end(), std::back_inserter(message), StringUtils::ToUtf8);
+        std::transform(messageArray.begin(), messageArray.end(), std::back_inserter(message), NapiUtil::ToUtf8);
         result = ::taihe::array<taihe::string>(taihe::copy_data_t{}, message.data(), message.size());
     } else {
         ConvertErrorForBusinessError(errorCode);
@@ -1135,18 +1134,18 @@ void SetCBConfigSync(::ohos::telephony::sms::CBConfigOptions const & options)
         ConvertErrorForBusinessError(TELEPHONY_ERR_ARGUMENT_INVALID);
         return shortMessage;
     }
-    std::u16string specification16(StringUtils::ToUtf16(specification.c_str()));
+    std::u16string specification16(NapiUtil::ToUtf16(specification.c_str()));
     std::vector<unsigned char> strpdu(pdu.begin(), pdu.end());
     auto shortMessageObj = new ShortMessage();
     int32_t errorCode = ShortMessage::CreateMessage(strpdu, specification16, *shortMessageObj);
     if (errorCode == TELEPHONY_ERR_SUCCESS) {
         shortMessage.visibleMessageBody =
-            taihe::string(StringUtils::ToUtf8(shortMessageObj->visibleMessageBody_).c_str());
+            taihe::string(NapiUtil::ToUtf8(shortMessageObj->visibleMessageBody_).c_str());
         shortMessage.visibleRawAddress =
-            taihe::string(StringUtils::ToUtf8(shortMessageObj->visibleRawAddress_).c_str());
+            taihe::string(NapiUtil::ToUtf8(shortMessageObj->visibleRawAddress_).c_str());
         shortMessage.messageClass.from_value(static_cast<int32_t>(shortMessageObj->messageClass_));
         shortMessage.protocolId = shortMessageObj->protocolId_;
-        shortMessage.scAddress = taihe::string(StringUtils::ToUtf8(shortMessageObj->scAddress_).c_str());
+        shortMessage.scAddress = taihe::string(NapiUtil::ToUtf8(shortMessageObj->scAddress_).c_str());
         shortMessage.scTimestamp = shortMessageObj->scTimestamp_;
         shortMessage.isReplaceMessage = shortMessageObj->isReplaceMessage_;
         shortMessage.hasReplyPath = shortMessageObj->hasReplyPath_;
@@ -1179,7 +1178,7 @@ void SetSmscAddrSync(int32_t slotId, ::taihe::string_view smscAddr)
         return;
     }
     uint32_t errorCode =
-        Singleton<SmsServiceManagerClient>::GetInstance().SetScAddress(slotId, StringUtils::ToUtf16(smscAddr.c_str()));
+        Singleton<SmsServiceManagerClient>::GetInstance().SetScAddress(slotId, NapiUtil::ToUtf16(smscAddr.c_str()));
     if (errorCode != TELEPHONY_ERR_SUCCESS) {
         ConvertErrorForBusinessError(errorCode);
     }
