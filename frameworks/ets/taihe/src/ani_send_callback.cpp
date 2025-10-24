@@ -14,120 +14,77 @@
  */
 
 #include "ani_send_callback.h"
-#include "concurrency_helpers.h"
-#include "ohos.telephony.sms.ISendShortMessageCallback.ani.1.hpp"
 #include "telephony_log_wrapper.h"
+#include "taihe/platform/ani.hpp"
+#include "ohos.telephony.sms.proj.hpp"
+#include "ohos.telephony.sms.impl.hpp"
 
 using namespace taihe;
-using arkts::concurrency_helpers::GetWorkerId;
-using arkts::concurrency_helpers::SendEvent;
-
 namespace OHOS {
 namespace Telephony {
-static constexpr int32_t LOCAL_SCOPE_SIZE = 16;
 
-SendSmsResult AniSendCallback::WrapSmsSendResult(const ISendShortMessageCallback::SmsSendResult result)
+bool AniSendCallback::Init(uintptr_t callbackFunc)
 {
-    switch (result) {
-        case ISendShortMessageCallback::SmsSendResult::SEND_SMS_SUCCESS: {
-            return SendSmsResult::SEND_SMS_SUCCESS;
-        }
-        case ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_RADIO_OFF: {
-            return SendSmsResult::SEND_SMS_FAILURE_RADIO_OFF;
-        }
-        case ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE: {
-            return SendSmsResult::SEND_SMS_FAILURE_SERVICE_UNAVAILABLE;
-        }
-        default: {
-            return SendSmsResult::SEND_SMS_FAILURE_UNKNOWN;
-        }
+    if (callbackFunc == 0) {
+        TELEPHONY_LOGE("callbackFunc is nullptr!");
+        return false;
     }
+
+    cb_ = std::make_shared<AniCallbackInfo>();
+    if (nullptr == cb_) {
+        TELEPHONY_LOGE("AniCallbackInfo is null");
+        return false;
+    }
+
+    if (!cb_->init(callbackFunc)) {
+        TELEPHONY_LOGE("AniCallbackInfo init fail");
+        return false;
+    }
+
+    return true;
 }
 
-AniSendCallback::AniSendCallback(bool hasCallback, ani_env *env, ani_ref callbackRef)
-    : hasCallback_(hasCallback), env_(env), callbackRef_(callbackRef)
-{}
-
-AniSendCallback::~AniSendCallback()
+static ani_object ConvertTaiheISendShortMessageCallbackToAni(ani_env *env,
+    ::ohos::telephony::sms::ISendShortMessageCallback cpp_obj)
 {
-    env_ = nullptr;
-    callbackRef_ = nullptr;
+    ani_enum_item ani_field_result = {};
+    env->Enum_GetEnumItemByIndex(TH_ANI_FIND_ENUM(env, "@ohos.telephony.sms.sms.SendSmsResult"),
+        static_cast<ani_size>(cpp_obj.result.get_key()), &ani_field_result);
+    ani_string ani_field_url = {};
+    env->String_NewUTF8(cpp_obj.url.c_str(), cpp_obj.url.size(), &ani_field_url);
+    ani_boolean ani_field_isLastPart = static_cast<ani_boolean>(cpp_obj.isLastPart);
+    ani_object ani_obj = {};
+    env->Object_New(TH_ANI_FIND_CLASS(env, "@ohos.telephony.sms.sms._taihe_ISendShortMessageCallback_inner"),
+        TH_ANI_FIND_CLASS_METHOD(env, "@ohos.telephony.sms.sms._taihe_ISendShortMessageCallback_inner", "<ctor>",
+        nullptr), &ani_obj, ani_field_result, ani_field_url, ani_field_isLastPart);
+    return ani_obj;
 }
 
-static ani_object GetDefaultBusinessError(ani_env *env)
+void AniSendCallback::CompleteSmsSendWork(const ISendShortMessageCallback::SmsSendResult result)
 {
-    static const char *businessErrorName = "L@ohos/base/BusinessError;";
-    ani_class cls;
-    auto status = env->FindClass(businessErrorName, &cls);
-    if (ANI_OK != status) {
-        TELEPHONY_LOGI("Not found class '%{public}s' errcode %{public}d.", businessErrorName, status);
-        return nullptr;
-    }
-    ani_method ctor;
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor);
-    if (ANI_OK != status) {
-        TELEPHONY_LOGI("Not found ctor of '%{public}s' errcode %{public}d.", businessErrorName, status);
-        return nullptr;
-    }
-    ani_object businessErrorObject;
-    status = env->Object_New(cls, ctor, &businessErrorObject);
-    if (ANI_OK != status) {
-        TELEPHONY_LOGI("Can not create business error errcode %{public}d.", status);
-        return nullptr;
-    }
-    return businessErrorObject;
-}
-
-void CompleteSmsSendWork(SendCallbackContext *context)
-{
-    ani_env *env = context->env;
-    if (ANI_OK != env->CreateLocalScope(LOCAL_SCOPE_SIZE)) {
-        TELEPHONY_LOGI("CompleteSmsSendWork CreateLocalScope failed.");
+    auto env = cb_->envT_;
+    ani_status aniStatus;
+    ani_ref aniNull;
+    if ((aniStatus = env->GetNull(&aniNull)) != ANI_OK) {
+        TELEPHONY_LOGE("get null value failed, status = %{public}d", aniStatus);
         return;
     }
-    auto businessError = GetDefaultBusinessError(env);
-    ::ohos::telephony::sms::SendSmsResult resultParam(::ohos::telephony::sms::SendSmsResult::key_t(context->result));
-    ::ohos::telephony::sms::ISendShortMessageCallback callbackParam = { std::move(resultParam), std::move(""),
-        std::move(false) };
-    auto param = ::taihe::into_ani<::ohos::telephony::sms::ISendShortMessageCallback>(env, callbackParam);
-    auto callbackFunc = reinterpret_cast<ani_object>(context->callbackRef);
-    ani_ref ani_argv[] = {businessError, param};
-    ani_ref ani_result;
-    ani_class cls;
-    env->FindClass("Lstd/core/Function2;", &cls);
-    ani_boolean ret;
-    env->Object_InstanceOf(callbackFunc, cls, &ret);
-    if (!ret) {
-        TELEPHONY_LOGI("%{public}s: callbackFunc is not instance Of Function2.", __func__);
-    }
-    auto errCode = env->FunctionalObject_Call(static_cast<ani_fn_object>(callbackFunc), 2, ani_argv, &ani_result);
-    env->DestroyLocalScope();
-    TELEPHONY_LOGI("CompleteSmsSendWork enter 5 call returned %{public}d.", errCode);
+
+    ohos::telephony::sms::SendSmsResult taiheSendResult =
+        ::ohos::telephony::sms::SendSmsResult::from_value(static_cast<int>(result));
+    ohos::telephony::sms::ISendShortMessageCallback sendShortMessageResult = { taiheSendResult, "", false };
+    ani_object aniSendResult = ConvertTaiheISendShortMessageCallbackToAni(env, sendShortMessageResult);
+
+    AniCommonUtils::ExecAsyncCallBack(env, static_cast<ani_object>(aniNull), aniSendResult,
+        static_cast<ani_object>(cb_->funRef_));
 }
 
 void AniSendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResult result)
 {
-    TELEPHONY_LOGI("OnSmsSendResult start hasCallback_ = %d", hasCallback_);
-    if (hasCallback_) {
-        auto mainId = GetWorkerId(env_);
-
-        SendCallbackContext *pContext = std::make_unique<SendCallbackContext>().release();
-        if (pContext == nullptr) {
-            TELEPHONY_LOGE("OnSmsSendResult pContext is nullptr!");
-            return;
-        }
-        pContext->env = env_;
-        pContext->callbackRef = callbackRef_;
-        pContext->result = WrapSmsSendResult(result);
-
-        auto task = [](void *data) {
-            SendCallbackContext *pContext = static_cast<SendCallbackContext *>(data);
-            CompleteSmsSendWork(pContext);
-        };
-
-        auto status = SendEvent(env_, mainId, task, reinterpret_cast<void *>(pContext));
-
-        TELEPHONY_LOGI("OnSmsSendResult SendEvent status = %d", status);
+    if (cb_) {
+        cb_->AttachThread();
+        CompleteSmsSendWork(result);
+        cb_->DetachThread();
     }
 }
 } // namespace Telephony
