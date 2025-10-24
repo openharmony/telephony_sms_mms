@@ -121,7 +121,7 @@ struct MmsAttachment {
     contentType: String;
     isSmil: bool;
     path: Optional<String>;
-    inBuff: Optional<@typedarray Array<u8>>;
+    inBuff: Optional<Array<i32>>;
     fileName: Optional<String>;
     charset: Optional<MmsCharSets>;
 }
@@ -131,13 +131,13 @@ struct MmsReadOrigInd {
     messageId: String;
     to: Array<MmsAddress>;
     @!sts_inject_into_interface("""
-    	get from():MmsAddress
+        get from():MmsAddress
         set from(value:MmsAddress)
     """)
     @!sts_inject_into_class("""
         get from():MmsAddress {
             return this.fromAddress;
-    	}
+        }
         set from(value: MmsAddress) {
             this.fromAddress = value;
         }
@@ -152,13 +152,13 @@ struct MmsReadRecInd {
     messageId: String;
     to: Array<MmsAddress>;
     @!sts_inject_into_interface("""
-    	get from():MmsAddress
+        get from():MmsAddress
         set from(value:MmsAddress)
     """)
     @!sts_inject_into_class("""
         get from():MmsAddress {
             return this.fromAddress;
-    	}
+        }
         set from(value: MmsAddress) {
             this.fromAddress = value;
         }
@@ -190,7 +190,7 @@ struct MmsRetrieveConf {
     to: Array<MmsAddress>;
     version: MmsVersionType;
    @!sts_inject_into_interface("""
-   	get from():MmsAddress | undefined
+    get from():MmsAddress | undefined
         set from(value:MmsAddress | undefined)
     """)
     @!sts_inject_into_class("""
@@ -226,7 +226,7 @@ struct MmsNotificationInd {
     contentLocation: String;
     version: MmsVersionType;
     @!sts_inject_into_interface("""
-    	get from():MmsAddress | undefined
+        get from():MmsAddress | undefined
         set from(value:MmsAddress | undefined)
     """)
     @!sts_inject_into_class("""
@@ -302,13 +302,13 @@ struct ISendShortMessageCallback {
 }
 
 struct IDeliveryShortMessageCallback {
-    pdu: @typedarray Array<u8>;
+    pdu: Array<i32>;
 }
 
 /* content: string | Array<number> convert to union */
 union ContentOption {
     shortMessage: String;
-    dataMessage: @typedarray Array<u8>;
+    dataMessage: Array<i32>;
 }
 
 struct SendMessageOptions {
@@ -327,10 +327,10 @@ struct ShortMessage {
     messageClass: ShortMessageClass;
     protocolId: i32;
     scAddress: String;
-    scTimestamp: i32;
+    scTimestamp: i64;
     isReplaceMessage: bool;
     hasReplyPath: bool;
-    pdu: @typedarray Array<u8>;
+    pdu: Array<i32>;
     status: i32;
     isSmsStatusReportMessage: bool;
 }
@@ -358,13 +358,13 @@ struct CBConfigOptions {
 
 struct MmsSendReq {
     @!sts_inject_into_interface("""
-    	get from():MmsAddress
+        get from():MmsAddress
         set from(value:MmsAddress)
     """)
     @!sts_inject_into_class("""
         get from(): MmsAddress {
             return this.fromAddress;
-    	}
+        }
         set from(value: MmsAddress) {
             this.fromAddress = value;
         }
@@ -388,7 +388,7 @@ struct MmsSendReq {
 
 union FilePathName {
     pathNameString: String;
-    pathNameArray: @typedarray Array<u8>;
+    pathNameArray: Array<i32>;
 }
 
 function HasSmsCapability(): bool;
@@ -405,6 +405,10 @@ function GetDefaultSmsSlotIdSync(): i32;
 @gen_promise("getDefaultSmsSimId")
 function GetDefaultSmsSimIdSync(): i32;
 
+@gen_async("sendShortMessage")
+@gen_promise("sendShortMessage")
+function SendShortMessageSync(options: SendMessageOptions): void;
+
 @gen_async("getSmsSegmentsInfo")
 @gen_promise("getSmsSegmentsInfo")
 function GetSmsSegmentsInfoSync(slotId: i32, message: String, force7bit: bool): SmsSegmentsInfo;
@@ -417,8 +421,8 @@ function IsImsSmsSupportedSync(slotId: i32): bool;
 @gen_promise("getImsShortMessageFormat")
 function GetImsShortMessageFormatSync(): String;
 
-@gen_async("downloadMms")  
-@gen_promise("downloadMms")  
+@gen_async("downloadMms")
+@gen_promise("downloadMms")
 function DownloadMmsSync(context: @sts_type("BaseContext") Opaque, mmsParams: MmsParams): void;
   
 @gen_async("decodeMms")
@@ -427,7 +431,7 @@ function DecodeMmsSync(mmsFilePathName: FilePathName): MmsInformation;
 
 @gen_async("encodeMms")
 @gen_promise("encodeMms")
-function EncodeMmsSync(mms: MmsInformation): @typedarray Array<u8>;
+function EncodeMmsSync(mms: MmsInformation): Array<i32>;
 
 @gen_async("getSmscAddr")
 @gen_promise("getSmscAddr")
@@ -451,11 +455,11 @@ function SetCBConfigSync(options: CBConfigOptions): void;
 
 @gen_async("splitMessage")
 @gen_promise("splitMessage")
-function SplitMessageSync(content:String):Array<String>;
+function SplitMessageSync(content:String): Array<String>;
 
 @gen_async("createMessage")
-@gen_promise("createMessage")   
-function CreateMessageSync(pdu:Array<u8>,specification:String):ShortMessage;
+@gen_promise("createMessage")
+function CreateMessageSync(pdu: Array<i32>, specification:String): ShortMessage;
 
 @gen_async("setDefaultSmsSlotId")
 @gen_promise("setDefaultSmsSlotId")   

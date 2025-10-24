@@ -14,105 +14,88 @@
  */
 
 #include "ani_delivery_callback.h"
-#include "concurrency_helpers.h"
-#include "ohos.telephony.sms.IDeliveryShortMessageCallback.ani.1.hpp"
-#include "string_ex.h"
 #include "telephony_log_wrapper.h"
-
-using arkts::concurrency_helpers::GetWorkerId;
-using arkts::concurrency_helpers::SendEvent;
+#include "string_ex.h"
+#include "taihe/platform/ani.hpp"
+#include "ohos.telephony.sms.proj.hpp"
+#include "ohos.telephony.sms.impl.hpp"
 
 namespace OHOS {
 namespace Telephony {
-static constexpr int32_t LOCAL_SCOPE_SIZE = 16;
 
-AniDeliveryCallback::AniDeliveryCallback(bool hasCallback, ani_env *env, ani_ref callbackRef)
-    : hasCallback_(hasCallback), env_(env), callbackRef_(callbackRef)
-{}
-
-AniDeliveryCallback::~AniDeliveryCallback()
+bool AniDeliveryCallback::Init(uintptr_t callbackFunc)
 {
-    env_ = nullptr;
-    callbackRef_ = nullptr;
+    if (callbackFunc == 0) {
+        return false;
+    }
+    cb_ = std::make_shared<AniCallbackInfo>();
+    if (nullptr == cb_) {
+        return false;
+    }
+    if (!cb_->init(callbackFunc)) {
+        return false;
+    }
+    return true;
 }
 
-static ani_object GetDefaultBusinessError(ani_env *env)
+static ani_object ConvertTaiheIDeliveryShortMessageCallbackToAni(ani_env *env,
+    ::ohos::telephony::sms::IDeliveryShortMessageCallback cpp_obj)
 {
-    static const char *businessErrorName = "L@ohos/base/BusinessError;";
-    ani_class cls;
-    auto status = env->FindClass(businessErrorName, &cls);
-    if (ANI_OK != status) {
-        TELEPHONY_LOGI("Not found class '%{public}s' errcode %{public}d.", businessErrorName, status);
-        return nullptr;
+    size_t ani_field_pdu_ani_size = cpp_obj.pdu.size();
+    ani_array ani_field_pdu = {};
+    ani_ref ani_field_pdu_ani_none = {};
+    env->GetUndefined(&ani_field_pdu_ani_none);
+    env->Array_New(ani_field_pdu_ani_size, ani_field_pdu_ani_none, &ani_field_pdu);
+    for (size_t ani_field_pdu_iterator = 0; ani_field_pdu_iterator < ani_field_pdu_ani_size; ani_field_pdu_iterator++) {
+        ani_object ani_field_pdu_ani_item = {};
+        ani_int ani_field_pdu_ani_item_ani_after = static_cast<ani_int>(cpp_obj.pdu[ani_field_pdu_iterator]);
+        env->Object_New(TH_ANI_FIND_CLASS(env, "std.core.Int"),
+            TH_ANI_FIND_CLASS_METHOD(env, "std.core.Int", "<ctor>", "i:"),
+            &ani_field_pdu_ani_item, ani_field_pdu_ani_item_ani_after);
+        env->Array_Set(ani_field_pdu, ani_field_pdu_iterator, ani_field_pdu_ani_item);
     }
-    ani_method ctor;
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor);
-    if (ANI_OK != status) {
-        TELEPHONY_LOGI("Not found ctor of '%{public}s' errcode %{public}d.", businessErrorName, status);
-        return nullptr;
-    }
-    ani_object businessErrorObject;
-    status = env->Object_New(cls, ctor, &businessErrorObject);
-    if (ANI_OK != status) {
-        TELEPHONY_LOGI("Can not create business error errcode %{public}d.", status);
-        return nullptr;
-    }
-    return businessErrorObject;
+    ani_object ani_obj = {};
+    env->Object_New(TH_ANI_FIND_CLASS(env, "@ohos.telephony.sms.sms._taihe_IDeliveryShortMessageCallback_inner"),
+        TH_ANI_FIND_CLASS_METHOD(env, "@ohos.telephony.sms.sms._taihe_IDeliveryShortMessageCallback_inner",
+            "<ctor>", nullptr),
+        &ani_obj, ani_field_pdu);
+    return ani_obj;
 }
 
-void CompleteSmsDeliveryWork(DeliveryCallbackContext *context)
+void AniDeliveryCallback::CompleteSmsDeliveryWork(const std::u16string &pdu)
 {
-    ani_env *env = context->env;
-    if (ANI_OK != env->CreateLocalScope(LOCAL_SCOPE_SIZE)) {
-        TELEPHONY_LOGI("CompleteSmsDeliveryWork CreateLocalScope failed.");
+    auto env = cb_->envT_;
+    ani_status aniStatus;
+    ani_ref aniNull;
+    if ((aniStatus = env->GetNull(&aniNull)) != ANI_OK) {
+        TELEPHONY_LOGE("get null value failed, status = %{public}d", aniStatus);
         return;
     }
-    auto businessError = GetDefaultBusinessError(env);
-    std::string pduStr = context->pduStr;
-    ::taihe::array<uint8_t> arrayParam(pduStr.size());
-    for (uint32_t i = 0; i < static_cast<uint32_t>(pduStr.size()); ++i) {
-        arrayParam[i] = static_cast<uint8_t>(pduStr[i]);
+
+    std::string pduStr = Str16ToStr8(pdu);
+    std::vector<int> pduVec;
+    for (auto c: pduStr) {
+        pduVec.push_back(static_cast<int>(c));
     }
-    ::ohos::telephony::sms::IDeliveryShortMessageCallback callbackParam = { std::move(arrayParam) };
-    auto param = ::taihe::into_ani<::ohos::telephony::sms::IDeliveryShortMessageCallback>(env, callbackParam);
-    auto callbackFunc = reinterpret_cast<ani_object>(context->callbackRef);
-    ani_ref ani_argv[] = {businessError, param};
-    ani_ref ani_result;
-    ani_class cls;
-    env->FindClass("Lstd/core/Function2;", &cls);
-    ani_boolean ret;
-    env->Object_InstanceOf(callbackFunc, cls, &ret);
-    if (!ret) {
-        TELEPHONY_LOGI("%{public}s: callbackFunc is not instance Of Function2.", __func__);
+    auto pduBuffer = ::taihe::array<int32_t>(taihe::copy_data_t{}, pduVec.data(), pduVec.size());
+    std::vector<int32_t> vecBuffer;
+    for (size_t i = 0; i < pduBuffer.size(); i++) {
+        vecBuffer.push_back(static_cast<int32_t>(pduBuffer.at(i)));
     }
-    auto errCode = env->FunctionalObject_Call(static_cast<ani_fn_object>(callbackFunc), 2, ani_argv, &ani_result);
-    env->DestroyLocalScope();
-    TELEPHONY_LOGI("CompleteSmsDeliveryWork enter 5 call returned %{public}d.", errCode);
+    ::taihe::array<int32_t> arrarBuffer(vecBuffer);
+    ohos::telephony::sms::IDeliveryShortMessageCallback deliveryShortMessageResult = { arrarBuffer };
+    ani_object aniDeliveryResult = ConvertTaiheIDeliveryShortMessageCallbackToAni(env, deliveryShortMessageResult);
+
+    AniCommonUtils::ExecAsyncCallBack(env, static_cast<ani_object>(aniNull), aniDeliveryResult,
+        static_cast<ani_object>(cb_->funRef_));
 }
 
 void AniDeliveryCallback::OnSmsDeliveryResult(const std::u16string &pdu)
 {
-    TELEPHONY_LOGI("OnSmsDeliveryResult start hasCallback_ = %d", hasCallback_);
-    if (hasCallback_) {
-        auto mainId = GetWorkerId(env_);
-
-        DeliveryCallbackContext *pContext = std::make_unique<DeliveryCallbackContext>().release();
-        if (pContext == nullptr) {
-            TELEPHONY_LOGE("OnSmsDeliveryResult pContext is nullptr!");
-            return;
-        }
-        pContext->env = env_;
-        pContext->callbackRef = callbackRef_;
-        pContext->pduStr = Str16ToStr8(pdu);
-
-        auto task = [](void *data) {
-            DeliveryCallbackContext *pContext = static_cast<DeliveryCallbackContext *>(data);
-            CompleteSmsDeliveryWork(pContext);
-        };
-
-        auto status = SendEvent(env_, mainId, task, reinterpret_cast<void *>(pContext));
-
-        TELEPHONY_LOGI("OnSmsDeliveryResult SendEvent status = %d", status);
+    if (cb_) {
+        cb_->AttachThread();
+        CompleteSmsDeliveryWork(pdu);
+        cb_->DetachThread();
     }
 }
 } // namespace Telephony
