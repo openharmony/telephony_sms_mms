@@ -33,12 +33,10 @@ static constexpr uint32_t SPLIT_PDU_LENGTH = 195 * 1024;
 void AniMmsPdu::DeleteMmsPdu(AniMmsPduHelper &pduHelper)
 {
     if (GetMmsPdu(pduHelper).empty()) {
-        TELEPHONY_LOGE("mmsPdu_ is nullptr");
         return;
     }
     std::shared_ptr<DataShare::DataShareHelper> datashareHelper = pduHelper.GetDataShareHelper();
     if (datashareHelper == nullptr) {
-        TELEPHONY_LOGE("datashareHelper is nullptr");
         return;
     }
 
@@ -50,40 +48,31 @@ void AniMmsPdu::DeleteMmsPdu(AniMmsPduHelper &pduHelper)
         predicates.EqualTo(ID, url);
         result = datashareHelper->Delete(uri, predicates);
         if (result < 0) {
-            TELEPHONY_LOGE("delete mms pdu fail");
             mmsPdu_ = "";
             return;
         }
     }
     mmsPdu_ = "";
-    TELEPHONY_LOGI("result:%{public}d", result);
 }
 
 bool AniMmsPdu::InsertMmsPdu(AniMmsPduHelper &pduHelper, const std::string &mmsPdu)
 {
     std::shared_ptr<DataShare::DataShareHelper> datashareHelper = pduHelper.GetDataShareHelper();
     if (datashareHelper == nullptr) {
-        TELEPHONY_LOGE("datashareHelper is nullptr");
         return false;
     }
-
     Uri uri(SMS_PROFILE_MMS_PDU_URI);
-
     std::vector<std::string> mmsPdus = SplitPdu(mmsPdu);
-
     std::string dbUrl;
     for (std::string mmsPdu : mmsPdus) {
         DataShare::DataShareValuesBucket bucket;
         bucket.Put(PDU_CONTENT, mmsPdu);
         int32_t result = datashareHelper->Insert(uri, bucket);
         if (result < 0) {
-            TELEPHONY_LOGE("mms pdu insert fail");
             return false;
         }
         dbUrl += std::to_string(result) + ',';
     }
-
-    TELEPHONY_LOGI("insert db, dbUrl:%{public}s", dbUrl.c_str());
     pduHelper.SetDbUrl(dbUrl);
     pduHelper.NotifyAll();
     return dbUrl.empty() ? false : true;
@@ -108,7 +97,6 @@ std::vector<std::string> AniMmsPdu::SplitPdu(const std::string &mmsPdu)
             break;
         }
     }
-    TELEPHONY_LOGI("pduLen:%{public}zu,targetPduLen:%{public}zu", mmsPdu.size(), targetMmsPdu.size());
     return mmsPdus;
 }
 
@@ -143,7 +131,6 @@ bool AniMmsPdu::QueryMmsPdu(AniMmsPduHelper &pduHelper)
 {
     std::shared_ptr<DataShare::DataShareHelper> datashareHelper = pduHelper.GetDataShareHelper();
     if (datashareHelper == nullptr) {
-        TELEPHONY_LOGE("datashareHelper is nullptr");
         return false;
     }
     std::vector<std::string> dbUrls = SplitUrl(pduHelper.GetDbUrl());
@@ -157,13 +144,11 @@ bool AniMmsPdu::QueryMmsPdu(AniMmsPduHelper &pduHelper)
         predicates.EqualTo(ID, url);
         auto resultSet = datashareHelper->Query(uri, predicates, colume);
         if (resultSet == nullptr) {
-            TELEPHONY_LOGE("resultSet is nullptr");
             return false;
         }
         int count;
         resultSet->GetRowCount(count);
         if (count <= 0) {
-            TELEPHONY_LOGE("pdu count: %{public}d error", count);
             resultSet->Close();
             return false;
         }
@@ -181,7 +166,6 @@ bool AniMmsPdu::QueryMmsPdu(AniMmsPduHelper &pduHelper)
             mmsPdu += static_cast<char>(pduChar);
         }
     }
-    TELEPHONY_LOGI("mmsPdu size:%{public}zu, urlData:%{public}s", mmsPdu.size(), urlData.c_str());
     SetMmsPdu(mmsPdu);
     return true;
 }

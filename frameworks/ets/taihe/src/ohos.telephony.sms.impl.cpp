@@ -81,6 +81,11 @@ static const int32_t MESSAGE_UNKNOWN_STATUS = -1;
 static const int32_t SMS_INVALID_SIM_ID = 0;
 constexpr size_t BUFF_LENGTH = 1001;
 static const int32_t MESSAGE_PARAMETER_NOT_MATCH = 0;
+static const int32_t TEXT_MESSAGE_PARAMETER_MATCH = 1;
+static const int32_t RAW_DATA_MESSAGE_PARAMETER_MATCH = 2;
+static constexpr int32_t INVALID_PORT = -1;
+static constexpr int32_t MIN_PORT = 0;
+static constexpr int32_t MAX_PORT = 0xffff;
 
 enum DispositionValue : int32_t {
     FROM_DATA = 0,
@@ -113,8 +118,8 @@ struct SendMessageContext : BaseContext {
     std::u16string serviceCenter = u"";
     std::u16string textContent = u"";
     std::vector<uint8_t> rawDataContent;
-    ani_object sendCallbackRef = nullptr;
-    ani_object deliveryCallbackRef = nullptr;
+    uintptr_t sendCallbackFunc = 0;
+    uintptr_t deliveryCallbackFunc = 0;
     int32_t messageType = MESSAGE_PARAMETER_NOT_MATCH;
     uint16_t destinationPort = 0;
 };
@@ -124,9 +129,10 @@ static void ConvertErrorForBusinessError(int32_t errorCode)
     if (errorCode == TELEPHONY_ERR_PERMISSION_ERR) {
         set_business_error(JS_ERROR_TELEPHONY_PERMISSION_DENIED,
             "BusinessError 201:Permission denied");
+    } else {
+        OHOS::Telephony::JsError error = NapiUtil::ConverErrorMessageForJs(errorCode);
+        set_business_error(error.errorCode, error.errorMessage);
     }
-    OHOS::Telephony::JsError error = NapiUtil::ConverErrorMessageForJs(errorCode);
-    set_business_error(error.errorCode, error.errorMessage);
 }
 
 static bool IsValidSlotId(int32_t slotId)
@@ -134,17 +140,18 @@ static bool IsValidSlotId(int32_t slotId)
     return ((slotId >= DEFAULT_SIM_SLOT_ID) && (slotId < SIM_SLOT_COUNT));
 }
 
-static ::taihe::array<uint8_t> VectorToArray(std::vector<unsigned char> vec)
+static ::taihe::array<int32_t> VectorToArray(std::vector<unsigned char> vec)
 {
-    return ::taihe::array<uint8_t>(taihe::copy_data_t{}, vec.data(), vec.size());
+    return ::taihe::array<int32_t>(taihe::copy_data_t{}, vec.data(), vec.size());
 }
 
-std::unique_ptr<char[]> ArrayToUniquePtr(const ::taihe::array<uint8_t> &arr)
+std::unique_ptr<char[]> ArrayToUniquePtr(const ::taihe::array<int32_t> &arr)
 {
-    const uint8_t *data = arr.data();
     size_t size = arr.size();
     auto ptr = std::make_unique<char[]>(size);
-    std::copy(data, data + size, ptr.get());
+    for (size_t i = 0; i <  size; i++) {
+        ptr[i] = static_cast<char>(arr[i]);
+    }
     return ptr;
 }
 
@@ -213,7 +220,7 @@ static void GetAttachmentByDecodeMms(MmsMsg &mmsMsg,
         std::unique_ptr<char[]> buffer = nullptr;
         uint32_t nLen = 0;
         buffer = it.GetDataBuffer(nLen);
-        ::taihe::array<uint8_t> inBuff(taihe::copy_data_t{}, buffer.get(), nLen);
+        ::taihe::array<int32_t> inBuff(taihe::copy_data_t{}, buffer.get(), nLen);
         ohos::telephony::sms::MmsAttachment mmsAttachment = { it.GetContentId(),
             it.GetContentLocation(),
             ::ohos::telephony::sms::DispositionType::from_value(FormatDispositionValue(it.GetContentDisposition())),
@@ -221,7 +228,7 @@ static void GetAttachmentByDecodeMms(MmsMsg &mmsMsg,
             it.GetContentType(),
             it.IsSmilFile(),
             ::taihe::optional<::taihe::string>(std::in_place, it.GetAttachmentFilePath().c_str()),
-            ::taihe::optional<::taihe::array<uint8_t>>(std::in_place, inBuff),
+            ::taihe::optional<::taihe::array<int32_t>>(std::in_place, inBuff),
             ::taihe::optional<::taihe::string>(std::in_place, it.GetFileName()),
             ::taihe::optional<::ohos::telephony::sms::MmsCharSets>(std::in_place,
             ::ohos::telephony::sms::MmsCharSets::from_value(it.GetCharSet())) };
@@ -326,8 +333,10 @@ static void GetMmsSendConf(MmsMsg mmsMsg, ohos::telephony::sms::MmsInformation &
     ::ohos::telephony::sms::MmsSendConf mmsTypeSendConf = { mmsMsg.GetHeaderOctetValue(
         MmsFieldCode::MMS_RESPONSE_STATUS),
         mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_TRANSACTION_ID),
-        ::ohos::telephony::sms::MmsVersionType::from_value(mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_MMS_VERSION)),
-        ::taihe::optional<::taihe::string>(std::in_place, mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_MESSAGE_ID)) };
+        ::ohos::telephony::sms::MmsVersionType::from_value(
+            mmsMsg.GetHeaderIntegerValue(MmsFieldCode::MMS_MMS_VERSION)),
+        ::taihe::optional<::taihe::string>(std::in_place,
+            mmsMsg.GetHeaderStringValue(MmsFieldCode::MMS_MESSAGE_ID)) };
 
     mmsInfo.mmsType = ohos::telephony::sms::MmsType::make_mmsTypeSendConf(mmsTypeSendConf);
 }
@@ -593,14 +602,12 @@ static void GetMmsValueByMessageType(const ::ohos::telephony::sms::MessageType m
     MmsMsg mmsMsg;
     bool mmsResult = false;
     const ::taihe::string *pstrMmsPath = mmsFilePathName.get_pathNameString_ptr();
-    const ::taihe::array<uint8_t> *parrayMmsPath = mmsFilePathName.get_pathNameArray_ptr();
+    const ::taihe::array<int32_t> *parrayMmsPath = mmsFilePathName.get_pathNameArray_ptr();
     if (pstrMmsPath != nullptr && !pstrMmsPath->empty()) {
         mmsResult = mmsMsg.DecodeMsg(mmsFilePathName.get_pathNameString_ref().c_str());
     } else if (parrayMmsPath != nullptr && !parrayMmsPath->empty()) {
-        auto unique_ptr = std::make_unique<char[]>(mmsFilePathName.get_pathNameArray_ref().size());
-        std::copy(mmsFilePathName.get_pathNameArray_ref().begin(), mmsFilePathName.get_pathNameArray_ref().end(),
-            unique_ptr.get());
-        mmsResult = mmsMsg.DecodeMsg(std::move(unique_ptr), mmsFilePathName.get_pathNameArray_ref().size());
+        auto unique_ptr = ArrayToUniquePtr(mmsFilePathName.get_pathNameArray_ref());
+        mmsResult = mmsMsg.DecodeMsg(std::move(unique_ptr), parrayMmsPath->size());
     }
     if (!mmsResult) {
         ConvertErrorForBusinessError(TELEPHONY_ERR_FAIL);
@@ -811,7 +818,8 @@ static void SetRetrieveConfToCore(MmsMsg &mmsMsg, ::ohos::telephony::sms::MmsInf
     mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_RETRIEVE_STATUS, context.retrieveStatus.value());
     if (!context.retrieveText->empty()) {
         std::string retrieveText(context.retrieveText->c_str());
-        mmsMsg.SetHeaderEncodedStringValue(MmsFieldCode::MMS_RETRIEVE_TEXT, retrieveText, (uint32_t)MmsCharSets::UTF_8);
+        mmsMsg.SetHeaderEncodedStringValue(MmsFieldCode::MMS_RETRIEVE_TEXT, retrieveText,
+            (uint32_t)MmsCharSets::UTF_8);
     }
     mmsMsg.SetHeaderContentType(context.contentType.c_str());
 }
@@ -987,9 +995,9 @@ static void AttachmentArrayToVector(const ::taihe::array<::ohos::telephony::sms:
     }
 }
 
-::taihe::array<uint8_t> EncodeMmsSync(::ohos::telephony::sms::MmsInformation const & mms)
+::taihe::array<int32_t> EncodeMmsSync(::ohos::telephony::sms::MmsInformation const & mms)
 {
-    ::taihe::array<uint8_t> arrayEncodeResult = {};
+    ::taihe::array<int32_t> arrayEncodeResult = {};
     if (!TelephonyPermission::CheckCallerIsSystemApp()) {
         ConvertErrorForBusinessError(TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API);
         return arrayEncodeResult;
@@ -1012,7 +1020,7 @@ static void AttachmentArrayToVector(const ::taihe::array<::ohos::telephony::sms:
         ConvertErrorForBusinessError(TELEPHONY_ERR_FAIL);
         return arrayEncodeResult;
     }
-    return ::taihe::array<uint8_t>(taihe::copy_data_t{}, encodeResult.get(), outLen);
+    return ::taihe::array<int32_t>(taihe::copy_data_t{}, encodeResult.get(), outLen);
 }
 
 ::taihe::string GetSmscAddrSync(int32_t slotId)
@@ -1033,7 +1041,8 @@ void AddSimMessageSync(::ohos::telephony::sms::SimMessageOptions const & options
 {
     int32_t wrapStatus = static_cast<int32_t>(options.status);
     if (wrapStatus != MESSAGE_UNKNOWN_STATUS) {
-        ISmsServiceInterface::SimMessageStatus status = static_cast<ISmsServiceInterface::SimMessageStatus>(wrapStatus);
+        ISmsServiceInterface::SimMessageStatus status =
+            static_cast<ISmsServiceInterface::SimMessageStatus>(wrapStatus);
         std::u16string strSmsc(NapiUtil::ToUtf16(options.smsc.c_str()));
         std::u16string strPdu(NapiUtil::ToUtf16(options.pdu.c_str()));
         int32_t errorCode =
@@ -1061,11 +1070,11 @@ void DelSimMessageSync(int32_t slotId, int32_t msgIndex)
 ::taihe::array<::ohos::telephony::sms::SimShortMessage> GetAllSimMessagesSync(int32_t slotId)
 {
     ohos::telephony::sms::ShortMessageClass enuSmc(ohos::telephony::sms::ShortMessageClass::key_t::UNKNOWN);
-    ohos::telephony::sms::ShortMessage stuSm =
-        ohos::telephony::sms::ShortMessage{ "", "", enuSmc, -1, "", -1, false, false, {}, -1, false };
+    ohos::telephony::sms::ShortMessage stuSm = {
+        "", "", enuSmc, -1, "", -1, false, false, {}, -1, false };
     ohos::telephony::sms::SimMessageStatus enuSMS(
         ohos::telephony::sms::SimMessageStatus::key_t::SIM_MESSAGE_STATUS_FREE);
-    ohos::telephony::sms::SimShortMessage stuSSM = ohos::telephony::sms::SimShortMessage{ stuSm, enuSMS, -1 };
+    ohos::telephony::sms::SimShortMessage stuSSM = { stuSm, enuSMS, -1 };
     taihe::array<ohos::telephony::sms::SimShortMessage> megArr = {};
     if (!IsValidSlotId(slotId)) {
         ConvertErrorForBusinessError(ERROR_SLOT_ID_INVALID);
@@ -1086,9 +1095,7 @@ void DelSimMessageSync(int32_t slotId, int32_t msgIndex)
             stuSm.pdu = VectorToArray(message.pdu_);
             stuSm.status = message.status_;
             stuSm.isSmsStatusReportMessage = message.isSmsStatusReportMessage_;
-
             enuSMS.from_value(static_cast<int32_t>(message.simMessageStatus_));
-
             stuSSM.shortMessage = stuSm;
             stuSSM.simMessageStatus.from_value(enuSMS);
             stuSSM.indexOnSim = message.indexOnSim_;
@@ -1124,20 +1131,23 @@ void SetCBConfigSync(::ohos::telephony::sms::CBConfigOptions const & options)
     return result;
 }
 
-::ohos::telephony::sms::ShortMessage CreateMessageSync(::taihe::array_view<uint8_t> pdu,
+::ohos::telephony::sms::ShortMessage CreateMessageSync(::taihe::array_view<int32_t> pdu,
     ::taihe::string_view specification)
 {
     ohos::telephony::sms::ShortMessageClass shortMessageClass(ohos::telephony::sms::ShortMessageClass::key_t::UNKNOWN);
-    ohos::telephony::sms::ShortMessage shortMessage =
-        ohos::telephony::sms::ShortMessage{ "", "", shortMessageClass, -1, "", -1, false, false, {}, -1, false };
+    ohos::telephony::sms::ShortMessage shortMessage = {
+        "", "", shortMessageClass, -1, "", -1, false, false, {}, -1, false };
     if (specification.empty() || pdu.empty()) {
         ConvertErrorForBusinessError(TELEPHONY_ERR_ARGUMENT_INVALID);
         return shortMessage;
     }
+    std::vector<unsigned char> strPdu;
+    for (auto ch: pdu) {
+        strPdu.push_back(static_cast<unsigned char>(ch));
+    }
     std::u16string specification16(NapiUtil::ToUtf16(specification.c_str()));
-    std::vector<unsigned char> strpdu(pdu.begin(), pdu.end());
     auto shortMessageObj = new ShortMessage();
-    int32_t errorCode = ShortMessage::CreateMessage(strpdu, specification16, *shortMessageObj);
+    int32_t errorCode = ShortMessage::CreateMessage(strPdu, specification16, *shortMessageObj);
     if (errorCode == TELEPHONY_ERR_SUCCESS) {
         shortMessage.visibleMessageBody =
             taihe::string(NapiUtil::ToUtf8(shortMessageObj->visibleMessageBody_).c_str());
@@ -1183,6 +1193,169 @@ void SetSmscAddrSync(int32_t slotId, ::taihe::string_view smscAddr)
         ConvertErrorForBusinessError(errorCode);
     }
 }
+
+static int32_t MatchSendShortMessageParameters(::ohos::telephony::sms::SendMessageOptions const & param)
+{
+    bool contentIsStr = param.content.get_tag() == ::ohos::telephony::sms::ContentOption::tag_t::shortMessage;
+    bool contentIsArray = param.content.get_tag() == ::ohos::telephony::sms::ContentOption::tag_t::dataMessage;
+    bool serviceCenterTypeMatch = param.serviceCenter.has_value();
+    bool sendCallbackTypeMatch = param.sendCallback.has_value();
+    bool deliveryCallbackTypeMatch = param.deliveryCallback.has_value();
+    bool destindationPortMatch = param.destinationPort.has_value();
+    if (contentIsStr && serviceCenterTypeMatch && sendCallbackTypeMatch && deliveryCallbackTypeMatch) {
+        return TEXT_MESSAGE_PARAMETER_MATCH;
+    } else if (contentIsArray && serviceCenterTypeMatch && sendCallbackTypeMatch && deliveryCallbackTypeMatch &&
+        destindationPortMatch) {
+        return RAW_DATA_MESSAGE_PARAMETER_MATCH;
+    }
+    return MESSAGE_PARAMETER_NOT_MATCH;
+}
+
+static void ParseMessageParameter(int32_t messageMatchResult, ::ohos::telephony::sms::SendMessageOptions const & param,
+    std::shared_ptr<SendMessageContext> context)
+{
+    if (context == nullptr) {
+        return;
+    }
+
+    context->slotId = param.slotId;
+    context->destinationHost = NapiUtil::ToUtf16(std::string(param.destinationHost));
+    if (param.serviceCenter.has_value()) {
+        context->serviceCenter = NapiUtil::ToUtf16(std::string(param.serviceCenter.value()));
+    }
+    if (param.sendCallback.has_value()) {
+        context->sendCallbackFunc = param.sendCallback.value();
+    }
+    if (param.deliveryCallback.has_value()) {
+        context->deliveryCallbackFunc = param.deliveryCallback.value();
+    }
+    context->messageType = messageMatchResult;
+    if (messageMatchResult == TEXT_MESSAGE_PARAMETER_MATCH) {
+        ::taihe::string const & contentStr = param.content.get_shortMessage_ref();
+        context->textContent = NapiUtil::ToUtf16(std::string(contentStr));
+    } else if (messageMatchResult == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
+        int32_t destinationPort = INVALID_PORT;
+        if (param.destinationPort.has_value()) {
+            destinationPort = param.destinationPort.value();
+        }
+        context->destinationPort = static_cast<uint16_t>(destinationPort);
+        for (auto const & element : param.content.get_dataMessage_ref()) {
+            context->rawDataContent.push_back((uint8_t)element);
+        }
+    }
+}
+
+static int32_t ActuallySendTextMessage(std::shared_ptr<SendMessageContext> parameter,
+    std::unique_ptr<AniSendCallback> sendCallback, std::unique_ptr<AniDeliveryCallback> deliveryCallback)
+{
+    if (!IsValidSlotId(parameter->slotId)) {
+        auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
+        sendCallback->OnSmsSendResult(result);
+        if (deliveryCallback != nullptr) {
+            deliveryCallback->OnSmsDeliveryResult(u"");
+        }
+        return TELEPHONY_ERR_SLOTID_INVALID;
+    }
+
+    return Singleton<SmsServiceManagerClient>::GetInstance().SendMessage(parameter->slotId, parameter->destinationHost,
+        parameter->serviceCenter, parameter->textContent, sendCallback.release(), deliveryCallback.release());
+}
+
+static int32_t ActuallySendTextMessageWithoutSave(std::shared_ptr<SendMessageContext> parameter,
+    std::unique_ptr<AniSendCallback> sendCallback, std::unique_ptr<AniDeliveryCallback> deliveryCallback)
+{
+    if (!IsValidSlotId(parameter->slotId)) {
+        auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
+        sendCallback->OnSmsSendResult(result);
+        if (deliveryCallback != nullptr) {
+            deliveryCallback->OnSmsDeliveryResult(u"");
+        }
+        return TELEPHONY_ERR_SLOTID_INVALID;
+    }
+
+    return Singleton<SmsServiceManagerClient>::GetInstance().SendMessageWithoutSave(parameter->slotId,
+        parameter->destinationHost, parameter->serviceCenter, parameter->textContent, sendCallback.release(),
+        deliveryCallback.release());
+}
+
+static int32_t ActuallySendDataMessage(std::shared_ptr<SendMessageContext> parameter,
+    std::unique_ptr<AniSendCallback> sendCallback, std::unique_ptr<AniDeliveryCallback> deliveryCallback)
+{
+    if (!IsValidSlotId(parameter->slotId) ||
+        !(parameter->destinationPort >= MIN_PORT && parameter->destinationPort <= MAX_PORT)) {
+        auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
+        sendCallback->OnSmsSendResult(result);
+        if (deliveryCallback != nullptr) {
+            deliveryCallback->OnSmsDeliveryResult(u"");
+        }
+        return TELEPHONY_ERR_SLOTID_INVALID;
+    }
+
+    if (parameter->rawDataContent.size() > 0) {
+        uint16_t arrayLength = static_cast<uint16_t>(parameter->rawDataContent.size());
+        return Singleton<SmsServiceManagerClient>::GetInstance().SendMessage(parameter->slotId,
+            parameter->destinationHost, parameter->serviceCenter, parameter->destinationPort,
+            &parameter->rawDataContent[0], arrayLength, sendCallback.release(), deliveryCallback.release());
+    }
+    return TELEPHONY_ERR_ARGUMENT_INVALID;
+}
+
+static int32_t ActuallySendMessage(std::shared_ptr<SendMessageContext> parameter)
+{
+    std::unique_ptr<AniSendCallback> sendCallback = std::make_unique<AniSendCallback>();
+    if (sendCallback == nullptr) {
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    if (!sendCallback->Init(parameter->sendCallbackFunc)) {
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+
+    bool hasDeliveryCallback = parameter->deliveryCallbackFunc != 0;
+    std::unique_ptr<AniDeliveryCallback> deliveryCallback = std::make_unique<AniDeliveryCallback>();
+    if (deliveryCallback == nullptr) {
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    if (!deliveryCallback->Init(parameter->deliveryCallbackFunc)) {
+        return TELEPHONY_ERR_ARGUMENT_INVALID;
+    }
+
+    if (parameter->messageType == TEXT_MESSAGE_PARAMETER_MATCH) {
+        if (hasDeliveryCallback) {
+            return ActuallySendTextMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
+        }
+        return ActuallySendTextMessage(parameter, std::move(sendCallback), nullptr);
+    } else if (parameter->messageType == TEXT_MESSAGE_PARAMETER_MATCH) {
+        if (hasDeliveryCallback) {
+            return ActuallySendTextMessageWithoutSave(parameter, std::move(sendCallback), std::move(deliveryCallback));
+        }
+        return ActuallySendTextMessageWithoutSave(parameter, std::move(sendCallback), nullptr);
+    } else if (parameter->messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
+        if (hasDeliveryCallback) {
+            return ActuallySendDataMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
+        }
+        return ActuallySendDataMessage(parameter, std::move(sendCallback), nullptr);
+    }
+    return TELEPHONY_ERR_ARGUMENT_INVALID;
+}
+
+void SendShortMessageSync(::ohos::telephony::sms::SendMessageOptions const & options)
+{
+    int32_t messageMatchResult = MatchSendShortMessageParameters(options);
+    if (messageMatchResult == MESSAGE_PARAMETER_NOT_MATCH) {
+        ConvertErrorForBusinessError(TELEPHONY_ERR_ARGUMENT_INVALID);
+        return;
+    }
+    auto context = std::make_shared<SendMessageContext>();
+    if (context == nullptr) {
+        ConvertErrorForBusinessError(TELEPHONY_ERR_LOCAL_PTR_NULL);
+        return;
+    }
+    ParseMessageParameter(messageMatchResult, options, context);
+    int32_t errorCode = ActuallySendMessage(context);
+    if (errorCode != TELEPHONY_ERR_SUCCESS) {
+        ConvertErrorForBusinessError(errorCode);
+    }
+}
 } // namespace
 
 // Since these macros are auto-generate, lint will cause false positive.
@@ -1206,4 +1379,5 @@ TH_EXPORT_CPP_API_SplitMessageSync(SplitMessageSync);
 TH_EXPORT_CPP_API_CreateMessageSync(CreateMessageSync);
 TH_EXPORT_CPP_API_SetDefaultSmsSlotIdSync(SetDefaultSmsSlotIdSync);
 TH_EXPORT_CPP_API_SetSmscAddrSync(SetSmscAddrSync);
+TH_EXPORT_CPP_API_SendShortMessageSync(SendShortMessageSync);
 // NOLINTEND

@@ -50,6 +50,7 @@ taihe_shared_library("telephony_sms_taihe_native") {                #调用taihe
     "src/ani_send_recv_mms.cpp",
     "src/ani_send_callback.cpp",
     "src/ani_delivery_callback.cpp",
+    "src/ani_callback_common.cpp",
   ]
   deps = [
     ":run_taihe",
@@ -77,6 +78,11 @@ taihe_shared_library("telephony_sms_taihe_native") {                #调用taihe
     "runtime_core:ani_helpers",
   ]
 
+  defines = [
+    "TELEPHONY_LOG_TAG = \"SmsMmsEtsApi\"",
+    "LOG_DOMAIN = 0xD001F06",
+  ]
+  
   sanitize = {
     cfi = false             # napi target, not required to enable cfi
     cfi_cross_dso = false
