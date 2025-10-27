@@ -16,28 +16,24 @@
 #ifndef ANI_DELIVERY_CALL_BACK_H
 #define ANI_DELIVERY_CALL_BACK_H
 
-#include "ani.h"
 #include "delivery_short_message_callback_stub.h"
+#include "ani_callback_common.h"
 
 namespace OHOS {
 namespace Telephony {
-struct DeliveryCallbackContext {
-    ani_env *env = nullptr;
-    ani_ref callbackRef = nullptr;
-    std::string pduStr = "";
-};
+
 class AniDeliveryCallback : public DeliveryShortMessageCallbackStub {
 public:
-    AniDeliveryCallback(bool hasCallback, ani_env *env, ani_ref callbackRef);
-    ~AniDeliveryCallback();
+    AniDeliveryCallback() = default;
+    ~AniDeliveryCallback() = default;
+
     void OnSmsDeliveryResult(const std::u16string &pdu) override;
+    bool Init(uintptr_t callbackFunc);
 
 private:
-    bool hasCallback_;
-    ani_env *env_;
-    ani_ref callbackRef_;
+    std::shared_ptr<AniCallbackInfo> cb_ = nullptr;
+    void CompleteSmsDeliveryWork(const std::u16string &pdu);
 };
 } // namespace Telephony
 } // namespace OHOS
-
 #endif // ANI_DELIVERY_CALL_BACK_H

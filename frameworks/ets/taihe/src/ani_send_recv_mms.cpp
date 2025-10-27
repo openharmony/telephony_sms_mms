@@ -61,7 +61,6 @@ static std::shared_ptr<OHOS::DataShare::DataShareHelper> CreateDataShareHelper(a
 {
     auto env = ::taihe::get_env();
     if (env == nullptr) {
-        TELEPHONY_LOGE("Failed to get env.");
         return nullptr;
     }
 
@@ -69,7 +68,6 @@ static std::shared_ptr<OHOS::DataShare::DataShareHelper> CreateDataShareHelper(a
     if (GetContextMode(env, context) == ContextMode::STAGE) {
         auto stageContext = OHOS::AbilityRuntime::GetStageModeContext(env, context);
         if (stageContext == nullptr) {
-            TELEPHONY_LOGE("Failed to get native stage context instance");
             return nullptr;
         }
         dataShareHelper = DataShare::DataShareHelper::Creator(stageContext->GetToken(), SMS_PROFILE_URI);
@@ -81,13 +79,11 @@ static bool GetMmsPduFromFile(const std::string &fileName, std::string &mmsPdu)
 {
     char realPath[PATH_MAX] = {0};
     if (fileName.empty() || realpath(fileName.c_str(), realPath) == nullptr) {
-        TELEPHONY_LOGE("path or realPath is nullptr");
         return false;
     }
 
     FILE *pFile = fopen(realPath, "rb");
     if (pFile == nullptr) {
-        TELEPHONY_LOGE("openFile Error");
         return false;
     }
 
@@ -95,14 +91,12 @@ static bool GetMmsPduFromFile(const std::string &fileName, std::string &mmsPdu)
     long fileLen = ftell(pFile);
     if (fileLen <= 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
         (void)fclose(pFile);
-        TELEPHONY_LOGE("fileLen Over Max Error");
         return false;
     }
 
     std::unique_ptr<char[]> pduBuffer = std::make_unique<char[]>(fileLen);
     if (!pduBuffer) {
         (void)fclose(pFile);
-        TELEPHONY_LOGE("make unique pduBuffer nullptr Error");
         return false;
     }
     (void)fseek(pFile, 0, SEEK_SET);
@@ -122,13 +116,11 @@ static void StoreSendMmsPduToDataBase(AniMmsPduHelper &helper) __attribute__((no
 {
     std::shared_ptr<AniMmsPdu> mmsPduObj = std::make_shared<AniMmsPdu>();
     if (mmsPduObj == nullptr) {
-        TELEPHONY_LOGE("mmsPduObj nullptr");
         helper.NotifyAll();
         return;
     }
     std::string mmsPdu;
     if (!GetMmsPduFromFile(helper.GetPduFileName(), mmsPdu)) {
-        TELEPHONY_LOGE("get mmsPdu fail");
         helper.NotifyAll();
         return;
     }

@@ -16,28 +16,23 @@
 #ifndef ANI_SEND_CALL_BACK_H
 #define ANI_SEND_CALL_BACK_H
 
-#include "ani.h"
-#include "ani_sms.h"
 #include "send_short_message_callback_stub.h"
+#include "ani_callback_common.h"
 
 namespace OHOS {
 namespace Telephony {
-struct SendCallbackContext {
-    ani_env *env = nullptr;
-    ani_ref callbackRef = nullptr;
-    SendSmsResult result = SendSmsResult::SEND_SMS_FAILURE_UNKNOWN;
-};
+
 class AniSendCallback : public SendShortMessageCallbackStub {
 public:
-    AniSendCallback(bool hasCallback, ani_env *env, ani_ref callbackRef);
-    ~AniSendCallback();
+    AniSendCallback() = default;
+    ~AniSendCallback() = default;
+
     void OnSmsSendResult(const ISendShortMessageCallback::SmsSendResult result) override;
+    bool Init(uintptr_t callbackFunc);
 
 private:
-    bool hasCallback_;
-    ani_env *env_;
-    ani_ref callbackRef_;
-    SendSmsResult WrapSmsSendResult(const ISendShortMessageCallback::SmsSendResult result);
+    std::shared_ptr<AniCallbackInfo> cb_ = nullptr;
+    void CompleteSmsSendWork(const ISendShortMessageCallback::SmsSendResult result);
 };
 } // namespace Telephony
 } // namespace OHOS
