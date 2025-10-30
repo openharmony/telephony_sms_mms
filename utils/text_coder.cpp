@@ -193,8 +193,7 @@ bool TextCoder::GetEncodeString(
     size_t err = iconv(cd, &inBuf, &inLen, &outBuf, &outBufSize);
     iconv_close(cd);
     if (static_cast<int>(err) == -1) {
-        TELEPHONY_LOGE("iconv conversion failed");
-        return false;
+        TELEPHONY_LOGW("iconv conversion failed, but continue conv");
     }
     encodeString = std::string(outBufPtr.get(), outBuf - outBufPtr.get());
     return true;
@@ -420,8 +419,7 @@ int TextCoder::Ucs2ToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int 
         reinterpret_cast<size_t *>(&remainedLength));
     iconv_close(cd);
     if (static_cast<int>(err) == -1) {
-        TELEPHONY_LOGE("Ucs2ToUtf8-iconv result is err");
-        return 0;
+        TELEPHONY_LOGW("Ucs2ToUtf8-iconv result is err, but continue conv");
     }
     int length = maxLength - static_cast<int>(remainedLength);
     if (length < 0 || length >= maxLength) {
@@ -452,8 +450,7 @@ int TextCoder::EuckrToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, int
         reinterpret_cast<size_t *>(&textLen), reinterpret_cast<char **>(&dest),
         reinterpret_cast<size_t *>(&remainedLength));
     if (static_cast<int>(err) == -1) {
-        TELEPHONY_LOGE("EuckrToUtf8 iconv result is err");
-        return 0;
+        TELEPHONY_LOGW("EuckrToUtf8 iconv result is err, but continue conv");
     }
     int utf8Length = maxLength - static_cast<int>(remainedLength);
     if (utf8Length < 0 || utf8Length >= maxLength) {
@@ -486,8 +483,7 @@ int TextCoder::ShiftjisToUtf8(uint8_t *dest, int maxLength, const uint8_t *src, 
         reinterpret_cast<size_t *>(&remainedLength));
     iconv_close(cd);
     if (static_cast<int>(err) == -1) {
-        TELEPHONY_LOGE("ShiftjisToUtf8 iconv result is err");
-        return 0;
+        TELEPHONY_LOGW("ShiftjisToUtf8 iconv result is err, but continue conv");
     }
     int utf8Length = maxLength - static_cast<int>(remainedLength);
     if (utf8Length < 0 || utf8Length >= maxLength) {
