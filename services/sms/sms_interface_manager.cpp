@@ -46,6 +46,7 @@ void SmsInterfaceManager::InitInterfaceManager()
     smsReceiveManager_->SetCdmaSender(smsSendManager_->GetCdmaSmsSender());
     smsMiscManager_ = make_shared<SmsMiscManager>(slotId_);
 
+    #ifdef SMS_SUPPORT_MMS
     mmsSendManager_ = make_unique<MmsSendManager>(slotId_);
     if (mmsSendManager_ == nullptr) {
         TELEPHONY_LOGE("failed to create MmsSendManager");
@@ -59,6 +60,7 @@ void SmsInterfaceManager::InitInterfaceManager()
         return;
     }
     mmsReceiverManager_->Init();
+    #endif
 
     TELEPHONY_LOGI("SmsInterfaceManager::InitInterfaceManager success, %{public}d", slotId_);
 }
@@ -266,21 +268,31 @@ bool SmsInterfaceManager::HasSmsCapability()
 int32_t SmsInterfaceManager::SendMms(
     const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof)
 {
+    #ifdef SMS_SUPPORT_MMS
     if (mmsSendManager_ == nullptr) {
         TELEPHONY_LOGE("mmsSendManager_ nullptr error");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     return mmsSendManager_->SendMms(mmsc, data, ua, uaprof);
+    #else
+    TELEPHONY_LOGE("sms not support mms");
+    return TELEPHONY_ERR_FAIL;
+    #endif
 }
 
 int32_t SmsInterfaceManager::DownloadMms(
     const std::u16string &mmsc, std::u16string &data, const std::u16string &ua, const std::u16string &uaprof)
 {
+    #ifdef SMS_SUPPORT_MMS
     if (mmsReceiverManager_ == nullptr) {
         TELEPHONY_LOGE("mmsReceiverManager_ nullptr error");
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     return mmsReceiverManager_->DownloadMms(mmsc, data, ua, uaprof);
+    #else
+    TELEPHONY_LOGE("sms not support mms");
+    return TELEPHONY_ERR_FAIL;
+    #endif
 }
 
 int32_t SmsInterfaceManager::OnRilAdapterHostDied()

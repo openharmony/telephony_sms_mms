@@ -23,9 +23,13 @@ config("tel_sms_mms_config") {
     "services/sms/include/cdma",
     "services/sms/include/gsm",
     "services/sms/include/satellite",
-    "services/mms/include",
     "services/telephony_ext_wrapper/include",
   ]
+  if (sms_mms_feature_support_mms) {
+    include_dirs += [
+      "services/mms/include",
+    ]
+  }
 }
 
 ohos_shared_library("tel_sms_mms") {
@@ -37,16 +41,6 @@ ohos_shared_library("tel_sms_mms") {
   branch_protector_ret = "pac_ret"
   sources = [
     "frameworks/native/sms/src/short_message.cpp",
-    "services/mms/data_request.cpp",
-    "services/mms/mms_apn_info.cpp",
-    "services/mms/mms_conn_callback_stub.cpp",
-    "services/mms/mms_network_client.cpp",
-    "services/mms/mms_network_manager.cpp",
-    "services/mms/mms_persist_helper.cpp",
-    "services/mms/mms_receive.cpp",
-    "services/mms/mms_receive_manager.cpp",
-    "services/mms/mms_send_manager.cpp",
-    "services/mms/mms_sender.cpp",
     "services/sms/cdma/cdma_sms_message.cpp",
     "services/sms/cdma/cdma_sms_parameter_record.cpp",
     "services/sms/cdma/cdma_sms_receive_handler.cpp",
@@ -163,6 +157,21 @@ ohos_shared_library("tel_sms_mms") {
   ]
 
   defines += global_defines
+    if (sms_mms_feature_support_mms) {
+    sources += [
+      "services/mms/data_request.cpp",
+      "services/mms/mms_apn_info.cpp",
+      "services/mms/mms_conn_callback_stub.cpp",
+      "services/mms/mms_network_client.cpp",
+      "services/mms/mms_network_manager.cpp",
+      "services/mms/mms_persist_helper.cpp",
+      "services/mms/mms_receive.cpp",
+      "services/mms/mms_receive_manager.cpp",
+      "services/mms/mms_send_manager.cpp",
+      "services/mms/mms_sender.cpp",
+    ]
+    defines += [ "SMS_SUPPORT_MMS" ]
+  }
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.powermgr_power_manager) &&

@@ -22,8 +22,10 @@
 #include <vector>
 
 #include "i_sms_service_interface.h"
+#ifdef SMS_SUPPORT_MMS
 #include "mms_receive_manager.h"
 #include "mms_send_manager.h"
+#endif
 #include "sms_misc_manager.h"
 #include "sms_persist_helper.h"
 #include "sms_receive_manager.h"
@@ -72,8 +74,10 @@ private:
     std::unique_ptr<SmsSendManager> smsSendManager_;
     std::unique_ptr<SmsReceiveManager> smsReceiveManager_;
     std::shared_ptr<SmsMiscManager> smsMiscManager_;
+    #ifdef SMS_SUPPORT_MMS
     std::unique_ptr<MmsSendManager> mmsSendManager_;
     std::unique_ptr<MmsReceiveManager> mmsReceiverManager_;
+    #endif
 };
 } // namespace Telephony
 } // namespace OHOS

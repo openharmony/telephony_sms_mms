@@ -24,7 +24,8 @@
         ],
         "features": [
             "sms_mms_dynamic_start",
-            "sms_mms_tel_power_mode"
+            "sms_mms_tel_power_mode",
+            "sms_mms_feature_support_mms"
         ],
         "adapted_system_type": [
             "standard"
