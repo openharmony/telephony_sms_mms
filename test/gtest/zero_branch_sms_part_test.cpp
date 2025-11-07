@@ -338,11 +338,12 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0002, Function | MediumTest | Le
     int32_t result = interfaceManager->HasSmsCapability();
     EXPECT_GE(result, 0);
 
-    #ifdef SMS_SUPPORT_MMS
     std::u16string mmsc = u"";
     std::u16string data = u"";
     std::u16string ua = u"";
     std::u16string uaprof = u"";
+    
+    #ifdef SMS_SUPPORT_MMS
     interfaceManager->SendMms(mmsc, data, ua, uaprof);
     result = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
     EXPECT_GE(result, 0);
@@ -373,7 +374,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0002, Function | MediumTest | Le
     interfaceManager->GetSmsSegmentsInfo(dataStr, false, outInfo);
     result = interfaceManager->IsImsSmsSupported(0, isSupported);
     EXPECT_GE(result, 0);
-    
+
     #ifdef SMS_SUPPORT_MMS
     interfaceManager->GetImsShortMessageFormat(format);
     interfaceManager->mmsSendManager_ = nullptr;
