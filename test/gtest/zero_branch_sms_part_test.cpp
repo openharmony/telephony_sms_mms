@@ -394,6 +394,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
 {
     int32_t slotId = 0;
     std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    #ifdef SMS_SUPPORT_MMS
     interfaceManager->mmsSendManager_ = nullptr;
     std::u16string mmsc(StringUtils::ToUtf16(VNET_MMSC));
     std::u16string data(StringUtils::ToUtf16(SEND_MMS_FILE_URL));
@@ -404,6 +405,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
     int32_t downloadMmsRet = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
     EXPECT_GE(sendMmsRet, 0);
     EXPECT_GE(downloadMmsRet, 0);
+    #endif
 
     if (interfaceManager->smsSendManager_ == nullptr) {
         interfaceManager->smsSendManager_ = std::make_unique<SmsSendManager>(0);
