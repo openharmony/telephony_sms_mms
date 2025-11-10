@@ -343,11 +343,11 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0002, Function | MediumTest | Le
     std::u16string ua = u"";
     std::u16string uaprof = u"";
     
-    #ifdef SMS_SUPPORT_MMS
+#ifdef SMS_SUPPORT_MMS
     interfaceManager->SendMms(mmsc, data, ua, uaprof);
     result = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
     EXPECT_GE(result, 0);
-    #endif
+#endif
 
     interfaceManager->smsMiscManager_ = nullptr;
     interfaceManager->AddSimMessage(dataStr, dataStr, ISmsServiceInterface::SIM_MESSAGE_STATUS_UNREAD);
@@ -375,14 +375,14 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0002, Function | MediumTest | Le
     result = interfaceManager->IsImsSmsSupported(0, isSupported);
     EXPECT_GE(result, 0);
 
-    #ifdef SMS_SUPPORT_MMS
+#ifdef SMS_SUPPORT_MMS
     interfaceManager->GetImsShortMessageFormat(format);
     interfaceManager->mmsSendManager_ = nullptr;
     interfaceManager->SendMms(mmsc, data, ua, uaprof);
     interfaceManager->mmsReceiverManager_ = nullptr;
     result = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
     EXPECT_GE(result, 0);
-    #endif
+#endif
 }
 
 /**
@@ -394,7 +394,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
 {
     int32_t slotId = 0;
     std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
-    #ifdef SMS_SUPPORT_MMS
+#ifdef SMS_SUPPORT_MMS
     interfaceManager->mmsSendManager_ = nullptr;
     std::u16string mmsc(StringUtils::ToUtf16(VNET_MMSC));
     std::u16string data(StringUtils::ToUtf16(SEND_MMS_FILE_URL));
@@ -405,7 +405,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
     int32_t downloadMmsRet = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
     EXPECT_GE(sendMmsRet, 0);
     EXPECT_GE(downloadMmsRet, 0);
-    #endif
+#endif
 
     if (interfaceManager->smsSendManager_ == nullptr) {
         interfaceManager->smsSendManager_ = std::make_unique<SmsSendManager>(0);
