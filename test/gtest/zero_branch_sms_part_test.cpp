@@ -347,6 +347,12 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0002, Function | MediumTest | Le
     interfaceManager->SendMms(mmsc, data, ua, uaprof);
     result = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
     EXPECT_GE(result, 0);
+    interfaceManager->GetImsShortMessageFormat(format);
+    interfaceManager->mmsSendManager_ = nullptr;
+    interfaceManager->SendMms(mmsc, data, ua, uaprof);
+    interfaceManager->mmsReceiverManager_ = nullptr;
+    result = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
+    EXPECT_GE(result, 0);
 #endif
 
     interfaceManager->smsMiscManager_ = nullptr;
@@ -374,15 +380,6 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0002, Function | MediumTest | Le
     interfaceManager->GetSmsSegmentsInfo(dataStr, false, outInfo);
     result = interfaceManager->IsImsSmsSupported(0, isSupported);
     EXPECT_GE(result, 0);
-
-#ifdef SMS_SUPPORT_MMS
-    interfaceManager->GetImsShortMessageFormat(format);
-    interfaceManager->mmsSendManager_ = nullptr;
-    interfaceManager->SendMms(mmsc, data, ua, uaprof);
-    interfaceManager->mmsReceiverManager_ = nullptr;
-    result = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
-    EXPECT_GE(result, 0);
-#endif
 }
 
 /**
