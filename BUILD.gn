@@ -157,7 +157,7 @@ ohos_shared_library("tel_sms_mms") {
   ]
 
   defines += global_defines
-    if (sms_mms_feature_support_mms) {
+  if (sms_mms_feature_support_mms) {
     sources += [
       "services/mms/data_request.cpp",
       "services/mms/mms_apn_info.cpp",
