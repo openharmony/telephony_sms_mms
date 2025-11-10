@@ -343,18 +343,6 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0002, Function | MediumTest | Le
     std::u16string ua = u"";
     std::u16string uaprof = u"";
     
-#ifdef SMS_SUPPORT_MMS
-    interfaceManager->SendMms(mmsc, data, ua, uaprof);
-    result = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
-    EXPECT_GE(result, 0);
-    interfaceManager->GetImsShortMessageFormat(format);
-    interfaceManager->mmsSendManager_ = nullptr;
-    interfaceManager->SendMms(mmsc, data, ua, uaprof);
-    interfaceManager->mmsReceiverManager_ = nullptr;
-    result = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
-    EXPECT_GE(result, 0);
-#endif
-
     interfaceManager->smsMiscManager_ = nullptr;
     interfaceManager->AddSimMessage(dataStr, dataStr, ISmsServiceInterface::SIM_MESSAGE_STATUS_UNREAD);
     interfaceManager->UpdateSimMessage(0, ISmsServiceInterface::SIM_MESSAGE_STATUS_UNREAD, dataStr, dataStr);
@@ -438,6 +426,33 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0003, Function | MediumTest | Le
     interfaceManager->SplitMessage(randomText, splitMessage);
     EXPECT_GE(splitMessage.size(), 1);
 }
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceManager_0004
+ * @tc.name     Test SmsInterfaceManager
+ * @tc.desc     Function test
+ */
+#ifdef SMS_SUPPORT_MMS
+HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0004, Function | MediumTest | Level1)
+{
+    std::u16string mmsc = u"";
+    std::u16string data = u"";
+    std::u16string ua = u"";
+    std::u16string uaprof = u"";
+    int32_t slotId = 0;
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+
+    interfaceManager->SendMms(mmsc, data, ua, uaprof);
+    result = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
+    EXPECT_GE(result, 0);
+    interfaceManager->GetImsShortMessageFormat(format);
+    interfaceManager->mmsSendManager_ = nullptr;
+    interfaceManager->SendMms(mmsc, data, ua, uaprof);
+    interfaceManager->mmsReceiverManager_ = nullptr;
+    result = interfaceManager->DownloadMms(mmsc, data, ua, uaprof);
+    EXPECT_GE(result, 0);
+}
+#endif
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsEmailMessage_0001
