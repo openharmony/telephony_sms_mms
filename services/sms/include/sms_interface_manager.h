@@ -74,10 +74,10 @@ private:
     std::unique_ptr<SmsSendManager> smsSendManager_;
     std::unique_ptr<SmsReceiveManager> smsReceiveManager_;
     std::shared_ptr<SmsMiscManager> smsMiscManager_;
-    #ifdef SMS_SUPPORT_MMS
+#ifdef SMS_SUPPORT_MMS
     std::unique_ptr<MmsSendManager> mmsSendManager_;
     std::unique_ptr<MmsReceiveManager> mmsReceiverManager_;
-    #endif
+#endif
 };
 } // namespace Telephony
 } // namespace OHOS
