@@ -557,41 +557,19 @@ declare namespace sms {
    * Turn on Cell BroadCast by list.
    *
    * @permission ohos.permission.RECEIVE_SMS
-   * @param { CBConfigListOptions } options - Indicates cell broadcast configuration list options.
-   * @param { AsyncCallback<void> } callback - The callback of setCBConfigList.
-   * @throws { BusinessError } 201 - Permission denied.
-   * @throws { BusinessError } 202 - Non-system applications use system APIs.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
-   * Incorrect parameter types.
-   * @throws { BusinessError } 8300001 - Invalid parameter value.
-   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
-   * @throws { BusinessError } 8300003 - System internal error.
-   * @throws { BusinessError } 8300999 - Unknown error code.
-   * @syscap SystemCapability.Telephony.SmsMms
-   * @systemapi Hide this for inner system use.
-   * @since 7
-   */
-  function setCBConfigList(options: CBConfigListOptions, callback: AsyncCallback<void>): void;
-
-  /**
-   * Turn on Cell BroadCast by list.
-   *
-   * @permission ohos.permission.RECEIVE_SMS
-   * @param { CBConfigListOptions } options - Indicates cell broadcast configuration list options.
+   * @param { CBConfigListConfigs } configs - Indicates cell broadcast configuration list configs.
    * @returns { Promise<void> } The promise returned by the setCBConfigList.
    * @throws { BusinessError } 201 - Permission denied.
    * @throws { BusinessError } 202 - Non-system applications use system APIs.
-   * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2.
-   * Incorrect parameter types.
-   * @throws { BusinessError } 8300001 - Invalid parameter value.
-   * @throws { BusinessError } 8300002 - Operation failed. Cannot connect to service.
-   * @throws { BusinessError } 8300003 - System internal error.
-   * @throws { BusinessError } 8300999 - Unknown error code.
+   * @throws { BusinessError } 8700001 - Invalid parameter value.
+   * @throws { BusinessError } 8700002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 8700003 - System internal error.
+   * @throws { BusinessError } 8700999 - Unknown error code.
    * @syscap SystemCapability.Telephony.SmsMms
    * @systemapi Hide this for inner system use.
-   * @since 7
+   * @since 22 dynamic&static
    */
-  function setCBConfigList(options: CBConfigListOptions): Promise<void>;
+  function setCBConfigList(configs: CBConfigListConfigs): Promise<void>;
 
   /**
    * Get an SMS segment encode relation information.
@@ -2354,41 +2332,41 @@ declare namespace sms {
   }
 
   /**
-   * Defines the cell broadcast configuration list options.
+   * Defines the cell broadcast configuration list configs.
    *
-   * @interface CBConfigListOptions
+   * @interface CBConfigListConfigs
    * @syscap SystemCapability.Telephony.SmsMms
    * @systemapi Hide this for inner system use.
-   * @since 7
+   * @since 22 dynamic&static
    */
-  export interface CBConfigListOptions {
+  export interface CBConfigListConfigs {
     /**
-     * Indicates the card slot ID for the cell broadcast configuration list options.
+     * Indicates the card slot ID for the cell broadcast configuration list configs.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
-     * @since 7
+     * @since 22 dynamic&static
      */
-    slotId: number;
+    slotId: int;
 
     /**
-     * Indicates the messageIDs for the cell broadcast configuration list options.
+     * Indicates the messageIDs for the cell broadcast configuration list configs.
      *
-     * @type { number[] }
+     * @type { int[] }
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
-     * @since 7
+     * @since 22 dynamic&static
      */
-    messageIds: number[];
+    messageIds: int[];
 
     /**
-     * Indicates the RAN type for the cell broadcast configuration list options.
+     * Indicates the RAN type for the cell broadcast configuration list configs.
      *
      * @type { RanType }
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
-     * @since 7
+     * @since 22 dynamic&static
      */
     ranType: RanType;
   }
@@ -2939,7 +2917,8 @@ declare namespace sms {
    * @enum { number }
    * @syscap SystemCapability.Telephony.SmsMms
    * @systemapi Hide this for inner system use.
-   * @since 7
+   * @since 7 dynamic
+   * @since 22 static
    */
   export enum RanType {
     /**
@@ -2947,7 +2926,8 @@ declare namespace sms {
      *
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
-     * @since 7
+     * @since 7 dynamic
+     * @since 22 static
      */
     TYPE_GSM = 1,
 
@@ -2956,7 +2936,8 @@ declare namespace sms {
      *
      * @syscap SystemCapability.Telephony.SmsMms
      * @systemapi Hide this for inner system use.
-     * @since 7
+     * @since 7 dynamic
+     * @since 22 static
      */
     TYPE_CDMA = 2,
   }
