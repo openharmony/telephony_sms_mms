@@ -22,3 +22,7 @@ global_defines = []
 if (sms_mms_tel_power_mode) {
   global_defines += [ "BASE_POWER_IMPROVEMENT_FEATURE" ]
 }
+
+if (sms_mms_feature_support_mms) {
+  global_defines += [ "SMS_SUPPORT_MMS" ]
+}  
