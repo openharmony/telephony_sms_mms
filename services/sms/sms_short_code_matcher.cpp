@@ -52,10 +52,6 @@ std::string SmsShortCodeMatcher::RemovePlusSign(const std::string &addr)
 
 bool SmsShortCodeMatcher::MatchesRegexList(const std::string &str, const std::vector<std::string> &regexList)
 {
-    if (str.empty() || regexList.empty()) {
-        TELEPHONY_LOGE("Invalid input string or regex list");
-        return false;
-    }
     for (const auto &regexStr : regexList) {
         std::regex pattern(regexStr);
         if (std::regex_match(str, pattern)) {
