@@ -28,9 +28,6 @@ namespace OHOS {
 namespace Telephony {
 using namespace testing::ext;
 
-extern const char *SMS_SHORT_CODE_RULES_JSON_PATH;
-extern std::unordered_map<std::string, ShortCodeRule> countryShortCodeRules;
-
 class BranchSmsPart1Test : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -134,7 +131,7 @@ HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0005, TestSize.Level0)
 HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0006, TestSize.Level0)
 {
     auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
-	const std::string countryCode = "ca";
+    const std::string countryCode = "ca";
     const std::string desAddr = "+1234567";
     SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
     EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_SHORT_CODE);
@@ -148,7 +145,7 @@ HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0006, TestSize.Level0)
 HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0007, TestSize.Level0)
 {
     auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
-	const std::string countryCode = "ca";
+    const std::string countryCode = "ca";
     const std::string desAddr = "244444";
     SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
     EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_STANDARD);
@@ -162,7 +159,7 @@ HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0007, TestSize.Level0)
 HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0008, TestSize.Level0)
 {
     auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
-	const std::string countryCode = "ca";
+    const std::string countryCode = "ca";
     const std::string desAddr = "+77777";
     SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
     EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM);
@@ -176,7 +173,7 @@ HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0008, TestSize.Level0)
 HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0009, TestSize.Level0)
 {
     auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
-	const std::string countryCode = "pl";
+    const std::string countryCode = "pl";
     const std::string desAddr = "7910";
     SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
     EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_PREMIUM);
