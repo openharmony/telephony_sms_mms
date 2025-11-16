@@ -52,7 +52,7 @@ std::string SmsShortCodeMatcher::RemovePlusSign(const std::string &addr)
 
 bool SmsShortCodeMatcher::MatchesRegexList(const std::string &str, const std::vector<std::string> &regexList)
 {
-    if (str.empty || regexList.empty) {
+    if (str.empty() || regexList.empty()) {
         TELEPHONY_LOGE("Invalid input string or regex list");
         return false;
     }
@@ -211,7 +211,7 @@ bool SmsShortCodeMatcher::GetCountryCodeFromNetwork(std::u16string &countryCode1
     int32_t primarySlotId = 0;
     CoreServiceClient::GetInstance().GetPrimarySlotId(primarySlotId);
     CoreServiceClient::GetInstance().GetIsoCountryCodeForNetwork(primarySlotId, countryCode16);
-    if (countryCode16.empty) {
+    if (countryCode16.empty()) {
         return false;
     }
     return true;
