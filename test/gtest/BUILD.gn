@@ -83,6 +83,7 @@ test_sources += [
     "zero_branch_cdma_sms_test.cpp",
     "zero_branch_mms_test.cpp",
     "zero_branch_sms_part_test.cpp",
+    "zero_branch_sms_part1_test.cpp",
     "zero_branch_sms_test.cpp",
     "zero_branch_utils_test.cpp",
     "mms_cdma_gtest.cpp",
