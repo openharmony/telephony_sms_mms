@@ -80,6 +80,7 @@ sms_mms_src = [
     "$SMS_MMS_SOURCE_DIR/services/sms/sms_send_manager.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/sms_sender.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/sms_service.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/sms_short_code_matcher.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/sms_state_handler.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/sms_state_observer.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/sms_wap_push_buffer.cpp",
