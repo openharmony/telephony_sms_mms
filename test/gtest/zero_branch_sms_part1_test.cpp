@@ -194,7 +194,7 @@ HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0010, TestSize.Level0)
 }
 
 /**
- * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_00011
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0011
  * @tc.name     Test SmsShortCodeMatcher
  * @tc.desc     Function test
  */
