@@ -49,7 +49,7 @@ struct ShortCodeRule {
 class SmsShortCodeMatcher {
 public:
     SmsShortCodeMatcher();
-    PremiumSmsType GetPremiumSmsType(const int32_t &slotId, const std::string &desAddr);
+    PremiumSmsType GetPremiumSmsType(const int32_t slotId, const std::string &desAddr);
 
 private:
     std::string RemovePlusSign(const std::string &addr);
@@ -57,11 +57,11 @@ private:
     bool MatchesRegexList(const std::string &str, const std::vector<std::string> &regexList);
     bool LoadShortCodeRulesFromJson(const std::string &jsonPath);
     SmsShortCodeType MatchShortCodeType(const std::string &countryCode, const std::string &desAddr);
-    void GetCountryCode(const int32_t &slotId, std::string &countryCode);
-    void GetCountryCodeFromNetwork(std::u16string &countryCode16);
+    bool GetCountryCode(const int32_t &slotId, std::string &countryCode);
+    bool GetCountryCodeFromNetwork(std::u16string &countryCode16);
     std::unordered_map<std::string, ShortCodeRule> countryShortCodeRules_;
     bool loadFileSuccess_ = false;
 };
 } // namespace Telephony
 } // namespace OHOS
-#endif
+#endif
