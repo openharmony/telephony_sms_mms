@@ -13,6 +13,7 @@
 import("//build/ohos.gni")
 
 SMS_MMS_SOURCE_DIR = "../"
+import("$SMS_MMS_SOURCE_DIR/smsmms.gni")
 
 sms_mms_src = [
     "$SMS_MMS_SOURCE_DIR/frameworks/native/sms/src/short_message.cpp",
@@ -58,10 +59,6 @@ sms_mms_src = [
     "$SMS_MMS_SOURCE_DIR/services/sms/ims_service_interaction/src/ims_sms_proxy.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/proxy/sms_delivery_short_message_proxy.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/proxy/sms_send_short_message_proxy.cpp",
-    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_callback.cpp",
-    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_callback_stub.cpp",
-    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_client.cpp",
-    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_proxy.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/sms_base_message.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/sms_broadcast_subscriber_receiver.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/sms_dump_helper.cpp",
@@ -120,6 +117,15 @@ sms_mms_src = [
     "$SMS_MMS_SOURCE_DIR/test/gtest/sms_send_callback_gtest.cpp",
 ]
 
+if (sms_mms_feature_support_satellite) {
+  sms_mms_src += [
+    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_callback.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_callback_stub.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_client.cpp",
+    "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_proxy.cpp",
+  ]
+}
+
 sms_mms_incluedirs = [
     "$SMS_MMS_SOURCE_DIR/:tel_sms_mms_config",
     "$SMS_MMS_SOURCE_DIR/interfaces/innerkits/",
@@ -141,6 +147,8 @@ sms_mms_defines = [
     "TELEPHONY_LOG_TAG = \"SmsMms\"",
     "LOG_DOMAIN = 0xD001F06",
 ]
+
+sms_mms_defines += [ "SMS_MMS_SUPPORT_SATELLITE" ]
 
 sms_mms_cflags = [
     "-fstack-protector-strong",

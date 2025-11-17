@@ -434,9 +434,13 @@ HWTEST_F(SmsGsmTest, GsmSmsSender_002, Function | MediumTest | Level1)
     GsmSimMessageParam smsData;
     std::shared_ptr<SmsSendIndexer> indexer = std::make_shared<SmsSendIndexer>("des", "src", "text", nullptr, nullptr);
     indexer->hasMore_ = true;
+#ifdef SMS_MMS_SUPPORT_SATELLITE
     smsSender->SendSatelliteSms(indexer, smsData);
+#endif
     indexer->csResendCount_ = 1;
+#ifdef SMS_MMS_SUPPORT_SATELLITE
     smsSender->SendSatelliteSms(indexer, smsData);
+#endif
     smsSender->ResendDataDelivery(indexer);
     EXPECT_NE(indexer, nullptr);
 }
