@@ -26,6 +26,7 @@
 #include "sms_service.h"
 
 using namespace OHOS::Telephony;
+using namespace OHOS::AppExecFwk;
 namespace OHOS {
 static bool g_isInited = false;
 constexpr int32_t SLOT_NUM = 2;
@@ -189,8 +190,10 @@ void SendSmsTest2(const uint8_t *data, size_t size)
     int32_t slotId = static_cast<int32_t>(size % SLOT_NUM);
     auto sender = std::make_shared<GsmSmsSender>(slotId, fun);
     sender->Init();
+#ifdef SMS_MMS_SUPPORT_SATELLITE
     sender->RegisterSatelliteCallback();
     sender->UnregisterSatelliteCallback();
+#endif // SMS_MMS_SUPPORT_SATELLITE
     std::string desAddr(reinterpret_cast<const char *>(data), size);
     std::string scAddr(reinterpret_cast<const char *>(data), size);
     std::string text(reinterpret_cast<const char *>(data), size);
@@ -206,7 +209,9 @@ void SendSmsTest2(const uint8_t *data, size_t size)
     std::shared_ptr<SmsSendIndexer> smsIndexer =
         std::make_shared<SmsSendIndexer>(desAddr, scAddr, text, sendCallback, deliveryCallback);
     sender->SendCsSms(smsIndexer, smsData);
+#ifdef SMS_MMS_SUPPORT_SATELLITE
     sender->SendSatelliteSms(smsIndexer, smsData);
+#endif // SMS_MMS_SUPPORT_SATELLITE
     sender->SendImsSms(smsIndexer, smsData);
     bool isSupported;
     sender->IsImsSmsSupported(slotId, isSupported);

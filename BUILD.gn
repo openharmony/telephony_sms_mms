@@ -73,10 +73,6 @@ ohos_shared_library("tel_sms_mms") {
     "services/sms/ims_service_interaction/src/ims_sms_proxy.cpp",
     "services/sms/proxy/sms_delivery_short_message_proxy.cpp",
     "services/sms/proxy/sms_send_short_message_proxy.cpp",
-    "services/sms/satellite_service_interaction/src/satellite_sms_callback.cpp",
-    "services/sms/satellite_service_interaction/src/satellite_sms_callback_stub.cpp",
-    "services/sms/satellite_service_interaction/src/satellite_sms_client.cpp",
-    "services/sms/satellite_service_interaction/src/satellite_sms_proxy.cpp",
     "services/sms/sms_base_message.cpp",
     "services/sms/sms_broadcast_subscriber_receiver.cpp",
     "services/sms/sms_dump_helper.cpp",
@@ -107,6 +103,15 @@ ohos_shared_library("tel_sms_mms") {
     "utils/string_utils.cpp",
     "utils/text_coder.cpp",
   ]
+
+  if (sms_mms_feature_support_satellite) {
+    sources += [
+      "services/sms/satellite_service_interaction/src/satellite_sms_callback.cpp",
+      "services/sms/satellite_service_interaction/src/satellite_sms_callback_stub.cpp",
+      "services/sms/satellite_service_interaction/src/satellite_sms_client.cpp",
+      "services/sms/satellite_service_interaction/src/satellite_sms_proxy.cpp",
+    ]
+  }
 
   include_dirs = [
     ":tel_sms_mms_config",

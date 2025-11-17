@@ -19,7 +19,9 @@
 #define private public
 #define protected public
 #include "mms_receive_manager.h"
+#ifdef SMS_MMS_SUPPORT_SATELLITE
 #include "satellite_sms_client.h"
+#endif // SMS_MMS_SUPPORT_SATELLITE
 #include "mms_send_manager.h"
 #undef private
 #undef protected
@@ -78,6 +80,7 @@ HWTEST_F(MmsReceiveManagerTest, MmsReceiveManagerTest_002, Function | MediumTest
     EXPECT_EQ(recvMgr.DownloadMms(mmsc, data, ua, uaprof), TELEPHONY_ERR_LOCAL_PTR_NULL);
 }
 
+#ifdef SMS_MMS_SUPPORT_SATELLITE
 /**
  * @tc.number   SatelliteSmsClient_001
  * @tc.name     SatelliteSmsClient_001
@@ -132,5 +135,6 @@ HWTEST_F(MmsReceiveManagerTest, SatelliteSmsClient_003, Function | MediumTest | 
     satelliteSmsClient.ServiceOn();
     satelliteSmsClient.receiverMap_.clear();
 }
+#endif // SMS_MMS_SUPPORT_SATELLITE
 }
 }
