@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #include "sms_short_code_matcher.h"
-
+ 
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -22,17 +22,17 @@
 #include <nlohmann/json.hpp>
 #include <regex>
 #include <string>
-
+ 
 #include "core_service_client.h"
 #include "telephony_errors.h"
 #include "telephony_log_wrapper.h"
 #include "sms_service.h"
-
+ 
 namespace fs = std::filesystem;
 namespace OHOS {
 namespace Telephony {
 const char *SMS_SHORT_CODE_RULES_JSON_PATH = "/etc/telephony/sms_short_code_rules.json";
-
+ 
 SmsShortCodeMatcher::SmsShortCodeMatcher()
 {
     if (LoadShortCodeRulesFromJson(SMS_SHORT_CODE_RULES_JSON_PATH)) {
@@ -41,7 +41,7 @@ SmsShortCodeMatcher::SmsShortCodeMatcher()
     }
     TELEPHONY_LOGE("Failed to load short code rules");
 }
-
+ 
 std::string SmsShortCodeMatcher::RemovePlusSign(const std::string &addr)
 {
     if (!addr.empty() && addr[0] == '+') {
@@ -49,7 +49,7 @@ std::string SmsShortCodeMatcher::RemovePlusSign(const std::string &addr)
     }
     return addr;
 }
-
+ 
 bool SmsShortCodeMatcher::MatchesRegexList(const std::string &str, const std::vector<std::string> &regexList)
 {
     for (const auto &regexStr : regexList) {
@@ -60,7 +60,7 @@ bool SmsShortCodeMatcher::MatchesRegexList(const std::string &str, const std::ve
     }
     return false;
 }
-
+ 
 bool SmsShortCodeMatcher::LoadShortCodeRulesFromJson(const std::string &jsonPath)
 {
     fs::path absolutePath = fs::absolute(jsonPath);
@@ -102,7 +102,7 @@ bool SmsShortCodeMatcher::LoadShortCodeRulesFromJson(const std::string &jsonPath
     TELEPHONY_LOGI("Loaded %zu short code rules", countryShortCodeRules_.size());
     return true;
 }
-
+ 
 void SmsShortCodeMatcher::ParseCodeArray(const nlohmann::json &jsonArray, std::vector<std::string> &result)
 {
     if (!jsonArray.is_array()) {
@@ -117,7 +117,7 @@ void SmsShortCodeMatcher::ParseCodeArray(const nlohmann::json &jsonArray, std::v
         }
     }
 }
-
+ 
 PremiumSmsType SmsShortCodeMatcher::GetPremiumSmsType(const int32_t slotId, const std::string &desAddr)
 {
     if (desAddr.empty() || !loadFileSuccess_) {
@@ -130,22 +130,20 @@ PremiumSmsType SmsShortCodeMatcher::GetPremiumSmsType(const int32_t slotId, cons
         TELEPHONY_LOGE("Invalid country code");
         return PremiumSmsType::UNKNOWN;
     }
-
+ 
     SmsShortCodeType smsShortCodeType = MatchShortCodeType(countryCode, desAddr);
+    TELEPHONY_LOGI("smsShortCodeType: %d", static_cast<int>(smsShortCodeType));
     if (smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN) {
-        TELEPHONY_LOGI("Destination address is unknown");
         return PremiumSmsType::UNKNOWN;
     }
     if (smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_SHORT_CODE ||
         smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_FREE ||
         smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_STANDARD) {
-        TELEPHONY_LOGI("Destination address is not premium or possible premium");
         return PremiumSmsType::NOT_PREMIUM;
     }
-    TELEPHONY_LOGI("Destination address is premium or possible premium");
     return PremiumSmsType::PREMIUM_OR_POSSIBLE_PREMIUM;
 }
-
+ 
 SmsShortCodeType SmsShortCodeMatcher::MatchShortCodeType(const std::string &countryCode, const std::string &desAddr)
 {
     std::string processedAddr = RemovePlusSign(desAddr);
@@ -159,9 +157,9 @@ SmsShortCodeType SmsShortCodeMatcher::MatchShortCodeType(const std::string &coun
         TELEPHONY_LOGE("No rules found for country code: %s", countryCode.c_str());
         return SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
     }
-
+ 
     const ShortCodeRule& rule = it->second;
-
+ 
     if (MatchesRegexList(processedAddr, rule.freeCodes)) {
         return SmsShortCodeType::SMS_SHORT_CODE_TYPE_FREE;
     }
@@ -176,10 +174,10 @@ SmsShortCodeType SmsShortCodeMatcher::MatchShortCodeType(const std::string &coun
     }
     return SmsShortCodeType::SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM;
 }
-
+ 
 bool SmsShortCodeMatcher::GetCountryCode(const int32_t &slotId, std::string &countryCode)
 {
-    if (slotId < 0 || slotId > 1) {
+    if (slotId < 0 || slotId > SIM_SLOT_COUNT) {
         TELEPHONY_LOGE("Invalid slotId");
         countryCode = "";
         return false;
@@ -189,19 +187,19 @@ bool SmsShortCodeMatcher::GetCountryCode(const int32_t &slotId, std::string &cou
     if (countryCode16.empty()) {
         TELEPHONY_LOGI("Network country code is empty");
         CoreServiceClient::GetInstance().GetISOCountryCodeForSim(slotId, countryCode16);
-        }
+    }
     if (countryCode16.empty()) {
         TELEPHONY_LOGE("Both network and SIM country codes are empty, get country code failed");
         countryCode = "";
         return false;
     }
-
+ 
     countryCode = Str16ToStr8(countryCode16);
     std::transform(countryCode.begin(), countryCode.end(), countryCode.begin(), ::tolower);
     TELEPHONY_LOGI("Got country code: %s", countryCode.c_str());
     return true;
 }
-
+ 
 bool SmsShortCodeMatcher::GetCountryCodeFromNetwork(std::u16string &countryCode16)
 {
     int32_t primarySlotId = 0;
