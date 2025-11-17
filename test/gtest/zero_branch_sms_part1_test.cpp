@@ -198,7 +198,7 @@ HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0010, TestSize.Level0)
  * @tc.name     Test SmsShortCodeMatcher
  * @tc.desc     Function test
  */
-HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_00011, TestSize.Level0)
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0011, TestSize.Level0)
 {
     auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
     const std::string countryCode = "";
@@ -212,7 +212,7 @@ HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_00011, TestSize.Level0)
  * @tc.name     Test SmsShortCodeMatcher
  * @tc.desc     Function test
  */
-HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_00012, TestSize.Level0)
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0012, TestSize.Level0)
 {
     auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
     const std::string countryCode = "zz";
