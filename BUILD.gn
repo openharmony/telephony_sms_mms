@@ -29,6 +29,7 @@ config("tel_sms_mms_config") {
     include_dirs += [
       "services/mms/include",
     ]
+    defines = [ "SMS_SUPPORT_MMS" ]
   }
 }
 
@@ -170,7 +171,6 @@ ohos_shared_library("tel_sms_mms") {
       "services/mms/mms_send_manager.cpp",
       "services/mms/mms_sender.cpp",
     ]
-    defines += [ "SMS_SUPPORT_MMS" ]
   }
 
   if (defined(global_parts_info) &&
