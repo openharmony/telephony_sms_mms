@@ -183,9 +183,9 @@ ohos_shared_library("tel_sms_mms") {
 
   public_configs = [ ":tel_sms_mms_config" ]
 
-  cflags = [
+  cflags_cc = [
     "-D_FORTIFY_SOURCE=2",
-    "-O2",
+    "-Os",
   ]
 
   if (is_standard_system) {
