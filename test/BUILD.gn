@@ -13,6 +13,7 @@
 
 import("//build/test.gni")
 import("sms_mms_test.gni")
+import("../smsmms.gni")
 
 config("sms_mms_test_config") {
   include_dirs = sms_mms_incluedirs
@@ -29,7 +30,7 @@ ohos_static_library("tel_sms_mms_test_base") {
   public_configs = [ ":sms_mms_test_config" ]
   external_deps = sms_mms_external_deps
   external_deps += [ "core_service:ffrt_mocked" ]
-  defines = sms_mms_defines
+  defines = sms_mms_defines + global_defines
   cflags = sms_mms_cflags
   cflags_cc = cflags
   part_name = "sms_mms"

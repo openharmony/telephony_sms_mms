@@ -15,10 +15,15 @@ declare_args() {
   sms_mms_dynamic_start = false
   sms_mms_tel_power_mode = false
   sms_mms_feature_support_mms = true
+  sms_mms_feature_support_satellite = true
 }
 
 global_defines = []
 
 if (sms_mms_tel_power_mode) {
   global_defines += [ "BASE_POWER_IMPROVEMENT_FEATURE" ]
+}
+
+if (sms_mms_feature_support_satellite) {
+  global_defines += [ "SMS_MMS_SUPPORT_SATELLITE" ]
 }

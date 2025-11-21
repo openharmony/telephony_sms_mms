@@ -16,7 +16,7 @@ import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 SMS_MMS_SOURCE_DIR = "../../../"
-
+import("$SMS_MMS_SOURCE_DIR/smsmms.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("GsmSmsSenderFuzzTest") {
   module_output_path = "sms_mms/sms_mms"
@@ -64,6 +64,7 @@ ohos_fuzztest("GsmSmsSenderFuzzTest") {
     "TELEPHONY_LOG_TAG = \"SmsMmsFuzzTest\"",
     "LOG_DOMAIN = 0xD000F00",
   ]
+  defines += global_defines
 
   cflags = [
     "-g",
