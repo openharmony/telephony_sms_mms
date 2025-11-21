@@ -96,6 +96,7 @@ ohos_shared_library("tel_sms_mms") {
     "services/sms/sms_send_manager.cpp",
     "services/sms/sms_sender.cpp",
     "services/sms/sms_service.cpp",
+    "services/sms/sms_short_code_matcher.cpp",
     "services/sms/sms_state_handler.cpp",
     "services/sms/sms_state_observer.cpp",
     "services/sms/sms_wap_push_buffer.cpp",
@@ -182,9 +183,9 @@ ohos_shared_library("tel_sms_mms") {
 
   public_configs = [ ":tel_sms_mms_config" ]
 
-  cflags = [
+  cflags_cc = [
     "-D_FORTIFY_SOURCE=2",
-    "-O2",
+    "-Os",
   ]
 
   if (is_standard_system) {

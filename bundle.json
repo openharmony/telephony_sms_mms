@@ -73,6 +73,15 @@
                 "//base/telephony/sms_mms/frameworks/js/napi/:sms",
                 "//base/telephony/sms_mms/sa_profile:sms_mms_sa_profile"
             ],
+            "group_type": {
+                "base_group": [
+                ],
+                "fwk_group": [
+                ],
+                "service_group": [
+                    "//base/telephony/sms_mms/services/etc:sms_short_code_rules_default"
+                ]
+            },
             "inner_kits": [
                 {
                     "name":"//base/telephony/sms_mms/frameworks/native:tel_sms_mms_api",
