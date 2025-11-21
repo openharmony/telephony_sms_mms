@@ -92,6 +92,15 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
         delete work;
         work = nullptr;
     }
+
+    uint32_t refCount = 0;
+    if (napi_reference_unref(env_, thisVarRef_, &refCount) == napi_ok && refCount == 0) {
+        napi_delete_reference(env_, thisVarRef_);
+    }
+    if (napi_reference_unref(env_, callbackRef_, &refCount) == napi_ok && refCount == 0) {
+        napi_delete_reference(env_, callbackRef_);
+    }
+
     TELEPHONY_LOGI("CompleteSmsSendWork end");
 }
 
@@ -118,14 +127,26 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
         pContext->callbackRef = callbackRef_;
         pContext->result = WrapSmsSendResult(result);
         work->data = static_cast<void *>(pContext);
-        int32_t errCode = uv_queue_work_with_qos(
-            loop, work, [](uv_work_t *work) {},
-            [](uv_work_t *work, int status) { CompleteSmsSendWork(work, status); }, uv_qos_default);
+
+        napi_status statusThisVarRef = napi_reference_ref(env_, thisVarRef_, nullptr);
+        napi_status statusCallbackRef = napi_reference_ref(env_, callbackRef_, nullptr);
+
+        int32_t errCode = 0;
+        if (statusThisVarRef == napi_ok && statusCallbackRef == napi_ok) {
+            errCode = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
+                [](uv_work_t *work, int status) { CompleteSmsSendWork(work, status); }, uv_qos_default); 
+        } else {
+            TELEPHONY_LOGE("fail to napi_reference_ref");
+            errCode = 1;
+        }
+
         if (errCode != 0) {
             TELEPHONY_LOGE("failed to uv_queue_work_with_qos, errCode: %{public}d", errCode);
-            pContext->env = nullptr;
-            pContext->thisVarRef = nullptr;
-            pContext->callbackRef = nullptr;
+            
+            uint32_t unused;
+            napi_reference_unref(env_, thisVarRef_, &unused);
+            napi_reference_unref(env_, callbackRef_, &unused);
+
             delete pContext;
             pContext = nullptr;
             delete work;
