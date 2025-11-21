@@ -40,6 +40,11 @@ public:
     static std::mutex ctx_;
     static std::condition_variable cv_;
     int32_t slotId_ = -1;
+
+private:
+    void GetMmsUserAgentProfile(std::string &uaProfile);
+
+private:
     uint8_t requestId_ = 0;
 };
 } // namespace Telephony

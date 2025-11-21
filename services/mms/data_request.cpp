@@ -67,7 +67,9 @@ int32_t DataRequest::ExecuteMms(const std::string &method, std::shared_ptr<MmsNe
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
 
-    int32_t executeResult = HttpRequest(slotId_, method, mmsNetworkMgr, contentUrl, pduDir, ua, uaprof);
+    std::string custUaprof = uaprof;
+    GetMmsUserAgentProfile(custUaprof);
+    int32_t executeResult = HttpRequest(slotId_, method, mmsNetworkMgr, contentUrl, pduDir, ua, custUaprof);
     mmsNetworkMgr->ReleaseNetwork(GetRequestId(), false);
     return executeResult;
 }
@@ -80,6 +82,15 @@ uint8_t DataRequest::GetRequestId()
 void DataRequest::CreateRequestId()
 {
     requestId_++;
+}
+
+void DataRequest::GetMmsUserAgentProfile(std::string &uaProfile)
+{
+    OperatorConfig operatorConfig;
+    CoreManagerInner::GetInstance().GetOperatorConfigs(slotId_, operatorConfig);
+    if (operatorConfig.stringValue.find(KEY_MMS_USER_AGENT_PROFILE_STRING) != operatorConfig.stringValue.end()) {
+        uaProfile = operatorConfig.stringValue[KEY_MMS_USER_AGENT_PROFILE_STRING];
+    }
 }
 } // namespace Telephony
 } // namespace OHOS
