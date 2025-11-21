@@ -1623,6 +1623,7 @@ HWTEST_F(BranchSmsTest, GsmSmsSender_0001, Function | MediumTest | Level1)
     EXPECT_TRUE(gsmSmsSender->SetPduInfo(smsIndexer, gsmSmsMessage, isMore));
 }
 
+#ifdef SMS_MMS_SUPPORT_SATELLITE
 /**
  * @tc.number   Telephony_SmsMmsGtest_SatelliteSmsCallback_0001
  * @tc.name     Test SatelliteSms Callback
@@ -1763,6 +1764,7 @@ HWTEST_F(BranchSmsTest, SatelliteSmsClient_0001, Function | MediumTest | Level1)
         satelliteSmsClient.SendSmsAck(INVALID_SLOTID, SMS_EVENT_NEW_SMS_REPLY, true, AckIncomeCause::SMS_ACK_RESULT_OK),
         TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL);
 }
+#endif // SMS_MMS_SUPPORT_SATELLITE
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsMiscManager_0001

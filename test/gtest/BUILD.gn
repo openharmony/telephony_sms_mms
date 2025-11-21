@@ -13,6 +13,7 @@
 
 import("//build/test.gni")
 SMS_MMS_SOURCE_DIR = "../../"
+import("$SMS_MMS_SOURCE_DIR/smsmms.gni")
 
 declare_args() {
 unittest_deps = [
@@ -77,7 +78,6 @@ test_sources += [
     "sms_ims_service_interaction_gtest.cpp",
     "sms_mms_common_test.cpp",
     "sms_mms_receive_gtest.cpp",
-    "sms_satellite_gtest.cpp",
     "sms_service_proxy_gtest.cpp",
     "zero_branch_cb_test.cpp",
     "zero_branch_cdma_sms_test.cpp",
@@ -94,6 +94,12 @@ test_sources += [
     "sms_utils_gtest.cpp"
 ]
 
+if (sms_mms_feature_support_satellite) {
+  test_sources += [
+    "sms_satellite_gtest.cpp",
+  ]
+}
+
 template("unittest_suite") {
   ohos_unittest(target_name) {
     subsystem_name = "telephony"
@@ -104,6 +110,7 @@ template("unittest_suite") {
     deps = unittest_deps
     configs = [ ":unittest_config" ]
     external_deps = unittest_external_deps
+    defines = global_defines
   }
 }
 
