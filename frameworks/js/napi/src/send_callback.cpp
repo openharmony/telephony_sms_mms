@@ -134,7 +134,7 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
         int32_t errCode = 0;
         if (statusThisVarRef == napi_ok && statusCallbackRef == napi_ok) {
             errCode = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
-                [](uv_work_t *work, int status) { CompleteSmsSendWork(work, status); }, uv_qos_default); 
+                [](uv_work_t *work, int status) { CompleteSmsSendWork(work, status); }, uv_qos_default);
         } else {
             TELEPHONY_LOGE("fail to napi_reference_ref");
             errCode = 1;
