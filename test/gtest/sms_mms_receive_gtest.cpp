@@ -40,7 +40,7 @@ using ::testing::Return;
 using ::testing::SetArgReferee;
 
 namespace {
-    constexpr const char *KEY_MMS_USER_AGENT_PROFILE_STRING = "mms_user_agent_profile_string";
+constexpr const char *KEY_MMS_USER_AGENT_PROFILE_STRING = "mms_user_agent_profile_string";
 } // namespace
 
 class MmsReceiveGtest : public testing::Test {
