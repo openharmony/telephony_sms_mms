@@ -24,6 +24,7 @@ namespace OHOS {
 namespace Telephony {
 using namespace NetManagerStandard;
 constexpr static const int32_t WAIT_TIME_SECOND = 30;
+constexpr const char *KEY_MMS_USER_AGENT_PROFILE_STRING = "mms_user_agent_profile_string";
 
 DataRequest::DataRequest(int32_t slotId) : slotId_(slotId) {}
 
