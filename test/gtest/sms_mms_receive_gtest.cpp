@@ -17,6 +17,7 @@
 #define protected public
 
 #include "gtest/gtest.h"
+#include "core_manager_inner.h"
 #include "data_request.h"
 #include "mms_apn_info.h"
 #include "mms_receive.h"
@@ -24,17 +25,37 @@
 #include "mms_sender.h"
 #include "mms_send_manager.h"
 #include "mms_network_client.h"
+#include "mock/mock_sim_manager.h"
 #include "sms_persist_helper.h"
 
 namespace OHOS {
 namespace Telephony {
 using namespace testing::ext;
+using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::DoAll;
+using ::testing::Invoke;
+using ::testing::Mock;
+using ::testing::Return;
+using ::testing::SetArgReferee;
+
+namespace {
+    constexpr const char *KEY_MMS_USER_AGENT_PROFILE_STRING = "mms_user_agent_profile_string";
+} // namespace
+
 class MmsReceiveGtest : public testing::Test {
 public:
+    MmsReceiveGtest()
+    {
+        mockSimManager = new MockSimManager();
+        std::shared_ptr<MockSimManager> mockSimManagerPtr(mockSimManager);
+        CoreManagerInner::GetInstance().simManager_ = mockSimManagerPtr;
+    }
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    MockSimManager *mockSimManager = new MockSimManager();
 };
 void MmsReceiveGtest::SetUpTestCase() {}
 
@@ -175,6 +196,39 @@ HWTEST_F(MmsReceiveGtest, MmsSenderTest_0001, Function | MediumTest | Level1)
     std::string uaprof;
     int32_t ret = mmsSender->ExecuteSendMms(method, url, data, uaprof);
     EXPECT_EQ(ret, TELEPHONY_ERR_MMS_FAIL_DATA_NETWORK_ERROR);
+}
+
+/**
+ * @tc.number   Telephony_GetDefaultMmsUserAgentProfileTest
+ * @tc.name     Test GetMmsUserAgentProfile
+ * @tc.desc     Function test
+ */
+HWTEST_F(MmsReceiveGtest, GetDefaultMmsUserAgentProfileTest, Function | MediumTest | Level1)
+{
+    int32_t slotId = 0;
+    std::string uaProfile = "testUrl";
+    auto dataRequest = std::make_shared<DataRequest>(slotId);
+    dataRequest->GetMmsUserAgentProfile(uaProfile);
+    EXPECT_EQ(uaProfile, "testUrl");
+}
+
+/**
+ * @tc.number   Telephony_GetCustomMmsUserAgentProfileTest
+ * @tc.name     Test GetMmsUserAgentProfile
+ * @tc.desc     Function test
+ */
+HWTEST_F(MmsReceiveGtest, GetCustomMmsUserAgentProfileTest, Function | MediumTest | Level1)
+{
+    int32_t slotId = 0;
+    std::string uaProfile = "testUrl";
+    auto dataRequest = std::make_shared<DataRequest>(slotId);
+    EXPECT_CALL(*mockSimManager, GetOperatorConfigs(_, _)).Times(AtLeast(1))
+        .WillOnce([](int32_t slotId, OperatorConfig &poc) {
+            poc.stringValue[KEY_MMS_USER_AGENT_PROFILE_STRING] = "custUrl";
+            return 0;
+        });
+    dataRequest->GetMmsUserAgentProfile(uaProfile);
+    EXPECT_EQ(uaProfile, "custUrl");
 }
 } // namespace Telephony
 } // namespace OHOS

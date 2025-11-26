@@ -43,8 +43,6 @@ public:
 
 private:
     void GetMmsUserAgentProfile(std::string &uaProfile);
-
-private:
     uint8_t requestId_ = 0;
 };
 } // namespace Telephony
