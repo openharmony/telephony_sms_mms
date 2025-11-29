@@ -80,7 +80,7 @@
                 "fwk_group": [
                 ],
                 "service_group": [
-                    "//base/telephony/sms_mms/services/etc:sms_short_code_rules_default"
+                    "//base/telephony/sms_mms/services/etc:sms_short_code_rules"
                 ]
             },
             "inner_kits": [
