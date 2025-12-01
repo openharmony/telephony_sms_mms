@@ -195,6 +195,7 @@ bool SmsShortCodeMatcher::GetCountryCode(const int32_t &slotId, std::string &cou
     }
  
     countryCode = Str16ToStr8(countryCode16);
+    std::transform(countryCode.begin(), countryCode.end(), countryCode.begin(), ::tolower);
     TELEPHONY_LOGI("Got country code: %s", countryCode.c_str());
     return true;
 }
