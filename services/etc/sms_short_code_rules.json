@@ -1,770 +1,770 @@
 {
     "countryShortCodeRules": [
         {
-            "countryCode": "AE",
+            "countryCode": "ae",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["1017", "1355", "3214", "6253", "6568", "999"]
         },
         {
-            "countryCode": "AL",
+            "countryCode": "al",
             "pattern": "\\d{5}",
             "premiumCodes": ["15191", "55[56]00"],
             "standardCodes": [],
             "freeCodes": []
         },
         {
-            "countryCode": "AR",
+            "countryCode": "ar",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["11711", "28291", "44077", "78887", "191289", "39010"]
         },
         {
-            "countryCode": "AM",
+            "countryCode": "am",
             "pattern": "\\d{3,5}",
             "premiumCodes": ["11[2456]1", "3024"],
             "standardCodes": [],
             "freeCodes": ["10[123]", "71522", "71512", "71502"]
         },
         {
-            "countryCode": "AT",
+            "countryCode": "at",
             "pattern": "11\\d{4}",
             "premiumCodes": ["09.*"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}"]
         },
         {
-            "countryCode": "AU",
+            "countryCode": "au",
             "pattern": "19(?:\\d{4}|\\d{6})",
             "premiumCodes": ["19998882", "19944444"],
             "standardCodes": [],
             "freeCodes": []
         },
         {
-            "countryCode": "AZ",
+            "countryCode": "az",
             "pattern": "\\d{4,5}",
             "premiumCodes": ["330[12]", "87744", "901[234]", "93(?:94|101)", "9426", "9525"],
             "standardCodes": [],
             "freeCodes": []
         },
         {
-            "countryCode": "BD",
+            "countryCode": "bd",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["16672"]
         },
         {
-            "countryCode": "BE",
+            "countryCode": "be",
             "pattern": "",
             "premiumCodes": ["\\d{4}"],
             "standardCodes": [],
             "freeCodes": ["8\\d{3}", "116\\d{3}"]
         },
         {
-            "countryCode": "BF",
+            "countryCode": "bf",
             "pattern": "\\d{1,4}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["3558"]
         },
         {
-            "countryCode": "BG",
+            "countryCode": "bg",
             "pattern": "\\d{4,6}",
             "premiumCodes": ["18(?:16|423)", "19(?:1[56]|35)"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "1988", "1490", "162055"]
         },
         {
-            "countryCode": "BH",
+            "countryCode": "bh",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["81181", "85999"]
         },
         {
-            "countryCode": "BR",
+            "countryCode": "br",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["6000[012]\\d", "876", "5500", "9963", "4141", "8000", "2652", "26808"]
         },
         {
-            "countryCode": "BW",
+            "countryCode": "bw",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["16641"]
         },
         {
-            "countryCode": "BY",
+            "countryCode": "by",
             "pattern": "\\d{4}",
             "premiumCodes": ["3336", "4161", "444[4689]", "501[34]", "7781"],
             "standardCodes": [],
             "freeCodes": []
         },
         {
-            "countryCode": "CA",
+            "countryCode": "ca",
             "pattern": "\\d{5,6}",
             "premiumCodes": ["60999", "88188", "43030"],
             "standardCodes": ["244444"],
             "freeCodes": ["455677", "24470"]
         },
         {
-            "countryCode": "CD",
+            "countryCode": "cd",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["444123"]
         },
         {
-            "countryCode": "CH",
+            "countryCode": "ch",
             "pattern": "[2-9]\\d{2,4}",
             "premiumCodes": ["543", "83111", "30118"],
             "standardCodes": [],
             "freeCodes": ["98765", "30075", "30047"]
         },
         {
-            "countryCode": "CL",
+            "countryCode": "cl",
             "pattern": "cl",
             "premiumCodes": "\\d{4,5}",
             "standardCodes": [],
             "freeCodes": ["9963", "9240", "1038", "4848"]
         },
         {
-            "countryCode": "CN",
+            "countryCode": "cn",
             "pattern": "",
             "premiumCodes": ["1066.*"],
             "standardCodes": [],
             "freeCodes": ["1065.*"]
         },
         {
-            "countryCode": "CO",
+            "countryCode": "co",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["890350", "908160", "892255", "898002", "898880", "899960", "899948", "87739", "85517", "491289", "890119"]
         },
         {
-            "countryCode": "CR",
+            "countryCode": "cr",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["466453"]
         },
         {
-            "countryCode": "CY",
+            "countryCode": "cy",
             "pattern": "\\d{4,6}",
             "premiumCodes": ["7510"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}"]
         },
         {
-            "countryCode": "CZ",
+            "countryCode": "cz",
             "pattern": "",
             "premiumCodes": ["90\\d{5}", "90\\d{3}"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}"]
         },
         {
-            "countryCode": "DE",
+            "countryCode": "de",
             "pattern": "\\d{4,5}|1232\\d{3}",
             "premiumCodes": ["11(?:111|833)", "1232(?:013|021|060|075|286|358)", "118(?:44|80|86)", "20[25]00", "220(?:21|22|88|99)", "221(?:14|21)", "223(?:44|53|77)", "224[13]0", "225(?:20|59|90)", "226(?:06|10|20|26|30|40|56|70)", "227(?:07|33|39|66|76|78|79|88|99)", "228(?:08|11|66|77)", "23300", "30030", "3[12347]000", "330(?:33|55|66)", "33(?:233|331|366|533)", "34(?:34|567)", "37000", "40(?:040|123|444|[3568]00)", "41(?:010|414)", "44(?:000|044|344|44[24]|544)", "50005", "50100", "50123", "50555", "51000", "52(?:255|783)", "54(?:100|2542)", "55(?:077|[24]00|222|333|55|[12369]55)", "56(?:789|886)", "60800", "6[13]000", "66(?:[12348]66|566|766|777|88|999)", "68888", "70(?:07|123|777)", "76766", "77(?:007|070|222|444|[567]77)", "80(?:008|123|888)", "82(?:002|[378]00|323|444|472|474|488|727)", "83(?:005|[169]00|333|830)", "84(?:141|300|32[34]|343|488|499|777|888)", "85888", "86(?:188|566|640|644|650|677|868|888)", "870[24]9", "871(?:23|[49]9)", "872(?:1[0-8]|49|99)", "87499", "875(?:49|55|99)", "876(?:0[1367]|1[1245678]|54|99)", "877(?:00|99)", "878(?:15|25|3[567]|8[12])", "87999", "880(?:08|44|55|77|99)", "88688", "888(?:03|10|8|89)", "8899", "90(?:009|999)"],
             "standardCodes": ["116\\d{3}", "81214", "81215", "47529", "70296", "83782", "3011", "73240", "72438"],
             "freeCodes": []
         },
         {
-            "countryCode": "DK",
+            "countryCode": "dk",
             "pattern": "\\d{4,5}",
             "premiumCodes": ["1\\d{3}"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "4665"]
         },
         {
-            "countryCode": "DO",
+            "countryCode": "do",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["912892", "912"]
         },
         {
-            "countryCode": "DZ",
+            "countryCode": "dz",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["63071"]
         },
         {
-            "countryCode": "EC",
+            "countryCode": "ec",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["466453", "18512"]
         },
         {
-            "countryCode": "EE",
+            "countryCode": "ee",
             "pattern": "1\\d{2,4}",
             "premiumCodes": ["90\\d{5}", "15330", "1701[0-3]"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "95034"]
         },
         {
-            "countryCode": "EG",
+            "countryCode": "eg",
             "pattern": "\\d{4,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["1499", "10020", "100158"]
         },
         {
-            "countryCode": "ES",
+            "countryCode": "es",
             "pattern": "",
             "premiumCodes": ["[23][57]\\d{3}", "280\\d{2}", "[79]9[57]\\d{3}"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "22791", "222145", "22189"]
         },
         {
-            "countryCode": "ET",
+            "countryCode": "et",
             "pattern": "\\d{1,4}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["8527"]
         },
         {
-            "countryCode": "FI",
+            "countryCode": "fi",
             "pattern": "\\d{5,6}",
             "premiumCodes": ["0600.*", "0700.*", "171(?:59|63)"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "14789", "17110"]
         },
         {
-            "countryCode": "FR",
+            "countryCode": "fr",
             "pattern": "",
             "premiumCodes": ["[4-8]\\d{4}"],
             "standardCodes": [],
             "freeCodes": ["3\\d{4}", "116\\d{3}", "21101", "20366", "555", "2051", "33033", "21727"]
         },
         {
-            "countryCode": "GB",
+            "countryCode": "gb",
             "pattern": "\\d{4,6}",
             "premiumCodes": ["[5-8]\\d{4}"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "2020", "35890", "61002", "61202", "887", "83669", "34664", "40406", "60174", "7726", "37726", "88555", "9017", "9018"]
         },
         {
-            "countryCode": "GE",
+            "countryCode": "ge",
             "pattern": "ge",
             "premiumCodes": "\\d{1,5}",
             "standardCodes": ["801[234]", "888[239]"],
             "freeCodes": ["95201", "95202", "95203"]
         },
         {
-            "countryCode": "GH",
+            "countryCode": "gh",
             "pattern": "\\d{4}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["5041", "3777", "2333", "6061"]
         },
         {
-            "countryCode": "GR",
+            "countryCode": "gr",
             "pattern": "\\d{5}",
             "premiumCodes": ["54\\d{3}", "19[0-5]\\d{2}"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "12115"]
         },
         {
-            "countryCode": "GT",
+            "countryCode": "gt",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["466453"]
         },
         {
-            "countryCode": "HR",
+            "countryCode": "hr",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["13062"]
         },
         {
-            "countryCode": "HU",
+            "countryCode": "hu",
             "pattern": "[01](?:\\d{3}|\\d{9})",
             "premiumCodes": ["0691227910", "1784"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}"]
         },
         {
-            "countryCode": "HN",
+            "countryCode": "hn",
             "pattern": "\\d{4,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["466453"]
         },
         {
-            "countryCode": "IN",
+            "countryCode": "in",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["59336", "53969"]
         },
         {
-            "countryCode": "ID",
+            "countryCode": "id",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["99477", "6006", "46645", "363", "93457", "99265", "77413"]
         },
         {
-            "countryCode": "IE",
+            "countryCode": "ie",
             "pattern": "\\d{5}",
             "premiumCodes": ["5[3-9]\\d{3}"],
             "standardCodes": ["5[12]\\d{3}"],
             "freeCodes": ["50\\d{3}", "116\\d{3}"]
         },
         {
-            "countryCode": "IL",
+            "countryCode": "il",
             "pattern": "\\d{1,5}",
             "premiumCodes": ["4422", "4545"],
             "standardCodes": [],
             "freeCodes": ["37477", "6681"]
         },
         {
-            "countryCode": "IR",
+            "countryCode": "ir",
             "pattern": "\\d{4,8}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["700792", "100016", "30008360"]
         },
         {
-            "countryCode": "IT",
+            "countryCode": "it",
             "pattern": "\\d{5}",
             "premiumCodes": ["44[0-4]\\d{2}", "47[0-4]\\d{2}", "48[0-4]\\d{2}", "44[5-9]\\d{4}", "47[5-9]\\d{4}", "48[5-9]\\d{4}", "455\\d{2}", "499\\d{2}"],
             "standardCodes": ["430\\d{2}", "431\\d{2}", "434\\d{4}", "435\\d{4}", "439\\d{7}"],
             "freeCodes": ["116\\d{3}", "4112503", "40\\d{0,12}"]
         },
         {
-            "countryCode": "JO",
+            "countryCode": "jo",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["99066", "99390"]
         },
         {
-            "countryCode": "JP",
+            "countryCode": "jp",
             "pattern": "\\d{1,9}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["8083", "00050320"]
         },
         {
-            "countryCode": "KE",
+            "countryCode": "ke",
             "pattern": "\\d{5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["21725", "21562", "40520", "23342", "40023", "24088", "23054"]
         },
         {
-            "countryCode": "KG",
+            "countryCode": "kg",
             "pattern": "\\d{4}",
             "premiumCodes": ["415[2367]", "444[69]"],
             "standardCodes": [],
             "freeCodes": []
         },
         {
-            "countryCode": "KR",
+            "countryCode": "kr",
             "pattern": "\\d{4,7}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["\\*9712", "\\*9090", "##900"]
         },
         {
-            "countryCode": "KZ",
+            "countryCode": "kz",
             "pattern": "\\d{4}",
             "premiumCodes": ["335[02]", "4161", "444[469]", "77[2359]0", "8444", "919[3-5]", "968[2-5]"],
             "standardCodes": [],
             "freeCodes": []
         },
         {
-            "countryCode": "KW",
+            "countryCode": "kw",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["1378", "50420", "94006", "55991", "50976", "7112"]
         },
         {
-            "countryCode": "LS",
+            "countryCode": "ls",
             "pattern": "\\d{4,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["32012"]
         },
         {
-            "countryCode": "LT",
+            "countryCode": "lt",
             "pattern": "\\d{3,5}",
             "premiumCodes": ["13[89]1", "1394", "16[34]5"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "1399", "1324"]
         },
         {
-            "countryCode": "LU",
+            "countryCode": "lu",
             "pattern": "",
             "premiumCodes": ["6\\d{4}"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "60231", "64085"]
         },
         {
-            "countryCode": "LV",
+            "countryCode": "lv",
             "pattern": "\\d{4}",
             "premiumCodes": ["18(?:19|63|7[1-4])"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "1399"]
         },
         {
-            "countryCode": "MA",
+            "countryCode": "ma",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["53819"]
         },
         {
-            "countryCode": "MK",
+            "countryCode": "mk",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["129005", "122"]
         },
         {
-            "countryCode": "ML",
+            "countryCode": "ml",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["36098"]
         },
         {
-            "countryCode": "MN",
+            "countryCode": "mn",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["44444", "45678", "445566"]
         },
         {
-            "countryCode": "MW",
+            "countryCode": "mw",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["4276", "4305", "4326"]
         },
         {
-            "countryCode": "MZ",
+            "countryCode": "mz",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["1714"]
         },
         {
-            "countryCode": "MX",
+            "countryCode": "mx",
             "pattern": "\\d{4,7}",
             "premiumCodes": ["53035", "7766"],
             "standardCodes": [],
             "freeCodes": ["26259", "46645", "50025", "50052", "5050", "76551", "88778", "9963", "91101", "45453", "550346", "3030303", "81811", "81818"]
         },
         {
-            "countryCode": "MY",
+            "countryCode": "my",
             "pattern": "\\d{5}",
             "premiumCodes": ["32298", "33776"],
             "standardCodes": [],
             "freeCodes": ["22099", "28288", "66668", "66966"]
         },
         {
-            "countryCode": "NA",
+            "countryCode": "na",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["40005"]
         },
         {
-            "countryCode": "NI",
+            "countryCode": "ni",
             "pattern": "\\d{4,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["466453"]
         },
         {
-            "countryCode": "NL",
+            "countryCode": "nl",
             "pattern": "\\d{4}",
             "premiumCodes": ["4466", "5040"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "2223", "6225", "2223", "1662"]
         },
         {
-            "countryCode": "NG",
+            "countryCode": "ng",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["2441", "55020"]
         },
         {
-            "countryCode": "NO",
+            "countryCode": "no",
             "pattern": "\\d{4,5}",
             "premiumCodes": ["2201", "222[67]"],
             "standardCodes": [],
             "freeCodes": ["2171"]
         },
         {
-            "countryCode": "NZ",
+            "countryCode": "nz",
             "pattern": "\\d{3,4}",
             "premiumCodes": ["3903", "8995", "4679"],
             "standardCodes": [],
             "freeCodes": ["1737", "176", "2141", "3067", "3068", "3110", "3876", "4006", "4053", "4061", "4062", "4202", "4300", "4334", "4412", "4575", "5626", "8006", "8681"]
         },
         {
-            "countryCode": "PE",
+            "countryCode": "pe",
             "pattern": "\\d{4,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["9963", "40778", "301303"]
         },
         {
-            "countryCode": "PH",
+            "countryCode": "ph",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["2147", "5495", "5496"]
         },
         {
-            "countryCode": "PK",
+            "countryCode": "pk",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["2057", "9092", "909203", "909201"]
         },
         {
-            "countryCode": "PS",
+            "countryCode": "ps",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["37477", "6681"]
         },
         {
-            "countryCode": "PY",
+            "countryCode": "py",
             "pattern": "\\d{6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["191289"]
         },
         {
-            "countryCode": "PL",
+            "countryCode": "pl",
             "pattern": "\\d{4,5}",
             "premiumCodes": ["74240", "79(?:10|866)", "92525"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "8012", "80921"]
         },
         {
-            "countryCode": "PT",
+            "countryCode": "pt",
             "pattern": "",
             "premiumCodes": ["6[1289]\\d{3}"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "1262", "12666"]
         },
         {
-            "countryCode": "QA",
+            "countryCode": "qa",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["92451"]
         },
         {
-            "countryCode": "RE",
+            "countryCode": "re",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["38600", "36300", "36303", "959"]
         },
         {
-            "countryCode": "RO",
+            "countryCode": "ro",
             "pattern": "\\d{4}",
             "premiumCodes": ["12(?:63|66|88)", "13(?:14|80)"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "3654", "8360", "3838"]
         },
         {
-            "countryCode": "RU",
+            "countryCode": "ru",
             "pattern": "\\d{4}",
             "premiumCodes": ["1(?:1[56]1|899)", "2(?:09[57]|322|47[46]|880|990)", "3[589]33", "4161", "44(?:4[3-9]|81)", "77(?:33|81)", "8424"],
             "standardCodes": ["2037", "2044"],
             "freeCodes": ["6954", "8501"]
         },
         {
-            "countryCode": "RW",
+            "countryCode": "rw",
             "pattern": "\\d{4}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["5060", "5061"]
         },
         {
-            "countryCode": "SA",
+            "countryCode": "sa",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["8145"]
         },
         {
-            "countryCode": "SE",
+            "countryCode": "se",
             "pattern": "",
             "premiumCodes": ["72\\d{3}"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}"]
         },
         {
-            "countryCode": "SG",
+            "countryCode": "sg",
             "pattern": "7\\d{4}",
             "premiumCodes": ["73800"],
             "standardCodes": ["74688", "70134"],
             "freeCodes": []
         },
         {
-            "countryCode": "SI",
+            "countryCode": "si",
             "pattern": "\\d{4}",
             "premiumCodes": ["[368]\\d{3}"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "3133"]
         },
         {
-            "countryCode": "SK",
+            "countryCode": "sk",
             "pattern": "",
             "premiumCodes": ["\\d{4}"],
             "standardCodes": [],
             "freeCodes": ["116\\d{3}", "8000"]
         },
         {
-            "countryCode": "SN",
+            "countryCode": "sn",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["21215", "21098"]
         },
         {
-            "countryCode": "SV",
+            "countryCode": "sv",
             "pattern": "\\d{4,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["466453"]
         },
         {
-            "countryCode": "TW",
+            "countryCode": "tw",
             "pattern": "\\d{4}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["1922"]
         },
         {
-            "countryCode": "TH",
+            "countryCode": "th",
             "pattern": "\\d{1,5}",
             "premiumCodes": ["4\\d{6}"],
             "standardCodes": [],
             "freeCodes": ["4186001"]
         },
         {
-            "countryCode": "TJ",
+            "countryCode": "tj",
             "pattern": "\\d{4}",
             "premiumCodes": ["11[3-7]1", "4161", "4333", "444[689]"],
             "standardCodes": [],
             "freeCodes": []
         },
         {
-            "countryCode": "TL",
+            "countryCode": "tl",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["46645"]
         },
         {
-            "countryCode": "TZ",
+            "countryCode": "tz",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["15046", "15324", "15610"]
         },
         {
-            "countryCode": "TN",
+            "countryCode": "tn",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["85799", "772024"]
         },
         {
-            "countryCode": "TR",
+            "countryCode": "tr",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["7529", "5528", "6493", "3193"]
         },
         {
-            "countryCode": "UA",
+            "countryCode": "ua",
             "pattern": "\\d{4}",
             "premiumCodes": ["444[3-9]", "70[579]4", "7540"],
             "standardCodes": [],
             "freeCodes": []
         },
         {
-            "countryCode": "UG",
+            "countryCode": "ug",
             "pattern": "\\d{4}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["8009"]
         },
         {
-            "countryCode": "US",
+            "countryCode": "us",
             "pattern": "\\d{5,6}",
             "premiumCodes": ["20433", "21(?:344|472)", "22715", "23(?:333|847)", "24(?:15|28)0", "25209", "27(?:449|606|663)", "28498", "305(?:00|83)", "32(?:340|941)", "33(?:166|786|849)", "34746", "35(?:182|564)", "37975", "38(?:135|146|254)", "41(?:366|463)", "42335", "43(?:355|500)", "44(?:578|711|811)", "45814", "46(?:157|173|327)", "46666", "47553", "48(?:221|277|669)", "50(?:844|920)", "51(?:062|368)", "52944", "54(?:723|892)", "55928", "56483", "57370", "59(?:182|187|252|342)", "60339", "61(?:266|982)", "62478", "64(?:219|898)", "65(?:108|500)", "69(?:208|388)", "70877", "71851", "72(?:078|087|465)", "73(?:288|588|882|909|997)", "74(?:034|332|815)", "76426", "79213", "81946", "83177", "84(?:103|685)", "85797", "86(?:234|236|666)", "89616", "90(?:715|842|938)", "91(?:362|958)", "94719", "95297", "96(?:040|666|835|969)", "97(?:142|294|688)", "99(?:689|796|807)"],
             "standardCodes": ["44567", "244444"],
             "freeCodes": ["122", "87902", "21696", "24614", "28003", "30356", "33669", "40196", "41064", "41270", "43753", "44034", "46645", "52413", "56139", "57969", "61785", "66975", "75136", "76227", "81398", "83952", "85140", "86566", "86799", "95737", "96684", "99245", "611611", "96831", "10907"]
         },
         {
-            "countryCode": "UY",
+            "countryCode": "uy",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["55002", "191289"]
         },
         {
-            "countryCode": "VE",
+            "countryCode": "ve",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["538352"]
         },
         {
-            "countryCode": "VN",
+            "countryCode": "vn",
             "pattern": "\\d{1,6}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["5001", "9055", "90002", "118989", "46645"]
         },
         {
-            "countryCode": "YT",
+            "countryCode": "yt",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["38600", "36300", "36303", "959"]
         },
         {
-            "countryCode": "ZA",
+            "countryCode": "za",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["44136", "30791", "36056", "33009"]
         },
         {
-            "countryCode": "YE",
+            "countryCode": "ye",
             "pattern": "\\d{1,4}",
             "premiumCodes": [],
             "standardCodes": [],
             "freeCodes": ["5079"]
         },
         {
-            "countryCode": "ZW",
+            "countryCode": "zw",
             "pattern": "\\d{1,5}",
             "premiumCodes": [],
             "standardCodes": [],
