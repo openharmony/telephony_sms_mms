@@ -13,202 +13,212 @@
  * limitations under the License.
  */
 
-#include "sms_short_code_matcher.h"
+#define private public
+#define protected public
 
-#include <cstdint>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <nlohmann/json.hpp>
-#include <regex>
-#include <string>
+#include <gmock/gmock.h>
+#include <random>
 
 #include "core_service_client.h"
-#include "telephony_errors.h"
-#include "telephony_log_wrapper.h"
+#include "gtest/gtest.h"
 #include "sms_service.h"
+#include "sms_short_code_matcher.h"
 
-namespace fs = std::filesystem;
 namespace OHOS {
 namespace Telephony {
-const char *SMS_SHORT_CODE_RULES_JSON_PATH = "/etc/telephony/sms_short_code_rules.json";
+using namespace testing::ext;
 
-SmsShortCodeMatcher::SmsShortCodeMatcher()
+class BranchSmsPart1Test : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+};
+
+void BranchSmsPart1Test::SetUpTestCase() {}
+void BranchSmsPart1Test::TearDownTestCase() {}
+void BranchSmsPart1Test::SetUp() {}
+void BranchSmsPart1Test::TearDown() {}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0001
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0001, TestSize.Level0)
 {
-    if (LoadShortCodeRulesFromJson(SMS_SHORT_CODE_RULES_JSON_PATH)) {
-        loadFileSuccess_ = true;
-        return;
-    }
-    TELEPHONY_LOGE("Failed to load short code rules");
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string desAddr = "+10660";
+    int32_t slotId = 0;
+    const std::string expectedCountryCode = "cn";
+    std::string countryCode;
+    smsShortCodeMatcher->GetCountryCode(slotId, countryCode);
+    EXPECT_EQ(countryCode, expectedCountryCode);
+    PremiumSmsType premiumSmsType = smsShortCodeMatcher->GetPremiumSmsType(slotId, desAddr);
+    EXPECT_EQ(premiumSmsType, PremiumSmsType::PREMIUM_OR_POSSIBLE_PREMIUM);
 }
 
-std::string SmsShortCodeMatcher::RemovePlusSign(const std::string &addr)
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0002
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0002, TestSize.Level0)
 {
-    if (!addr.empty() && addr[0] == '+') {
-        return addr.substr(1);
-    }
-    return addr;
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string desAddr = "+10661";
+    int32_t slotId = 0;
+    const std::string expectedCountryCode = "cn";
+    std::string countryCode;
+    smsShortCodeMatcher->GetCountryCode(slotId, countryCode);
+    EXPECT_EQ(countryCode, expectedCountryCode);
+    PremiumSmsType premiumSmsType = smsShortCodeMatcher->GetPremiumSmsType(slotId, desAddr);
+    EXPECT_EQ(premiumSmsType, PremiumSmsType::PREMIUM_OR_POSSIBLE_PREMIUM);
 }
 
-bool SmsShortCodeMatcher::MatchesRegexList(const std::string &str, const std::vector<std::string> &regexList)
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0003
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0003, TestSize.Level0)
 {
-    for (const auto &regexStr : regexList) {
-        std::regex pattern(regexStr);
-        if (std::regex_match(str, pattern)) {
-            return true;
-        }
-    }
-    return false;
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string desAddr = "+10661";
+    int32_t slotId = 2;
+    const std::string expectedCountryCode = "";
+    std::string countryCode;
+    smsShortCodeMatcher->GetCountryCode(slotId, countryCode);
+    EXPECT_EQ(countryCode, expectedCountryCode);
+    PremiumSmsType premiumSmsType = smsShortCodeMatcher->GetPremiumSmsType(slotId, desAddr);
+    EXPECT_EQ(premiumSmsType, PremiumSmsType::UNKNOWN);
 }
 
-bool SmsShortCodeMatcher::LoadShortCodeRulesFromJson(const std::string &jsonPath)
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0004
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0004, TestSize.Level0)
 {
-    fs::path absolutePath = fs::absolute(jsonPath);
-    if (!fs::exists(absolutePath) || !fs::is_regular_file(absolutePath)) {
-        TELEPHONY_LOGE("Invalid file path: %s", absolutePath.c_str());
-        return false;
-    }
-    std::ifstream file(absolutePath);
-    if (!file.is_open()) {
-        TELEPHONY_LOGE("Failed to open rules file: %s", absolutePath.c_str());
-        return false;
-    }
-    nlohmann::json jsonFile;
-    file >> jsonFile;
-    if (file.fail()) {
-        TELEPHONY_LOGE("Failed to read JSON file: %s", absolutePath.c_str());
-        return false;
-    }
-    const bool hasValidRules = jsonFile.contains("countryShortCodeRules") &&
-        jsonFile["countryShortCodeRules"].is_array();
-    if (!hasValidRules) {
-        return false;
-    }
-    for (const auto& ruleJson : jsonFile["countryShortCodeRules"]) {
-        if (!ruleJson.contains("countryCode")) {
-            TELEPHONY_LOGE("Missing countryCode in rule");
-            continue;
-        }
-        std::string countryCode = ruleJson["countryCode"].get<std::string>();
-        std::transform(countryCode.begin(), countryCode.end(), countryCode.begin(), ::tolower);
-        ShortCodeRule rule;
-        rule.countryCode = countryCode;
-        rule.pattern = ruleJson.value("pattern", "");
-        ParseCodeArray(ruleJson.value("premiumCodes", nlohmann::json::array()), rule.premiumCodes);
-        ParseCodeArray(ruleJson.value("standardCodes", nlohmann::json::array()), rule.standardCodes);
-        ParseCodeArray(ruleJson.value("freeCodes", nlohmann::json::array()), rule.freeCodes);
-        countryShortCodeRules_[countryCode] = rule;
-    }
-    TELEPHONY_LOGI("Loaded %zu short code rules", countryShortCodeRules_.size());
-    return true;
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string desAddr = "+10650";
+    int32_t slotId = 1;
+    PremiumSmsType premiumSmsType = smsShortCodeMatcher->GetPremiumSmsType(slotId, desAddr);
+    EXPECT_EQ(premiumSmsType, PremiumSmsType::NOT_PREMIUM);
 }
 
-void SmsShortCodeMatcher::ParseCodeArray(const nlohmann::json &jsonArray, std::vector<std::string> &result)
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0005
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0005, TestSize.Level0)
 {
-    if (!jsonArray.is_array()) {
-        return;
-    }
-    for (const auto &item : jsonArray) {
-        if (item.is_string()) {
-            result.push_back(item.get<std::string>());
-        } else {
-            std::string itemStr = item.dump();
-            TELEPHONY_LOGE("Non-string element found in JSON array: %s", itemStr.c_str());
-        }
-    }
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string desAddr = "+";
+    int32_t slotId = 0;
+    PremiumSmsType premiumSmsType = smsShortCodeMatcher->GetPremiumSmsType(slotId, desAddr);
+    EXPECT_EQ(premiumSmsType, PremiumSmsType::UNKNOWN);
 }
 
-PremiumSmsType SmsShortCodeMatcher::GetPremiumSmsType(const int32_t slotId, const std::string &desAddr)
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0006
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0006, TestSize.Level0)
 {
-    if (desAddr.empty() || !loadFileSuccess_) {
-        TELEPHONY_LOGE("Invalid destination address or failed to load short code rules");
-        return PremiumSmsType::UNKNOWN;
-    }
-    std::string countryCode = "";
-    GetCountryCode(slotId, countryCode);
-    if (countryCode.empty()) {
-        TELEPHONY_LOGE("Invalid country code");
-        return PremiumSmsType::UNKNOWN;
-    }
- 
-    SmsShortCodeType smsShortCodeType = MatchShortCodeType(countryCode, desAddr);
-    TELEPHONY_LOGI("smsShortCodeType: %d", static_cast<int>(smsShortCodeType));
-    if (smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN) {
-        return PremiumSmsType::UNKNOWN;
-    }
-    if (smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_SHORT_CODE ||
-        smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_FREE ||
-        smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_STANDARD) {
-        return PremiumSmsType::NOT_PREMIUM;
-    }
-    return PremiumSmsType::PREMIUM_OR_POSSIBLE_PREMIUM;
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string countryCode = "ca";
+    const std::string desAddr = "+1234567";
+    SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
+    EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_SHORT_CODE);
 }
 
-SmsShortCodeType SmsShortCodeMatcher::MatchShortCodeType(const std::string &countryCode, const std::string &desAddr)
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0007
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0007, TestSize.Level0)
 {
-    std::string processedAddr = RemovePlusSign(desAddr);
-    if (processedAddr.empty()) {
-        TELEPHONY_LOGE("Invalid address after processing");
-        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
-    }
-    
-    auto it = countryShortCodeRules_.find(countryCode);
-    if (it == countryShortCodeRules_.end()) {
-        TELEPHONY_LOGE("No rules found for country code: %s", countryCode.c_str());
-        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
-    }
- 
-    const ShortCodeRule& rule = it->second;
- 
-    if (MatchesRegexList(processedAddr, rule.freeCodes)) {
-        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_FREE;
-    }
-    if (MatchesRegexList(processedAddr, rule.standardCodes)) {
-        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_STANDARD;
-    }
-    if (MatchesRegexList(processedAddr, rule.premiumCodes)) {
-        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_PREMIUM;
-    }
-    if (!MatchesRegexList(processedAddr, std::vector<std::string>{rule.pattern})) {
-        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_SHORT_CODE;
-    }
-    return SmsShortCodeType::SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM;
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string countryCode = "ca";
+    const std::string desAddr = "244444";
+    SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
+    EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_STANDARD);
 }
 
-bool SmsShortCodeMatcher::GetCountryCode(const int32_t &slotId, std::string &countryCode)
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0008
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0008, TestSize.Level0)
 {
-    if (slotId < 0 || slotId >= SIM_SLOT_COUNT) {
-        TELEPHONY_LOGE("Invalid slotId");
-        countryCode = "";
-        return false;
-    }
-    std::u16string countryCode16 = u"";
-    GetCountryCodeFromNetwork(countryCode16);
-    if (countryCode16.empty()) {
-        TELEPHONY_LOGI("Network country code is empty");
-        CoreServiceClient::GetInstance().GetISOCountryCodeForSim(slotId, countryCode16);
-    }
-    if (countryCode16.empty()) {
-        TELEPHONY_LOGE("Both network and SIM country codes are empty, get country code failed");
-        countryCode = "";
-        return false;
-    }
- 
-    countryCode = Str16ToStr8(countryCode16);
-    std::transform(countryCode.begin(), countryCode.end(), countryCode.begin(), ::tolower);
-    TELEPHONY_LOGI("Got country code: %s", countryCode.c_str());
-    return true;
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string countryCode = "ca";
+    const std::string desAddr = "+77777";
+    SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
+    EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM);
 }
 
-bool SmsShortCodeMatcher::GetCountryCodeFromNetwork(std::u16string &countryCode16)
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0009
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0009, TestSize.Level0)
 {
-    int32_t primarySlotId = 0;
-    CoreServiceClient::GetInstance().GetPrimarySlotId(primarySlotId);
-    CoreServiceClient::GetInstance().GetIsoCountryCodeForNetwork(primarySlotId, countryCode16);
-    if (countryCode16.empty()) {
-        return false;
-    }
-    return true;
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string countryCode = "pl";
+    const std::string desAddr = "7910";
+    SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
+    EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_PREMIUM);
+}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0010
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0010, TestSize.Level0)
+{
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string countryCode = "pl";
+    const std::string desAddr = "116123";
+    SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
+    EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_FREE);
+}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0011
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0011, TestSize.Level0)
+{
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string countryCode = "";
+    const std::string desAddr = "12345";
+    SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
+    EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN);
+}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_SmsShortCodeMatcher_0012
+ * @tc.name     Test SmsShortCodeMatcher
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0012, TestSize.Level0)
+{
+    auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
+    const std::string countryCode = "zz";
+    const std::string desAddr = "12345";
+    SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
+    EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN);
 }
 } // namespace Telephony
 } // namespace OHOS
