@@ -23,7 +23,5 @@ ohos_prebuilt_etc("sms_short_code_rules_default") {
 }
 
 group("sms_short_code_rules") {
-  deps = [
-    ":sms_short_code_rules_default",
-  ]
+  deps = [ ":sms_short_code_rules_default" ]
 }

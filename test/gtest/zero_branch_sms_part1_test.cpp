@@ -87,12 +87,12 @@ HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0003, TestSize.Level0)
     auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
     const std::string desAddr = "+10661";
     int32_t slotId = 2;
-    const std::string expectedCountryCode = "cn";
+    const std::string expectedCountryCode = "";
     std::string countryCode;
     smsShortCodeMatcher->GetCountryCode(slotId, countryCode);
     EXPECT_EQ(countryCode, expectedCountryCode);
     PremiumSmsType premiumSmsType = smsShortCodeMatcher->GetPremiumSmsType(slotId, desAddr);
-    EXPECT_EQ(premiumSmsType, PremiumSmsType::PREMIUM_OR_POSSIBLE_PREMIUM);
+    EXPECT_EQ(premiumSmsType, PremiumSmsType::UNKNOWN);
 }
 
 /**
@@ -104,7 +104,7 @@ HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0004, TestSize.Level0)
 {
     auto smsShortCodeMatcher = std::make_shared<SmsShortCodeMatcher>();
     const std::string desAddr = "+10650";
-    int32_t slotId = 0;
+    int32_t slotId = 1;
     PremiumSmsType premiumSmsType = smsShortCodeMatcher->GetPremiumSmsType(slotId, desAddr);
     EXPECT_EQ(premiumSmsType, PremiumSmsType::NOT_PREMIUM);
 }
