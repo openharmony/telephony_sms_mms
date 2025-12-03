@@ -177,7 +177,7 @@ SmsShortCodeType SmsShortCodeMatcher::MatchShortCodeType(const std::string &coun
 
 bool SmsShortCodeMatcher::GetCountryCode(const int32_t &slotId, std::string &countryCode)
 {
-    if (slotId < 0 || slotId > SIM_SLOT_COUNT) {
+    if (slotId < 0 || slotId >= SIM_SLOT_COUNT) {
         TELEPHONY_LOGE("Invalid slotId");
         countryCode = "";
         return false;
