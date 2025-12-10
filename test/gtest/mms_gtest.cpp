@@ -839,6 +839,8 @@ HWTEST_F(MmsGtest, MmsDecodeBuffer_0002, Function | MediumTest | Level1)
     mmsDecodeBuffer.DecodeText(testStr, intVar);
     mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = QUOTE_CHAR_LEN;
     mmsDecodeBuffer.DecodeText(testStr, intVar);
+    mmsDecodeBuffer.pduBuffer_[mmsDecodeBuffer.curPosition_] = 0;
+    mmsDecodeBuffer.DecodeText(testStr, intVar);
 
     mmsDecodeBuffer.curPosition_ = 0;
     testChar += 1;
