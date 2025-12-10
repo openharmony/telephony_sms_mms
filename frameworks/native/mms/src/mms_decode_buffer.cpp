@@ -330,7 +330,7 @@ bool MmsDecodeBuffer::DecodeText(std::string &str, uint32_t &len)
             break;
         }
     }
-    return (len > 0) ? true : false;
+    return (len >= 0) ? true : false;
 }
 
 /**
