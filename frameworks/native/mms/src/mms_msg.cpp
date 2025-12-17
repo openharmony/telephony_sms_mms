@@ -37,11 +37,11 @@ bool MmsMsg::DecodeMsg(std::string mmsFilePathName)
         return true;
     }
     if (!mmsHeader_.DecodeMmsHeader(decodeBuffer)) {
-        TELEPHONY_LOGE("Decode Mms Header Error.");
+        TELEPHONY_LOGE("Decode Mms Header Error. Error Location:%{public}d", decodeBuffer.GetCurPosition());
         return false;
     }
     if (!mmsBody_.DecodeMmsBody(decodeBuffer, mmsHeader_)) {
-        TELEPHONY_LOGE("Decode Mms Body Error.");
+        TELEPHONY_LOGE("Decode Mms Body Error. Error Location:%{public}d", decodeBuffer.GetCurPosition());
         return false;
     }
     return true;
@@ -55,11 +55,11 @@ bool MmsMsg::DecodeMsg(std::unique_ptr<char[]> inBuff, uint32_t inLen)
         return false;
     }
     if (!mmsHeader_.DecodeMmsHeader(decodeBuffer)) {
-        TELEPHONY_LOGE("Decode Mms Header Error.");
+        TELEPHONY_LOGE("Decode Mms Header Error. Error Location:%{public}d", decodeBuffer.GetCurPosition());
         return false;
     }
     if (!mmsBody_.DecodeMmsBody(decodeBuffer, mmsHeader_)) {
-        TELEPHONY_LOGE("Decode Mms Body Error.");
+        TELEPHONY_LOGE("Decode Mms Body Error. Error Location:%{public}d", decodeBuffer.GetCurPosition());
         return false;
     }
     return true;
