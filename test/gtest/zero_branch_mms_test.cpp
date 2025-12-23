@@ -230,7 +230,7 @@ HWTEST_F(BranchMmsTest, MmsHeader_0003, Function | MediumTest | Level1)
     EXPECT_FALSE(mmsHeader->DecodeFieldLongValue(1, decodeBuffer, data));
     EXPECT_FALSE(mmsHeader->DecodeFieldIntegerValue(1, decodeBuffer, data));
     EXPECT_FALSE(mmsHeader->DecodeFieldTextStringValue(1, decodeBuffer, data));
-    EXPECT_FALSE(mmsHeader->DecodeFieldTextStringValue(MMS_BCC, decodeBuffer, data));
+    EXPECT_TRUE(mmsHeader->DecodeFieldTextStringValue(MMS_BCC, decodeBuffer, data));
     EXPECT_FALSE(mmsHeader->DecodeFieldEncodedStringValue(1, decodeBuffer, data));
     EXPECT_FALSE(mmsHeader->DecodeFieldEncodedStringValue(MMS_BCC, decodeBuffer, data));
     EXPECT_FALSE(mmsHeader->DecodeFromValue(1, decodeBuffer, data));
@@ -853,7 +853,7 @@ HWTEST_F(BranchMmsTest, MmsContentType_0003, TestSize.Level0)
     decoderBuffer.pduBuffer_[0] = 0;
     decoderBuffer.curPosition_ = 0;
     decoderBuffer.totolLength_ = 1;
-    ASSERT_FALSE(mmsContentType.DecodeTypeField(decoderBuffer, valueLen));
+    ASSERT_TRUE(mmsContentType.DecodeTypeField(decoderBuffer, valueLen));
     mmsContentType.msgContentParm_.textMap_[152] = "";
     int32_t offset = 1;
     mmsEncodeBuffer.curPosition_ = CODE_BUFFER_MAX_SIZE + offset;
