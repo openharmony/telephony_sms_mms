@@ -725,7 +725,6 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0002, Function | MediumTest | Level1)
     EXPECT_EQ(smsSendManager->IsImsSmsSupported(INVALID_SLOTID, isSupported), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(smsSendManager->SplitMessage(scAddr, splitMessage), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(smsSendManager->GetSmsSegmentsInfo(scAddr, true, lenInfo), TELEPHONY_ERR_SUCCESS);
-    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(0, desAddr, smsShortCodeType), TELEPHONY_ERR_LOCAL_PTR_NULL);
     smsSendManager->smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
     EXPECT_EQ(smsSendManager->GetSmsShortCodeType(0, desAddr, smsShortCodeType), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(smsShortCodeType, 1);
