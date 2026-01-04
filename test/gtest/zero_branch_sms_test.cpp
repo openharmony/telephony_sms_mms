@@ -2042,8 +2042,6 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
 {
     int32_t slotId = 0;
     std::u16string desAddr = u"";
-    std::string desAddr8 = "";
-    int32_t smsShortCodeType = -1;
     sptr<ISendShortMessageCallback> sendCallback;
     sptr<IDeliveryShortMessageCallback> deliveryCallback;
     int32_t ret = 0;
@@ -2089,7 +2087,26 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Decode(pdu, pdu);
     uint32_t charset = 1;
     Singleton<SmsServiceManagerClient>::GetInstance().GetEncodeStringFunc(pdu, charset, charset, pdu);
-    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr8, smsShortCodeType);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsServiceManagerClient_0002
+ * @tc.name     Test SmsServiceManagerClient_GetSmsShortCodeType
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsServiceManagerClient_GetSmsShortCodeType, Function | MediumTest | Level1)
+{
+    int32_t slotId = 0;
+    std::string desAddr = "";
+    int32_t smsShortCodeType = -1;
+    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    EXPECT_EQ(smsShortCodeType, "-1");
+    std::string desAddr = "12345";
+    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    EXPECT_EQ(smsShortCodeType, "0");
+    std::string desAddr = "+10660";
+    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    EXPECT_EQ(smsShortCodeType, "1");
 }
 
 /**
@@ -2416,10 +2433,10 @@ HWTEST_F(BranchSmsTest, SmsService_0005, Function | MediumTest | Level1)
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsService_0006
- * @tc.name     Test SmsService
+ * @tc.name     Test SmsService_GetSmsShortCodeType
  * @tc.desc     Function test
  */
-HWTEST_F(BranchSmsTest, SmsService_0006, Function | MediumTest | Level1)
+HWTEST_F(BranchSmsTest, SmsService_GetSmsShortCodeType, Function | MediumTest | Level1)
 {
     auto smsService = DelayedSingleton<SmsService>::GetInstance();
     int32_t shortCodeType = -1;
