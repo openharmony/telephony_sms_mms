@@ -108,10 +108,10 @@ HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_004, Function | MediumTest | L
 }
 /**
  * @tc.number   Telephony_SmsMmsGtest_smsServiceProxyTest_005
- * @tc.name     smsServiceProxyTest_001
+ * @tc.name     smsServiceProxyTest_GetSmsShortCodeType_1
  * @tc.desc     Function test
  */
-HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_005, Function | MediumTest | Level1)
+HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_GetSmsShortCodeType_1, Function | MediumTest | Level1)
 {
     sptr<IRemoteObject> sptrRemoteObject = nullptr;
     SmsServiceProxy smsServiceProxy(sptrRemoteObject);
@@ -123,10 +123,10 @@ HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_005, Function | MediumTest | L
 }
 /**
  * @tc.number   Telephony_SmsMmsGtest_smsServiceProxyTest_006
- * @tc.name     smsServiceProxyTest_GetSmsShortCodeType
+ * @tc.name     smsServiceProxyTest_GetSmsShortCodeType_2
  * @tc.desc     Function test
  */
-HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_GetSmsShortCodeType, Function | MediumTest | Level1)
+HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_GetSmsShortCodeType_2, Function | MediumTest | Level1)
 {
     sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
     sptrRemoteObject->retGetObjectRefCount = 1;
@@ -135,7 +135,6 @@ HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_GetSmsShortCodeType, Function 
     int32_t slotId = 0;
     std::string desAddr = "10650";
     int32_t smsShortCodeType = -1;
-
     EXPECT_EQ(smsServiceProxy.Remote().GetRefPtr(), sptrRemoteObject);
     EXPECT_EQ(smsServiceProxy.GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), 0);
     EXPECT_EQ(smsShortCodeType, 0);
