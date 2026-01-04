@@ -229,6 +229,15 @@ public:
     int32_t GetImsShortMessageFormat(std::u16string &format) override;
 
     /**
+     * @brief Get SMS Short Code Type
+     * @param slotId [in], indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param desAddr [in], indicates the destination address.
+     * @return int32_t, returns {@code 0} if get SMS short code type success
+     */
+    int32_t GetSmsShortCodeType(int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType) override;
+
+    /**
      * @brief HasSmsCapability
      * Check whether it is supported Sms Capability
      * @return true
