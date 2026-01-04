@@ -1805,7 +1805,6 @@ static void NativeGetSmsShortCodeType(napi_env env, void *data)
     if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
         context->resolved = true;
     }
-    TELEPHONY_LOGE("NativeGetSmsShortCodeType errorCode:%{public}d", context->errorCode);
 }
 
 static void GetSmsShortCodeTypeCallback(napi_env env, napi_status status, void *data)
