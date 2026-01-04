@@ -123,10 +123,10 @@ HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_005, Function | MediumTest | L
 }
 /**
  * @tc.number   Telephony_SmsMmsGtest_smsServiceProxyTest_006
- * @tc.name     smsServiceProxyTest_006
+ * @tc.name     smsServiceProxyTest_GetSmsShortCodeType
  * @tc.desc     Function test
  */
-HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_006, Function | MediumTest | Level1)
+HWTEST_F(SmsServiceProxyTest, smsServiceProxyTest_GetSmsShortCodeType, Function | MediumTest | Level1)
 {
     sptr<MockRemoteObject> sptrRemoteObject = new MockRemoteObject();
     sptrRemoteObject->retGetObjectRefCount = 1;
