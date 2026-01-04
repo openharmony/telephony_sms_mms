@@ -70,6 +70,13 @@ void SmsSendManager::Init()
         return;
     }
     cdmaSmsSender_->Init();
+
+    smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
+    if (smsShortCodeMatcher_ == nullptr) {
+        TELEPHONY_LOGE("failed to create SmsShortCodeMatcher");
+        return;
+    }
+
     InitNetworkHandle();
 }
 
