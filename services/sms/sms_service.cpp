@@ -371,6 +371,24 @@ int32_t SmsService::GetImsShortMessageFormat(std::u16string &format)
     return interfaceManager->GetImsShortMessageFormat(format);
 }
 
+int32_t SmsService::GetSmsShortCodeType(int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType)
+{
+    if (!TelephonyPermission::CheckCallerIsSystemApp()) {
+        TELEPHONY_LOGE("Non-system applications use system APIs!");
+        return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
+    }
+    if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
+        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
+        return TELEPHONY_ERR_PERMISSION_ERR;
+    }
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = GetSmsInterfaceManager(slotId);
+    if (interfaceManager == nullptr) {
+        TELEPHONY_LOGE("interfaceManager is nullptr error.");
+        return TELEPHONY_ERR_SLOTID_INVALID;
+    }
+    return interfaceManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+}
+
 bool SmsService::HasSmsCapability()
 {
     int32_t slotId = GetDefaultSmsSlotId();
@@ -686,7 +704,7 @@ int32_t SmsService::SplitMessage(const std::u16string &message, std::vector<std:
         return TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API;
     }
     if (!TelephonyPermission::CheckPermission(Permission::SEND_MESSAGES)) {
-        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Get State Permisson.");
+        TELEPHONY_LOGE("Check Permission Failed, No Has Telephony Send Messages Permisson.");
         return TELEPHONY_ERR_PERMISSION_ERR;
     }
 
