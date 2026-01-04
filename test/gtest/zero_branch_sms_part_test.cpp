@@ -464,10 +464,10 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0004, Function | MediumTest | Le
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceManager_0005
- * @tc.name     Test SmsInterfaceManager
+ * @tc.name     SmsInterfaceManager_GetSmsShortCodeType
  * @tc.desc     Function test
  */
-HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0005, Function | MediumTest | Level1)
+HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_GetSmsShortCodeType, Function | MediumTest | Level1)
 {
     int32_t slotId = 0;
     std::string desAddr = "12345";
