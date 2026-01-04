@@ -464,7 +464,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0004, Function | MediumTest | Le
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceManager_0005
- * @tc.name     SmsInterfaceManager_GetSmsShortCodeType
+ * @tc.name     Test SmsInterfaceManager_GetSmsShortCodeType
  * @tc.desc     Function test
  */
 HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_GetSmsShortCodeType, Function | MediumTest | Level1)
@@ -478,7 +478,14 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_GetSmsShortCodeType, Function | 
     EXPECT_EQ(result, TELEPHONY_ERR_LOCAL_PTR_NULL);
     interfaceManager->smsSendManager_ = std::make_unique<SmsSendManager>(slotId);
     result = interfaceManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
-    EXPECT_GE(result, TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(result, TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsShortCodeType, 0);
+    desAddr = "10660";
+    interfaceManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    EXPECT_EQ(smsShortCodeType, 1);
+    desAddr = "";
+    interfaceManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    EXPECT_EQ(smsShortCodeType, -1);
 }
 
 /**
