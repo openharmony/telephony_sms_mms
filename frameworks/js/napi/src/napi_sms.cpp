@@ -1794,6 +1794,70 @@ static std::string to_utf8(std::u16string str16)
     return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> {}.to_bytes(str16);
 }
 
+static void NativeGetSmsShortCodeType(napi_env env, void *data)
+{
+    auto context = static_cast<GetSmsShortCodeTypeContext *>(data);
+    if (context == nullptr) {
+        return;
+    }
+    context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance()
+        .GetSmsShortCodeType(context->slotId, context->destAddr, context->smsShortCodeType);
+    if (context->errorCode == TELEPHONY_ERR_SUCCESS) {
+        context->resolved = true;
+    }
+    TELEPHONY_LOGE("NativeGetSmsShortCodeType errorCode:%{public}d", context->errorCode);
+}
+
+static void GetSmsShortCodeTypeCallback(napi_env env, napi_status status, void *data)
+{
+    auto context = static_cast<GetSmsShortCodeTypeContext *>(data);
+    if (context == nullptr) {
+        return;
+    }
+    napi_value callbackValue = nullptr;
+    if (context->smsShortCodeType != SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_PREMIUM &&
+        context->smsShortCodeType != SmsShortCodeType::SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM) {
+        context->smsShortCodeType = SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
+    }
+    if (context != nullptr && context->resolved) {
+        napi_create_int32(env, context->smsShortCodeType, &callbackValue);
+    } else {
+        JsError error = NapiUtil::ConverErrorMessageForJs(context->errorCode);
+        napi_value errVal = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
+    }
+    NapiUtil::Handle2ValueCallback(env, context, callbackValue);
+}
+
+static bool MatchGetSmsShortCodeTypeParameters(napi_env env, const napi_value parameters[], size_t parameterCount)
+{
+    return NapiUtil::MatchParameters(env, parameters, { napi_number, napi_string });
+}
+
+static napi_value GetSmsShortCodeType(napi_env env, napi_callback_info info)
+{
+    size_t parameterCount = TWO_PARAMETERS;
+    napi_value parameters[TWO_PARAMETERS] = { 0 };
+    napi_value thisVar = nullptr;
+    void *data = nullptr;
+    napi_get_cb_info(env, info, &parameterCount, parameters, &thisVar, &data);
+    if (!MatchGetSmsShortCodeTypeParameters(env, parameters, parameterCount)) {
+        TELEPHONY_LOGE("GetSmsShortCodeType parameter matching failed.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    auto context = std::make_unique<GetSmsShortCodeTypeContext>().release();
+    if (context == nullptr) {
+        TELEPHONY_LOGE("GetSmsShortCodeType context is nullptr.");
+        NapiUtil::ThrowParameterError(env);
+        return nullptr;
+    }
+    napi_get_value_int32(env, parameters[0], &context->slotId);
+    context->destAddr = NapiUtil::GetStringFromValue(env, parameters[1]);
+    napi_value result = NapiUtil::HandleAsyncWork(
+        env, context, "GetSmsShortCodeType", NativeGetSmsShortCodeType, GetSmsShortCodeTypeCallback);
+    return result;
+}
+
 static void GetImsShortMessageFormatCallback(napi_env env, napi_status status, void *data)
 {
     auto context = static_cast<SingleValueContext<std::u16string> *>(data);
@@ -2088,6 +2152,7 @@ napi_value DeclareSmsInterface(napi_env env, napi_value exports)
         DECLARE_NAPI_WRITABLE_FUNCTION("encodeMms", NapiMms::EncodeMms),
         DECLARE_NAPI_WRITABLE_FUNCTION("sendMms", NapiSendRecvMms::SendMms),
         DECLARE_NAPI_WRITABLE_FUNCTION("downloadMms", NapiSendRecvMms::DownloadMms),
+        DECLARE_NAPI_WRITABLE_FUNCTION("getSmsShortCodeType", GetSmsShortCodeType),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
