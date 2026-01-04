@@ -19,9 +19,9 @@
 
 #include "core_manager_inner.h"
 #include "radio_event.h"
-#ifdef SMS_MMS_SUPPORT_SATELLITE
+#ifdef SMS_MMS_SATELLITE
 #include "satellite_sms_client.h"
-#endif // SMS_MMS_SUPPORT_SATELLITE
+#endif // SMS_MMS_SATELLITE
 #include "securec.h"
 #include "sms_hisysevent.h"
 #include "telephony_log_wrapper.h"
@@ -184,7 +184,7 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
         TELEPHONY_LOGE("gsm_sms_sender: SendSms smsIndexer nullptr");
         return;
     }
-#ifdef SMS_MMS_SUPPORT_SATELLITE
+#ifdef SMS_MMS_SATELLITE
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
     if (!satelliteSmsClient.IsSatelliteEnabled()) {
         if (!isImsNetDomain_ && (voiceServiceState_ != static_cast<int32_t>(RegServiceState::REG_STATE_IN_SERVICE))) {
@@ -195,7 +195,7 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
             return;
         }
     }
-#endif // SMS_MMS_SUPPORT_SATELLITE
+#endif // SMS_MMS_SATELLITE
     int64_t refId = GetMsgRef64Bit();
     TELEPHONY_LOGI("gsm refId = %{public}" PRId64 "", refId);
     if (!SendCacheMapAddItem(refId, smsIndexer)) {
@@ -208,13 +208,13 @@ void GsmSmsSender::SendSmsToRil(const shared_ptr<SmsSendIndexer> &smsIndexer)
     smsData.smscPdu = StringUtils::StringToHex(smsIndexer->GetEncodeSmca());
     smsData.pdu = StringUtils::StringToHex(smsIndexer->GetEncodePdu());
 
-#ifdef SMS_MMS_SUPPORT_SATELLITE
+#ifdef SMS_MMS_SATELLITE
     if (satelliteSmsClient.IsSatelliteEnabled()) {
         TELEPHONY_LOGI("send sms through satellite");
         SendSatelliteSms(smsIndexer, smsData);
         return;
     }
-#endif // SMS_MMS_SUPPORT_SATELLITE
+#endif // SMS_MMS_SATELLITE
 
     bool sendCsSMS = false;
     if ((!isImsNetDomain_ || !imsSmsCfg_) || (smsIndexer->GetPsResendCount() == MAX_SEND_RETRIES)) {
@@ -244,7 +244,7 @@ void GsmSmsSender::SendCsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, GsmSi
     }
 }
 
-#ifdef SMS_MMS_SUPPORT_SATELLITE
+#ifdef SMS_MMS_SATELLITE
 void GsmSmsSender::SendSatelliteSms(const shared_ptr<SmsSendIndexer> &smsIndexer, GsmSimMessageParam smsData)
 {
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
@@ -262,7 +262,7 @@ void GsmSmsSender::SendSatelliteSms(const shared_ptr<SmsSendIndexer> &smsIndexer
         satelliteSmsClient.SendSms(slotId_, RadioEvent::RADIO_SEND_SMS, smsData);
     }
 }
-#endif // SMS_MMS_SUPPORT_SATELLITE
+#endif // SMS_MMS_SATELLITE
 
 void GsmSmsSender::SendImsSms(const shared_ptr<SmsSendIndexer> &smsIndexer, GsmSimMessageParam smsData)
 {
@@ -335,7 +335,7 @@ void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &e
             reportList_.erase(iter);
         }
     }
-#ifdef SMS_MMS_SUPPORT_SATELLITE
+#ifdef SMS_MMS_SATELLITE
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
     if (satelliteSmsClient.GetSatelliteCapability() > 0 && satelliteSmsClient.IsSatelliteEnabled()) {
         TELEPHONY_LOGI("send sms ack through satellite");
@@ -343,7 +343,7 @@ void GsmSmsSender::StatusReportAnalysis(const AppExecFwk::InnerEvent::Pointer &e
     } else {
 #else
     {
-#endif // SMS_MMS_SUPPORT_SATELLITE
+#endif // SMS_MMS_SATELLITE
         CoreManagerInner::GetInstance().SendSmsAck(slotId_, 0, AckIncomeCause::SMS_ACK_PROCESSED, true, nullptr);
     }
     if (deliveryCallback != nullptr) {
@@ -406,19 +406,19 @@ void GsmSmsSender::SetSendIndexerInfo(const std::shared_ptr<SmsSendIndexer> &ind
 
 bool GsmSmsSender::RegisterHandler()
 {
-#ifdef SMS_MMS_SUPPORT_SATELLITE
+#ifdef SMS_MMS_SATELLITE
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
     if (satelliteSmsClient.GetSatelliteSupported()) {
         satelliteSmsClient.AddSendHandler(slotId_, std::static_pointer_cast<TelEventHandler>(shared_from_this()));
     }
-#endif // SMS_MMS_SUPPORT_SATELLITE
+#endif // SMS_MMS_SATELLITE
     CoreManagerInner::GetInstance().RegisterCoreNotify(
         slotId_, shared_from_this(), RadioEvent::RADIO_SMS_STATUS, nullptr);
 
     return true;
 }
 
-#ifdef SMS_MMS_SUPPORT_SATELLITE
+#ifdef SMS_MMS_SATELLITE
 void GsmSmsSender::RegisterSatelliteCallback()
 {
     auto &satelliteSmsClient = SatelliteSmsClient::GetInstance();
@@ -441,7 +441,7 @@ void GsmSmsSender::UnregisterSatelliteCallback()
         satelliteCallback_ = nullptr;
     }
 }
-#endif // SMS_MMS_SUPPORT_SATELLITE
+#endif // SMS_MMS_SATELLITE
 
 void GsmSmsSender::RegisterImsHandler()
 {
