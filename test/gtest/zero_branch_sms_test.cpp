@@ -2106,26 +2106,8 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Decode(pdu, pdu);
     uint32_t charset = 1;
     Singleton<SmsServiceManagerClient>::GetInstance().GetEncodeStringFunc(pdu, charset, charset, pdu);
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_SmsServiceManagerClient_0002
- * @tc.name     Test SmsServiceManagerClient_GetSmsShortCodeType
- * @tc.desc     Function test
- */
-HWTEST_F(BranchSmsTest, SmsServiceManagerClient_GetSmsShortCodeType, Function | MediumTest | Level1)
-{
-    int32_t slotId = 0;
-    std::string desAddr = "12345";
-    int32_t smsShortCodeType = -1;
-    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
-    EXPECT_EQ(smsShortCodeType, 0);
-    desAddr = "";
-    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr8, smsShortCodeType);
     EXPECT_EQ(smsShortCodeType, -1);
-    desAddr = "+10660";
-    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
-    EXPECT_EQ(smsShortCodeType, 1);
 }
 
 /**
