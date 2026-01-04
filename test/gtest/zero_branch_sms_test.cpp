@@ -680,11 +680,9 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0002, Function | MediumTest | Level1)
     auto smsSendManager = std::make_shared<SmsSendManager>(INVALID_SLOTID);
     std::function<void(std::shared_ptr<SmsSendIndexer>)> fun = nullptr;
     std::string scAddr = "123";
-    std::string desAddr = "10660";
     bool isSupported = true;
     std::vector<std::u16string> splitMessage;
     LengthInfo lenInfo;
-    int32_t smsShortCodeType = -1;
     const sptr<ISendShortMessageCallback> sendCallback =
         iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
     const sptr<IDeliveryShortMessageCallback> deliveryCallback =
@@ -725,9 +723,30 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0002, Function | MediumTest | Level1)
     EXPECT_EQ(smsSendManager->IsImsSmsSupported(INVALID_SLOTID, isSupported), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(smsSendManager->SplitMessage(scAddr, splitMessage), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(smsSendManager->GetSmsSegmentsInfo(scAddr, true, lenInfo), TELEPHONY_ERR_SUCCESS);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsSendManager_0003
+ * @tc.name     Test SmsSendManager_SmsShortCodeType
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsSendManager_SmsShortCodeType, Function | MediumTest | Level1)
+{
+    auto smsSendManager = std::make_shared<SmsSendManager>(INVALID_SLOTID);
+    int32_t slotId = 0;
+    std::string desAddr = "10660";
+    int32_t smsShortCodeType = -1;
+    smsSendManager->smsShortCodeMatcher_ = nullptr;
+    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_LOCAL_PTR_NULL);
     smsSendManager->smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
-    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(0, desAddr, smsShortCodeType), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(smsShortCodeType, 1);
+    desAddr = "12345";
+    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsShortCodeType, 0);
+    desAddr = "";
+    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsShortCodeType, -1);
 }
 
 /**
