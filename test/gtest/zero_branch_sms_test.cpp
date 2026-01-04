@@ -2100,13 +2100,13 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_GetSmsShortCodeType, Function | 
     std::string desAddr = "";
     int32_t smsShortCodeType = -1;
     Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
-    EXPECT_EQ(smsShortCodeType, "-1");
+    EXPECT_EQ(smsShortCodeType, -1);
     desAddr = "12345";
     Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
-    EXPECT_EQ(smsShortCodeType, "0");
+    EXPECT_EQ(smsShortCodeType, 0);
     desAddr = "+10660";
     Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
-    EXPECT_EQ(smsShortCodeType, "1");
+    EXPECT_EQ(smsShortCodeType, 1);
 }
 
 /**
