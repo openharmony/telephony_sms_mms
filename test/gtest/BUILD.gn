@@ -94,7 +94,7 @@ test_sources += [
     "sms_utils_gtest.cpp"
 ]
 
-if (sms_mms_feature_support_satellite) {
+if (sms_mms_satellite) {
   test_sources += [
     "sms_satellite_gtest.cpp",
   ]

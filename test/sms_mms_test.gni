@@ -118,7 +118,8 @@ sms_mms_src = [
     "$SMS_MMS_SOURCE_DIR/test/gtest/sms_send_callback_gtest.cpp",
 ]
 
-if (sms_mms_feature_support_satellite) {
+if (sms_mms_satellite) {
+  sms_mms_defines += [ "SMS_MMS_SATELLITE" ]
   sms_mms_src += [
     "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_callback.cpp",
     "$SMS_MMS_SOURCE_DIR/services/sms/satellite_service_interaction/src/satellite_sms_callback_stub.cpp",
@@ -148,8 +149,6 @@ sms_mms_defines = [
     "TELEPHONY_LOG_TAG = \"SmsMms\"",
     "LOG_DOMAIN = 0xD001F06",
 ]
-
-sms_mms_defines += [ "SMS_MMS_SUPPORT_SATELLITE" ]
 
 sms_mms_cflags = [
     "-fstack-protector-strong",
