@@ -524,6 +524,29 @@ int32_t SmsServiceProxy::GetSmsSegmentsInfo(
     return TELEPHONY_ERR_SUCCESS;
 }
 
+int32_t SmsServiceProxy::GetSmsShortCodeType(int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType)
+{
+    TELEPHONY_LOGI("SmsServiceProxy::GetSmsShortCodeType");
+    MessageParcel dataParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!dataParcel.WriteInterfaceToken(SmsServiceProxy::GetDescriptor())) {
+        TELEPHONY_LOGE("GetSmsShortCodeType WriteInterfaceToken is false");
+        return TELEPHONY_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    dataParcel.WriteInt32(slotId);
+    dataParcel.WriteString(desAddr);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TELEPHONY_LOGE("GetSmsShortCodeType Remote is null");
+        return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    remote->SendRequest(static_cast<int32_t>(SmsServiceInterfaceCode::GET_SMS_SHORT_CODE_TYPE), dataParcel,
+        replyParcel, option);
+    smsShortCodeType = replyParcel.ReadInt32();
+    return TELEPHONY_ERR_SUCCESS;
+}
+
 int32_t SmsServiceProxy::IsImsSmsSupported(int32_t slotId, bool &isSupported)
 {
     TELEPHONY_LOGI("SmsServiceProxy::IsImsSmsSupported slotId : %{public}d", slotId);
