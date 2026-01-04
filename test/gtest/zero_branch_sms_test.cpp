@@ -2422,7 +2422,6 @@ HWTEST_F(BranchSmsTest, SmsService_0005, Function | MediumTest | Level1)
 HWTEST_F(BranchSmsTest, SmsService_0006, Function | MediumTest | Level1)
 {
     auto smsService = DelayedSingleton<SmsService>::GetInstance();
-    int32_t slotId = 0;
     int32_t shortCodeType = -1;
     std::string desAddr = "12345";
     smsService->slotSmsInterfaceManagerMap_.erase(INVALID_SLOTID);
