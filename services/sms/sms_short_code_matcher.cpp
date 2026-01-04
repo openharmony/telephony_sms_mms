@@ -118,30 +118,22 @@ void SmsShortCodeMatcher::ParseCodeArray(const nlohmann::json &jsonArray, std::v
     }
 }
 
-PremiumSmsType SmsShortCodeMatcher::GetPremiumSmsType(const int32_t slotId, const std::string &desAddr)
+SmsShortCodeType SmsShortCodeMatcher::GetSmsShortCodeType(const int32_t slotId, const std::string &desAddr)
 {
     if (desAddr.empty() || !loadFileSuccess_) {
         TELEPHONY_LOGE("Invalid destination address or failed to load short code rules");
-        return PremiumSmsType::UNKNOWN;
+        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
     }
     std::string countryCode = "";
     GetCountryCode(slotId, countryCode);
     if (countryCode.empty()) {
         TELEPHONY_LOGE("Invalid country code");
-        return PremiumSmsType::UNKNOWN;
+        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
     }
- 
+
     SmsShortCodeType smsShortCodeType = MatchShortCodeType(countryCode, desAddr);
     TELEPHONY_LOGI("smsShortCodeType: %d", static_cast<int>(smsShortCodeType));
-    if (smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN) {
-        return PremiumSmsType::UNKNOWN;
-    }
-    if (smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_SHORT_CODE ||
-        smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_FREE ||
-        smsShortCodeType == SmsShortCodeType::SMS_SHORT_CODE_TYPE_STANDARD) {
-        return PremiumSmsType::NOT_PREMIUM;
-    }
-    return PremiumSmsType::PREMIUM_OR_POSSIBLE_PREMIUM;
+    return smsShortCodeType;
 }
 
 SmsShortCodeType SmsShortCodeMatcher::MatchShortCodeType(const std::string &countryCode, const std::string &desAddr)
@@ -151,26 +143,23 @@ SmsShortCodeType SmsShortCodeMatcher::MatchShortCodeType(const std::string &coun
         TELEPHONY_LOGE("Invalid address after processing");
         return SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
     }
-    
+
     auto it = countryShortCodeRules_.find(countryCode);
     if (it == countryShortCodeRules_.end()) {
         TELEPHONY_LOGE("No rules found for country code: %s", countryCode.c_str());
         return SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
     }
- 
+
     const ShortCodeRule& rule = it->second;
- 
-    if (MatchesRegexList(processedAddr, rule.freeCodes)) {
-        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_FREE;
-    }
-    if (MatchesRegexList(processedAddr, rule.standardCodes)) {
-        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_STANDARD;
+
+    if (MatchesRegexList(processedAddr, rule.freeCodes) || MatchesRegexList(processedAddr, rule.standardCodes)) {
+        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_PREMIUM;
     }
     if (MatchesRegexList(processedAddr, rule.premiumCodes)) {
-        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_PREMIUM;
+        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM;
     }
     if (!MatchesRegexList(processedAddr, std::vector<std::string>{rule.pattern})) {
-        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_SHORT_CODE;
+        return SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_PREMIUM;
     }
     return SmsShortCodeType::SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM;
 }
@@ -193,7 +182,7 @@ bool SmsShortCodeMatcher::GetCountryCode(const int32_t &slotId, std::string &cou
         countryCode = "";
         return false;
     }
- 
+
     countryCode = Str16ToStr8(countryCode16);
     std::transform(countryCode.begin(), countryCode.end(), countryCode.begin(), ::tolower);
     TELEPHONY_LOGI("Got country code: %s", countryCode.c_str());
