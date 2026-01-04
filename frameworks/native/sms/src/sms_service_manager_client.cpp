@@ -253,6 +253,16 @@ int32_t SmsServiceManagerClient::GetSmsSegmentsInfo(
     return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
 }
 
+int32_t SmsServiceManagerClient::GetSmsShortCodeType(
+    int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType)
+{
+    if (InitSmsServiceProxy()) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return smsServiceInterface_->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    }
+    return TELEPHONY_ERR_IPC_CONNECT_STUB_FAIL;
+}
+
 int32_t SmsServiceManagerClient::IsImsSmsSupported(int32_t slotId, bool &isSupported)
 {
     if (InitSmsServiceProxy()) {
