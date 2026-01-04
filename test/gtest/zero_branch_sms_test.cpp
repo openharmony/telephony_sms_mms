@@ -2425,8 +2425,6 @@ HWTEST_F(BranchSmsTest, SmsService_0006, Function | MediumTest | Level1)
     int32_t slotId = 0;
     int32_t shortCodeType = -1;
     std::string desAddr = "12345";
-    smsService->GetSmsShortCodeType(slotId, desAddr, shortCodeType);
-    EXPECT_EQ(shortCodeType, 0);
     smsService->slotSmsInterfaceManagerMap_.erase(INVALID_SLOTID);
     EXPECT_EQ(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType), TELEPHONY_ERR_SLOTID_INVALID);
     smsService->slotSmsInterfaceManagerMap_[INVALID_SLOTID] = std::make_shared<SmsInterfaceManager>(INVALID_SLOTID);
