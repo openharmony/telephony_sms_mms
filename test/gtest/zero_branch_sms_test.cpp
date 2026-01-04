@@ -2061,6 +2061,8 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
 {
     int32_t slotId = 0;
     std::u16string desAddr = u"";
+    std::string desAddr8 = "";
+    int32_t smsShortCodeType = -1;
     sptr<ISendShortMessageCallback> sendCallback;
     sptr<IDeliveryShortMessageCallback> deliveryCallback;
     int32_t ret = 0;
