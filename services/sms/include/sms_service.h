@@ -251,6 +251,13 @@ public:
     int32_t GetImsShortMessageFormat(std::u16string &format) override;
 
     /**
+     * Get the Sms Short Code Type
+     * Hide this for inner system use
+     * @return Returns {@code 0} if get sms short code type
+     */
+    int32_t GetSmsShortCodeType(int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType) override;
+
+    /**
      * Check whether it is supported Sms Capability
      * @return Returns {@code true} if support sms; returns {@code false}
      */
