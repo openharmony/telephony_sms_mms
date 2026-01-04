@@ -25,17 +25,8 @@ namespace OHOS {
 namespace Telephony {
 enum class SmsShortCodeType {
     SMS_SHORT_CODE_TYPE_UNKNOWN = -1,
-    SMS_SHORT_CODE_TYPE_NOT_SHORT_CODE,
-    SMS_SHORT_CODE_TYPE_FREE,
-    SMS_SHORT_CODE_TYPE_STANDARD,
-    SMS_SHORT_CODE_TYPE_PREMIUM,
+    SMS_SHORT_CODE_TYPE_NOT_PREMIUM,
     SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM,
-};
-
-enum class PremiumSmsType {
-    UNKNOWN = -1,
-    NOT_PREMIUM,
-    PREMIUM_OR_POSSIBLE_PREMIUM,
 };
 
 struct ShortCodeRule {
@@ -49,7 +40,7 @@ struct ShortCodeRule {
 class SmsShortCodeMatcher {
 public:
     SmsShortCodeMatcher();
-    PremiumSmsType GetPremiumSmsType(const int32_t slotId, const std::string &desAddr);
+    SmsShortCodeType GetSmsShortCodeType(const int32_t slotId, const std::string &desAddr);
 
 private:
     std::string RemovePlusSign(const std::string &addr);
