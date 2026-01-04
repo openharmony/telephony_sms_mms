@@ -1819,7 +1819,7 @@ static void GetSmsShortCodeTypeCallback(napi_env env, napi_status status, void *
         context->smsShortCodeType != SmsShortCodeType::SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM) {
         context->smsShortCodeType = SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
     }
-    if (context != nullptr && context->resolved) {
+    if (context->resolved) {
         napi_create_int32(env, context->smsShortCodeType, &callbackValue);
     } else {
         JsError error = NapiUtil::ConverErrorMessageForJs(context->errorCode);
