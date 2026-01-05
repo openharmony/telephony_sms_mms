@@ -2443,11 +2443,14 @@ HWTEST_F(BranchSmsTest, SmsService_GetSmsShortCodeType, Function | MediumTest | 
 {
     auto smsService = DelayedSingleton<SmsService>::GetInstance();
     int32_t shortCodeType = -1;
-    std::string desAddr = "12345";
+    int32_t slotId = 0;
+    std::string desAddr = "";
     smsService->slotSmsInterfaceManagerMap_.erase(INVALID_SLOTID);
     EXPECT_EQ(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType), TELEPHONY_ERR_SLOTID_INVALID);
     smsService->slotSmsInterfaceManagerMap_[INVALID_SLOTID] = std::make_shared<SmsInterfaceManager>(INVALID_SLOTID);
-    EXPECT_GE(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType), TELEPHONY_ERR_SUCCESS);
+    smsService->slotSmsInterfaceManagerMap_[slotId] = std::make_shared<SmsInterfaceManager>(slotId);
+    EXPECT_GE(smsService->GetSmsShortCodeType(slotId, desAddr, shortCodeType), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(shortCodeType, -1);
 }
 
 /**
