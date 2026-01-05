@@ -27,6 +27,7 @@ namespace OHOS {
 namespace Telephony {
 using namespace std;
 constexpr static int32_t CB_RANGE_LIST_MAX_SIZE = 256;
+static int32_t SMS_SHORT_CODE_TYPE_UNKNOWN = -1;
 static inline bool IsValidSlotId(int32_t slotId)
 {
     return ((slotId >= DEFAULT_SIM_SLOT_ID) && (slotId < SIM_SLOT_COUNT));
@@ -509,10 +510,11 @@ void SmsInterfaceStub::OnGetSmsShortCodeType(MessageParcel &data, MessageParcel 
 {
     int32_t slotId = data.ReadInt32();
     std::string desAddr = data.ReadString();
-    int32_t smsShortCodeType = -1;
+    int32_t smsShortCodeType = SMS_SHORT_CODE_TYPE_UNKNOWN;
     int32_t result = GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
     if (result != TELEPHONY_ERR_SUCCESS) {
         TELEPHONY_LOGE("SmsInterfaceStub::OnGetSmsShortCodeType result is not TELEPHONY_ERR_SUCCESS.");
+        reply.WriteInt32(SMS_SHORT_CODE_TYPE_UNKNOWN);
         return;
     }
     reply.WriteInt32(smsShortCodeType);
