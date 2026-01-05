@@ -1754,9 +1754,7 @@ static void GetSmsShortCodeTypeCallback(napi_env env, napi_status status, void *
     if (context->resolved) {
         napi_create_int32(env, static_cast<int32_t>(context->smsShortCodeType), &callbackValue);
     } else {
-        JsError error = NapiUtil::ConverErrorMessageForJs(context->errorCode);
-        napi_value errVal = NapiUtil::CreateErrorMessage(env, error.errorMessage, error.errorCode);
-        NapiUtil::ThrowError(env, error.errorCode, error.errorMessage);
+        napi_create_int32(env, static_cast<int32_t>(SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN), &callbackValue);
     }
     NapiUtil::Handle2ValueCallback(env, context, callbackValue);
 }
