@@ -2105,7 +2105,7 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Encode(pdu, pdu);
     Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Decode(pdu, pdu);
     uint32_t charset = 1;
-    Singleton<SmsServiceManagerClient>::GetInstance().SendEmcRescueMessage(remoteId, pdu);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetEncodeStringFunc(pdu, charset, charset, pdu);
 }
 
 /**
