@@ -2063,8 +2063,7 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     std::u16string desAddr = u"";
     sptr<ISendShortMessageCallback> sendCallback;
     sptr<IDeliveryShortMessageCallback> deliveryCallback;
-    int32_t ret = 0;
-    ret = Singleton<SmsServiceManagerClient>::GetInstance().SetDefaultSmsSlotId(slotId);
+    int32_t ret = Singleton<SmsServiceManagerClient>::GetInstance().SetDefaultSmsSlotId(slotId);
     EXPECT_GE(ret, 0);
     Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSlotId();
     Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSimId(slotId);
@@ -2087,8 +2086,7 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     std::vector<ShortMessage> messages;
     Singleton<SmsServiceManagerClient>::GetInstance().GetAllSimMessages(slotId, messages);
     bool enable = true;
-    uint8_t ranType = 1;
-    Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(slotId, enable, msgIndex, msgIndex, ranType);
+    Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(slotId, enable, msgIndex, msgIndex, 1);
     std::vector<int32_t> messageIds = {4352, 4355, 4388, 4390};
     Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(slotId, messageIds, 1);
     Singleton<SmsServiceManagerClient>::GetInstance().SetImsSmsConfig(slotId, enable);
@@ -2104,8 +2102,7 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     Singleton<SmsServiceManagerClient>::GetInstance().CreateMessage(pdu, pdu, message);
     Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Encode(pdu, pdu);
     Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Decode(pdu, pdu);
-    uint32_t charset = 1;
-    Singleton<SmsServiceManagerClient>::GetInstance().GetEncodeStringFunc(pdu, charset, charset, pdu);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetEncodeStringFunc(pdu, 1, 1, pdu);
 }
 
 /**
@@ -2115,10 +2112,8 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
  */
 HWTEST_F(BranchSmsTest, SmsServiceManagerClient_GetSmsShortCodeType, Function | MediumTest | Level1)
 {
-    int32_t slotId = 0;
-    std::string desAddr = "";
     int32_t smsShortCodeType = -1;
-    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(0, "", smsShortCodeType);
     EXPECT_EQ(smsShortCodeType, -1);
 }
 
