@@ -256,6 +256,21 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0003, Function | MediumTest | Level
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceStub_0004
+ * @tc.name     Test SmsInterfaceStub_GetSmsShortCodeType
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_GetSmsShortCodeType, TestSize.Level0)
+{
+    MessageParcel ShortCodeParcel;
+    ShortCodeParcel.WriteInt32(0);
+    ShortCodeParcel.WriteString("12345");
+    DelayedSingleton<SmsService>::GetInstance()->OnGetSmsShortCodeType(ShortCodeParcel, replyParcel, option);
+    result = replyParcel.ReadInt32();
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceStub_0004
  * @tc.name     Test SmsInterfaceStub
  * @tc.desc     Function test
  */
