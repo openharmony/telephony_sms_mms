@@ -258,10 +258,10 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_GetSmsShortCodeType, TestSize.Level
     MessageParcel replyParcel;
     MessageOption option(MessageOption::TF_SYNC);
     ShortCodeParcel.WriteInt32(0);
-    ShortCodeParcel.WriteString("12345");
+    ShortCodeParcel.WriteString("");
     DelayedSingleton<SmsService>::GetInstance()->OnGetSmsShortCodeType(ShortCodeParcel, replyParcel, option);
     int32_t result = replyParcel.ReadInt32();
-    EXPECT_GE(result, 0);
+    EXPECT_EQ(result, -1);
 }
 
 /**
