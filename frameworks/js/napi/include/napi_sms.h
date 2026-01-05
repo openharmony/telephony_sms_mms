@@ -101,8 +101,16 @@ enum SmsShortCodeType {
      * Indicates the SMS destination address is an unknown short code type.
      */
     SMS_SHORT_CODE_TYPE_UNKNOWN = -1,
-    SMS_SHORT_CODE_TYPE_NOT_PREMIUM,
-    SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM,
+
+    /**
+     * Indicates the SMS destination address is a not premium short code type.
+     */
+    SMS_SHORT_CODE_TYPE_NOT_PREMIUM = 0,
+
+    /**
+     * Indicates the SMS destination address is a possible premium short code type.
+     */
+    SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM = 1,
 };
 
 struct SendMessageContext : BaseContext {
@@ -218,7 +226,7 @@ struct GetSmsSegmentsInfoContext : BaseContext {
 struct GetSmsShortCodeTypeContext : BaseContext {
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::string destAddr = "";
-    int32_t smsShortCodeType = -1;
+    SmsShortCodeType smsShortCodeType = SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
 };
 
 template<typename T>
