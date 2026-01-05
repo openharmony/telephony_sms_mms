@@ -1730,12 +1730,12 @@ static void NativeGetSmsShortCodeType(napi_env env, void *data)
     if (context == nullptr) {
         return;
     }
-    int32_t smsShortCodeTypeNum = static_cast<int32_t>(context->smsShortCodeType);
+    int32_t smsShortCodeType = static_cast<int32_t>(context->smsShortCodeType);
     context->errorCode = Singleton<SmsServiceManagerClient>::GetInstance()
-        .GetSmsShortCodeType(context->slotId, context->destAddr, smsShortCodeTypeNum);
-    if (smsShortCodeTypeNum == static_cast<int32_t>(SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_PREMIUM) ||
-        smsShortCodeTypeNum == static_cast<int32_t>(SmsShortCodeType::SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM)) {
-        context->smsShortCodeType = static_cast<SmsShortCodeType>(smsShortCodeTypeNum); 
+        .GetSmsShortCodeType(context->slotId, context->destAddr, smsShortCodeType);
+    if (smsShortCodeType == static_cast<int32_t>(SmsShortCodeType::SMS_SHORT_CODE_TYPE_NOT_PREMIUM) ||
+        smsShortCodeType == static_cast<int32_t>(SmsShortCodeType::SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM)) {
+        context->smsShortCodeType = static_cast<SmsShortCodeType>(smsShortCodeType); 
     } else {
         context->smsShortCodeType = SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
     }
