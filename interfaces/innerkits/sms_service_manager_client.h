@@ -255,6 +255,18 @@ public:
     int32_t GetImsShortMessageFormat(std::u16string &format);
 
     /**
+     * @brief Get SMS Short Code Type
+     *
+     * @param slotId [in], indicates the card slot index number,
+     * ranging from {@code 0} to the maximum card slot index number supported by the device.
+     * @param desAddr [in], indicates the destination address.
+     * @return int32_t, returns {@code -1} if the SMS destination address is an unknown short code type,
+     * returns {@code 0} if the SMS destination address is not a premium short code type,
+     * returns {@code 1} if the SMS destination address is a possible premium short code type.
+     */
+    int32_t GetSmsShortCodeType(int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType);
+
+    /**
      * @brief Check whether it is supported Sms Capability
      *
      * @return {@code true} if UE has sms capability; returns {@code false} otherwise.

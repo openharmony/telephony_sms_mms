@@ -64,6 +64,7 @@ private:
     void OnGetSmsSegmentsInfo(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnIsImsSmsSupported(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetImsShortMessageFormat(MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    void OnGetSmsShortCodeType(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnHasSmsCapability(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnCreateMessage(MessageParcel &data, MessageParcel &reply, MessageOption &option);
     void OnGetBase64Encode(MessageParcel &data, MessageParcel &reply, MessageOption &option);

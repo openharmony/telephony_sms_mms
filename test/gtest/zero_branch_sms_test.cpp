@@ -726,6 +726,30 @@ HWTEST_F(BranchSmsTest, SmsSendManager_0002, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number   Telephony_SmsMmsGtest_SmsSendManager_0003
+ * @tc.name     Test SmsSendManager_SmsShortCodeType
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsSendManager_SmsShortCodeType, Function | MediumTest | Level1)
+{
+    auto smsSendManager = std::make_shared<SmsSendManager>(INVALID_SLOTID);
+    int32_t slotId = 0;
+    std::string desAddr = "10660";
+    int32_t smsShortCodeType = -1;
+    smsSendManager->smsShortCodeMatcher_ = nullptr;
+    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_LOCAL_PTR_NULL);
+    smsSendManager->smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
+    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsShortCodeType, 1);
+    desAddr = "12345";
+    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsShortCodeType, 0);
+    desAddr = "";
+    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsShortCodeType, -1);
+}
+
+/**
  * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceManager_0001
  * @tc.name     Test SmsInterfaceManager
  * @tc.desc     Function test
@@ -2039,8 +2063,7 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     std::u16string desAddr = u"";
     sptr<ISendShortMessageCallback> sendCallback;
     sptr<IDeliveryShortMessageCallback> deliveryCallback;
-    int32_t ret = 0;
-    ret = Singleton<SmsServiceManagerClient>::GetInstance().SetDefaultSmsSlotId(slotId);
+    int32_t ret = Singleton<SmsServiceManagerClient>::GetInstance().SetDefaultSmsSlotId(slotId);
     EXPECT_GE(ret, 0);
     Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSlotId();
     Singleton<SmsServiceManagerClient>::GetInstance().GetDefaultSmsSimId(slotId);
@@ -2063,8 +2086,7 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     std::vector<ShortMessage> messages;
     Singleton<SmsServiceManagerClient>::GetInstance().GetAllSimMessages(slotId, messages);
     bool enable = true;
-    uint8_t ranType = 1;
-    Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(slotId, enable, msgIndex, msgIndex, ranType);
+    Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfig(slotId, enable, msgIndex, msgIndex, 1);
     std::vector<int32_t> messageIds = {4352, 4355, 4388, 4390};
     Singleton<SmsServiceManagerClient>::GetInstance().SetCBConfigList(slotId, messageIds, 1);
     Singleton<SmsServiceManagerClient>::GetInstance().SetImsSmsConfig(slotId, enable);
@@ -2080,8 +2102,19 @@ HWTEST_F(BranchSmsTest, SmsServiceManagerClient_0001, Function | MediumTest | Le
     Singleton<SmsServiceManagerClient>::GetInstance().CreateMessage(pdu, pdu, message);
     Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Encode(pdu, pdu);
     Singleton<SmsServiceManagerClient>::GetInstance().GetBase64Decode(pdu, pdu);
-    uint32_t charset = 1;
-    Singleton<SmsServiceManagerClient>::GetInstance().GetEncodeStringFunc(pdu, charset, charset, pdu);
+    Singleton<SmsServiceManagerClient>::GetInstance().GetEncodeStringFunc(pdu, 1, 1, pdu);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsServiceManagerClient_0002
+ * @tc.name     Test SmsServiceManagerClient_GetSmsShortCodeType
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsServiceManagerClient_GetSmsShortCodeType, Function | MediumTest | Level1)
+{
+    int32_t smsShortCodeType = -1;
+    Singleton<SmsServiceManagerClient>::GetInstance().GetSmsShortCodeType(0, "", smsShortCodeType);
+    EXPECT_EQ(smsShortCodeType, -1);
 }
 
 /**
@@ -2404,6 +2437,25 @@ HWTEST_F(BranchSmsTest, SmsService_0005, Function | MediumTest | Level1)
     EXPECT_GE(splitRes, TELEPHONY_ERR_ARGUMENT_INVALID);
     EXPECT_GE(smsRes, TELEPHONY_ERR_ARGUMENT_INVALID);
     EXPECT_TRUE(smsService != nullptr);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsService_0006
+ * @tc.name     Test SmsService_GetSmsShortCodeType
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsTest, SmsService_GetSmsShortCodeType, Function | MediumTest | Level1)
+{
+    auto smsService = DelayedSingleton<SmsService>::GetInstance();
+    int32_t shortCodeType = -1;
+    int32_t slotId = 0;
+    std::string desAddr = "";
+    smsService->slotSmsInterfaceManagerMap_.erase(INVALID_SLOTID);
+    EXPECT_EQ(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType), TELEPHONY_ERR_SLOTID_INVALID);
+    smsService->slotSmsInterfaceManagerMap_[INVALID_SLOTID] = std::make_shared<SmsInterfaceManager>(INVALID_SLOTID);
+    smsService->slotSmsInterfaceManagerMap_[slotId] = std::make_shared<SmsInterfaceManager>(slotId);
+    EXPECT_GE(smsService->GetSmsShortCodeType(slotId, desAddr, shortCodeType), TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(shortCodeType, -1);
 }
 
 /**

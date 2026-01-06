@@ -24,6 +24,7 @@
 #include "gsm_sms_sender.h"
 #include "sms_send_indexer.h"
 #include "sms_network_policy_manager.h"
+#include "sms_short_code_matcher.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -46,6 +47,7 @@ public:
     int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported);
     bool SetImsSmsConfig(int32_t slotId, int32_t enable);
     int32_t GetImsShortMessageFormat(std::u16string &format);
+    int32_t GetSmsShortCodeType(int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType);
     void OnRilAdapterHostDied();
 
 private:
@@ -58,6 +60,7 @@ private:
     std::shared_ptr<SmsSender> gsmSmsSender_;
     std::shared_ptr<SmsSender> cdmaSmsSender_;
     std::shared_ptr<SmsNetworkPolicyManager> networkManager_;
+    std::shared_ptr<SmsShortCodeMatcher> smsShortCodeMatcher_;
 };
 } // namespace Telephony
 } // namespace OHOS

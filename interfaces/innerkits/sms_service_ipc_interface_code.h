@@ -149,6 +149,11 @@ enum class SmsServiceInterfaceCode {
      * Request to get encode string.
      */
     GET_ENCODE_STRING,
+
+    /**
+     * Request to get SMS short code type.
+     */
+    GET_SMS_SHORT_CODE_TYPE,
 };
 } // namespace Telephony
 } // namespace OHOS

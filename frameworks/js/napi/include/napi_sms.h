@@ -96,6 +96,23 @@ enum RanType {
     TYPE_CDMA = 2,
 };
 
+enum SmsShortCodeType {
+    /**
+     * Indicates the SMS destination address is an unknown short code type.
+     */
+    SMS_SHORT_CODE_TYPE_UNKNOWN = -1,
+
+    /**
+     * Indicates the SMS destination address is a not premium short code type.
+     */
+    SMS_SHORT_CODE_TYPE_NOT_PREMIUM = 0,
+
+    /**
+     * Indicates the SMS destination address is a possible premium short code type.
+     */
+    SMS_SHORT_CODE_TYPE_POSSIBLE_PREMIUM = 1,
+};
+
 struct SendMessageContext : BaseContext {
     int32_t slotId = DEFAULT_SIM_SLOT_ID;
     std::u16string destinationHost = u"";
@@ -204,6 +221,12 @@ struct GetSmsSegmentsInfoContext : BaseContext {
     int32_t encodeCount = 0;
     int32_t encodeCountRemaining = 0;
     ISmsServiceInterface::SmsSegmentsInfo::SmsSegmentCodeScheme scheme;
+};
+
+struct GetSmsShortCodeTypeContext : BaseContext {
+    int32_t slotId = DEFAULT_SIM_SLOT_ID;
+    std::string destAddr = "";
+    SmsShortCodeType smsShortCodeType = SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN;
 };
 
 template<typename T>

@@ -62,6 +62,7 @@ public:
     int32_t GetSmsSegmentsInfo(const std::string &message, bool force7BitCode, LengthInfo &outInfo);
     int32_t IsImsSmsSupported(int32_t slotId, bool &isSupported);
     int32_t GetImsShortMessageFormat(std::u16string &format);
+    int32_t GetSmsShortCodeType(int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType);
     bool HasSmsCapability();
     int32_t SendMms(
         const std::u16string &mmsc, const std::u16string &data, const std::u16string &ua, const std::u16string &uaprof);
