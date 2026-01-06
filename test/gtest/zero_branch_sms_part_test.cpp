@@ -107,6 +107,7 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0001, Function | MediumTest | Level
     DelayedSingleton<SmsService>::GetInstance()->OnGetBase64Decode(dataParcel, replyParcel, option);
     DelayedSingleton<SmsService>::GetInstance()->OnGetEncodeStringFunc(dataParcel, replyParcel, option);
     DelayedSingleton<SmsService>::GetInstance()->OnGetSmsSegmentsInfo(dataParcel, replyParcel, option);
+    DelayedSingleton<SmsService>::GetInstance()->OnGetSmsShortCodeType(dataParcel, replyParcel, option);
 
     MessageParcel sendTextParcel;
     sendTextParcel.WriteInt32(0);
@@ -244,6 +245,23 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_0003, Function | MediumTest | Level
     DelayedSingleton<SmsService>::GetInstance()->OnGetDefaultSmsSimId(formatParcel, replyParcel, option);
     result = replyParcel.ReadInt32();
     EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceStub_0004
+ * @tc.name     Test SmsInterfaceStub_GetSmsShortCodeType
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsInterfaceStub_GetSmsShortCodeType, TestSize.Level0)
+{
+    MessageParcel ShortCodeParcel;
+    MessageParcel replyParcel;
+    MessageOption option(MessageOption::TF_SYNC);
+    ShortCodeParcel.WriteInt32(0);
+    ShortCodeParcel.WriteString("");
+    DelayedSingleton<SmsService>::GetInstance()->OnGetSmsShortCodeType(ShortCodeParcel, replyParcel, option);
+    int32_t result = replyParcel.ReadInt32();
+    EXPECT_EQ(result, -1);
 }
 
 /**
@@ -453,6 +471,31 @@ HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_0004, Function | MediumTest | Le
     EXPECT_GE(result, 0);
 }
 #endif
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_SmsInterfaceManager_0005
+ * @tc.name     Test SmsInterfaceManager_GetSmsShortCodeType
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPartTest, SmsInterfaceManager_GetSmsShortCodeType, Function | MediumTest | Level1)
+{
+    int32_t slotId = 0;
+    std::string desAddr = "12345";
+    int32_t smsShortCodeType = -1;
+    std::shared_ptr<SmsInterfaceManager> interfaceManager = std::make_shared<SmsInterfaceManager>(slotId);
+    interfaceManager->smsSendManager_ = nullptr;
+    int32_t result = interfaceManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    EXPECT_EQ(result, TELEPHONY_ERR_LOCAL_PTR_NULL);
+    interfaceManager->smsSendManager_ = std::make_unique<SmsSendManager>(slotId);
+    interfaceManager->smsSendManager_->smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
+    result = interfaceManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    EXPECT_EQ(result, TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsShortCodeType, 0);
+    desAddr = "10660";
+    result = interfaceManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+    EXPECT_EQ(result, TELEPHONY_ERR_SUCCESS);
+    EXPECT_EQ(smsShortCodeType, 1);
+}
 
 /**
  * @tc.number   Telephony_SmsMmsGtest_SmsEmailMessage_0001

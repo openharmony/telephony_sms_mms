@@ -255,6 +255,15 @@ int32_t SmsInterfaceManager::GetImsShortMessageFormat(std::u16string &format)
     return smsSendManager_->GetImsShortMessageFormat(format);
 }
 
+int32_t SmsInterfaceManager::GetSmsShortCodeType(int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType)
+{
+    if (smsSendManager_ == nullptr) {
+        TELEPHONY_LOGE("smsSendManager is nullptr error.");
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
+    return smsSendManager_->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType);
+}
+
 bool SmsInterfaceManager::HasSmsCapability()
 {
     auto helperPtr = DelayedSingleton<SmsPersistHelper>::GetInstance();
