@@ -106,7 +106,7 @@ ohos_shared_library("tel_sms_mms") {
     "utils/text_coder.cpp",
   ]
 
-  if (sms_mms_feature_support_satellite) {
+  if (sms_mms_satellite) {
     sources += [
       "services/sms/satellite_service_interaction/src/satellite_sms_callback.cpp",
       "services/sms/satellite_service_interaction/src/satellite_sms_callback_stub.cpp",
