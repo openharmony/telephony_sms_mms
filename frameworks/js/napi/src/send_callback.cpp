@@ -22,6 +22,8 @@
 
 namespace OHOS {
 namespace Telephony {
+static const int32_t CALLBACK_VALUE_LEN = 2;
+
 SendSmsResult SendCallback::WrapSmsSendResult(const ISendShortMessageCallback::SmsSendResult result)
 {
     switch (result) {
