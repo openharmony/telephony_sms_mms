@@ -61,16 +61,25 @@ void UnrefAndDeleteSmsSendWork(napi_env env, napi_ref thisVarRef, napi_ref callb
     delete work;
 }
 
+inline void Unref(napi_env env, napi_ref thisVarRef, napi_ref callbackRef)
+{
+    uint32_t refCount = 0;
+    if (napi_reference_unref(env, thisVarRef, &refCount) == napi_ok && refCount == 0) {
+        napi_delete_reference(env, thisVarRef);
+    }
+    if (napi_reference_unref(env, callbackRef, &refCount) == napi_ok && refCount == 0) {
+        napi_delete_reference(env, callbackRef);
+    }
+}
+
 void CompleteSmsSendWork(uv_work_t *work, int status)
 {
     TELEPHONY_LOGI("CompleteSmsSendWork start");
     if (work == nullptr) {
-        TELEPHONY_LOGE("CompleteSmsSendWork work is nullptr!");
         return;
     }
     std::unique_ptr<SendCallbackContext> pContext(static_cast<SendCallbackContext *>(work->data));
     if (pContext == nullptr) {
-        TELEPHONY_LOGE("CompleteSmsSendWork pContext is nullptr!");
         delete work;
         return;
     }
@@ -81,16 +90,13 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
     SendSmsResult wrapResult = pContext->result;
     napi_handle_scope scope = nullptr;
     if (napi_open_handle_scope(env, &scope) != napi_ok || scope == nullptr) {
-        TELEPHONY_LOGE("CompleteSmsSendWork open scope failed");
-        UnrefAndDeleteSmsSendWork(env, thisVarRef, callbackRef, work);
+        Unref(env, thisVarRef, callbackRef);
         return;
     }
-
     napi_value callbackFunc = nullptr;
     if (napi_get_reference_value(env, callbackRef, &callbackFunc) != napi_ok || callbackFunc == nullptr) {
-        TELEPHONY_LOGE("napi_get_reference_value callbackFunc failed");
         napi_close_handle_scope(env, scope);
-        UnrefAndDeleteSmsSendWork(env, thisVarRef, callbackRef, work);
+        Unref(env, thisVarRef, callbackRef);
         return;
     }
     napi_value callbackValues[CALLBACK_VALUE_LEN] = { 0 };
@@ -99,20 +105,18 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
     napi_value sendResultValue = nullptr;
     napi_create_int32(env, wrapResult, &sendResultValue);
     napi_set_named_property(env, callbackValues[1], "result", sendResultValue);
-    
+
     napi_value thisVar = nullptr;
     if (napi_get_reference_value(env, thisVarRef, &thisVar) != napi_ok || thisVar == nullptr) {
-        TELEPHONY_LOGE("napi_get_reference_value thisVar failed");
         napi_close_handle_scope(env, scope);
-        UnrefAndDeleteSmsSendWork(env, thisVarRef, callbackRef, work);
+        Unref(env, thisVarRef, callbackRef);
         return;
     }
 
     napi_value callbackResult = nullptr;
-    napi_status callStatus = napi_call_function(env, thisVar, callbackFunc, 2, callbackValues, &callbackResult);
-    TELEPHONY_LOGI("CompleteSmsSendWork napi_call_function satatus = %d", callStatus);
+    napi_call_function(env, thisVar, callbackFunc, 2, callbackValues, &callbackResult);
     napi_close_handle_scope(env, scope);
-    UnrefAndDeleteSmsSendWork(env, thisVarRef, callbackRef, work);
+    Unref(env, thisVarRef, callbackRef);
     TELEPHONY_LOGI("CompleteSmsSendWork end");
 }
 
@@ -125,17 +129,11 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
-        TELEPHONY_LOGE("OnSmsSendResult loop is nullptr");
         return;
     }
     uv_work_t *work = new uv_work_t;
-    if (work == nullptr) {
-        TELEPHONY_LOGE("OnSmsSendResult work is nullptr!");
-        return;
-    }
     SendCallbackContext *pContext = new (std::nothrow) SendCallbackContext();
     if (pContext == nullptr) {
-        TELEPHONY_LOGE("OnSmsSendResult pContext is nullptr!");
         delete work;
         return;
     }
@@ -148,10 +146,13 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
     napi_status st1 = napi_reference_ref(env_, thisVarRef_, nullptr);
     napi_status st2 = napi_reference_ref(env_, callbackRef_, nullptr);
     if (st1 != napi_ok || st2 != napi_ok) {
-        TELEPHONY_LOGE("OnSmsSendResult napi_reference_ref failed");
-        uint32_t unused;
-        if (st1 == napi_ok) napi_reference_unref(env_, thisVarRef_, &unused);
-        if (st2 == napi_ok) napi_reference_unref(env_, callbackRef_, &unused);
+        uint32_t refCount = 0;
+        if (st1 == napi_ok && napi_reference_unref(env_, thisVarRef_, &refCount) == napi_ok && refCount == 0) {
+            napi_delete_reference(env_, thisVarRef_);
+        }
+        if (st2 == napi_ok && napi_reference_unref(env_, callbackRef_, &refCount) == napi_ok && refCount == 0) {
+            napi_delete_reference(env_, callbackRef_);
+        }
         delete pContext;
         delete work;
         return;
@@ -161,10 +162,10 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
         [](uv_work_t *work, int status) { CompleteSmsSendWork(work, status); }, uv_qos_default);
     if (errCode != 0) {
         TELEPHONY_LOGE("failed to uv_queue_work_with_qos, errCode: %{public}d", errCode);
-        UnrefAndDeleteSmsSendWork(env_, thisVarRef_, callbackRef_, work);
-        delete pContext;
-        return;
+        Unref(env_, thisVarRef_, callbackRef_);
     }
+    delete pContext;
+    delete work;
 }
 } // namespace Telephony
 } // namespace OHOS
