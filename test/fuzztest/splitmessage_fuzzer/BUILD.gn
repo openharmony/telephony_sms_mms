@@ -49,7 +49,7 @@ ohos_fuzztest("SplitMessageFuzzTest") {
     "curl:curl_shared",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
-    "ffrt:libffrt",
+    "core_service:ffrt_mocked",
     "hilog:libhilog",
     "ipc:ipc_single",
     "libphonenumber:phonenumber_standard",
