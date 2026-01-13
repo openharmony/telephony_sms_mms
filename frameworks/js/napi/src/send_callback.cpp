@@ -53,14 +53,6 @@ SendCallback::~SendCallback()
     callbackRef_ = nullptr;
 }
 
-void UnrefAndDeleteSmsSendWork(napi_env env, napi_ref thisVarRef, napi_ref callbackRef, uv_work_t *work)
-{
-    uint32_t unused = 0;
-    napi_reference_unref(env, thisVarRef, &unused);
-    napi_reference_unref(env, callbackRef, &unused);
-    delete work;
-}
-
 inline void Unref(napi_env env, napi_ref thisVarRef, napi_ref callbackRef)
 {
     uint32_t refCount = 0;
