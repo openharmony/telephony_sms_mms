@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define private public
+#define protected public
 
 #include "cdma_sms_message.h"
 #include "cdma_sms_receive_handler.h"
@@ -1519,6 +1521,49 @@ HWTEST_F(SmsGtest, Sms_TestDump_0001, TestSize.Level0)
     EXPECT_GE(DelayedSingleton<SmsService>::GetInstance()->Dump(0, emptyArgs), 0);
     EXPECT_GE(DelayedSingleton<SmsService>::GetInstance()->Dump(0, args), 0);
 }
+
+/**
+ * @tc.number   Telephony_SmsGtest_SmsPersistHelper_QueryOneSessionByPhoneNum
+ * @tc.name     Test SmsService
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsGtest, SmsPersistHelper_QueryOneSessionByPhoneNum, Function | MediumTest | Level1)
+{
+    auto smsPersistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
+    DataShare::DataSharePredicates predicates;
+    std::string phoneNum = "";
+    std::string telephone = "13866666666";
+    uint16_t sessionId = 0;
+    EXPECT_FALSE(smsPersistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, phoneNum));
+    EXPECT_FALSE(smsPersistHelper->isSameFormatePhoneNumber(phoneNum, telephone));
+    AccessMmsToken token;
+    EXPECT_TRUE(smsPersistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, phoneNum));
+    EXPECT_FALSE(smsPersistHelper->isSameFormatePhoneNumber(phoneNum, telephone));
+    phoneNum = "13866666666";
+    EXPECT_TRUE(smsPersistHelper->isSameFormatePhoneNumber(phoneNum, telephone));
+    EXPECT_FALSE(smsPersistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, phoneNum));
+    phoneNum = "123";
+    telephone = "123";
+    EXPECT_TRUE(smsPersistHelper->isSameFormatePhoneNumber(phoneNum, telephone));
+}
+
+/**
+ * @tc.number   Telephony_SmsGtest_SmsService_InsertSession
+ * @tc.name     Test SmsService
+ * @tc.desc     Function test
+ */
+HWTEST_F(SmsGtest, SmsService_InsertSession, Function | MediumTest | Level1)
+{
+    auto smsService = DelayedSingleton<SmsService>::GetInstance();
+    bool isNewSession = 0;
+    uint16_t messageCount = 0;
+    const std::string number = "123";
+    const std::string text = "qwe";
+    EXPECT_FALSE(smsService->InsertSession(isNewSession, messageCount, number, text));
+    isNewSession = 1;
+    EXPECT_FALSE(smsService->InsertSession(isNewSession, messageCount, number, text));
+}
+
 #else // TEL_TEST_UNSUPPORT
 #endif // TEL_TEST_UNSUPPORT
 } // namespace Telephony
