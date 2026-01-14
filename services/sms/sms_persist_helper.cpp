@@ -159,6 +159,72 @@ bool SmsPersistHelper::QuerySession(
     return false;
 }
 
+bool SmsPersistHelper::isSameFormatePhoneNumber(const std::string phoneNum, std::string telephone)
+{
+    std::string formatPhoneNum;
+    std::string formatTelephone;
+    FormatSmsNumber(phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL,
+        formatPhoneNum);
+    FormatSmsNumber(telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL,
+        formatTelephone);
+    if (formatPhoneNum == formatTelephone) {
+        return true;
+    }
+    FormatSmsNumber(phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164,
+        formatPhoneNum);
+    FormatSmsNumber(telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164,
+        formatTelephone);
+    if (formatPhoneNum == formatTelephone) {
+        return true;
+    }
+    return false;
+}
+
+bool SmsPersistHelper::QueryOneSessionByPhoneNum(DataShare::DataSharePredicates &predicates,
+    uint16_t &sessionId, const std::string phoneNum)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper = CreateSmsHelper();
+    if (helper == nullptr) {
+        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
+        return false;
+    }
+    Uri uri(SMS_SESSION);
+    std::vector<std::string> columns;
+    auto resultSet = helper->Query(uri, predicates, columns);
+    if (resultSet == nullptr) {
+        TELEPHONY_LOGE("Query Result Set nullptr Failed.");
+        return false;
+    }
+    int32_t resultSetNum = resultSet->GoToFirstRow();
+    int32_t columnInt;
+    std::string columnString;
+    int columnIndex;
+    std::string telephone = "";
+    while (resultSetNum == 0) {
+        resultSet->GetColumnIndex("telephone", columnIndex);
+        if (resultSet->GetString(columnIndex, columnString) == 0) {
+            telephone = columnString;
+            TELEPHONY_LOGI("QueryOneSessionByPhoneNum0 telephone:%{public}s", telephone.c_str());
+        }
+        TELEPHONY_LOGI("QueryOneSessionByPhoneNum1 phoneNum:%{public}s telephone:%{public}s",
+            phoneNum.c_str(), telephone.c_str());
+        if (!isSameFormatePhoneNumber(phoneNum, telephone)) {
+            TELEPHONY_LOGI("QueryOneSessionByPhoneNum2 not same fomate phone number");
+            resultSetNum = resultSet->GoToNextRow();
+            continue;
+        }
+        resultSet->GetColumnIndex("id", columnIndex);
+        if (resultSet->GetInt(columnIndex, columnInt) == 0) {
+            sessionId = columnInt;
+            TELEPHONY_LOGI("QueryOneSessionByPhoneNum3 sessionId:%{public}d", sessionId);
+            resultSet->Close();
+            return true;
+        }
+    }
+    resultSet->Close();
+    return false;
+}
+
 bool SmsPersistHelper::UpdateSms(DataShare::DataSharePredicates &predicates, DataShare::DataShareValuesBucket &values)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateSmsHelper();

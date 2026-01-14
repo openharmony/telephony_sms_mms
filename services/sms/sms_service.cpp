@@ -227,7 +227,7 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t 
     DataShare::DataSharePredicates predicates;
     auto persistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
     UpdatePredicatesByPhoneNum(predicates, telephone);
-    return persistHelper->QuerySession(predicates, sessionId, messageCount);
+    return persistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, telephone);
 }
 
 void SmsService::InsertSmsMmsInfo(
@@ -284,7 +284,15 @@ bool SmsService::InsertSession(
         sessionBucket.Put(Session::MESSAGE_COUNT, std::to_string(messageCount));
         DataShare::DataSharePredicates predicates;
         UpdatePredicatesByPhoneNum(predicates, number);
-        return DelayedSingleton<SmsPersistHelper>::GetInstance()->Update(predicates, sessionBucket);
+        uint16_t sessionId;
+        DataShare::DataSharePredicates predicatesNew;
+        if (DelayedSingleton<SmsPersistHelper>::GetInstance()->
+            QueryOneSessionByPhoneNum(predicates, sessionId, number)) {
+            predicatesNew.EqualTo(Session::ID, std::to_string(sessionId));
+            return DelayedSingleton<SmsPersistHelper>::GetInstance()->Update(predicatesNew, sessionBucket);
+        } else {
+            TELEPHONY_LOGE("QueryOneSessionByPhoneNum fail");
+        }
     }
     sessionBucket.Put(Session::MESSAGE_COUNT, "1");
     return DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(SMS_SESSION, sessionBucket);
@@ -994,6 +1002,7 @@ bool SmsService::IsInfoMsg(const std::string &telephone)
 void SmsService::UpdatePredicatesByPhoneNum(DataShare::DataSharePredicates &predicates, const std::string &phoneNum)
 {
     // 如果尾数小于等于7位，直接全等对比；群聊也直接全等对比；通知消息也做全等对比
+    TELEPHONY_LOGE("UpdatePredicatesByPhoneNum0 phoneNum %{public}s", phoneNum.c_str());
     if (phoneNum.size() <= 7 || phoneNum.find(',') != std::string::npos || IsInfoMsg(phoneNum)) {
         predicates.EqualTo(Session::TELEPHONE, phoneNum);
     } else {
@@ -1001,17 +1010,21 @@ void SmsService::UpdatePredicatesByPhoneNum(DataShare::DataSharePredicates &pred
         auto persistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
         int32_t ret = persistHelper->FormatSmsNumber(
             phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL, formatNum);
+            TELEPHONY_LOGE("UpdatePredicatesByPhoneNum1 formatNum %{public}s", formatNum.c_str());
         if (ret != TELEPHONY_SUCCESS) {
             ret = persistHelper->FormatSmsNumber(
                 phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164, formatNum);
+                TELEPHONY_LOGE("UpdatePredicatesByPhoneNum2 formatNum %{public}s", formatNum.c_str());
         }
         if (ret != TELEPHONY_SUCCESS) {
             formatNum = phoneNum;
+            TELEPHONY_LOGE("UpdatePredicatesByPhoneNum3 formatNum %{public}s", formatNum.c_str());
         }
+        TELEPHONY_LOGE("UpdatePredicatesByPhoneNum4 formatNum %{public}s", formatNum.c_str());
         // 增加contactsNum字段的判断，防止单聊通过endsWith匹配到群聊。
         predicates.In(Session::CONTACTS_NUM, std::vector<string>({ "0", "1" }));
         predicates.And();
-        predicates.EndsWith(Session::TELEPHONE, phoneNum);
+        predicates.EndsWith(Session::TELEPHONE, formatNum);
     }
 }
 } // namespace Telephony
