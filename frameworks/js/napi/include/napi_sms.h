@@ -23,12 +23,7 @@
 #include <string>
 #include <vector>
 
-#include "base_context.h"
-#include "i_sms_service_interface.h"
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
-#include "napi_util.h"
-#include "short_message.h"
+#include "napi_sms_util.h"
 #include "sms_service_manager_client.h"
 #include "telephony_log_wrapper.h"
 #include "telephony_types.h"
