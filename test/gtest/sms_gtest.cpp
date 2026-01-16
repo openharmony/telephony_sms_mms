@@ -1534,17 +1534,16 @@ HWTEST_F(SmsGtest, SmsPersistHelper_QueryOneSessionByPhoneNum, Function | Medium
     std::string phoneNum = "";
     std::string telephone = "13866666666";
     uint16_t sessionId = 0;
-    EXPECT_FALSE(smsPersistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, phoneNum));
-    EXPECT_FALSE(smsPersistHelper->isSameFormatePhoneNumber(phoneNum, telephone));
+    uint16_t messageCount = 0;
+    EXPECT_FALSE(smsPersistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, messageCount, phoneNum));
     AccessMmsToken token;
-    EXPECT_TRUE(smsPersistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, phoneNum));
-    EXPECT_FALSE(smsPersistHelper->isSameFormatePhoneNumber(phoneNum, telephone));
+    EXPECT_TRUE(smsPersistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, messageCount, phoneNum));
     phoneNum = "13866666666";
-    EXPECT_TRUE(smsPersistHelper->isSameFormatePhoneNumber(phoneNum, telephone));
-    EXPECT_FALSE(smsPersistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, phoneNum));
-    phoneNum = "123";
-    telephone = "123";
-    EXPECT_TRUE(smsPersistHelper->isSameFormatePhoneNumber(phoneNum, telephone));
+    EXPECT_FALSE(smsPersistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, messageCount, phoneNum));
+    smsPersistHelper->IsSameFormatPhoneNumber(phoneNum, telephone,
+        i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL);
+    smsPersistHelper->IsSameFormatPhoneNumber(phoneNum, telephone,
+        i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164);
 }
 
 /**

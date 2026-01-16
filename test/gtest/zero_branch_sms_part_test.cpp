@@ -1635,7 +1635,6 @@ HWTEST_F(BranchSmsPartTest, SmsPersistHelper_0003, Function | MediumTest | Level
     int32_t dataBaseId;
     uint16_t idxId;
     DataShare::DataSharePredicates predicates;
-    EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySession(predicates, idxId, idxId));
     EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->QuerySmsMmsForId(predicates, dataBaseId));
     std::vector<SmsReceiveIndexer> indexers;
     EXPECT_FALSE(DelayedSingleton<SmsPersistHelper>::GetInstance()->Query(predicates, indexers));

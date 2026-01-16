@@ -127,61 +127,18 @@ bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBu
     return ret >= 0;
 }
 
-bool SmsPersistHelper::QuerySession(
-    DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount)
-{
-    std::shared_ptr<DataShare::DataShareHelper> helper = CreateSmsHelper();
-    if (helper == nullptr) {
-        TELEPHONY_LOGE("Create Data Ability Helper nullptr Failed.");
-        return false;
-    }
-    Uri uri(SMS_SESSION);
-    std::vector<std::string> columns;
-    auto resultSet = helper->Query(uri, predicates, columns);
-    if (resultSet == nullptr) {
-        TELEPHONY_LOGE("Query Result Set nullptr Failed.");
-        return false;
-    }
-    resultSet->GoToFirstRow();
-    int32_t columnInt;
-    int columnIndex;
-    resultSet->GetColumnIndex("id", columnIndex);
-    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
-        sessionId = columnInt;
-    }
-    resultSet->GetColumnIndex("message_count", columnIndex);
-    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
-        messageCount = columnInt;
-        resultSet->Close();
-        return true;
-    }
-    resultSet->Close();
-    return false;
-}
-
-bool SmsPersistHelper::isSameFormatePhoneNumber(const std::string phoneNum, std::string telephone)
+bool SmsPersistHelper::IsSameFormatPhoneNumber(const std::string &phoneNum, const std::string &telephone,
+    i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat format)
 {
     std::string formatPhoneNum;
     std::string formatTelephone;
-    FormatSmsNumber(phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL,
-        formatPhoneNum);
-    FormatSmsNumber(telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL,
-        formatTelephone);
-    if (formatPhoneNum == formatTelephone) {
-        return true;
-    }
-    FormatSmsNumber(phoneNum, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164,
-        formatPhoneNum);
-    FormatSmsNumber(telephone, ISO_COUNTRY_CODE, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164,
-        formatTelephone);
-    if (formatPhoneNum == formatTelephone) {
-        return true;
-    }
-    return false;
+    FormatSmsNumber(phoneNum, ISO_COUNTRY_CODE, format, formatPhoneNum);
+    FormatSmsNumber(telephone, ISO_COUNTRY_CODE, format, formatTelephone);
+    return formatPhoneNum == formatTelephone;
 }
 
 bool SmsPersistHelper::QueryOneSessionByPhoneNum(DataShare::DataSharePredicates &predicates,
-    uint16_t &sessionId, const std::string phoneNum)
+    uint16_t &sessionId, uint16_t &messageCount, const std::string &phoneNum)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateSmsHelper();
     if (helper == nullptr) {
@@ -195,28 +152,34 @@ bool SmsPersistHelper::QueryOneSessionByPhoneNum(DataShare::DataSharePredicates 
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
         return false;
     }
-    int32_t resultSetNum = resultSet->GoToFirstRow();
+    int32_t result = resultSet->GoToFirstRow();
     int32_t columnInt;
     std::string columnString;
     int columnIndex;
     std::string telephone = "";
-    while (resultSetNum == 0) {
+    while (result == DataShare::E_OK) {
         resultSet->GetColumnIndex("telephone", columnIndex);
         if (resultSet->GetString(columnIndex, columnString) == 0) {
             telephone = columnString;
         }
-        if (!isSameFormatePhoneNumber(phoneNum, telephone)) {
-            TELEPHONY_LOGI("QueryOneSessionByPhoneNum not same fomate phone number");
-            resultSetNum = resultSet->GoToNextRow();
+        if (!IsSameFormatPhoneNumber(phoneNum, telephone,
+            i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL) && !IsSameFormatPhoneNumber(phoneNum,
+            telephone, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164)) {
+            TELEPHONY_LOGI("QueryOneSessionByPhoneNum not same format phone number");
+            result = resultSet->GoToNextRow();
             continue;
         }
         resultSet->GetColumnIndex("id", columnIndex);
         if (resultSet->GetInt(columnIndex, columnInt) == 0) {
-            sessionId = columnInt;
-            TELEPHONY_LOGI("QueryOneSessionByPhoneNum sessionId:%{public}d", sessionId);
+            sessionId = static_cast<uint16_t>(columnInt);
+        }
+        resultSet->GetColumnIndex("message_count", columnIndex);
+        if (resultSet->GetInt(columnIndex, columnInt) == 0) {
+            messageCount = static_cast<uint16_t>(columnInt);
             resultSet->Close();
             return true;
         }
+        break;
     }
     resultSet->Close();
     return false;
