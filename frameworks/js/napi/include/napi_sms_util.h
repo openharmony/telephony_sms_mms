@@ -19,6 +19,13 @@
 #include <string>
 #include <vector>
 
+#include "base_context.h"
+#include "js_error_code.h"
+#include "napi/native_api.h"
+#include "napi/native_node_api.h"
+#include "i_sms_service_interface.h"
+#include "telephony_napi_common_error.h"
+#include "short_message.h"
 #include "napi_util.h"
 
 namespace OHOS {
