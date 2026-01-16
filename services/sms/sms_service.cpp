@@ -227,7 +227,7 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t 
     DataShare::DataSharePredicates predicates;
     auto persistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
     UpdatePredicatesByPhoneNum(predicates, telephone);
-    return persistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, telephone);
+    return persistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, messageCount, telephone);
 }
 
 void SmsService::InsertSmsMmsInfo(
@@ -287,11 +287,9 @@ bool SmsService::InsertSession(
         uint16_t sessionId;
         DataShare::DataSharePredicates predicatesNew;
         if (DelayedSingleton<SmsPersistHelper>::GetInstance()->
-            QueryOneSessionByPhoneNum(predicates, sessionId, number)) {
+            QueryOneSessionByPhoneNum(predicates, sessionId, messageCount, number)) {
             predicatesNew.EqualTo(Session::ID, std::to_string(sessionId));
             return DelayedSingleton<SmsPersistHelper>::GetInstance()->Update(predicatesNew, sessionBucket);
-        } else {
-            TELEPHONY_LOGE("QueryOneSessionByPhoneNum fail");
         }
     }
     sessionBucket.Put(Session::MESSAGE_COUNT, "1");
