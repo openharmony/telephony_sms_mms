@@ -204,19 +204,16 @@ bool SmsPersistHelper::QueryOneSessionByPhoneNum(DataShare::DataSharePredicates 
         resultSet->GetColumnIndex("telephone", columnIndex);
         if (resultSet->GetString(columnIndex, columnString) == 0) {
             telephone = columnString;
-            TELEPHONY_LOGI("QueryOneSessionByPhoneNum0 telephone:%{public}s", telephone.c_str());
         }
-        TELEPHONY_LOGI("QueryOneSessionByPhoneNum1 phoneNum:%{public}s telephone:%{public}s",
-            phoneNum.c_str(), telephone.c_str());
         if (!isSameFormatePhoneNumber(phoneNum, telephone)) {
-            TELEPHONY_LOGI("QueryOneSessionByPhoneNum2 not same fomate phone number");
+            TELEPHONY_LOGI("QueryOneSessionByPhoneNum not same fomate phone number");
             resultSetNum = resultSet->GoToNextRow();
             continue;
         }
         resultSet->GetColumnIndex("id", columnIndex);
         if (resultSet->GetInt(columnIndex, columnInt) == 0) {
             sessionId = columnInt;
-            TELEPHONY_LOGI("QueryOneSessionByPhoneNum3 sessionId:%{public}d", sessionId);
+            TELEPHONY_LOGI("QueryOneSessionByPhoneNum sessionId:%{public}d", sessionId);
             resultSet->Close();
             return true;
         }
