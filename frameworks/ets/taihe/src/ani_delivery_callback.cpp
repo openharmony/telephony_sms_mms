@@ -65,6 +65,9 @@ static ani_object ConvertTaiheIDeliveryShortMessageCallbackToAni(ani_env *env,
 void AniDeliveryCallback::CompleteSmsDeliveryWork(const std::u16string &pdu)
 {
     auto env = cb_->envT_;
+    if (env == nullptr) {
+        return;
+    }
     ani_status aniStatus;
     ani_ref aniNull;
     if ((aniStatus = env->GetNull(&aniNull)) != ANI_OK) {
