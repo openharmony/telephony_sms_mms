@@ -127,8 +127,18 @@ bool SmsPersistHelper::Insert(std::string tableUri, DataShare::DataShareValuesBu
     return ret >= 0;
 }
 
-bool SmsPersistHelper::QuerySession(
-    DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount)
+bool SmsPersistHelper::IsSameFormatPhoneNumber(const std::string &phoneNum, const std::string &telephone,
+    i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat format)
+{
+    std::string formatPhoneNum;
+    std::string formatTelephone;
+    FormatSmsNumber(phoneNum, ISO_COUNTRY_CODE, format, formatPhoneNum);
+    FormatSmsNumber(telephone, ISO_COUNTRY_CODE, format, formatTelephone);
+    return formatPhoneNum == formatTelephone;
+}
+
+bool SmsPersistHelper::QueryOneSessionByPhoneNum(DataShare::DataSharePredicates &predicates,
+    uint16_t &sessionId, uint16_t &messageCount, const std::string &phoneNum)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateSmsHelper();
     if (helper == nullptr) {
@@ -142,18 +152,34 @@ bool SmsPersistHelper::QuerySession(
         TELEPHONY_LOGE("Query Result Set nullptr Failed.");
         return false;
     }
-    resultSet->GoToFirstRow();
+    int32_t result = resultSet->GoToFirstRow();
     int32_t columnInt;
+    std::string columnString;
     int columnIndex;
-    resultSet->GetColumnIndex("id", columnIndex);
-    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
-        sessionId = columnInt;
-    }
-    resultSet->GetColumnIndex("message_count", columnIndex);
-    if (resultSet->GetInt(columnIndex, columnInt) == 0) {
-        messageCount = columnInt;
-        resultSet->Close();
-        return true;
+    std::string telephone = "";
+    while (result == DataShare::E_OK) {
+        resultSet->GetColumnIndex("telephone", columnIndex);
+        if (resultSet->GetString(columnIndex, columnString) == 0) {
+            telephone = columnString;
+        }
+        if (!IsSameFormatPhoneNumber(phoneNum, telephone,
+            i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::NATIONAL) && !IsSameFormatPhoneNumber(phoneNum,
+            telephone, i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat::E164)) {
+            TELEPHONY_LOGI("QueryOneSessionByPhoneNum not same format phone number");
+            result = resultSet->GoToNextRow();
+            continue;
+        }
+        resultSet->GetColumnIndex("id", columnIndex);
+        if (resultSet->GetInt(columnIndex, columnInt) == 0) {
+            sessionId = static_cast<uint16_t>(columnInt);
+        }
+        resultSet->GetColumnIndex("message_count", columnIndex);
+        if (resultSet->GetInt(columnIndex, columnInt) == 0) {
+            messageCount = static_cast<uint16_t>(columnInt);
+            resultSet->Close();
+            return true;
+        }
+        break;
     }
     resultSet->Close();
     return false;
