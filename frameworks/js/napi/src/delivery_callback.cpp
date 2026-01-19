@@ -66,11 +66,11 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     if (work == nullptr) {
         return;
     }
-    std::unique_ptr<DeliveryCallbackContext> pContext(static_cast<DeliveryCallbackContext *>(work->data));
-    if (pContext == nullptr) {
+    if (work->data == nullptr) {
         delete work;
         return;
     }
+    std::unique_ptr<DeliveryCallbackContext> pContext(static_cast<DeliveryCallbackContext *>(work->data));
 
     napi_env env = pContext->env;
     napi_ref thisVarRef = pContext->thisVarRef;
@@ -80,17 +80,20 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     if (napi_open_handle_scope(env, &scope) != napi_ok || scope == nullptr) {
         NapiSmsUtil::Unref(env, thisVarRef);
         NapiSmsUtil::Unref(env, callbackRef);
+        delete work;
         return;
     }
     napi_value callbackFunc = nullptr;
     if (napi_get_reference_value(env, callbackRef, &callbackFunc) != napi_ok || callbackFunc == nullptr) {
-        NapiSmsUtil::CloseHandleScopeAndUnrefBoth(scope, env, thisVarRef, callbackRef);
+        NapiSmsUtil::CloseHandleScope(scope, env, thisVarRef, callbackRef);
+        delete work;
         return;
     }
 
     napi_value thisVar = nullptr;
     if (napi_get_reference_value(env, thisVarRef, &thisVar) != napi_ok || thisVar == nullptr) {
-        NapiSmsUtil::CloseHandleScopeAndUnrefBoth(scope, env, thisVarRef, callbackRef);
+        NapiSmsUtil::CloseHandleScope(scope, env, thisVarRef, callbackRef);
+        delete work;
         return;
     }
     napi_value callbackValues[CALLBACK_VALUE_LEN] = { 0 };
@@ -98,7 +101,8 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     napi_value callbackResult = nullptr;
     size_t argc = sizeof(callbackValues) / sizeof(callbackValues[0]);
     napi_call_function(env, thisVar, callbackFunc, argc, callbackValues, &callbackResult);
-    NapiSmsUtil::CloseHandleScopeAndUnrefBoth(scope, env, thisVarRef, callbackRef);
+    NapiSmsUtil::CloseHandleScope(scope, env, thisVarRef, callbackRef);
+    delete work;
     TELEPHONY_LOGI("CompleteSmsDeliveryWork end");
 }
 
@@ -118,13 +122,13 @@ void DeliveryCallback::OnSmsDeliveryResult(const std::u16string &pdu)
     pContext->pduStr = NapiUtil::ToUtf8(pdu);
     uv_work_t *work = new uv_work_t;
     work->data = static_cast<void *>(pContext);
-    delete pContext;
 
     napi_status st1 =  napi_reference_ref(env_, thisVarRef_, nullptr);
     napi_status st2 =  napi_reference_ref(env_, callbackRef_, nullptr);
     if (st1 != napi_ok || st2 != napi_ok) {
         if (st1 == napi_ok) NapiSmsUtil::Unref(env_, thisVarRef_);
         if (st2 == napi_ok) NapiSmsUtil::Unref(env_, callbackRef_);
+        delete pContext;
         delete work;
         return;
     }
@@ -135,8 +139,9 @@ void DeliveryCallback::OnSmsDeliveryResult(const std::u16string &pdu)
         TELEPHONY_LOGE("OnSmsDeliveryResult uv_queue_work_with_qos failed, errCode: %{public}d", errCode);
         NapiSmsUtil::Unref(env_, thisVarRef_);
         NapiSmsUtil::Unref(env_, callbackRef_);
+        delete pContext;
+        delete work;
     }
-    delete work;
 }
 } // namespace Telephony
 } // namespace OHOS
