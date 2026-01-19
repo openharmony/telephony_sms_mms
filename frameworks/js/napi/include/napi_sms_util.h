@@ -37,3 +37,4 @@ public:
 };
 } // namespace Telephony
 } // namespace OHOS
+#endif // NAPI_SMS_UTIL_H
