@@ -227,7 +227,7 @@ bool SmsService::QuerySessionByTelephone(const std::string &telephone, uint16_t 
     DataShare::DataSharePredicates predicates;
     auto persistHelper = DelayedSingleton<SmsPersistHelper>::GetInstance();
     UpdatePredicatesByPhoneNum(predicates, telephone);
-    return persistHelper->QuerySession(predicates, sessionId, messageCount);
+    return persistHelper->QueryOneSessionByPhoneNum(predicates, sessionId, messageCount, telephone);
 }
 
 void SmsService::InsertSmsMmsInfo(
@@ -284,7 +284,13 @@ bool SmsService::InsertSession(
         sessionBucket.Put(Session::MESSAGE_COUNT, std::to_string(messageCount));
         DataShare::DataSharePredicates predicates;
         UpdatePredicatesByPhoneNum(predicates, number);
-        return DelayedSingleton<SmsPersistHelper>::GetInstance()->Update(predicates, sessionBucket);
+        uint16_t sessionId;
+        DataShare::DataSharePredicates predicatesNew;
+        if (DelayedSingleton<SmsPersistHelper>::GetInstance()->
+            QueryOneSessionByPhoneNum(predicates, sessionId, messageCount, number)) {
+            predicatesNew.EqualTo(Session::ID, std::to_string(sessionId));
+            return DelayedSingleton<SmsPersistHelper>::GetInstance()->Update(predicatesNew, sessionBucket);
+        }
     }
     sessionBucket.Put(Session::MESSAGE_COUNT, "1");
     return DelayedSingleton<SmsPersistHelper>::GetInstance()->Insert(SMS_SESSION, sessionBucket);
@@ -1011,7 +1017,7 @@ void SmsService::UpdatePredicatesByPhoneNum(DataShare::DataSharePredicates &pred
         // 增加contactsNum字段的判断，防止单聊通过endsWith匹配到群聊。
         predicates.In(Session::CONTACTS_NUM, std::vector<string>({ "0", "1" }));
         predicates.And();
-        predicates.EndsWith(Session::TELEPHONE, phoneNum);
+        predicates.EndsWith(Session::TELEPHONE, formatNum);
     }
 }
 } // namespace Telephony
