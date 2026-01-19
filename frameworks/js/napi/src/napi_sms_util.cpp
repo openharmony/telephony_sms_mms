@@ -21,7 +21,7 @@
 #include "napi_mms.h"
 namespace OHOS {
 namespace Telephony {
-    void __attribute__((noinline)) NapiSmsUtil::Unref(napi_env env, napi_ref ref)
+void __attribute__((noinline)) NapiSmsUtil::Unref(napi_env env, napi_ref ref)
 {
     uint32_t refCount = 0;
     if (napi_reference_unref(env, ref, &refCount) == napi_ok && refCount == 0) {
