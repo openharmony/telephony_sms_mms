@@ -38,7 +38,7 @@ std::unique_ptr<char[]> SmsWapPushBuffer::ReadDataBuffer(uint32_t desLen)
 
 std::unique_ptr<char[]> SmsWapPushBuffer::ReadDataBuffer(uint32_t offset, uint32_t desLen)
 {
-    if ((desLen > totolLength_) || ((offset + desLen) > totolLength_)) {
+    if ((desLen > totolLength_) || ((static_cast<uint64_t>(offset) + desLen) > totolLength_)) {
         return nullptr;
     }
     if (desLen > MMS_PDU_MAX_SIZE) {

@@ -75,6 +75,10 @@ bool MmsContentType::DecodeMmsContentType(MmsDecodeBuffer &decodeBuffer, int32_t
         std::string sType = "";
         uint32_t len = 0;
         decodeBuffer.DecodeText(sType, len);
+        if (len >= INT32_MAX) {
+            TELEPHONY_LOGE("len value overflow");
+            return false;
+        }
         contentLength = static_cast<int32_t>(len + 1);
         contentType_ = sType;
         return true; // 2
@@ -119,7 +123,12 @@ bool MmsContentType::DecodeMmsCTGeneralForm(MmsDecodeBuffer &decodeBuffer, int32
         TELEPHONY_LOGE("Decode contentType DecodeValueLengthReturnLen fail.");
         return false;
     }
-    contentLength = static_cast<int32_t>(valueLength + returnLength);
+    uint64_t totalLength = static_cast<uint64_t>(valueLength) + returnLength;
+    if (totalLength > INT32_MAX) {
+        TELEPHONY_LOGE("totalLength value overflow");
+        return false;
+    }
+    contentLength = static_cast<int32_t>(totalLength);
 
     uint8_t oneByte = 0;
     if (!decodeBuffer.PeekOneByte(oneByte)) {

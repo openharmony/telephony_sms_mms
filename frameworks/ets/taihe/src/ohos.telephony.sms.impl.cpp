@@ -220,6 +220,9 @@ static void GetAttachmentByDecodeMms(MmsMsg &mmsMsg,
         std::unique_ptr<char[]> buffer = nullptr;
         uint32_t nLen = 0;
         buffer = it.GetDataBuffer(nLen);
+        if (buffer == nullptr) {
+            continue;
+        }
         ::taihe::array<int32_t> inBuff(taihe::copy_data_t{}, buffer.get(), nLen);
         ohos::telephony::sms::MmsAttachment mmsAttachment = { it.GetContentId(),
             it.GetContentLocation(),
@@ -667,7 +670,7 @@ static bool SetAttachmentToCore(MmsMsg &mmsMsg, std::vector<MmsAttachmentContext
 
 static void SendReqToCoreSetMmsTo(const ::ohos::telephony::sms::MmsSendReq sendReq, MmsMsg &mmsMsg)
 {
-    if (sendReq.to->size() > 0) {
+    if (sendReq.to.has_value() && sendReq.to->size() > 0) {
         std::vector<MmsAddress> toAddrs;
         for (size_t i = 0; i < sendReq.to->size(); i++) {
             MmsAddress oneAddress;
@@ -681,7 +684,7 @@ static void SendReqToCoreSetMmsTo(const ::ohos::telephony::sms::MmsSendReq sendR
 
 static void SendReqToCoreAddHeaderAddressValue(const ::ohos::telephony::sms::MmsSendReq sendReq, MmsMsg &mmsMsg)
 {
-    if (sendReq.cc->size() > 0) {
+    if (sendReq.cc.has_value() && sendReq.cc->size() > 0) {
         for (::ohos::telephony::sms::MmsAddress ccAddress : sendReq.cc.value()) {
             OHOS::Telephony::MmsAddress oneAddress;
             OHOS::Telephony::MmsCharSets ccCharset = static_cast<MmsCharSets>(ccAddress.charset.get_value());
@@ -690,7 +693,7 @@ static void SendReqToCoreAddHeaderAddressValue(const ::ohos::telephony::sms::Mms
         }
     }
 
-    if (sendReq.bcc->size() > 0) {
+    if (sendReq.bcc.has_value() && sendReq.bcc->size() > 0) {
         for (::ohos::telephony::sms::MmsAddress bccAddress : sendReq.bcc.value()) {
             OHOS::Telephony::MmsAddress oneAddress;
             OHOS::Telephony::MmsCharSets bccCharset = static_cast<MmsCharSets>(bccAddress.charset.get_value());
@@ -717,7 +720,7 @@ static void SetSendReqToCore(MmsMsg &mmsMsg, ::ohos::telephony::sms::MmsInformat
         mmsMsg.SetMmsDate(sendReq.date.value());
     }
     SendReqToCoreAddHeaderAddressValue(sendReq, mmsMsg);
-    if (sendReq.subject->size() > 0) {
+    if (sendReq.subject.has_value() && sendReq.subject->size() > 0) {
         mmsMsg.SetMmsSubject(sendReq.subject.value().c_str());
     }
     if (sendReq.messageClass.value() > 0) {
@@ -775,7 +778,9 @@ static void SetRespIndToCore(MmsMsg &mmsMsg, ::ohos::telephony::sms::MmsInformat
     mmsMsg.SetMmsTransactionId(context.transactionId.c_str());
     mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_STATUS, context.status);
     mmsMsg.SetMmsVersion(context.version.get_value());
-    mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_REPORT_ALLOWED, context.reportAllowed->get_value());
+    if (context.reportAllowed.has_value()) {
+        mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_REPORT_ALLOWED, context.reportAllowed->get_value());
+    }
 }
 
 static void SetRetrieveConfToCore(MmsMsg &mmsMsg, ::ohos::telephony::sms::MmsInformation const & mms)
@@ -802,7 +807,7 @@ static void SetRetrieveConfToCore(MmsMsg &mmsMsg, ::ohos::telephony::sms::MmsInf
         mmsMsg.SetMmsFrom(address);
     }
 
-    if (context.cc->size() > 0) {
+    if (context.cc.has_value() && context.cc->size() > 0) {
         for (::ohos::telephony::sms::MmsAddress ccAddress : context.cc.value()) {
             OHOS::Telephony::MmsAddress oneAddress;
             OHOS::Telephony::MmsCharSets charset = static_cast<MmsCharSets>(ccAddress.charset.get_value());
@@ -811,12 +816,16 @@ static void SetRetrieveConfToCore(MmsMsg &mmsMsg, ::ohos::telephony::sms::MmsInf
         }
     }
 
-    mmsMsg.SetMmsSubject(context.subject->c_str());
-    mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_PRIORITY, context.priority->get_value());
+    if (context.subject.has_value()) {
+        mmsMsg.SetMmsSubject(context.subject->c_str());
+    }
+    if (context.priority.has_value()) {
+        mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_PRIORITY, context.priority->get_value());
+    }
     mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_DELIVERY_REPORT, context.deliveryReport.value());
     mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_READ_REPORT, context.readReport.value());
     mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_RETRIEVE_STATUS, context.retrieveStatus.value());
-    if (!context.retrieveText->empty()) {
+    if (context.retrieveText.has_value() && !context.retrieveText->empty()) {
         std::string retrieveText(context.retrieveText->c_str());
         mmsMsg.SetHeaderEncodedStringValue(MmsFieldCode::MMS_RETRIEVE_TEXT, retrieveText,
             (uint32_t)MmsCharSets::UTF_8);
@@ -829,7 +838,9 @@ static void SetAcknowledgeIndToCore(MmsMsg &mmsMsg, ::ohos::telephony::sms::MmsI
     auto context = mms.mmsType.get_mmsTypeAcknowledgeInd_ref();
     mmsMsg.SetMmsTransactionId(context.transactionId.c_str());
     mmsMsg.SetMmsVersion(context.version.get_value());
-    mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_REPORT_ALLOWED, context.reportAllowed->get_value());
+    if (context.reportAllowed.has_value()) {
+        mmsMsg.SetHeaderOctetValue(MmsFieldCode::MMS_REPORT_ALLOWED, context.reportAllowed->get_value());
+    }
 }
 
 static void SetDeliveryIndToCore(MmsMsg &mmsMsg, ::ohos::telephony::sms::MmsInformation const & mms)

@@ -49,6 +49,9 @@ int32_t DataRequest::ExecuteMms(const std::string &method, std::shared_ptr<MmsNe
     const std::string &contentUrl, std::string &pduDir, const std::string &ua, const std::string &uaprof)
 {
     std::unique_lock<std::mutex> lck(ctx_);
+    if (mmsNetworkMgr == nullptr) {
+        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+    }
     if (mmsNetworkMgr->AcquireNetwork(slotId_, GetRequestId()) != NETMANAGER_SUCCESS) {
         TELEPHONY_LOGE("acquire network fail");
         return TELEPHONY_ERR_MMS_FAIL_DATA_NETWORK_ERROR;
