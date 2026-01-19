@@ -17,8 +17,8 @@
 
 #include <uv.h>
 
-#include "napi_util.h"
 #include "telephony_log_wrapper.h"
+#include "napi_sms_util.h"
 
 namespace OHOS {
 namespace Telephony {
