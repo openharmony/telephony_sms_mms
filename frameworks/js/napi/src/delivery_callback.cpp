@@ -85,14 +85,18 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     }
     napi_value callbackFunc = nullptr;
     if (napi_get_reference_value(env, callbackRef, &callbackFunc) != napi_ok || callbackFunc == nullptr) {
-        NapiSmsUtil::CloseHandleScope(scope, env, thisVarRef, callbackRef);
+        napi_close_handle_scope(env, scope);
+        NapiSmsUtil::Unref(env, thisVarRef);
+        NapiSmsUtil::Unref(env, callbackRef);
         delete work;
         return;
     }
 
     napi_value thisVar = nullptr;
     if (napi_get_reference_value(env, thisVarRef, &thisVar) != napi_ok || thisVar == nullptr) {
-        NapiSmsUtil::CloseHandleScope(scope, env, thisVarRef, callbackRef);
+        napi_close_handle_scope(env, scope);
+        NapiSmsUtil::Unref(env, thisVarRef);
+        NapiSmsUtil::Unref(env, callbackRef);
         delete work;
         return;
     }
@@ -101,7 +105,9 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     napi_value callbackResult = nullptr;
     size_t argc = sizeof(callbackValues) / sizeof(callbackValues[0]);
     napi_call_function(env, thisVar, callbackFunc, argc, callbackValues, &callbackResult);
-    NapiSmsUtil::CloseHandleScope(scope, env, thisVarRef, callbackRef);
+    napi_close_handle_scope(env, scope);
+    NapiSmsUtil::Unref(env, thisVarRef);
+    NapiSmsUtil::Unref(env, callbackRef);
     delete work;
     TELEPHONY_LOGI("CompleteSmsDeliveryWork end");
 }
