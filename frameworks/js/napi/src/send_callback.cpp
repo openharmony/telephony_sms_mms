@@ -78,7 +78,9 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
     }
     napi_value callbackFunc = nullptr;
     if (napi_get_reference_value(env, callbackRef, &callbackFunc) != napi_ok || callbackFunc == nullptr) {
-        NapiSmsUtil::CloseHandleScope(scope, env, thisVarRef, callbackRef);
+        napi_close_handle_scope(env, scope);
+        NapiSmsUtil::Unref(env, thisVarRef);
+        NapiSmsUtil::Unref(env, callbackRef);
         delete work;
         return;
     }
@@ -86,19 +88,23 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
     callbackValues[0] = NapiUtil::CreateUndefined(env);
     napi_create_object(env, &callbackValues[1]);
     napi_value sendResultValue = nullptr;
-    napi_create_int32(env, wrapResult, &sendResultValue);
+    napi_create_int32(env, static_cast<int32_t>(pContext->result), &sendResultValue);
     napi_set_named_property(env, callbackValues[1], "result", sendResultValue);
 
     napi_value thisVar = nullptr;
     if (napi_get_reference_value(env, thisVarRef, &thisVar) != napi_ok || thisVar == nullptr) {
-        NapiSmsUtil::CloseHandleScope(scope, env, thisVarRef, callbackRef);
+        napi_close_handle_scope(env, scope);
+        NapiSmsUtil::Unref(env, thisVarRef);
+        NapiSmsUtil::Unref(env, callbackRef);
         delete work;
         return;
     }
 
     napi_value callbackResult = nullptr;
-    napi_call_function(env, thisVar, callbackFunc, 2, callbackValues, &callbackResult);
-    NapiSmsUtil::CloseHandleScope(scope, env, thisVarRef, callbackRef);
+    napi_call_function(env, thisVar, callbackFunc, CALLBACK_VALUE_LEN, callbackValues, &callbackResult);
+    napi_close_handle_scope(env, scope);
+    NapiSmsUtil::Unref(env, thisVarRef);
+    NapiSmsUtil::Unref(env, callbackRef);
     delete work;
     TELEPHONY_LOGI("CompleteSmsSendWork end");
 }
