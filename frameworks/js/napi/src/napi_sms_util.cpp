@@ -19,6 +19,7 @@
 
 #include "telephony_log_wrapper.h"
 #include "napi_mms.h"
+
 namespace OHOS {
 namespace Telephony {
 void __attribute__((noinline)) NapiSmsUtil::Unref(napi_env env, napi_ref ref)
