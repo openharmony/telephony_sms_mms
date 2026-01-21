@@ -33,7 +33,6 @@ namespace Telephony {
 class NapiSmsUtil {
 public:
     static __attribute__((noinline)) void Unref(napi_env env, napi_ref ref);
-    static void CloseHandleScope(napi_handle_scope scope, napi_env env, napi_ref ref1, napi_ref ref2);
 };
 } // namespace Telephony
 } // namespace OHOS
