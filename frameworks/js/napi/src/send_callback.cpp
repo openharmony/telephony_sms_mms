@@ -97,7 +97,7 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
     }
 
     napi_value callbackResult = nullptr;
-    napi_call_function(env, thisVar, callbackFunc, CALLBACK_VALUE_LEN, callbackValues, &callbackResult);
+    napi_call_function(env, thisVar, callbackFunc, 2, callbackValues, &callbackResult);
     NapiSmsUtil::CloseHandleScope(scope, env, thisVarRef, callbackRef);
     delete work;
     TELEPHONY_LOGI("CompleteSmsSendWork end");
