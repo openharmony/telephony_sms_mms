@@ -28,12 +28,5 @@ void __attribute__((noinline)) NapiSmsUtil::Unref(napi_env env, napi_ref ref)
         napi_delete_reference(env, ref);
     }
 }
-
-void NapiSmsUtil::CloseHandleScope(napi_handle_scope scope, napi_env env, napi_ref ref1, napi_ref ref2)
-{
-    napi_close_handle_scope(env, scope);
-    Unref(env, ref1);
-    Unref(env, ref2);
-}
 } // namespace Telephony
 } // namespace OHOS
