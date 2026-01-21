@@ -68,7 +68,6 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
     napi_env env = pContext->env;
     napi_ref thisVarRef = pContext->thisVarRef;
     napi_ref callbackRef = pContext->callbackRef;
-    SendSmsResult wrapResult = pContext->result;
     napi_handle_scope scope = nullptr;
     if (napi_open_handle_scope(env, &scope) != napi_ok || scope == nullptr) {
         NapiSmsUtil::Unref(env, thisVarRef);
