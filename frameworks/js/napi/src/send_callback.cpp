@@ -18,7 +18,6 @@
 #include <uv.h>
 
 #include "telephony_log_wrapper.h"
-#include "napi_util.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -128,8 +127,12 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
     napi_status st1 = napi_reference_ref(env_, thisVarRef_, nullptr);
     napi_status st2 = napi_reference_ref(env_, callbackRef_, nullptr);
     if (st1 != napi_ok || st2 != napi_ok) {
-        if (st1 == napi_ok) NapiSmsUtil::Unref(env_, thisVarRef_);
-        if (st2 == napi_ok) NapiSmsUtil::Unref(env_, callbackRef_);
+        if (st1 == napi_ok) {
+            NapiSmsUtil::Unref(env_, thisVarRef_);
+        }
+        if (st2 == napi_ok) {
+            NapiSmsUtil::Unref(env_, callbackRef_);
+        }
         delete pContext;
         delete work;
         return;
