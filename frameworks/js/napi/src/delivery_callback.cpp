@@ -31,6 +31,10 @@ DeliveryCallback::DeliveryCallback(bool hasCallback, napi_env env, napi_ref this
 
 DeliveryCallback::~DeliveryCallback()
 {
+    if (hasCallback_) {
+        napi_reference_unref(env_, thisVarRef_, nullptr);
+        napi_reference_unref(env_, callbackRef_, nullptr);
+    }
     env_ = nullptr;
     thisVarRef_ = nullptr;
     callbackRef_ = nullptr;
