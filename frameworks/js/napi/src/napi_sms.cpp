@@ -179,17 +179,36 @@ static int32_t ActuallySendDataMessage(SendMessageContext &parameter, std::uniqu
 static int32_t ActuallySendMessage(napi_env env, SendMessageContext &parameter)
 {
     bool hasSendCallback = parameter.sendCallbackRef != nullptr;
+    if (hasSendCallback) {
+        napi_reference_ref(env, parameter.thisVarRef, nullptr);
+        napi_reference_ref(env, parameter.sendCallbackRef, nullptr);
+    }
     std::unique_ptr<SendCallback> sendCallback =
         std::make_unique<SendCallback>(hasSendCallback, env, parameter.thisVarRef, parameter.sendCallbackRef);
     if (sendCallback == nullptr) {
         TELEPHONY_LOGE("ActuallySendMessage sendCallback == nullptr");
+        if (hasSendCallback) {
+            NapiSmsUtil::Unref(env, parameter.thisVarRef);
+            NapiSmsUtil::Unref(env, parameter.sendCallbackRef);
+        }
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     bool hasDeliveryCallback = parameter.deliveryCallbackRef != nullptr;
+    if (hasDeliveryCallback) {
+        napi_reference_ref(env, parameter.thisVarRef, nullptr);
+        napi_reference_ref(env, parameter.deliveryCallbackRef, nullptr);
+    }
     std::unique_ptr<DeliveryCallback> deliveryCallback = std::make_unique<DeliveryCallback>(
         hasDeliveryCallback, env, parameter.thisVarRef, parameter.deliveryCallbackRef);
     if (deliveryCallback == nullptr) {
         TELEPHONY_LOGE("ActuallySendMessage deliveryCallback == nullptr");
+        if (hasDeliveryCallback) {
+            NapiSmsUtil::Unref(env, parameter.thisVarRef);
+            NapiSmsUtil::Unref(env, parameter.deliveryCallbackRef);
+        }
+        if (sendCallback) {
+            sendCallback.reset();
+        }
         return TELEPHONY_ERR_LOCAL_PTR_NULL;
     }
     if (parameter.messageType == TEXT_MESSAGE_PARAMETER_MATCH && parameter.isPersist) {
