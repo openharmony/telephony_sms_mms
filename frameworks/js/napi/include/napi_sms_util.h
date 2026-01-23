@@ -26,7 +26,7 @@
 #include "i_sms_service_interface.h"
 #include "telephony_napi_common_error.h"
 #include "short_message.h"
-#include "napi_sms.h"
+#include "napi_util.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -44,6 +44,7 @@ public:
         napi_env env, const napi_value parameters[], size_t parameterCount);
     static int32_t MatchSendMessageParameters(
         napi_env env, napi_value parameters[], size_t parameterCount);
+    static __attribute__((noinline)) void Unref(napi_env env, napi_ref ref);
 };
 } // namespace Telephony
 } // namespace OHOS
