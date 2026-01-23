@@ -2,7 +2,7 @@
  * Copyright (C) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -18,18 +18,18 @@
 #include <uv.h>
 
 #include "telephony_log_wrapper.h"
-#include "napi_util.h"
+#include "napi_mms.h"
 
 namespace OHOS {
 namespace Telephony {
 namespace {
-const std::string SLOT_ID_STR = "slotId";
-const std::string DESTINATION_HOST_STR = "destinationHost";
-const std::string SERVICE_CENTER_STR = "serviceCenter";
-const std::string CONTENT_STR = "content";
-const std::string DESTINATION_PORT_STR = "destinationPort";
-const std::string SEND_CALLBACK_STR = "sendCallback";
-const std::string DELIVERY_CALLBACK_STR = "deliveryCallback";
+const std::string g_slotIdStr = "slotId";
+const std::string g_destinationHostStr = "destinationHost";
+const std::string g_serviceCenterStr = "serviceCenter";
+const std::string g_contentStr = "content";
+const std::string g_destinationPortStr = "destinationPort";
+const std::string g_sendCallbackStr = "sendCallback";
+const std::string g_deliveryCallbackStr = "deliveryCallback";
 } // namespace
 void NapiSmsUtil::SetPropertyArray(napi_env env, napi_value object,
     const std::string &name, std::vector<unsigned char> pdu)
@@ -93,9 +93,6 @@ bool NapiSmsUtil::MatchObjectProperty(
 
 int32_t NapiSmsUtil::MatchSendShortMessageParameters(napi_env env, napi_value parameters[], size_t parameterCount)
 {
-    if (parameters == nullptr) {
-        return MESSAGE_PARAMETER_NOT_MATCH;
-    }
     bool match = false;
     switch (parameterCount) {
         case ONE_PARAMETER: {
@@ -114,25 +111,25 @@ int32_t NapiSmsUtil::MatchSendShortMessageParameters(napi_env env, napi_value pa
     }
 
     napi_value object = parameters[0];
-    bool hasSlotId = NapiUtil::HasNamedTypeProperty(env, object, napi_number, SLOT_ID_STR);
-    bool hasDestinationHost = NapiUtil::HasNamedTypeProperty(env, object, napi_string, DESTINATION_HOST_STR);
-    bool hasContent = NapiUtil::HasNamedProperty(env, object, CONTENT_STR);
+    bool hasSlotId = NapiUtil::HasNamedTypeProperty(env, object, napi_number, g_slotIdStr);
+    bool hasDestinationHost = NapiUtil::HasNamedTypeProperty(env, object, napi_string, g_destinationHostStr);
+    bool hasContent = NapiUtil::HasNamedProperty(env, object, g_contentStr);
     bool hasNecessaryParameter = hasSlotId && hasDestinationHost && hasContent;
     if (!hasNecessaryParameter) {
         return MESSAGE_PARAMETER_NOT_MATCH;
     }
-    napi_value contentValue = NapiUtil::GetNamedProperty(env, object, CONTENT_STR);
+    napi_value contentValue = NapiUtil::GetNamedProperty(env, object, g_contentStr);
     bool contentIsStr = NapiUtil::MatchValueType(env, contentValue, napi_string);
     bool contentIsObj = NapiUtil::MatchValueType(env, contentValue, napi_object);
     bool contentIsArray = false;
     if (contentIsObj) {
         napi_is_array(env, contentValue, &contentIsArray);
     }
-    bool serviceCenterTypeMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_string, SERVICE_CENTER_STR);
-    bool sendCallbackTypeMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_function, SEND_CALLBACK_STR);
+    bool serviceCenterTypeMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_string, g_serviceCenterStr);
+    bool sendCallbackTypeMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_function, g_sendCallbackStr);
     bool deliveryCallbackTypeMatch =
-        NapiUtil::MatchOptionPropertyType(env, object, napi_function, DELIVERY_CALLBACK_STR);
-    bool destindationPortMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_number, DESTINATION_PORT_STR);
+        NapiUtil::MatchOptionPropertyType(env, object, napi_function, g_deliveryCallbackStr);
+    bool destindationPortMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_number, g_destinationPortStr);
     if (contentIsStr && serviceCenterTypeMatch && sendCallbackTypeMatch && deliveryCallbackTypeMatch) {
         return TEXT_MESSAGE_PARAMETER_MATCH;
     } else if (contentIsArray && serviceCenterTypeMatch && sendCallbackTypeMatch && deliveryCallbackTypeMatch &&
@@ -144,9 +141,6 @@ int32_t NapiSmsUtil::MatchSendShortMessageParameters(napi_env env, napi_value pa
 
 bool NapiSmsUtil::MatchCreateMessageParameter(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
-    if (parameters == nullptr) {
-        return false;
-    }
     bool typeMatch = false;
     switch (parameterCount) {
         case TWO_PARAMETERS: {
@@ -170,33 +164,30 @@ bool NapiSmsUtil::MatchCreateMessageParameter(napi_env env, const napi_value par
 
 int32_t NapiSmsUtil::MatchSendMessageParameters(napi_env env, napi_value parameters[], size_t parameterCount)
 {
-    if (parameters == nullptr) {
-        return MESSAGE_PARAMETER_NOT_MATCH;
-    }
     bool match = (parameterCount == 1) && NapiUtil::MatchParameters(env, parameters, {napi_object});
     if (!match) {
         return MESSAGE_PARAMETER_NOT_MATCH;
     }
     napi_value object = parameters[0];
-    bool hasSlotId = NapiUtil::HasNamedTypeProperty(env, object, napi_number, SLOT_ID_STR);
-    bool hasDestinationHost = NapiUtil::HasNamedTypeProperty(env, object, napi_string, DESTINATION_HOST_STR);
-    bool hasContent = NapiUtil::HasNamedProperty(env, object, CONTENT_STR);
+    bool hasSlotId = NapiUtil::HasNamedTypeProperty(env, object, napi_number, g_slotIdStr);
+    bool hasDestinationHost = NapiUtil::HasNamedTypeProperty(env, object, napi_string, g_destinationHostStr);
+    bool hasContent = NapiUtil::HasNamedProperty(env, object, g_contentStr);
     bool hasNecessaryParameter = hasSlotId && hasDestinationHost && hasContent;
     if (!hasNecessaryParameter) {
         return MESSAGE_PARAMETER_NOT_MATCH;
     }
-    napi_value contentValue = NapiUtil::GetNamedProperty(env, object, CONTENT_STR);
+    napi_value contentValue = NapiUtil::GetNamedProperty(env, object, g_contentStr);
     bool contentIsStr = NapiUtil::MatchValueType(env, contentValue, napi_string);
     bool contentIsObj = NapiUtil::MatchValueType(env, contentValue, napi_object);
     bool contentIsArray = false;
     if (contentIsObj) {
         napi_is_array(env, contentValue, &contentIsArray);
     }
-    bool serviceCenterTypeMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_string, SERVICE_CENTER_STR);
-    bool sendCallbackTypeMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_function, SEND_CALLBACK_STR);
+    bool serviceCenterTypeMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_string, g_serviceCenterStr);
+    bool sendCallbackTypeMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_function, g_sendCallbackStr);
     bool deliveryCallbackTypeMatch =
-        NapiUtil::MatchOptionPropertyType(env, object, napi_function, DELIVERY_CALLBACK_STR);
-    bool destindationPortMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_number, DESTINATION_PORT_STR);
+        NapiUtil::MatchOptionPropertyType(env, object, napi_function, g_deliveryCallbackStr);
+    bool destindationPortMatch = NapiUtil::MatchOptionPropertyType(env, object, napi_number, g_destinationPortStr);
     if (contentIsStr && serviceCenterTypeMatch && sendCallbackTypeMatch && deliveryCallbackTypeMatch) {
         return TEXT_MESSAGE_PARAMETER_MATCH;
     } else if (contentIsArray && serviceCenterTypeMatch && sendCallbackTypeMatch && deliveryCallbackTypeMatch &&
@@ -204,6 +195,14 @@ int32_t NapiSmsUtil::MatchSendMessageParameters(napi_env env, napi_value paramet
         return RAW_DATA_MESSAGE_PARAMETER_MATCH;
     }
     return MESSAGE_PARAMETER_NOT_MATCH;
+}
+
+void __attribute__((noinline)) NapiSmsUtil::Unref(napi_env env, napi_ref ref)
+{
+    uint32_t refCount = 0;
+    if (napi_reference_unref(env, ref, &refCount) == napi_ok && refCount == 0) {
+        napi_delete_reference(env, ref);
+    }
 }
 } // namespace Telephony
 } // namespace OHOS
