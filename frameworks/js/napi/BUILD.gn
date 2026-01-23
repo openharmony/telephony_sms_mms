@@ -32,6 +32,7 @@ ohos_shared_library("sms") {
     "src/napi_send_recv_mms.cpp",
     "src/napi_sms.cpp",
     "src/send_callback.cpp",
+    "src/napi_sms_util.cpp",
   ]
 
   defines = [

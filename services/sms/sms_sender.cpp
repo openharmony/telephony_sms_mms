@@ -487,6 +487,9 @@ void SmsSender::DataBasedSmsDeliverySplitPage(GsmSmsMessage &gsmSmsMessage, std:
             return;
         }
 
+        if (tpdu == nullptr) {
+            return;
+        }
         (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
         if (cellsInfos[indexData].encodeData.size() > MAX_USER_DATA_LEN + 1) {
             TELEPHONY_LOGE("data length invalid.");

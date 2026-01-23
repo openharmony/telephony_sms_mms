@@ -190,8 +190,6 @@ bool GsmSmsCbHandler::InitLocation(SmsCbInfo &info)
     sptr<GsmCellLocation> gsmLocation = sptr<GsmCellLocation>(static_cast<GsmCellLocation *>(location.GetRefPtr()));
     info.lac_ = gsmLocation->GetLac();
     info.cid_ = gsmLocation->GetCellId();
-    TELEPHONY_LOGI("plmn = %{private}s lac = %{private}s cid = %{private}s", StringUtils::ToUtf8(info.plmn_).c_str(),
-        std::to_string(info.lac_).c_str(), std::to_string(info.cid_).c_str());
     switch (info.header->serialNum.geoScope) {
         case LaWide:
             info.cid_ = defaultValue;

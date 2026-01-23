@@ -92,6 +92,9 @@ void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const s
     for (int i = 0; i < cellsInfosSize; i++) {
         std::shared_ptr<SmsSendIndexer> indexer = nullptr;
         std::string segmentText;
+        if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1 || cellsInfos[i].encodeData.empty()) {
+            return;
+        }
         segmentText.append((char *)(cellsInfos[i].encodeData.data()), cellsInfos[i].encodeData.size());
         indexer = make_shared<SmsSendIndexer>(desAddr, scAddr, segmentText, sendCallback, deliveryCallback);
         if (indexer == nullptr) {
@@ -102,10 +105,6 @@ void GsmSmsSender::TextBasedSmsSplitDelivery(const std::string &desAddr, const s
         indexer->SetDataBaseId(dataBaseId);
         indexer->SetIsMmsApp(isMmsApp);
         (void)memset_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, 0x00, MAX_USER_DATA_LEN + 1);
-        if (cellsInfos[i].encodeData.size() > MAX_USER_DATA_LEN + 1) {
-            TELEPHONY_LOGE("TextBasedSmsDelivery data length invalid.");
-            return;
-        }
         int ret = memcpy_s(tpdu->data.submit.userData.data, MAX_USER_DATA_LEN + 1, &cellsInfos[i].encodeData[0],
             cellsInfos[i].encodeData.size());
         if (ret != EOK) {
