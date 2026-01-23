@@ -26,13 +26,24 @@
 #include "i_sms_service_interface.h"
 #include "telephony_napi_common_error.h"
 #include "short_message.h"
-#include "napi_util.h"
+#include "napi_sms.h"
 
 namespace OHOS {
 namespace Telephony {
 class NapiSmsUtil {
 public:
-    static __attribute__((noinline)) void Unref(napi_env env, napi_ref ref);
+    static void SetPropertyArray(napi_env env, napi_value object, const std::string &name,
+        std::vector<unsigned char> pdu);
+    static int32_t WrapSimMessageStatus(int32_t status);
+    static std::u16string GetU16StrFromNapiValue(napi_env env, napi_value value);
+    static bool MatchObjectProperty(napi_env env, napi_value object,
+        std::initializer_list<std::pair<std::string, napi_valuetype>> pairList);
+    static int32_t MatchSendShortMessageParameters(
+        napi_env env, napi_value parameters[], size_t parameterCount);
+    static bool MatchCreateMessageParameter(
+        napi_env env, const napi_value parameters[], size_t parameterCount);
+    static int32_t MatchSendMessageParameters(
+        napi_env env, napi_value parameters[], size_t parameterCount);
 };
 } // namespace Telephony
 } // namespace OHOS

@@ -41,7 +41,8 @@ public:
     bool QueryParamBoolean(const std::string key, bool defValue);
     bool QuerySmsMmsForId(DataShare::DataSharePredicates &predicates, int32_t &dataBaseId);
     bool QueryMaxGroupId(DataShare::DataSharePredicates &predicates, uint16_t &maxGroupId);
-    bool QuerySession(DataShare::DataSharePredicates &predicates, uint16_t &sessionId, uint16_t &messageCount);
+    bool QueryOneSessionByPhoneNum(DataShare::DataSharePredicates &predicates, uint16_t &sessionId,
+        uint16_t &messageCount, const std::string &phoneNum);
     bool UpdateContact(const std::string &address);
     int32_t FormatSmsNumber(const std::string &num, std::string countryCode,
         const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo, std::string &formatNum);
@@ -67,6 +68,8 @@ private:
     void CbnFormat(std::string &numTemp, const i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat formatInfo,
         std::string &formatNum);
     void ReleaseDataShareHelper();
+    bool IsSameFormatPhoneNumber(const std::string &phoneNum, const std::string &telephone,
+        i18n::phonenumbers::PhoneNumberUtil::PhoneNumberFormat format);
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> smsDataShareHelper_ = nullptr;

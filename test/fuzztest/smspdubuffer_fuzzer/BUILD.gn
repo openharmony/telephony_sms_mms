@@ -35,7 +35,7 @@ ohos_fuzztest("SmsPduBufferFuzzTest") {
     "access_token:libnativetoken_shared",
     "access_token:libtoken_setproc",
     "c_utils:utils",
-    "ffrt:libffrt",
+    "core_service:ffrt_mocked",
     "hilog:libhilog",
     "safwk:system_ability_fwk",
   ]

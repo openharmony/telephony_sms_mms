@@ -31,6 +31,7 @@ namespace Telephony {
 static constexpr uint8_t HEX_OFFSET = 4;
 static constexpr uint8_t STEP_2BIT = 2;
 static constexpr char HEX_TABLE[] = "0123456789ABCDEF";
+static constexpr uint32_t MMS_PDU_MAX_SIZE = 10 * 1024 * 1024;
 
 StringUtils::StringUtils() {}
 
@@ -63,6 +64,9 @@ std::string StringUtils::StringToHex(const std::string &data)
 
 std::string StringUtils::StringToHex(const char *data, int byteLength)
 {
+    if (data == nullptr || byteLength <= 0 || byteLength > MMS_PDU_MAX_SIZE) {
+        return "";
+    }
     std::stringstream ss;
     for (int i = 0; i < byteLength; ++i) {
         unsigned char temp = static_cast<unsigned char>(data[i]) >> HEX_OFFSET;

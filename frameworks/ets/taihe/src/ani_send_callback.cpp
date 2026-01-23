@@ -63,6 +63,9 @@ static ani_object ConvertTaiheISendShortMessageCallbackToAni(ani_env *env,
 void AniSendCallback::CompleteSmsSendWork(const ISendShortMessageCallback::SmsSendResult result)
 {
     auto env = cb_->envT_;
+    if (env == nullptr) {
+        return;
+    }
     ani_status aniStatus;
     ani_ref aniNull;
     if ((aniStatus = env->GetNull(&aniNull)) != ANI_OK) {
