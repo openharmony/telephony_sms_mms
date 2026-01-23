@@ -48,8 +48,13 @@ SendCallback::SendCallback(bool hasCallback, napi_env env, napi_ref thisVarRef, 
 SendCallback::~SendCallback()
 {
     if (hasCallback_) {
-        napi_reference_unref(env_, thisVarRef_, nullptr);
-        napi_reference_unref(env_, callbackRef_, nullptr);
+        uint32_t refCount = 0;
+        if (napi_reference_unref(env_, thisVarRef_, &refCount) == napi_ok && refCount == 0) {
+            napi_delete_reference(env_, thisVarRef_);
+        }
+        if (napi_reference_unref(env_, callbackRef_, &refCount) == napi_ok && refCount == 0) {
+            napi_delete_reference(env_, callbackRef_);
+        }
     }
     env_ = nullptr;
     thisVarRef_ = nullptr;
@@ -71,8 +76,10 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
     napi_env env = pContext->env;
     napi_ref thisVarRef = pContext->thisVarRef;
     napi_ref callbackRef = pContext->callbackRef;
+    SendSmsResult wrapResult = pContext->result;
     napi_handle_scope scope = nullptr;
     if (napi_open_handle_scope(env, &scope) != napi_ok || scope == nullptr) {
+        TELEPHONY_LOGE("CompleteSmsSendWork work is nullptr!");
         delete work;
         return;
     }
@@ -86,7 +93,7 @@ void CompleteSmsSendWork(uv_work_t *work, int status)
     callbackValues[0] = NapiUtil::CreateUndefined(env);
     napi_create_object(env, &callbackValues[1]);
     napi_value sendResultValue = nullptr;
-    napi_create_int32(env, static_cast<int32_t>(pContext->result), &sendResultValue);
+    napi_create_int32(env, wrapResult, &sendResultValue);
     napi_set_named_property(env, callbackValues[1], "result", sendResultValue);
 
     napi_value thisVar = nullptr;
@@ -122,6 +129,7 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
 
     int32_t errCode = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
         [](uv_work_t *work, int status) { CompleteSmsSendWork(work, status); }, uv_qos_default);
+
     if (errCode != 0) {
         TELEPHONY_LOGE("OnSmsSendResult uv_queue_work_with_qos failed, errCode: %{public}d", errCode);
         delete pContext;
