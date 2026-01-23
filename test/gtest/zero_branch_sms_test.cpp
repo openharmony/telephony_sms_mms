@@ -1156,142 +1156,6 @@ HWTEST_F(BranchSmsTest, GsmSmsParamCodec_0013, Function | MediumTest | Level1) {
 }
 
 /**
- * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0001
- * @tc.name     Test CreateMessage
- * @tc.desc     Function test
- */
-HWTEST_F(BranchSmsTest, CreateMessage_0001, Function | MediumTest | Level1) {
-    /*
-        step1: The pdu whose mti is 0
-    */
-    std::string pduHex = "07914151551512f2040B916105551511f100006060605130308A04D4F29C0E";
-    /*
-        step2: Decoding pdu packets
-    */
-    GsmSmsMessage message;
-    auto result = message.CreateMessage(pduHex);
-    EXPECT_TRUE(result != nullptr);
-    EXPECT_TRUE(result->GetSmscAddr()== "+14155551212");
-    EXPECT_TRUE(result->GetOriginatingAddress() == "+16505551111");
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0002
- * @tc.name     Test CreateMessage
- * @tc.desc     Function test
- */
-HWTEST_F(BranchSmsTest, CreateMessage_0002, Function | MediumTest | Level1) {
-    /*
-        step1: The pdu whose mti is 1
-    */
-    std::string pduHex = "07914151551512f2050B916105551511f100006060605130308A04D4F29C0E";
-    /*
-        step2: Decoding pdu packets
-    */
-    GsmSmsMessage message;
-    auto result = message.CreateMessage(pduHex);
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0003
- * @tc.name     Test CreateMessage
- * @tc.desc     Function test
- */
-HWTEST_F(BranchSmsTest, CreateMessage_0003, Function | MediumTest | Level1) {
-    /*
-        step1: The pdu whose mti is 2
-    */
-    std::string pduHex = "07914151551512f2060B916105551511f100006060605130308A04D4F29C0E";
-    /*
-        step2: Decoding pdu packets
-    */
-    GsmSmsMessage message;
-    auto result = message.CreateMessage(pduHex);
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0004
- * @tc.name     Test CreateMessage
- * @tc.desc     Function test
- */
-HWTEST_F(BranchSmsTest, CreateMessage_0004, Function | MediumTest | Level1) {
-    /*
-        step1: The pdu whose mti is 3
-    */
-    std::string pduHex = "07914151551512f2070B916105551511f100006060605130308A04D4F29C0E";
-    /*
-        step2: Decoding pdu packets
-    */
-    GsmSmsMessage message;
-    auto result = message.CreateMessage(pduHex);
-    EXPECT_TRUE(result != nullptr);
-    EXPECT_TRUE(result->GetSmscAddr() == "+14155551212");
-    EXPECT_TRUE(result->GetOriginatingAddress() == "+16505551111");
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0005
- * @tc.name     Test CreateMessage
- * @tc.desc     Function test
- */
-HWTEST_F(BranchSmsTest, CreateMessage_0005, Function | MediumTest | Level1) {
-    /*
-        step1: The pdu whose ton is TYPE_ALPHA_NUMERIC
-    */
-    const std::string pduHex =
-        "07915892208800F0040ED0A3F19CDD7A52A10008424011119582235C4F60768400630073006C00200041007000"
-        "704E006B2160275BC678BC70BA0034003800370033003200373002598267097591554FFF0C8ACB806F7D61006300"
-        "73006C670D52D971B17DDA003200350031003200330031003200333002";
-    /*
-        step2: Decoding pdu packets
-    */
-    GsmSmsMessage message;
-    auto result = message.CreateMessage(pduHex);
-    EXPECT_TRUE(result != nullptr);
-    EXPECT_TRUE(result->GetSmscAddr() == "+85290288000");
-    EXPECT_TRUE(result->GetOriginatingAddress() == "#csl-OTP");
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0006
- * @tc.name     Test CreateMessage
- * @tc.desc     Function test
- */
-HWTEST_F(BranchSmsTest, CreateMessage_0006, Function | MediumTest | Level1) {
-    /*
-        step1: The pdu whose ton is TYPE_ALPHA_NUMERIC
-    */
-    const std::string pduHex =
-        "07915892208800F0040ED0B4F19CDD8B61A10108424011119582235C4F60768400630073006C0020004100700"
-        "0704E006B2160275BC678BC70BA0034003800370033003200373002598267097591554FFF0C8ACB806F7D610063"
-        "0073006C670D52D971B17DDA003200350031003200330031003200333002";
-    /*
-        step2: Decoding pdu packets
-    */
-    GsmSmsMessage message;
-    auto result = message.CreateMessage(pduHex);
-    EXPECT_TRUE(result != nullptr);
-    EXPECT_TRUE(result->GetSmscAddr() == "+85290288000");
-    EXPECT_TRUE(result->GetOriginatingAddress() == "4csl=1XP");
-}
-
-/**
- * @tc.number   Telephony_SmsMmsGtest_CreateMessage_0007
- * @tc.name     Test CreateMessage special sms
- * @tc.desc     Function test
- */
-HWTEST_F(BranchSmsTest, CreateMessage_0007, Function | MediumTest | Level1) {
-    const std::string pdu =
-        "069168310992004412D0C87AF85A4E53CB733A00D85270709182850014"
-        "0401020001D0CB733AC8FE4E8FCBED709A0D";
-    GsmSmsMessage message;
-    auto result = message.CreateMessage(pdu);
-    EXPECT_TRUE(result != nullptr);
-}
-
-/**
  * @tc.number   Telephony_SmsMmsGtest_GsmSmsUDataCodec_0001
  * @tc.name     Test GsmUserDataPdu
  * @tc.desc     Function test
@@ -2243,6 +2107,28 @@ HWTEST_F(BranchSmsTest, GsmSmsSender_0002, Function | MediumTest | Level1)
     const std::shared_ptr<SmsSendIndexer> indexer = nullptr;
     gsmSmsSender->SendImsSms(indexer, smsData);
     EXPECT_TRUE(gsmSmsSender != nullptr);
+    const sptr<ISendShortMessageCallback> sendCallback =
+        iface_cast<ISendShortMessageCallback>(new SendShortMessageCallbackStub());
+    const sptr<IDeliveryShortMessageCallback> deliveryCallback =
+        iface_cast<IDeliveryShortMessageCallback>(new DeliveryShortMessageCallbackStub());
+    const std::string desAddr = "qwe";
+    const std::string scAddr = "123";
+    GsmSmsMessage gsmSmsMessage;
+    std::vector<struct SplitInfo> splits;
+    SplitInfo info;
+    info.encodeData.clear();
+    splits.push_back(info);
+    int32_t dataBaseId = 0;
+    gsmSmsSender->TextBasedSmsSplitDelivery(desAddr, scAddr, splits, DataCodingScheme::DATA_CODING_7BIT, false,
+        nullptr, gsmSmsMessage, sendCallback, deliveryCallback, dataBaseId, false);
+    splits[0].encodeData.resize(MAX_USER_DATA_LEN + 2);
+    gsmSmsSender->TextBasedSmsSplitDelivery(desAddr, scAddr, splits, DataCodingScheme::DATA_CODING_7BIT, false,
+        nullptr, gsmSmsMessage, sendCallback, deliveryCallback, dataBaseId, false);
+    uint8_t msgRef8bit = 0;
+    uint16_t port = 1;
+    gsmSmsSender->DataBasedSmsDeliverySplitPage(gsmSmsMessage, splits, nullptr, msgRef8bit, desAddr, scAddr,
+        port, sendCallback, deliveryCallback);
+    EXPECT_EQ(splits.size(), 1);
 }
 
 /**

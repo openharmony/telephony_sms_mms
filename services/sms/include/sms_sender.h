@@ -75,11 +75,6 @@ public:
         std::shared_ptr<struct SmsTpdu> tpdu, uint8_t msgRef8bit, const std::string &desAddr, const std::string &scAddr,
         int32_t port, const sptr<ISendShortMessageCallback> &sendCallback,
         const sptr<IDeliveryShortMessageCallback> &deliveryCallback);
-    void DataBasedSmsDeliveryPacketSplitPage(GsmSmsMessage &gsmSmsMessage, std::shared_ptr<struct SmsTpdu> tpdu,
-        uint8_t msgRef8bit, uint32_t indexData, int32_t port, const std::string &scAddr,
-        const sptr<ISendShortMessageCallback> &sendCallback,
-        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, std::shared_ptr<SmsSendIndexer> indexer,
-        std::vector<struct SplitInfo> cellsInfos);
     void DataBasedSmsDeliverySendSplitPage(std::shared_ptr<struct EncodeInfo> encodeInfo,
         const sptr<ISendShortMessageCallback> &sendCallback, std::shared_ptr<SmsSendIndexer> indexer,
         uint8_t msgRef8bit, uint32_t totalPage);
@@ -135,6 +130,11 @@ private:
 
     void HandleResend(const std::shared_ptr<SmsSendIndexer> &smsIndexer);
     void UpdateUnSentCellCount(uint8_t refId);
+    void DataBasedSmsDeliveryPacketSplitPage(GsmSmsMessage &gsmSmsMessage, std::shared_ptr<struct SmsTpdu> tpdu,
+        uint8_t msgRef8bit, uint32_t indexData, int32_t port, const std::string &scAddr,
+        const sptr<ISendShortMessageCallback> &sendCallback,
+        const sptr<IDeliveryShortMessageCallback> &deliveryCallback, std::shared_ptr<SmsSendIndexer> indexer,
+        std::vector<struct SplitInfo> cellsInfos);
 
 private:
     std::function<void(std::shared_ptr<SmsSendIndexer>)> sendRetryFun_;

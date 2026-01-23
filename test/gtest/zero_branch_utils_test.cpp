@@ -25,6 +25,7 @@
 #include "sms_common_utils.h"
 #include "sms_persist_helper.h"
 #include "text_coder.h"
+#include "string_utils.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -83,7 +84,10 @@ HWTEST_F(BranchUtilsTest, TextCoder_0001, Function | MediumTest | Level1)
     EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(pDestText, 1, pMsgText, -1), -1);
     EXPECT_EQ(TextCoder::Instance().Utf8ToUcs2(pDestText, 0, pMsgText, -1), 0);
     EXPECT_EQ(TextCoder::Instance().CdmaUtf8ToAuto(pDestText, 1, pMsgText, 0, DataCodingScheme), 0);
+    EXPECT_EQ(TextCoder::Instance().CdmaUtf8ToAuto(pDestText, 0, pMsgText, 1, DataCodingScheme), 0);
     EXPECT_EQ(TextCoder::Instance().GsmUtf8ToAuto(pDestText, 1, pMsgText, 0,
+        DataCodingScheme, codingNational, langId), 0);
+    EXPECT_EQ(TextCoder::Instance().GsmUtf8ToAuto(pDestText, 0, pMsgText, 1,
         DataCodingScheme, codingNational, langId), 0);
     EXPECT_EQ(TextCoder::Instance().Gsm7bitToUtf8(pDestText, 0, pMsgText, 0, msgLangInfo), 0);
     EXPECT_GE(TextCoder::Instance().ShiftjisToUtf8(pDestText, 1, pMsgText, -1), 0);
@@ -370,6 +374,24 @@ HWTEST_F(BranchUtilsTest, SmsCommonUtils_0007, Function | MediumTest | Level1)
     EXPECT_EQ(smsCommonUtils->DtmfCharToDigit(smsCommonUtils->DigitToDtmfChar('0')), '0');
     EXPECT_EQ(smsCommonUtils->DtmfCharToDigit(smsCommonUtils->DigitToDtmfChar('#')), '#');
     free(packData);
+}
+
+/**
+ * @tc.number   Telephony_SmsMmsGtest_StringUtils_StringToHex
+ * @tc.name     Test StringUtils StringToHex
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchUtilsTest, StringUtils_StringToHex, Function | MediumTest | Level1)
+{
+    const std::string srcStr = "hello world";
+    const std::string destStr = "68656C6C6F20776F726C64";
+    const char *nullStr = nullptr;
+    const uint32_t MMS_PDU_MAX_SIZE = 10 * 1024 * 1024;
+    EXPECT_EQ(StringUtils::StringToHex(nullStr, srcStr.length()), "");
+    EXPECT_EQ(StringUtils::StringToHex(srcStr.c_str(), -1), "");
+    EXPECT_EQ(StringUtils::StringToHex(srcStr.c_str(), MMS_PDU_MAX_SIZE), "");
+    EXPECT_EQ(StringUtils::StringToHex(srcStr.c_str(), srcStr.length()), destStr);
+    EXPECT_EQ(StringUtils::StringToHex(srcStr), destStr);
 }
 } // namespace Telephony
 } // namespace OHOS
