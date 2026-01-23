@@ -17,7 +17,6 @@
 
 #include "delivery_callback.h"
 #include "napi_mms.h"
-#include "napi_sms_util.h"
 #include "napi_send_recv_mms.h"
 #include "send_callback.h"
 #include "sms_mms_errors.h"
