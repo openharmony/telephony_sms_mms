@@ -32,8 +32,13 @@ DeliveryCallback::DeliveryCallback(bool hasCallback, napi_env env, napi_ref this
 DeliveryCallback::~DeliveryCallback()
 {
     if (hasCallback_) {
-        napi_reference_unref(env_, thisVarRef_, nullptr);
-        napi_reference_unref(env_, callbackRef_, nullptr);
+        uint32_t refCount = 0;
+        if (napi_reference_unref(env_, thisVarRef_, &refCount) == napi_ok && refCount == 0) {
+            napi_delete_reference(env_, thisVarRef_);
+        }
+        if (napi_reference_unref(env_, callbackRef_, &refCount) == napi_ok && refCount == 0) {
+            napi_delete_reference(env_, callbackRef_);
+        }
     }
     env_ = nullptr;
     thisVarRef_ = nullptr;
@@ -68,6 +73,7 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
 {
     TELEPHONY_LOGI("CompleteSmsDeliveryWork start");
     if (work == nullptr) {
+        TELEPHONY_LOGE("CompleteSmsDeliveryWork work is nullptr");
         return;
     }
     if (work->data == nullptr) {
@@ -82,16 +88,12 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     std::string pduStr = pContext->pduStr;
     napi_handle_scope scope = nullptr;
     if (napi_open_handle_scope(env, &scope) != napi_ok || scope == nullptr) {
-        NapiSmsUtil::Unref(env, thisVarRef);
-        NapiSmsUtil::Unref(env, callbackRef);
         delete work;
         return;
     }
     napi_value callbackFunc = nullptr;
     if (napi_get_reference_value(env, callbackRef, &callbackFunc) != napi_ok || callbackFunc == nullptr) {
         napi_close_handle_scope(env, scope);
-        NapiSmsUtil::Unref(env, thisVarRef);
-        NapiSmsUtil::Unref(env, callbackRef);
         delete work;
         return;
     }
@@ -99,8 +101,6 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     napi_value thisVar = nullptr;
     if (napi_get_reference_value(env, thisVarRef, &thisVar) != napi_ok || thisVar == nullptr) {
         napi_close_handle_scope(env, scope);
-        NapiSmsUtil::Unref(env, thisVarRef);
-        NapiSmsUtil::Unref(env, callbackRef);
         delete work;
         return;
     }
@@ -110,8 +110,6 @@ void CompleteSmsDeliveryWork(uv_work_t *work, int status)
     size_t argc = sizeof(callbackValues) / sizeof(callbackValues[0]);
     napi_call_function(env, thisVar, callbackFunc, argc, callbackValues, &callbackResult);
     napi_close_handle_scope(env, scope);
-    NapiSmsUtil::Unref(env, thisVarRef);
-    NapiSmsUtil::Unref(env, callbackRef);
     delete work;
     TELEPHONY_LOGI("CompleteSmsDeliveryWork end");
 }
@@ -133,26 +131,10 @@ void DeliveryCallback::OnSmsDeliveryResult(const std::u16string &pdu)
     uv_work_t *work = new uv_work_t;
     work->data = static_cast<void *>(pContext);
 
-    napi_status st1 =  napi_reference_ref(env_, thisVarRef_, nullptr);
-    napi_status st2 =  napi_reference_ref(env_, callbackRef_, nullptr);
-    if (st1 != napi_ok || st2 != napi_ok) {
-        if (st1 == napi_ok) {
-            NapiSmsUtil::Unref(env_, thisVarRef_);
-        }
-        if (st2 == napi_ok) {
-            NapiSmsUtil::Unref(env_, callbackRef_);
-        }
-        delete pContext;
-        delete work;
-        return;
-    }
-
     int32_t errCode = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
         [](uv_work_t *work, int status) { CompleteSmsDeliveryWork(work, status); }, uv_qos_default);
     if (errCode != 0) {
         TELEPHONY_LOGE("OnSmsDeliveryResult uv_queue_work_with_qos failed, errCode: %{public}d", errCode);
-        NapiSmsUtil::Unref(env_, thisVarRef_);
-        NapiSmsUtil::Unref(env_, callbackRef_);
         delete pContext;
         delete work;
     }
