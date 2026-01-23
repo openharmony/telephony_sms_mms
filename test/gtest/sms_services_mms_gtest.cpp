@@ -80,6 +80,8 @@ HWTEST_F(SmsServicesMmsGtest, DataRequest_0001, Function | MediumTest | Level2)
     std::string testStr = "";
     EXPECT_EQ(dataRequest->HttpRequest(slotId, testStr, nullptr, testStr, testStr, "ua", "uaprof"),
         TELEPHONY_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(dataRequest->ExecuteMms(testStr, nullptr, testStr, testStr, "ua", "uaprof"),
+        TELEPHONY_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(SmsServicesMmsGtest, MmsNetworkClient_0001, Function | MediumTest | Level2)

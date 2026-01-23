@@ -266,8 +266,8 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
     DataCodingScheme &scheme, SmsCodingNationalType codingNationalType, MSG_LANGUAGE_ID_T &langId)
 {
     int maxUcs2Length = srcLength;
-    if (maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
-        TELEPHONY_LOGE("src over size");
+    if (maxLength <= 0 || maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
+        TELEPHONY_LOGE("length invalid");
         return 0;
     }
     std::unique_ptr<WCHAR[]> ucs2Text = std::make_unique<WCHAR[]>(maxUcs2Length);
@@ -312,8 +312,8 @@ int TextCoder::GsmUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, i
 int TextCoder::CdmaUtf8ToAuto(uint8_t *dest, int maxLength, const uint8_t *src, int srcLength, DataCodingScheme &scheme)
 {
     int maxUcs2Length = srcLength;
-    if (maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
-        TELEPHONY_LOGE("CdmaUtf8ToAuto src over size");
+    if (maxLength <= 0 || maxUcs2Length <= 0 || static_cast<uint32_t>(maxUcs2Length) >= UCS2_LEN_MAX) {
+        TELEPHONY_LOGE("length invalid");
         return 0;
     }
     std::unique_ptr<WCHAR[]> ucs2Text = std::make_unique<WCHAR[]>(maxUcs2Length);

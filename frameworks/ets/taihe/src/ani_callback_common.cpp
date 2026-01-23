@@ -135,6 +135,9 @@ ani_status AniCommonUtils::ExecAsyncCallBack(ani_env *env, ani_object businessEr
     ani_ref ani_argv[] = {businessError, param};
     ani_ref ani_result;
     ani_class cls;
+    if (env == nullptr) {
+        return status;
+    }
     if ((status = env->FindClass("Lstd/core/Function2;", &cls)) != ANI_OK) {
         TELEPHONY_LOGE("find calss is failed, status = %{public}d", status);
         return status;

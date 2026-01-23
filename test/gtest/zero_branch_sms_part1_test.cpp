@@ -23,6 +23,7 @@
 #include "gtest/gtest.h"
 #include "sms_service.h"
 #include "sms_short_code_matcher.h"
+#include "gsm_sms_message.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -219,6 +220,155 @@ HWTEST_F(BranchSmsPart1Test, SmsShortCodeMatcher_0012, TestSize.Level0)
     const std::string desAddr = "12345";
     SmsShortCodeType smsShortCodeType = smsShortCodeMatcher->MatchShortCodeType(countryCode, desAddr);
     EXPECT_EQ(smsShortCodeType, SmsShortCodeType::SMS_SHORT_CODE_TYPE_UNKNOWN);
+}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_CreateMessage_0001
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, CreateMessage_0001, Function | MediumTest | Level1)
+{
+    /*
+        step1: The pdu whose mti is 0
+    */
+    std::string pduHex = "07914151551512f2040B916105551511f100006060605130308A04D4F29C0E";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_TRUE(result != nullptr);
+    EXPECT_TRUE(result->GetSmscAddr()== "+14155551212");
+    EXPECT_TRUE(result->GetOriginatingAddress() == "+16505551111");
+}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_CreateMessage_0002
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, CreateMessage_0002, Function | MediumTest | Level1)
+{
+    /*
+        step1: The pdu whose mti is 1
+    */
+    std::string pduHex = "07914151551512f2050B916105551511f100006060605130308A04D4F29C0E";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_CreateMessage_0003
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, CreateMessage_0003, Function | MediumTest | Level1)
+{
+    /*
+        step1: The pdu whose mti is 2
+    */
+    std::string pduHex = "07914151551512f2060B916105551511f100006060605130308A04D4F29C0E";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_CreateMessage_0004
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, CreateMessage_0004, Function | MediumTest | Level1)
+{
+    /*
+        step1: The pdu whose mti is 3
+    */
+    std::string pduHex = "07914151551512f2070B916105551511f100006060605130308A04D4F29C0E";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_TRUE(result != nullptr);
+    EXPECT_TRUE(result->GetSmscAddr() == "+14155551212");
+    EXPECT_TRUE(result->GetOriginatingAddress() == "+16505551111");
+}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_CreateMessage_0005
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, CreateMessage_0005, Function | MediumTest | Level1)
+{
+    /*
+        step1: The pdu whose ton is TYPE_ALPHA_NUMERIC
+    */
+    const std::string pduHex =
+        "07915892208800F0040ED0A3F19CDD7A52A10008424011119582235C4F60768400630073006C00200041007000"
+        "704E006B2160275BC678BC70BA0034003800370033003200373002598267097591554FFF0C8ACB806F7D61006300"
+        "73006C670D52D971B17DDA003200350031003200330031003200333002";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_TRUE(result != nullptr);
+    EXPECT_TRUE(result->GetSmscAddr() == "+85290288000");
+    EXPECT_TRUE(result->GetOriginatingAddress() == "#csl-OTP");
+}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_CreateMessage_0006
+ * @tc.name     Test CreateMessage
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, CreateMessage_0006, Function | MediumTest | Level1)
+{
+    /*
+        step1: The pdu whose ton is TYPE_ALPHA_NUMERIC
+    */
+    const std::string pduHex =
+        "07915892208800F0040ED0B4F19CDD8B61A10108424011119582235C4F60768400630073006C0020004100700"
+        "0704E006B2160275BC678BC70BA0034003800370033003200373002598267097591554FFF0C8ACB806F7D610063"
+        "0073006C670D52D971B17DDA003200350031003200330031003200333002";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_TRUE(result != nullptr);
+    EXPECT_TRUE(result->GetSmscAddr() == "+85290288000");
+    EXPECT_TRUE(result->GetOriginatingAddress() == "4csl=1XP");
+}
+
+/**
+ * @tc.number   Telephony_BranchSmsPart1Test_CreateMessage_0007
+ * @tc.name     Test CreateMessage special sms
+ * @tc.desc     Function test
+ */
+HWTEST_F(BranchSmsPart1Test, CreateMessage_0007, Function | MediumTest | Level1)
+{
+    /*
+        step1: The pdu whose ton is TYPE_ALPHA_NUMERIC
+    */
+    const std::string pduHex =
+        "069168310992004412D0C87AF85A4E53CB733A00D85270709182850014"
+        "0401020001D0CB733AC8FE4E8FCBED709A0D";
+    /*
+        step2: Decoding pdu packets
+    */
+    GsmSmsMessage message;
+    auto result = message.CreateMessage(pduHex);
+    EXPECT_TRUE(result != nullptr);
 }
 } // namespace Telephony
 } // namespace OHOS

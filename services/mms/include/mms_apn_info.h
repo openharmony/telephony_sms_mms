@@ -29,18 +29,18 @@ public:
     ~MmsApnInfo();
     void getMmsApn();
     std::shared_ptr<DataShare::DataShareHelper> CreatePdpProfileHelper();
-    void PdpProfileSelect(const std::shared_ptr<DataShare::DataShareHelper> &helper);
     std::string getMmscUrl();
     void setMmscUrl(std::string mmscUrl);
     std::string getMmsProxyAddressAndProxyPort();
     void setMmsProxyAddressAndProxyPort(std::string mmsProxyAddressAndProxyPort);
     bool SplitAndMatchApnTypes(std::string apn);
-    bool GetMmsApnValue(std::shared_ptr<DataShare::ResultSet> resultSet, int count, std::string &homeUrlVal,
-        std::string &mmsIPAddressVal);
-
+    
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataAHelper(
         int32_t systemAbilityId, const std::string &dataAbilityUri) const;
+    void PdpProfileSelect(const std::shared_ptr<DataShare::DataShareHelper> &helper);
+    bool GetMmsApnValue(std::shared_ptr<DataShare::ResultSet> resultSet, int count, std::string &homeUrlVal,
+        std::string &mmsIPAddressVal);
 
 private:
     int32_t slotId_ = -1;

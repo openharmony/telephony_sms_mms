@@ -31,6 +31,10 @@ static const int32_t DEFAULT_REF_COUNT = 1;
 
 static void SetPropertyArray(napi_env env, napi_value object, const std::string &name, MmsAttachmentContext &context)
 {
+    if (context.inBuff == nullptr) {
+        TELEPHONY_LOGE("inBuff is nullptr");
+        return;
+    }
     napi_value array = nullptr;
     napi_create_array(env, &array);
     for (uint32_t i = 0; i < context.inBuffLen; i++) {
@@ -802,7 +806,11 @@ uint32_t GetNapiUint32Value(napi_env env, napi_value napiValue, std::string name
 
 uint8_t GetNapiUint8Value(napi_env env, napi_value napiValue, const std::string &name, uint8_t defValue = 0)
 {
-    return uint8_t(GetNapiInt32Value(env, napiValue, name, defValue));
+    int32_t value = GetNapiInt32Value(env, napiValue, name, defValue);
+    if (value > UINT8_MAX || value < 0) {
+        return defValue;
+    }
+    return static_cast<uint8_t>(value);
 }
 
 MmsCharSets formatMmsCharSet(int32_t charsetInt)
@@ -1143,7 +1151,6 @@ bool ParseEncodeMmsParam(napi_env env, napi_value object, EncodeMmsContext &cont
 bool SetAttachmentToCore(MmsMsg &mmsMsg, std::vector<MmsAttachmentContext> &attachment)
 {
     if (attachment.size() > 0) {
-        int i = 0;
         for (auto it = attachment.begin(); it != attachment.end(); it++) {
             MmsAttachment itAttachment;
             if (it->path.size() > 0) {
@@ -1178,7 +1185,6 @@ bool SetAttachmentToCore(MmsMsg &mmsMsg, std::vector<MmsAttachmentContext> &atta
                 TELEPHONY_LOGE("attachment file error");
                 return false;
             }
-            i++;
         }
     }
     return true;
@@ -1536,7 +1542,7 @@ napi_value NapiMms::InitSupportEnumMmsCharSets(napi_env env, napi_value exports)
     };
     napi_value result = nullptr;
     napi_define_class(env, "MmsCharSets", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
-        sizeof(desc) / sizeof(*desc), desc, &result);
+        sizeof(desc) / sizeof(desc[0]), desc, &result);
     napi_set_named_property(env, exports, "MmsCharSets", result);
     return exports;
 }
@@ -1591,7 +1597,7 @@ napi_value NapiMms::InitSupportEnumMessageType(napi_env env, napi_value exports)
     };
     napi_value result = nullptr;
     napi_define_class(env, "MessageType", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
-        sizeof(desc) / sizeof(*desc), desc, &result);
+        sizeof(desc) / sizeof(desc[0]), desc, &result);
     napi_set_named_property(env, exports, "MessageType", result);
     return exports;
 }
@@ -1622,7 +1628,7 @@ napi_value NapiMms::InitSupportEnumPriorityType(napi_env env, napi_value exports
     };
     napi_value result = nullptr;
     napi_define_class(env, "MmsPriorityType", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
-        sizeof(desc) / sizeof(*desc), desc, &result);
+        sizeof(desc) / sizeof(desc[0]), desc, &result);
     napi_set_named_property(env, exports, "MmsPriorityType", result);
     return exports;
 }
@@ -1657,7 +1663,7 @@ napi_value NapiMms::InitSupportEnumVersionType(napi_env env, napi_value exports)
     };
     napi_value result = nullptr;
     napi_define_class(env, "MmsVersionType", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
-        sizeof(desc) / sizeof(*desc), desc, &result);
+        sizeof(desc) / sizeof(desc[0]), desc, &result);
     napi_set_named_property(env, exports, "MmsVersionType", result);
     return exports;
 }
@@ -1688,7 +1694,7 @@ napi_value NapiMms::InitSupportEnumDispositionType(napi_env env, napi_value expo
     };
     napi_value result = nullptr;
     napi_define_class(env, "DispositionType", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
-        sizeof(desc) / sizeof(*desc), desc, &result);
+        sizeof(desc) / sizeof(desc[0]), desc, &result);
     napi_set_named_property(env, exports, "DispositionType", result);
     return exports;
 }
@@ -1715,7 +1721,7 @@ napi_value NapiMms::InitSupportEnumReportAllowedType(napi_env env, napi_value ex
     };
     napi_value result = nullptr;
     napi_define_class(env, "ReportType", NAPI_AUTO_LENGTH, CreateEnumConstructor, nullptr,
-        sizeof(desc) / sizeof(*desc), desc, &result);
+        sizeof(desc) / sizeof(desc[0]), desc, &result);
     napi_set_named_property(env, exports, "ReportType", result);
     return exports;
 }
