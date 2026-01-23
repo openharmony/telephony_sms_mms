@@ -136,7 +136,6 @@ static int32_t ActuallySendMessage(napi_env env, SendMessageContext &parameter)
     std::unique_ptr<SendCallback> sendCallback =
         std::make_unique<SendCallback>(hasSendCallback, env, parameter.thisVarRef, parameter.sendCallbackRef);
     if (sendCallback == nullptr) {
-        TELEPHONY_LOGE("ActuallySendMessage sendCallback == nullptr");
         if (hasSendCallback) {
             NapiSmsUtil::Unref(env, parameter.thisVarRef);
             NapiSmsUtil::Unref(env, parameter.sendCallbackRef);
@@ -151,7 +150,6 @@ static int32_t ActuallySendMessage(napi_env env, SendMessageContext &parameter)
     std::unique_ptr<DeliveryCallback> deliveryCallback = std::make_unique<DeliveryCallback>(
         hasDeliveryCallback, env, parameter.thisVarRef, parameter.deliveryCallbackRef);
     if (deliveryCallback == nullptr) {
-        TELEPHONY_LOGE("ActuallySendMessage deliveryCallback == nullptr");
         if (hasDeliveryCallback) {
             NapiSmsUtil::Unref(env, parameter.thisVarRef);
             NapiSmsUtil::Unref(env, parameter.deliveryCallbackRef);
