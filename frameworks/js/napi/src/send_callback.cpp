@@ -140,6 +140,7 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
         delete pContext;
         delete work;
     }
+    return;
 }
 } // namespace Telephony
 } // namespace OHOS
