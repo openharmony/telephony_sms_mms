@@ -27,7 +27,12 @@ static const int32_t CALLBACK_VALUE_LEN = 2;
 
 DeliveryCallback::DeliveryCallback(bool hasCallback, napi_env env, napi_ref thisVarRef, napi_ref callbackRef)
     : hasCallback_(hasCallback), env_(env), thisVarRef_(thisVarRef), callbackRef_(callbackRef)
-{}
+{
+    if (hasCallback_) {
+        napi_reference_ref(env_, thisVarRef_, nullptr);
+        napi_reference_ref(env_, callbackRef_, nullptr);
+    }
+}
 
 DeliveryCallback::~DeliveryCallback()
 {
