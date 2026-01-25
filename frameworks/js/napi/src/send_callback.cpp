@@ -134,7 +134,6 @@ void SendCallback::OnSmsSendResult(const ISendShortMessageCallback::SmsSendResul
 
     int32_t errCode = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
         [](uv_work_t *work, int status) { CompleteSmsSendWork(work, status); }, uv_qos_default);
-
     if (errCode != 0) {
         TELEPHONY_LOGE("OnSmsSendResult uv_queue_work_with_qos failed, errCode: %{public}d", errCode);
         delete pContext;
