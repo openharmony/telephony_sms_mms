@@ -143,6 +143,7 @@ void DeliveryCallback::OnSmsDeliveryResult(const std::u16string &pdu)
         delete pContext;
         delete work;
     }
+    return;
 }
 } // namespace Telephony
 } // namespace OHOS
