@@ -205,13 +205,5 @@ int32_t NapiSmsUtil::MatchSendMessageParameters(napi_env env, napi_value paramet
     }
     return MESSAGE_PARAMETER_NOT_MATCH;
 }
-
-void __attribute__((noinline)) NapiSmsUtil::Unref(napi_env env, napi_ref ref)
-{
-    uint32_t refCount = 0;
-    if (napi_reference_unref(env, ref, &refCount) == napi_ok && refCount == 0) {
-        napi_delete_reference(env, ref);
-    }
-}
 } // namespace Telephony
 } // namespace OHOS
