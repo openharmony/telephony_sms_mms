@@ -44,7 +44,6 @@ public:
         napi_env env, const napi_value parameters[], size_t parameterCount);
     static int32_t MatchSendMessageParameters(
         napi_env env, napi_value parameters[], size_t parameterCount);
-    static __attribute__((noinline)) void Unref(napi_env env, napi_ref ref);
 };
 } // namespace Telephony
 } // namespace OHOS
