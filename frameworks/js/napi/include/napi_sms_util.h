@@ -26,7 +26,7 @@
 #include "i_sms_service_interface.h"
 #include "telephony_napi_common_error.h"
 #include "short_message.h"
-#include "napi_sms.h"
+#include "napi_util.h"
 
 namespace OHOS {
 namespace Telephony {

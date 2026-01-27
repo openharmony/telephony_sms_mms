@@ -17,7 +17,6 @@
 
 #include "delivery_callback.h"
 #include "napi_mms.h"
-#include "napi_sms_util.h"
 #include "napi_send_recv_mms.h"
 #include "send_callback.h"
 #include "sms_mms_errors.h"
@@ -132,17 +131,9 @@ static int32_t ActuallySendMessage(napi_env env, SendMessageContext &parameter)
     bool hasSendCallback = parameter.sendCallbackRef != nullptr;
     std::unique_ptr<SendCallback> sendCallback =
         std::make_unique<SendCallback>(hasSendCallback, env, parameter.thisVarRef, parameter.sendCallbackRef);
-    if (sendCallback == nullptr) {
-        TELEPHONY_LOGE("ActuallySendMessage sendCallback == nullptr");
-        return TELEPHONY_ERR_LOCAL_PTR_NULL;
-    }
     bool hasDeliveryCallback = parameter.deliveryCallbackRef != nullptr;
     std::unique_ptr<DeliveryCallback> deliveryCallback = std::make_unique<DeliveryCallback>(
         hasDeliveryCallback, env, parameter.thisVarRef, parameter.deliveryCallbackRef);
-    if (deliveryCallback == nullptr) {
-        TELEPHONY_LOGE("ActuallySendMessage deliveryCallback == nullptr");
-        return TELEPHONY_ERR_LOCAL_PTR_NULL;
-    }
     if (parameter.messageType == TEXT_MESSAGE_PARAMETER_MATCH && parameter.isPersist) {
         if (hasDeliveryCallback) {
             return ActuallySendTextMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
