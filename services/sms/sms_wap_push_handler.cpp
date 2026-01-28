@@ -141,7 +141,8 @@ void SmsWapPushHandler::DeleteWapPush(std::shared_ptr<SmsReceiveIndexer> indexer
         TELEPHONY_LOGE("handler is nullptr.");
         return;
     }
-    handler->DeleteMessageFormDb(indexer->GetMsgRefId(), indexer->GetDataBaseId());
+    handler->DeleteMessageFormDb(indexer->GetMsgRefId(), indexer->GetDataBaseId(),
+        indexer->GetMsgCount(), indexer->GetOriginatingAddress());
 }
 
 /*
@@ -355,6 +356,7 @@ bool SmsWapPushHandler::SendWapPushMessageBroadcast(std::shared_ptr<SmsReceiveIn
     want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_DATABASE_ID_KEY, indexer->GetDataBaseId());
     want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_MSG_REF_ID_KEY, indexer->GetMsgRefId());
     want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_ADDRESS_KEY, indexer->GetOriginatingAddress());
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_MSG_COUNT_KEY, indexer->GetMsgCount());
 
     EventFwk::CommonEventData data;
     data.SetWant(want);

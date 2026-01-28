@@ -389,7 +389,7 @@ HWTEST_F(SmsServicesMmsGtest, SmsReceiveHandlerDisable_0001, Function | MediumTe
     smsReceiveHandler->CombineMessagePart(indexer);
 
     reliabilityHandler->CheckBlockedPhoneNumber(BLOCK_NUMBER);
-    reliabilityHandler->DeleteAutoSmsFromDB(reliabilityHandler, 0, 0);
+    reliabilityHandler->DeleteAutoSmsFromDB(reliabilityHandler, indexer);
     reliabilityHandler->SendBroadcast(indexer, pdus);
     smsReceiveHandler->HandleReceivedSms(smsBaseMessage);
     indexer = std::make_shared<SmsReceiveIndexer>();

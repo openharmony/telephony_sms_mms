@@ -309,7 +309,8 @@ void SmsReceiveReliabilityHandler::ReadySendSmsBroadcast(
     SendBroadcast(indexer, pdus);
 }
 
-void SmsReceiveReliabilityHandler::DeleteMessageFormDb(const uint16_t refId, const int32_t dataBaseId)
+void SmsReceiveReliabilityHandler::DeleteMessageFormDb(const uint16_t refId, const int32_t dataBaseId,
+    const int32_t msgCount, const std::string address)
 {
     if (refId == 0 && dataBaseId == 0) {
         TELEPHONY_LOGE("DeleteMessageFormDb fail by refId error");
@@ -317,7 +318,11 @@ void SmsReceiveReliabilityHandler::DeleteMessageFormDb(const uint16_t refId, con
     }
     if (refId == 0) {
         DataShare::DataSharePredicates predicates;
-        predicates.EqualTo(SmsSubsection::ID, std::to_string(dataBaseId));
+        predicates.EqualTo(SmsSubsection::SENDER_NUMBER, address)
+            ->And()
+            ->EqualTo(SmsSubsection::SMS_SUBSECTION_ID, std::to_string(refId))
+            ->And()
+            ->EqualTo(SmsSubsection::SIZE, std::to_string(msgCount));
         DelayedSingleton<SmsPersistHelper>::GetInstance()->Delete(predicates);
     } else {
         DataShare::DataSharePredicates predicates;
@@ -348,6 +353,7 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_MSG_REF_ID_KEY, indexer->GetMsgRefId());
     std::string addr = indexer->GetOriginatingAddress();
     want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_ADDRESS_KEY, addr);
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_MSG_COUNT_KEY, indexer->GetMsgCount());
     data.SetWant(want);
 
     bool cbResult = false;
@@ -361,7 +367,7 @@ void SmsReceiveReliabilityHandler::SendBroadcast(
     HiSysEventCBResult(cbResult);
     if (CT_SMSC.compare(addr) == 0 || CT_SMSC_86.compare(addr) == 0 || CT_SMSC_INTERNATION_86.compare(addr) == 0) {
         TELEPHONY_LOGI("del ct auto sms from db");
-        DeleteAutoSmsFromDB(shared_from_this(), indexer->GetMsgRefId(), indexer->GetDataBaseId());
+        DeleteAutoSmsFromDB(shared_from_this(), indexer);
     }
 }
 
@@ -405,9 +411,10 @@ void SmsReceiveReliabilityHandler::HiSysEventCBResult(bool publishResult)
 }
 
 void SmsReceiveReliabilityHandler::DeleteAutoSmsFromDB(
-    std::shared_ptr<SmsReceiveReliabilityHandler> handler, uint16_t refId, int32_t dataBaseId)
+    std::shared_ptr<SmsReceiveReliabilityHandler> handler, const std::shared_ptr<SmsReceiveIndexer> indexer)
 {
-    handler->DeleteMessageFormDb(refId, dataBaseId);
+    handler->DeleteMessageFormDb(indexer->GetMsgRefId(), indexer->GetDataBaseId(),
+        indexer->GetMsgCount(), indexer->GetOriginatingAddress());
 }
 
 bool SmsReceiveReliabilityHandler::CheckBlockedPhoneNumber(std::string originatingAddress)

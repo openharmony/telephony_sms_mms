@@ -29,6 +29,7 @@ public:
     static constexpr const char *SMS_BROADCAST_DATABASE_ID_KEY = "dataBaseId";
     static constexpr const char *SMS_BROADCAST_MSG_REF_ID_KEY = "msgRefId";
     static constexpr const char *SMS_BROADCAST_ADDRESS_KEY = "addr";
+    static constexpr const char *SMS_BROADCAST_MSG_COUNT_KEY = "msgCount";
     SmsBroadcastSubscriberReceiver(const OHOS::EventFwk::CommonEventSubscribeInfo &subscriberInfo);
     ~SmsBroadcastSubscriberReceiver() = default;
     virtual void OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data);
