@@ -93,6 +93,7 @@ bool GsmSmsParamCodec::CheckVoicemail(SmsReadBuffer &buffer, int32_t *setType, i
 
     if (oneByte != HEX_VALUE_04) {
         TELEPHONY_LOGE("data error.");
+        buffer.MoveBack(1);
         return false;
     }
 
@@ -102,6 +103,7 @@ bool GsmSmsParamCodec::CheckVoicemail(SmsReadBuffer &buffer, int32_t *setType, i
     }
     if (oneByte != HEX_VALUE_D0) {
         TELEPHONY_LOGE("data error.");
+        buffer.MoveBack(1);
         return false;
     }
 
@@ -124,6 +126,7 @@ bool GsmSmsParamCodec::CheckVoicemail(SmsReadBuffer &buffer, int32_t *setType, i
         *setType = static_cast<int32_t>(oneByte & HEX_VALUE_01); /* 0 : clear, 1 : set */
         if (!buffer.PickOneByte(oneByte)) {
             TELEPHONY_LOGE("get data error.");
+            buffer.MoveBack(1);
             return false;
         }
         *indType = static_cast<int32_t>(oneByte & HEX_VALUE_01); /* 0 : indicator 1, 1 : indicator 2 */

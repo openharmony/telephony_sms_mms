@@ -63,7 +63,8 @@ void DoRecvItemsTest(const uint8_t *data, size_t size, std::shared_ptr<SmsReceiv
     if (reliabilityHandler == nullptr) {
         return;
     }
-    reliabilityHandler->DeleteMessageFormDb(smsReceiveIndexer->GetMsgRefId());
+    reliabilityHandler->DeleteMessageFormDb(smsReceiveIndexer->GetMsgRefId(), smsReceiveIndexer->GetDataBaseId(),
+        smsReceiveIndexer->GetMsgCount(), smsReceiveIndexer->GetOriginatingAddress());
 
     std::vector<SmsReceiveIndexer> dbIndexers;
     std::string strData(reinterpret_cast<const char *>(data), size);
@@ -85,7 +86,7 @@ void DoRecvItemsTest(const uint8_t *data, size_t size, std::shared_ptr<SmsReceiv
     reliabilityHandler->ReadyDecodeWapPushUserData(indexer, userDataRaws);
     reliabilityHandler->GetSmsUserDataMultipage(pages, indexer.GetMsgCount(), dbIndexers, size, userDataRaws);
     reliabilityHandler->ReadySendSmsBroadcast(indexer, userDataRaws);
-    reliabilityHandler->DeleteMessageFormDb(size, size);
+    reliabilityHandler->DeleteMessageFormDb(size, size, indexer.GetMsgCount(), indexer.GetOriginatingAddress());
     reliabilityHandler->RemoveBlockedSms(dbIndexers);
 
     std::shared_ptr<SmsReceiveIndexer> indexerPtr =

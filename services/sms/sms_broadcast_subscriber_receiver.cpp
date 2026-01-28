@@ -37,12 +37,15 @@ void SmsBroadcastSubscriberReceiver::OnReceiveEvent(const OHOS::EventFwk::Common
     if (isSms || isWapPush) {
         int refId = want.GetIntParam(SMS_BROADCAST_MSG_REF_ID_KEY, 0);
         int dataBaseId = want.GetIntParam(SMS_BROADCAST_DATABASE_ID_KEY, 0);
-        TELEPHONY_LOGI("OnReceiveEvent refId =%{public}d, dataBaseId =%{public}d", refId, dataBaseId);
+        int msgCount = want.GetIntParam(SMS_BROADCAST_MSG_COUNT_KEY, 0);
+        TELEPHONY_LOGI("OnReceiveEvent refId =%{public}d, dataBaseId =%{public}d, msgCount = %{public}d",
+            refId, dataBaseId, msgCount);
         std::string address = want.GetStringParam(SMS_BROADCAST_ADDRESS_KEY);
         if (!address.empty() && isSms) {
             DelayedSingleton<SmsPersistHelper>::GetInstance()->UpdateContact(address);
         }
-        std::make_shared<SmsReceiveReliabilityHandler>(0)->DeleteMessageFormDb(refId, dataBaseId);
+        std::make_shared<SmsReceiveReliabilityHandler>(0)->
+            DeleteMessageFormDb(refId, dataBaseId, msgCount, address);
     }
 }
 } // namespace Telephony
