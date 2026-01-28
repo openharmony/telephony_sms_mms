@@ -2159,6 +2159,7 @@ HWTEST_F(BranchSmsPartTest, SmsBroadcastSubscriberReceiver_0001, Function | Medi
     want.SetAction(CommonEventSupport::COMMON_EVENT_SMS_RECEIVE_COMPLETED);
     want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_ADDRESS_KEY, addr);
     want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_DATABASE_ID_KEY, 1);
+    want.SetParam(SmsBroadcastSubscriberReceiver::SMS_BROADCAST_MSG_COUNT_KEY, 1);
     data.SetWant(want);
     receiver->OnReceiveEvent(data);
 

@@ -131,7 +131,7 @@ HWTEST_F(BranchSmsTest, SmsReceiveHandler_0001, Function | MediumTest | Level1)
     smsReceiveHandler->CombineMessagePart(indexer);
 
     reliabilityHandler->CheckBlockedPhoneNumber(BLOCK_NUMBER);
-    reliabilityHandler->DeleteAutoSmsFromDB(reliabilityHandler, 0, 0);
+    reliabilityHandler->DeleteAutoSmsFromDB(reliabilityHandler, indexer);
     reliabilityHandler->SendBroadcast(indexer, pdus);
     smsReceiveHandler->HandleReceivedSms(smsBaseMessage);
     indexer = std::make_shared<SmsReceiveIndexer>();
@@ -187,7 +187,8 @@ HWTEST_F(BranchSmsTest, SmsReceiveReliabilityHandler_0001, Function | MediumTest
     reliabilityHandler->ReadyDecodeWapPushUserData(indexer, userDataRaws);
     reliabilityHandler->GetSmsUserDataMultipage(pages, indexer.GetMsgCount(), dbIndexers, 0, userDataRaws);
     reliabilityHandler->ReadySendSmsBroadcast(indexer, userDataRaws);
-    reliabilityHandler->DeleteMessageFormDb(strData.size(), strData.size());
+    reliabilityHandler->DeleteMessageFormDb(strData.size(), strData.size(), indexer.GetMsgCount(),
+        indexer.GetOriginatingAddress());
     reliabilityHandler->RemoveBlockedSms(dbIndexers);
 
     std::shared_ptr<SmsReceiveIndexer> indexerPtr =
