@@ -340,7 +340,7 @@ bool SmsReceiveHandler::CombineMultiPageMessage(const std::shared_ptr<SmsReceive
         string pdu = StringUtils::StringToHex(v.GetPdu());
         if ((v.GetMsgSeqId() - PDU_POS_OFFSET >= msgSeg) || (v.GetMsgSeqId() - PDU_POS_OFFSET < 0)) {
             reliabilityHandler->DeleteMessageFormDb(indexer->GetMsgRefId(), indexer->GetDataBaseId(),
-            indexer->GetMsgCount(), indexer->GetOriginatingAddress());
+                indexer->GetMsgCount(), indexer->GetOriginatingAddress());
             return false;
         }
         pdus->at(v.GetMsgSeqId() - PDU_POS_OFFSET) = pdu;
