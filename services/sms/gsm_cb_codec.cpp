@@ -494,6 +494,7 @@ bool GsmCbCodec::GetServiceCategory(uint16_t &cbCategoty) const
     return true;
 }
 
+__attribute__((no_sanitize("cfi")))
 bool GsmCbCodec::GetWarningType(uint16_t &type) const
 {
     if (cbHeader_ == nullptr) {
@@ -522,6 +523,7 @@ bool GsmCbCodec::IsEtwsPrimary(bool &primary) const
     return true;
 }
 
+__attribute__((no_sanitize("cfi")))
 bool GsmCbCodec::IsEtwsMessage(bool &etws) const
 {
     if (cbHeader_ == nullptr) {
