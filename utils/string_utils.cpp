@@ -64,7 +64,7 @@ std::string StringUtils::StringToHex(const std::string &data)
 
 std::string StringUtils::StringToHex(const char *data, int byteLength)
 {
-    if (data == nullptr || byteLength <= 0 || byteLength > MMS_PDU_MAX_SIZE) {
+    if (data == nullptr || byteLength <= 0 || static_cast<uint32_t>(byteLength) > MMS_PDU_MAX_SIZE) {
         return "";
     }
     std::stringstream ss;
