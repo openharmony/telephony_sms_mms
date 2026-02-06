@@ -101,6 +101,7 @@ void SmsReceiveHandler::HandleReconnectEvent()
                 g_smsBaseMessageQueue.size());
             reconnectDataShareCount_ = 0;
             alreadySendEvent_ = false;
+            std::lock_guard<std::mutex> lockRequest(mutexRunningLock_);
             ReleaseRunningLock();
         } else {
             TELEPHONY_LOGI("Send event %{public}u times", reconnectDataShareCount_);
@@ -254,6 +255,7 @@ void SmsReceiveHandler::HandleRunningLockTimeoutEvent(const AppExecFwk::InnerEve
 {
 #ifdef ABILITY_POWER_SUPPORT
     auto serial = event->GetParam();
+    std::lock_guard<std::mutex> lockRequest(mutexRunningLock_);
     if (serial == smsLockSerialNum_) {
         TELEPHONY_LOGE("HandleRunningLockTimeoutEvent, serial:%{public}d, smsLockSerialNum_:%{public}d",
             static_cast<int>(serial), static_cast<int>(smsLockSerialNum_));
