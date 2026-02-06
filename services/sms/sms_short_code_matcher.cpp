@@ -54,7 +54,7 @@ bool SmsShortCodeMatcher::MatchesRegexList(const std::string &str, const std::ve
 {
     for (const auto &regexStr : regexList) {
         std::regex pattern(regexStr);
-        if (std::regex_match(str, pattern)) {
+        if (!str.empty() && std::regex_match(str, pattern)) {
             return true;
         }
     }
