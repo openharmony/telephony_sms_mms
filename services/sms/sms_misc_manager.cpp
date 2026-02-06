@@ -228,6 +228,7 @@ void SmsMiscManager::NotifyHasResponse()
 
 void SmsMiscManager::UpdateCbRangList(std::shared_ptr<CBConfigInfo> res)
 {
+    std::unique_lock<std::mutex> lock(cbMutex_);
     mdRangeList_.clear();
     if (res->mids.empty()) {
         return;

@@ -1335,11 +1335,6 @@ static int32_t ActuallySendMessage(std::shared_ptr<SendMessageContext> parameter
             return ActuallySendTextMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
         }
         return ActuallySendTextMessage(parameter, std::move(sendCallback), nullptr);
-    } else if (parameter->messageType == TEXT_MESSAGE_PARAMETER_MATCH) {
-        if (hasDeliveryCallback) {
-            return ActuallySendTextMessageWithoutSave(parameter, std::move(sendCallback), std::move(deliveryCallback));
-        }
-        return ActuallySendTextMessageWithoutSave(parameter, std::move(sendCallback), nullptr);
     } else if (parameter->messageType == RAW_DATA_MESSAGE_PARAMETER_MATCH) {
         if (hasDeliveryCallback) {
             return ActuallySendDataMessage(parameter, std::move(sendCallback), std::move(deliveryCallback));
