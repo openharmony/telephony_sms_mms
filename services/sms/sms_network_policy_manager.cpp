@@ -205,9 +205,9 @@ int32_t SmsNetworkPolicyManager::GetId()
 
 void SmsNetworkPolicyManager::NetworkUnregister(int32_t id)
 {
+    std::lock_guard<std::mutex> lock(callbackMapMutex_);
     auto iter = callbackMap_.find(id);
     if (iter != callbackMap_.end()) {
-        std::lock_guard<std::mutex> lock(callbackMapMutex_);
         callbackMap_.erase(iter);
     } else {
         TELEPHONY_LOGE("NetworkUnregister id[%{public}d] is failed", id);
