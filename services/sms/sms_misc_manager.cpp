@@ -59,16 +59,20 @@ int32_t SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t to
     } else {
         ret = CloseCBRange(fromMsgId, toMsgId);
     }
+    lock.unlock();
     if (ret) {
         if (!SendDataToRil(false, oldRangeList)) {
+            lock.lock();
             rangeList_ = oldRangeList;
             return TELEPHONY_ERR_RIL_CMD_FAIL;
         }
         if (!SendDataToRil(true, rangeList_)) {
+            lock.lock();
             rangeList_ = oldRangeList;
             return TELEPHONY_ERR_RIL_CMD_FAIL;
         }
     } else {
+        lock.lock();
         rangeList_ = oldRangeList;
     }
     return TELEPHONY_ERR_SUCCESS;
