@@ -41,9 +41,11 @@ int32_t SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t to
         TELEPHONY_LOGI("cb channel invalid");
         return TELEPHONY_ERR_ARGUMENT_INVALID;
     }
-    std::unique_lock<std::mutex> lock(cbMutex_);
+    std::unique_lock<ffrt::shared_mutex> lock(cbMutex_);
     if (!hasGotCbRange_) {
+        lock.unlock();
         GetModemCBRange();
+        lock.lock();
         if (mdRangeList_.size() != 0) {
             if (!SendDataToRil(false, mdRangeList_)) {
                 return TELEPHONY_ERR_RIL_CMD_FAIL;
@@ -57,16 +59,20 @@ int32_t SmsMiscManager::SetCBConfig(bool enable, uint32_t fromMsgId, uint32_t to
     } else {
         ret = CloseCBRange(fromMsgId, toMsgId);
     }
+    lock.unlock();
     if (ret) {
         if (!SendDataToRil(false, oldRangeList)) {
+            lock.lock();
             rangeList_ = oldRangeList;
             return TELEPHONY_ERR_RIL_CMD_FAIL;
         }
         if (!SendDataToRil(true, rangeList_)) {
+            lock.lock();
             rangeList_ = oldRangeList;
             return TELEPHONY_ERR_RIL_CMD_FAIL;
         }
     } else {
+        lock.lock();
         rangeList_ = oldRangeList;
     }
     return TELEPHONY_ERR_SUCCESS;
@@ -199,10 +205,10 @@ void SmsMiscManager::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
 
 void SmsMiscManager::GetCBConfigFinish(const AppExecFwk::InnerEvent::Pointer &event)
 {
-    isSuccess_ = true;
+    isCbConfigFinish_ = true;
     std::shared_ptr<CBConfigInfo> res = event->GetSharedObject<CBConfigInfo>();
     if (res == nullptr) {
-        isSuccess_ = false;
+        isCbConfigFinish_ = false;
     } else {
         UpdateCbRangList(res);
     }
@@ -228,7 +234,7 @@ void SmsMiscManager::NotifyHasResponse()
 
 void SmsMiscManager::UpdateCbRangList(std::shared_ptr<CBConfigInfo> res)
 {
-    std::unique_lock<std::mutex> lock(cbMutex_);
+    std::unique_lock<ffrt::shared_mutex> lock(cbMutex_);
     mdRangeList_.clear();
     if (res->mids.empty()) {
         return;
@@ -359,7 +365,7 @@ bool SmsMiscManager::SendDataToRil(bool enable, std::list<gsmCBRangeInfo> list)
         CoreManagerInner::GetInstance().SetCBConfig(
             slotId_, SmsMiscManager::SET_CB_CONFIG_FINISH, cbData, shared_from_this());
         while (!isSuccess_) {
-            TELEPHONY_LOGD("SendDataToRil::wait(), isSuccess_ = false");
+            TELEPHONY_LOGI("SendDataToRil::wait(), isSuccess_ = false");
             if (condVar_.wait_for(lock, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
                 break;
             }
@@ -374,11 +380,11 @@ void SmsMiscManager::GetModemCBRange()
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (!hasGotCbRange_) {
-        isSuccess_ = false;
+        isCbConfigFinish_ = false;
         int32_t condition = conditonVar_++;
         fairList_.push_back(condition);
         CoreManagerInner::GetInstance().GetCBConfig(slotId_, SmsMiscManager::GET_CB_CONFIG_FINISH, shared_from_this());
-        while (!isSuccess_) {
+        while (!isCbConfigFinish_) {
             TELEPHONY_LOGI("GetCBConfig::wait(), isSuccess_ = false");
             if (condVar_.wait_for(lock, std::chrono::seconds(WAIT_TIME_SECOND)) == std::cv_status::timeout) {
                 break;
@@ -414,7 +420,7 @@ int32_t SmsMiscManager::SetCBConfigList(const std::vector<int32_t>& messageIds, 
         return TELEPHONY_ERR_SUCCESS;
     }
     // 合并新范围到当前缓存（先备份）
-    std::unique_lock<std::mutex> lock(cbMutex_);
+    std::unique_lock<ffrt::shared_mutex> lock(cbMutex_);
     std::list<gsmCBRangeInfo> oldRangeList = rangeList_;
     std::list<gsmCBRangeInfo> mergedRanges = oldRangeList;
     // 将新范围合并到mergedRanges
