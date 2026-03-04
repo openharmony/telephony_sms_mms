@@ -25,6 +25,7 @@
 #include "tel_ril_sms_parcel.h"
 #include "i_sms_service_interface.h"
 #include "tel_event_handler.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -109,12 +110,13 @@ private:
     std::list<gsmCBRangeInfo> rangeList_;
     std::condition_variable condVar_;
     std::mutex mutex_;
-    std::mutex cbMutex_;
+    ffrt::shared_mutex cbMutex_;
     std::string smscAddr_;
     std::string codeScheme_ { "0-255" };
     std::list<gsmCBRangeInfo> mdRangeList_;
     int32_t smsCapacityOfSim_ = 0;
     static bool hasGotCbRange_;
+    bool isCbConfigFinish_ = false;
 };
 } // namespace Telephony
 } // namespace OHOS
