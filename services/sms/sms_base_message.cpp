@@ -427,7 +427,7 @@ void SmsBaseMessage::SplitMessageUcs2(std::vector<struct SplitInfo> &splitResult
      * 0xa2,0xa3] become [0xa1a2,0xa3a4]
      */
     uint16_t decodeData16Bit[dataSize];
-    for (int i = 0; i < dataSize; i++) {
+    for (int32_t i = 0; i < dataSize; i++) {
         decodeData16Bit[i] = (decodeData[i * utf16Multiples] << bits) | decodeData[i * utf16Multiples + oneByte];
     }
     /*
