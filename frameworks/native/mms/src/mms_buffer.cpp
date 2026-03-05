@@ -121,7 +121,11 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         TELEPHONY_LOGE("Open File Error");
         return false;
     }
-    (void)fseek(pFile, 0, SEEK_END);
+
+    if (fseek(pFile, 0, SEEK_END) != 0) {
+        (void)fclose(pFile);
+        return false;
+    }
     long fileLen = ftell(pFile);
     if (fileLen == 0) {
         (void)fclose(pFile);
@@ -144,7 +148,10 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         TELEPHONY_LOGE("make unique pduBuffer nullptr Error .");
         return false;
     }
-    (void)fseek(pFile, 0, SEEK_SET);
+    if (fseek(pFile, 0, SEEK_SET) != 0) {
+        (void)fclose(pFile);
+        return false;
+    }
     totolLength_ = fread(pduBuffer_.get(), 1, fileLen, pFile);
     (void)fclose(pFile);
     return true;

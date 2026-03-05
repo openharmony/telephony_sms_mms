@@ -87,7 +87,10 @@ static bool GetMmsPduFromFile(const std::string &fileName, std::string &mmsPdu)
         return false;
     }
 
-    (void)fseek(pFile, 0, SEEK_END);
+    if (fseek(pFile, 0, SEEK_END) != 0) {
+        (void)fclose(pFile);
+        return false;
+    }
     long fileLen = ftell(pFile);
     if (fileLen <= 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
         (void)fclose(pFile);
@@ -99,7 +102,10 @@ static bool GetMmsPduFromFile(const std::string &fileName, std::string &mmsPdu)
         (void)fclose(pFile);
         return false;
     }
-    (void)fseek(pFile, 0, SEEK_SET);
+    if (fseek(pFile, 0, SEEK_SET) != 0) {
+        (void)fclose(pFile);
+        return false;
+    }
     int32_t totolLength = static_cast<int32_t>(fread(pduBuffer.get(), 1, MMS_PDU_MAX_SIZE, pFile));
     TELEPHONY_LOGI("fread totolLength%{private}d", totolLength);
 

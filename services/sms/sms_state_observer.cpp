@@ -62,7 +62,8 @@ std::shared_ptr<SmsStateEventSubscriber> SmsStateObserver::SubscribeToEvents(con
         return nullptr;
     }
 
-    SystemAbilityStatusChangeListener* statusListener = new SystemAbilityStatusChangeListener(subscriber);
+    sptr<SystemAbilityStatusChangeListener> statusListener =
+        sptr<SystemAbilityStatusChangeListener>::MakeSptr(subscriber);
 
     int32_t ret = samgrProxy->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, statusListener);
     TELEPHONY_LOGI("SubscribeToEvents SubscribeSystemAbility result:%{public}d", ret);

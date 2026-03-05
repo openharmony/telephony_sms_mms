@@ -692,7 +692,7 @@ std::string MmsHeader::MakeTransactionId(uint32_t len)
     std::uniform_int_distribution<unsigned> typeNumRandom(0, typeNum);
     std::uniform_int_distribution<unsigned> digitalNumRandom(0, digitalNum);
     std::uniform_int_distribution<unsigned> englishLettersNumRandom(0, englishLettersNum);
-    for (uint16_t i = 0; i < len; i++) {
+    for (uint32_t i = 0; i < len; i++) {
         switch (typeNumRandom(e)) {
             case 0:
                 transactionId += 'A' + (englishLettersNumRandom(e));
