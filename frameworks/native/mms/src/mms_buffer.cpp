@@ -138,22 +138,28 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         TELEPHONY_LOGE("Mms Over Long Error .");
         return false;
     }
+    if (!AllocateBufferAndReadFile(pFile, fileLen)) {
+        (void)fclose(pFile);
+        return false;
+    }
+    return true;
+}
+
+bool MmsBuffer::AllocateBufferAndReadFile(FILE *pFile, long fileLen)
+{
     if (pduBuffer_) {
         pduBuffer_.reset();
     }
 
     pduBuffer_ = std::make_unique<char[]>(fileLen);
     if (!pduBuffer_) {
-        (void)fclose(pFile);
         TELEPHONY_LOGE("make unique pduBuffer nullptr Error .");
         return false;
     }
     if (fseek(pFile, 0, SEEK_SET) != 0) {
-        (void)fclose(pFile);
         return false;
     }
     totolLength_ = fread(pduBuffer_.get(), 1, fileLen, pFile);
-    (void)fclose(pFile);
     return true;
 }
 
