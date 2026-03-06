@@ -38,7 +38,7 @@ protected:
     uint32_t totolLength_ = 0;
     uint32_t savePosition_ = 0;
 private:
-    bool AllocateBufferAndReadFile(FILE *pFile, long fileLen);
+    bool WriteBufferFromFile(FILE *pFile, long fileLen);
 };
 } // namespace Telephony
 } // namespace OHOS

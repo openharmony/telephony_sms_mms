@@ -1158,6 +1158,9 @@ void SetCBConfigSync(::ohos::telephony::sms::CBConfigOptions const & options)
     }
     std::u16string specification16(NapiUtil::ToUtf16(specification.c_str()));
     auto shortMessageObj = new ShortMessage();
+    if (shortMessageObj == nullptr) {
+        return shortMessage;
+    }
     int32_t errorCode = ShortMessage::CreateMessage(strPdu, specification16, *shortMessageObj);
     if (errorCode == TELEPHONY_ERR_SUCCESS) {
         shortMessage.visibleMessageBody =

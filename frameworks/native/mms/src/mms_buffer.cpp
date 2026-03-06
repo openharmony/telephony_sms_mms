@@ -138,14 +138,15 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         TELEPHONY_LOGE("Mms Over Long Error .");
         return false;
     }
-    if (!AllocateBufferAndReadFile(pFile, fileLen)) {
+    if (!WriteBufferFromFile(pFile, fileLen)) {
         (void)fclose(pFile);
         return false;
     }
+    (void)fclose(pFile);
     return true;
 }
 
-bool MmsBuffer::AllocateBufferAndReadFile(FILE *pFile, long fileLen)
+bool MmsBuffer::WriteBufferFromFile(FILE *pFile, long fileLen)
 {
     if (pduBuffer_) {
         pduBuffer_.reset();
