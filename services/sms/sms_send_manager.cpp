@@ -72,8 +72,6 @@ void SmsSendManager::Init()
     cdmaSmsSender_->Init();
 
     InitNetworkHandle();
-
-    smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
 }
 
 void SmsSendManager::InitNetworkHandle()
@@ -356,6 +354,7 @@ int32_t SmsSendManager::GetImsShortMessageFormat(std::u16string &format)
 
 int32_t SmsSendManager::GetSmsShortCodeType(int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType)
 {
+    smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
     if (smsShortCodeMatcher_ == nullptr) {
         TELEPHONY_LOGE("smsShortCodeMatcher is nullptr error.");
         smsShortCodeType = -1;
