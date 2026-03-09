@@ -1046,5 +1046,22 @@ HWTEST_F(MmsGtest, SmsServiceTest_0001, Function | MediumTest | Level1)
     EXPECT_GE(homeUrlVal.length(), 0);
 }
 #endif // TEL_TEST_UNSUPPORT
+
+/**
+ * @tc.number   GetMmsPduFromFileTest
+ * @tc.name     Test normal message
+ * @tc.desc     Function test
+ */
+HWTEST_F(MmsGtest, GetMmsPduFromFileTest, Function | MediumTest | Level1)
+{
+    std::string tempFileName = "test_mms_pdu.txt";
+    std::ofstream file(tempFileName);
+    file.close();
+    std::unique_ptr<MmsNetworkClient> mmsClient = std::make_unique<MmsNetworkClient>(0);
+    std::string fileName = "test_mms_pdu.txt";
+    std::string strBuf;
+    bool result = mmsClient->GetMmsPduFromFile(fileName, strBuf);
+    EXPECT_FALSE(result);
+}
 } // namespace Telephony
 } // namespace OHOS
