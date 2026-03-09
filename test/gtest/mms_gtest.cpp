@@ -48,6 +48,8 @@
 #include "telephony_log_wrapper.h"
 #include "telephony_types.h"
 #include "uri.h"
+#include "mms_network_client.h"
+#include <fstream>
 
 namespace OHOS {
 namespace Telephony {
