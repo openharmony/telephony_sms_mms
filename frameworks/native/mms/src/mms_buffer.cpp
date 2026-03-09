@@ -126,7 +126,7 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         (void)fclose(pFile);
         return false;
     }
-    long fileLen = ftell(pFile);
+    uint32_t fileLen = ftell(pFile);
     if (fileLen == 0) {
         (void)fclose(pFile);
         totolLength_ = 0;
@@ -146,7 +146,7 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
     return true;
 }
 
-bool MmsBuffer::WriteBufferFromFile(FILE *pFile, long fileLen)
+bool MmsBuffer::WriteBufferFromFile(FILE *pFile, uint32_t fileLen)
 {
     if (pduBuffer_) {
         pduBuffer_.reset();
