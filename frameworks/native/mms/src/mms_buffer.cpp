@@ -102,6 +102,7 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
 {
     FILE *pFile = nullptr;
     char realPath[PATH_MAX] = {0};
+    uint32_t fileLen = 0;
     if (strPathName.empty() || realpath(strPathName.c_str(), realPath) == NULL) {
         TELEPHONY_LOGE("path or realPath is NULL");
         return false;
@@ -126,14 +127,14 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         (void)fclose(pFile);
         return false;
     }
-    uint32_t fileLen = ftell(pFile);
+    fileLen = (uint32_t)ftell(pFile);
     if (fileLen == 0) {
         (void)fclose(pFile);
         totolLength_ = 0;
         TELEPHONY_LOGE("Mmms File Is Empty.");
         return true;
     }
-    if (fileLen < 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
+    if (fileLen < 0 || fileLen > MMS_PDU_MAX_SIZE) {
         (void)fclose(pFile);
         TELEPHONY_LOGE("Mms Over Long Error .");
         return false;
