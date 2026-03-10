@@ -60,7 +60,7 @@ private:
     std::shared_ptr<SmsSender> gsmSmsSender_;
     std::shared_ptr<SmsSender> cdmaSmsSender_;
     std::shared_ptr<SmsNetworkPolicyManager> networkManager_;
-    std::shared_ptr<SmsShortCodeMatcher> smsShortCodeMatcher_;
+    std::shared_ptr<SmsShortCodeMatcher> smsShortCodeMatcher_ = nullptr;
 };
 } // namespace Telephony
 } // namespace OHOS
