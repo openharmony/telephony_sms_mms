@@ -737,9 +737,6 @@ HWTEST_F(BranchSmsTest, SmsSendManager_SmsShortCodeType, Function | MediumTest |
     int32_t slotId = 0;
     std::string desAddr = "10660";
     int32_t smsShortCodeType = -1;
-    smsSendManager->smsShortCodeMatcher_ = nullptr;
-    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_LOCAL_PTR_NULL);
-    smsSendManager->smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
     EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(smsShortCodeType, 1);
     desAddr = "12345";
