@@ -354,11 +354,8 @@ int32_t SmsSendManager::GetImsShortMessageFormat(std::u16string &format)
 
 int32_t SmsSendManager::GetSmsShortCodeType(int32_t slotId, const std::string &desAddr, int32_t &smsShortCodeType)
 {
-    smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
     if (smsShortCodeMatcher_ == nullptr) {
-        TELEPHONY_LOGE("smsShortCodeMatcher is nullptr error.");
-        smsShortCodeType = -1;
-        return TELEPHONY_ERR_LOCAL_PTR_NULL;
+        smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
     }
     smsShortCodeType = static_cast<int32_t>(smsShortCodeMatcher_->GetSmsShortCodeType(slotId, desAddr));
     return TELEPHONY_ERR_SUCCESS;
