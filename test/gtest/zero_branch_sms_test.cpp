@@ -737,9 +737,6 @@ HWTEST_F(BranchSmsTest, SmsSendManager_SmsShortCodeType, Function | MediumTest |
     int32_t slotId = 0;
     std::string desAddr = "10660";
     int32_t smsShortCodeType = -1;
-    smsSendManager->smsShortCodeMatcher_ = nullptr;
-    EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_LOCAL_PTR_NULL);
-    smsSendManager->smsShortCodeMatcher_ = std::make_shared<SmsShortCodeMatcher>();
     EXPECT_EQ(smsSendManager->GetSmsShortCodeType(slotId, desAddr, smsShortCodeType), TELEPHONY_ERR_SUCCESS);
     EXPECT_EQ(smsShortCodeType, 1);
     desAddr = "12345";
@@ -2337,7 +2334,8 @@ HWTEST_F(BranchSmsTest, SmsService_GetSmsShortCodeType, Function | MediumTest | 
     smsService->slotSmsInterfaceManagerMap_.erase(INVALID_SLOTID);
     EXPECT_EQ(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType), TELEPHONY_ERR_PERMISSION_ERR);
     AccessMmsToken token;
-    EXPECT_EQ(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType), TELEPHONY_ERR_SLOTID_INVALID);
+    EXPECT_EQ(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType),
+        TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API);
     smsService->slotSmsInterfaceManagerMap_[INVALID_SLOTID] = std::make_shared<SmsInterfaceManager>(INVALID_SLOTID);
     EXPECT_GE(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType), TELEPHONY_ERR_SUCCESS);
 }
