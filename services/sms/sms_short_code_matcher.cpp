@@ -85,8 +85,8 @@ bool SmsShortCodeMatcher::LoadShortCodeRulesFromJson(const std::string &jsonPath
         return false;
     }
     for (const auto& ruleJson : jsonFile["countryShortCodeRules"]) {
-        if (!ruleJson.contains("countryCode")) {
-            TELEPHONY_LOGE("Missing countryCode in rule");
+        if (!ruleJson.contains("countryCode") || !ruleJson["countryCode"].is_string()) {
+            TELEPHONY_LOGE("Missing countryCode in rule or countryCode is not a string type");
             continue;
         }
         std::string countryCode = ruleJson["countryCode"].get<std::string>();
