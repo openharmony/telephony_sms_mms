@@ -63,7 +63,6 @@ bool SmsShortCodeMatcher::MatchesRegexList(const std::string &str, const std::ve
 
 bool SmsShortCodeMatcher::LoadShortCodeRulesFromJson(const std::string &jsonPath)
 {
-    std::string countryCode;
     fs::path absolutePath = fs::absolute(jsonPath);
     if (!fs::exists(absolutePath) || !fs::is_regular_file(absolutePath)) {
         TELEPHONY_LOGE("Invalid file path: %s", absolutePath.c_str());
@@ -86,12 +85,11 @@ bool SmsShortCodeMatcher::LoadShortCodeRulesFromJson(const std::string &jsonPath
         return false;
     }
     for (const auto& ruleJson : jsonFile["countryShortCodeRules"]) {
-        if (ruleJson.contains("countryCode") && ruleJson["countryCode"].is_string()) {
-            countryCode = ruleJson["countryCode"].get<std::string>();
-        } else {
+        if (!ruleJson.contains("countryCode") || !ruleJson["countryCode"].is_string()) {
             TELEPHONY_LOGE("Missing countryCode in rule or countryCode is not a string type");
             continue;
         }
+        std::string countryCode = ruleJson["countryCode"].get<std::string>();
         std::transform(countryCode.begin(), countryCode.end(), countryCode.begin(), ::tolower);
         ShortCodeRule rule;
         rule.countryCode = countryCode;
