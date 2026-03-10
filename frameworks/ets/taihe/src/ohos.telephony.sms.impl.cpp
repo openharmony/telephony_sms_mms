@@ -1175,8 +1175,10 @@ void SetCBConfigSync(::ohos::telephony::sms::CBConfigOptions const & options)
         shortMessage.isSmsStatusReportMessage = shortMessageObj->isSmsStatusReportMessage_;
     } else {
         ConvertErrorForBusinessError(errorCode);
+        delete shortMessageObj;
         return shortMessage;
     }
+    delete shortMessageObj;
     return shortMessage;
 }
 

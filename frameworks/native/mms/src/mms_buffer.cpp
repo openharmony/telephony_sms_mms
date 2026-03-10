@@ -102,6 +102,7 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
 {
     FILE *pFile = nullptr;
     char realPath[PATH_MAX] = {0};
+    uint32_t fileLen = 0;
     if (strPathName.empty() || realpath(strPathName.c_str(), realPath) == NULL) {
         TELEPHONY_LOGE("path or realPath is NULL");
         return false;
@@ -121,32 +122,46 @@ bool MmsBuffer::WriteBufferFromFile(std::string &strPathName)
         TELEPHONY_LOGE("Open File Error");
         return false;
     }
-    (void)fseek(pFile, 0, SEEK_END);
-    long fileLen = ftell(pFile);
+
+    if (fseek(pFile, 0, SEEK_END) != 0) {
+        (void)fclose(pFile);
+        return false;
+    }
+    fileLen = (uint32_t)ftell(pFile);
     if (fileLen == 0) {
         (void)fclose(pFile);
         totolLength_ = 0;
         TELEPHONY_LOGE("Mmms File Is Empty.");
         return true;
     }
-    if (fileLen < 0 || fileLen > static_cast<long>(MMS_PDU_MAX_SIZE)) {
+    if (fileLen < 0 || fileLen > MMS_PDU_MAX_SIZE) {
         (void)fclose(pFile);
         TELEPHONY_LOGE("Mms Over Long Error .");
         return false;
     }
+    if (!WriteBufferFromFile(pFile, fileLen)) {
+        (void)fclose(pFile);
+        return false;
+    }
+    (void)fclose(pFile);
+    return true;
+}
+
+bool MmsBuffer::WriteBufferFromFile(FILE *pFile, uint32_t fileLen)
+{
     if (pduBuffer_) {
         pduBuffer_.reset();
     }
 
     pduBuffer_ = std::make_unique<char[]>(fileLen);
     if (!pduBuffer_) {
-        (void)fclose(pFile);
         TELEPHONY_LOGE("make unique pduBuffer nullptr Error .");
         return false;
     }
-    (void)fseek(pFile, 0, SEEK_SET);
+    if (fseek(pFile, 0, SEEK_SET) != 0) {
+        return false;
+    }
     totolLength_ = fread(pduBuffer_.get(), 1, fileLen, pFile);
-    (void)fclose(pFile);
     return true;
 }
 
