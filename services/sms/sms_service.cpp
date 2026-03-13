@@ -1019,9 +1019,18 @@ void SmsService::UpdatePredicatesByPhoneNum(DataShare::DataSharePredicates &pred
             formatNum = phoneNum;
         }
         // 增加contactsNum字段的判断，防止单聊通过endsWith匹配到群聊。
+        std::string normalizedNum = formatNum;
+        size_t firstNonZero = normalizedNum.find_first_not_of('0');
+        if (firstNonZero != string::npos) {
+            // 从第一个非0字符开始截取
+            normalizedNum = normalizedNum.substr(firstNonZero);
+        } else {
+            // 如果全是0，则保留一个0
+            normalizedNum = "0";
+        }
         predicates.In(Session::CONTACTS_NUM, std::vector<string>({ "0", "1" }));
         predicates.And();
-        predicates.EndsWith(Session::TELEPHONE, formatNum);
+        predicates.EndsWith(Session::TELEPHONE, normalizedNum);
     }
 }
 } // namespace Telephony
