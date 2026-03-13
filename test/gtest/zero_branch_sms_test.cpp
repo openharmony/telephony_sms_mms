@@ -2334,8 +2334,7 @@ HWTEST_F(BranchSmsTest, SmsService_GetSmsShortCodeType, Function | MediumTest | 
     smsService->slotSmsInterfaceManagerMap_.erase(INVALID_SLOTID);
     EXPECT_EQ(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType), TELEPHONY_ERR_PERMISSION_ERR);
     AccessMmsToken token;
-    EXPECT_EQ(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType),
-        TELEPHONY_ERR_ILLEGAL_USE_OF_SYSTEM_API);
+    EXPECT_EQ(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType), TELEPHONY_ERR_SLOTID_INVALID);
     smsService->slotSmsInterfaceManagerMap_[INVALID_SLOTID] = std::make_shared<SmsInterfaceManager>(INVALID_SLOTID);
     EXPECT_GE(smsService->GetSmsShortCodeType(INVALID_SLOTID, desAddr, shortCodeType), TELEPHONY_ERR_SUCCESS);
 }
