@@ -51,13 +51,16 @@
                 "icu",
                 "init",
                 "ipc",
+                "image_framework",
                 "libphonenumber",
+                "libuv",
                 "napi",
                 "netmanager_base",
                 "netstack",
                 "os_account",
                 "power_manager",
                 "resource_management",
+                "runtime_core",
                 "safwk",
                 "samgr",
                 "protobuf",
@@ -73,7 +76,8 @@
                 "//base/telephony/sms_mms/frameworks/cj:cj_sms_ffi",
                 "//base/telephony/sms_mms/frameworks/js/napi/:sms",
                 "//base/telephony/sms_mms/sa_profile:sms_mms_sa_profile",
-                "//base/telephony/sms_mms/services/etc:sms_short_code_rules"
+                "//base/telephony/sms_mms/services/etc:sms_short_code_rules",
+                "//base/telephony/sms_mms/frameworks/ets/taihe:telephony_sms_taihe"
             ],
             "inner_kits": [
                 {
