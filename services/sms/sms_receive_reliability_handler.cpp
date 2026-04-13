@@ -316,19 +316,13 @@ void SmsReceiveReliabilityHandler::DeleteMessageFormDb(const uint16_t refId, con
         TELEPHONY_LOGE("DeleteMessageFormDb fail by refId error");
         return;
     }
-    if (refId == 0) {
-        DataShare::DataSharePredicates predicates;
-        predicates.EqualTo(SmsSubsection::SENDER_NUMBER, address)
-            ->And()
-            ->EqualTo(SmsSubsection::SMS_SUBSECTION_ID, std::to_string(refId))
-            ->And()
-            ->EqualTo(SmsSubsection::SIZE, std::to_string(msgCount));
-        DelayedSingleton<SmsPersistHelper>::GetInstance()->Delete(predicates);
-    } else {
-        DataShare::DataSharePredicates predicates;
-        predicates.EqualTo(SmsSubsection::SMS_SUBSECTION_ID, std::to_string(refId));
-        DelayedSingleton<SmsPersistHelper>::GetInstance()->Delete(predicates);
-    }
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(SmsSubsection::SENDER_NUMBER, address)
+        ->And()
+        ->EqualTo(SmsSubsection::SMS_SUBSECTION_ID, std::to_string(refId))
+        ->And()
+        ->EqualTo(SmsSubsection::SIZE, std::to_string(msgCount));
+    DelayedSingleton<SmsPersistHelper>::GetInstance()->Delete(predicates);
 }
 
 void SmsReceiveReliabilityHandler::SendBroadcast(
