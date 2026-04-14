@@ -156,7 +156,7 @@ bool SmsWapPushContentType::DecodeCTGeneralForm(SmsWapPushBuffer &decodeBuffer, 
         std::string sType = "";
         uint32_t len = 0;
         decodeBuffer.DecodeText(sType, len);
-        valueLength -= len + 1;
+        valueLength = valueLength < len + 1 ? 0 : valueLength - len - 1;
         contentType_ = sType;
     } else {
         TELEPHONY_LOGI("Wap push decode contentType empty.");

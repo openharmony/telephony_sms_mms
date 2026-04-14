@@ -132,7 +132,7 @@ bool GsmUserDataDecode::DecodeGsmHeadPduPartData(
         userData->headerCnt = 0;
     }
 
-    if (udhl > 0) {
+    if (udhl > 0 && (udhl + 1) * NORMAL_BYTE_BITS <= udl * GSM_ENCODE_BITS) {
         fillBits = ((udl * GSM_ENCODE_BITS) - ((udhl + 1) * NORMAL_BYTE_BITS)) % GSM_ENCODE_BITS;
         udl = ((udl * GSM_ENCODE_BITS) - ((udhl + 1) * NORMAL_BYTE_BITS)) / GSM_ENCODE_BITS;
     }
