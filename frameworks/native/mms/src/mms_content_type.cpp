@@ -150,7 +150,7 @@ bool MmsContentType::DecodeMmsCTGeneralForm(MmsDecodeBuffer &decodeBuffer, int32
         std::string sType = "";
         uint32_t len = 0;
         decodeBuffer.DecodeText(sType, len);
-        valueLength -= len + 1;
+        valueLength = valueLength < len + 1 ? 0 : valueLength - len - 1;
         contentType_ = sType;
     } else {
         TELEPHONY_LOGE("Decode contentType DecodeMmsContentType fail.");
