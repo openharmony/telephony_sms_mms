@@ -27,6 +27,7 @@ namespace Telephony {
 const std::string BUNDLE_NAME = "";
 constexpr const char *ABILITY_NAME = "AlertService";
 static constexpr int32_t USER_ID = 100;
+int32_t timeOutMs = 1500;
 
 CbStartAbility::~CbStartAbility() {}
 
@@ -40,6 +41,7 @@ void CbStartAbility::StartAbility(AAFwk::Want &want)
     want.SetElementName("", BUNDLE_NAME, ABILITY_NAME);
     if (!activatedOsAccountIds.empty()) {
         TELEPHONY_LOGI("the foreground OS account local ID: %{public}d", activatedOsAccountIds[0]);
+        HoldRunningLock(timeOutMs);
         ErrCode code = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr,
         activatedOsAccountIds[0]);
         TELEPHONY_LOGI("start ability code:%{public}d", code);
@@ -48,6 +50,29 @@ void CbStartAbility::StartAbility(AAFwk::Want &want)
         ErrCode code = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr, USER_ID);
         TELEPHONY_LOGI("start ability code:%{public}d", code);
     }
+}
+
+void CbStartAbility::HoldRunningLock(int32_t timeOutMs)
+{
+    TELEPHONY_LOGI("HoldRunningLock timeOutMs: %{public}d",  timeOutMs);
+    std::lock_guard lock(lockMutex_);
+    if (runningLock_ == nullptr) {
+        auto &powerMgrClient = PowerMgr::PowerMgrClient::GetInstance();
+        std::string lockName = "CbStartAbilityLock" ;
+        runningLock_ =
+            powerMgrClient.CreateRunningLock(lockName, PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    }
+    if (runningLock_ == nullptr) {
+        TELEPHONY_LOGE("Create runningLock failed.");
+        return;
+    }
+    TELEPHONY_LOGI("HoldRunningLock Lock");
+    int32_t res = runningLock_->Lock(timeOutMs);
+    if (res != 0) {
+        TELEPHONY_LOGE("HoldRunningLock lock failed");
+        return;
+    }
+    TELEPHONY_LOGI("HoldRunningLock success");
 }
 } // namespace Telephony
 } // namespace OHOS
