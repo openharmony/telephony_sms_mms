@@ -47,6 +47,12 @@ bool MmsBody::DecodeMultipart(MmsDecodeBuffer &decodeBuffer)
     }
     bodyEntrys_ = nEntries;
     TELEPHONY_LOGE("attachment number: %{public}u", nEntries);
+    // LCOV_EXCL_START
+    if (decodeBuffer.GetSize() - decodeBuffer.GetCurPosition() < nEntries) {
+        TELEPHONY_LOGE("Decode nEntries failed.");
+        return false;
+    }
+    // LCOV_EXCL_STOP
     while (nEntries) {
         MmsBodyPart bodyPart;
         if (!bodyPart.DecodePart(decodeBuffer, nEntries)) {
