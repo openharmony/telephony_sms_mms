@@ -32,12 +32,10 @@ public:
     bool PickOneByte(uint8_t &oneByte);
     void SetPointer(uint32_t offset);
 
-public:
-    std::unique_ptr<char[]> pduBuffer_ { nullptr };
-
 private:
     uint32_t curPosition_ = 0;
     uint32_t totolLength_ = 0;
+    std::unique_ptr<char[]> pduBuffer_ { nullptr };
 };
 } // namespace Telephony
 } // namespace OHOS
