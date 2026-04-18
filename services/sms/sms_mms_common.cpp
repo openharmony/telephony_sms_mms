@@ -38,7 +38,6 @@ void SmsMmsCommon::SendBroadcast(int32_t id, std::string notify, std::string sta
     want.SetAction(notify);
     std::vector<std::string> smsPermissions;
     smsPermissions.emplace_back(Permission::SEND_MESSAGES);
-    smsPermissions.emplace_back(Permission::READ_PRIVILEGED_PHONE_STATE);
     publishInfo.SetSubscriberPermissions(smsPermissions);
     want.SetParam(SmsMmsCommonData::MSG_ID, id);
     want.SetParam(SmsMmsCommonData::MSG_TYPE, type);
