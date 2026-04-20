@@ -18,6 +18,8 @@
 
 #include "singleton.h"
 #include "want.h"
+#include "power_mgr_client.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Telephony {
@@ -25,6 +27,10 @@ class CbStartAbility {
     DECLARE_DELAYED_SINGLETON(CbStartAbility)
 public:
     void StartAbility(AAFwk::Want &want);
+    void HoldRunningLock(int32_t timeOutMs);
+private:
+    std::shared_ptr<OHOS::PowerMgr::RunningLock> runningLock_ = nullptr;
+    ffrt::mutex lockMutex_;
 };
 } // namespace Telephony
 } // namespace OHOS
