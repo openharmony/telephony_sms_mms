@@ -340,8 +340,8 @@ bool MmsHeader::SetOctetValue(uint8_t fieldId, uint8_t value)
                 return false;
             }
     }
-    auto ret = octetValueMap_.emplace(fieldId, value);
-    return ret.second;
+    octetValueMap_[fieldId] = value;
+    return true;
 }
 
 bool MmsHeader::SetOctetValuePartData(uint8_t fieldId, uint8_t value, bool &match)
@@ -463,8 +463,8 @@ bool MmsHeader::SetLongValue(uint8_t fieldId, int64_t value)
         TELEPHONY_LOGE("The fieldId[%{public}02X] value is not belong to LongValue.", fieldId);
         return false;
     }
-    auto ret = longValueMap_.emplace(fieldId, value);
-    return ret.second;
+    longValueMap_[fieldId] = value;
+    return true;
 }
 
 bool MmsHeader::GetTextValue(uint8_t fieldId, std::string &value) const
@@ -488,8 +488,8 @@ bool MmsHeader::SetTextValue(uint8_t fieldId, std::string value)
         TELEPHONY_LOGE("The fieldId[%{public}02X] value is not belong to TextValue.", fieldId);
         return false;
     }
-    auto ret = textValueMap_.emplace(fieldId, value);
-    return ret.second;
+    textValueMap_[fieldId] = value;
+    return true;
 }
 
 bool MmsHeader::GetEncodeStringValue(uint8_t fieldId, MmsEncodeString &value) const
@@ -517,8 +517,8 @@ bool MmsHeader::SetEncodeStringValue(uint8_t fieldId, uint32_t charset, const st
         TELEPHONY_LOGE("MmsHeader SetEncodeString fail.");
         return false;
     }
-    auto ret = encodeStringsMap_.emplace(fieldId, encodeString);
-    return ret.second;
+    encodeStringsMap_[fieldId] = encodeString;
+    return true;
 }
 
 bool MmsHeader::AddHeaderAddressValue(uint8_t fieldId, MmsAddress &address)
@@ -605,7 +605,7 @@ bool MmsHeader::DecodeMmsMsgType(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t
         TELEPHONY_LOGE("MmsHeader message type not support.");
         return false;
     }
-    octetValueMap_.emplace(fieldId, oneByte);
+    octetValueMap_[fieldId] = oneByte;
     return true;
 }
 
@@ -660,7 +660,7 @@ bool MmsHeader::DecodeFieldOctetValue(uint8_t fieldId, MmsDecodeBuffer &buff, in
         TELEPHONY_LOGE("MmsHeader GetOneByte fail.");
         return false;
     }
-    octetValueMap_.emplace(fieldId, oneByte);
+    octetValueMap_[fieldId] = oneByte;
     return true;
 }
 
@@ -677,8 +677,8 @@ bool MmsHeader::DecodeFieldLongValue(uint8_t fieldId, MmsDecodeBuffer &buff, int
         TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeLongInteger fail.", fieldId);
         return false;
     }
-    auto ret = longValueMap_.emplace(fieldId, value);
-    return ret.second;
+    longValueMap_[fieldId] = value;
+    return true;
 }
 
 std::string MmsHeader::MakeTransactionId(uint32_t len)
@@ -723,7 +723,7 @@ bool MmsHeader::DecodeFieldTextStringValue(uint8_t fieldId, MmsDecodeBuffer &buf
     }
 
     len = (int32_t)tempLen;
-    textValueMap_.emplace(fieldId, tempString);
+    textValueMap_[fieldId] = tempString;
     return true;
 }
 
@@ -740,7 +740,7 @@ bool MmsHeader::DecodeFieldEncodedStringValue(uint8_t fieldId, MmsDecodeBuffer &
         TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeEncodeString fail.", fieldId);
         return false;
     }
-    encodeStringsMap_.emplace(fieldId, encodeString);
+    encodeStringsMap_[fieldId] = encodeString;
     return true;
 }
 
@@ -863,8 +863,8 @@ bool MmsHeader::DecodeFieldIntegerValue(uint8_t fieldId, MmsDecodeBuffer &buff, 
         TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeInteger fail.", fieldId);
         return false;
     }
-    auto ret = longValueMap_.emplace(fieldId, value);
-    return ret.second;
+    longValueMap_[fieldId] = value;
+    return true;
 }
 
 /**
@@ -912,8 +912,8 @@ bool MmsHeader::DecodeFieldDate(uint8_t fieldId, MmsDecodeBuffer &buff, int32_t 
         long timeStamp = chrono::duration_cast<chrono::seconds>(timePoint).count();
         timeValue += static_cast<uint64_t>(timeStamp);
     }
-    auto ret = longValueMap_.emplace(fieldId, timeValue);
-    return ret.second;
+    longValueMap_[fieldId] = timeValue;
+    return true;
 }
 
 /**
@@ -955,8 +955,8 @@ bool MmsHeader::DecodeFieldPreviouslySentDate(uint8_t fieldId, MmsDecodeBuffer &
         TELEPHONY_LOGE("The fieldId[%{public}d] MmsHeader DecodeLongInteger fail.", fieldId);
         return false;
     }
-    auto ret = longValueMap_.emplace(fieldId, perviouslySentDate);
-    return ret.second;
+    longValueMap_[fieldId] = perviouslySentDate;
+    return true;
 }
 
 /**
@@ -1737,8 +1737,8 @@ bool MmsHeader::CheckBooleanValue(uint8_t fieldId, uint8_t value)
             return false;
     }
 
-    auto ret = octetValueMap_.emplace(fieldId, value);
-    return ret.second;
+    octetValueMap_[fieldId] = value;
+    return true;
 }
 } // namespace Telephony
 } // namespace OHOS
