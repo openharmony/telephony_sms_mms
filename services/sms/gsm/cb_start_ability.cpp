@@ -66,13 +66,11 @@ void CbStartAbility::HoldRunningLock(int32_t timeOutMs)
         TELEPHONY_LOGE("Create runningLock failed.");
         return;
     }
-    TELEPHONY_LOGI("HoldRunningLock Lock");
     int32_t res = runningLock_->Lock(timeOutMs);
     if (res != 0) {
         TELEPHONY_LOGE("HoldRunningLock lock failed");
         return;
     }
-    TELEPHONY_LOGI("HoldRunningLock success");
 }
 } // namespace Telephony
 } // namespace OHOS
