@@ -27,7 +27,7 @@ namespace Telephony {
 const std::string BUNDLE_NAME = "";
 constexpr const char *ABILITY_NAME = "AlertService";
 static constexpr int32_t USER_ID = 100;
-int32_t timeOutMs = 1500;
+int32_t timeOutMs = 10000;
 
 CbStartAbility::~CbStartAbility() {}
 
