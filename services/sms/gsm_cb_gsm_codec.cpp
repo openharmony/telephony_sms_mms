@@ -230,10 +230,6 @@ bool GsmCbGsmCodec::Decode2gCbMsg()
 
 bool GsmCbGsmCodec::Decode2gCbMsg7bit(uint16_t dataLen)
 {
-    if (dataLen > MAX_ETWS_PDU_LEN) {
-        TELEPHONY_LOGE("dataLen %{punlic}u execeeds MAX_PAGE_PDU_LEN %{public}u", dataLen, MAX_PAGE_PDU_LEN);
-        return false;
-    }
     uint8_t pageData[MAX_PAGE_PDU_LEN * SMS_BYTE_BIT / GSM_CODE_BIT + 1] = { 0 };
     std::vector<uint8_t> dataPdu;
     cbCodec_->GetPduData(dataPdu);
