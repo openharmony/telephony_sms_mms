@@ -1274,23 +1274,6 @@ static int32_t ActuallySendTextMessage(std::shared_ptr<SendMessageContext> param
         parameter->serviceCenter, parameter->textContent, sendCallback.release(), deliveryCallback.release());
 }
 
-static int32_t ActuallySendTextMessageWithoutSave(std::shared_ptr<SendMessageContext> parameter,
-    std::unique_ptr<AniSendCallback> sendCallback, std::unique_ptr<AniDeliveryCallback> deliveryCallback)
-{
-    if (!IsValidSlotId(parameter->slotId)) {
-        auto result = ISendShortMessageCallback::SmsSendResult::SEND_SMS_FAILURE_UNKNOWN;
-        sendCallback->OnSmsSendResult(result);
-        if (deliveryCallback != nullptr) {
-            deliveryCallback->OnSmsDeliveryResult(u"");
-        }
-        return TELEPHONY_ERR_SLOTID_INVALID;
-    }
-
-    return Singleton<SmsServiceManagerClient>::GetInstance().SendMessageWithoutSave(parameter->slotId,
-        parameter->destinationHost, parameter->serviceCenter, parameter->textContent, sendCallback.release(),
-        deliveryCallback.release());
-}
-
 static int32_t ActuallySendDataMessage(std::shared_ptr<SendMessageContext> parameter,
     std::unique_ptr<AniSendCallback> sendCallback, std::unique_ptr<AniDeliveryCallback> deliveryCallback)
 {
