@@ -17,6 +17,7 @@
 
 #include "data_request.h"
 #include "telephony_log_wrapper.h"
+#include <regex>
 
 namespace OHOS {
 namespace Telephony {
@@ -33,6 +34,9 @@ MmsReceive::~MmsReceive() {}
 int32_t MmsReceive::ExecuteDownloadMms(
     const std::string &contentUrl, std::string &pduDir, const std::string &ua, const std::string &uaprof)
 {
+    if (!regex_match(contentUrl, std::regex("^http(s)?:\\/\\/.+"))) {
+        return TELEPHONY_ERR_MMS_FAIL_HTTP_ERROR;
+    }
     auto mmsNetworkMgr = std::make_shared<MmsNetworkManager>();
     if (mmsNetworkMgr == nullptr) {
         TELEPHONY_LOGE("mmsNetworkMgr_ is nullptr");
