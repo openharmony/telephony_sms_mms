@@ -465,7 +465,7 @@ bool MmsContentType::EncodeTypeField(MmsEncodeBuffer &encodeBuffer)
     if (msgContentParm_.GetType().empty()) {
         return true;
     }
-    if (!encodeBuffer.WriteByte(static_cast<uint8_t>(ContentParam::CT_P_TYPE))) {
+    if (!encodeBuffer.WriteByte(static_cast<uint8_t>(ContentParam::CT_P_TYPE_STRING))) {
         TELEPHONY_LOGE("Encode contentType WriteByte fail.");
         return false;
     }
