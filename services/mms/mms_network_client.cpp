@@ -550,7 +550,7 @@ void MmsNetworkClient::HttpCallBack(std::shared_ptr<HttpClientTask> task)
             clientCv_.notify_one();
         });
     task->OnDataReceive([this](const HttpClientRequest &request, const uint8_t *data, size_t length) {
-        if (data == nullptr || length == 0) {
+        if (data == nullptr || length == 0 || length > MMS_PDU_MAX_SIZE) {
             return;
         }
         responseData_.insert(responseData_.size(), reinterpret_cast<const char *>(data), length);
