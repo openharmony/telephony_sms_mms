@@ -46,7 +46,7 @@ bool CdmaSmsTransportMessage::Encode(SmsWriteBuffer &pdu)
         TELEPHONY_LOGE("type write error");
         return false;
     }
-    for (uint8_t i = 0; i < parameter_.size(); i++) {
+    for (size_t i = 0; i < parameter_.size(); i++) {
         if (parameter_[i] == nullptr || !parameter_[i]->Encode(pdu)) {
             TELEPHONY_LOGE("parameter encode error");
             return false;
@@ -75,7 +75,7 @@ bool CdmaSmsTransportMessage::Decode(SmsReadBuffer &pdu)
         TELEPHONY_LOGE("type[%{public}d] is invalid", type_);
         return false;
     }
-    for (uint8_t i = 0; i < parameter_.size(); i++) {
+    for (size_t i = 0; i < parameter_.size(); i++) {
         if (parameter_[i] == nullptr || !parameter_[i]->Decode(pdu)) {
             TELEPHONY_LOGE("parameter decode error");
             return false;
