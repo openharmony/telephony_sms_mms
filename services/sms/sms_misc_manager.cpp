@@ -15,6 +15,8 @@
 
 #include "sms_misc_manager.h"
 
+#include <charconv>
+
 #include "core_manager_inner.h"
 #include "short_message.h"
 #include "sms_mms_errors.h"
@@ -251,8 +253,17 @@ void SmsMiscManager::UpdateCbRangList(std::shared_ptr<CBConfigInfo> res)
             TELEPHONY_LOGE("start or end not decimal");
             return;
         }
-        if (std::stoi(start) <= std::stoi(end)) {
-            infoData data(std::stoi(start), std::stoi(end));
+        uint32_t startValue = 0;
+        uint32_t endValue = 0;
+        auto startResult = std::from_chars(start.data(), start.data() + start.size(), startValue);
+        auto endResult = std::from_chars(end.data(), end.data() + end.size(), endValue);
+        if (startResult.ec != std::errc{} || startResult.ptr != start.data() + start.size() ||
+            endResult.ec != std::errc{} || endResult.ptr != end.data() + end.size()) {
+            TELEPHONY_LOGE("start or end is out of range");
+            continue;
+        }
+        if (startValue <= endValue && endValue <= RANG_MAX) {
+            infoData data(startValue, endValue);
             mdRangeList_.emplace_back(data.startPos, data.endPos);
         }
     }
