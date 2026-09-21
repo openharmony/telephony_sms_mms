@@ -15,6 +15,7 @@
 
 #include "mms_network_client.h"
 
+#include <charconv>
 #include <curl/curl.h>
 #include <curl/easy.h>
 
@@ -136,7 +137,15 @@ int32_t MmsNetworkClient::GetMmsApnPorxy(NetStack::HttpClient::HttpProxy &httpPr
         TELEPHONY_LOGE("port not decimal");
         return TELEPHONY_ERR_MMS_FAIL_APN_INVALID;
     }
-    httpProxy.port = std::stoi(port);
+    int32_t parsedPort = 0;
+    const char *first = port.data();
+    const char *last = first + port.size();
+    auto result = std::from_chars(first, last, parsedPort);
+    if (result.ec != std::errc{} || result.ptr != last) {
+        TELEPHONY_LOGE("port out of range");
+        return TELEPHONY_ERR_MMS_FAIL_APN_INVALID;
+    }
+    httpProxy.port = parsedPort;
     return TELEPHONY_SUCCESS;
 }
 
