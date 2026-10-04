@@ -15,6 +15,9 @@
 
 #include "sms_receive_reliability_handler.h"
 
+#include <charconv>
+#include <limits>
+
 #include "common_event.h"
 #include "common_event_support.h"
 #include "gsm_sms_message.h"
@@ -83,11 +86,16 @@ bool SmsReceiveReliabilityHandler::DeleteExpireSmsFromDB()
     int64_t currentTime = time(&timep);
 
     std::string smsExpire = GetSmsExpire();
-    if (!IsValidDecValue(smsExpire)) {
+    int64_t expireDays = 0;
+    const char *first = smsExpire.data();
+    const char *last = first + smsExpire.size();
+    auto result = std::from_chars(first, last, expireDays);
+    if (!IsValidDecValue(smsExpire) || result.ec != std::errc{} || result.ptr != last ||
+        expireDays > std::numeric_limits<int64_t>::max() / ONE_DAY_TOTAL_SECONDS) {
         TELEPHONY_LOGE("system property telephony.sms.expire.days not decimal");
-        smsExpire = DEFAULT_EXPIRE_DAYS;
+        expireDays = 7;
     }
-    int64_t validityDuration = std::stoi(smsExpire) * ONE_DAY_TOTAL_SECONDS;
+    int64_t validityDuration = expireDays * ONE_DAY_TOTAL_SECONDS;
     int64_t deadlineTime = currentTime - validityDuration;
     if (deadlineTime <= 0) {
         TELEPHONY_LOGE("deadlineTime is negative");
